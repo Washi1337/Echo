@@ -4,4 +4,8 @@
         <TargetFramework>netstandard1.0</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Echo.Core\Echo.Core.csproj" />
+    </ItemGroup>
+
 </Project>
