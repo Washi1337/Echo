@@ -25,7 +25,12 @@ namespace Echo.Core.Emulation
         /// <inheritdoc />
         public TValue this[IVariable variable]
         {
-            get => !_variables.TryGetValue(variable, out var value) ? _defaultValue : value;
+            get
+            {
+                if (!_variables.TryGetValue(variable, out var value))
+                    _variables[variable] = value = (TValue) _defaultValue.Copy();
+                return value;
+            }
             set => _variables[variable] = value;
         }
 
@@ -36,7 +41,7 @@ namespace Echo.Core.Emulation
         }
         
         /// <summary>
-        /// Creates a copy of the snapshot.
+        /// Creates a copy of the snapshot. This also copies all registered values for each variable.
         /// </summary>
         /// <returns>The copied variable state.</returns>
         public VariableState<TValue> Copy()
@@ -44,7 +49,7 @@ namespace Echo.Core.Emulation
             var result = new VariableState<TValue>(_defaultValue);
 
             foreach (var entry in _variables)
-                result._variables.Add(entry);
+                result._variables.Add(entry.Key, (TValue) entry.Value.Copy());
             
             return result;
         }

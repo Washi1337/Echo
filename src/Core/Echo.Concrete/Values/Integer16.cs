@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Echo.Core.Values;
 
 namespace Echo.Concrete.Values
 {
@@ -86,6 +87,11 @@ namespace Echo.Concrete.Values
         public override BitArray GetMask()
         {
             return new BitArray(BitConverter.GetBytes(Mask));
+        }
+
+        public override IValue Copy()
+        {
+            return new Integer16(U16);
         }
         
     }

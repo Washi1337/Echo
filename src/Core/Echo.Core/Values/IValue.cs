@@ -20,5 +20,11 @@ namespace Echo.Core.Values
         {
             get;
         }
+
+        /// <summary>
+        /// Creates an exact copy of the value.
+        /// </summary>
+        /// <returns>The copied value.</returns>
+        IValue Copy();
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections;
+using Echo.Core.Values;
 
 namespace Echo.Concrete.Values
 {
@@ -86,6 +87,10 @@ namespace Echo.Concrete.Values
         {
             return new BitArray(new[] {Mask});
         }
-        
+
+        public override IValue Copy()
+        {
+            return new Integer8(U8);
+        }
     }
 }

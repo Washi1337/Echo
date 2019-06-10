@@ -66,14 +66,14 @@ namespace Echo.Core.Emulation
         }
 
         /// <summary>
-        /// Creates a copy of the stack state.
+        /// Creates a copy of the stack state. This also copies all values inside the stack.
         /// </summary>
         /// <returns>The copied stack state.</returns>
         public StackState<TValue> Copy()
         {
             var result = new StackState<TValue>();
             foreach (var value in _stack.Reverse())
-                result.Push(value);
+                result.Push((TValue) value.Copy());
             return result;
         }
     }

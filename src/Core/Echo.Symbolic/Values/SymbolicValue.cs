@@ -9,6 +9,11 @@ namespace Echo.Symbolic.Values
     /// </summary>
     public class SymbolicValue : IValue
     {
+        public SymbolicValue()
+            : this(0, Enumerable.Empty<IDataSource>())
+        {
+        }
+        
         public SymbolicValue(int size)
             : this(size, Enumerable.Empty<IDataSource>())
         {
@@ -42,10 +47,19 @@ namespace Echo.Symbolic.Values
             get;
         }
 
+        IValue IValue.Copy()
+        {
+            return Copy();
+        }
+
+        public SymbolicValue Copy()
+        {
+            return new SymbolicValue(Size, DataSources);
+        }
+
         public override string ToString()
         {
             return $"{string.Join(" | ", DataSources)} ({Size} bytes)";
         }
-        
     }
 }

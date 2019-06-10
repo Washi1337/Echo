@@ -22,7 +22,7 @@ namespace Echo.Core.Emulation
         }
 
         /// <summary>
-        /// Creates a copy of the snapshot.
+        /// Creates a copy of the snapshot. This also copies all registered values for each variable.
         /// </summary>
         /// <returns>The copied variable state.</returns>
         IVariableState<TValue> Copy();

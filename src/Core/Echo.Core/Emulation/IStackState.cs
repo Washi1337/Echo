@@ -60,7 +60,7 @@ namespace Echo.Core.Emulation
         IList<TValue> Pop(int count, bool reversed = false);
         
         /// <summary>
-        /// Creates a copy of the stack state.
+        /// Creates a copy of the stack state. This also copies all values inside the stack.
         /// </summary>
         /// <returns>The copied stack state.</returns>
         IStackState<TValue> Copy();

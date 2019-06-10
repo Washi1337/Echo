@@ -40,9 +40,43 @@ namespace Echo.Core.Tests.Values
             get;
         }
 
+        public IValue Copy()
+        {
+            return new DummyValue(Identifier, IsKnown, Size);
+        }
+
         public override string ToString()
         {
             return $"value_{Identifier} (Known: {IsKnown}, Size: {Size})";
+        }
+
+        protected bool Equals(DummyValue other)
+        {
+            return Identifier == other.Identifier
+                   && IsKnown == other.IsKnown 
+                   && Size == other.Size;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != this.GetType())
+                return false;
+            return Equals((DummyValue) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = Identifier;
+                hashCode = (hashCode * 397) ^ IsKnown.GetHashCode();
+                hashCode = (hashCode * 397) ^ Size;
+                return hashCode;
+            }
         }
     }
 }

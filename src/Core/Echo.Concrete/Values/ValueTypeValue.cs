@@ -18,5 +18,7 @@ namespace Echo.Concrete.Values
         {
             get;
         }
+
+        public abstract IValue Copy();
     }
 }
