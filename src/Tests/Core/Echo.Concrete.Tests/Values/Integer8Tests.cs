@@ -9,7 +9,7 @@ namespace Echo.Concrete.Tests.Values
         public void KnownValue()
         {
             var value = new Integer8(0xFF);
-            
+
             Assert.True(value.IsKnown);
             Assert.Equal(Integer8.FullyKnownMask, value.Mask);
             Assert.Equal(0xFF, value.U8);

@@ -1,9 +1,11 @@
+using System.Collections;
+
 namespace Echo.Concrete.Values
 {
     /// <summary>
     /// Represents a (partially) known concrete 8 bit integral value.
     /// </summary>
-    public class Integer8 : ValueTypeValue
+    public class Integer8 : PrimitiveNumberValue
     {
         public static implicit operator Integer8(byte value)
         {
@@ -20,12 +22,12 @@ namespace Echo.Concrete.Values
         private byte _value;
         
         public Integer8(byte value)
-            : this(value, 0xFF)
+            : this(value, FullyKnownMask)
         {
         }
 
         public Integer8(sbyte value)
-            : this(value, 0xFF)
+            : this(value, FullyKnownMask)
         {
         }
 
@@ -75,18 +77,15 @@ namespace Echo.Concrete.Values
             set;
         }
 
-        public override string ToString()
+        public override BitArray GetBits()
         {
-            var bits = new char[Size * 8];
-
-            for (int i = 0, j = 1 << (bits.Length - 1); i < bits.Length; i++, j >>= 1)
-            {
-                bits[i] = (Mask & j) == 0 
-                    ? '?' 
-                    : (_value & j) != 0 ? '1' : '0';
-            }
-            
-            return new string(bits);
+            return new BitArray(new[] {U8});
         }
+
+        public override BitArray GetMask()
+        {
+            return new BitArray(new[] {Mask});
+        }
+        
     }
 }
