@@ -35,7 +35,7 @@ namespace Echo.Symbolic.Values
         }
 
         /// <summary>
-        /// Provides a list of all data sources that this 
+        /// Provides a list of all data sources of this value.
         /// </summary>
         public IList<IDataSource> DataSources
         {

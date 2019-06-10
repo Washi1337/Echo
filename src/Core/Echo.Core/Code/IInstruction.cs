@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Echo.Core.Emulation;
+using Echo.Core.Values;
 
 namespace Echo.Core.Code
 {
@@ -63,7 +64,8 @@ namespace Echo.Core.Code
         /// </summary>
         /// <param name="state">The current program state.</param>
         /// <returns>A collection of possible offsets.</returns>
-        IEnumerable<long> GetSuccessors(IProgramState state);
+        IEnumerable<long> GetSuccessors<TValue>(IProgramState<TValue> state) 
+            where TValue : IValue;
 
         /// <summary>
         /// Gets a value indicating the number of values this instruction pushes on the stack.
