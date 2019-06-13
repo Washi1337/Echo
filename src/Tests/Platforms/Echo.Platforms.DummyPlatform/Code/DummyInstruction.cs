@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Echo.Core.Code;
-using Echo.Core.Emulation;
-using Echo.Core.Values;
 
-namespace Echo.Symbolic.Tests
+namespace Echo.Platforms.DummyPlatform.Code
 {
     public class DummyInstruction : IInstruction
     {
@@ -15,7 +13,7 @@ namespace Echo.Symbolic.Tests
         {
             Offset = offset;
             Mnemonic = "op";
-            Operand = Array.Empty<object>();
+            Operand = new object[0];
             _popCount = popCount;
             _pushCount = pushCount;
         }
@@ -39,24 +37,19 @@ namespace Echo.Symbolic.Tests
 
         public IEnumerable<byte> GetOpCodeBytes()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public IEnumerable<byte> GetOperandBytes()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public IEnumerable<byte> GetBytes()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
-
-        public IEnumerable<long> GetSuccessors<TValue>(IProgramState<TValue> state) where TValue : IValue
-        {
-            throw new System.NotImplementedException();
-        }
-
+        
         public int GetStackPushCount()
         {
             return _pushCount;
@@ -69,12 +62,12 @@ namespace Echo.Symbolic.Tests
 
         public IEnumerable<IVariable> GetReadVariables()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public IEnumerable<IVariable> GetWrittenVariables()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

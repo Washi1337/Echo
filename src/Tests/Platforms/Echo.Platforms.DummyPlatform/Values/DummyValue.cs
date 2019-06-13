@@ -1,7 +1,7 @@
 using System;
 using Echo.Core.Values;
 
-namespace Echo.Core.Tests.Values
+namespace Echo.Platforms.DummyPlatform.Values
 {
     public class DummyValue : IValue
     {
@@ -27,7 +27,6 @@ namespace Echo.Core.Tests.Values
         public int Identifier
         {
             get;
-            set;
         }
 
         public bool IsKnown

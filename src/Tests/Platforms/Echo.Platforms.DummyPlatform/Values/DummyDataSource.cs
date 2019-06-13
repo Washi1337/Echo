@@ -1,7 +1,7 @@
 using System;
 using Echo.Symbolic.Values;
 
-namespace Echo.Symbolic.Tests.Values
+namespace Echo.Platforms.DummyPlatform.Values
 {
     public class DummyDataSource : IDataSource
     {

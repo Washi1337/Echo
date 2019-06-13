@@ -1,6 +1,6 @@
 using Echo.Core.Code;
 
-namespace Echo.Core.Tests.Code
+namespace Echo.Platforms.DummyPlatform.Code
 {
     public class DummyVariable : IVariable
     {

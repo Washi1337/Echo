@@ -18,7 +18,7 @@ namespace Echo.Core.Code
         }
         
         /// <summary>
-        /// Gets the mnemonic representing the operation code of the instruction.
+        /// Gets the string representation of the operation code of the instruction.
         /// </summary>
         string Mnemonic
         {
@@ -58,14 +58,6 @@ namespace Echo.Core.Code
         /// </summary>
         /// <returns></returns>
         IEnumerable<byte> GetBytes();
-
-        /// <summary>
-        /// Gets a collection of offsets that this instruction might transfer control to after execution. 
-        /// </summary>
-        /// <param name="state">The current program state.</param>
-        /// <returns>A collection of possible offsets.</returns>
-        IEnumerable<long> GetSuccessors<TValue>(IProgramState<TValue> state) 
-            where TValue : IValue;
 
         /// <summary>
         /// Gets a value indicating the number of values this instruction pushes on the stack.

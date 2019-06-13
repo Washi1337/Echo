@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Echo.Core.Emulation;
-using Echo.Core.Tests.Values;
+using Echo.Platforms.DummyPlatform.Values;
 using Xunit;
 
 namespace Echo.Core.Tests.Emulation

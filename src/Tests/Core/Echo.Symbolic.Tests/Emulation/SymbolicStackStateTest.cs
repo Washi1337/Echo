@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Echo.Core.Emulation;
+using Echo.Platforms.DummyPlatform.Values;
 using Echo.Symbolic.Emulation;
 using Echo.Symbolic.Tests.Values;
 using Echo.Symbolic.Values;

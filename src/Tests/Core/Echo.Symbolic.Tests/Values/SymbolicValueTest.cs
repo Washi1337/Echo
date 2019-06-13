@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Echo.Platforms.DummyPlatform.Values;
 using Echo.Symbolic.Values;
 using Xunit;
 
