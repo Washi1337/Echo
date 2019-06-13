@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.Core.Values;
@@ -10,24 +11,26 @@ namespace Echo.Core.Emulation
     public class StackState<TValue> : IStackState<TValue> 
         where TValue : IValue
     {
-        private readonly Stack<TValue> _stack = new Stack<TValue>();
-
+        private readonly List<TValue> _stack = new List<TValue>();
+        
         /// <inheritdoc />
-        public TValue Top => _stack.Count == 0 ? default : _stack.Peek();
+        public TValue Top => Size == 0 ? default : _stack[Size - 1];
 
         /// <inheritdoc />
         public int Size => _stack.Count;
 
+        protected List<TValue> Items => _stack;
+
         /// <inheritdoc />
         public IEnumerable<TValue> GetAllStackSlots()
         {
-            return _stack.AsEnumerable();
+            return Enumerable.Reverse(_stack);
         }
 
         /// <inheritdoc />
         public void Push(TValue value)
         {
-            _stack.Push(value);
+            _stack.Add(value);
         }
 
         /// <inheritdoc />
@@ -35,27 +38,26 @@ namespace Echo.Core.Emulation
         {
             if (reversed)
                 values = values.Reverse();
-            
-            foreach (var value in values)
-                _stack.Push(value);
+
+            _stack.AddRange(values);
         }
 
         /// <inheritdoc />
         public TValue Pop()
         {
-            return _stack.Pop();
+            var top = Top;
+            _stack.RemoveAt(Size - 1);
+            return top;
         }
 
         /// <inheritdoc />
         public IList<TValue> Pop(int count, bool reversed = false)
         {
             var values = new TValue[count];
-
-            for (int i = 0; i < count; i++)
-            {
-                int index = reversed ? count - i - 1 : i;
-                values[index] = _stack.Pop();
-            }
+            _stack.CopyTo(values, Size - count);
+            
+            if (!reversed)
+                Array.Reverse(values);
 
             return values;
         }
@@ -72,8 +74,7 @@ namespace Echo.Core.Emulation
         public StackState<TValue> Copy()
         {
             var result = new StackState<TValue>();
-            foreach (var value in _stack.Reverse())
-                result.Push((TValue) value.Copy());
+            result._stack.AddRange(_stack);
             return result;
         }
     }

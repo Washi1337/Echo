@@ -42,10 +42,10 @@ namespace Echo.Core.Tests.Emulation
         public void PushMany()
         {
             var stack = new StackState<DummyValue>();
-            var values = CreateDummyValues(2);
+            var values = CreateDummyValues(3);
             
             stack.Push(values);
-            Assert.Equal(2, stack.Size);
+            Assert.Equal(3, stack.Size);
             Assert.Equal(values.Last(), stack.Top);
             Assert.Equal(values.Reverse(), stack.GetAllStackSlots());   
         }
@@ -54,10 +54,10 @@ namespace Echo.Core.Tests.Emulation
         public void PushManyReversed()
         {
             var stack = new StackState<DummyValue>();
-            var values = CreateDummyValues(2);
+            var values = CreateDummyValues(3);
             
             stack.Push(values, reversed: true);
-            Assert.Equal(2, stack.Size);
+            Assert.Equal(3, stack.Size);
             Assert.Equal(values.First(), stack.Top);
             Assert.Equal(values, stack.GetAllStackSlots());   
         }
@@ -76,27 +76,27 @@ namespace Echo.Core.Tests.Emulation
         public void PopMany()
         {
             var stack = new StackState<DummyValue>();
-            var values = CreateDummyValues(2);
+            var values = CreateDummyValues(3);
             
             stack.Push(values);
-            Assert.Equal(values.Reverse(), stack.Pop(2));
+            Assert.Equal(values.Reverse(), stack.Pop(3));
         }
 
         [Fact]
         public void PopManyReversed()
         {
             var stack = new StackState<DummyValue>();
-            var values = CreateDummyValues(2);
+            var values = CreateDummyValues(3);
             
             stack.Push(values);
-            Assert.Equal(values, stack.Pop(2, reversed: true));
+            Assert.Equal(values, stack.Pop(3, reversed: true));
         }
 
         [Fact]
         public void Copy()
         {
             var stack = new StackState<DummyValue>();
-            stack.Push(CreateDummyValues(2));
+            stack.Push(CreateDummyValues(3));
 
             var copy = stack.Copy();
             
