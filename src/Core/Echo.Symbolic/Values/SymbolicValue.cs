@@ -13,6 +13,16 @@ namespace Echo.Symbolic.Values
             : this(0, Enumerable.Empty<IDataSource>())
         {
         }
+
+        public SymbolicValue(params IDataSource[] dataSources)
+            : this(0, dataSources.AsEnumerable())
+        {
+        }
+        
+        public SymbolicValue(IEnumerable<IDataSource> dataSources)
+            : this(0, dataSources.AsEnumerable())
+        {
+        }
         
         public SymbolicValue(int size)
             : this(size, Enumerable.Empty<IDataSource>())
@@ -27,8 +37,9 @@ namespace Echo.Symbolic.Values
         public SymbolicValue(int size, IEnumerable<IDataSource> dataSources)
         {
             Size = size;
-            DataSources = new List<IDataSource>(dataSources);
+            DataSources = new HashSet<IDataSource>(dataSources);
         }
+
 
         /// <inheritdoc />
         public bool IsKnown => DataSources.Count > 0;
@@ -42,7 +53,7 @@ namespace Echo.Symbolic.Values
         /// <summary>
         /// Provides a list of all data sources of this value.
         /// </summary>
-        public IList<IDataSource> DataSources
+        public ISet<IDataSource> DataSources
         {
             get;
         }
@@ -55,6 +66,13 @@ namespace Echo.Symbolic.Values
         public SymbolicValue Copy()
         {
             return new SymbolicValue(Size, DataSources);
+        }
+
+        public bool MergeWith(SymbolicValue other)
+        {
+            int count = DataSources.Count;
+            DataSources.UnionWith(other.DataSources);
+            return count != DataSources.Count;
         }
 
         public override string ToString()
