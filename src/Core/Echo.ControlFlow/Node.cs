@@ -15,7 +15,6 @@ namespace Echo.ControlFlow
         where TInstruction : IInstruction
     {
         private Edge<TInstruction> _fallThroughEdge;
-        IEdge INode.GetFallThroughEdge() => FallThroughEdge;
 
         /// <summary>
         /// Creates a new empty basic block, to be added to a control flow graph.
@@ -63,7 +62,7 @@ namespace Echo.ControlFlow
             get => FallThroughEdge?.Target;
             set => FallThroughEdge = new Edge<TInstruction>(this, value);
         }
-        
+
         /// <summary>
         /// Gets or sets the edge to the neighbour to which the control is transferred to after execution of this block
         /// and no other condition is met.
@@ -73,8 +72,14 @@ namespace Echo.ControlFlow
             get => _fallThroughEdge;
             set
             {
+                _fallThroughEdge?.Target.IncomingEdges.Remove(value);
+
                 if (value != null)
+                {
                     AdjacencyCollection<TInstruction>.AssertEdgeValidity(this, EdgeType.FallThrough, value);
+                    value.Target.IncomingEdges.Add(value);
+                }
+
                 _fallThroughEdge = value;
             }
         }
@@ -101,6 +106,18 @@ namespace Echo.ControlFlow
         {
             get;
         }
+        
+        /// <summary>
+        /// Provides a record of all incoming edges.
+        /// </summary>
+        /// <remarks>
+        /// This property is automatically updated by the adjacency lists and the fall through edge property associated
+        /// to all nodes that might connect themselves to the current node. Do not change it in this class.
+        /// </remarks>
+        internal ICollection<Edge<TInstruction>> IncomingEdges
+        {
+            get;
+        } = new List<Edge<TInstruction>>();
 
         /// <summary>
         /// Connects the node to the provided neighbour using a fallthrough edge. 
@@ -141,7 +158,7 @@ namespace Echo.ControlFlow
                         throw new InvalidOperationException("Node already has a fallthrough edge to another node.");
                     FallThroughEdge = edge;
                     break;
-                
+
                 case EdgeType.Conditional:
                     ConditionalEdges.Add(edge);
                     break;
@@ -149,7 +166,7 @@ namespace Echo.ControlFlow
                 case EdgeType.Abnormal:
                     AbnormalEdges.Add(edge);
                     break;
-                
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(edgeType), edgeType, null);
             }
@@ -163,7 +180,7 @@ namespace Echo.ControlFlow
         /// <returns>The incoming edges.</returns>
         public IEnumerable<Edge<TInstruction>> GetIncomingEdges()
         {
-            throw new NotImplementedException();
+            return IncomingEdges;
         }
         
         /// <summary>
@@ -187,7 +204,9 @@ namespace Echo.ControlFlow
         /// <returns>The predecessor nodes.</returns>
         public IEnumerable<Node<TInstruction>> GetPredecessors()
         {
-            throw new NotImplementedException();
+            return GetIncomingEdges()
+                .Select(n => n.Source)
+                .Distinct();
         }
 
         /// <summary>
@@ -203,12 +222,12 @@ namespace Echo.ControlFlow
         }
 
         /// <summary>
-        /// Determines whether another node is a neighbour of this node.
+        /// Determines whether another node is a successor of this node.
         /// </summary>
-        /// <param name="neighbour">The potential neighbour.</param>
-        /// <returns><c>True</c> if the provided node is a neighbour, <c>false</c> otherwise.</returns>
-        /// <exception cref="ArgumentNullException">Occurs when the provided neighbour is <c>null</c></exception>
-        public bool HasNeighbour(Node<TInstruction> neighbour)
+        /// <param name="neighbour">The potential successor.</param>
+        /// <returns><c>True</c> if the provided node is a successor, <c>false</c> otherwise.</returns>
+        /// <exception cref="ArgumentNullException">Occurs when the provided successor is <c>null</c></exception>
+        public bool HasSuccessor(Node<TInstruction> neighbour)
         {
             if (neighbour == null)
                 throw new ArgumentNullException(nameof(neighbour));
@@ -216,6 +235,8 @@ namespace Echo.ControlFlow
                    || ConditionalEdges.Contains(neighbour)
                    || AbnormalEdges.Contains(neighbour);
         }
+        
+        IEdge INode.GetFallThroughEdge() => FallThroughEdge;
 
         IEnumerable<IEdge> INode.GetConditionalEdges() => ConditionalEdges;
 

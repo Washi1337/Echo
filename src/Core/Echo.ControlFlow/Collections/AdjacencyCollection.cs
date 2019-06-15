@@ -41,7 +41,7 @@ namespace Echo.ControlFlow.Collections
         }
 
         /// <summary>
-        /// Creates and adds an edge to the provided node.
+        /// Creates and adds a edge to the provided node.
         /// </summary>
         /// <param name="neighbour">The new neighbouring node.</param>
         /// <returns>The created edge.</returns>
@@ -64,6 +64,7 @@ namespace Echo.ControlFlow.Collections
         {
             AssertEdgeValidity(Owner, _edgeType, edge);
             GetEdges(edge.Target).Add(edge);
+            edge.Target.IncomingEdges.Add(edge);
             return edge;
         }
 
@@ -128,7 +129,11 @@ namespace Echo.ControlFlow.Collections
         /// <inheritdoc />
         public bool Remove(Edge<TInstruction> edge)
         {
-            return GetEdges(edge.Target).Remove(edge);
+            bool result = GetEdges(edge.Target).Remove(edge);
+            if (result)
+                edge.Target.IncomingEdges.Remove(edge);
+            
+            return result;
         }
         
         /// <inheritdoc />

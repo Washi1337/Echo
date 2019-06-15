@@ -117,7 +117,7 @@ namespace Echo.ControlFlow.Tests
         }
 
         [Fact]
-        public void NeighboursExist()
+        public void SuccessorExists()
         {
             var nodes = CreateDummyGraph(4);
 
@@ -125,10 +125,10 @@ namespace Echo.ControlFlow.Tests
             nodes[0].ConnectWith(nodes[2], EdgeType.Conditional);
             nodes[2].ConnectWith(nodes[3]);
             
-            Assert.True(nodes[0].HasNeighbour(nodes[1]));
-            Assert.True(nodes[0].HasNeighbour(nodes[2]));
-            Assert.False(nodes[0].HasNeighbour(nodes[3]));
-            Assert.True(nodes[2].HasNeighbour(nodes[3]));
+            Assert.True(nodes[0].HasSuccessor(nodes[1]));
+            Assert.True(nodes[0].HasSuccessor(nodes[2]));
+            Assert.False(nodes[0].HasSuccessor(nodes[3]));
+            Assert.True(nodes[2].HasSuccessor(nodes[3]));
         }
 
         [Fact]
@@ -140,6 +140,62 @@ namespace Echo.ControlFlow.Tests
             
             Assert.Equal(2, nodes[0].ConditionalEdges.Count);
             Assert.Equal(2, nodes[0].ParentGraph.GetEdges().Count());
+        }
+
+        [Fact]
+        public void GetSuccessors()
+        {
+            var nodes = CreateDummyGraph(4);
+
+            nodes[0].ConnectWith(nodes[1]);
+            nodes[0].ConnectWith(nodes[2], EdgeType.Conditional);
+            nodes[1].ConnectWith(nodes[3]);
+            nodes[2].ConnectWith(nodes[3]);
+
+            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            {
+                nodes[1], nodes[2]
+            }, new HashSet<Node<DummyInstruction>>(nodes[0].GetSuccessors()));
+            
+            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            {
+                nodes[3]
+            }, new HashSet<Node<DummyInstruction>>(nodes[1].GetSuccessors()));
+            
+            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            {
+                nodes[3]
+            }, new HashSet<Node<DummyInstruction>>(nodes[2].GetSuccessors()));
+            
+            Assert.Empty(nodes[3].GetSuccessors());
+        }
+
+        [Fact]
+        public void GetPredecessors()
+        {
+            var nodes = CreateDummyGraph(4);
+
+            nodes[0].ConnectWith(nodes[1]);
+            nodes[0].ConnectWith(nodes[2], EdgeType.Conditional);
+            nodes[1].ConnectWith(nodes[3]);
+            nodes[2].ConnectWith(nodes[3]);
+
+            Assert.Empty(nodes[0].GetPredecessors());
+
+            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            {
+                nodes[0]
+            }, new HashSet<Node<DummyInstruction>>(nodes[1].GetPredecessors()));
+
+            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            {
+                nodes[0]
+            }, new HashSet<Node<DummyInstruction>>(nodes[2].GetPredecessors()));
+
+            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            {
+                nodes[1], nodes[2]
+            }, new HashSet<Node<DummyInstruction>>(nodes[3].GetPredecessors()));
         }
 
     }
