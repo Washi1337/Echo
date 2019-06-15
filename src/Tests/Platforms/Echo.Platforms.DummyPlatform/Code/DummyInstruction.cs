@@ -9,11 +9,11 @@ namespace Echo.Platforms.DummyPlatform.Code
         private int _pushCount;
         private int _popCount;
 
-        public DummyInstruction(long offset, int popCount, int pushCount)
+        public DummyInstruction(long offset, DummyOpCode opCode, int popCount, int pushCount, params object[] operands)
         {
             Offset = offset;
-            Mnemonic = "op";
-            Operand = new object[0];
+            OpCode = opCode;
+            Operand = operands;
             _popCount = popCount;
             _pushCount = pushCount;
         }
@@ -23,10 +23,12 @@ namespace Echo.Platforms.DummyPlatform.Code
             get;
         }
 
-        public string Mnemonic
+        public DummyOpCode OpCode
         {
             get;
         }
+
+        public string Mnemonic => OpCode.ToString().ToLowerInvariant();
 
         public IList<object> Operand
         {
@@ -72,7 +74,7 @@ namespace Echo.Platforms.DummyPlatform.Code
 
         public override string ToString()
         {
-            return $"Label_{Offset:X4}: op({string.Join(", ", Operand)})";
+            return $"Label_{Offset:X4}: {Mnemonic}({string.Join(", ", Operand)})";
         }
     }
 }
