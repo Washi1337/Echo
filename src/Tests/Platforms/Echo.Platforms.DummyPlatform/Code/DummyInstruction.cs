@@ -69,5 +69,10 @@ namespace Echo.Platforms.DummyPlatform.Code
         {
             throw new NotImplementedException();
         }
+
+        public override string ToString()
+        {
+            return $"Label_{Offset:X4}: op({string.Join(", ", Operand)})";
+        }
     }
 }

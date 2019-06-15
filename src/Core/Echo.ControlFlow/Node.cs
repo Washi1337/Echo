@@ -20,7 +20,7 @@ namespace Echo.ControlFlow
         /// Creates a new empty basic block, to be added to a control flow graph.
         /// </summary>
         public Node()
-        : this(Enumerable.Empty<TInstruction>())
+            : this(Enumerable.Empty<TInstruction>())
         {
         }
 
