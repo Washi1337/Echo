@@ -9,7 +9,7 @@ namespace Echo.ControlFlow.Tests.Construction
 {
     public class StaticGraphBuilderTest
     {
-        private static readonly DummySuccessorResolver SuccessorResolver = new DummySuccessorResolver();
+        private static readonly DummyStaticSuccessorResolver SuccessorResolver = new DummyStaticSuccessorResolver();
         
         [Fact]
         public void SingleBlock()

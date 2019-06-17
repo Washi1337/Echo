@@ -6,7 +6,7 @@ using Echo.Platforms.DummyPlatform.Code;
 
 namespace Echo.Platforms.DummyPlatform.ControlFlow
 {
-    public class DummySuccessorResolver : IStaticSuccessorResolver<DummyInstruction>
+    public class DummyStaticSuccessorResolver : IStaticSuccessorResolver<DummyInstruction>
     {
         public ICollection<SuccessorInfo> GetSuccessors(DummyInstruction instruction)
         {
