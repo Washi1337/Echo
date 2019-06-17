@@ -20,7 +20,7 @@ namespace Echo.ControlFlow
 
         /// <summary>
         /// Gets or sets the node that is executed first in the control flow graph.
-        /// </summary>        
+        /// </summary>
         public Node<TInstruction> Entrypoint
         {
             get;
@@ -34,7 +34,7 @@ namespace Echo.ControlFlow
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets a collection of all edges that transfer control from one block to the other in the graph.
         /// </summary>

@@ -8,16 +8,4 @@
       <ProjectReference Include="..\Echo.Core\Echo.Core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Analysis\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Remove="Analysis\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Analysis\**" />
-    </ItemGroup>
-
 </Project>

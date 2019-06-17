@@ -18,6 +18,6 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Indicates the edge is only traversed in abnormal circumstances, typically when an exception occurs.
         /// </summary>
-        Abnormal,    
+        Abnormal,
     }
 }
