@@ -28,7 +28,7 @@ namespace Echo.ControlFlow.Tests
             var nodes = CreateDummyGraph(2);
             nodes[0].FallThroughEdge = new Edge<DummyInstruction>(nodes[0], nodes[1]);
             
-            Assert.Equal(nodes[0], nodes[0].FallThroughEdge.Source);
+            Assert.Equal(nodes[0], nodes[0].FallThroughEdge.Origin);
             Assert.Equal(nodes[1], nodes[0].FallThroughEdge.Target);
             Assert.Equal(EdgeType.FallThrough, nodes[0].FallThroughEdge.Type);
         }
@@ -63,7 +63,7 @@ namespace Echo.ControlFlow.Tests
 
             var edge = nodes[0].ConditionalEdges.Add(nodes[1]);
 
-            Assert.Equal(nodes[0], edge.Source);
+            Assert.Equal(nodes[0], edge.Origin);
             Assert.Equal(EdgeType.Conditional, edge.Type);
             Assert.Contains(edge, nodes[0].ConditionalEdges);
         }
@@ -75,7 +75,7 @@ namespace Echo.ControlFlow.Tests
 
             var edge = nodes[0].AbnormalEdges.Add(nodes[1]);
 
-            Assert.Equal(nodes[0], edge.Source);
+            Assert.Equal(nodes[0], edge.Origin);
             Assert.Equal(EdgeType.Abnormal, edge.Type);
             Assert.Contains(edge, nodes[0].AbnormalEdges);
         }
@@ -86,7 +86,7 @@ namespace Echo.ControlFlow.Tests
             var nodes = CreateDummyGraph(2);
 
             var edge = nodes[0].ConnectWith(nodes[1]);
-            Assert.Equal(nodes[0], edge.Source);
+            Assert.Equal(nodes[0], edge.Origin);
             Assert.Equal(nodes[1], edge.Target);
             Assert.Equal(EdgeType.FallThrough, edge.Type);
             Assert.Equal(edge, nodes[0].FallThroughEdge);
@@ -98,7 +98,7 @@ namespace Echo.ControlFlow.Tests
             var nodes = CreateDummyGraph(2);
 
             var edge = nodes[0].ConnectWith(nodes[1], EdgeType.Conditional);
-            Assert.Equal(nodes[0], edge.Source);
+            Assert.Equal(nodes[0], edge.Origin);
             Assert.Equal(nodes[1], edge.Target);
             Assert.Equal(EdgeType.Conditional, edge.Type);
             Assert.Contains(edge, nodes[0].ConditionalEdges);
@@ -110,7 +110,7 @@ namespace Echo.ControlFlow.Tests
             var nodes = CreateDummyGraph(2);
 
             var edge = nodes[0].ConnectWith(nodes[1], EdgeType.Abnormal);
-            Assert.Equal(nodes[0], edge.Source);
+            Assert.Equal(nodes[0], edge.Origin);
             Assert.Equal(nodes[1], edge.Target);
             Assert.Equal(EdgeType.Abnormal, edge.Type);
             Assert.Contains(edge, nodes[0].AbnormalEdges);

@@ -205,7 +205,7 @@ namespace Echo.ControlFlow
         public IEnumerable<Node<TInstruction>> GetPredecessors()
         {
             return GetIncomingEdges()
-                .Select(n => n.Source)
+                .Select(n => n.Origin)
                 .Distinct();
         }
 

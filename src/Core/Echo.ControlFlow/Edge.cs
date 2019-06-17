@@ -13,22 +13,22 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Creates a new fallthrough edge between two nodes.
         /// </summary>
-        /// <param name="source">The node to start the edge at.</param>
+        /// <param name="origin">The node to start the edge at.</param>
         /// <param name="target">The node to use as destination for the edge.</param>
-        public Edge(Node<TInstruction> source, Node<TInstruction> target)
-            : this(source, target, EdgeType.FallThrough)
+        public Edge(Node<TInstruction> origin, Node<TInstruction> target)
+            : this(origin, target, EdgeType.FallThrough)
         {
         }
         
         /// <summary>
         /// Creates a new edge between two nodes.
         /// </summary>
-        /// <param name="source">The node to start the edge at.</param>
+        /// <param name="origin">The node to start the edge at.</param>
         /// <param name="target">The node to use as destination for the edge.</param>
         /// <param name="edgeType">The type of the edge to create.</param>
-        public Edge(Node<TInstruction> source, Node<TInstruction> target, EdgeType edgeType)
+        public Edge(Node<TInstruction> origin, Node<TInstruction> target, EdgeType edgeType)
         {
-            Source = source;
+            Origin = origin;
             Target = target;
             Type = edgeType;
         }
@@ -36,12 +36,12 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the graph that contains this edge.
         /// </summary>
-        public Graph<TInstruction> ParentGraph => Source?.ParentGraph ?? Target?.ParentGraph;
+        public Graph<TInstruction> ParentGraph => Origin?.ParentGraph ?? Target?.ParentGraph;
 
         /// <summary>
         /// Gets the node that this edge originates from.
         /// </summary>
-        public Node<TInstruction> Source
+        public Node<TInstruction> Origin
         {
             get;
         }
@@ -54,7 +54,7 @@ namespace Echo.ControlFlow
             get;
         }
 
-        INode IEdge.Source => Source;
+        INode IEdge.Origin => Origin;
 
         INode IEdge.Target => Target;
 

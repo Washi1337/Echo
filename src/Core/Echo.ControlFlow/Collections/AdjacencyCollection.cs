@@ -157,7 +157,7 @@ namespace Echo.ControlFlow.Collections
                     $"Cannot add an edge of type {item.Type} to a collection of type {type}.");
             }
             
-            if (item.Source != owner)
+            if (item.Origin != owner)
                 throw new ArgumentException("Cannot add an edge originating from a different node.");
         }
 

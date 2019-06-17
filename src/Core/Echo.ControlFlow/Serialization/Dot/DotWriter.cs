@@ -99,7 +99,7 @@ namespace Echo.ControlFlow.Serialization.Dot
 
         protected virtual void Write(IDictionary<INode, string> nodeIdentifiers, IEdge edge)
         {
-            WriteIdentifier(nodeIdentifiers[edge.Source]);
+            WriteIdentifier(nodeIdentifiers[edge.Origin]);
             Writer.Write(" -> ");
             WriteIdentifier(nodeIdentifiers[edge.Target]);
             

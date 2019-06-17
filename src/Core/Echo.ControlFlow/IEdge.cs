@@ -12,7 +12,7 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the node that this edge starts at.
         /// </summary>
-        INode Source
+        INode Origin
         {
             get;
         }
