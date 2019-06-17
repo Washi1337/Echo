@@ -6,57 +6,49 @@ using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction
 {
-    public abstract class StaticGraphBuilder<TInstruction> : IGraphBuilder<TInstruction>
+    /// <summary>
+    /// Provides an implementation of a control flow graph builder that traverses the instructions in a recursive manner,
+    /// and determines for each instruction the successors by looking at the general flow control of each instruction.
+    /// </summary>
+    /// <typeparam name="TInstruction">The type of instructions to store in the control flow graph.</typeparam>
+    /// <remarks>
+    /// This flow graph builder does <strong>not</strong> do any emulation or data flow analysis. Therefore, this flow
+    /// graph builder can only be reliably used when the instructions to graph do not contain any indirect branching
+    /// instructions. For example, if we target x86, the instruction <c>jmp 12345678h</c> is possible to process using
+    /// this graph builder, but <c>jmp eax</c> is not.
+    /// </remarks>
+    public class StaticGraphBuilder<TInstruction> : IGraphBuilder<TInstruction>
         where TInstruction : IInstruction
     {
-        protected struct InstructionInfo
-        {
-            public InstructionInfo(TInstruction instruction, ICollection<SuccessorInfo> successors)
-            {
-                Instruction = instruction;
-                Successors = successors;
-            }
-            
-            public TInstruction Instruction
-            {
-                get;
-            }
-
-            public ICollection<SuccessorInfo> Successors
-            {
-                get;
-            }
-        }
-        
-        protected struct SuccessorInfo
-        {
-            public SuccessorInfo(long destinationAddress, EdgeType edgeType)
-            {
-                DestinationAddress = destinationAddress;
-                EdgeType = edgeType;
-            }
-            
-            public long DestinationAddress
-            {
-                get;
-            }
-
-            public EdgeType EdgeType
-            {
-                get;
-            }
-        }
-        
-        public StaticGraphBuilder(IInstructionProvider<TInstruction> provider)
+        /// <summary>
+        /// Creates a new static graph builder using the provided instructions and successor resolver.
+        /// </summary>
+        /// <param name="provider">The object containing the instructions to graph.</param>
+        /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
+        /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
+        public StaticGraphBuilder(IInstructionProvider<TInstruction> provider, IStaticSuccessorResolver<TInstruction> successorResolver)
         {
             InstructionProvider = provider ?? throw new ArgumentNullException(nameof(provider));
+            SuccessorResolver = successorResolver ?? throw new ArgumentNullException(nameof(successorResolver));
         }
         
+        /// <summary>
+        /// Gets the object used to obtain the instructions to put in the control flow graph. 
+        /// </summary>
         public IInstructionProvider<TInstruction> InstructionProvider
         {
             get;
         }
-        
+
+        /// <summary>
+        /// Gets the object used to determine the successors of a single instruction.
+        /// </summary>
+        public IStaticSuccessorResolver<TInstruction> SuccessorResolver
+        {
+            get;
+        }
+
+        /// <inheritdoc />
         public Graph<TInstruction> ConstructFlowGraph(long entrypoint)
         {
             CollectInstructions(entrypoint, out var instructions, out var blockHeaders);
@@ -68,11 +60,11 @@ namespace Echo.ControlFlow.Construction
             return graph;
         }
 
-        private void CollectInstructions(long entrypoint, out IDictionary<long, InstructionInfo> instructions, 
+        private void CollectInstructions(long entrypoint, out IDictionary<long, InstructionInfo<TInstruction>> instructions, 
             out HashSet<long> blockHeaders)
         {
             var visited = new HashSet<long>();
-            instructions = new Dictionary<long, InstructionInfo>();
+            instructions = new Dictionary<long, InstructionInfo<TInstruction>>();
             blockHeaders = new HashSet<long> {entrypoint};
 
             // Start at the entrypoint.
@@ -88,10 +80,10 @@ namespace Echo.ControlFlow.Construction
                 {
                     // Get the instruction at the provided offset and figure out successors.
                     var instruction = InstructionProvider.GetInstructionAtOffset(currentOffset);
-                    var currentSuccessors = GetSuccessors(instruction);
+                    var currentSuccessors = SuccessorResolver.GetSuccessors(instruction);
                     
                     // Store collected data.
-                    instructions.Add(currentOffset, new InstructionInfo(instruction, currentSuccessors));
+                    instructions.Add(currentOffset, new InstructionInfo<TInstruction>(instruction, currentSuccessors));
                     
                     // Figure out next offsets to process.
                     bool nextInstructionIsSuccessor = false;
@@ -122,7 +114,7 @@ namespace Echo.ControlFlow.Construction
             }
         }
 
-        private static void CreateNodes(Graph<TInstruction> graph, IDictionary<long, InstructionInfo> instructions, 
+        private static void CreateNodes(Graph<TInstruction> graph, IDictionary<long, InstructionInfo<TInstruction>> instructions, 
             ICollection<long> blockHeaders)
         {
             Node<TInstruction> currentNode = null;
@@ -148,7 +140,7 @@ namespace Echo.ControlFlow.Construction
             }
         }
 
-        private static void ConnectNodes(Graph<TInstruction> graph, IDictionary<long, InstructionInfo> instructions)
+        private static void ConnectNodes(Graph<TInstruction> graph, IDictionary<long, InstructionInfo<TInstruction>> instructions)
         {
             foreach (var node in graph.Nodes)
             {
@@ -170,8 +162,6 @@ namespace Echo.ControlFlow.Construction
                 }
             }
         }
-
-        protected abstract ICollection<SuccessorInfo> GetSuccessors(TInstruction instruction);
     }
     
 }

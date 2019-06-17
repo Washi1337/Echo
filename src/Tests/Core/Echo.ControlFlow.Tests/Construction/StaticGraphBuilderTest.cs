@@ -1,6 +1,5 @@
-using System.IO;
 using System.Linq;
-using Echo.ControlFlow.Serialization.Dot;
+using Echo.ControlFlow.Construction;
 using Echo.Core.Code;
 using Echo.Platforms.DummyPlatform.Code;
 using Echo.Platforms.DummyPlatform.ControlFlow;
@@ -10,6 +9,8 @@ namespace Echo.ControlFlow.Tests.Construction
 {
     public class StaticGraphBuilderTest
     {
+        private static readonly DummySuccessorResolver SuccessorResolver = new DummySuccessorResolver();
+        
         [Fact]
         public void SingleBlock()
         {
@@ -24,7 +25,7 @@ namespace Echo.ControlFlow.Tests.Construction
             };
             
             var list = new InstructionList<DummyInstruction>(instructions);
-            var builder = new DummyStaticGraphBuilder(list);
+            var builder = new StaticGraphBuilder<DummyInstruction>(list, SuccessorResolver);
             var graph = builder.ConstructFlowGraph(0);
             
             Assert.Single(graph.Nodes);
@@ -37,21 +38,25 @@ namespace Echo.ControlFlow.Tests.Construction
         {
             var instructions = new[]
             {
+                // Entrypoint
                 DummyInstruction.Op(0, 0, 1),
                 DummyInstruction.JmpCond(1, 5),
                 
+                // True
                 DummyInstruction.Op(2, 0, 0),
                 DummyInstruction.Op(3, 0, 0),
                 DummyInstruction.Jmp(4, 7),
                 
+                // False
                 DummyInstruction.Op(5, 0, 0),
                 DummyInstruction.Op(6, 0, 0),
                 
+                // Endif
                 DummyInstruction.Ret(7)
             };
             
             var list = new InstructionList<DummyInstruction>(instructions);
-            var builder = new DummyStaticGraphBuilder(list);
+            var builder = new StaticGraphBuilder<DummyInstruction>(list, SuccessorResolver);
             var graph = builder.ConstructFlowGraph(0);
 
 
@@ -91,7 +96,7 @@ namespace Echo.ControlFlow.Tests.Construction
             };
             
             var list = new InstructionList<DummyInstruction>(instructions);
-            var builder = new DummyStaticGraphBuilder(list);
+            var builder = new StaticGraphBuilder<DummyInstruction>(list, SuccessorResolver);
             var graph = builder.ConstructFlowGraph(0);
             
             Assert.Equal(4, graph.Nodes.Count);

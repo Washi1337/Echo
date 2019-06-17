@@ -2,19 +2,13 @@ using System;
 using System.Collections.Generic;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
-using Echo.Core.Code;
 using Echo.Platforms.DummyPlatform.Code;
 
 namespace Echo.Platforms.DummyPlatform.ControlFlow
 {
-    public class DummyStaticGraphBuilder : StaticGraphBuilder<DummyInstruction>
+    public class DummySuccessorResolver : IStaticSuccessorResolver<DummyInstruction>
     {
-        public DummyStaticGraphBuilder(IInstructionProvider<DummyInstruction> provider) 
-            : base(provider)
-        {
-        }
-
-        protected override ICollection<SuccessorInfo> GetSuccessors(DummyInstruction instruction)
+        public ICollection<SuccessorInfo> GetSuccessors(DummyInstruction instruction)
         {
             var result = new List<SuccessorInfo>(1);
             switch (instruction.OpCode)
