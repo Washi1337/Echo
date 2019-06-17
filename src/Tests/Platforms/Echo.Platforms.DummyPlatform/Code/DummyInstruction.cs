@@ -9,6 +9,26 @@ namespace Echo.Platforms.DummyPlatform.Code
         private int _pushCount;
         private int _popCount;
 
+        public static DummyInstruction Op(long offset, int popCount, int pushCount)
+        {
+            return new DummyInstruction(offset, DummyOpCode.Op, popCount, pushCount, popCount, pushCount);
+        }
+
+        public static DummyInstruction Jmp(long offset, long target)
+        {
+            return new DummyInstruction(offset, DummyOpCode.Jmp, 0, 0, target);
+        }
+
+        public static DummyInstruction JmpCond(long offset, long target)
+        {
+            return new DummyInstruction(offset, DummyOpCode.JmpCond, 1, 0, target);
+        }
+
+        public static DummyInstruction Ret(long offset)
+        {
+            return new DummyInstruction(offset, DummyOpCode.Ret, 0, 0);
+        }
+        
         public DummyInstruction(long offset, DummyOpCode opCode, int popCount, int pushCount, params object[] operands)
         {
             Offset = offset;

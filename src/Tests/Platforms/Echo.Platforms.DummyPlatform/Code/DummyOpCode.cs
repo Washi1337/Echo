@@ -5,5 +5,6 @@ namespace Echo.Platforms.DummyPlatform.Code
         Op,
         Jmp,
         JmpCond,
+        Ret,
     }
 }

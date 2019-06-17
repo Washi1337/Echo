@@ -82,5 +82,6 @@ namespace Echo.Core.Code
         /// </summary>
         /// <returns>The variables this instruction writes to.</returns>
         IEnumerable<IVariable> GetWrittenVariables();
+        
     }
 }

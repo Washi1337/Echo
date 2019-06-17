@@ -44,6 +44,12 @@ namespace Echo.ControlFlow
             return Nodes.SelectMany(n => n.GetOutgoingEdges());
         }
 
+        public Node<TInstruction> GetNodeByOffset(long offset)
+        {
+            // TODO: use something more efficient than a linear search.
+            return Nodes.FirstOrDefault(n => n.Instructions.Count > 0 && n.Instructions[0].Offset == offset);
+        }
+        
         INode IGraph.Entrypoint => Entrypoint;
 
         IEnumerable<INode> IGraph.GetNodes() => Nodes;
