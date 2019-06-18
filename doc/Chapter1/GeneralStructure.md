@@ -1,5 +1,5 @@
-General Structure
-=================
+General Project Structure
+=========================
 
 The Echo project mainly consists of two parts. The core libraries that is shared amongst all platforms, and the various back-end libraries that implement the interfaces to describe various platforms.
 
