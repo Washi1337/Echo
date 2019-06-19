@@ -23,15 +23,28 @@ namespace Echo.ControlFlow.Construction
         /// <summary>
         /// Creates a new static graph builder using the provided instructions and successor resolver.
         /// </summary>
+        /// <param name="instructions">The object containing the instructions to graph.</param>
+        /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
+        /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
+        public StaticGraphBuilder(IEnumerable<TInstruction> instructions,
+            IStaticSuccessorResolver<TInstruction> successorResolver)
+            : this(new ListInstructionProvider<TInstruction>(instructions), successorResolver)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new static graph builder using the provided instructions and successor resolver.
+        /// </summary>
         /// <param name="provider">The object containing the instructions to graph.</param>
         /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
-        public StaticGraphBuilder(IInstructionProvider<TInstruction> provider, IStaticSuccessorResolver<TInstruction> successorResolver)
+        public StaticGraphBuilder(IInstructionProvider<TInstruction> provider,
+            IStaticSuccessorResolver<TInstruction> successorResolver)
         {
             InstructionProvider = provider ?? throw new ArgumentNullException(nameof(provider));
             SuccessorResolver = successorResolver ?? throw new ArgumentNullException(nameof(successorResolver));
         }
-        
+
         /// <summary>
         /// Gets the object used to obtain the instructions to put in the control flow graph. 
         /// </summary>

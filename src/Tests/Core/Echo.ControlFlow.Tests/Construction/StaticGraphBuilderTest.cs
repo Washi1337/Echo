@@ -24,7 +24,7 @@ namespace Echo.ControlFlow.Tests.Construction
                 DummyInstruction.Ret(5)
             };
             
-            var list = new InstructionList<DummyInstruction>(instructions);
+            var list = new ListInstructionProvider<DummyInstruction>(instructions);
             var builder = new StaticGraphBuilder<DummyInstruction>(list, SuccessorResolver);
             var graph = builder.ConstructFlowGraph(0);
             
@@ -55,7 +55,7 @@ namespace Echo.ControlFlow.Tests.Construction
                 DummyInstruction.Ret(7)
             };
             
-            var list = new InstructionList<DummyInstruction>(instructions);
+            var list = new ListInstructionProvider<DummyInstruction>(instructions);
             var builder = new StaticGraphBuilder<DummyInstruction>(list, SuccessorResolver);
             var graph = builder.ConstructFlowGraph(0);
 
@@ -95,7 +95,7 @@ namespace Echo.ControlFlow.Tests.Construction
                 DummyInstruction.Ret(12)
             };
             
-            var list = new InstructionList<DummyInstruction>(instructions);
+            var list = new ListInstructionProvider<DummyInstruction>(instructions);
             var builder = new StaticGraphBuilder<DummyInstruction>(list, SuccessorResolver);
             var graph = builder.ConstructFlowGraph(0);
             
