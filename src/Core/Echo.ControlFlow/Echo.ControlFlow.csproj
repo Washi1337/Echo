@@ -8,8 +8,4 @@
       <ProjectReference Include="..\Echo.Core\Echo.Core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Analysis\Traversal\PostOrderRecorder.cs" />
-    </ItemGroup>
-
 </Project>
