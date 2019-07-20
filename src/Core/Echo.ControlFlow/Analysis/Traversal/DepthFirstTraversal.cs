@@ -10,8 +10,27 @@ namespace Echo.ControlFlow.Analysis.Traversal
     {
         /// <inheritdoc />
         public event EventHandler<NodeDiscoveryEventArgs> NodeDiscovered;
-
+        
+        /// <inheritdoc />
         public event EventHandler TraversalCompleted;
+
+        public DepthFirstTraversal()
+            : this(false)
+        {
+        }
+
+        public DepthFirstTraversal(bool reverseTraversal)
+        {
+            ReverseTraversal = reverseTraversal;
+        }
+
+        /// <summary>
+        /// Gets a value indicating the traversal algorithm should traverse either outgoing or incoming edges. 
+        /// </summary>
+        public bool ReverseTraversal
+        {
+            get;
+        }
 
         /// <inheritdoc />
         public void Run(INode entrypoint)
@@ -37,8 +56,9 @@ namespace Echo.ControlFlow.Analysis.Traversal
                 
                 if (eventArgs.ContinueExploring)
                 {
-                    foreach (var edge in node.GetOutgoingEdges())
-                        stack.Push((edge.Target, edge));
+                    var nextEdges = ReverseTraversal ? node.GetIncomingEdges() : node.GetOutgoingEdges();
+                    foreach (var edge in nextEdges)
+                        stack.Push((edge.GetOtherNode(node), edge));
                 }
             }
             

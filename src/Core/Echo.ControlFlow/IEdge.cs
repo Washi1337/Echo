@@ -33,4 +33,12 @@ namespace Echo.ControlFlow
             get;
         }
     }
+    
+    public static partial class GraphExtensions
+    {
+        public static INode GetOtherNode(this IEdge edge, INode node)
+        {
+            return edge.Origin == node ? edge.Target : edge.Origin;
+        }   
+    }
 }
