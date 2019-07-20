@@ -28,7 +28,7 @@ namespace Echo.Core.Code
         /// <summary>
         /// Gets the operands of the instruction.
         /// </summary>
-        IList<object> Operand
+        IList<object> Operands
         {
             get;
         }

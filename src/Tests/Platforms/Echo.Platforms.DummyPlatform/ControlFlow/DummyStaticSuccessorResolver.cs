@@ -17,11 +17,11 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
                     result.Add(new SuccessorInfo(instruction.Offset + instruction.Size, EdgeType.FallThrough));
                     break;
                 case DummyOpCode.Jmp:
-                    result.Add(new SuccessorInfo((long) instruction.Operand[0], EdgeType.FallThrough));
+                    result.Add(new SuccessorInfo((long) instruction.Operands[0], EdgeType.FallThrough));
                     break;
                 case DummyOpCode.JmpCond:
                     result.Add(new SuccessorInfo(instruction.Offset + instruction.Size, EdgeType.FallThrough));
-                    result.Add(new SuccessorInfo((long) instruction.Operand[0], EdgeType.Conditional));
+                    result.Add(new SuccessorInfo((long) instruction.Operands[0], EdgeType.Conditional));
                     break;
                 case DummyOpCode.Ret:
                     break;

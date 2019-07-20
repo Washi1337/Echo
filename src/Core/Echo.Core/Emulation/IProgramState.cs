@@ -9,6 +9,15 @@ namespace Echo.Core.Emulation
         where TValue : IValue
     {
         /// <summary>
+        /// Gets or sets the current value of the program counter that points to the instruction to be executed next.
+        /// </summary>
+        long ProgramCounter
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
         /// Gets the current stack state of the program.
         /// </summary>
         IStackState<TValue> Stack

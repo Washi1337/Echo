@@ -33,7 +33,7 @@ namespace Echo.Platforms.DummyPlatform.Code
         {
             Offset = offset;
             OpCode = opCode;
-            Operand = operands;
+            Operands = operands;
             _popCount = popCount;
             _pushCount = pushCount;
         }
@@ -50,7 +50,7 @@ namespace Echo.Platforms.DummyPlatform.Code
 
         public string Mnemonic => OpCode.ToString().ToLowerInvariant();
 
-        public IList<object> Operand
+        public IList<object> Operands
         {
             get;
         }
@@ -94,7 +94,7 @@ namespace Echo.Platforms.DummyPlatform.Code
 
         public override string ToString()
         {
-            return $"Label_{Offset:X4}: {Mnemonic}({string.Join(", ", Operand)})";
+            return $"Label_{Offset:X4}: {Mnemonic}({string.Join(", ", Operands)})";
         }
     }
 }
