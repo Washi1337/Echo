@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Echo.ControlFlow.Analysis.Traversal;
 
 namespace Echo.ControlFlow.Analysis.Domination
@@ -16,6 +18,9 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// <returns>The constructed dominator tree.</returns>
         public static DominatorTree FromControlFlowGraph(IGraph graph)
         {
+            if (graph.Entrypoint == null)
+                throw new ArgumentException("Control flow graph does not have an entrypoint.");
+            
             var idoms = GetImmediateDominators(graph.Entrypoint);
             var nodes = ConstructTreeNodes(idoms, graph.Entrypoint);
             return new DominatorTree(nodes, graph.Entrypoint);
@@ -143,6 +148,8 @@ namespace Echo.ControlFlow.Analysis.Domination
         }
         
         private readonly IDictionary<INode, DominatorTreeNode> _nodes;
+        private Dictionary<INode, ISet<INode>> _frontier;
+        private readonly object _frontierSyncLock = new object();
 
         private DominatorTree(IDictionary<INode, DominatorTreeNode> nodes, INode root)
         {
@@ -187,6 +194,50 @@ namespace Echo.ControlFlow.Analysis.Domination
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Determines the dominance frontier of a specific node. That is, the set of all nodes where the dominance of
+        /// the specified node stops.
+        /// </summary>
+        /// <param name="node">The node to obtain the dominance frontier from.</param>
+        /// <returns>A collection of nodes representing the dominance frontier.</returns>
+        public IEnumerable<INode> GetDominanceFrontier(INode node)
+        {
+            if (_frontier == null)
+            {
+                lock (_frontierSyncLock)
+                {
+                    if (_frontier == null)
+                        InitializeDominanceFrontiers();
+                }
+            }
+
+            return _frontier[node];
+        }
+        
+        private void InitializeDominanceFrontiers()
+        {
+            var frontier = _nodes.Keys.ToDictionary(x => x, _ => (ISet<INode>) new HashSet<INode>());
+            
+            foreach (var node in _nodes.Keys)
+            {
+                var predecessors = node.GetPredecessors().ToArray();
+                if (predecessors.Length >= 2)
+                {
+                    foreach (var p in predecessors)
+                    {
+                        var runner = p;
+                        while (runner != _nodes[node].Parent.OriginalNode)
+                        {
+                            frontier[runner].Add(node);
+                            runner = _nodes[runner].Parent.OriginalNode;
+                        }
+                    }
+                }
+            }
+
+            _frontier = frontier;
         }
     }
 }

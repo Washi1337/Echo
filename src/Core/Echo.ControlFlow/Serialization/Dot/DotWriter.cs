@@ -82,7 +82,7 @@ namespace Echo.ControlFlow.Serialization.Dot
 
         protected virtual void WriteHeader()
         {
-            Writer.WriteLine("strict digraph {");
+            Writer.WriteLine("digraph {");
         }
 
         private void WriteFooter()

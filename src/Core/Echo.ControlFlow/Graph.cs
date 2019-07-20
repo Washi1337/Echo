@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow;
@@ -13,6 +14,8 @@ namespace Echo.ControlFlow
     public class Graph<TInstruction> : IGraph
         where TInstruction : IInstruction
     {
+        private Node<TInstruction> _entrypoint;
+
         public Graph()
         {
             Nodes = new NodeCollection<TInstruction>(this);
@@ -23,8 +26,16 @@ namespace Echo.ControlFlow
         /// </summary>
         public Node<TInstruction> Entrypoint
         {
-            get;
-            set;
+            get => _entrypoint;
+            set
+            {
+                if (_entrypoint != value)
+                {
+                    if (!Nodes.Contains(value))
+                        throw new ArgumentException("Node is not present in the graph.", nameof(value));
+                    _entrypoint = value;
+                }
+            }
         }
 
         /// <summary>
