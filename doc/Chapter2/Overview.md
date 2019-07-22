@@ -13,15 +13,22 @@ The figure below depicts a control flow graph of a very simple if-statement:
 How are they modelled in Echo?
 ------------------------------
 
-CFGs are modelled in Echo using the classes found in the `Echo.ControlFlow` namespace. The base interfaces include:
+Graphs are modelled in Echo using the classes found in the `Echo.ControlFlow` namespace. The base interfaces include:
 - `INode`: A single node.
 - `IEdge`: An edge between two nodes.
 - `IGraph`: A collection of nodes and edges, with one node selected as the entrypoint.
 
-A default implementation is given to represent nodes containing a list of instructions. Given a type `TInstruction`, one could use the following classes to model a CFG:
-- `Node<TInstruction>`
-- `Edge<TInstruction>`
-- `Graph<TInstruction>`
+A default implementation is given to represent nodes with some generic data type stored in each of them. Given a type `TContents`, one could use the following classes to model a CFG:
+- `Node<TContents>`
+- `Edge<TContents>`
+- `Graph<TContents>`
+
+However, when specifically dealing with CFGs, you probably will only deal with the following classes instead:
+- `ControlFlowGraph<TInstruction>`
+- `BasicBlockNode<TInstruction>` 
+- `BasicBlock<TInstruction>`
+
+These are convenience classes defined in the `Echo.ControlFlow.Specialized` interface that simplify your expressions a bit.
 
 Constructing CFGs
 -----------------

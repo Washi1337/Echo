@@ -30,8 +30,8 @@ var resolver = new DummyStaticSuccessorResolver();
 
 Now we can build our control flow graph from our list. Given the entrypoint address stored in a variable `entrypointAddress` of type `long`, we can construct the control flow graph using:
 ```csharp
-var builder = new StaticGraphBuilder<DummyInstruction>(instructions, resolver);
-Graph<DummyInstruction> graph = builder.ConstructFlowGraph(entrypointAddress);
+var builder = new StaticFlowGraphBuilder<DummyInstruction>(instructions, resolver);
+ControlFlowGraph<DummyInstruction> graph = builder.ConstructFlowGraph(entrypointAddress);
 
 ```
 

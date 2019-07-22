@@ -18,7 +18,7 @@ To perform dominator analysis on a CFG produced by Echo, we can construct a domi
 ```csharp
 using Echo.ControlFlow.Analysis.Domination;
 ...
-var dominatorTree = DominatorTree.FromControlFlowGraph(graph);
+var dominatorTree = DominatorTree.FromGraph(graph);
 ```
 
 A `DominatorTree` has a `Root` node, and every node in the tree corresponds to one node in the original control flow graph. Furthermore, a dominator tree can be used to verify whether a specific node dominates another. Taking the example in the figure above, we have that:

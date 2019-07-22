@@ -6,7 +6,7 @@ Traversing a control flow graph can be done manually, or done through a `ITraver
 Manual Traversal
 ----------------
 
-Every CFG has an **Entrypoint** and every node in a CFG consists of at least the following methods that can be used to navigate through the CFG:
+Every graph has an **Entrypoint** and every node in a graph consists of at least the following methods that can be used to navigate through the CFG:
 
 - `IEdge GetFallThroughEdge()`: Gets or sets the edge to the neighbour to which the control is transferred to after execution of this block and no other condition is met.
 - `IEnumerable<IEdge> GetConditionalEdges()`:  Gets a collection of conditional edges that originate from this source.

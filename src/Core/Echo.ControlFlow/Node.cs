@@ -224,6 +224,11 @@ namespace Echo.ControlFlow
                    || AbnormalEdges.Contains(neighbour);
         }
 
+        public override string ToString()
+        {
+            return Contents?.ToString() ?? "<null>";
+        }
+
         IEdge INode.GetFallThroughEdge() => FallThroughEdge;
 
         IEnumerable<IEdge> INode.GetConditionalEdges() => ConditionalEdges;
