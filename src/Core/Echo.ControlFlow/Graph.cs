@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.ControlFlow;
 using Echo.ControlFlow.Collections;
 using Echo.Core.Code;
 
@@ -47,6 +46,18 @@ namespace Echo.ControlFlow
         }
 
         /// <summary>
+        /// Gets an ordered collection of all exception handlers that are defined in the control flow graph.
+        /// </summary>
+        /// <remarks>
+        /// If two exception handlers are nested (i.e. they overlap in the try segments), the one that occurs first in
+        /// this collection is the enclosing exception handler.
+        /// </remarks>
+        public IList<ExceptionHandler<TInstruction>> ExceptionHandlers
+        {
+            get;
+        } = new List<ExceptionHandler<TInstruction>>();
+        
+        /// <summary>
         /// Gets a collection of all edges that transfer control from one block to the other in the graph.
         /// </summary>
         /// <returns>The edges.</returns>
@@ -61,10 +72,12 @@ namespace Echo.ControlFlow
             return Nodes.FirstOrDefault(n => n.Instructions.Count > 0 && n.Instructions[0].Offset == offset);
         }
         
-        INode IGraph.Entrypoint => Entrypoint;
+        INode IGraphSegment.Entrypoint => Entrypoint;
 
-        IEnumerable<INode> IGraph.GetNodes() => Nodes;
+        IEnumerable<INode> IGraphSegment.GetNodes() => Nodes;
 
         IEnumerable<IEdge> IGraph.GetEdges() => GetEdges();
+
+        IEnumerable<IExceptionHandler> IGraph.GetExceptionHandlers() => ExceptionHandlers;
     }
 }

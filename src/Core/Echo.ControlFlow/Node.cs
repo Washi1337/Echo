@@ -235,7 +235,17 @@ namespace Echo.ControlFlow
                    || ConditionalEdges.Contains(neighbour)
                    || AbnormalEdges.Contains(neighbour);
         }
-        
+
+        /// <summary>
+        /// Gets a collection of exception handlers that contain the node.
+        /// </summary>
+        /// <returns>The exception handlers.</returns>
+        public IEnumerable<ExceptionHandler<TInstruction>> GetExceptionHandlers()
+        {
+            return ParentGraph.ExceptionHandlers
+                .Where(e => e.Try.Nodes.Contains(this) || e.Handler.Nodes.Contains(this));
+        }
+
         IEdge INode.GetFallThroughEdge() => FallThroughEdge;
 
         IEnumerable<IEdge> INode.GetConditionalEdges() => ConditionalEdges;
@@ -250,6 +260,7 @@ namespace Echo.ControlFlow
 
         IEnumerable<INode> INode.GetSuccessors() => GetSuccessors();
 
+        IEnumerable<IExceptionHandler> INode.GetExceptionHandlers() => GetExceptionHandlers();
 
     }
 }
