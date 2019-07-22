@@ -1,4 +1,4 @@
-namespace Echo.ControlFlow
+namespace Echo.ControlFlow.Specialized
 {
     /// <summary>
     /// Represents a single exception handler region in a control flow graph, consisting of a segment that is protected

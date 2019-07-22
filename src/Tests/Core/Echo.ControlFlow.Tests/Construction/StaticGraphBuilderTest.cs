@@ -25,11 +25,11 @@ namespace Echo.ControlFlow.Tests.Construction
             };
             
             var list = new ListInstructionProvider<DummyInstruction>(instructions);
-            var builder = new StaticGraphBuilder<DummyInstruction>(list, SuccessorResolver);
+            var builder = new StaticFlowGraphBuilder<DummyInstruction>(list, SuccessorResolver);
             var graph = builder.ConstructFlowGraph(0);
             
             Assert.Single(graph.Nodes);
-            Assert.Equal(instructions, graph.Nodes.First().Instructions);
+            Assert.Equal(instructions, graph.Nodes.First().Contents.Instructions);
             Assert.Equal(graph.Nodes.First(), graph.Entrypoint);
         }
         
@@ -56,7 +56,7 @@ namespace Echo.ControlFlow.Tests.Construction
             };
             
             var list = new ListInstructionProvider<DummyInstruction>(instructions);
-            var builder = new StaticGraphBuilder<DummyInstruction>(list, SuccessorResolver);
+            var builder = new StaticFlowGraphBuilder<DummyInstruction>(list, SuccessorResolver);
             var graph = builder.ConstructFlowGraph(0);
 
 
@@ -96,7 +96,7 @@ namespace Echo.ControlFlow.Tests.Construction
             };
             
             var list = new ListInstructionProvider<DummyInstruction>(instructions);
-            var builder = new StaticGraphBuilder<DummyInstruction>(list, SuccessorResolver);
+            var builder = new StaticFlowGraphBuilder<DummyInstruction>(list, SuccessorResolver);
             var graph = builder.ConstructFlowGraph(0);
             
             Assert.Equal(4, graph.Nodes.Count);

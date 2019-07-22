@@ -3,22 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Collections
 {
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class NodeCollection<TInstruction> : ICollection<Node<TInstruction>> 
-        where TInstruction : IInstruction
+    public class NodeCollection<TContents> : ICollection<Node<TContents>>
     {
-        private readonly ISet<Node<TInstruction>> _nodes = new HashSet<Node<TInstruction>>();
+        private readonly ISet<Node<TContents>> _nodes = new HashSet<Node<TContents>>();
 
-        internal NodeCollection(Graph<TInstruction> parentGraph)
+        internal NodeCollection(Graph<TContents> parentGraph)
         {
             ParentGraph = parentGraph ?? throw new ArgumentNullException(nameof(parentGraph));
         }
 
-        public Graph<TInstruction> ParentGraph
+        public Graph<TContents> ParentGraph
         {
             get;
         }
@@ -27,7 +25,7 @@ namespace Echo.ControlFlow.Collections
 
         public bool IsReadOnly => false;
         
-        public IEnumerator<Node<TInstruction>> GetEnumerator()
+        public IEnumerator<Node<TContents>> GetEnumerator()
         {
             return _nodes.GetEnumerator();
         }
@@ -37,7 +35,7 @@ namespace Echo.ControlFlow.Collections
             return GetEnumerator();
         }
 
-        public void Add(Node<TInstruction> item)
+        public void Add(Node<TContents> item)
         {
             if (item.ParentGraph == ParentGraph)
                 return;
@@ -49,7 +47,7 @@ namespace Echo.ControlFlow.Collections
                 item.ParentGraph = ParentGraph;
         }
 
-        public void AddRange(IEnumerable<Node<TInstruction>> items)
+        public void AddRange(IEnumerable<Node<TContents>> items)
         {
             var nodes = items.ToArray();
             if (nodes.Any(n => n.ParentGraph != ParentGraph && n.ParentGraph != null))
@@ -66,17 +64,17 @@ namespace Echo.ControlFlow.Collections
                 Remove(node);
         }
 
-        public bool Contains(Node<TInstruction> item)
+        public bool Contains(Node<TContents> item)
         {
             return _nodes.Contains(item);
         }
 
-        public void CopyTo(Node<TInstruction>[] array, int arrayIndex)
+        public void CopyTo(Node<TContents>[] array, int arrayIndex)
         {
             _nodes.CopyTo(array, arrayIndex);
         }
 
-        public bool Remove(Node<TInstruction> item)
+        public bool Remove(Node<TContents> item)
         {
             if (_nodes.Remove(item))
             {

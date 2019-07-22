@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 namespace Echo.ControlFlow.Analysis.Domination
 {
     /// <summary>
-    /// Represents a collection of dominator tree node children that are dominated by a single control flow graph node.
+    /// Represents a collection of dominator tree node children that are dominated by a single graph node.
     /// </summary>
     public class DominatorTreeNodeCollection : Collection<DominatorTreeNode>
     {

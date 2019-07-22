@@ -19,7 +19,7 @@ namespace Echo.ControlFlow.Construction
         /// <remarks>
         /// This method is meant for components within the Echo project that require information about the successors
         /// of an individual instruction. These are typically control flow graph builders, such as the
-        /// <see cref="StaticGraphBuilder{TInstruction}"/> class.
+        /// <see cref="StaticFlowGraphBuilder{TInstruction}"/> class.
         ///
         /// Successors are either directly encoded within the instruction (e.g. as an operand),
         /// or implied by the default flow control of the provided instruction:

@@ -6,7 +6,7 @@ using Echo.ControlFlow.Analysis.Traversal;
 namespace Echo.ControlFlow.Analysis.Domination
 {
     /// <summary>
-    /// Represents a dominator tree, where each tree node corresponds to one node in a control flow graph, and each
+    /// Represents a dominator tree, where each tree node corresponds to one node in a graph, and each
     /// is immediately dominated by its parent.
     /// </summary>
     public class DominatorTree
@@ -16,7 +16,7 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// </summary>
         /// <param name="graph">The control flow graph to turn into a dominator tree.</param>
         /// <returns>The constructed dominator tree.</returns>
-        public static DominatorTree FromControlFlowGraph(IGraph graph)
+        public static DominatorTree FromGraph(IGraph graph)
         {
             if (graph.Entrypoint == null)
                 throw new ArgumentException("Control flow graph does not have an entrypoint.");

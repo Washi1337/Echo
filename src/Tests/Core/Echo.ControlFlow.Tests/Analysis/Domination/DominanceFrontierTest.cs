@@ -11,25 +11,25 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         [Fact]
         public void Simple()
         {
-            var cfg = new Graph<DummyInstruction>();
+            var cfg = new Graph<int>();
             
-            var n = new Node<DummyInstruction>();
+            var n = new Node<int>(0);
             cfg.Nodes.Add(n);
             cfg.Entrypoint = n;
 
-            var tree = DominatorTree.FromControlFlowGraph(cfg);
+            var tree = DominatorTree.FromGraph(cfg);
             Assert.Empty(tree.GetDominanceFrontier(n));
         }
 
         [Fact]
         public void Path()
         {
-            var cfg = new Graph<DummyInstruction>();
+            var cfg = new Graph<int>();
 
-            var nodes = new Node<DummyInstruction>[3];
+            var nodes = new Node<int>[3];
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new Node<DummyInstruction>();
+                nodes[i] = new Node<int>(i);
                 cfg.Nodes.Add(nodes[i]);
                 if (i > 0)
                     nodes[i - 1].ConnectWith(nodes[i]);
@@ -37,19 +37,19 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
 
             cfg.Entrypoint = nodes[0];
 
-            var tree = DominatorTree.FromControlFlowGraph(cfg);
+            var tree = DominatorTree.FromGraph(cfg);
             Assert.All(nodes, n => Assert.Empty(tree.GetDominanceFrontier(n)));
         }
 
         [Fact]
         public void If()
         {
-            var cfg = new Graph<DummyInstruction>();
+            var cfg = new Graph<int>();
 
-            var nodes = new Node<DummyInstruction>[4];
+            var nodes = new Node<int>[4];
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new Node<DummyInstruction>();
+                nodes[i] = new Node<int>(i);
                 cfg.Nodes.Add(nodes[i]);
             }
 
@@ -60,7 +60,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
 
             cfg.Entrypoint = nodes[0];
 
-            var tree = DominatorTree.FromControlFlowGraph(cfg);
+            var tree = DominatorTree.FromGraph(cfg);
             Assert.Equal(new[] {nodes[3]}, tree.GetDominanceFrontier(nodes[1]));
             Assert.Equal(new[] {nodes[3]}, tree.GetDominanceFrontier(nodes[2]));
         }
@@ -68,12 +68,12 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         [Fact]
         public void Loop()
         {        
-            var cfg = new Graph<DummyInstruction>();
+            var cfg = new Graph<int>();
 
-            var nodes = new Node<DummyInstruction>[4];
+            var nodes = new Node<int>[4];
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new Node<DummyInstruction>();
+                nodes[i] = new Node<int>(i);
                 cfg.Nodes.Add(nodes[i]);
             }
 
@@ -84,7 +84,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
 
             cfg.Entrypoint = nodes[0];
 
-            var tree = DominatorTree.FromControlFlowGraph(cfg);
+            var tree = DominatorTree.FromGraph(cfg);
             Assert.Equal(new HashSet<INode> {nodes[2]}, tree.GetDominanceFrontier(nodes[1]));
             Assert.Equal(new HashSet<INode> {nodes[2]}, tree.GetDominanceFrontier(nodes[2]));
         }
@@ -96,12 +96,12 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             // http://www.sable.mcgill.ca/~hendren/621/ControlFlowAnalysis_Handouts.pdf
             // (slide 57)
             
-            var cfg = new Graph<DummyInstruction>();
+            var cfg = new Graph<int>();
 
-            var nodes = new Node<DummyInstruction>[11];
+            var nodes = new Node<int>[11];
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new Node<DummyInstruction>();
+                nodes[i] = new Node<int>(i);
                 cfg.Nodes.Add(nodes[i]);
             }
 
@@ -125,7 +125,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
 
             cfg.Entrypoint = nodes[0];
             
-            var tree = DominatorTree.FromControlFlowGraph(cfg);
+            var tree = DominatorTree.FromGraph(cfg);
             Assert.Empty(tree.GetDominanceFrontier(nodes[0]));
             Assert.Equal(new HashSet<INode> {nodes[1]}, tree.GetDominanceFrontier(nodes[1]));
             Assert.Equal(new HashSet<INode> {nodes[3]}, tree.GetDominanceFrontier(nodes[2]));

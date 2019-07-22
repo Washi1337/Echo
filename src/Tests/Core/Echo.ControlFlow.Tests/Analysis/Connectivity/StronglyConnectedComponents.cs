@@ -10,12 +10,12 @@ namespace Echo.ControlFlow.Tests.Analysis.Connectivity
         [Fact]
         public void Simple()
         {
-            var cfg = new Graph<DummyInstruction>();
+            var cfg = new Graph<int>();
 
-            var nodes = new Node<DummyInstruction>[5];
+            var nodes = new Node<int>[5];
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new Node<DummyInstruction>();
+                nodes[i] = new Node<int>(i);
                 cfg.Nodes.Add(nodes[i]);
             }
 
@@ -47,5 +47,6 @@ namespace Echo.ControlFlow.Tests.Analysis.Connectivity
                 nodes[4]
             }, components);
         }
+
     }
 }

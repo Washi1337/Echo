@@ -1,4 +1,5 @@
 using System.IO;
+using Echo.ControlFlow.Specialized;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Serialization.Dot
@@ -16,7 +17,7 @@ namespace Echo.ControlFlow.Serialization.Dot
             WriteIdentifier(identifier);
             
             Writer.Write(" [shape=box3d, label=");
-            string code = string.Join("\\l", ((Node<TInstruction>) node).Instructions) + "\\l";
+            string code = string.Join("\\l", ((Node<BasicBlock<TInstruction>>) node).Contents.Instructions) + "\\l";
             WriteIdentifier(code);
             Writer.Write(']');
             WriteSemicolon();

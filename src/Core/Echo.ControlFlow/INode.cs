@@ -52,11 +52,5 @@ namespace Echo.ControlFlow
         /// </summary>
         /// <returns>The successor nodes.</returns>
         IEnumerable<INode> GetSuccessors();
-
-        /// <summary>
-        /// Gets a collection of exception handlers that contain the node.
-        /// </summary>
-        /// <returns>The exception handlers.</returns>
-        IEnumerable<IExceptionHandler> GetExceptionHandlers();
     }
 }

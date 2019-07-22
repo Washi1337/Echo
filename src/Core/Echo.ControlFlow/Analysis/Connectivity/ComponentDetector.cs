@@ -9,14 +9,14 @@ namespace Echo.ControlFlow.Analysis.Connectivity
         /// <summary>
         /// Finds all strongly connected components in the provided graph.
         /// </summary>
-        /// <param name="cfg">The graph to get the components from.</param>
+        /// <param name="graph">The graph to get the components from.</param>
         /// <returns>A collection of sets representing the strongly connected components.</returns>
-        public static ICollection<ISet<INode>> FindStronglyConnectedComponents(this IGraph cfg)
+        public static ICollection<ISet<INode>> FindStronglyConnectedComponents(this IGraph graph)
         {
             var traversal = new DepthFirstTraversal();
             var recorder = new PostOrderRecorder(traversal);
 
-            traversal.Run(cfg.Entrypoint);
+            traversal.Run(graph.Entrypoint);
 
             var visited = new HashSet<INode>();
             var result = new List<ISet<INode>>();

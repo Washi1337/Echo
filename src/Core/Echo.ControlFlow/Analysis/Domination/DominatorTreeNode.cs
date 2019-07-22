@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Echo.ControlFlow.Analysis.Domination
 {
     /// <summary>
-    /// Represents a single node in a dominator tree of a control flow graph. 
+    /// Represents a single node in a dominator tree of a graph. 
     /// </summary>
     /// <remarks>
     /// It stores the original control flow graph node from which this tree node was inferred, as well a reference to its

@@ -2,28 +2,27 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Collections;
-using Echo.Core.Code;
 
 namespace Echo.ControlFlow
 {
     /// <summary>
-    /// Provides a base implementation of a control flow graph, that stores for each node a list of instructions.
+    /// Provides a generic base implementation of a control flow graph that contains for each node a user predefined
+    /// object in a type safe manner. 
     /// </summary>
-    /// <typeparam name="TInstruction">The type of instructions to use.</typeparam>
-    public class Graph<TInstruction> : IGraph
-        where TInstruction : IInstruction
+    /// <typeparam name="TContents">The type of data that each node in the graph stores.</typeparam>
+    public class Graph<TContents> : IGraph
     {
-        private Node<TInstruction> _entrypoint;
+        private Node<TContents> _entrypoint;
 
         public Graph()
         {
-            Nodes = new NodeCollection<TInstruction>(this);
+            Nodes = new NodeCollection<TContents>(this);
         }
 
         /// <summary>
         /// Gets or sets the node that is executed first in the control flow graph.
         /// </summary>
-        public Node<TInstruction> Entrypoint
+        public Node<TContents> Entrypoint
         {
             get => _entrypoint;
             set
@@ -40,36 +39,18 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets a collection of all basic blocks present in the graph.
         /// </summary>
-        public NodeCollection<TInstruction> Nodes
+        public NodeCollection<TContents> Nodes
         {
             get;
         }
-
-        /// <summary>
-        /// Gets an ordered collection of all exception handlers that are defined in the control flow graph.
-        /// </summary>
-        /// <remarks>
-        /// If two exception handlers are nested (i.e. they overlap in the try segments), the one that occurs first in
-        /// this collection is the enclosing exception handler.
-        /// </remarks>
-        public IList<ExceptionHandler<TInstruction>> ExceptionHandlers
-        {
-            get;
-        } = new List<ExceptionHandler<TInstruction>>();
         
         /// <summary>
         /// Gets a collection of all edges that transfer control from one block to the other in the graph.
         /// </summary>
         /// <returns>The edges.</returns>
-        public IEnumerable<Edge<TInstruction>> GetEdges()
+        public IEnumerable<Edge<TContents>> GetEdges()
         {
             return Nodes.SelectMany(n => n.GetOutgoingEdges());
-        }
-
-        public Node<TInstruction> GetNodeByOffset(long offset)
-        {
-            // TODO: use something more efficient than a linear search.
-            return Nodes.FirstOrDefault(n => n.Instructions.Count > 0 && n.Instructions[0].Offset == offset);
         }
         
         INode IGraphSegment.Entrypoint => Entrypoint;
@@ -78,6 +59,5 @@ namespace Echo.ControlFlow
 
         IEnumerable<IEdge> IGraph.GetEdges() => GetEdges();
 
-        IEnumerable<IExceptionHandler> IGraph.GetExceptionHandlers() => ExceptionHandlers;
     }
 }

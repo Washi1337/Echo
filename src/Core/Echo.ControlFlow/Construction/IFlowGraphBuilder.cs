@@ -1,3 +1,4 @@
+using Echo.ControlFlow.Specialized;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction
@@ -6,7 +7,7 @@ namespace Echo.ControlFlow.Construction
     /// Provides members for building a control flow graph, starting at a specific entrypoint address.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that the control flow graph will contain.</typeparam>
-    public interface IGraphBuilder<TInstruction>
+    public interface IFlowGraphBuilder<TInstruction>
         where TInstruction : IInstruction
     {
         /// <summary>
@@ -17,6 +18,6 @@ namespace Echo.ControlFlow.Construction
         /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
         /// provided in <paramref name="entrypoint"/>.
         /// </returns>
-        Graph<TInstruction> ConstructFlowGraph(long entrypoint);
+        ControlFlowGraph<TInstruction> ConstructFlowGraph(long entrypoint);
     }
 }

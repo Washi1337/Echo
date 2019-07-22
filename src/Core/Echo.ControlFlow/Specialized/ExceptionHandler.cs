@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Echo.Core.Code;
 
-namespace Echo.ControlFlow
+namespace Echo.ControlFlow.Specialized
 {
 
     /// <summary>
@@ -10,23 +9,22 @@ namespace Echo.ControlFlow
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to use.</typeparam>
     public class ExceptionHandler<TInstruction> : IExceptionHandler
-        where TInstruction : IInstruction
     {
         /// <summary>
         /// Gets the graph segment that is protected by the exception handler.
         /// </summary>
-        public GraphSegment<TInstruction> Try
+        public ControlFlowGraphRegion<TInstruction> Try
         {
             get;
-        } = new GraphSegment<TInstruction>();
+        } = new ControlFlowGraphRegion<TInstruction>();
 
         /// <summary>
         /// Gets the graph segment that handles any exceptions that might occur in the protected region.
         /// </summary>
-        public GraphSegment<TInstruction> Handler
+        public ControlFlowGraphRegion<TInstruction> Handler
         {
             get;
-        } = new GraphSegment<TInstruction>();
+        } = new ControlFlowGraphRegion<TInstruction>();
 
         /// <summary>
         /// Gets a collection of all nodes present in the exception handler.
@@ -35,7 +33,7 @@ namespace Echo.ControlFlow
         /// <remarks>
         /// This collection first returns all nodes within the protected region, and then the nodes of the handler segment.
         /// </remarks>
-        public IEnumerable<Node<TInstruction>> GetNodes() => Try.Nodes.Union(Handler.Nodes);
+        public IEnumerable<Node<BasicBlock<TInstruction>>> GetNodes() => Try.Nodes.Union(Handler.Nodes);
         
         INode IGraphSegment.Entrypoint => Try.Entrypoint;
         

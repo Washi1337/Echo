@@ -8,13 +8,13 @@ namespace Echo.ControlFlow.Tests
 {
     public class NodeTest
     {
-        private static IList<Node<DummyInstruction>> CreateDummyGraph(int nodeCount)
+        private static IList<Node<int>> CreateDummyGraph(int nodeCount)
         {
-            var graph = new Graph<DummyInstruction>();
+            var graph = new Graph<int>();
 
-            var nodes = new Node<DummyInstruction>[nodeCount];
+            var nodes = new Node<int>[nodeCount];
             for (int i = 0; i < nodeCount; i++)
-                nodes[i] = new Node<DummyInstruction>();
+                nodes[i] = new Node<int>(i);
 
             foreach (var node in nodes)
                 graph.Nodes.Add(node);
@@ -26,7 +26,7 @@ namespace Echo.ControlFlow.Tests
         public void ValidFallthroughEdge()
         {
             var nodes = CreateDummyGraph(2);
-            nodes[0].FallThroughEdge = new Edge<DummyInstruction>(nodes[0], nodes[1]);
+            nodes[0].FallThroughEdge = new Edge<int>(nodes[0], nodes[1]);
             
             Assert.Equal(nodes[0], nodes[0].FallThroughEdge.Origin);
             Assert.Equal(nodes[1], nodes[0].FallThroughEdge.Target);
@@ -37,13 +37,13 @@ namespace Echo.ControlFlow.Tests
         public void InvalidFallthroughEdge()
         {
             var nodes = CreateDummyGraph(2);
-            nodes[0].FallThroughEdge = new Edge<DummyInstruction>(nodes[0], nodes[1]);
+            nodes[0].FallThroughEdge = new Edge<int>(nodes[0], nodes[1]);
 
             Assert.Throws<ArgumentException>(
-                () => nodes[0].FallThroughEdge = new Edge<DummyInstruction>(nodes[1], nodes[0]));
+                () => nodes[0].FallThroughEdge = new Edge<int>(nodes[1], nodes[0]));
             
             Assert.Throws<ArgumentException>(
-                () => nodes[0].FallThroughEdge = new Edge<DummyInstruction>(nodes[0], nodes[1], EdgeType.Conditional));
+                () => nodes[0].FallThroughEdge = new Edge<int>(nodes[0], nodes[1], EdgeType.Conditional));
         }
         
         [Fact]
@@ -52,7 +52,7 @@ namespace Echo.ControlFlow.Tests
             var nodes = CreateDummyGraph(2);
 
             var edge = nodes[0].ConditionalEdges.Add(
-                new Edge<DummyInstruction>(nodes[0], nodes[1], EdgeType.Conditional));
+                new Edge<int>(nodes[0], nodes[1], EdgeType.Conditional));
             Assert.Contains(edge, nodes[0].ConditionalEdges);
         }
         
@@ -152,20 +152,20 @@ namespace Echo.ControlFlow.Tests
             nodes[1].ConnectWith(nodes[3]);
             nodes[2].ConnectWith(nodes[3]);
 
-            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            Assert.Equal(new HashSet<Node<int>>
             {
                 nodes[1], nodes[2]
-            }, new HashSet<Node<DummyInstruction>>(nodes[0].GetSuccessors()));
+            }, new HashSet<Node<int>>(nodes[0].GetSuccessors()));
             
-            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            Assert.Equal(new HashSet<Node<int>>
             {
                 nodes[3]
-            }, new HashSet<Node<DummyInstruction>>(nodes[1].GetSuccessors()));
+            }, new HashSet<Node<int>>(nodes[1].GetSuccessors()));
             
-            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            Assert.Equal(new HashSet<Node<int>>
             {
                 nodes[3]
-            }, new HashSet<Node<DummyInstruction>>(nodes[2].GetSuccessors()));
+            }, new HashSet<Node<int>>(nodes[2].GetSuccessors()));
             
             Assert.Empty(nodes[3].GetSuccessors());
         }
@@ -182,20 +182,20 @@ namespace Echo.ControlFlow.Tests
 
             Assert.Empty(nodes[0].GetPredecessors());
 
-            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            Assert.Equal(new HashSet<Node<int>>
             {
                 nodes[0]
-            }, new HashSet<Node<DummyInstruction>>(nodes[1].GetPredecessors()));
+            }, new HashSet<Node<int>>(nodes[1].GetPredecessors()));
 
-            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            Assert.Equal(new HashSet<Node<int>>
             {
                 nodes[0]
-            }, new HashSet<Node<DummyInstruction>>(nodes[2].GetPredecessors()));
+            }, new HashSet<Node<int>>(nodes[2].GetPredecessors()));
 
-            Assert.Equal(new HashSet<Node<DummyInstruction>>
+            Assert.Equal(new HashSet<Node<int>>
             {
                 nodes[1], nodes[2]
-            }, new HashSet<Node<DummyInstruction>>(nodes[3].GetPredecessors()));
+            }, new HashSet<Node<int>>(nodes[3].GetPredecessors()));
         }
 
     }

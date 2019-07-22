@@ -2,53 +2,41 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Collections;
+using Echo.ControlFlow.Specialized;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow
 {
     /// <summary>
-    /// Provides a base implementation for a basic block present in a control flow graph, containing a list of
-    /// instructions that are executed in sequential order.
+    /// Provides a generic base implementation for a node present in a graph, containing a user
+    /// defined object in a type-safe manner.
     /// </summary>
-    /// <typeparam name="TInstruction">The type of instructions to store.</typeparam>
-    public class Node<TInstruction> : INode
-        where TInstruction : IInstruction
+    /// <typeparam name="TContents">The type of data to store in the node.</typeparam>
+    public class Node<TContents> : INode
     {
-        private Edge<TInstruction> _fallThroughEdge;
+        private Edge<TContents> _fallThroughEdge;
 
         /// <summary>
-        /// Creates a new empty basic block, to be added to a control flow graph.
+        /// Creates a new basic block filled with the provided data, to be added to the graph.
         /// </summary>
-        public Node()
-            : this(Enumerable.Empty<TInstruction>())
+        /// <param name="contents">The data to store in the node.</param>
+        public Node(TContents contents)
         {
-        }
-
-        /// <summary>
-        /// Creates a new basic block filled with the provided list of instructions, to be added to a control flow graph.
-        /// </summary>
-        /// <param name="instructions">The instructions to store in the basic block.</param>
-        public Node(IEnumerable<TInstruction> instructions)
-        {
-            Instructions = new List<TInstruction>(instructions);
-            ConditionalEdges = new AdjacencyCollection<TInstruction>(this, EdgeType.Conditional);
-            AbnormalEdges = new AdjacencyCollection<TInstruction>(this, EdgeType.Abnormal);
+            Contents = contents;
+            ConditionalEdges = new AdjacencyCollection<TContents>(this, EdgeType.Conditional);
+            AbnormalEdges = new AdjacencyCollection<TContents>(this, EdgeType.Abnormal);
         }
 
         /// <summary>
         /// Gets the graph that contains this node, or <c>null</c> if the node is not added to any graph yet.  
         /// </summary>
-        public Graph<TInstruction> ParentGraph
+        public Graph<TContents> ParentGraph
         {
             get;
             internal set;
         }
 
-        /// <summary>
-        /// Gets a collection of instructions that are executed in sequential order when the program reaches this
-        /// basic block.
-        /// </summary>
-        public IList<TInstruction> Instructions
+        public TContents Contents
         {
             get;
         }
@@ -57,17 +45,17 @@ namespace Echo.ControlFlow
         /// Gets or sets the neighbour to which the control is transferred to after execution of this block and no
         /// other condition is met.
         /// </summary>
-        public Node<TInstruction> FallThroughNeighbour
+        public Node<TContents> FallThroughNeighbour
         {
             get => FallThroughEdge?.Target;
-            set => FallThroughEdge = new Edge<TInstruction>(this, value);
+            set => FallThroughEdge = new Edge<TContents>(this, value);
         }
 
         /// <summary>
         /// Gets or sets the edge to the neighbour to which the control is transferred to after execution of this block
         /// and no other condition is met.
         /// </summary>
-        public Edge<TInstruction> FallThroughEdge
+        public Edge<TContents> FallThroughEdge
         {
             get => _fallThroughEdge;
             set
@@ -76,7 +64,7 @@ namespace Echo.ControlFlow
 
                 if (value != null)
                 {
-                    AdjacencyCollection<TInstruction>.AssertEdgeValidity(this, EdgeType.FallThrough, value);
+                    AdjacencyCollection<TContents>.AssertEdgeValidity(this, EdgeType.FallThrough, value);
                     value.Target.IncomingEdges.Add(value);
                 }
 
@@ -91,7 +79,7 @@ namespace Echo.ControlFlow
         /// These edges are typically present when a node is a basic block encoding the header of an if statement
         /// or a loop. 
         /// </remarks>
-        public AdjacencyCollection<TInstruction> ConditionalEdges
+        public AdjacencyCollection<TContents> ConditionalEdges
         {
             get;
         }
@@ -102,7 +90,7 @@ namespace Echo.ControlFlow
         /// <remarks>
         /// These edges are typically present when a node is part of a region of code protected by an exception handler.
         /// </remarks>
-        public AdjacencyCollection<TInstruction> AbnormalEdges
+        public AdjacencyCollection<TContents> AbnormalEdges
         {
             get;
         }
@@ -114,10 +102,10 @@ namespace Echo.ControlFlow
         /// This property is automatically updated by the adjacency lists and the fall through edge property associated
         /// to all nodes that might connect themselves to the current node. Do not change it in this class.
         /// </remarks>
-        internal ICollection<Edge<TInstruction>> IncomingEdges
+        internal ICollection<Edge<TContents>> IncomingEdges
         {
             get;
-        } = new List<Edge<TInstruction>>();
+        } = new List<Edge<TContents>>();
 
         /// <summary>
         /// Connects the node to the provided neighbour using a fallthrough edge. 
@@ -126,7 +114,7 @@ namespace Echo.ControlFlow
         /// <returns>The edge that was used to connect the two nodes together.</returns>
         /// <exception cref="ArgumentNullException">Occurs when <paramref name="neighbour"/> is <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">Occurs when the node already contains a fallthrough edge to another node.</exception>
-        public Edge<TInstruction> ConnectWith(Node<TInstruction> neighbour)
+        public Edge<TContents> ConnectWith(Node<TContents> neighbour)
         {
             if (neighbour == null)
                 throw new ArgumentNullException(nameof(neighbour));
@@ -145,11 +133,11 @@ namespace Echo.ControlFlow
         ///     already contains a fallthrough edge to another node.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when an invalid edge type was provided.</exception>
-        public Edge<TInstruction> ConnectWith(Node<TInstruction> neighbour, EdgeType edgeType)
+        public Edge<TContents> ConnectWith(Node<TContents> neighbour, EdgeType edgeType)
         {
             if (neighbour == null)
                 throw new ArgumentNullException(nameof(neighbour));
-            var edge = new Edge<TInstruction>(this, neighbour, edgeType);
+            var edge = new Edge<TContents>(this, neighbour, edgeType);
             
             switch (edgeType)
             {
@@ -178,7 +166,7 @@ namespace Echo.ControlFlow
         /// Gets a collection of all edges that target this node.
         /// </summary>
         /// <returns>The incoming edges.</returns>
-        public IEnumerable<Edge<TInstruction>> GetIncomingEdges()
+        public IEnumerable<Edge<TContents>> GetIncomingEdges()
         {
             return IncomingEdges;
         }
@@ -187,9 +175,9 @@ namespace Echo.ControlFlow
         /// Gets a collection of all outgoing edges originating from this node.
         /// </summary>
         /// <returns>The outgoing edges.</returns>
-        public IEnumerable<Edge<TInstruction>> GetOutgoingEdges()
+        public IEnumerable<Edge<TContents>> GetOutgoingEdges()
         {
-            var result = new List<Edge<TInstruction>>();
+            var result = new List<Edge<TContents>>();
             if (FallThroughEdge != null)
                 result.Add(FallThroughEdge);
             result.AddRange(ConditionalEdges);
@@ -202,7 +190,7 @@ namespace Echo.ControlFlow
         /// node this node in the complete control flow graph, regardless of edge type. 
         /// </summary>
         /// <returns>The predecessor nodes.</returns>
-        public IEnumerable<Node<TInstruction>> GetPredecessors()
+        public IEnumerable<Node<TContents>> GetPredecessors()
         {
             return GetIncomingEdges()
                 .Select(n => n.Origin)
@@ -214,7 +202,7 @@ namespace Echo.ControlFlow
         /// might transfer control to, regardless of edge type.
         /// </summary>
         /// <returns>The successor nodes.</returns>
-        public IEnumerable<Node<TInstruction>> GetSuccessors()
+        public IEnumerable<Node<TContents>> GetSuccessors()
         {
             return GetOutgoingEdges()
                 .Select(n => n.Target)
@@ -227,23 +215,13 @@ namespace Echo.ControlFlow
         /// <param name="neighbour">The potential successor.</param>
         /// <returns><c>True</c> if the provided node is a successor, <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentNullException">Occurs when the provided successor is <c>null</c></exception>
-        public bool HasSuccessor(Node<TInstruction> neighbour)
+        public bool HasSuccessor(Node<TContents> neighbour)
         {
             if (neighbour == null)
                 throw new ArgumentNullException(nameof(neighbour));
             return FallThroughNeighbour == neighbour
                    || ConditionalEdges.Contains(neighbour)
                    || AbnormalEdges.Contains(neighbour);
-        }
-
-        /// <summary>
-        /// Gets a collection of exception handlers that contain the node.
-        /// </summary>
-        /// <returns>The exception handlers.</returns>
-        public IEnumerable<ExceptionHandler<TInstruction>> GetExceptionHandlers()
-        {
-            return ParentGraph.ExceptionHandlers
-                .Where(e => e.Try.Nodes.Contains(this) || e.Handler.Nodes.Contains(this));
         }
 
         IEdge INode.GetFallThroughEdge() => FallThroughEdge;
@@ -259,8 +237,6 @@ namespace Echo.ControlFlow
         IEnumerable<INode> INode.GetPredecessors() => GetPredecessors();
 
         IEnumerable<INode> INode.GetSuccessors() => GetSuccessors();
-
-        IEnumerable<IExceptionHandler> INode.GetExceptionHandlers() => GetExceptionHandlers();
 
     }
 }

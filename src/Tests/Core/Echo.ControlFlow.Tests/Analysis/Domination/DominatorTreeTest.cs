@@ -10,7 +10,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         {
             var graph = TestGraphs.CreateSingularGraph();
 
-            var dominatorTree = DominatorTree.FromControlFlowGraph(graph);
+            var dominatorTree = DominatorTree.FromGraph(graph);
             Assert.Equal(graph.Entrypoint, dominatorTree.Root.OriginalNode);
             Assert.True(dominatorTree.Dominates(graph.Entrypoint, graph.Entrypoint));
         }
@@ -25,7 +25,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             var n3 = graph.GetNodeByOffset(2);
             var n4 = graph.GetNodeByOffset(3);
 
-            var dominatorTree = DominatorTree.FromControlFlowGraph(graph);
+            var dominatorTree = DominatorTree.FromGraph(graph);
             Assert.Equal(graph.Entrypoint, dominatorTree.Root.OriginalNode);
             
             Assert.True(dominatorTree.Dominates(n1, n1));
@@ -59,7 +59,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             var n3 = graph.GetNodeByOffset(3);
             var n4 = graph.GetNodeByOffset(4);
             
-            var dominatorTree = DominatorTree.FromControlFlowGraph(graph);
+            var dominatorTree = DominatorTree.FromGraph(graph);
             Assert.Equal(graph.Entrypoint, dominatorTree.Root.OriginalNode);
             
             Assert.True(dominatorTree.Dominates(n1, n1));
@@ -93,7 +93,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             var n3 = graph.GetNodeByOffset(2);
             var n4 = graph.GetNodeByOffset(4);
             
-            var dominatorTree = DominatorTree.FromControlFlowGraph(graph);
+            var dominatorTree = DominatorTree.FromGraph(graph);
             Assert.Equal(graph.Entrypoint, dominatorTree.Root.OriginalNode);
             
             Assert.True(dominatorTree.Dominates(n1, n1));

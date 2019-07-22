@@ -6,16 +6,15 @@ namespace Echo.ControlFlow
     /// Provides an implementation for a single edge in a control flow graph, including the source and target node,
     /// and the type of edge.
     /// </summary>
-    /// <typeparam name="TInstruction">The type of instructions that the connected nodes store.</typeparam>
-    public class Edge<TInstruction> : IEdge
-        where TInstruction : IInstruction
+    /// <typeparam name="TContents">The type of contents that the connected nodes store.</typeparam>
+    public class Edge<TContents> : IEdge
     {
         /// <summary>
         /// Creates a new fallthrough edge between two nodes.
         /// </summary>
         /// <param name="origin">The node to start the edge at.</param>
         /// <param name="target">The node to use as destination for the edge.</param>
-        public Edge(Node<TInstruction> origin, Node<TInstruction> target)
+        public Edge(Node<TContents> origin, Node<TContents> target)
             : this(origin, target, EdgeType.FallThrough)
         {
         }
@@ -26,7 +25,7 @@ namespace Echo.ControlFlow
         /// <param name="origin">The node to start the edge at.</param>
         /// <param name="target">The node to use as destination for the edge.</param>
         /// <param name="edgeType">The type of the edge to create.</param>
-        public Edge(Node<TInstruction> origin, Node<TInstruction> target, EdgeType edgeType)
+        public Edge(Node<TContents> origin, Node<TContents> target, EdgeType edgeType)
         {
             Origin = origin;
             Target = target;
@@ -36,12 +35,12 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the graph that contains this edge.
         /// </summary>
-        public Graph<TInstruction> ParentGraph => Origin?.ParentGraph ?? Target?.ParentGraph;
+        public Graph<TContents> ParentGraph => Origin?.ParentGraph ?? Target?.ParentGraph;
 
         /// <summary>
         /// Gets the node that this edge originates from.
         /// </summary>
-        public Node<TInstruction> Origin
+        public Node<TContents> Origin
         {
             get;
         }
@@ -49,7 +48,7 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the node that this edge targets.
         /// </summary>
-        public Node<TInstruction> Target
+        public Node<TContents> Target
         {
             get;
         }

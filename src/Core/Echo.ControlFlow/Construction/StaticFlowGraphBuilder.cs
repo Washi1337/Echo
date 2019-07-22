@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Echo.ControlFlow.Specialized;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction
@@ -17,7 +18,7 @@ namespace Echo.ControlFlow.Construction
     /// instructions. For example, if we target x86, the instruction <c>jmp 12345678h</c> is possible to process using
     /// this graph builder, but <c>jmp eax</c> is not.
     /// </remarks>
-    public class StaticGraphBuilder<TInstruction> : IGraphBuilder<TInstruction>
+    public class StaticFlowGraphBuilder<TInstruction> : IFlowGraphBuilder<TInstruction>
         where TInstruction : IInstruction
     {
         /// <summary>
@@ -26,7 +27,7 @@ namespace Echo.ControlFlow.Construction
         /// <param name="instructions">The object containing the instructions to graph.</param>
         /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
-        public StaticGraphBuilder(IEnumerable<TInstruction> instructions,
+        public StaticFlowGraphBuilder(IEnumerable<TInstruction> instructions,
             IStaticSuccessorResolver<TInstruction> successorResolver)
             : this(new ListInstructionProvider<TInstruction>(instructions), successorResolver)
         {
@@ -38,7 +39,7 @@ namespace Echo.ControlFlow.Construction
         /// <param name="provider">The object containing the instructions to graph.</param>
         /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
-        public StaticGraphBuilder(IInstructionProvider<TInstruction> provider,
+        public StaticFlowGraphBuilder(IInstructionProvider<TInstruction> provider,
             IStaticSuccessorResolver<TInstruction> successorResolver)
         {
             InstructionProvider = provider ?? throw new ArgumentNullException(nameof(provider));
@@ -61,17 +62,27 @@ namespace Echo.ControlFlow.Construction
             get;
         }
 
-        /// <inheritdoc />
-        public Graph<TInstruction> ConstructFlowGraph(long entrypoint)
+        /// <summary>
+        /// Constructs a control flow graph in a static analysis manner, starting at the provided entrypoint address.
+        /// </summary>
+        /// <param name="entrypoint">The address of the first instruction to traverse.</param>
+        /// <returns>
+        /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
+        /// provided in <paramref name="entrypoint"/>.
+        /// </returns>
+        public ControlFlowGraph<TInstruction> ConstructFlowGraph(long entrypoint)
         {
             CollectInstructions(entrypoint, out var instructions, out var blockHeaders);
 
-            var graph = new Graph<TInstruction>();
+            var graph = new ControlFlowGraph<TInstruction>();
             CreateNodes(graph, instructions, blockHeaders);
             ConnectNodes(graph, instructions);
             graph.Entrypoint = graph.GetNodeByOffset(entrypoint);
             return graph;
         }
+        
+        ControlFlowGraph<TInstruction> IFlowGraphBuilder<TInstruction>.ConstructFlowGraph(long entrypoint) 
+            => ConstructFlowGraph(entrypoint);
 
         private void CollectInstructions(long entrypoint, out IDictionary<long, InstructionInfo<TInstruction>> instructions, 
             out HashSet<long> blockHeaders)
@@ -127,22 +138,22 @@ namespace Echo.ControlFlow.Construction
             }
         }
 
-        private static void CreateNodes(Graph<TInstruction> graph, IDictionary<long, InstructionInfo<TInstruction>> instructions, 
+        private static void CreateNodes(ControlFlowGraph<TInstruction> graph, IDictionary<long, InstructionInfo<TInstruction>> instructions, 
             ICollection<long> blockHeaders)
         {
-            Node<TInstruction> currentNode = null;
+            BasicBlockNode<TInstruction> currentNode = null;
             foreach (var info in instructions.Values.OrderBy(t => t.Instruction.Offset))
             {
                 // Check if we reached a new block header.
                 if (currentNode == null || blockHeaders.Contains(info.Instruction.Offset))
                 {
                     // We arrived at a new basic block header. Create a new node for it. 
-                    currentNode = new Node<TInstruction>();
+                    currentNode = new BasicBlockNode<TInstruction>(new BasicBlock<TInstruction>(info.Instruction.Offset));
                     graph.Nodes.Add(currentNode);
                 }
 
                 // Add the current instruction to the current block that we're populating.
-                currentNode.Instructions.Add(info.Instruction);
+                currentNode.Contents.Instructions.Add(info.Instruction);
 
                 // Edge case: Blocks might not come straight after each other. If we see that the next instruction
                 // does not exist, or the previous algorithm has decided the next instruction is a block header, 
@@ -153,12 +164,13 @@ namespace Echo.ControlFlow.Construction
             }
         }
 
-        private static void ConnectNodes(Graph<TInstruction> graph, IDictionary<long, InstructionInfo<TInstruction>> instructions)
+        private static void ConnectNodes(ControlFlowGraph<TInstruction> graph, IDictionary<long, InstructionInfo<TInstruction>> instructions)
         {
             foreach (var node in graph.Nodes)
             {
                 // Get the successors of the last instruction in the current block.
-                var last = node.Instructions[node.Instructions.Count - 1];
+                var block = node.Contents;
+                var last = block.Instructions[block.Instructions.Count - 1];
                 var successors = instructions[last.Offset].Successors;
 
                 // Add edges accordingly.
