@@ -3,16 +3,23 @@ using System.Collections.Generic;
 
 namespace Echo.ControlFlow.Analysis.Traversal
 {
+    /// <summary>
+    /// Provides a mechanism to record the order in which each node in the graph was traversed by a traversal algorithm.
+    /// </summary>
     public class TraversalOrderRecorder
     {
         private readonly IDictionary<INode, int> _indices = new Dictionary<INode, int>();
         private readonly List<INode> _order = new List<INode>();
-        private readonly ITraversal _traversal;
 
+        /// <summary>
+        /// Creates a new traversal order recorder and hooks into the provided traversal object.
+        /// </summary>
+        /// <param name="traversal">The traversal object to hook into.</param>
         public TraversalOrderRecorder(ITraversal traversal)
         {
-            _traversal = traversal ?? throw new ArgumentNullException(nameof(traversal));
-            _traversal.NodeDiscovered += TraversalOnNodeDiscovered;
+            if (traversal == null)
+                throw new ArgumentNullException(nameof(traversal));
+            traversal.NodeDiscovered += TraversalOnNodeDiscovered;
         }
         
         /// <summary>
@@ -30,6 +37,10 @@ namespace Echo.ControlFlow.Analysis.Traversal
             return _indices.TryGetValue(node, out int index) ? index : -1;
         }
 
+        /// <summary>
+        /// Gets the full traversal as an ordered list of nodes.
+        /// </summary>
+        /// <returns>The traversal.</returns>
         public IList<INode> GetTraversal()
         {
             return _order.AsReadOnly();

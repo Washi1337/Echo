@@ -4,6 +4,9 @@ using Echo.ControlFlow.Analysis.Traversal;
 
 namespace Echo.ControlFlow.Analysis.Connectivity
 {
+    /// <summary>
+    /// Provides utility members for finding connected components within a graph.
+    /// </summary>
     public static class ComponentDetector
     {
         /// <summary>

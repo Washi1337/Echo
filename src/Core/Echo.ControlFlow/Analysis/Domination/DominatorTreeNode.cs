@@ -12,7 +12,7 @@ namespace Echo.ControlFlow.Analysis.Domination
     /// </remarks>
     public class DominatorTreeNode
     {
-        public DominatorTreeNode(INode node)
+        internal DominatorTreeNode(INode node)
         {
             OriginalNode = node ?? throw new ArgumentNullException(nameof(node));
             Children  = new DominatorTreeNodeCollection(this);

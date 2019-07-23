@@ -5,6 +5,11 @@ namespace Echo.ControlFlow.Construction
     /// </summary>
     public struct SuccessorInfo
     {
+        /// <summary>
+        /// Creates a new successor reference.
+        /// </summary>
+        /// <param name="destinationAddress">The address of the successor instruction.</param>
+        /// <param name="edgeType">The type of control flow transfer that has to be made to go to this successor.</param>
         public SuccessorInfo(long destinationAddress, EdgeType edgeType)
         {
             DestinationAddress = destinationAddress;

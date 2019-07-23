@@ -14,6 +14,9 @@ namespace Echo.ControlFlow
     {
         private Node<TContents> _entrypoint;
 
+        /// <summary>
+        /// Creates a new empty graph.
+        /// </summary>
         public Graph()
         {
             Nodes = new NodeCollection<TContents>(this);

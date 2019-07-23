@@ -18,7 +18,8 @@ namespace Echo.ControlFlow.Collections
             = new Dictionary<INode, ICollection<Edge<TContents>>>();
 
         private readonly EdgeType _edgeType;
-
+        private int _count;
+        
         internal AdjacencyCollection(Node<TContents> owner, EdgeType edgeType)
         {
             _edgeType = edgeType;
@@ -26,7 +27,7 @@ namespace Echo.ControlFlow.Collections
         }
 
         /// <inheritdoc />
-        public int Count => _neighbours.Values.Sum(x => x.Count);
+        public int Count => _count;
 
         /// <inheritdoc />
         public bool IsReadOnly => false;
@@ -64,6 +65,7 @@ namespace Echo.ControlFlow.Collections
             AssertEdgeValidity(Owner, _edgeType, edge);
             GetEdges(edge.Target).Add(edge);
             edge.Target.IncomingEdges.Add(edge);
+            _count++;
             return edge;
         }
 
@@ -78,6 +80,7 @@ namespace Echo.ControlFlow.Collections
         {
             foreach (var item in this.ToArray())
                 Remove(item);
+            _count = 0;
         }
 
         /// <summary>
@@ -130,8 +133,11 @@ namespace Echo.ControlFlow.Collections
         {
             bool result = GetEdges(edge.Target).Remove(edge);
             if (result)
+            {
+                _count--;
                 edge.Target.IncomingEdges.Remove(edge);
-            
+            }
+
             return result;
         }
         

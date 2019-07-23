@@ -36,6 +36,9 @@ namespace Echo.ControlFlow
             internal set;
         }
 
+        /// <summary>
+        /// Gets the user-defined contents of this node.
+        /// </summary>
         public TContents Contents
         {
             get;
@@ -224,6 +227,7 @@ namespace Echo.ControlFlow
                    || AbnormalEdges.Contains(neighbour);
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return Contents?.ToString() ?? "<null>";

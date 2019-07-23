@@ -8,31 +8,35 @@ namespace Echo.ControlFlow.Analysis.Domination
     /// </summary>
     public class DominatorTreeNodeCollection : Collection<DominatorTreeNode>
     {
-        public DominatorTreeNodeCollection(DominatorTreeNode owner)
+        private readonly DominatorTreeNode _owner;
+
+        internal DominatorTreeNodeCollection(DominatorTreeNode owner)
         {
-            Owner = owner ?? throw new ArgumentNullException(nameof(owner));
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
-        
-        public DominatorTreeNode Owner
-        {
-            get;
-        }
-        
-        private void AssertNoParent(DominatorTreeNode node)
+
+        /// <summary>
+        /// Asserts that the provided node is not already added to another tree node.
+        /// </summary>
+        /// <param name="node">The node to verify.</param>
+        /// <exception cref="ArgumentException">Occurs if the node is already added to another node.</exception>
+        protected static void AssertNoParent(DominatorTreeNode node)
         {
             if (node.Parent != null)
                 throw new ArgumentException("Cannot add a node that is already a child of another node.");
         }
-        
+
+        /// <inheritdoc />
         protected override void SetItem(int index, DominatorTreeNode item)
         {
             AssertNoParent(item);
             var old = Items[index];
             base.SetItem(index, item);
             old.Parent = null;
-            item.Parent = Owner;
+            item.Parent = _owner;
         }
 
+        /// <inheritdoc />
         protected override void ClearItems()
         {
             foreach (var item in Items)
@@ -40,16 +44,18 @@ namespace Echo.ControlFlow.Analysis.Domination
             base.ClearItems();
         }
 
+        /// <inheritdoc />
         protected override void RemoveItem(int index)
         {
             Items[index].Parent = null;
             base.RemoveItem(index);
         }
 
+        /// <inheritdoc />
         protected override void InsertItem(int index, DominatorTreeNode item)
         {
             AssertNoParent(item);
-            item.Parent = Owner;
+            item.Parent = _owner;
             base.InsertItem(index, item);
         }
     }

@@ -11,6 +11,10 @@ namespace Echo.ControlFlow.Analysis.Traversal
         private readonly Stack<INode> _stack = new Stack<INode>();
         private readonly List<INode> _order = new List<INode>();
 
+        /// <summary>
+        /// Creates a new post traversal order and hooks into the provided traversal object.
+        /// </summary>
+        /// <param name="traversal">The traversal object to hook into.</param>
         public PostOrderRecorder(ITraversal traversal)
         {
             traversal.NodeDiscovered += TraversalOnNodeDiscovered;

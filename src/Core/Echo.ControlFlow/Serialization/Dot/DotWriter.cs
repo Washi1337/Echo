@@ -10,18 +10,13 @@ namespace Echo.ControlFlow.Serialization.Dot
     /// </summary>
     public class DotWriter
     {
-        public static readonly IDictionary<char, string> EscapedCharacters = new Dictionary<char, string>
+        private static readonly IDictionary<char, string> EscapedCharacters = new Dictionary<char, string>
         {
             ['\r'] = "\\\r",
             ['\n'] = "\\\n",
             ['"'] = "\\\"",
             ['\t'] = "\\\t",
         };
-
-        protected TextWriter Writer
-        {
-            get;
-        }
 
         /// <summary>
         /// Creates a new dot writer. 
@@ -31,7 +26,15 @@ namespace Echo.ControlFlow.Serialization.Dot
         {
             Writer = writer ?? throw new ArgumentNullException(nameof(writer));
         }
-        
+
+        /// <summary>
+        /// Gets the writer that is used to write textual data to the output stream.
+        /// </summary>
+        protected TextWriter Writer
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether nodes in the output file should be explicitly defined before the
         /// edges are defined.
@@ -80,16 +83,27 @@ namespace Echo.ControlFlow.Serialization.Dot
             WriteFooter();
         }
 
+        /// <summary>
+        /// Appends the header of a new graph to the output stream.
+        /// </summary>
         protected virtual void WriteHeader()
         {
             Writer.WriteLine("digraph {");
         }
 
+        /// <summary>
+        /// Appends the footer of a graph to the output stream.
+        /// </summary>
         private void WriteFooter()
         {
             Writer.WriteLine("}");
         }
 
+        /// <summary>
+        /// Appends a single node definition to the output stream.
+        /// </summary>
+        /// <param name="node">The node to append.</param>
+        /// <param name="identifier">The identifier to use when referencing this node.</param>
         protected virtual void Write(INode node, string identifier)
         {
             WriteIdentifier(identifier);
@@ -97,6 +111,11 @@ namespace Echo.ControlFlow.Serialization.Dot
             Writer.WriteLine();
         }
 
+        /// <summary>
+        /// Appends an edge to the output stream.
+        /// </summary>
+        /// <param name="nodeIdentifiers">A mapping between nodes and their identifiers.</param>
+        /// <param name="edge">The edge to append.</param>
         protected virtual void Write(IDictionary<INode, string> nodeIdentifiers, IEdge edge)
         {
             WriteIdentifier(nodeIdentifiers[edge.Origin]);
@@ -108,6 +127,10 @@ namespace Echo.ControlFlow.Serialization.Dot
             Writer.WriteLine();
         }
 
+        /// <summary>
+        /// Appends a single identifier to the output stream.
+        /// </summary>
+        /// <param name="text">The identifier to write.</param>
         protected void WriteIdentifier(string text)
         {
             if (!NeedsEscaping(text))
@@ -123,17 +146,29 @@ namespace Echo.ControlFlow.Serialization.Dot
             }
         }
         
+        /// <summary>
+        /// Appends a semicolon to the output stream, depending on the value of <see cref="IncludeSemicolons"/>.
+        /// </summary>
         protected void WriteSemicolon()
         {
             if (IncludeSemicolons)
                 Writer.Write(';');
         }
 
+        /// <summary>
+        /// Determines whether an identifier requires escaping.
+        /// </summary>
+        /// <param name="text">The identifier to test.</param>
+        /// <returns><c>True</c> if the identifier needs escaping, <c>false</c> otherwise.</returns>
         protected static bool NeedsEscaping(string text)
         {
             return text.ToCharArray().Any(c => EscapedCharacters.ContainsKey(c) || !char.IsLetterOrDigit(c));
         }
 
+        /// <summary>
+        /// Appends a single character to the output stream, and escapes it when necessary.
+        /// </summary>
+        /// <param name="c">The character to write.</param>
         protected void WriteEscapedCharacter(char c)
         {
             if (EscapedCharacters.TryGetValue(c, out string escaped))

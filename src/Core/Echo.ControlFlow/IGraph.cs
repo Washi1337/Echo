@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Echo.ControlFlow
 {
     /// <summary>
-    /// Represents a control flow graph encoding all possible execution paths in a chunk of code.
+    /// Provides members to model a graph-like structure.
     /// </summary>
     public interface IGraph : IGraphSegment
     {

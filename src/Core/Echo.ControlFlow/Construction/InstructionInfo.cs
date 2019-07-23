@@ -15,6 +15,11 @@ namespace Echo.ControlFlow.Construction
     public struct InstructionInfo<TInstruction>
         where TInstruction : IInstruction
     {
+        /// <summary>
+        /// Creates a new instance of the instruction information tuple.
+        /// </summary>
+        /// <param name="instruction">The instruction.</param>
+        /// <param name="successors">The successors referenced by the instruction.</param>
         public InstructionInfo(TInstruction instruction, ICollection<SuccessorInfo> successors)
         {
             Instruction = instruction;

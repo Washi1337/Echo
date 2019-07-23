@@ -14,11 +14,21 @@ namespace Echo.ControlFlow.Analysis.Traversal
         /// <inheritdoc />
         public event EventHandler TraversalCompleted;
 
+        /// <summary>
+        /// Creates a new depth first traversal.
+        /// </summary>
         public DepthFirstTraversal()
             : this(false)
         {
         }
 
+        /// <summary>
+        /// Creates a new depth first traversal.
+        /// </summary>
+        /// <param name="reverseTraversal">
+        /// <c>True</c> if the traversal should traverse the graph in a reversed manner.
+        /// That is, whether the traversal should treat each edge as if it was reversed.
+        /// </param>
         public DepthFirstTraversal(bool reverseTraversal)
         {
             ReverseTraversal = reverseTraversal;
@@ -65,11 +75,18 @@ namespace Echo.ControlFlow.Analysis.Traversal
             OnTraversalCompleted();
         }
 
+        /// <summary>
+        /// Fires and handles the node discovered event.
+        /// </summary>
+        /// <param name="e">The event arguments.</param>
         protected virtual void OnNodeDiscovered(NodeDiscoveryEventArgs e)
         {
             NodeDiscovered?.Invoke(this, e);
         }
 
+        /// <summary>
+        /// Fires and handles the traversal completed event.
+        /// </summary>
         protected virtual void OnTraversalCompleted()
         {
             TraversalCompleted?.Invoke(this, EventArgs.Empty);
