@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Echo.ControlFlow.Analysis.Domination
 {
@@ -41,6 +42,31 @@ namespace Echo.ControlFlow.Analysis.Domination
         public IList<DominatorTreeNode> Children
         {
             get;
+        }
+
+        public IEnumerable<DominatorTreeNode> GetDirectChildren()
+        {
+            return Children.Where(c => c.OriginalNode.HasPredecessor(OriginalNode));
+        }
+
+        public IEnumerable<DominatorTreeNode> GetIndirectChildren()
+        {
+            return Children.Where(c => !c.OriginalNode.HasPredecessor(OriginalNode));
+        }
+
+        public IEnumerable<DominatorTreeNode> GetDescendants()
+        {
+            var stack = new Stack<DominatorTreeNode>();
+            stack.Push(this);
+            
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                yield return current;
+
+                foreach (var child in current.Children)
+                    stack.Push(child);
+            }
         }
     }
 }

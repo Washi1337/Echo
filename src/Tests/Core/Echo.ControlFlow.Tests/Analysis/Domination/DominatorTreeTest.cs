@@ -53,7 +53,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         public void If()
         {
             // Artificially construct an if construct.
-            var graph = TestGraphs.CreateIf();
+            var graph = TestGraphs.CreateIfElse();
             var n1 = graph.GetNodeByOffset(0);
             var n2 = graph.GetNodeByOffset(2);
             var n3 = graph.GetNodeByOffset(3);

@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Echo.ControlFlow.Specialized
+namespace Echo.ControlFlow.Specialized.Blocks
 {
     /// <summary>
     /// Represents one basic block in a control flow graph, consisting of a list of instructions (or statements).
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that the basic block contains.</typeparam>
-    public class BasicBlock<TInstruction>
+    public class BasicBlock<TInstruction> : IBlock<TInstruction>
     {
         /// <summary>
         /// Creates a new, empty basic block.
@@ -67,7 +67,17 @@ namespace Echo.ControlFlow.Specialized
         {
             get;
         }
-        
-        
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            string newLine = Environment.NewLine;
+            return "{" + newLine + string.Join(newLine, Instructions) + newLine + "}";
+        }
+
+        IEnumerable<BasicBlock<TInstruction>> IBlock<TInstruction>.GetAllBlocks()
+        {
+            return new[] {this};
+        }
     }
 }

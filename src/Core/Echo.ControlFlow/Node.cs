@@ -211,6 +211,21 @@ namespace Echo.ControlFlow
                 .Select(n => n.Target)
                 .Distinct();
         }
+        
+        /// <summary>
+        /// Determines whether another node is a predecessor of this node.
+        /// </summary>
+        /// <param name="neighbour">The potential predecessor.</param>
+        /// <returns><c>True</c> if the provided node is a predecessor, <c>false</c> otherwise.</returns>
+        /// <exception cref="ArgumentNullException">Occurs when the provided predecessor is <c>null</c></exception>
+        public bool HasPredecessor(Node<TContents> neighbour)
+        {
+            if (neighbour == null)
+                throw new ArgumentNullException(nameof(neighbour));
+            
+            // We don't use IncomingEdges here as this requires a linear search.
+            return neighbour.HasSuccessor(this);
+        }
 
         /// <summary>
         /// Determines whether another node is a successor of this node.
@@ -246,6 +261,10 @@ namespace Echo.ControlFlow
         IEnumerable<INode> INode.GetPredecessors() => GetPredecessors();
 
         IEnumerable<INode> INode.GetSuccessors() => GetSuccessors();
+
+        bool INode.HasPredecessor(INode node) => node is Node<TContents> n && HasPredecessor(n);
+        
+        bool INode.HasSuccessor(INode node) => node is Node<TContents> n && HasSuccessor(n);
 
     }
 }

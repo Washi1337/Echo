@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Echo.ControlFlow.Specialized.Blocks;
 
 namespace Echo.ControlFlow.Specialized
 {

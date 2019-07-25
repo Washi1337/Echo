@@ -52,5 +52,9 @@ namespace Echo.ControlFlow
         /// </summary>
         /// <returns>The successor nodes.</returns>
         IEnumerable<INode> GetSuccessors();
+
+        bool HasPredecessor(INode node);
+
+        bool HasSuccessor(INode node);
     }
 }

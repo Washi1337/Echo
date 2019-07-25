@@ -121,6 +121,20 @@ namespace Echo.ControlFlow.Serialization.Dot
             WriteIdentifier(nodeIdentifiers[edge.Origin]);
             Writer.Write(" -> ");
             WriteIdentifier(nodeIdentifiers[edge.Target]);
+
+            switch (edge.Type)
+            {
+                case EdgeType.FallThrough:
+                    break;
+                case EdgeType.Conditional:
+                    Writer.Write("[color=red]");
+                    break;
+                case EdgeType.Abnormal:
+                    Writer.Write("[color=gray, style=dashed]");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
             
             WriteSemicolon();
             

@@ -1,5 +1,6 @@
 using System.IO;
 using Echo.ControlFlow.Specialized;
+using Echo.ControlFlow.Specialized.Blocks;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Serialization.Dot

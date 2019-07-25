@@ -65,7 +65,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Traversal
         public void If()
         {
             // Artificially construct an if construct.
-            var graph = TestGraphs.CreateIf();
+            var graph = TestGraphs.CreateIfElse();
 
             var n1 = graph.GetNodeByOffset(0);
             var n2 = graph.GetNodeByOffset(2);
@@ -91,7 +91,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Traversal
         public void IfReversed()
         {
             // Artificially construct an if construct.
-            var graph = TestGraphs.CreateIf();
+            var graph = TestGraphs.CreateIfElse();
 
             var n1 = graph.GetNodeByOffset(0);
             var n2 = graph.GetNodeByOffset(2);

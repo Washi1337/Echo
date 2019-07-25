@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Echo.ControlFlow.Specialized.Blocks;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Specialized
