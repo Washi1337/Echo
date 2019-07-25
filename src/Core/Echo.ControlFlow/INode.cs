@@ -53,8 +53,20 @@ namespace Echo.ControlFlow
         /// <returns>The successor nodes.</returns>
         IEnumerable<INode> GetSuccessors();
 
+        /// <summary>
+        /// Determines whether the provided node precedes the current node. This includes any node that
+        /// might transfer control to node this node in the complete control flow graph, regardless of edge type. 
+        /// </summary>
+        /// <param name="node">The node to check.</param>
+        /// <returns><c>True</c> if the node is a predecessor, <c>false</c> otherwise.</returns>
         bool HasPredecessor(INode node);
 
+        /// <summary>
+        /// Determines whether the provided node might be executed after the current node.This includes any node that this node
+        /// might transfer control to, regardless of edge type. 
+        /// </summary>
+        /// <param name="node">The node to check.</param>
+        /// <returns><c>True</c> if the node is a successor, <c>false</c> otherwise.</returns>
         bool HasSuccessor(INode node);
     }
 }
