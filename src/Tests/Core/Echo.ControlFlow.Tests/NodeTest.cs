@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Echo.ControlFlow.Specialized;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
@@ -198,5 +199,63 @@ namespace Echo.ControlFlow.Tests
             }, new HashSet<Node<int>>(nodes[3].GetPredecessors()));
         }
 
+        [Fact]
+        public void SplitBasicBlock()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Op(0, 0, 0),
+                DummyInstruction.Op(1, 0, 0),
+                DummyInstruction.Op(2, 0, 0),
+                DummyInstruction.Op(3, 0, 0),
+            };
+            
+            var cfg = new ControlFlowGraph<DummyInstruction>();
+            var node = new BasicBlockNode<DummyInstruction>(instructions);
+            cfg.Nodes.Add(node);
+            cfg.Entrypoint = node;
+
+            node.Split(2);
+
+            Assert.Equal(2, cfg.Nodes.Count);
+            Assert.Equal(new[] {instructions[0], instructions[1]}, node.Contents.Instructions);
+            
+            var newNode = cfg.Entrypoint.FallThroughNeighbour;
+            Assert.NotNull(newNode);
+            Assert.Equal(new[] {instructions[2], instructions[3]}, newNode.Contents.Instructions);
+        }
+        
+        [Fact]
+        public void SplitMultipleOutgoingEdges()
+        {
+            var cfg = TestGraphs.CreateIf();
+            var nodes = cfg.Nodes
+                .OrderBy(n => n.Contents.Offset)
+                .ToArray();
+
+            nodes[0].Split(1);
+            var newNode = nodes[0].FallThroughNeighbour;
+            
+            Assert.NotEqual(nodes[2], newNode);
+            Assert.Equal(nodes[1], newNode.FallThroughNeighbour);
+            Assert.Contains(nodes[2], newNode.ConditionalEdges.Select(e => e.Target));
+        }
+
+        [Fact]
+        public void SplitMultipleIncomingEdges()
+        {
+            var cfg = TestGraphs.CreateIf();
+            var nodes = cfg.Nodes
+                .OrderBy(n => n.Contents.Offset)
+                .ToArray();
+
+            nodes[2].Split(1);
+            var newNode = nodes[2].FallThroughNeighbour;
+
+            Assert.NotNull(newNode);
+            Assert.Equal(2, nodes[2].GetIncomingEdges().Count());
+            Assert.Single(newNode.GetIncomingEdges());
+            Assert.True(newNode.HasPredecessor(nodes[2]));
+        }
     }
 }

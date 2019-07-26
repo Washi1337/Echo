@@ -1,7 +1,7 @@
 using Echo.ControlFlow.Specialized;
 using Echo.Platforms.DummyPlatform.Code;
 
-namespace Echo.ControlFlow.Tests.Analysis
+namespace Echo.ControlFlow.Tests
 {
     public static class TestGraphs
     {

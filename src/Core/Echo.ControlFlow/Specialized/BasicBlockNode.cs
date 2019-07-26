@@ -46,6 +46,5 @@ namespace Echo.ControlFlow.Specialized
             : base(basicBlock)
         {
         }
-        
     }
 }

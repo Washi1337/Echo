@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Collections;
 using Echo.ControlFlow.Specialized;
+using Echo.ControlFlow.Specialized.Blocks;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow
@@ -265,6 +266,45 @@ namespace Echo.ControlFlow
         bool INode.HasPredecessor(INode node) => node is Node<TContents> n && HasPredecessor(n);
         
         bool INode.HasSuccessor(INode node) => node is Node<TContents> n && HasSuccessor(n);
+    }
 
+    public static partial class GraphExtensions
+    {
+        /// <summary>
+        /// Splits the provided node containing a basic block into two separate nodes, by removing all instructions in
+        /// the basic block starting at the provided index, putting them in a new node and connecting the provided node
+        /// with the new node using a fallthrough edge.
+        /// </summary>
+        /// <param name="node">The node to split.</param>
+        /// <param name="index">The index of the instruction to split the node at.</param>
+        /// <typeparam name="TInstruction">The type of instructions that this node contains.</typeparam>
+        /// <exception cref="InvalidOperationException">Occurs when the node is not added to a graph yet.</exception>
+        public static void Split<TInstruction>(this Node<BasicBlock<TInstruction>> node, int index)
+        {
+            if (node.ParentGraph == null)
+                throw new InvalidOperationException("Cannot split a node that is not added to a graph yet.");
+
+            // Construct the new basic block by removing the instructions from the original block.
+            var newBlock = new BasicBlock<TInstruction>();
+            var oldInstructions = node.Contents.Instructions;
+            for (int i = index; i < oldInstructions.Count;)
+            {
+                var instruction = oldInstructions[i];
+                oldInstructions.RemoveAt(i);
+                newBlock.Instructions.Add(instruction);
+            }
+
+            // Create the new node.
+            var newNode = new Node<BasicBlock<TInstruction>>(newBlock);
+            node.ParentGraph.Nodes.Add(newNode);
+
+            // Connect the new node with the nodes that the original node was connected to.
+            foreach (var edge in node.GetOutgoingEdges())
+                newNode.ConnectWith(edge.Target, edge.Type);
+            
+            // Remove the edges of the original node and connect the original node with the new node.
+            node.ConditionalEdges.Clear();
+            node.FallThroughNeighbour = newNode;
+        }
     }
 }
