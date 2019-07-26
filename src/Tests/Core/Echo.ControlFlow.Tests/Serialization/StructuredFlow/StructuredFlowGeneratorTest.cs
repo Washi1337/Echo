@@ -102,6 +102,31 @@ namespace Echo.ControlFlow.Tests.Serialization.StructuredFlow
                     orderdNodes[3],
                 });
         }
+
+        [Fact]
+        public void Switch()
+        {
+            var cfg = TestGraphs.CreateSwitch();
+            var orderedEntries = cfg.Nodes
+                .Select(n => n.Contents.Instructions[0])
+                .OrderBy(i => i.Offset)
+                .ToArray();
+            
+            var generator = new StructuredFlowGenerator<DummyInstruction>();
+            var block = generator.Generate(cfg);
+            
+            var generatedEntries = block.GetAllBlocks()
+                .Select(x => x.Instructions[0])
+                .ToList();
+
+            Assert.All(generatedEntries, i => Assert.True(
+                generatedEntries.IndexOf(i) <= generatedEntries.IndexOf(orderedEntries[5])));
+            
+            Assert.True(generatedEntries.IndexOf(orderedEntries[1]) < generatedEntries.IndexOf(orderedEntries[2]));
+            Assert.True(generatedEntries.IndexOf(orderedEntries[1]) < generatedEntries.IndexOf(orderedEntries[3]));
+            Assert.True(generatedEntries.IndexOf(orderedEntries[1]) < generatedEntries.IndexOf(orderedEntries[4]));
+            
+        }
         
     }
 }

@@ -24,6 +24,11 @@ namespace Echo.Platforms.DummyPlatform.Code
             return new DummyInstruction(offset, DummyOpCode.JmpCond, 1, 0, target);
         }
 
+        public static DummyInstruction Switch(long offset, params long[] targets)
+        {
+            return new DummyInstruction(offset, DummyOpCode.Switch, 1, 0, targets);
+        }
+
         public static DummyInstruction Ret(long offset)
         {
             return new DummyInstruction(offset, DummyOpCode.Ret, 0, 0);

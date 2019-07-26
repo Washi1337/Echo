@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
 using Echo.Platforms.DummyPlatform.Code;
@@ -22,6 +23,11 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
                 case DummyOpCode.JmpCond:
                     result.Add(new SuccessorInfo(instruction.Offset + instruction.Size, EdgeType.FallThrough));
                     result.Add(new SuccessorInfo((long) instruction.Operands[0], EdgeType.Conditional));
+                    break;
+                case DummyOpCode.Switch:
+                    result.Add(new SuccessorInfo(instruction.Offset + instruction.Size, EdgeType.FallThrough));
+                    result.AddRange(((long[]) instruction.Operands[0])
+                        .Select(target => new SuccessorInfo(target, EdgeType.Conditional)));
                     break;
                 case DummyOpCode.Ret:
                     break;

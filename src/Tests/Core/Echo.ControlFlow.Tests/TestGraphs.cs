@@ -1,4 +1,5 @@
 using Echo.ControlFlow.Specialized;
+using Echo.Core.Emulation;
 using Echo.Platforms.DummyPlatform.Code;
 
 namespace Echo.ControlFlow.Tests
@@ -203,6 +204,50 @@ namespace Echo.ControlFlow.Tests
             n3.ConnectWith(n4);
             n2.ConnectWith(n3);
 
+            return graph;
+        }
+
+        public static ControlFlowGraph<DummyInstruction> CreateSwitch()
+        {
+            var graph = new ControlFlowGraph<DummyInstruction>();
+
+            var n1 = new BasicBlockNode<DummyInstruction>(0, new[]
+            {
+                DummyInstruction.Switch(0, 2, 3, 4, 5),
+            });
+            var n2 = new BasicBlockNode<DummyInstruction>(1, new[]
+            {
+                DummyInstruction.Jmp(1, 5),
+            });
+            var n3 = new BasicBlockNode<DummyInstruction>(2, new[]
+            {
+                DummyInstruction.Jmp(2, 5),
+            });
+            var n4 = new BasicBlockNode<DummyInstruction>(3, new[]
+            {
+                DummyInstruction.Jmp(3, 5),
+            });
+            var n5 = new BasicBlockNode<DummyInstruction>(4, new[]
+            {
+                DummyInstruction.Jmp(4, 5),
+            });
+            var n6 = new BasicBlockNode<DummyInstruction>(5, new[]
+            {
+                DummyInstruction.Ret(5), 
+            });
+            
+            graph.Nodes.AddRange(new[] {n1, n2, n3, n4, n5, n6});
+            graph.Entrypoint = n1;
+
+            n1.ConnectWith(n2);
+            n1.ConnectWith(n3,EdgeType.Conditional);
+            n1.ConnectWith(n4,EdgeType.Conditional);
+            n1.ConnectWith(n5,EdgeType.Conditional);
+            n2.ConnectWith(n6);
+            n3.ConnectWith(n6);
+            n4.ConnectWith(n6);
+            n5.ConnectWith(n6);
+            
             return graph;
         }
     }
