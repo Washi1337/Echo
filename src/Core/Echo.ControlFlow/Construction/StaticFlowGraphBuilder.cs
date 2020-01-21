@@ -20,37 +20,25 @@ namespace Echo.ControlFlow.Construction
     /// this graph builder, but <c>jmp eax</c> is not.
     /// </remarks>
     public class StaticFlowGraphBuilder<TInstruction> : IFlowGraphBuilder<TInstruction>
-        where TInstruction : IInstruction
     {
         /// <summary>
-        /// Creates a new static graph builder using the provided instructions and successor resolver.
+        /// Creates a new static graph builder using the provided instruction successor resolver.
         /// </summary>
-        /// <param name="instructions">The object containing the instructions to graph.</param>
+        /// <param name="architecture">The architecture of the instructions to graph.</param>
         /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
-        public StaticFlowGraphBuilder(IEnumerable<TInstruction> instructions,
-            IStaticSuccessorResolver<TInstruction> successorResolver)
-            : this(new ListInstructionProvider<TInstruction>(instructions), successorResolver)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new static graph builder using the provided instructions and successor resolver.
-        /// </summary>
-        /// <param name="provider">The object containing the instructions to graph.</param>
-        /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
-        /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
-        public StaticFlowGraphBuilder(IInstructionProvider<TInstruction> provider,
+        public StaticFlowGraphBuilder(
+            IInstructionSetArchitecture<TInstruction> architecture,
             IStaticSuccessorResolver<TInstruction> successorResolver)
         {
-            InstructionProvider = provider ?? throw new ArgumentNullException(nameof(provider));
+            Architecture = architecture;
             SuccessorResolver = successorResolver ?? throw new ArgumentNullException(nameof(successorResolver));
         }
 
         /// <summary>
-        /// Gets the object used to obtain the instructions to put in the control flow graph. 
+        /// Gets the architecture of the instructions to graph.
         /// </summary>
-        public IInstructionProvider<TInstruction> InstructionProvider
+        public IInstructionSetArchitecture<TInstruction> Architecture
         {
             get;
         }
@@ -66,30 +54,48 @@ namespace Echo.ControlFlow.Construction
         /// <summary>
         /// Constructs a control flow graph in a static analysis manner, starting at the provided entrypoint address.
         /// </summary>
+        /// <param name="instructions">The instructions</param>
         /// <param name="entrypoint">The address of the first instruction to traverse.</param>
         /// <returns>
         /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
         /// provided in <paramref name="entrypoint"/>.
         /// </returns>
-        public ControlFlowGraph<TInstruction> ConstructFlowGraph(long entrypoint)
+        public ControlFlowGraph<TInstruction> ConstructFlowGraph(IEnumerable<TInstruction> instructions, long entrypoint)
         {
-            CollectInstructions(entrypoint, out var instructions, out var blockHeaders);
+            return ConstructFlowGraph(new ListInstructionProvider<TInstruction>(Architecture, instructions.ToList()), entrypoint);
+        }
+        
+        /// <summary>
+        /// Constructs a control flow graph in a static analysis manner, starting at the provided entrypoint address.
+        /// </summary>
+        /// <param name="instructions">The instructions</param>
+        /// <param name="entrypoint">The address of the first instruction to traverse.</param>
+        /// <returns>
+        /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
+        /// provided in <paramref name="entrypoint"/>.
+        /// </returns>
+        public ControlFlowGraph<TInstruction> ConstructFlowGraph(
+            IInstructionProvider<TInstruction> instructions,
+            long entrypoint)
+        {
+            CollectInstructions(instructions, entrypoint, out var instructionInfos, out var blockHeaders);
 
             var graph = new ControlFlowGraph<TInstruction>();
-            CreateNodes(graph, instructions, blockHeaders);
-            ConnectNodes(graph, instructions);
+            CreateNodes(graph, instructionInfos, blockHeaders);
+            ConnectNodes(graph, instructionInfos);
             graph.Entrypoint = graph.GetNodeByOffset(entrypoint);
             return graph;
         }
         
-        ControlFlowGraph<TInstruction> IFlowGraphBuilder<TInstruction>.ConstructFlowGraph(long entrypoint) 
-            => ConstructFlowGraph(entrypoint);
+        ControlFlowGraph<TInstruction> IFlowGraphBuilder<TInstruction>.ConstructFlowGraph(IInstructionProvider<TInstruction> instructions, long entrypoint) 
+            => ConstructFlowGraph(instructions, entrypoint);
 
-        private void CollectInstructions(long entrypoint, out IDictionary<long, InstructionInfo<TInstruction>> instructions, 
+        private void CollectInstructions(IInstructionProvider<TInstruction> instructions, long entrypoint, 
+            out IDictionary<long, InstructionInfo<TInstruction>> instructionInfos, 
             out HashSet<long> blockHeaders)
         {
             var visited = new HashSet<long>();
-            instructions = new Dictionary<long, InstructionInfo<TInstruction>>();
+            instructionInfos = new Dictionary<long, InstructionInfo<TInstruction>>();
             blockHeaders = new HashSet<long> {entrypoint};
 
             // Start at the entrypoint.
@@ -104,19 +110,19 @@ namespace Echo.ControlFlow.Construction
                 if (visited.Add(currentOffset))
                 {
                     // Get the instruction at the provided offset and figure out successors.
-                    var instruction = InstructionProvider.GetInstructionAtOffset(currentOffset);
+                    var instruction = instructions.GetInstructionAtOffset(currentOffset);
                     var currentSuccessors = SuccessorResolver.GetSuccessors(instruction);
                     
                     // Store collected data.
-                    instructions.Add(currentOffset, new InstructionInfo<TInstruction>(instruction, currentSuccessors));
+                    instructionInfos.Add(currentOffset, new InstructionInfo<TInstruction>(instruction, currentSuccessors));
                     
                     // Figure out next offsets to process.
                     bool nextInstructionIsSuccessor = false;
-                    foreach (var destinationAddress in currentSuccessors
+                    foreach (long destinationAddress in currentSuccessors
                         .Select(s => s.DestinationAddress)
                         .Distinct())
                     {
-                        if (destinationAddress == currentOffset + instruction.Size)
+                        if (destinationAddress == currentOffset + Architecture.GetSize(instruction))
                         {
                             // Successor is just the next instruction.
                             nextInstructionIsSuccessor = true;
@@ -133,23 +139,24 @@ namespace Echo.ControlFlow.Construction
                     // If we have multiple successors (e.g. as with an if-else construct), or the next instruction is
                     // not a successor (e.g. with a return address), the next instruction is another block header. 
                     if (!nextInstructionIsSuccessor || currentSuccessors.Count > 1)
-                        blockHeaders.Add(currentOffset + instruction.Size);
+                        blockHeaders.Add(currentOffset + Architecture.GetSize(instruction));
                     
                 }
             }
         }
 
-        private static void CreateNodes(ControlFlowGraph<TInstruction> graph, IDictionary<long, InstructionInfo<TInstruction>> instructions, 
+        private void CreateNodes(ControlFlowGraph<TInstruction> graph, IDictionary<long, InstructionInfo<TInstruction>> instructions, 
             ICollection<long> blockHeaders)
         {
             BasicBlockNode<TInstruction> currentNode = null;
-            foreach (var info in instructions.Values.OrderBy(t => t.Instruction.Offset))
+            foreach (var info in instructions.Values.OrderBy(t => Architecture.GetOffset(t.Instruction)))
             {
                 // Check if we reached a new block header.
-                if (currentNode == null || blockHeaders.Contains(info.Instruction.Offset))
+                long offset = Architecture.GetOffset(info.Instruction);
+                if (currentNode == null || blockHeaders.Contains(offset))
                 {
                     // We arrived at a new basic block header. Create a new node for it. 
-                    currentNode = new BasicBlockNode<TInstruction>(new BasicBlock<TInstruction>(info.Instruction.Offset));
+                    currentNode = new BasicBlockNode<TInstruction>(new BasicBlock<TInstruction>(offset));
                     graph.Nodes.Add(currentNode);
                 }
 
@@ -159,20 +166,20 @@ namespace Echo.ControlFlow.Construction
                 // Edge case: Blocks might not come straight after each other. If we see that the next instruction
                 // does not exist, or the previous algorithm has decided the next instruction is a block header, 
                 // we can create a new block in the next iteration.
-                long nextOffset = info.Instruction.Offset + info.Instruction.Size;
+                long nextOffset = offset + Architecture.GetSize(info.Instruction);
                 if (!instructions.ContainsKey(nextOffset) || blockHeaders.Contains(nextOffset))
                     currentNode = null;
             }
         }
 
-        private static void ConnectNodes(ControlFlowGraph<TInstruction> graph, IDictionary<long, InstructionInfo<TInstruction>> instructions)
+        private void ConnectNodes(ControlFlowGraph<TInstruction> graph, IDictionary<long, InstructionInfo<TInstruction>> instructions)
         {
             foreach (var node in graph.Nodes)
             {
                 // Get the successors of the last instruction in the current block.
                 var block = node.Contents;
-                var last = block.Instructions[block.Instructions.Count - 1];
-                var successors = instructions[last.Offset].Successors;
+                long footerOffset = Architecture.GetOffset(block.Instructions[block.Instructions.Count - 1]);
+                var successors = instructions[footerOffset].Successors;
 
                 // Add edges accordingly.
                 foreach (var successor in successors)
@@ -181,7 +188,7 @@ namespace Echo.ControlFlow.Construction
                     if (successorNode == null)
                     {
                         throw new ArgumentException(
-                            $"Instruction at address {last.Offset:X8} refers to a non-existing node.");
+                            $"Instruction at address {footerOffset:X8} refers to a non-existing node.");
                     }
 
                     node.ConnectWith(successorNode, successor.EdgeType);

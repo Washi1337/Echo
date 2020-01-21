@@ -4,11 +4,8 @@ using Echo.Core.Code;
 
 namespace Echo.Platforms.DummyPlatform.Code
 {
-    public class DummyInstruction : IInstruction
+    public class DummyInstruction
     {
-        private int _pushCount;
-        private int _popCount;
-
         public static DummyInstruction Op(long offset, int popCount, int pushCount)
         {
             return new DummyInstruction(offset, DummyOpCode.Op, popCount, pushCount, popCount, pushCount);
@@ -33,16 +30,16 @@ namespace Echo.Platforms.DummyPlatform.Code
         {
             return new DummyInstruction(offset, DummyOpCode.Ret, 0, 0);
         }
-        
+
         public DummyInstruction(long offset, DummyOpCode opCode, int popCount, int pushCount, params object[] operands)
         {
             Offset = offset;
             OpCode = opCode;
             Operands = operands;
-            _popCount = popCount;
-            _pushCount = pushCount;
+            PopCount = popCount;
+            PushCount = pushCount;
         }
-        
+
         public long Offset
         {
             get;
@@ -60,41 +57,14 @@ namespace Echo.Platforms.DummyPlatform.Code
             get;
         }
 
-        public int Size => 1;
-
-        public IEnumerable<byte> GetOpCodeBytes()
+        public int PushCount
         {
-            throw new NotImplementedException();
+            get;
         }
 
-        public IEnumerable<byte> GetOperandBytes()
+        public int PopCount
         {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<byte> GetBytes()
-        {
-            throw new NotImplementedException();
-        }
-        
-        public int GetStackPushCount()
-        {
-            return _pushCount;
-        }
-
-        public int GetStackPopCount()
-        {
-            return _popCount;
-        }
-
-        public IEnumerable<IVariable> GetReadVariables()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<IVariable> GetWrittenVariables()
-        {
-            throw new NotImplementedException();
+            get;
         }
 
         public override string ToString()

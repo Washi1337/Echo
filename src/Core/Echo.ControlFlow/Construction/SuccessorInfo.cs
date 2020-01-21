@@ -3,7 +3,7 @@ namespace Echo.ControlFlow.Construction
     /// <summary>
     /// Represents a reference to an instruction that is the successor of another instruction. 
     /// </summary>
-    public struct SuccessorInfo
+    public readonly struct SuccessorInfo
     {
         /// <summary>
         /// Creates a new successor reference.

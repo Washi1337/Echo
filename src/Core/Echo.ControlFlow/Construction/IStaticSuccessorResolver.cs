@@ -9,7 +9,6 @@ namespace Echo.ControlFlow.Construction
     /// </summary>
     /// <typeparam name="TInstruction">The type of instruction to resolve the successors from.</typeparam>
     public interface IStaticSuccessorResolver<in TInstruction>
-        where TInstruction : IInstruction
     {
         /// <summary>
         /// Gets a collection of references that represent the successors of the provided instruction.

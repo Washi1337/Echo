@@ -8,34 +8,38 @@ namespace Echo.Core.Code
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to store.</typeparam>
     public class ListInstructionProvider<TInstruction> : IInstructionProvider<TInstruction>
-        where TInstruction : IInstruction
     {
         private readonly IDictionary<long, TInstruction> _instructions = new Dictionary<long, TInstruction>();
 
         /// <summary>
         /// Creates a new wrapper for a sequence of instructions.
         /// </summary>
+        /// <param name="architecture">The instruction architecture.</param>
         /// <param name="instructions">The instructions to put into the wrapper.</param>
         /// <exception cref="ArgumentException">Occurs when there are multiple instructions with the same offset.</exception>
         /// <exception cref="ArgumentNullException">Occurs when the provided instruction sequence is <c>null</c>.</exception>
-        public ListInstructionProvider(IEnumerable<TInstruction> instructions)
+        public ListInstructionProvider(IInstructionSetArchitecture<TInstruction> architecture, IEnumerable<TInstruction> instructions)
         {
             if (instructions == null)
                 throw new ArgumentNullException(nameof(instructions));
-            
+            Architecture = architecture;
+
             foreach (var instruction in instructions)
             {
-                if (_instructions.ContainsKey(instruction.Offset))
-                    throw new ArgumentException($"Sequence contains multiple instructions with the offset {instruction.Offset:X8}.");
-                _instructions[instruction.Offset] = instruction;
+                long offset = architecture.GetOffset(instruction);
+                if (_instructions.ContainsKey(offset))
+                    throw new ArgumentException($"Sequence contains multiple instructions with the offset {offset:X8}.");
+                _instructions[offset] = instruction;
             }
         }
 
         /// <inheritdoc />
-        public TInstruction GetInstructionAtOffset(long offset)
+        public IInstructionSetArchitecture<TInstruction> Architecture
         {
-            return _instructions[offset];
+            get;
         }
-        
+
+        /// <inheritdoc />
+        public TInstruction GetInstructionAtOffset(long offset) => _instructions[offset];
     }
 }

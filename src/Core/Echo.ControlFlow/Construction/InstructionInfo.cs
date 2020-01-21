@@ -12,8 +12,7 @@ namespace Echo.ControlFlow.Construction
     /// This structure is used by graph builders to keep track of instructions and their successors to eventually build
     /// a control flow graph.
     /// </remarks>
-    public struct InstructionInfo<TInstruction>
-        where TInstruction : IInstruction
+    public readonly struct InstructionInfo<TInstruction>
     {
         /// <summary>
         /// Creates a new instance of the instruction information tuple.
