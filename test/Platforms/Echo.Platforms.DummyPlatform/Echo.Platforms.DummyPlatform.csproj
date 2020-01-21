@@ -6,8 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Core\Echo.ControlFlow\Echo.ControlFlow.csproj" />
-      <ProjectReference Include="..\..\..\Core\Echo.Symbolic\Echo.Symbolic.csproj" />
+      <ProjectReference Include="..\..\..\src\Core\Echo.ControlFlow\Echo.ControlFlow.csproj" />
+      <ProjectReference Include="..\..\..\src\Core\Echo.Symbolic\Echo.Symbolic.csproj" />
     </ItemGroup>
 
 </Project>

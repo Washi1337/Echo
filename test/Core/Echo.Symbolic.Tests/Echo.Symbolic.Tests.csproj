@@ -13,7 +13,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Core\Echo.Core\Echo.Core.csproj" />
+      <ProjectReference Include="..\..\..\src\Core\Echo.Core\Echo.Core.csproj" />
+      <ProjectReference Include="..\..\..\src\Core\Echo.Symbolic\Echo.Symbolic.csproj" />
       <ProjectReference Include="..\..\Platforms\Echo.Platforms.DummyPlatform\Echo.Platforms.DummyPlatform.csproj" />
     </ItemGroup>
 

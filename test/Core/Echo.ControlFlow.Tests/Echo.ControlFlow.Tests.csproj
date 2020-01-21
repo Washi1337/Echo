@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Core\Echo.ControlFlow\Echo.ControlFlow.csproj" />
+      <ProjectReference Include="..\..\..\src\Core\Echo.ControlFlow\Echo.ControlFlow.csproj" />
       <ProjectReference Include="..\..\Platforms\Echo.Platforms.DummyPlatform\Echo.Platforms.DummyPlatform.csproj" />
     </ItemGroup>
 
