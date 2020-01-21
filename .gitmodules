@@ -1,0 +1,4 @@
+[submodule "deps/AsmResolver"]
+	path = deps/AsmResolver
+	url = https://github.com/Washi1337/AsmResolver
+	branch = v4
