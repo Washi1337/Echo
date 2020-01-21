@@ -10,28 +10,36 @@ To construct a CFG using the static control flow graph builder, we need classes 
 using Echo.ControlFlow.Construction;
 ```
 
-The static graph builder of Echo defines two constructors, one accepting an `IEnumerable<TInstruction>` containing the instructions to store in the graph, and the other using an `IInstructionProvider<TInstruction>`. Note that the latter option might be more efficient for larger chunks of code. Furthermore, the first option is just a shortcut for the second otion.
+The static graph builder of Echo defines one constructor that accepts an instruction set architecture, and a successor resolver. The architecture tells Echo how to interpret a model of an instruction in the instruction set. The successor resolver is able to tell the graph builder what the successors are of a single instruction. Both parameters are platform dependent, and every platform has their unique architecture representative and successor resolver.
 
-For example:
+In the following snippets, we assume our instruction model is called `DummyInstruction`, our architecture is represented by `DummyArchitecture`, and our successor resolver is of the type `DummyStaticSuccessorResolver`:
+
+```csharp
+public readonly struct DummyInstruction { ... } 
+public class DummyArchitecture : IInstructionSetArchitecture<DummyInstruction> { ... }
+public class DummyStaticSuccessorResolver : IStaticSuccessorResolver<DummyInstruction> { ... }
+
+// ...
+
+var architecture = mew DummyArchitecture();
+var resolver = new DummyStaticSuccessorResolver(architecture);
+```
+
+Next we need a set of instructions to graph. We can use any instance of `IEnumerable<TInstruction>`:
 ```csharp
 var instructions = new List<DummyInstruction> { ... }
 ```
 
-Is a shortcut for:
+or use an instance of a class implementing the `IInstructionProvider<TInstruction>` interface instead:
+
 ```csharp
 var instructions = new ListInstructionProvider<DummyInstruction>(new List<DummyInstruction> { ... });
 ```
 
-Next, we need an instance of `IStaticSuccessorResolver<TInstruction>`, which is able to tell the graph builder what the successors are of a single instruction. This is platform dependent, and every platform has their unique successor resolver.
-
-```csharp
-var resolver = new DummyStaticSuccessorResolver();
-```
-
 Now we can build our control flow graph from our list. Given the entrypoint address stored in a variable `entrypointAddress` of type `long`, we can construct the control flow graph using:
 ```csharp
-var builder = new StaticFlowGraphBuilder<DummyInstruction>(instructions, resolver);
-ControlFlowGraph<DummyInstruction> graph = builder.ConstructFlowGraph(entrypointAddress);
+var builder = new StaticFlowGraphBuilder<DummyInstruction>(architecture, resolver);
+ControlFlowGraph<DummyInstruction> graph = builder.ConstructFlowGraph(instructions, entrypointAddress);
 
 ```
 

@@ -74,9 +74,7 @@ namespace Echo.ControlFlow.Construction
         /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
         /// provided in <paramref name="entrypoint"/>.
         /// </returns>
-        public ControlFlowGraph<TInstruction> ConstructFlowGraph(
-            IInstructionProvider<TInstruction> instructions,
-            long entrypoint)
+        public ControlFlowGraph<TInstruction> ConstructFlowGraph(IInstructionProvider<TInstruction> instructions, long entrypoint)
         {
             CollectInstructions(instructions, entrypoint, out var instructionInfos, out var blockHeaders);
 
