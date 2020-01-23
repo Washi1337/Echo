@@ -39,7 +39,10 @@ namespace Echo.Core.Emulation
         {
             return Copy();
         }
-        
+
+        /// <inheritdoc />
+        public IEnumerable<IVariable> GetAllRecordedVariables() => _variables.Keys;
+
         /// <summary>
         /// Creates a copy of the snapshot. This also copies all registered values for each variable.
         /// </summary>

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Echo.Core.Code;
 using Echo.Core.Values;
 
@@ -20,6 +21,12 @@ namespace Echo.Core.Emulation
             get;
             set;
         }
+
+        /// <summary>
+        /// Obtains a list of all recorded variables in this snapshot.
+        /// </summary>
+        /// <returns>The recorded variables.</returns>
+        IEnumerable<IVariable> GetAllRecordedVariables();
 
         /// <summary>
         /// Creates a copy of the snapshot. This also copies all registered values for each variable.

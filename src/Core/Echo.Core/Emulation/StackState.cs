@@ -54,8 +54,12 @@ namespace Echo.Core.Emulation
         public IList<TValue> Pop(int count, bool reversed = false)
         {
             var values = new TValue[count];
-            _stack.CopyTo(values, Size - count);
+            if (count <= 0)
+                return values;
             
+            _stack.CopyTo(values, Size - count);
+            _stack.RemoveRange(Size - count, count);
+
             if (!reversed)
                 Array.Reverse(values);
 
@@ -71,7 +75,7 @@ namespace Echo.Core.Emulation
         /// Creates a copy of the stack state. This also copies all values inside the stack.
         /// </summary>
         /// <returns>The copied stack state.</returns>
-        public StackState<TValue> Copy()
+        public virtual StackState<TValue> Copy()
         {
             var result = new StackState<TValue>();
             result._stack.AddRange(_stack);
