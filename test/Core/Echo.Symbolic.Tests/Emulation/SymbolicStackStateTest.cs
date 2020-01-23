@@ -19,11 +19,11 @@ namespace Echo.Symbolic.Tests.Emulation
                 new DummyDataSource(1)
             };
             
-            var stack1 = new SymbolicStackState();
+            var stack1 = new StackState<SymbolicValue>();
             var value1 = new SymbolicValue(sources[0]);
             stack1.Push(value1);
             
-            var stack2 = new SymbolicStackState();
+            var stack2 = new StackState<SymbolicValue>();
             var value2 = new SymbolicValue(sources[1]);
             stack2.Push(value2);
             
@@ -53,7 +53,7 @@ namespace Echo.Symbolic.Tests.Emulation
                 }
             };
             
-            var stack1 = new SymbolicStackState();
+            var stack1 = new StackState<SymbolicValue>();
             var values1 = new[]
             {
                 new SymbolicValue(sources[0][0]),
@@ -62,7 +62,7 @@ namespace Echo.Symbolic.Tests.Emulation
             };
             stack1.Push(values1);
             
-            var stack2 = new SymbolicStackState();
+            var stack2 = new StackState<SymbolicValue>();
             var values2 = new[]
             {
                 new SymbolicValue(sources[0][1]),
@@ -84,14 +84,14 @@ namespace Echo.Symbolic.Tests.Emulation
         [Fact]
         public void MergeStackImbalance()
         {
-            var stack1 = new SymbolicStackState();
+            var stack1 = new StackState<SymbolicValue>();
             stack1.Push(new[]
             {
                 new SymbolicValue(),
                 new SymbolicValue(),
             });
             
-            var stack2 = new SymbolicStackState();
+            var stack2 = new StackState<SymbolicValue>();
             stack2.Push(new[]
             {
                 new SymbolicValue(),

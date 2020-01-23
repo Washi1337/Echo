@@ -32,5 +32,11 @@ namespace Echo.Core.Emulation
         {
             get;
         }
+
+        /// <summary>
+        /// Creates a deep copy of the snapshot. This includes copying the state of the stack and each variable.
+        /// </summary>
+        /// <returns>The copied program state.</returns>
+        IProgramState<TValue> Copy();
     }
 }

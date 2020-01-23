@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Echo.Symbolic.Values;
 
 namespace Echo.Platforms.DummyPlatform.Values
@@ -26,6 +27,10 @@ namespace Echo.Platforms.DummyPlatform.Values
         {
             return "source_" + Identifier;
         }
-        
+
+        public IList<SymbolicValue> StackDependencies
+        {
+            get;
+        } = new SymbolicValue[0];
     }
 }
