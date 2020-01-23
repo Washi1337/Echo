@@ -84,9 +84,6 @@ namespace Echo.ControlFlow.Construction
             graph.Entrypoint = graph.GetNodeByOffset(entrypoint);
             return graph;
         }
-        
-        ControlFlowGraph<TInstruction> IFlowGraphBuilder<TInstruction>.ConstructFlowGraph(IInstructionProvider<TInstruction> instructions, long entrypoint) 
-            => ConstructFlowGraph(instructions, entrypoint);
 
         private void CollectInstructions(IInstructionProvider<TInstruction> instructions, long entrypoint, 
             out IDictionary<long, InstructionInfo<TInstruction>> instructionInfos, 
