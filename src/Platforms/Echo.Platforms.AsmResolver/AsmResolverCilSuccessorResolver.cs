@@ -28,7 +28,7 @@ namespace Echo.Platforms.AsmResolver
                 
                 case CilFlowControl.Branch:
                     var label = (ICilLabel) instruction.Operand;
-                    result.Add(CreateConditional(label));
+                    result.Add(new SuccessorInfo(label.Offset, EdgeType.FallThrough));
                     break;
                 
                 case CilFlowControl.ConditionalBranch:
