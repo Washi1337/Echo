@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Echo.Core.Code;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow.Collections
 {

@@ -1,3 +1,5 @@
+using Echo.Core.Graphing;
+
 namespace Echo.ControlFlow.Specialized
 {
     /// <summary>
@@ -5,12 +7,12 @@ namespace Echo.ControlFlow.Specialized
     /// by the handler, and the segment containing the code that handles any exceptions that might occur in the protected
     /// region. 
     /// </summary>
-    public interface IExceptionHandler : IGraphSegment
+    public interface IExceptionHandler : ISubGraph
     {
         /// <summary>
         /// Gets the graph segment that is protected by the exception handler.
         /// </summary>
-        IGraphSegment Try
+        ISubGraph Try
         {
             get;
         }
@@ -18,7 +20,7 @@ namespace Echo.ControlFlow.Specialized
         /// <summary>
         /// Gets the graph segment that handles any exceptions that might occur in the protected region.
         /// </summary>
-        IGraphSegment Handler
+        ISubGraph Handler
         {
             get;
         }

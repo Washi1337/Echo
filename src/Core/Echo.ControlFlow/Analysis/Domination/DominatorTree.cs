@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Analysis.Traversal;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow.Analysis.Domination
 {
@@ -16,7 +17,7 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// </summary>
         /// <param name="graph">The control flow graph to turn into a dominator tree.</param>
         /// <returns>The constructed dominator tree.</returns>
-        public static DominatorTree FromGraph(IGraph graph)
+        public static DominatorTree FromGraph<TContents>(Graph<TContents> graph)
         {
             if (graph.Entrypoint == null)
                 throw new ArgumentException("Control flow graph does not have an entrypoint.");
@@ -48,7 +49,7 @@ namespace Echo.ControlFlow.Analysis.Domination
             var parents = new ParentRecorder(traversal);
             traversal.Run(entrypoint);
 
-            var orderedNodes = order.GetTraversal();            
+            var orderedNodes = order.GetTraversal();
             foreach (var node in orderedNodes)
             {
                 idom[node] = null;

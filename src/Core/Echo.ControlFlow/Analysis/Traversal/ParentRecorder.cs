@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow.Analysis.Traversal
 {

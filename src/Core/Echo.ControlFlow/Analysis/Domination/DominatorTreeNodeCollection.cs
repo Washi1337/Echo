@@ -1,12 +1,14 @@
 using System;
 using System.Collections.ObjectModel;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow.Analysis.Domination
 {
     /// <summary>
     /// Represents a collection of dominator tree node children that are dominated by a single graph node.
     /// </summary>
-    public class DominatorTreeNodeCollection : Collection<DominatorTreeNode>
+    public class DominatorTreeNodeCollection<TNode> : Collection<DominatorTreeNode>
+        where TNode : INode
     {
         private readonly DominatorTreeNode _owner;
 

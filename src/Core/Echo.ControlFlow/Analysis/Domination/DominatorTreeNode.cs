@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow.Analysis.Domination
 {
@@ -15,8 +16,8 @@ namespace Echo.ControlFlow.Analysis.Domination
     {
         internal DominatorTreeNode(INode node)
         {
-            OriginalNode = node ?? throw new ArgumentNullException(nameof(node));
-            Children  = new DominatorTreeNodeCollection(this);
+            OriginalNode = node;
+            Children  = new DominatorTreeNodeCollection<INode>(this);
         }
 
         /// <summary>

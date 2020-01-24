@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Echo.ControlFlow.Serialization.Dot
+namespace Echo.Core.Graphing.Serialization.Dot
 {
     /// <summary>
     /// Provides a mechanism for writing graphs to a character stream using the dot file format.
@@ -121,23 +121,7 @@ namespace Echo.ControlFlow.Serialization.Dot
             WriteIdentifier(nodeIdentifiers[edge.Origin]);
             Writer.Write(" -> ");
             WriteIdentifier(nodeIdentifiers[edge.Target]);
-
-            switch (edge.Type)
-            {
-                case EdgeType.FallThrough:
-                    break;
-                case EdgeType.Conditional:
-                    Writer.Write("[color=red]");
-                    break;
-                case EdgeType.Abnormal:
-                    Writer.Write("[color=gray, style=dashed]");
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-            
             WriteSemicolon();
-            
             Writer.WriteLine();
         }
 

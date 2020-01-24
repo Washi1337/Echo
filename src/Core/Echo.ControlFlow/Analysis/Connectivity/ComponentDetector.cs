@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Analysis.Traversal;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow.Analysis.Connectivity
 {
@@ -19,7 +20,7 @@ namespace Echo.ControlFlow.Analysis.Connectivity
             var traversal = new DepthFirstTraversal();
             var recorder = new PostOrderRecorder(traversal);
 
-            traversal.Run(graph.Entrypoint);
+            traversal.Run(graph.GetNodes().First());
 
             var visited = new HashSet<INode>();
             var result = new List<ISet<INode>>();

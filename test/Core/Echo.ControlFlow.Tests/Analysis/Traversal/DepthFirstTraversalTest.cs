@@ -1,4 +1,5 @@
 using Echo.ControlFlow.Analysis.Traversal;
+using Echo.Core.Graphing;
 using Xunit;
 
 namespace Echo.ControlFlow.Tests.Analysis.Traversal

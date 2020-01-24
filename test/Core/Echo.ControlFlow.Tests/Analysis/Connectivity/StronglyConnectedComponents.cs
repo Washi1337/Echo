@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Echo.ControlFlow.Analysis.Connectivity;
+using Echo.Core.Graphing;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 

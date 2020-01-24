@@ -1,16 +1,12 @@
-namespace Echo.ControlFlow
+namespace Echo.Core.Graphing
 {
     /// <summary>
-    /// Represents a single edge that connects to nodes together in a control flow graph.
+    /// Represents a single edge that connects to nodes together in a directed graph.
     /// </summary>
-    /// <remarks>
-    /// If an edge is in between two nodes, it means that control might be transferred from the one node to the other
-    /// during the execution of the program that is encoded by the control flow graph. 
-    /// </remarks>
     public interface IEdge
     {
         /// <summary>
-        /// Gets the node that this edge starts at.
+        /// Gets the node that this edge starts at in the directed graph.
         /// </summary>
         INode Origin
         {
@@ -18,17 +14,9 @@ namespace Echo.ControlFlow
         }
 
         /// <summary>
-        /// Gets the node that this edge transfers control to when followed.
+        /// Gets the node that this edge points to in the directed graph.
         /// </summary>
         INode Target
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the type of the edge.
-        /// </summary>
-        EdgeType Type
         {
             get;
         }

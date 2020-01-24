@@ -1,4 +1,5 @@
 using System;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow.Analysis.Traversal
 {

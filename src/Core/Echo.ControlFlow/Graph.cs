@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Collections;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow
 {
@@ -56,9 +57,7 @@ namespace Echo.ControlFlow
             return Nodes.SelectMany(n => n.GetOutgoingEdges());
         }
         
-        INode IGraphSegment.Entrypoint => Entrypoint;
-
-        IEnumerable<INode> IGraphSegment.GetNodes() => Nodes;
+        IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
 
         IEnumerable<IEdge> IGraph.GetEdges() => GetEdges();
 

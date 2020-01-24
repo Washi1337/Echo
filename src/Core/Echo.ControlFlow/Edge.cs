@@ -1,4 +1,5 @@
 using Echo.Core.Code;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow
 {
@@ -6,6 +7,10 @@ namespace Echo.ControlFlow
     /// Provides an implementation for a single edge in a control flow graph, including the source and target node,
     /// and the type of edge.
     /// </summary>
+    /// <remarks>
+    /// If an edge is in between two nodes, it means that control might be transferred from the one node to the other
+    /// during the execution of the program that is encoded by the control flow graph. 
+    /// </remarks>
     /// <typeparam name="TContents">The type of contents that the connected nodes store.</typeparam>
     public class Edge<TContents> : IEdge
     {
@@ -57,7 +62,9 @@ namespace Echo.ControlFlow
 
         INode IEdge.Target => Target;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the type of the edge.
+        /// </summary>
         public EdgeType Type
         {
             get;

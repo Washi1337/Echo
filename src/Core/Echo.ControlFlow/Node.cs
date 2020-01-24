@@ -5,6 +5,7 @@ using Echo.ControlFlow.Collections;
 using Echo.ControlFlow.Specialized;
 using Echo.ControlFlow.Specialized.Blocks;
 using Echo.Core.Code;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow
 {
@@ -248,12 +249,6 @@ namespace Echo.ControlFlow
         {
             return Contents?.ToString() ?? "<null>";
         }
-
-        IEdge INode.GetFallThroughEdge() => FallThroughEdge;
-
-        IEnumerable<IEdge> INode.GetConditionalEdges() => ConditionalEdges;
-
-        IEnumerable<IEdge> INode.GetAbnormalEdges() => AbnormalEdges;
 
         IEnumerable<IEdge> INode.GetIncomingEdges() => GetIncomingEdges();
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Specialized.Blocks;
 using Echo.Core.Code;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow.Specialized
 {
@@ -10,7 +11,7 @@ namespace Echo.ControlFlow.Specialized
     /// Provides a base implementation of a segment in a control flow graph that stores for each node a list of instructions.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to store in the nodes.</typeparam>
-    public class ControlFlowGraphRegion<TInstruction> : IGraphSegment
+    public class ControlFlowGraphRegion<TInstruction> : ISubGraph
     {
         private Node<BasicBlock<TInstruction>> _entrypoint;
 
@@ -40,8 +41,6 @@ namespace Echo.ControlFlow.Specialized
             get;
         } = new HashSet<Node<BasicBlock<TInstruction>>>();
 
-        INode IGraphSegment.Entrypoint => Entrypoint;
-
-        IEnumerable<INode> IGraphSegment.GetNodes() => Nodes;
+        IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
     }
 }

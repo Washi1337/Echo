@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Specialized.Blocks;
+using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow.Specialized
 {
@@ -36,12 +37,10 @@ namespace Echo.ControlFlow.Specialized
         /// </remarks>
         public IEnumerable<Node<BasicBlock<TInstruction>>> GetNodes() => Try.Nodes.Union(Handler.Nodes);
         
-        INode IGraphSegment.Entrypoint => Try.Entrypoint;
+        ISubGraph IExceptionHandler.Try => Try;
         
-        IGraphSegment IExceptionHandler.Try => Try;
-        
-        IGraphSegment IExceptionHandler.Handler => Handler;
+        ISubGraph IExceptionHandler.Handler => Handler;
 
-        IEnumerable<INode> IGraphSegment.GetNodes() => GetNodes();
+        IEnumerable<INode> ISubGraph.GetNodes() => GetNodes();
     }
 }

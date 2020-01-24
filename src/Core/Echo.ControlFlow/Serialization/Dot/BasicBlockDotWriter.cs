@@ -2,6 +2,8 @@ using System.IO;
 using Echo.ControlFlow.Specialized;
 using Echo.ControlFlow.Specialized.Blocks;
 using Echo.Core.Code;
+using Echo.Core.Graphing;
+using Echo.Core.Graphing.Serialization.Dot;
 
 namespace Echo.ControlFlow.Serialization.Dot
 {

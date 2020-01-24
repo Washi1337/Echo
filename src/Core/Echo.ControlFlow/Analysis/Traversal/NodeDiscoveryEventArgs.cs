@@ -1,3 +1,5 @@
+using Echo.Core.Graphing;
+
 namespace Echo.ControlFlow.Analysis.Traversal
 {
     /// <summary>
