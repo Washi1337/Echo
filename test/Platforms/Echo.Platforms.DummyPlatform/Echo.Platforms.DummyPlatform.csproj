@@ -7,7 +7,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\src\Core\Echo.ControlFlow\Echo.ControlFlow.csproj" />
-      <ProjectReference Include="..\..\..\src\Core\Echo.Symbolic\Echo.Symbolic.csproj" />
+      <ProjectReference Include="..\..\..\src\Core\Echo.DataFlow\Echo.DataFlow.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using Echo.Core.Emulation;
+using Echo.DataFlow.Values;
 using Echo.Platforms.DummyPlatform.Values;
-using Echo.Symbolic.Emulation;
-using Echo.Symbolic.Tests.Values;
-using Echo.Symbolic.Values;
+using Echo.DataFlow.Emulation;
+using Echo.DataFlow.Tests.Values;
 using Xunit;
 
-namespace Echo.Symbolic.Tests.Emulation
+namespace Echo.DataFlow.Tests.Emulation
 {
     public class SymbolicStackStateTest
     {

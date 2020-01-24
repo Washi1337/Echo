@@ -1,8 +1,8 @@
 using System.Linq;
 using Echo.Core.Emulation;
-using Echo.Symbolic.Values;
+using Echo.DataFlow.Values;
 
-namespace Echo.Symbolic.Emulation
+namespace Echo.DataFlow.Emulation
 {
     /// <summary>
     /// Represents a stack that contains only symbolic values, and provides functionality to merge with other

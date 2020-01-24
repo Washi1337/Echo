@@ -1,7 +1,7 @@
 ﻿using Echo.Core.Emulation;
-using Echo.Symbolic.Values;
+using Echo.DataFlow.Values;
 
-namespace Echo.Symbolic.Emulation
+namespace Echo.DataFlow.Emulation
 {
     public static class SymbolicVariableState
     {

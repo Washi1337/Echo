@@ -1,9 +1,9 @@
 using System.Collections.Generic;
+using Echo.DataFlow.Values;
 using Echo.Platforms.DummyPlatform.Values;
-using Echo.Symbolic.Values;
 using Xunit;
 
-namespace Echo.Symbolic.Tests.Values
+namespace Echo.DataFlow.Tests.Values
 {
     public class SymbolicValueTest
     {

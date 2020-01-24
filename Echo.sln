@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Core", "src\Core\Echo.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Concrete", "src\Core\Echo.Concrete\Echo.Concrete.csproj", "{3B8FB9D7-8B39-4B0B-A05D-9C07B11466FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Symbolic", "src\Core\Echo.Symbolic\Echo.Symbolic.csproj", "{2D940041-E424-4960-AF1D-A0ECA48DB7F4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.DataFlow", "src\Core\Echo.DataFlow\Echo.DataFlow.csproj", "{2D940041-E424-4960-AF1D-A0ECA48DB7F4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{620B6332-1C8B-4C82-BE28-5D62765C96F0}"
 EndProject
@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{91D56580-5
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Concrete.Tests", "test\Core\Echo.Concrete.Tests\Echo.Concrete.Tests.csproj", "{354DB6CF-9BC9-4982-A47D-2A4AFA8C1F32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Symbolic.Tests", "test\Core\Echo.Symbolic.Tests\Echo.Symbolic.Tests.csproj", "{ED03B0AB-D8D8-45E3-9E37-7D54E6230CD6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.DataFlow.Tests", "test\Core\Echo.DataFlow.Tests\Echo.DataFlow.Tests.csproj", "{ED03B0AB-D8D8-45E3-9E37-7D54E6230CD6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Core.Tests", "test\Core\Echo.Core.Tests\Echo.Core.Tests.csproj", "{EE4BFF69-AD48-4690-8F74-9A01901E352D}"
 EndProject

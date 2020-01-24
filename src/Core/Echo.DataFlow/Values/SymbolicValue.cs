@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Echo.Core.Values;
 
-namespace Echo.Symbolic.Values
+namespace Echo.DataFlow.Values
 {
     /// <summary>
     /// Represents a symbolic value that resides in memory. 

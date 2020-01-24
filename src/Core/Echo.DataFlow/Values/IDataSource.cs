@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Echo.Symbolic.Values
+namespace Echo.DataFlow.Values
 {
     public interface IDataSource
     {
