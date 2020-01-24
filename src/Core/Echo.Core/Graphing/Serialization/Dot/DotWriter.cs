@@ -63,22 +63,18 @@ namespace Echo.Core.Graphing.Serialization.Dot
             WriteHeader();
             
             // Nodes
-            var nodeIdentifiers = new Dictionary<INode, string>();
             foreach (var node in graph.GetNodes())
             {
-                string identifier = nodeIdentifiers.Count.ToString();
-                nodeIdentifiers[node] = identifier;
-                
                 if (SeparateNodesAndEdges
                     || !node.GetIncomingEdges().Any() && !node.GetOutgoingEdges().Any())
                 {
-                    Write(node, identifier);
+                    Write(node, node.Id.ToString());
                 }
             }
 
             // Edges
             foreach (var edge in graph.GetEdges())
-                Write(nodeIdentifiers, edge);
+                Write(edge);
 
             WriteFooter();
         }
@@ -114,13 +110,12 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <summary>
         /// Appends an edge to the output stream.
         /// </summary>
-        /// <param name="nodeIdentifiers">A mapping between nodes and their identifiers.</param>
         /// <param name="edge">The edge to append.</param>
-        protected virtual void Write(IDictionary<INode, string> nodeIdentifiers, IEdge edge)
+        protected virtual void Write(IEdge edge)
         {
-            WriteIdentifier(nodeIdentifiers[edge.Origin]);
+            WriteIdentifier(edge.Origin.Id.ToString());
             Writer.Write(" -> ");
-            WriteIdentifier(nodeIdentifiers[edge.Target]);
+            WriteIdentifier(edge.Target.Id.ToString());
             WriteSemicolon();
             Writer.WriteLine();
         }
