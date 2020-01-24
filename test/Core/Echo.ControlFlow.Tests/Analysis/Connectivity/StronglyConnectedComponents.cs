@@ -16,7 +16,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Connectivity
             var nodes = new Node<int>[5];
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new Node<int>(i);
+                nodes[i] = new Node<int>(i, i);
                 cfg.Nodes.Add(nodes[i]);
             }
 

@@ -14,7 +14,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         {
             var cfg = new Graph<int>();
             
-            var n = new Node<int>(0);
+            var n = new Node<int>(0, 0);
             cfg.Nodes.Add(n);
             cfg.Entrypoint = n;
 
@@ -30,7 +30,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             var nodes = new Node<int>[3];
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new Node<int>(i);
+                nodes[i] = new Node<int>(i, i);
                 cfg.Nodes.Add(nodes[i]);
                 if (i > 0)
                     nodes[i - 1].ConnectWith(nodes[i]);
@@ -50,7 +50,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             var nodes = new Node<int>[4];
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new Node<int>(i);
+                nodes[i] = new Node<int>(i, i);
                 cfg.Nodes.Add(nodes[i]);
             }
 
@@ -74,7 +74,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             var nodes = new Node<int>[4];
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new Node<int>(i);
+                nodes[i] = new Node<int>(i, i);
                 cfg.Nodes.Add(nodes[i]);
             }
 
@@ -102,7 +102,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             var nodes = new Node<int>[11];
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new Node<int>(i);
+                nodes[i] = new Node<int>(i, i);
                 cfg.Nodes.Add(nodes[i]);
             }
 

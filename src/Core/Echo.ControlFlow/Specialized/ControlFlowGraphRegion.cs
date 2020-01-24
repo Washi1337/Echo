@@ -41,6 +41,12 @@ namespace Echo.ControlFlow.Specialized
             get;
         } = new HashSet<Node<BasicBlock<TInstruction>>>();
 
+        INode ISubGraph.GetNodeById(long id)
+        {
+            // TODO: more optimized lookup.
+            return Nodes.First(n => n.Offset == id);
+        }
+
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
     }
 }

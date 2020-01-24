@@ -11,24 +11,6 @@ namespace Echo.ControlFlow.Specialized
     public class BasicBlockNode<TInstruction> : Node<BasicBlock<TInstruction>>
     {
         /// <summary>
-        /// Creates a basic block node with an empty basic block inside of it.  
-        /// </summary>
-        public BasicBlockNode() 
-            : this(Enumerable.Empty<TInstruction>())
-        {
-        }
-
-        /// <summary>
-        /// Creates a basic block node with the provided instructions.
-        /// </summary>
-        /// <param name="instructions">The instructions to store.</param>
-        public BasicBlockNode(IEnumerable<TInstruction> instructions)
-            : this(new BasicBlock<TInstruction>(instructions))
-        {
-        }
-
-
-        /// <summary>
         /// Creates a basic block node with the provided instructions.
         /// </summary>
         /// <param name="offset">The offset (i.e. identifier) of the new node.</param>
@@ -43,7 +25,7 @@ namespace Echo.ControlFlow.Specialized
         /// </summary>
         /// <param name="basicBlock">The data to store in the basic block.</param>
         public BasicBlockNode(BasicBlock<TInstruction> basicBlock)
-            : base(basicBlock)
+            : base(basicBlock.Offset, basicBlock)
         {
         }
     }

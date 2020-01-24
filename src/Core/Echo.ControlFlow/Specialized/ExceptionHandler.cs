@@ -28,6 +28,12 @@ namespace Echo.ControlFlow.Specialized
             get;
         } = new ControlFlowGraphRegion<TInstruction>();
 
+        /// <inheritdoc />
+        INode ISubGraph.GetNodeById(long id)
+        {
+            throw new System.NotImplementedException();
+        }
+
         /// <summary>
         /// Gets a collection of all nodes present in the exception handler.
         /// </summary>

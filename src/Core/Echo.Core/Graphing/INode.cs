@@ -8,6 +8,14 @@ namespace Echo.Core.Graphing
     public interface INode
     {
         /// <summary>
+        /// Gets the identifier of the node.
+        /// </summary>
+        long Id
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Gets a collection of all edges that target this node.
         /// </summary>
         /// <returns>The incoming edges.</returns>

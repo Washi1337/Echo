@@ -56,7 +56,9 @@ namespace Echo.ControlFlow
         {
             return Nodes.SelectMany(n => n.GetOutgoingEdges());
         }
-        
+
+        INode ISubGraph.GetNodeById(long id) => Nodes[id];
+
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
 
         IEnumerable<IEdge> IGraph.GetEdges() => GetEdges();

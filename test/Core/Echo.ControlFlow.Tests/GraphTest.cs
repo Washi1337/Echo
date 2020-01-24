@@ -21,7 +21,7 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new Graph<int>();
 
-            var node = new Node<int>(0);
+            var node = new Node<int>(0, 0);
             graph.Nodes.Add(node);
 
             Assert.Single(graph.Nodes);
@@ -35,10 +35,10 @@ namespace Echo.ControlFlow.Tests
 
             var nodes = new HashSet<Node<int>>
             {
-                new Node<int>(0),
-                new Node<int>(1),
-                new Node<int>(2),
-                new Node<int>(3),
+                new Node<int>(0, 0),
+                new Node<int>(1, 1),
+                new Node<int>(2, 2),
+                new Node<int>(3, 3),
             };
 
             graph.Nodes.AddRange(nodes);
@@ -50,7 +50,7 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new Graph<int>();
 
-            var node = new Node<int>(0);
+            var node = new Node<int>(0, 0);
             graph.Nodes.Add(node);
 
             graph.Entrypoint = node;
@@ -64,8 +64,8 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new Graph<int>();
             
-            var n1 = new Node<int>(0);
-            var n2 = new Node<int>(1);
+            var n1 = new Node<int>(0, 0);
+            var n2 = new Node<int>(1, 1);
 
             graph.Nodes.AddRange(new[] {n1, n2});
             n1.ConnectWith(n2);
@@ -78,9 +78,9 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new Graph<int>();
             
-            var n1 = new Node<int>(0);
-            var n2 = new Node<int>(1);
-            var n3 = new Node<int>(2);
+            var n1 = new Node<int>(0, 0);
+            var n2 = new Node<int>(1, 1);
+            var n3 = new Node<int>(2, 2);
 
             graph.Nodes.AddRange(new[] {n1, n2, n3});
 
@@ -100,8 +100,8 @@ namespace Echo.ControlFlow.Tests
             var graph1 = new Graph<int>();
             var graph2 = new Graph<int>();
             
-            var n1 = new Node<int>(0);
-            var n2 = new Node<int>(1);
+            var n1 = new Node<int>(0, 0);
+            var n2 = new Node<int>(1, 1);
 
             graph1.Nodes.Add(n1);
             graph2.Nodes.Add(n2);
@@ -115,13 +115,13 @@ namespace Echo.ControlFlow.Tests
             var graph1 = new Graph<int>();
             var graph2 = new Graph<int>();
             
-            var n1a = new Node<int>(0);
-            var n1b = new Node<int>(1);
+            var n1a = new Node<int>(0, 0);
+            var n1b = new Node<int>(1, 1);
             
-            var n2 = new Node<int>(2);
+            var n2 = new Node<int>(2, 2);
             
-            var n3a = new Node<int>(3);
-            var n3b = new Node<int>(4);
+            var n3a = new Node<int>(3, 3);
+            var n3b = new Node<int>(4, 4);
 
             graph1.Nodes.AddRange(new[] {n1a, n1b});
             graph2.Nodes.Add(n2);
