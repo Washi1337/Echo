@@ -258,10 +258,7 @@ namespace Echo.ControlFlow
         }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return Contents?.ToString() ?? "<null>";
-        }
+        public override string ToString() => Offset.ToString("X8");
 
         IEnumerable<IEdge> INode.GetIncomingEdges() => GetIncomingEdges();
 

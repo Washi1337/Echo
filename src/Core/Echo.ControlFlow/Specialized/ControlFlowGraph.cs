@@ -21,16 +21,5 @@ namespace Echo.ControlFlow.Specialized
         {
             get;
         } = new List<ExceptionHandler<TInstruction>>();
-
-        /// <summary>
-        /// Searches for a node in the control flow graph with the provided offset or identifier.
-        /// </summary>
-        /// <param name="offset">The offset of the node to find.</param>
-        /// <returns>The node.</returns>
-        public Node<BasicBlock<TInstruction>> GetNodeByOffset(long offset)
-        {
-            // TODO: use something more efficient than a linear search.
-            return Nodes.First(n => n.Contents.Offset == offset);
-        }
     }
 }

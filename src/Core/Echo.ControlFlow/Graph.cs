@@ -57,6 +57,13 @@ namespace Echo.ControlFlow
             return Nodes.SelectMany(n => n.GetOutgoingEdges());
         }
 
+        /// <summary>
+        /// Searches for a node in the control flow graph with the provided offset or identifier.
+        /// </summary>
+        /// <param name="offset">The offset of the node to find.</param>
+        /// <returns>The node.</returns>
+        public Node<TContents> GetNodeByOffset(long offset) => Nodes[offset];
+        
         INode ISubGraph.GetNodeById(long id) => Nodes[id];
 
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
