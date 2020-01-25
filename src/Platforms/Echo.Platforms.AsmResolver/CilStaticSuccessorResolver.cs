@@ -6,12 +6,12 @@ using Echo.ControlFlow.Construction;
 
 namespace Echo.Platforms.AsmResolver
 {
-    public class AsmResolverCilSuccessorResolver : IStaticSuccessorResolver<CilInstruction>
+    public class CilStaticSuccessorResolver : IStaticSuccessorResolver<CilInstruction>
     {
-        public static AsmResolverCilSuccessorResolver Instance
+        public static CilStaticSuccessorResolver Instance
         {
             get;
-        } = new AsmResolverCilSuccessorResolver();
+        } = new CilStaticSuccessorResolver();
         
         public ICollection<SuccessorInfo> GetSuccessors(CilInstruction instruction)
         {

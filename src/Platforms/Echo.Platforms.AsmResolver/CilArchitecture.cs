@@ -9,23 +9,23 @@ namespace Echo.Platforms.AsmResolver
     /// <summary>
     /// Provides a description of the CIL instruction set architecture (ISA) that is modelled by AsmResolver.   
     /// </summary>
-    public class AsmResolverCilArchitecture : IInstructionSetArchitecture<CilInstruction>
+    public class CilArchitecture : IInstructionSetArchitecture<CilInstruction>
     {
         /// <summary>
         /// Gets a singleton instance of this architecture description.
         /// </summary>
-        public static AsmResolverCilArchitecture Instance
+        public static CilArchitecture Instance
         {
             get;
-        } = new AsmResolverCilArchitecture();
+        } = new CilArchitecture();
 
         /// <summary>
         /// Gets the default static successor resolution engine for this architecture.
         /// </summary>
-        public AsmResolverCilSuccessorResolver SuccessorResolver
+        public CilStaticSuccessorResolver SuccessorResolver
         {
             get;
-        } = new AsmResolverCilSuccessorResolver();
+        } = new CilStaticSuccessorResolver();
 
         /// <inheritdoc />
         public long GetOffset(CilInstruction instruction) =>
