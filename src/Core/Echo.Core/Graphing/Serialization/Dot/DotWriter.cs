@@ -53,7 +53,31 @@ namespace Echo.Core.Graphing.Serialization.Dot
             get;
             set;
         } = true;
-        
+
+        /// <summary>
+        /// Gets or sets the adorner to use for adorning the nodes in the final output.
+        /// </summary>
+        /// <remarks>
+        /// When this property is set to <c>null</c> no adornments will be added.
+        /// </remarks>
+        public IDotNodeAdorner NodeAdorner
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the adorner to use for adorning the edges in the final output.
+        /// </summary>
+        /// <remarks>
+        /// When this property is set to <c>null</c> no adornments will be added.
+        /// </remarks>
+        public IDotEdgeAdorner EdgeAdorner
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Writes a graph to the character stream.
         /// </summary>
@@ -103,6 +127,10 @@ namespace Echo.Core.Graphing.Serialization.Dot
         protected virtual void Write(INode node, string identifier)
         {
             WriteIdentifier(identifier);
+            
+            if (NodeAdorner != null)
+                WriteAttributes(NodeAdorner.GetNodeAttributes(node).ToArray());
+            
             WriteSemicolon();
             Writer.WriteLine();
         }
@@ -116,8 +144,31 @@ namespace Echo.Core.Graphing.Serialization.Dot
             WriteIdentifier(edge.Origin.Id.ToString());
             Writer.Write(" -> ");
             WriteIdentifier(edge.Target.Id.ToString());
+
+            if (EdgeAdorner != null)
+                WriteAttributes(EdgeAdorner.GetEdgeAttributes(edge).ToArray());
+
             WriteSemicolon();
             Writer.WriteLine();
+        }
+
+        private void WriteAttributes(IList<KeyValuePair<string, string>> attributes)
+        {
+            if (attributes.Count > 0)
+            {
+                Writer.Write(" [");
+                for (int i = 0; i < attributes.Count; i++)
+                {
+                    WriteIdentifier(attributes[i].Key);
+                    Writer.Write('=');
+                    WriteIdentifier(attributes[i].Value);
+
+                    if (i < attributes.Count - 1)
+                        Writer.Write(", ");
+                }
+
+                Writer.Write(']');
+            }
         }
 
         /// <summary>
@@ -155,7 +206,10 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <returns><c>True</c> if the identifier needs escaping, <c>false</c> otherwise.</returns>
         protected static bool NeedsEscaping(string text)
         {
-            return text.ToCharArray().Any(c => EscapedCharacters.ContainsKey(c) || !char.IsLetterOrDigit(c));
+            bool startsWithDigit = char.IsDigit(text[0]);
+            return text.Any(c => EscapedCharacters.ContainsKey(c)
+                                 || !char.IsLetterOrDigit(c)
+                                 || startsWithDigit && !char.IsDigit(c));
         }
 
         /// <summary>
