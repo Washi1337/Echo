@@ -13,22 +13,12 @@ The figure below depicts a control flow graph of a very simple if-statement:
 How are they modelled in Echo?
 ------------------------------
 
-Graphs are modelled in Echo using the classes found in the `Echo.ControlFlow` namespace. The base interfaces include:
-- `INode`: A single node.
-- `IEdge`: An edge between two nodes.
-- `IGraph`: A collection of nodes and edges, with one node selected as the entrypoint.
+There are three main classes that are used to model CFGs. Given a `TInstruction` type, representing the type of instructions to store in the CFG, Echo defines the following classes:
+- `ControlFlowNode<TInstruction>`: A single node containing a basic block of instructions.
+- `ControlFlowEdge<TInstruction>`: A control flow transfer between two nodes.
+- `ControlFlowGraph<TInstruction>`: A collection of control flow nodes and edges.
 
-A default implementation is given to represent nodes with some generic data type stored in each of them. Given a type `TContents`, one could use the following classes to model a CFG:
-- `Node<TContents>`
-- `Edge<TContents>`
-- `Graph<TContents>`
-
-However, when specifically dealing with CFGs, you probably will only deal with the following classes instead:
-- `ControlFlowGraph<TInstruction>`
-- `BasicBlockNode<TInstruction>` 
-- `BasicBlock<TInstruction>`
-
-These are convenience classes defined in the `Echo.ControlFlow.Specialized` interface that simplify your expressions a bit.
+These classes implement the `INode`, `IEdge` and `IGraph` interfaces, and work therefore with all kinds of generic graph algorithms and export features.
 
 Constructing CFGs
 -----------------
@@ -44,10 +34,3 @@ Echo implements various standard analysis algorithms that can be used to effecti
 
 - [Traversal of Control Flow Graphs](Traversals.md)
 - [Dominator Analysis](Dominators.md)
-
-Exporting CFGs
---------------
-
-Echo also has the capability to export CFGs:
-
-- [Exporting CFGs to Dot files](Dot.md)
