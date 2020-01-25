@@ -32,7 +32,7 @@ namespace Echo.DataFlow
 
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
 
-        IEnumerable<IEdge> IGraph.GetEdges()
+        public IEnumerable<IEdge> GetEdges()
         {
             return Nodes
                 .Cast<INode>()

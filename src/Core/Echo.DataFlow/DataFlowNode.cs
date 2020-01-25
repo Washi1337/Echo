@@ -68,7 +68,7 @@ namespace Echo.DataFlow
                 yield return new DataFlowEdge<TContents>(d, this);
         }
 
-        public IEnumerable<IEdge> GetOutgoingEdges()
+        IEnumerable<IEdge> INode.GetOutgoingEdges()
         {
             foreach (var dataSource in StackDependencies.SelectMany(v => v.DataSources))
                 yield return new DataFlowEdge<TContents>(this, dataSource);

@@ -28,11 +28,18 @@ namespace Echo.DataFlow.Collections
         public bool IsReadOnly => false;
 
         /// <summary>
-        /// Gets a node by its offset.
+        /// Gets a node by its identifier.
         /// </summary>
-        /// <param name="offset">The node offset.</param>
-        public DataFlowNode<TContents> this[long offset] => _nodes[offset];
+        /// <param name="id">The node identifier.</param>
+        public DataFlowNode<TContents> this[long id] => _nodes[id];
 
+        public DataFlowNode<TContents> Add(long id, TContents contents)
+        {
+            var node = new DataFlowNode<TContents>(id, contents);
+            Add(node);
+            return node;
+        }
+        
         /// <inheritdoc />
         public void Add(DataFlowNode<TContents> item)
         {
