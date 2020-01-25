@@ -32,6 +32,27 @@ namespace Echo.ControlFlow.Serialization.Dot
             WriteSemicolon();
             Writer.WriteLine();
         }
-        
+
+        /// <inheritdoc />
+        protected override void Write(IEdge edge)
+        {
+            WriteIdentifier(edge.Origin.Id.ToString());
+            Writer.Write(" -> ");
+            WriteIdentifier(edge.Target.Id.ToString());
+
+            if (edge is Edge<BasicBlock<TInstruction>> e)
+            {
+                Writer.Write(e.Type switch
+                {
+                    EdgeType.FallThrough => " [color=black]",
+                    EdgeType.Conditional => " [color=red]",
+                    EdgeType.Abnormal => " [color=gray, style=dashed]",
+                    _ => string.Empty
+                });
+            }
+
+            WriteSemicolon();
+            Writer.WriteLine();
+        }
     }
 }
