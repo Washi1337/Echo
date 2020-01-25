@@ -10,7 +10,7 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void Empty()
         {
-            var graph = new Graph<int>();
+            var graph = new ControlFlowGraph<int>();
             
             Assert.Empty(graph.Nodes);
             Assert.Empty(graph.GetEdges());
@@ -19,9 +19,9 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void SingleNode()
         {
-            var graph = new Graph<int>();
+            var graph = new ControlFlowGraph<int>();
 
-            var node = new Node<int>(0, 0);
+            var node = new ControlFlowNode<int>(0, 0);
             graph.Nodes.Add(node);
 
             Assert.Single(graph.Nodes);
@@ -31,26 +31,26 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void AddMultipleNodes()
         {
-            var graph = new Graph<int>();
+            var graph = new ControlFlowGraph<int>();
 
-            var nodes = new HashSet<Node<int>>
+            var nodes = new HashSet<ControlFlowNode<int>>
             {
-                new Node<int>(0, 0),
-                new Node<int>(1, 1),
-                new Node<int>(2, 2),
-                new Node<int>(3, 3),
+                new ControlFlowNode<int>(0, 0),
+                new ControlFlowNode<int>(1, 1),
+                new ControlFlowNode<int>(2, 2),
+                new ControlFlowNode<int>(3, 3),
             };
 
             graph.Nodes.AddRange(nodes);
-            Assert.Equal(nodes, new HashSet<Node<int>>(graph.Nodes));
+            Assert.Equal(nodes, new HashSet<ControlFlowNode<int>>(graph.Nodes));
         }
 
         [Fact]
         public void Entrypoint()
         {
-            var graph = new Graph<int>();
+            var graph = new ControlFlowGraph<int>();
 
-            var node = new Node<int>(0, 0);
+            var node = new ControlFlowNode<int>(0, 0);
             graph.Nodes.Add(node);
 
             graph.Entrypoint = node;
@@ -62,10 +62,10 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void AddEdge()
         {
-            var graph = new Graph<int>();
+            var graph = new ControlFlowGraph<int>();
             
-            var n1 = new Node<int>(0, 0);
-            var n2 = new Node<int>(1, 1);
+            var n1 = new ControlFlowNode<int>(0, 0);
+            var n2 = new ControlFlowNode<int>(1, 1);
 
             graph.Nodes.AddRange(new[] {n1, n2});
             n1.ConnectWith(n2);
@@ -76,32 +76,32 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void AddMultipleEdges()
         {
-            var graph = new Graph<int>();
+            var graph = new ControlFlowGraph<int>();
             
-            var n1 = new Node<int>(0, 0);
-            var n2 = new Node<int>(1, 1);
-            var n3 = new Node<int>(2, 2);
+            var n1 = new ControlFlowNode<int>(0, 0);
+            var n2 = new ControlFlowNode<int>(1, 1);
+            var n3 = new ControlFlowNode<int>(2, 2);
 
             graph.Nodes.AddRange(new[] {n1, n2, n3});
 
-            var edges = new HashSet<Edge<int>>
+            var edges = new HashSet<ControlFlowEdge<int>>
             {
-                n1.ConnectWith(n2, EdgeType.Conditional),
+                n1.ConnectWith(n2, ControlFlowEdgeType.Conditional),
                 n1.ConnectWith(n3),
                 n2.ConnectWith(n3),
             };
 
-            Assert.Equal(edges, new HashSet<Edge<int>>(graph.GetEdges()));
+            Assert.Equal(edges, new HashSet<ControlFlowEdge<int>>(graph.GetEdges()));
         }
 
         [Fact]
         public void AddFromAnotherGraph()
         {
-            var graph1 = new Graph<int>();
-            var graph2 = new Graph<int>();
+            var graph1 = new ControlFlowGraph<int>();
+            var graph2 = new ControlFlowGraph<int>();
             
-            var n1 = new Node<int>(0, 0);
-            var n2 = new Node<int>(1, 1);
+            var n1 = new ControlFlowNode<int>(0, 0);
+            var n2 = new ControlFlowNode<int>(1, 1);
 
             graph1.Nodes.Add(n1);
             graph2.Nodes.Add(n2);
@@ -112,16 +112,16 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void AddManyFromAnotherGraph()
         {
-            var graph1 = new Graph<int>();
-            var graph2 = new Graph<int>();
+            var graph1 = new ControlFlowGraph<int>();
+            var graph2 = new ControlFlowGraph<int>();
             
-            var n1a = new Node<int>(0, 0);
-            var n1b = new Node<int>(1, 1);
+            var n1a = new ControlFlowNode<int>(0, 0);
+            var n1b = new ControlFlowNode<int>(1, 1);
             
-            var n2 = new Node<int>(2, 2);
+            var n2 = new ControlFlowNode<int>(2, 2);
             
-            var n3a = new Node<int>(3, 3);
-            var n3b = new Node<int>(4, 4);
+            var n3a = new ControlFlowNode<int>(3, 3);
+            var n3b = new ControlFlowNode<int>(4, 4);
 
             graph1.Nodes.AddRange(new[] {n1a, n1b});
             graph2.Nodes.Add(n2);

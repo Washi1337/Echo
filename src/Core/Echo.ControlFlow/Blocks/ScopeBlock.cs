@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Echo.ControlFlow.Specialized.Blocks
+namespace Echo.ControlFlow.Blocks
 {
     /// <summary>
     /// Represents a collection of blocks grouped together into one single block. 

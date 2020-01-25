@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.ControlFlow.Specialized;
-using Echo.ControlFlow.Specialized.Blocks;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction
@@ -78,7 +76,7 @@ namespace Echo.ControlFlow.Construction
 
         private void CreateNodes(ControlFlowGraph<TInstruction> graph, IInstructionTraversalResult<TInstruction> traversalResult)
         {
-            BasicBlockNode<TInstruction> currentNode = null;
+            ControlFlowNode<TInstruction> currentNode = null;
             foreach (var info in traversalResult.GetAllInstructions())
             {
                 // Check if we reached a new block header.
@@ -86,7 +84,7 @@ namespace Echo.ControlFlow.Construction
                 if (currentNode == null || traversalResult.IsBlockHeader(offset))
                 {
                     // We arrived at a new basic block header. Create a new node for it. 
-                    currentNode = new BasicBlockNode<TInstruction>(new BasicBlock<TInstruction>(offset));
+                    currentNode = new ControlFlowNode<TInstruction>(offset);
                     graph.Nodes.Add(currentNode);
                 }
 

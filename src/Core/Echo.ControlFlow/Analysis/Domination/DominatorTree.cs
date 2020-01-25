@@ -17,7 +17,7 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// </summary>
         /// <param name="graph">The control flow graph to turn into a dominator tree.</param>
         /// <returns>The constructed dominator tree.</returns>
-        public static DominatorTree FromGraph<TContents>(Graph<TContents> graph)
+        public static DominatorTree FromGraph<TContents>(ControlFlowGraph<TContents> graph)
         {
             if (graph.Entrypoint == null)
                 throw new ArgumentException("Control flow graph does not have an entrypoint.");

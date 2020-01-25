@@ -17,19 +17,19 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
             switch (instruction.OpCode)
             {
                 case DummyOpCode.Op:
-                    result.Add(new SuccessorInfo(instruction.Offset + 1, EdgeType.FallThrough));
+                    result.Add(new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough));
                     break;
                 case DummyOpCode.Jmp:
-                    result.Add(new SuccessorInfo((long) instruction.Operands[0], EdgeType.FallThrough));
+                    result.Add(new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.FallThrough));
                     break;
                 case DummyOpCode.JmpCond:
-                    result.Add(new SuccessorInfo(instruction.Offset + 1, EdgeType.FallThrough));
-                    result.Add(new SuccessorInfo((long) instruction.Operands[0], EdgeType.Conditional));
+                    result.Add(new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough));
+                    result.Add(new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.Conditional));
                     break;
                 case DummyOpCode.Switch:
-                    result.Add(new SuccessorInfo(instruction.Offset + 1, EdgeType.FallThrough));
+                    result.Add(new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough));
                     result.AddRange(((long[]) instruction.Operands[0])
-                        .Select(target => new SuccessorInfo(target, EdgeType.Conditional)));
+                        .Select(target => new SuccessorInfo(target, ControlFlowEdgeType.Conditional)));
                     break;
                 case DummyOpCode.Ret:
                     break;

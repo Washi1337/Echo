@@ -1,40 +1,68 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Echo.ControlFlow.Blocks;
 using Echo.ControlFlow.Collections;
-using Echo.ControlFlow.Specialized;
-using Echo.ControlFlow.Specialized.Blocks;
-using Echo.Core.Code;
 using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow
 {
     /// <summary>
-    /// Provides a generic base implementation for a node present in a graph, containing a user
-    /// defined object in a type-safe manner.
+    /// Represents a node in a control flow graph, containing a basic block of instructions that are to be executed
+    /// in a sequence.
     /// </summary>
-    /// <typeparam name="TContents">The type of data to store in the node.</typeparam>
-    public class Node<TContents> : INode
+    /// <typeparam name="TInstruction">The type of data to store in the node.</typeparam>
+    public class ControlFlowNode<TInstruction> : INode
     {
-        private Edge<TContents> _fallThroughEdge;
+        private ControlFlowEdge<TInstruction> _fallThroughEdge;
+
 
         /// <summary>
-        /// Creates a new basic block filled with the provided data, to be added to the graph.
+        /// Creates a new control flow graph node with an empty basic block, to be added to the graph.
         /// </summary>
         /// <param name="offset">The offset of the node.</param>
-        /// <param name="contents">The data to store in the node.</param>
-        public Node(long offset, TContents contents)
+        public ControlFlowNode(long offset)
+            : this(offset, new BasicBlock<TInstruction>(offset))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new control flow node containing the provided basic block of instructions, to be added to the graph.
+        /// </summary>
+        /// <param name="offset">The offset of the node.</param>
+        /// <param name="instructions">The basic block to store in the node.</param>
+        public ControlFlowNode(long offset, params TInstruction[] instructions)
+            : this(offset, instructions.AsEnumerable())
+        {
+        }
+
+        /// <summary>
+        /// Creates a new control flow node containing the provided basic block of instructions, to be added to the graph.
+        /// </summary>
+        /// <param name="offset">The offset of the node.</param>
+        /// <param name="instructions">The basic block to store in the node.</param>
+        public ControlFlowNode(long offset, IEnumerable<TInstruction> instructions)
+            : this(offset, new BasicBlock<TInstruction>(0, instructions))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new control flow node containing the provided basic block of instructions, to be added to the graph.
+        /// </summary>
+        /// <param name="offset">The offset of the node.</param>
+        /// <param name="basicBlock">The basic block to store in the node.</param>
+        public ControlFlowNode(long offset, BasicBlock<TInstruction> basicBlock)
         {
             Offset = offset;
-            Contents = contents;
-            ConditionalEdges = new AdjacencyCollection<TContents>(this, EdgeType.Conditional);
-            AbnormalEdges = new AdjacencyCollection<TContents>(this, EdgeType.Abnormal);
+            Contents = basicBlock ?? throw new ArgumentNullException(nameof(basicBlock));
+            ConditionalEdges = new AdjacencyCollection<TInstruction>(this, ControlFlowEdgeType.Conditional);
+            AbnormalEdges = new AdjacencyCollection<TInstruction>(this, ControlFlowEdgeType.Abnormal);
         }
 
         /// <summary>
         /// Gets the graph that contains this node, or <c>null</c> if the node is not added to any graph yet.  
         /// </summary>
-        public Graph<TContents> ParentGraph
+        public ControlFlowGraph<TInstruction> ParentGraph
         {
             get;
             internal set;
@@ -54,7 +82,7 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the user-defined contents of this node.
         /// </summary>
-        public TContents Contents
+        public BasicBlock<TInstruction> Contents
         {
             get;
         }
@@ -63,17 +91,17 @@ namespace Echo.ControlFlow
         /// Gets or sets the neighbour to which the control is transferred to after execution of this block and no
         /// other condition is met.
         /// </summary>
-        public Node<TContents> FallThroughNeighbour
+        public ControlFlowNode<TInstruction> FallThroughNeighbour
         {
             get => FallThroughEdge?.Target;
-            set => FallThroughEdge = new Edge<TContents>(this, value);
+            set => FallThroughEdge = new ControlFlowEdge<TInstruction>(this, value);
         }
 
         /// <summary>
         /// Gets or sets the edge to the neighbour to which the control is transferred to after execution of this block
         /// and no other condition is met.
         /// </summary>
-        public Edge<TContents> FallThroughEdge
+        public ControlFlowEdge<TInstruction> FallThroughEdge
         {
             get => _fallThroughEdge;
             set
@@ -82,7 +110,7 @@ namespace Echo.ControlFlow
 
                 if (value != null)
                 {
-                    AdjacencyCollection<TContents>.AssertEdgeValidity(this, EdgeType.FallThrough, value);
+                    AdjacencyCollection<TInstruction>.AssertEdgeValidity(this, ControlFlowEdgeType.FallThrough, value);
                     value.Target.IncomingEdges.Add(value);
                 }
 
@@ -97,7 +125,7 @@ namespace Echo.ControlFlow
         /// These edges are typically present when a node is a basic block encoding the header of an if statement
         /// or a loop. 
         /// </remarks>
-        public AdjacencyCollection<TContents> ConditionalEdges
+        public AdjacencyCollection<TInstruction> ConditionalEdges
         {
             get;
         }
@@ -108,7 +136,7 @@ namespace Echo.ControlFlow
         /// <remarks>
         /// These edges are typically present when a node is part of a region of code protected by an exception handler.
         /// </remarks>
-        public AdjacencyCollection<TContents> AbnormalEdges
+        public AdjacencyCollection<TInstruction> AbnormalEdges
         {
             get;
         }
@@ -120,10 +148,10 @@ namespace Echo.ControlFlow
         /// This property is automatically updated by the adjacency lists and the fall through edge property associated
         /// to all nodes that might connect themselves to the current node. Do not change it in this class.
         /// </remarks>
-        internal ICollection<Edge<TContents>> IncomingEdges
+        internal ICollection<ControlFlowEdge<TInstruction>> IncomingEdges
         {
             get;
-        } = new List<Edge<TContents>>();
+        } = new List<ControlFlowEdge<TInstruction>>();
 
         /// <summary>
         /// Connects the node to the provided neighbour using a fallthrough edge. 
@@ -132,11 +160,11 @@ namespace Echo.ControlFlow
         /// <returns>The edge that was used to connect the two nodes together.</returns>
         /// <exception cref="ArgumentNullException">Occurs when <paramref name="neighbour"/> is <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">Occurs when the node already contains a fallthrough edge to another node.</exception>
-        public Edge<TContents> ConnectWith(Node<TContents> neighbour)
+        public ControlFlowEdge<TInstruction> ConnectWith(ControlFlowNode<TInstruction> neighbour)
         {
             if (neighbour == null)
                 throw new ArgumentNullException(nameof(neighbour));
-            return ConnectWith(neighbour, EdgeType.FallThrough);
+            return ConnectWith(neighbour, ControlFlowEdgeType.FallThrough);
         }
         
         /// <summary>
@@ -147,29 +175,29 @@ namespace Echo.ControlFlow
         /// <returns>The edge that was used to connect the two nodes together.</returns>
         /// <exception cref="ArgumentNullException">Occurs when <paramref name="neighbour"/> is <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">
-        ///     Occurs when <paramref name="edgeType"/> equals <see cref="EdgeType.FallThrough"/>, and the node
+        ///     Occurs when <paramref name="edgeType"/> equals <see cref="ControlFlowEdgeType.FallThrough"/>, and the node
         ///     already contains a fallthrough edge to another node.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when an invalid edge type was provided.</exception>
-        public Edge<TContents> ConnectWith(Node<TContents> neighbour, EdgeType edgeType)
+        public ControlFlowEdge<TInstruction> ConnectWith(ControlFlowNode<TInstruction> neighbour, ControlFlowEdgeType edgeType)
         {
             if (neighbour == null)
                 throw new ArgumentNullException(nameof(neighbour));
-            var edge = new Edge<TContents>(this, neighbour, edgeType);
+            var edge = new ControlFlowEdge<TInstruction>(this, neighbour, edgeType);
             
             switch (edgeType)
             {
-                case EdgeType.FallThrough:
+                case ControlFlowEdgeType.FallThrough:
                     if (FallThroughEdge != null)
                         throw new InvalidOperationException("Node already has a fallthrough edge to another node.");
                     FallThroughEdge = edge;
                     break;
 
-                case EdgeType.Conditional:
+                case ControlFlowEdgeType.Conditional:
                     ConditionalEdges.Add(edge);
                     break;
                 
-                case EdgeType.Abnormal:
+                case ControlFlowEdgeType.Abnormal:
                     AbnormalEdges.Add(edge);
                     break;
 
@@ -184,7 +212,7 @@ namespace Echo.ControlFlow
         /// Gets a collection of all edges that target this node.
         /// </summary>
         /// <returns>The incoming edges.</returns>
-        public IEnumerable<Edge<TContents>> GetIncomingEdges()
+        public IEnumerable<ControlFlowEdge<TInstruction>> GetIncomingEdges()
         {
             return IncomingEdges;
         }
@@ -193,9 +221,9 @@ namespace Echo.ControlFlow
         /// Gets a collection of all outgoing edges originating from this node.
         /// </summary>
         /// <returns>The outgoing edges.</returns>
-        public IEnumerable<Edge<TContents>> GetOutgoingEdges()
+        public IEnumerable<ControlFlowEdge<TInstruction>> GetOutgoingEdges()
         {
-            var result = new List<Edge<TContents>>();
+            var result = new List<ControlFlowEdge<TInstruction>>();
             if (FallThroughEdge != null)
                 result.Add(FallThroughEdge);
             result.AddRange(ConditionalEdges);
@@ -208,7 +236,7 @@ namespace Echo.ControlFlow
         /// node this node in the complete control flow graph, regardless of edge type. 
         /// </summary>
         /// <returns>The predecessor nodes.</returns>
-        public IEnumerable<Node<TContents>> GetPredecessors()
+        public IEnumerable<ControlFlowNode<TInstruction>> GetPredecessors()
         {
             return GetIncomingEdges()
                 .Select(n => n.Origin)
@@ -220,7 +248,7 @@ namespace Echo.ControlFlow
         /// might transfer control to, regardless of edge type.
         /// </summary>
         /// <returns>The successor nodes.</returns>
-        public IEnumerable<Node<TContents>> GetSuccessors()
+        public IEnumerable<ControlFlowNode<TInstruction>> GetSuccessors()
         {
             return GetOutgoingEdges()
                 .Select(n => n.Target)
@@ -233,7 +261,7 @@ namespace Echo.ControlFlow
         /// <param name="neighbour">The potential predecessor.</param>
         /// <returns><c>True</c> if the provided node is a predecessor, <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentNullException">Occurs when the provided predecessor is <c>null</c></exception>
-        public bool HasPredecessor(Node<TContents> neighbour)
+        public bool HasPredecessor(ControlFlowNode<TInstruction> neighbour)
         {
             if (neighbour == null)
                 throw new ArgumentNullException(nameof(neighbour));
@@ -248,7 +276,7 @@ namespace Echo.ControlFlow
         /// <param name="neighbour">The potential successor.</param>
         /// <returns><c>True</c> if the provided node is a successor, <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentNullException">Occurs when the provided successor is <c>null</c></exception>
-        public bool HasSuccessor(Node<TContents> neighbour)
+        public bool HasSuccessor(ControlFlowNode<TInstruction> neighbour)
         {
             if (neighbour == null)
                 throw new ArgumentNullException(nameof(neighbour));
@@ -268,8 +296,8 @@ namespace Echo.ControlFlow
 
         IEnumerable<INode> INode.GetSuccessors() => GetSuccessors();
 
-        bool INode.HasPredecessor(INode node) => node is Node<TContents> n && HasPredecessor(n);
+        bool INode.HasPredecessor(INode node) => node is ControlFlowNode<TInstruction> n && HasPredecessor(n);
         
-        bool INode.HasSuccessor(INode node) => node is Node<TContents> n && HasSuccessor(n);
+        bool INode.HasSuccessor(INode node) => node is ControlFlowNode<TInstruction> n && HasSuccessor(n);
     }
 }

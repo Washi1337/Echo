@@ -11,12 +11,12 @@ namespace Echo.ControlFlow.Collections
     /// </summary>
     /// <typeparam name="TContents">The type of data that is stored in each node.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class NodeCollection<TContents> : ICollection<Node<TContents>>
+    public class NodeCollection<TContents> : ICollection<ControlFlowNode<TContents>>
     {
-        private readonly IDictionary<long, Node<TContents>> _nodes = new Dictionary<long, Node<TContents>>();
-        private readonly Graph<TContents> _owner;
+        private readonly IDictionary<long, ControlFlowNode<TContents>> _nodes = new Dictionary<long, ControlFlowNode<TContents>>();
+        private readonly ControlFlowGraph<TContents> _owner;
 
-        internal NodeCollection(Graph<TContents> owner)
+        internal NodeCollection(ControlFlowGraph<TContents> owner)
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
@@ -31,10 +31,10 @@ namespace Echo.ControlFlow.Collections
         /// Gets a node by its offset.
         /// </summary>
         /// <param name="offset">The node offset.</param>
-        public Node<TContents> this[long offset] => _nodes[offset];
+        public ControlFlowNode<TContents> this[long offset] => _nodes[offset];
 
         /// <inheritdoc />
-        public void Add(Node<TContents> item)
+        public void Add(ControlFlowNode<TContents> item)
         {
             if (item.ParentGraph == _owner)
                 return;
@@ -54,7 +54,7 @@ namespace Echo.ControlFlow.Collections
         /// <exception cref="ArgumentException">
         /// Occurs when at least one node in the provided collection is already added to another graph.
         /// </exception>
-        public void AddRange(IEnumerable<Node<TContents>> items)
+        public void AddRange(IEnumerable<ControlFlowNode<TContents>> items)
         {
             var nodes = items.ToArray();
 
@@ -93,7 +93,7 @@ namespace Echo.ControlFlow.Collections
         }
 
         /// <inheritdoc />
-        public bool Contains(Node<TContents> item)
+        public bool Contains(ControlFlowNode<TContents> item)
         {
             if (item == null)
                 return false;
@@ -101,7 +101,7 @@ namespace Echo.ControlFlow.Collections
         }
 
         /// <inheritdoc />
-        public void CopyTo(Node<TContents>[] array, int arrayIndex)
+        public void CopyTo(ControlFlowNode<TContents>[] array, int arrayIndex)
         {
             _nodes.Values.CopyTo(array, arrayIndex);
         }
@@ -125,7 +125,7 @@ namespace Echo.ControlFlow.Collections
         }
 
         /// <inheritdoc />
-        public bool Remove(Node<TContents> item)
+        public bool Remove(ControlFlowNode<TContents> item)
         {            
             if (item != null && _nodes.Remove(item.Offset))
             {
@@ -137,7 +137,7 @@ namespace Echo.ControlFlow.Collections
         }
         
         /// <inheritdoc />
-        public IEnumerator<Node<TContents>> GetEnumerator() => _nodes.Values.GetEnumerator();
+        public IEnumerator<ControlFlowNode<TContents>> GetEnumerator() => _nodes.Values.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         

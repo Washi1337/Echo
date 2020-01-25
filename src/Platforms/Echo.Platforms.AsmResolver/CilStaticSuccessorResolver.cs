@@ -28,7 +28,7 @@ namespace Echo.Platforms.AsmResolver
                 
                 case CilFlowControl.Branch:
                     var label = (ICilLabel) instruction.Operand;
-                    result.Add(new SuccessorInfo(label.Offset, EdgeType.FallThrough));
+                    result.Add(new SuccessorInfo(label.Offset, ControlFlowEdgeType.FallThrough));
                     break;
                 
                 case CilFlowControl.ConditionalBranch:
@@ -63,12 +63,12 @@ namespace Echo.Platforms.AsmResolver
 
         private static SuccessorInfo CreateFallThrough(CilInstruction instruction)
         {
-            return new SuccessorInfo(instruction.Offset + instruction.Size, EdgeType.FallThrough);
+            return new SuccessorInfo(instruction.Offset + instruction.Size, ControlFlowEdgeType.FallThrough);
         }
 
         private static SuccessorInfo CreateConditional(ICilLabel singleTarget)
         {
-            return new SuccessorInfo(singleTarget.Offset, EdgeType.Conditional);
+            return new SuccessorInfo(singleTarget.Offset, ControlFlowEdgeType.Conditional);
         }
     }
 }

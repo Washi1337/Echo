@@ -1,7 +1,4 @@
 using System.IO;
-using Echo.ControlFlow.Specialized;
-using Echo.ControlFlow.Specialized.Blocks;
-using Echo.Core.Code;
 using Echo.Core.Graphing;
 using Echo.Core.Graphing.Serialization.Dot;
 
@@ -12,10 +9,10 @@ namespace Echo.ControlFlow.Serialization.Dot
     /// instruction stored in the basic block in the label of the corresponding node.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that are stored in each basic block.</typeparam>
-    public class BasicBlockDotWriter<TInstruction> : DotWriter
+    public class ControlFlowDotWriter<TInstruction> : DotWriter
     {
         /// <inheritdoc />
-        public BasicBlockDotWriter(TextWriter writer) 
+        public ControlFlowDotWriter(TextWriter writer) 
             : base(writer)
         {
         }
@@ -26,7 +23,7 @@ namespace Echo.ControlFlow.Serialization.Dot
             WriteIdentifier(identifier);
             
             Writer.Write(" [shape=box3d, label=");
-            string code = string.Join("\\l", ((Node<BasicBlock<TInstruction>>) node).Contents.Instructions) + "\\l";
+            string code = string.Join("\\l", ((ControlFlowNode<TInstruction>) node).Contents.Instructions) + "\\l";
             WriteIdentifier(code);
             Writer.Write(']');
             WriteSemicolon();
@@ -40,13 +37,13 @@ namespace Echo.ControlFlow.Serialization.Dot
             Writer.Write(" -> ");
             WriteIdentifier(edge.Target.Id.ToString());
 
-            if (edge is Edge<BasicBlock<TInstruction>> e)
+            if (edge is ControlFlowEdge<TInstruction> e)
             {
                 Writer.Write(e.Type switch
                 {
-                    EdgeType.FallThrough => " [color=black]",
-                    EdgeType.Conditional => " [color=red]",
-                    EdgeType.Abnormal => " [color=gray, style=dashed]",
+                    ControlFlowEdgeType.FallThrough => " [color=black]",
+                    ControlFlowEdgeType.Conditional => " [color=red]",
+                    ControlFlowEdgeType.Abnormal => " [color=gray, style=dashed]",
                     _ => string.Empty
                 });
             }

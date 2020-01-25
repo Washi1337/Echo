@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Echo.ControlFlow.Specialized.Blocks
+namespace Echo.ControlFlow.Blocks
 {
     /// <summary>
     /// Represents a single block in structured program code. 

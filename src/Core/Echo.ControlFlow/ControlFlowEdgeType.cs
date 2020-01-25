@@ -3,7 +3,7 @@ namespace Echo.ControlFlow
     /// <summary>
     /// Provides all possible edge types that are supported in a control flow graph.
     /// </summary>
-    public enum EdgeType
+    public enum ControlFlowEdgeType
     {
         /// <summary>
         /// Indicates the edge is the default fallthrough edge of a node, and is traversed when no other edge is traversed.

@@ -11,19 +11,19 @@ namespace Echo.ControlFlow.Tests.Analysis.Connectivity
         [Fact]
         public void Simple()
         {
-            var cfg = new Graph<int>();
+            var cfg = new ControlFlowGraph<int>();
 
-            var nodes = new Node<int>[5];
+            var nodes = new ControlFlowNode<int>[5];
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new Node<int>(i, i);
+                nodes[i] = new ControlFlowNode<int>(i, i);
                 cfg.Nodes.Add(nodes[i]);
             }
 
             nodes[0].ConnectWith(nodes[2]);
             nodes[2].ConnectWith(nodes[1]);
             nodes[1].ConnectWith(nodes[0]);
-            nodes[0].ConnectWith(nodes[3], EdgeType.Conditional);
+            nodes[0].ConnectWith(nodes[3], ControlFlowEdgeType.Conditional);
             nodes[3].ConnectWith(nodes[4]);
 
             cfg.Entrypoint = nodes[0];

@@ -13,15 +13,15 @@ namespace Echo.ControlFlow.Collections
     /// </summary>
     /// <typeparam name="TContents">The type of data that each node stores.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class AdjacencyCollection<TContents> : ICollection<Edge<TContents>>
+    public class AdjacencyCollection<TContents> : ICollection<ControlFlowEdge<TContents>>
     {
-        private readonly IDictionary<INode, ICollection<Edge<TContents>>> _neighbours 
-            = new Dictionary<INode, ICollection<Edge<TContents>>>();
+        private readonly IDictionary<INode, ICollection<ControlFlowEdge<TContents>>> _neighbours 
+            = new Dictionary<INode, ICollection<ControlFlowEdge<TContents>>>();
 
-        private readonly EdgeType _edgeType;
+        private readonly ControlFlowEdgeType _edgeType;
         private int _count;
         
-        internal AdjacencyCollection(Node<TContents> owner, EdgeType edgeType)
+        internal AdjacencyCollection(ControlFlowNode<TContents> owner, ControlFlowEdgeType edgeType)
         {
             _edgeType = edgeType;
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
@@ -36,7 +36,7 @@ namespace Echo.ControlFlow.Collections
         /// <summary>
         /// Gets the node that all edges are originating from.
         /// </summary>
-        public Node<TContents> Owner
+        public ControlFlowNode<TContents> Owner
         {
             get;
         }
@@ -46,9 +46,9 @@ namespace Echo.ControlFlow.Collections
         /// </summary>
         /// <param name="neighbour">The new neighbouring node.</param>
         /// <returns>The created edge.</returns>
-        public Edge<TContents> Add(Node<TContents> neighbour)
+        public ControlFlowEdge<TContents> Add(ControlFlowNode<TContents> neighbour)
         {
-            var edge = new Edge<TContents>(Owner, neighbour, _edgeType);
+            var edge = new ControlFlowEdge<TContents>(Owner, neighbour, _edgeType);
             Add(edge);
             return edge;
         }
@@ -61,7 +61,7 @@ namespace Echo.ControlFlow.Collections
         /// <exception cref="ArgumentException">
         /// Occurs when the provided edge cannot be added to this collection because of an invalid source node or edge type.
         /// </exception>
-        public Edge<TContents> Add(Edge<TContents> edge)
+        public ControlFlowEdge<TContents> Add(ControlFlowEdge<TContents> edge)
         {
             AssertEdgeValidity(Owner, _edgeType, edge);
             GetEdges(edge.Target).Add(edge);
@@ -71,7 +71,7 @@ namespace Echo.ControlFlow.Collections
         }
 
         /// <inheritdoc />
-        void ICollection<Edge<TContents>>.Add(Edge<TContents> edge)
+        void ICollection<ControlFlowEdge<TContents>>.Add(ControlFlowEdge<TContents> edge)
         {
             Add(edge);
         }
@@ -90,19 +90,19 @@ namespace Echo.ControlFlow.Collections
         /// </summary>
         /// <param name="neighbour">The node to check.</param>
         /// <returns><c>True</c> if the provided node is a neighbour, <c>false</c> otherwise.</returns>
-        public bool Contains(Node<TContents> neighbour)
+        public bool Contains(ControlFlowNode<TContents> neighbour)
         {
             return GetEdges(neighbour).Count > 0;
         }
 
         /// <inheritdoc />
-        public bool Contains(Edge<TContents> item)
+        public bool Contains(ControlFlowEdge<TContents> item)
         {
             return GetEdges(item.Target).Contains(item);
         }
 
         /// <inheritdoc />
-        public void CopyTo(Edge<TContents>[] array, int arrayIndex)
+        public void CopyTo(ControlFlowEdge<TContents>[] array, int arrayIndex)
         {
             foreach (var edges in _neighbours.Values)
             {
@@ -116,7 +116,7 @@ namespace Echo.ControlFlow.Collections
         /// </summary>
         /// <param name="neighbour">The neighbour to cut ties with.</param>
         /// <returns><c>True</c> if at least one edge was removed, <c>false</c> otherwise.</returns>
-        public bool Remove(Node<TContents> neighbour)
+        public bool Remove(ControlFlowNode<TContents> neighbour)
         {
             var edges = GetEdges(neighbour);
             if (edges.Count > 0)
@@ -130,7 +130,7 @@ namespace Echo.ControlFlow.Collections
         }
         
         /// <inheritdoc />
-        public bool Remove(Edge<TContents> edge)
+        public bool Remove(ControlFlowEdge<TContents> edge)
         {
             bool result = GetEdges(edge.Target).Remove(edge);
             if (result)
@@ -143,7 +143,7 @@ namespace Echo.ControlFlow.Collections
         }
         
         /// <inheritdoc />
-        public IEnumerator<Edge<TContents>> GetEnumerator()
+        public IEnumerator<ControlFlowEdge<TContents>> GetEnumerator()
         {
             return _neighbours
                 .SelectMany(x => x.Value)
@@ -155,7 +155,7 @@ namespace Echo.ControlFlow.Collections
             return GetEnumerator();
         }
 
-        internal static void AssertEdgeValidity(Node<TContents> owner, EdgeType type, Edge<TContents> item)
+        internal static void AssertEdgeValidity(ControlFlowNode<TContents> owner, ControlFlowEdgeType type, ControlFlowEdge<TContents> item)
         {
             if (item.Type != type)
             {
@@ -167,11 +167,11 @@ namespace Echo.ControlFlow.Collections
                 throw new ArgumentException("Cannot add an edge originating from a different node.");
         }
 
-        private ICollection<Edge<TContents>> GetEdges(INode target)
+        private ICollection<ControlFlowEdge<TContents>> GetEdges(INode target)
         {
             if (!_neighbours.TryGetValue(target, out var edges))
             {
-                edges = new HashSet<Edge<TContents>>();
+                edges = new HashSet<ControlFlowEdge<TContents>>();
                 _neighbours[target] = edges;
             }
 

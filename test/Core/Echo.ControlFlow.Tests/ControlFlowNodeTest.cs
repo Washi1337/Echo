@@ -1,21 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.ControlFlow.Specialized;
-using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
 namespace Echo.ControlFlow.Tests
 {
     public class NodeTest
     {
-        private static IList<Node<int>> CreateDummyGraph(int nodeCount)
+        private static IList<ControlFlowNode<int>> CreateDummyGraph(int nodeCount)
         {
-            var graph = new Graph<int>();
+            var graph = new ControlFlowGraph<int>();
 
-            var nodes = new Node<int>[nodeCount];
+            var nodes = new ControlFlowNode<int>[nodeCount];
             for (int i = 0; i < nodeCount; i++)
-                nodes[i] = new Node<int>(i, i);
+                nodes[i] = new ControlFlowNode<int>(i, i);
 
             foreach (var node in nodes)
                 graph.Nodes.Add(node);
@@ -27,24 +25,24 @@ namespace Echo.ControlFlow.Tests
         public void ValidFallthroughEdge()
         {
             var nodes = CreateDummyGraph(2);
-            nodes[0].FallThroughEdge = new Edge<int>(nodes[0], nodes[1]);
+            nodes[0].FallThroughEdge = new ControlFlowEdge<int>(nodes[0], nodes[1]);
             
             Assert.Equal(nodes[0], nodes[0].FallThroughEdge.Origin);
             Assert.Equal(nodes[1], nodes[0].FallThroughEdge.Target);
-            Assert.Equal(EdgeType.FallThrough, nodes[0].FallThroughEdge.Type);
+            Assert.Equal(ControlFlowEdgeType.FallThrough, nodes[0].FallThroughEdge.Type);
         }
 
         [Fact]
         public void InvalidFallthroughEdge()
         {
             var nodes = CreateDummyGraph(2);
-            nodes[0].FallThroughEdge = new Edge<int>(nodes[0], nodes[1]);
+            nodes[0].FallThroughEdge = new ControlFlowEdge<int>(nodes[0], nodes[1]);
 
             Assert.Throws<ArgumentException>(
-                () => nodes[0].FallThroughEdge = new Edge<int>(nodes[1], nodes[0]));
+                () => nodes[0].FallThroughEdge = new ControlFlowEdge<int>(nodes[1], nodes[0]));
             
             Assert.Throws<ArgumentException>(
-                () => nodes[0].FallThroughEdge = new Edge<int>(nodes[0], nodes[1], EdgeType.Conditional));
+                () => nodes[0].FallThroughEdge = new ControlFlowEdge<int>(nodes[0], nodes[1], ControlFlowEdgeType.Conditional));
         }
         
         [Fact]
@@ -53,7 +51,7 @@ namespace Echo.ControlFlow.Tests
             var nodes = CreateDummyGraph(2);
 
             var edge = nodes[0].ConditionalEdges.Add(
-                new Edge<int>(nodes[0], nodes[1], EdgeType.Conditional));
+                new ControlFlowEdge<int>(nodes[0], nodes[1], ControlFlowEdgeType.Conditional));
             Assert.Contains(edge, nodes[0].ConditionalEdges);
         }
         
@@ -65,7 +63,7 @@ namespace Echo.ControlFlow.Tests
             var edge = nodes[0].ConditionalEdges.Add(nodes[1]);
 
             Assert.Equal(nodes[0], edge.Origin);
-            Assert.Equal(EdgeType.Conditional, edge.Type);
+            Assert.Equal(ControlFlowEdgeType.Conditional, edge.Type);
             Assert.Contains(edge, nodes[0].ConditionalEdges);
         }
 
@@ -77,7 +75,7 @@ namespace Echo.ControlFlow.Tests
             var edge = nodes[0].AbnormalEdges.Add(nodes[1]);
 
             Assert.Equal(nodes[0], edge.Origin);
-            Assert.Equal(EdgeType.Abnormal, edge.Type);
+            Assert.Equal(ControlFlowEdgeType.Abnormal, edge.Type);
             Assert.Contains(edge, nodes[0].AbnormalEdges);
         }
 
@@ -89,7 +87,7 @@ namespace Echo.ControlFlow.Tests
             var edge = nodes[0].ConnectWith(nodes[1]);
             Assert.Equal(nodes[0], edge.Origin);
             Assert.Equal(nodes[1], edge.Target);
-            Assert.Equal(EdgeType.FallThrough, edge.Type);
+            Assert.Equal(ControlFlowEdgeType.FallThrough, edge.Type);
             Assert.Equal(edge, nodes[0].FallThroughEdge);
         }
 
@@ -98,10 +96,10 @@ namespace Echo.ControlFlow.Tests
         {
             var nodes = CreateDummyGraph(2);
 
-            var edge = nodes[0].ConnectWith(nodes[1], EdgeType.Conditional);
+            var edge = nodes[0].ConnectWith(nodes[1], ControlFlowEdgeType.Conditional);
             Assert.Equal(nodes[0], edge.Origin);
             Assert.Equal(nodes[1], edge.Target);
-            Assert.Equal(EdgeType.Conditional, edge.Type);
+            Assert.Equal(ControlFlowEdgeType.Conditional, edge.Type);
             Assert.Contains(edge, nodes[0].ConditionalEdges);
         }
 
@@ -110,10 +108,10 @@ namespace Echo.ControlFlow.Tests
         {
             var nodes = CreateDummyGraph(2);
 
-            var edge = nodes[0].ConnectWith(nodes[1], EdgeType.Abnormal);
+            var edge = nodes[0].ConnectWith(nodes[1], ControlFlowEdgeType.Abnormal);
             Assert.Equal(nodes[0], edge.Origin);
             Assert.Equal(nodes[1], edge.Target);
-            Assert.Equal(EdgeType.Abnormal, edge.Type);
+            Assert.Equal(ControlFlowEdgeType.Abnormal, edge.Type);
             Assert.Contains(edge, nodes[0].AbnormalEdges);
         }
 
@@ -123,7 +121,7 @@ namespace Echo.ControlFlow.Tests
             var nodes = CreateDummyGraph(4);
 
             nodes[0].ConnectWith(nodes[1]);
-            nodes[0].ConnectWith(nodes[2], EdgeType.Conditional);
+            nodes[0].ConnectWith(nodes[2], ControlFlowEdgeType.Conditional);
             nodes[2].ConnectWith(nodes[3]);
             
             Assert.True(nodes[0].HasSuccessor(nodes[1]));
@@ -136,8 +134,8 @@ namespace Echo.ControlFlow.Tests
         public void MultiEdges()
         {
             var nodes = CreateDummyGraph(2);
-            nodes[0].ConnectWith(nodes[1], EdgeType.Conditional);
-            nodes[0].ConnectWith(nodes[1], EdgeType.Conditional);
+            nodes[0].ConnectWith(nodes[1], ControlFlowEdgeType.Conditional);
+            nodes[0].ConnectWith(nodes[1], ControlFlowEdgeType.Conditional);
             
             Assert.Equal(2, nodes[0].ConditionalEdges.Count);
             Assert.Equal(2, nodes[0].ParentGraph.GetEdges().Count());
@@ -149,24 +147,24 @@ namespace Echo.ControlFlow.Tests
             var nodes = CreateDummyGraph(4);
 
             nodes[0].ConnectWith(nodes[1]);
-            nodes[0].ConnectWith(nodes[2], EdgeType.Conditional);
+            nodes[0].ConnectWith(nodes[2], ControlFlowEdgeType.Conditional);
             nodes[1].ConnectWith(nodes[3]);
             nodes[2].ConnectWith(nodes[3]);
 
-            Assert.Equal(new HashSet<Node<int>>
+            Assert.Equal(new HashSet<ControlFlowNode<int>>
             {
                 nodes[1], nodes[2]
-            }, new HashSet<Node<int>>(nodes[0].GetSuccessors()));
+            }, new HashSet<ControlFlowNode<int>>(nodes[0].GetSuccessors()));
             
-            Assert.Equal(new HashSet<Node<int>>
+            Assert.Equal(new HashSet<ControlFlowNode<int>>
             {
                 nodes[3]
-            }, new HashSet<Node<int>>(nodes[1].GetSuccessors()));
+            }, new HashSet<ControlFlowNode<int>>(nodes[1].GetSuccessors()));
             
-            Assert.Equal(new HashSet<Node<int>>
+            Assert.Equal(new HashSet<ControlFlowNode<int>>
             {
                 nodes[3]
-            }, new HashSet<Node<int>>(nodes[2].GetSuccessors()));
+            }, new HashSet<ControlFlowNode<int>>(nodes[2].GetSuccessors()));
             
             Assert.Empty(nodes[3].GetSuccessors());
         }
@@ -177,26 +175,26 @@ namespace Echo.ControlFlow.Tests
             var nodes = CreateDummyGraph(4);
 
             nodes[0].ConnectWith(nodes[1]);
-            nodes[0].ConnectWith(nodes[2], EdgeType.Conditional);
+            nodes[0].ConnectWith(nodes[2], ControlFlowEdgeType.Conditional);
             nodes[1].ConnectWith(nodes[3]);
             nodes[2].ConnectWith(nodes[3]);
 
             Assert.Empty(nodes[0].GetPredecessors());
 
-            Assert.Equal(new HashSet<Node<int>>
+            Assert.Equal(new HashSet<ControlFlowNode<int>>
             {
                 nodes[0]
-            }, new HashSet<Node<int>>(nodes[1].GetPredecessors()));
+            }, new HashSet<ControlFlowNode<int>>(nodes[1].GetPredecessors()));
 
-            Assert.Equal(new HashSet<Node<int>>
+            Assert.Equal(new HashSet<ControlFlowNode<int>>
             {
                 nodes[0]
-            }, new HashSet<Node<int>>(nodes[2].GetPredecessors()));
+            }, new HashSet<ControlFlowNode<int>>(nodes[2].GetPredecessors()));
 
-            Assert.Equal(new HashSet<Node<int>>
+            Assert.Equal(new HashSet<ControlFlowNode<int>>
             {
                 nodes[1], nodes[2]
-            }, new HashSet<Node<int>>(nodes[3].GetPredecessors()));
+            }, new HashSet<ControlFlowNode<int>>(nodes[3].GetPredecessors()));
         }
 
     }

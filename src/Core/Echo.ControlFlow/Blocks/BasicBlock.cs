@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Echo.ControlFlow.Specialized.Blocks
+namespace Echo.ControlFlow.Blocks
 {
     /// <summary>
     /// Represents one basic block in a control flow graph, consisting of a list of instructions (or statements).
