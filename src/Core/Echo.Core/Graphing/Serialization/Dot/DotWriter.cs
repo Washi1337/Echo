@@ -129,7 +129,7 @@ namespace Echo.Core.Graphing.Serialization.Dot
             WriteIdentifier(identifier);
             
             if (NodeAdorner != null)
-                WriteAttributes(NodeAdorner.GetNodeAttributes(node).ToArray());
+                WriteAttributes(NodeAdorner.GetNodeAttributes(node));
             
             WriteSemicolon();
             Writer.WriteLine();
@@ -146,24 +146,28 @@ namespace Echo.Core.Graphing.Serialization.Dot
             WriteIdentifier(edge.Target.Id.ToString());
 
             if (EdgeAdorner != null)
-                WriteAttributes(EdgeAdorner.GetEdgeAttributes(edge).ToArray());
+                WriteAttributes(EdgeAdorner.GetEdgeAttributes(edge));
 
             WriteSemicolon();
             Writer.WriteLine();
         }
 
-        private void WriteAttributes(IList<KeyValuePair<string, string>> attributes)
+        private void WriteAttributes(IEnumerable<KeyValuePair<string, string>> attributes)
         {
-            if (attributes.Count > 0)
+            if (attributes == null)
+                return;
+            
+            var array = attributes.ToArray();
+            if (array.Length > 0)
             {
                 Writer.Write(" [");
-                for (int i = 0; i < attributes.Count; i++)
+                for (int i = 0; i < array.Length; i++)
                 {
-                    WriteIdentifier(attributes[i].Key);
+                    WriteIdentifier(array[i].Key);
                     Writer.Write('=');
-                    WriteIdentifier(attributes[i].Value);
+                    WriteIdentifier(array[i].Value);
 
-                    if (i < attributes.Count - 1)
+                    if (i < array.Length - 1)
                         Writer.Write(", ");
                 }
 
