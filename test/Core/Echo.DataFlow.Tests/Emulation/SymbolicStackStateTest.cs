@@ -1,34 +1,37 @@
 using System.Collections.Generic;
 using Echo.Core.Emulation;
-using Echo.DataFlow.Values;
-using Echo.Platforms.DummyPlatform.Values;
 using Echo.DataFlow.Emulation;
-using Echo.DataFlow.Tests.Values;
+using Echo.DataFlow.Values;
+using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
 namespace Echo.DataFlow.Tests.Emulation
 {
     public class SymbolicStackStateTest
     {
+        private static DataFlowNode<DummyInstruction> CreateDummyNode(long id)
+        {
+            return new DataFlowNode<DummyInstruction>(id, DummyInstruction.Op(id, 0, 1));
+        }
+        
         [Fact]
         public void MergeSingle()
         {
-            var sources = new IDataSource[]
+            var sources = new[]
             {
-                new DummyDataSource(0),
-                new DummyDataSource(1)
+                CreateDummyNode(0), CreateDummyNode(1),
             };
             
-            var stack1 = new StackState<SymbolicValue>();
-            var value1 = new SymbolicValue(sources[0]);
+            var stack1 = new StackState<SymbolicValue<DummyInstruction>>();
+            var value1 = new SymbolicValue<DummyInstruction>(sources[0]);
             stack1.Push(value1);
             
-            var stack2 = new StackState<SymbolicValue>();
-            var value2 = new SymbolicValue(sources[1]);
+            var stack2 = new StackState<SymbolicValue<DummyInstruction>>();
+            var value2 = new SymbolicValue<DummyInstruction>(sources[1]);
             stack2.Push(value2);
             
             Assert.True(stack1.MergeWith(stack2));
-            Assert.Equal(new HashSet<IDataSource>(sources), stack1.Top.DataSources);
+            Assert.Equal(new HashSet<IDataFlowNode>(sources), stack1.Top.DataSources);
         }
         
         [Fact]
@@ -36,38 +39,38 @@ namespace Echo.DataFlow.Tests.Emulation
         {
             var sources = new[]
             {
-                new IDataSource[]
+                new[]
                 {
-                    new DummyDataSource(0),
-                    new DummyDataSource(1)
+                    CreateDummyNode(0),
+                    CreateDummyNode(1)
                 },
-                new IDataSource[]
+                new[]
                 {
-                    new DummyDataSource(2),
-                    new DummyDataSource(3)
+                    CreateDummyNode(2),
+                    CreateDummyNode(3),
                 },
-                new IDataSource[]
+                new[]
                 {
-                    new DummyDataSource(4),
-                    new DummyDataSource(5)
+                    CreateDummyNode(4),
+                    CreateDummyNode(5),
                 }
             };
             
-            var stack1 = new StackState<SymbolicValue>();
+            var stack1 = new StackState<SymbolicValue<DummyInstruction>>();
             var values1 = new[]
             {
-                new SymbolicValue(sources[0][0]),
-                new SymbolicValue(sources[1][0]),
-                new SymbolicValue(sources[2][0]),
+                new SymbolicValue<DummyInstruction>(sources[0][0]),
+                new SymbolicValue<DummyInstruction>(sources[1][0]),
+                new SymbolicValue<DummyInstruction>(sources[2][0]),
             };
             stack1.Push(values1);
             
-            var stack2 = new StackState<SymbolicValue>();
+            var stack2 = new StackState<SymbolicValue<DummyInstruction>>();
             var values2 = new[]
             {
-                new SymbolicValue(sources[0][1]),
-                new SymbolicValue(sources[1][1]),
-                new SymbolicValue(sources[2][1]),
+                new SymbolicValue<DummyInstruction>(sources[0][1]),
+                new SymbolicValue<DummyInstruction>(sources[1][1]),
+                new SymbolicValue<DummyInstruction>(sources[2][1]),
             };
             stack2.Push(values2);
             
@@ -76,7 +79,7 @@ namespace Echo.DataFlow.Tests.Emulation
             int index = sources.Length - 1;
             foreach (var slot in stack1.GetAllStackSlots())
             {
-                Assert.Equal(new HashSet<IDataSource>(sources[index]), slot.DataSources);
+                Assert.Equal(new HashSet<IDataFlowNode>(sources[index]), slot.DataSources);
                 index--;
             }
         }
@@ -84,17 +87,17 @@ namespace Echo.DataFlow.Tests.Emulation
         [Fact]
         public void MergeStackImbalance()
         {
-            var stack1 = new StackState<SymbolicValue>();
+            var stack1 = new StackState<SymbolicValue<DummyInstruction>>();
             stack1.Push(new[]
             {
-                new SymbolicValue(),
-                new SymbolicValue(),
+                new SymbolicValue<DummyInstruction>(),
+                new SymbolicValue<DummyInstruction>(),
             });
             
-            var stack2 = new StackState<SymbolicValue>();
+            var stack2 = new StackState<SymbolicValue<DummyInstruction>>();
             stack2.Push(new[]
             {
-                new SymbolicValue(),
+                new SymbolicValue<DummyInstruction>(),
             });
 
             Assert.Throws<StackImbalanceException>(() => stack1.MergeWith(stack2));

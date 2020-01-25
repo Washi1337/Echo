@@ -5,7 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Echo.ControlFlow\Echo.ControlFlow.csproj" />
       <ProjectReference Include="..\Echo.Core\Echo.Core.csproj" />
     </ItemGroup>
 

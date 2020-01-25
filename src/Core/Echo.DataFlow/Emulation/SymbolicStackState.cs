@@ -17,7 +17,7 @@ namespace Echo.DataFlow.Emulation
         /// <param name="other">The state of the stack to pull the data sources from.</param>
         /// <returns><c>True</c> if the stack state has changed, <c>false</c> otherwise.</returns>
         /// <exception cref="StackImbalanceException">Occurs when the stack states are of different size.</exception>
-        public static bool MergeWith(this IStackState<SymbolicValue> self, IStackState<SymbolicValue> other)
+        public static bool MergeWith<T>(this IStackState<SymbolicValue<T>> self, IStackState<SymbolicValue<T>> other)
         {
             if (self.Size != other.Size)
                 throw new StackImbalanceException();

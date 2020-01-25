@@ -1,45 +1,53 @@
 using System.Collections.Generic;
 using System.Linq;
 using Echo.Core.Values;
+using Echo.DataFlow.Collections;
 
 namespace Echo.DataFlow.Values
 {
     /// <summary>
     /// Represents a symbolic value that resides in memory. 
     /// </summary>
-    public class SymbolicValue : IValue
+    public class SymbolicValue<T> : ISymbolicValue
     {
         public SymbolicValue()
-            : this(0, Enumerable.Empty<IDataSource>())
+            : this(0, Enumerable.Empty<DataFlowNode<T>>())
         {
         }
 
-        public SymbolicValue(params IDataSource[] dataSources)
+        public SymbolicValue(params DataFlowNode<T>[] dataSources)
             : this(0, dataSources.AsEnumerable())
         {
         }
         
-        public SymbolicValue(IEnumerable<IDataSource> dataSources)
+        public SymbolicValue(IEnumerable<DataFlowNode<T>> dataSources)
             : this(0, dataSources.AsEnumerable())
         {
         }
         
         public SymbolicValue(int size)
-            : this(size, Enumerable.Empty<IDataSource>())
+            : this(size, Enumerable.Empty<DataFlowNode<T>>())
         {
         }
 
-        public SymbolicValue(int size, params IDataSource[] dataSources)
+        public SymbolicValue(int size, params DataFlowNode<T>[] dataSources)
             : this(size, dataSources.AsEnumerable())
         {
         }
         
-        public SymbolicValue(int size, IEnumerable<IDataSource> dataSources)
+        public SymbolicValue(int size, IEnumerable<DataFlowNode<T>> dataSources)
         {
             Size = size;
-            DataSources = new HashSet<IDataSource>(dataSources);
+            DataSources = new DataSourceCollection<T>(this, dataSources);
         }
 
+        public DataFlowNode<T> Dependant
+        {
+            get;
+            internal set;
+        }
+
+        IDataFlowNode ISymbolicValue.Dependant => Dependant;
 
         /// <inheritdoc />
         public bool IsKnown => DataSources.Count > 0;
@@ -53,31 +61,29 @@ namespace Echo.DataFlow.Values
         /// <summary>
         /// Provides a list of all data sources of this value.
         /// </summary>
-        public ISet<IDataSource> DataSources
+        public DataSourceCollection<T> DataSources
         {
             get;
         }
 
-        IValue IValue.Copy()
-        {
-            return Copy();
-        }
+        IEnumerable<IDataFlowNode> ISymbolicValue.GetDataSources() => DataSources;
 
-        public SymbolicValue Copy()
-        {
-            return new SymbolicValue(Size, DataSources);
-        }
+        public SymbolicValue<T> Copy() => new SymbolicValue<T>(Size, DataSources);
 
-        public bool MergeWith(SymbolicValue other)
+        IValue IValue.Copy() => Copy();
+
+        public bool MergeWith(SymbolicValue<T> other)
         {
-            int count = DataSources.Count;
-            DataSources.UnionWith(other.DataSources);
-            return count != DataSources.Count;
+            bool changed = false;
+            foreach (var source in other.DataSources)
+                changed |= DataSources.Add(source);
+            return changed;
         }
 
         public override string ToString()
         {
-            return $"{string.Join(" | ", DataSources)} ({Size} bytes)";
+            string dataSourcesString = IsKnown ? string.Join(" | ", DataSources) : "?";
+            return $"{dataSourcesString} ({Size} bytes)";
         }
     }
 }
