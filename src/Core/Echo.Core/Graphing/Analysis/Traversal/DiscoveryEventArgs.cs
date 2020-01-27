@@ -1,6 +1,6 @@
 using System;
 
-namespace Echo.ControlFlow.Analysis.Traversal
+namespace Echo.Core.Graphing.Analysis.Traversal
 {
     /// <summary>
     /// Provides a base for a discovery event that occurs while traversing a graph.

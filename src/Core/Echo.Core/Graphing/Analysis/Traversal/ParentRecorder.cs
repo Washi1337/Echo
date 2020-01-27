@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Echo.Core.Graphing;
 
-namespace Echo.ControlFlow.Analysis.Traversal
+namespace Echo.Core.Graphing.Analysis.Traversal
 {
     /// <summary>
     /// Provides a mechanism to record all parent nodes during a traversal.

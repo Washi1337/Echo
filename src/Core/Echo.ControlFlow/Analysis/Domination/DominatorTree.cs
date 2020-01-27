@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.ControlFlow.Analysis.Traversal;
+using Echo.Core.Graphing.Analysis.Traversal;
 using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow.Analysis.Domination

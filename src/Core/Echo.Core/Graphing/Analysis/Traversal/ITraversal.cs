@@ -1,7 +1,7 @@
 using System;
 using Echo.Core.Graphing;
 
-namespace Echo.ControlFlow.Analysis.Traversal
+namespace Echo.Core.Graphing.Analysis.Traversal
 {
     /// <summary>
     /// Provides members for traversing a graph.
