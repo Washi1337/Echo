@@ -10,7 +10,7 @@ namespace Echo.ControlFlow.Analysis.Domination
     /// Represents a dominator tree, where each tree node corresponds to one node in a graph, and each
     /// is immediately dominated by its parent.
     /// </summary>
-    public class DominatorTree
+    public class DominatorTree : IGraph
     {
         /// <summary>
         /// Constructs a dominator tree from a control flow graph.
@@ -240,5 +240,12 @@ namespace Echo.ControlFlow.Analysis.Domination
 
             _frontier = frontier;
         }
+
+        INode ISubGraph.GetNodeById(long id) => _nodes.Values.FirstOrDefault(n => n.Id == id);
+
+        IEnumerable<INode> ISubGraph.GetNodes() => _nodes.Values;
+
+        IEnumerable<IEdge> IGraph.GetEdges() => 
+            _nodes.Values.SelectMany(n => ((INode) n).GetOutgoingEdges());
     }
 }
