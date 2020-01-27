@@ -7,7 +7,7 @@ Example
 -------
 To construct a CFG using the static control flow graph builder, we need classes from the following namespace:
 ```csharp
-using Echo.ControlFlow.Construction;
+using Echo.ControlFlow.Construction.Static;
 ```
 
 The static graph builder of Echo defines one constructor that accepts an instruction set architecture, and a successor resolver. The architecture tells Echo how to interpret a model of an instruction in the instruction set. The successor resolver is able to tell the graph builder what the successors are of a single instruction. Both parameters are platform dependent, and every platform has their unique architecture representative and successor resolver.
