@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using Echo.Core.Code;
 
-namespace Echo.ControlFlow.Construction
+namespace Echo.ControlFlow.Construction.Static
 {
     /// <summary>
     /// Provides members for resolving the static successors of a single instruction. That is, resolve any successor

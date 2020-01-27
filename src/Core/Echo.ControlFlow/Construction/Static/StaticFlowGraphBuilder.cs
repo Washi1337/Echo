@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Echo.Core.Code;
 
-namespace Echo.ControlFlow.Construction
+namespace Echo.ControlFlow.Construction.Static
 {
     /// <summary>
     /// Provides an implementation of a control flow graph builder that traverses the instructions in a recursive manner,

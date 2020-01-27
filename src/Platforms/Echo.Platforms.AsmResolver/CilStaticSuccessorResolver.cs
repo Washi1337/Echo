@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
+using Echo.ControlFlow.Construction.Static;
 
 namespace Echo.Platforms.AsmResolver
 {

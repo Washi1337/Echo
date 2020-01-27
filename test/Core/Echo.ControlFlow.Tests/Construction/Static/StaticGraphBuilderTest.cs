@@ -1,9 +1,9 @@
 using System.Linq;
-using Echo.ControlFlow.Construction;
+using Echo.ControlFlow.Construction.Static;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
-namespace Echo.ControlFlow.Tests.Construction
+namespace Echo.ControlFlow.Tests.Construction.Static
 {
     public class StaticGraphBuilderTest
     {
