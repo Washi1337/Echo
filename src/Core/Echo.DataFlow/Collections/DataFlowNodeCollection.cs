@@ -33,6 +33,12 @@ namespace Echo.DataFlow.Collections
         /// <param name="id">The node identifier.</param>
         public DataFlowNode<TContents> this[long id] => _nodes[id];
 
+        /// <summary>
+        /// Creates and adds a new node to the collection of data flow nodes.
+        /// </summary>
+        /// <param name="id">The unique identifier of the node.</param>
+        /// <param name="contents">The contents of the node.</param>
+        /// <returns>The created node.</returns>
         public DataFlowNode<TContents> Add(long id, TContents contents)
         {
             var node = new DataFlowNode<TContents>(id, contents);
@@ -85,7 +91,7 @@ namespace Echo.DataFlow.Collections
         /// <inheritdoc />
         public void Clear()
         {
-            foreach (var node in _nodes.Keys.ToArray())
+            foreach (long node in _nodes.Keys.ToArray())
                 Remove(node);
         }
 

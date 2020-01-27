@@ -83,5 +83,8 @@ namespace Echo.DataFlow
         bool INode.HasSuccessor(INode node) => StackDependencies.Any(dep => dep.DataSources.Contains(node));
 
         IEnumerable<ISymbolicValue> IDataFlowNode.GetStackDependencies() => StackDependencies;
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Id} ({Contents})";
     }
 }

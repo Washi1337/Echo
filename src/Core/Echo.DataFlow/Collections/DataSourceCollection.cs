@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Echo.DataFlow.Values;
 
@@ -10,6 +11,7 @@ namespace Echo.DataFlow.Collections
     /// Represents a set of data sources for a symbolic value.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to store in each node.</typeparam>
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class DataSourceCollection<TContents> : ICollection<DataFlowNode<TContents>>
     {
         private readonly HashSet<DataFlowNode<TContents>> _items;
@@ -18,7 +20,7 @@ namespace Echo.DataFlow.Collections
         /// Creates a new empty data source collection.
         /// </summary>
         /// <param name="owner">The symbolic value that owns this data source collection.</param>
-        public DataSourceCollection(SymbolicValue<TContents> owner)
+        internal DataSourceCollection(SymbolicValue<TContents> owner)
             : this(owner, Enumerable.Empty<DataFlowNode<TContents>>())
         {
         }

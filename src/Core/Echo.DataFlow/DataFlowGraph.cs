@@ -32,6 +32,7 @@ namespace Echo.DataFlow
 
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
 
+        /// <inheritdoc />
         public IEnumerable<IEdge> GetEdges()
         {
             return Nodes
