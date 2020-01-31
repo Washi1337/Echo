@@ -1,34 +1,29 @@
 using System.Collections.Generic;
-using Echo.ControlFlow.Analysis.Connectivity;
+using Echo.ControlFlow;
 using Echo.Core.Graphing;
-using Echo.Platforms.DummyPlatform.Code;
+using Echo.Core.Graphing.Analysis.Connectivity;
 using Xunit;
 
-namespace Echo.ControlFlow.Tests.Analysis.Connectivity
+namespace Echo.Core.Tests.Graphing.Analysis.Connectivity
 {
     public class StronglyConnectedComponents
     {
         [Fact]
         public void Simple()
         {
-            var cfg = new ControlFlowGraph<int>();
+            var graph = new IntGraph();
 
-            var nodes = new ControlFlowNode<int>[5];
+            var nodes = new IntNode[5];
             for (int i = 0; i < nodes.Length; i++)
-            {
-                nodes[i] = new ControlFlowNode<int>(i, i);
-                cfg.Nodes.Add(nodes[i]);
-            }
+                nodes[i] = graph.AddNode(i);
 
             nodes[0].ConnectWith(nodes[2]);
             nodes[2].ConnectWith(nodes[1]);
             nodes[1].ConnectWith(nodes[0]);
-            nodes[0].ConnectWith(nodes[3], ControlFlowEdgeType.Conditional);
+            nodes[0].ConnectWith(nodes[3]);
             nodes[3].ConnectWith(nodes[4]);
-
-            cfg.Entrypoint = nodes[0];
             
-            var components = cfg.FindStronglyConnectedComponents();
+            var components = graph.FindStronglyConnectedComponents();
 
             Assert.Equal(3, components.Count);
             Assert.Contains(new HashSet<INode>

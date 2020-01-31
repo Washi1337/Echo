@@ -27,3 +27,5 @@ A `DominatorTree` has a `Root` node, and every node in the tree corresponds to o
 dominatorTree.Dominates(n1, n4) // returns true
 dominatorTree.Dominates(n2, n4) // returns false
 ```
+
+The `DominatorTree` class implements the `IGraph` interface, which means it can also be used with various other analysis algorithms (such as traversals) and export utilities (such as exporting to dot files).

@@ -10,37 +10,65 @@ namespace Echo.DataFlow.Values
     /// </summary>
     public class SymbolicValue<T> : ISymbolicValue
     {
+        /// <summary>
+        /// Creates a new symbolic value with no data sources.
+        /// </summary>
         public SymbolicValue()
             : this(0, Enumerable.Empty<DataFlowNode<T>>())
         {
         }
 
+        /// <summary>
+        /// Creates a new symbolic value with the provided data sources.
+        /// </summary>
+        /// <param name="dataSources">The data sources of the symbolic value.</param>
         public SymbolicValue(params DataFlowNode<T>[] dataSources)
             : this(0, dataSources.AsEnumerable())
         {
         }
         
+        /// <summary>
+        /// Creates a new symbolic value with the provided data sources.
+        /// </summary>
+        /// <param name="dataSources">The data sources of the symbolic value.</param>
         public SymbolicValue(IEnumerable<DataFlowNode<T>> dataSources)
             : this(0, dataSources.AsEnumerable())
         {
         }
-        
+
+        /// <summary>
+        /// Creates a new symbolic value with no data sources.
+        /// </summary>
+        /// <param name="size">The size in bytes of the value at runtime.</param>
         public SymbolicValue(int size)
             : this(size, Enumerable.Empty<DataFlowNode<T>>())
         {
         }
 
+        /// <summary>
+        /// Creates a new symbolic value with the provided data sources.
+        /// </summary>
+        /// <param name="size">The size in bytes of the value at runtime.</param>
+        /// <param name="dataSources">The data sources of the symbolic value.</param>
         public SymbolicValue(int size, params DataFlowNode<T>[] dataSources)
             : this(size, dataSources.AsEnumerable())
         {
         }
         
+        /// <summary>
+        /// Creates a new symbolic value with the provided data sources.
+        /// </summary>
+        /// <param name="size">The size in bytes of the value at runtime.</param>
+        /// <param name="dataSources">The data sources of the symbolic value.</param>
         public SymbolicValue(int size, IEnumerable<DataFlowNode<T>> dataSources)
         {
             Size = size;
             DataSources = new DataSourceCollection<T>(this, dataSources);
         }
 
+        /// <summary>
+        /// Gets the node that depends on this symbolic value.
+        /// </summary>
         public DataFlowNode<T> Dependant
         {
             get;
@@ -68,10 +96,19 @@ namespace Echo.DataFlow.Values
 
         IEnumerable<IDataFlowNode> ISymbolicValue.GetDataSources() => DataSources;
 
+        /// <summary>
+        /// Creates an exact copy of the value.
+        /// </summary>
+        /// <returns>The copied value.</returns>
         public SymbolicValue<T> Copy() => new SymbolicValue<T>(Size, DataSources);
 
         IValue IValue.Copy() => Copy();
 
+        /// <summary>
+        /// Pulls data sources from another symbolic value into the current symbolic value. 
+        /// </summary>
+        /// <param name="other">The other symbolic value.</param>
+        /// <returns><c>true</c> if there were new data sources introduced to this symbolic value, <c>false</c> otherwise.</returns>
         public bool MergeWith(SymbolicValue<T> other)
         {
             bool changed = false;
@@ -80,6 +117,7 @@ namespace Echo.DataFlow.Values
             return changed;
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             string dataSourcesString = IsKnown ? string.Join(" | ", DataSources) : "?";

@@ -1,6 +1,6 @@
 using Echo.Core.Graphing;
 
-namespace Echo.ControlFlow.Analysis.Traversal
+namespace Echo.Core.Graphing.Analysis.Traversal
 {
     /// <summary>
     /// Provides information about a node discovery during a traversal of a graph.

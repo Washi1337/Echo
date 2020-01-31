@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Echo.Core.Graphing;
 
-namespace Echo.ControlFlow.Analysis.Traversal
+namespace Echo.Core.Graphing.Analysis.Traversal
 {
     /// <summary>
     /// Provides a mechanism to record the order in which each node in the graph was traversed by a traversal algorithm.

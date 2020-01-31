@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Echo.ControlFlow.Construction;
+using Echo.ControlFlow.Construction.Static;
 using Echo.Core.Code;
 using Echo.Platforms.DummyPlatform.ControlFlow;
 

@@ -14,7 +14,11 @@ Control Flow Analysis
 
 Symbolic Execution 
 ---------------------
-- [ ] Generic Symbolic Execution Engine
+- [ ] Generic symbolic execution engine base
+- [ ] CIL System.Reflection symbolic execution back-end
+- [ ] CIL AsmResolver symbolic execution back-end
+- [ ] CIL Mono.Cecil symbolic execution back-end
+- [ ] CIL dnlib symbolic execution back-end
 - [ ] Data flow analysis
 - [ ] Generic AST builder
 - [ ] Static single assignment transformer

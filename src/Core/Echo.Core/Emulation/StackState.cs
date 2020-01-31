@@ -19,6 +19,9 @@ namespace Echo.Core.Emulation
         /// <inheritdoc />
         public int Size => _stack.Count;
 
+        /// <summary>
+        /// Gets an ordered list of items allocated on the stack. The last item in the list represents the top of the stack.
+        /// </summary>
         protected List<TValue> Items => _stack;
 
         /// <inheritdoc />

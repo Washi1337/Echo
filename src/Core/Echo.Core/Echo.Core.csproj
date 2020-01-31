@@ -13,4 +13,8 @@
       <DocumentationFile>bin\Release\Echo.Core.xml</DocumentationFile>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="Graphing\Analysis" />
+    </ItemGroup>
+
 </Project>

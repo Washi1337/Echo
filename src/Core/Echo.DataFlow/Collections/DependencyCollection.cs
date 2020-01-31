@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using Echo.DataFlow.Values;
 
 namespace Echo.DataFlow.Collections
@@ -8,13 +9,14 @@ namespace Echo.DataFlow.Collections
     /// Represents a collection of dependencies for a node in a data flow graph.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in each node.</typeparam>
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class DependencyCollection<TContents> : Collection<SymbolicValue<TContents>>
     {
         /// <summary>
         /// Creates a new dependency collection for a node.
         /// </summary>
         /// <param name="owner">The owner node.</param>
-        public DependencyCollection(DataFlowNode<TContents> owner)
+        internal DependencyCollection(DataFlowNode<TContents> owner)
         {
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }

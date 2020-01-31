@@ -14,11 +14,16 @@ Graphs are modelled in Echo using the interfaces found in the `Echo.Core.Graphin
 
 Various parts of Echo implement these interfaces:
 - [Control Flow Graphs (CFGs)](../Chapter3/README.md)
+- [Dominator trees](../Chapter3/Dominators.md)
 - Data Flow Graphs (DFGs)
 
-Exporting CFGs
---------------
+Analysis of graphs
+------------------
+- [Traversal of graphs](Traversals.md)
 
-Echo also has the capability to export CFGs:
+Exporting Graphs
+----------------
 
-- [Exporting CFGs to Dot files](Dot.md)
+Echo also has the capability to export graphs:
+
+- [Exporting graphs to dot files](Dot.md)

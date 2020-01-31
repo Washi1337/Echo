@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Echo.Core.Graphing;
 
-namespace Echo.ControlFlow.Analysis.Traversal
+namespace Echo.Core.Graphing.Analysis.Traversal
 {
     /// <summary>
     /// Provides a mechanism for recording a post traversal order.

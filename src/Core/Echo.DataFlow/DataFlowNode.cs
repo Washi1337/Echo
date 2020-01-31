@@ -65,13 +65,13 @@ namespace Echo.DataFlow
         IEnumerable<IEdge> INode.GetIncomingEdges()
         {
             foreach (var d in Dependants)
-                yield return new DataFlowEdge<TContents>(d, this);
+                yield return new Edge(d, this);
         }
 
         IEnumerable<IEdge> INode.GetOutgoingEdges()
         {
             foreach (var dataSource in StackDependencies.SelectMany(v => v.DataSources))
-                yield return new DataFlowEdge<TContents>(this, dataSource);
+                yield return new Edge(this, dataSource);
         }
 
         IEnumerable<INode> INode.GetPredecessors() => Dependants;
@@ -83,5 +83,8 @@ namespace Echo.DataFlow
         bool INode.HasSuccessor(INode node) => StackDependencies.Any(dep => dep.DataSources.Contains(node));
 
         IEnumerable<ISymbolicValue> IDataFlowNode.GetStackDependencies() => StackDependencies;
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Id} ({Contents})";
     }
 }

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using Echo.ControlFlow.Analysis.Traversal;
+using Echo.Core.Graphing.Analysis.Traversal;
 using Echo.Core.Graphing;
 
-namespace Echo.ControlFlow.Analysis.Connectivity
+namespace Echo.Core.Graphing.Analysis.Connectivity
 {
     /// <summary>
     /// Provides utility members for finding connected components within a graph.
