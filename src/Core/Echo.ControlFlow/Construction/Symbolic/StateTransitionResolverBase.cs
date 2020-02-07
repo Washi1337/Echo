@@ -52,11 +52,19 @@ namespace Echo.ControlFlow.Construction.Symbolic
         protected void ApplyDefaultBehaviour(SymbolicProgramState<TInstruction> currentState, TInstruction instruction)
         {
             var node = GetOrCreateDataFlowNode(instruction);
-            var arguments = currentState.Stack.Pop(Architecture.GetStackPopCount(instruction));
-
-            for (int i = 0; i < arguments.Count; i++)
-                node.StackDependencies[i].MergeWith(arguments[i]);
             
+            int argumentsCount = Architecture.GetStackPopCount(instruction);
+            if (argumentsCount == -1)
+            {
+                currentState.Stack.Clear();
+            }
+            else
+            {
+                var arguments = currentState.Stack.Pop(argumentsCount, true);
+                for (int i = 0; i < arguments.Count; i++)
+                    node.StackDependencies[i].MergeWith(arguments[i]);
+            }
+
             for (int i = 0; i < Architecture.GetStackPushCount(instruction); i++)
                 currentState.Stack.Push(new SymbolicValue<TInstruction>(node));
             

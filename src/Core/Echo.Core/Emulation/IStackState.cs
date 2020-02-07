@@ -64,5 +64,10 @@ namespace Echo.Core.Emulation
         /// </summary>
         /// <returns>The copied stack state.</returns>
         IStackState<TValue> Copy();
+
+        /// <summary>
+        /// Removes all slots from the stack.
+        /// </summary>
+        void Clear();
     }
 }
