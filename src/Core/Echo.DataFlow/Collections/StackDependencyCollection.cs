@@ -6,17 +6,17 @@ using Echo.DataFlow.Values;
 namespace Echo.DataFlow.Collections
 {
     /// <summary>
-    /// Represents a collection of dependencies for a node in a data flow graph.
+    /// Represents a collection of dependencies allocated on a stack for a node in a data flow graph.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in each node.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class DependencyCollection<TContents> : Collection<SymbolicValue<TContents>>
+    public class StackDependencyCollection<TContents> : Collection<SymbolicValue<TContents>>
     {
         /// <summary>
         /// Creates a new dependency collection for a node.
         /// </summary>
         /// <param name="owner">The owner node.</param>
-        internal DependencyCollection(DataFlowNode<TContents> owner)
+        internal StackDependencyCollection(DataFlowNode<TContents> owner)
         {
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
@@ -57,8 +57,6 @@ namespace Echo.DataFlow.Collections
             var item = Items[index];
             base.RemoveItem(index);
             item.Dependant = null;
-            foreach (var source in item.DataSources)
-                source.Dependants.Remove(Owner);
         }
 
         /// <inheritdoc />

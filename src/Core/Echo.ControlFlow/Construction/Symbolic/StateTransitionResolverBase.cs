@@ -53,6 +53,16 @@ namespace Echo.ControlFlow.Construction.Symbolic
         {
             var node = GetOrCreateDataFlowNode(instruction);
             
+            ApplyStackTransition(node, currentState);
+            ApplyVariableTransition(node, currentState);
+
+            currentState.ProgramCounter += Architecture.GetSize(instruction);
+        }
+
+        private void ApplyStackTransition(DataFlowNode<TInstruction> node, SymbolicProgramState<TInstruction> currentState)
+        {
+            var instruction = node.Contents;
+            
             int argumentsCount = Architecture.GetStackPopCount(instruction);
             if (argumentsCount == -1)
             {
@@ -67,8 +77,19 @@ namespace Echo.ControlFlow.Construction.Symbolic
 
             for (int i = 0; i < Architecture.GetStackPushCount(instruction); i++)
                 currentState.Stack.Push(new SymbolicValue<TInstruction>(node));
+        }
+
+        private void ApplyVariableTransition(DataFlowNode<TInstruction> node, SymbolicProgramState<TInstruction> currentState)
+        {
+            var instruction = node.Contents;
             
-            currentState.ProgramCounter += Architecture.GetSize(instruction);
+            var readVariables = Architecture.GetReadVariables(instruction);
+            foreach (var variable in readVariables)
+                node.VariableDependencies[variable].MergeWith(currentState.Variables[variable]);
+
+            var writtenVariables = Architecture.GetWrittenVariables(instruction);
+            foreach (var variable in writtenVariables)
+                currentState.Variables[variable] = new SymbolicValue<TInstruction>(node);
         }
 
         /// <summary>
@@ -89,9 +110,15 @@ namespace Echo.ControlFlow.Construction.Symbolic
             else
             {
                 node = new DataFlowNode<TInstruction>(offset, instruction);
+                
                 int stackArgumentCount = Architecture.GetStackPopCount(instruction);
                 for (int i = 0; i < stackArgumentCount; i++)
                     node.StackDependencies.Add(new SymbolicValue<TInstruction>());
+
+                var readVariables = Architecture.GetReadVariables(instruction);
+                foreach (var variable in readVariables)
+                    node.VariableDependencies[variable] = new SymbolicValue<TInstruction>();
+                
                 DataFlowGraph.Nodes.Add(node);
             }
 

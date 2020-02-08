@@ -10,6 +10,8 @@ namespace Echo.DataFlow.Values
     /// </summary>
     public class SymbolicValue<T> : ISymbolicValue
     {
+        private DataFlowNode<T> _dependant;
+
         /// <summary>
         /// Creates a new symbolic value with no data sources.
         /// </summary>
@@ -71,8 +73,17 @@ namespace Echo.DataFlow.Values
         /// </summary>
         public DataFlowNode<T> Dependant
         {
-            get;
-            internal set;
+            get => _dependant;
+            internal set
+            {
+                if (value is null)
+                {
+                    foreach (var source in DataSources)
+                        source.Dependants.Remove(_dependant);
+                }
+                
+                _dependant = value;
+            }
         }
 
         IDataFlowNode ISymbolicValue.Dependant => Dependant;

@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Echo.Core.Code;
 using Echo.Core.Graphing;
 using Echo.DataFlow.Collections;
 using Echo.DataFlow.Values;
@@ -21,7 +23,8 @@ namespace Echo.DataFlow
         {
             Id = id;
             Contents = contents;
-            StackDependencies = new DependencyCollection<TContents>(this);
+            StackDependencies = new StackDependencyCollection<TContents>(this);
+            VariableDependencies = new VariableDependencyCollection<TContents>(this);
         }
 
         /// <summary>
@@ -52,7 +55,15 @@ namespace Echo.DataFlow
         /// <summary>
         /// Gets a collection of values allocated on a stack that this node depends on.
         /// </summary>
-        public DependencyCollection<TContents> StackDependencies
+        public StackDependencyCollection<TContents> StackDependencies
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a collection of values that are assigned to variables that this node depends on.
+        /// </summary>
+        public VariableDependencyCollection<TContents> VariableDependencies
         {
             get;
         }
@@ -64,14 +75,15 @@ namespace Echo.DataFlow
 
         IEnumerable<IEdge> INode.GetIncomingEdges()
         {
-            foreach (var d in Dependants)
-                yield return new Edge(d, this);
+            throw new NotImplementedException();
         }
 
         IEnumerable<IEdge> INode.GetOutgoingEdges()
         {
             foreach (var dataSource in StackDependencies.SelectMany(v => v.DataSources))
-                yield return new Edge(this, dataSource);
+                yield return new DataFlowEdge<TContents>(this, dataSource, DataFlowEdgeType.Stack);
+            foreach (var dataSource in VariableDependencies.Values.SelectMany(v => v.DataSources))
+                yield return new DataFlowEdge<TContents>(this, dataSource, DataFlowEdgeType.Variable);
         }
 
         IEnumerable<INode> INode.GetPredecessors() => Dependants;
@@ -83,6 +95,14 @@ namespace Echo.DataFlow
         bool INode.HasSuccessor(INode node) => StackDependencies.Any(dep => dep.DataSources.Contains(node));
 
         IEnumerable<ISymbolicValue> IDataFlowNode.GetStackDependencies() => StackDependencies;
+
+        IEnumerable<KeyValuePair<IVariable, ISymbolicValue>> IDataFlowNode.GetVariableDependencies()
+        {
+            var result = new Dictionary<IVariable, ISymbolicValue>();
+            foreach (var item in VariableDependencies)
+                result[item.Key] = item.Value;
+            return result;
+        }
 
         /// <inheritdoc />
         public override string ToString() => $"{Id} ({Contents})";

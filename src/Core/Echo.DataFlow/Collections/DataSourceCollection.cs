@@ -20,9 +20,10 @@ namespace Echo.DataFlow.Collections
         /// Creates a new empty data source collection.
         /// </summary>
         /// <param name="owner">The symbolic value that owns this data source collection.</param>
-        internal DataSourceCollection(SymbolicValue<TContents> owner)
+        internal DataSourceCollection(SymbolicValue<TContents> owner, DataFlowEdgeType type)
             : this(owner, Enumerable.Empty<DataFlowNode<TContents>>())
         {
+            Type = type;
         }
 
         /// <summary>
@@ -40,6 +41,11 @@ namespace Echo.DataFlow.Collections
         /// Gets the owner of the collection.
         /// </summary>
         public SymbolicValue<TContents> Owner
+        {
+            get;
+        }
+
+        public DataFlowEdgeType Type
         {
             get;
         }
