@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Echo.Core\Echo.Core.csproj" />
+      <ProjectReference Include="..\Echo.DataFlow\Echo.DataFlow.csproj" />
     </ItemGroup>
 
 </Project>

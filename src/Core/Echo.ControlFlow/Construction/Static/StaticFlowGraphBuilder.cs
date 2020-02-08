@@ -16,7 +16,7 @@ namespace Echo.ControlFlow.Construction.Static
     /// instructions. For example, if we target x86, the instruction <c>jmp 12345678h</c> is possible to process using
     /// this graph builder, but <c>jmp eax</c> is not.
     /// </remarks>
-    public class StaticFlowGraphBuilder<TInstruction> : FlowGraphBuilderBase<TInstruction>, IFlowGraphBuilder<TInstruction>
+    public class StaticFlowGraphBuilder<TInstruction> : FlowGraphBuilderBase<TInstruction>
     {
         /// <summary>
         /// Creates a new static graph builder using the provided instruction successor resolver.

@@ -60,7 +60,7 @@ namespace Echo.Core.Emulation
             if (count <= 0)
                 return values;
             
-            _stack.CopyTo(values, Size - count);
+            _stack.CopyTo(Size - count, values, 0, count);
             _stack.RemoveRange(Size - count, count);
 
             if (!reversed)
@@ -72,6 +72,12 @@ namespace Echo.Core.Emulation
         IStackState<TValue> IStackState<TValue>.Copy()
         {
             return Copy();
+        }
+
+        /// <inheritdoc />
+        public void Clear()
+        {
+            _stack.Clear();
         }
 
         /// <summary>

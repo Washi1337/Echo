@@ -9,7 +9,7 @@ namespace Echo.ControlFlow.Construction
     /// Provides a base for control flow graph builders that depend on a single traversal of the instructions.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to store in the control flow graph.</typeparam>
-    public abstract class FlowGraphBuilderBase<TInstruction>
+    public abstract class FlowGraphBuilderBase<TInstruction> : IFlowGraphBuilder<TInstruction>
     {
         /// <summary>
         /// Initializes the flow graph builder with an architecture.
