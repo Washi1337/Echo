@@ -14,6 +14,7 @@ namespace Echo.Platforms.AsmResolver
     {
         private readonly CilMethodBody _parentBody;
         private readonly CilVariable[] _variables;
+        private readonly CilParameter[] _parameters;
 
         /// <summary>
         /// Creates a new CIL architecture description based on a CIL method body.
@@ -22,7 +23,14 @@ namespace Echo.Platforms.AsmResolver
         public CilArchitecture(CilMethodBody parentBody)
         {
             _parentBody = parentBody ?? throw new ArgumentNullException(nameof(parentBody));
-            _variables = parentBody.LocalVariables.Select(variable => new CilVariable(variable)).ToArray();
+            
+            _variables = parentBody.LocalVariables
+                .Select(v => new CilVariable(v))
+                .ToArray();
+            
+            _parameters = parentBody.Owner.Parameters
+                .Select(p => new CilParameter(p))
+                .ToArray();
         }
 
         /// <summary>
@@ -97,6 +105,14 @@ namespace Echo.Platforms.AsmResolver
                 };
             }
 
+            if (instruction.IsLdarg())
+            {
+                return new[]
+                {
+                    _parameters[instruction.GetParameter(_parentBody.Owner.Parameters).Index]
+                };
+            }
+
             return Enumerable.Empty<IVariable>();
         }
 
@@ -108,6 +124,14 @@ namespace Echo.Platforms.AsmResolver
                 return new[]
                 {
                     _variables[instruction.GetLocalVariable(_parentBody.LocalVariables).Index]
+                };
+            }
+
+            if (instruction.IsStarg())
+            {
+                return new[]
+                {
+                    _parameters[instruction.GetParameter(_parentBody.Owner.Parameters).Index]
                 };
             }
 

@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.DotNet.Code.Cil;
 using Echo.Core.Code;
 
@@ -14,7 +15,7 @@ namespace Echo.Platforms.AsmResolver
         /// <param name="variable">The underlying variable object.</param>
         public CilVariable(CilLocalVariable variable)
         {
-            Variable = variable;
+            Variable = variable ?? throw new ArgumentNullException(nameof(variable));
         }
         
         /// <summary>
