@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Echo.Core.Code;
 using Echo.DataFlow.Values;
@@ -11,6 +12,7 @@ namespace Echo.DataFlow.Collections
     /// Represents a collection of variables and their symbolic values that a node in a data flow graph depends on.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in each node.</typeparam>
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class VariableDependencyCollection<TContents> : IDictionary<IVariable, SymbolicValue<TContents>>
     {
         private readonly IDictionary<IVariable, SymbolicValue<TContents>> _entries = new Dictionary<IVariable, SymbolicValue<TContents>>();
@@ -83,7 +85,7 @@ namespace Echo.DataFlow.Collections
 
         /// <inheritdoc />
         public void Add(IVariable key, SymbolicValue<TContents> value) => 
-            _entries.Add(new KeyValuePair<IVariable, SymbolicValue<TContents>>(key, value));
+            Add(new KeyValuePair<IVariable, SymbolicValue<TContents>>(key, value));
 
         /// <inheritdoc />
         public void Clear()
@@ -107,7 +109,7 @@ namespace Echo.DataFlow.Collections
         {
             if (_entries.TryGetValue(key, out var value))
             {
-                Remove(key);
+                _entries.Remove(key);
                 value.Dependant = null;
                 return true;
             }
