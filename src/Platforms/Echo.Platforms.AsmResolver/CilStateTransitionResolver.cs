@@ -10,8 +10,8 @@ namespace Echo.Platforms.AsmResolver
 {
     public class CilStateTransitionResolver : StateTransitionResolverBase<CilInstruction>
     {
-        public CilStateTransitionResolver()
-            : base(CilArchitecture.Instance)
+        public CilStateTransitionResolver(CilArchitecture architecture)
+            : base(architecture)
         {
         }
 

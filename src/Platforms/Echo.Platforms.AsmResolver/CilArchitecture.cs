@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Core.Code;
@@ -11,13 +12,18 @@ namespace Echo.Platforms.AsmResolver
     /// </summary>
     public class CilArchitecture : IInstructionSetArchitecture<CilInstruction>
     {
+        private readonly CilMethodBody _parentBody;
+        private readonly CilVariable[] _variables;
+
         /// <summary>
-        /// Gets a singleton instance of this architecture description.
+        /// Creates a new CIL architecture description based on a CIL method body.
         /// </summary>
-        public static CilArchitecture Instance
+        /// <param name="parentBody">The method body.</param>
+        public CilArchitecture(CilMethodBody parentBody)
         {
-            get;
-        } = new CilArchitecture();
+            _parentBody = parentBody ?? throw new ArgumentNullException(nameof(parentBody));
+            _variables = parentBody.LocalVariables.Select(variable => new CilVariable(variable)).ToArray();
+        }
 
         /// <summary>
         /// Gets the default static successor resolution engine for this architecture.
@@ -77,20 +83,35 @@ namespace Echo.Platforms.AsmResolver
         /// <inheritdoc />
         public int GetStackPopCount(CilInstruction instruction)
         {
-            // TODO: incorporate the parent method body somehow.
-            return instruction.GetStackPopCount(null);
+            return instruction.GetStackPopCount(_parentBody);
         }
 
         /// <inheritdoc />
         public IEnumerable<IVariable> GetReadVariables(CilInstruction instruction)
         {
-            throw new NotImplementedException();
+            if (instruction.IsLdloc())
+            {
+                return new[]
+                {
+                    _variables[instruction.GetLocalVariable(_parentBody.LocalVariables).Index]
+                };
+            }
+
+            return Enumerable.Empty<IVariable>();
         }
 
         /// <inheritdoc />
         public IEnumerable<IVariable> GetWrittenVariables(CilInstruction instruction)
-        {
-            throw new NotImplementedException();
+        {   
+            if (instruction.IsStloc())
+            {
+                return new[]
+                {
+                    _variables[instruction.GetLocalVariable(_parentBody.LocalVariables).Index]
+                };
+            }
+
+            return Enumerable.Empty<IVariable>();
         }
     }
 }
