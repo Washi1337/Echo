@@ -10,8 +10,6 @@ namespace Echo.DataFlow
     /// <typeparam name="TContents">The type of contents to put in a data flow node.</typeparam>
     public class DataDependency<TContents> : IDataDependency
     {
-        private DataFlowNode<TContents> _dependant;
-
         /// <summary>
         /// Creates a new data dependency with no data sources.
         /// </summary>
@@ -55,8 +53,8 @@ namespace Echo.DataFlow
         /// </summary>
         public DataFlowNode<TContents> Dependant
         {
-            get => _dependant;
-            internal set => _dependant = value;
+            get;
+            internal set;
         }
 
         /// <summary>

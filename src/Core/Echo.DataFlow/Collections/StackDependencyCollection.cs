@@ -47,7 +47,10 @@ namespace Echo.DataFlow.Collections
             AssertDependencyValidity(item);
             
             base.InsertItem(index, item);
+            
             item.Dependant = Owner;
+            foreach (var source in item.DataSources)
+                source.Dependants.Add(Owner);
         }
 
         /// <inheritdoc />
@@ -63,7 +66,11 @@ namespace Echo.DataFlow.Collections
         protected override void RemoveItem(int index)
         {
             var item = Items[index];
+            
             base.RemoveItem(index);
+            
+            foreach (var source in item.DataSources)
+                source.Dependants.Remove(Owner);
             item.Dependant = null;
         }
 
