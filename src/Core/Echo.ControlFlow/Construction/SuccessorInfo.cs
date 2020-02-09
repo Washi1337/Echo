@@ -32,5 +32,9 @@ namespace Echo.ControlFlow.Construction
         {
             get;
         }
+
+        /// <inheritdoc />
+        public override string ToString() => 
+            $"{DestinationAddress:X8} ({EdgeType})";
     }
 }

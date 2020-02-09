@@ -81,5 +81,11 @@ namespace Echo.DataFlow.Emulation
         {
             return Stack.MergeWith(other.Stack) | Variables.MergeWith(other.Variables);
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"PC: {ProgramCounter:X8}, Stack = {{{Stack}}}";
+        }
     }
 }

@@ -73,6 +73,8 @@ namespace Echo.DataFlow
             get;
         } = new List<DataFlowNode<TContents>>();
 
+        public IEnumerable<DataFlowNode<TContents>> GetDependants() => Dependants;
+
         IEnumerable<IEdge> INode.GetIncomingEdges()
         {
             throw new NotImplementedException();

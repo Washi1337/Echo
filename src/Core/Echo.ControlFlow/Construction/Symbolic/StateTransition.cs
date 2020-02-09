@@ -34,5 +34,9 @@ namespace Echo.ControlFlow.Construction.Symbolic
         {
             get;
         }
+
+        /// <inheritdoc />
+        public override string ToString() => 
+            $"{NextState.ProgramCounter:X8} ({EdgeType})";
     }
 }

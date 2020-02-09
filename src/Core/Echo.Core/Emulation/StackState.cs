@@ -90,5 +90,11 @@ namespace Echo.Core.Emulation
             result._stack.AddRange(_stack);
             return result;
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"Size: {Size}, Top: {Top}";
+        }
     }
 }
