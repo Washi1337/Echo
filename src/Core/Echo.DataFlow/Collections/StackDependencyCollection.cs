@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using Echo.DataFlow.Values;
 
 namespace Echo.DataFlow.Collections
@@ -29,16 +30,16 @@ namespace Echo.DataFlow.Collections
             get;
         }
 
-        private static void AssertDependencyValidity(DataDependency<TContents> item)
+        private void AssertDependencyValidity(DataDependency<TContents> item)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
             
             if (item.Dependant != null)
-                throw new InvalidOperationException("Stack dependency was already added to another node.");
+                throw new ArgumentException("Stack dependency was already added to another node.");
             
-            if (item.DependencyType != DataDependencyType.Stack)
-                throw new ArgumentException("Can only add stack dependencies.");
+            if (item.DataSources.Any(n => n.ParentGraph != Owner.ParentGraph))
+                throw new ArgumentException("Dependency contains data sources from another graph.");
         }
 
         /// <inheritdoc />

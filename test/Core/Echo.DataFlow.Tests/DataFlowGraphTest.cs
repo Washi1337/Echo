@@ -59,7 +59,7 @@ namespace Echo.DataFlow.Tests
             var n0 = dfg.Nodes.Add(0, 0);
             var n1 = dfg.Nodes.Add(1, 1);
 
-            n1.StackDependencies.Add(new DataDependency<int>(DataDependencyType.Stack));
+            n1.StackDependencies.Add(new DataDependency<int>());
             Assert.Empty(dfg.GetEdges());
         }
         
@@ -70,7 +70,7 @@ namespace Echo.DataFlow.Tests
             var n0 = dfg.Nodes.Add(0, 0);
             var n1 = dfg.Nodes.Add(1, 1);
             
-            n1.StackDependencies.Add(new DataDependency<int>(DataDependencyType.Stack, n0));
+            n1.StackDependencies.Add(new DataDependency<int>(n0));
             Assert.Contains(dfg.GetEdges(), e => e.Origin == n1 && e.Target == n0);
         }
     }

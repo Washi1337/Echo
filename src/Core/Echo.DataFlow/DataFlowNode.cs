@@ -81,8 +81,8 @@ namespace Echo.DataFlow
 
         IEnumerable<IEdge> INode.GetOutgoingEdges()
         {
-            foreach (var edge in StackDependencies.SelectMany(dep => dep.GetEdges()))
-                yield return edge;
+            foreach (var source in StackDependencies.SelectMany(dep => dep.DataSources))
+                yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Stack);
 
             // TODO: variable dependencies.
         }

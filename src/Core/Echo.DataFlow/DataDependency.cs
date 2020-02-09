@@ -13,39 +13,27 @@ namespace Echo.DataFlow
         /// <summary>
         /// Creates a new data dependency with no data sources.
         /// </summary>
-        /// <param name="dependencyType">The type of data dependency.</param>
-        public DataDependency(DataDependencyType dependencyType)
-            : this (dependencyType, Enumerable.Empty<DataFlowNode<TContents>>())
+        public DataDependency()
+            : this (Enumerable.Empty<DataFlowNode<TContents>>())
         {
         }
 
         /// <summary>
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
-        /// <param name="dependencyType">The type of data dependency.</param>
         /// <param name="dataSources">The data sources.</param>
-        public DataDependency(DataDependencyType dependencyType, params DataFlowNode<TContents>[] dataSources)
-            : this(dependencyType, dataSources.AsEnumerable())
+        public DataDependency(params DataFlowNode<TContents>[] dataSources)
+            : this(dataSources.AsEnumerable())
         {
         }
         
         /// <summary>
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
-        /// <param name="dependencyType">The type of data dependency.</param>
         /// <param name="dataSources">The data sources.</param>
-        public DataDependency(DataDependencyType dependencyType, IEnumerable<DataFlowNode<TContents>> dataSources)
+        public DataDependency(IEnumerable<DataFlowNode<TContents>> dataSources)
         {
-            DependencyType = dependencyType;
             DataSources = new DataSourceCollection<TContents>(this, dataSources);
-        }
-
-        /// <summary>
-        /// Gets the type of dependency this object encodes.
-        /// </summary>
-        public DataDependencyType DependencyType
-        {
-            get;
         }
 
         /// <summary>
@@ -79,13 +67,5 @@ namespace Echo.DataFlow
 
         IEnumerable<IDataFlowNode> IDataDependency.GetDataSources() => DataSources;
 
-        /// <summary>
-        /// Constructs edges for a data flow graph, based on this data dependency.
-        /// </summary>
-        public IEnumerable<DataFlowEdge<TContents>> GetEdges()
-        {
-            return DataSources.Select(source =>
-                new DataFlowEdge<TContents>(Dependant, source, DependencyType));
-        }
     }
 }
