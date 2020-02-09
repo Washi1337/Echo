@@ -87,7 +87,8 @@ namespace Echo.Core.Emulation
         public virtual StackState<TValue> Copy()
         {
             var result = new StackState<TValue>();
-            result._stack.AddRange(_stack);
+            foreach (var value in _stack)
+                result._stack.Add((TValue) value.Copy());
             return result;
         }
 

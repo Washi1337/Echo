@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <RootNamespace>Echo.Platforms.DummyPlatform</RootNamespace>
+        <LangVersion>8</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

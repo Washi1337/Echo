@@ -17,8 +17,4 @@
       <ProjectReference Include="..\..\Platforms\Echo.Platforms.DummyPlatform\Echo.Platforms.DummyPlatform.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Construction\Symbolic" />
-    </ItemGroup>
-
 </Project>

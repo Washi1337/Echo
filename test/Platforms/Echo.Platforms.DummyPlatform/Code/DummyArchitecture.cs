@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.Core.Code;
@@ -48,9 +49,9 @@ namespace Echo.Platforms.DummyPlatform.Code
             instruction.PopCount;
 
         public IEnumerable<IVariable> GetReadVariables(DummyInstruction instruction) =>
-            throw new System.NotImplementedException();
+            Enumerable.Empty<IVariable>();
 
         public IEnumerable<IVariable> GetWrittenVariables(DummyInstruction instruction) =>
-            throw new System.NotImplementedException();
+            Enumerable.Empty<IVariable>();
     }
 }

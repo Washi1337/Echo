@@ -22,8 +22,12 @@ namespace Echo.DataFlow.Emulation
                 throw new StackImbalanceException();
 
             var zipped = self
-                .GetAllStackSlots()
-                .Zip(other.GetAllStackSlots(), (a, b) => (a, b));
+                    .GetAllStackSlots()
+                    .Zip(other.GetAllStackSlots(), (a, b) => (a, b))
+#if DEBUG
+                    .ToArray()
+#endif
+                ;
             
             bool changed = false;
             foreach (var (a, b) in zipped)
