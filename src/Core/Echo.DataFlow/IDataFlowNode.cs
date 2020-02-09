@@ -14,12 +14,12 @@ namespace Echo.DataFlow
         /// Gets all symbolic stack values that this node depends on.
         /// </summary>
         /// <returns>The values.</returns>
-        IEnumerable<ISymbolicValue> GetStackDependencies();
+        IEnumerable<IDataDependency> GetStackDependencies();
 
         /// <summary>
         /// Gets all variables and their symbolic values that this node depends on.
         /// </summary>
         /// <returns>The variables and their symbolic values.</returns>
-        IEnumerable<KeyValuePair<IVariable, ISymbolicValue>> GetVariableDependencies();
+        IEnumerable<KeyValuePair<IVariable, IDataDependency>> GetVariableDependencies();
     }
 }

@@ -39,10 +39,10 @@ namespace Echo.DataFlow.Tests
             var n0 = dfg.Nodes.Add(0, 0);
             var n1 = dfg.Nodes.Add(1, 1);
 
-            var symbolicValue = new SymbolicValue<int>(n0);
-            n1.StackDependencies.Add(symbolicValue);
+            var dependency = new DataDependency<int>(DataDependencyType.Stack, n0);
+            n1.StackDependencies.Add(dependency);
             
-            Assert.Same(n1, symbolicValue.Dependant);
+            Assert.Same(n1, dependency.Dependant);
         }
 
         [Fact]
@@ -52,41 +52,11 @@ namespace Echo.DataFlow.Tests
             var n0 = dfg.Nodes.Add(0, 0);
             var n1 = dfg.Nodes.Add(1, 1);
 
-            var symbolicValue = new SymbolicValue<int>(n0);
+            var symbolicValue = new DataDependency<int>(DataDependencyType.Stack, n0);
             n1.StackDependencies.Add(symbolicValue);
             n1.StackDependencies.Remove(symbolicValue);
             Assert.Null(symbolicValue.Dependant);
         }
         
-        [Fact]
-        public void AddVariableDependencyShouldSetDependant()
-        {
-            var variable = new DummyVariable("V_1");
-            
-            var dfg = new DataFlowGraph<int>();
-            var n0 = dfg.Nodes.Add(0, 0);
-            var n1 = dfg.Nodes.Add(1, 1);
-
-            var symbolicValue = new SymbolicValue<int>(n0);
-            n1.VariableDependencies.Add(variable, symbolicValue);
-            
-            Assert.Same(n1, symbolicValue.Dependant);
-        }
-
-        [Fact]
-        public void RemoveVariableDependencyShouldUnsetDependant()
-        {
-            var variable = new DummyVariable("V_1");
-            
-            var dfg = new DataFlowGraph<int>();
-            var n0 = dfg.Nodes.Add(0, 0);
-            var n1 = dfg.Nodes.Add(1, 1);
-
-            var symbolicValue = new SymbolicValue<int>(n0);
-            n1.VariableDependencies.Add(variable, symbolicValue);
-            n1.VariableDependencies.Remove(variable);
-            
-            Assert.Null(symbolicValue.Dependant);
-        }
     }
 }

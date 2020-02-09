@@ -3,7 +3,7 @@
     /// <summary>
     /// Provides members for describing types of dependencies between nodes in a data flow graph.
     /// </summary>
-    public enum DataFlowEdgeType
+    public enum DataDependencyType
     {
         /// <summary>
         /// Indicates the dependency is a stack dependency.

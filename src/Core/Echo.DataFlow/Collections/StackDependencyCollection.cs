@@ -10,7 +10,7 @@ namespace Echo.DataFlow.Collections
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in each node.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class StackDependencyCollection<TContents> : Collection<SymbolicValue<TContents>>
+    public class StackDependencyCollection<TContents> : Collection<DataDependency<TContents>>
     {
         /// <summary>
         /// Creates a new dependency collection for a node.
@@ -29,24 +29,32 @@ namespace Echo.DataFlow.Collections
             get;
         }
 
-        private static void AssertHasNoOwner(SymbolicValue<TContents> item)
+        private static void AssertDependencyValidity(DataDependency<TContents> item)
         {
+            if (item == null)
+                throw new ArgumentNullException(nameof(item));
+            
             if (item.Dependant != null)
-                throw new InvalidOperationException("Dependency was already added to another node.");
+                throw new InvalidOperationException("Stack dependency was already added to another node.");
+            
+            if (item.DependencyType != DataDependencyType.Stack)
+                throw new ArgumentException("Can only add stack dependencies.");
         }
 
         /// <inheritdoc />
-        protected override void InsertItem(int index, SymbolicValue<TContents> item)
+        protected override void InsertItem(int index, DataDependency<TContents> item)
         {
-            AssertHasNoOwner(item);
+            AssertDependencyValidity(item);
+            
             base.InsertItem(index, item);
             item.Dependant = Owner;
         }
 
         /// <inheritdoc />
-        protected override void SetItem(int index, SymbolicValue<TContents> item)
+        protected override void SetItem(int index, DataDependency<TContents> item)
         {
-            AssertHasNoOwner(item);
+            AssertDependencyValidity(item);
+            
             RemoveAt(index);
             Insert(index, item);
         }

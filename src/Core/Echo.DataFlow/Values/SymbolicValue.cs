@@ -8,10 +8,8 @@ namespace Echo.DataFlow.Values
     /// <summary>
     /// Represents a symbolic value that resides in memory. 
     /// </summary>
-    public class SymbolicValue<T> : ISymbolicValue
+    public class SymbolicValue<T> : IDataDependency, IValue
     {
-        private DataFlowNode<T> _dependant;
-
         /// <summary>
         /// Creates a new symbolic value with no data sources.
         /// </summary>
@@ -65,28 +63,8 @@ namespace Echo.DataFlow.Values
         public SymbolicValue(int size, IEnumerable<DataFlowNode<T>> dataSources)
         {
             Size = size;
-            DataSources = new DataSourceCollection<T>(this, dataSources);
+            DataSources = new HashSet<DataFlowNode<T>>(dataSources);
         }
-
-        /// <summary>
-        /// Gets the node that depends on this symbolic value.
-        /// </summary>
-        public DataFlowNode<T> Dependant
-        {
-            get => _dependant;
-            internal set
-            {
-                if (value is null)
-                {
-                    foreach (var source in DataSources)
-                        source.Dependants.Remove(_dependant);
-                }
-                
-                _dependant = value;
-            }
-        }
-
-        IDataFlowNode ISymbolicValue.Dependant => Dependant;
 
         /// <inheritdoc />
         public bool IsKnown => DataSources.Count > 0;
@@ -100,12 +78,12 @@ namespace Echo.DataFlow.Values
         /// <summary>
         /// Provides a list of all data sources of this value.
         /// </summary>
-        public DataSourceCollection<T> DataSources
+        public ISet<DataFlowNode<T>> DataSources
         {
             get;
         }
 
-        IEnumerable<IDataFlowNode> ISymbolicValue.GetDataSources() => DataSources;
+        IEnumerable<IDataFlowNode> IDataDependency.GetDataSources() => DataSources;
 
         /// <summary>
         /// Creates an exact copy of the value.

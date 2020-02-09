@@ -7,7 +7,7 @@ namespace Echo.DataFlow
     /// and the target of the node represents the dependency.
     /// </summary>
     /// <typeparam name="TContents">The type of information to store in each data flow node.</typeparam>
-    public class DataFlowEdge<TContents> : IEdge
+    public readonly struct DataFlowEdge<TContents> : IEdge
     {
         /// <summary>
         /// Creates a new dependency edge between two nodes.
@@ -15,7 +15,7 @@ namespace Echo.DataFlow
         /// <param name="origin">The dependent node.</param>
         /// <param name="target">The dependency node.</param>
         /// <param name="type">The type of dependency.</param>
-        public DataFlowEdge(DataFlowNode<TContents> origin, DataFlowNode<TContents> target, DataFlowEdgeType type)
+        public DataFlowEdge(DataFlowNode<TContents> origin, DataFlowNode<TContents> target, DataDependencyType type)
         {
             Origin = origin;
             Target = target;
@@ -45,7 +45,7 @@ namespace Echo.DataFlow
         /// <summary>
         /// Gets the type of dependency that this edge encodes.
         /// </summary>
-        public DataFlowEdgeType Type
+        public DataDependencyType Type
         {
             get;
         }

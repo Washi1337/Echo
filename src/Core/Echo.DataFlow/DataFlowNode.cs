@@ -24,7 +24,6 @@ namespace Echo.DataFlow
             Id = id;
             Contents = contents;
             StackDependencies = new StackDependencyCollection<TContents>(this);
-            VariableDependencies = new VariableDependencyCollection<TContents>(this);
         }
 
         /// <summary>
@@ -82,10 +81,10 @@ namespace Echo.DataFlow
 
         IEnumerable<IEdge> INode.GetOutgoingEdges()
         {
-            foreach (var dataSource in StackDependencies.SelectMany(v => v.DataSources))
-                yield return new DataFlowEdge<TContents>(this, dataSource, DataFlowEdgeType.Stack);
-            foreach (var dataSource in VariableDependencies.Values.SelectMany(v => v.DataSources))
-                yield return new DataFlowEdge<TContents>(this, dataSource, DataFlowEdgeType.Variable);
+            foreach (var edge in StackDependencies.SelectMany(dep => dep.GetEdges()))
+                yield return edge;
+
+            // TODO: variable dependencies.
         }
 
         IEnumerable<INode> INode.GetPredecessors() => Dependants;
@@ -96,14 +95,11 @@ namespace Echo.DataFlow
 
         bool INode.HasSuccessor(INode node) => StackDependencies.Any(dep => dep.DataSources.Contains(node));
 
-        IEnumerable<ISymbolicValue> IDataFlowNode.GetStackDependencies() => StackDependencies;
+        IEnumerable<IDataDependency> IDataFlowNode.GetStackDependencies() => StackDependencies;
 
-        IEnumerable<KeyValuePair<IVariable, ISymbolicValue>> IDataFlowNode.GetVariableDependencies()
+        IEnumerable<KeyValuePair<IVariable, IDataDependency>> IDataFlowNode.GetVariableDependencies()
         {
-            var result = new Dictionary<IVariable, ISymbolicValue>();
-            foreach (var item in VariableDependencies)
-                result[item.Key] = item.Value;
-            return result;
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />

@@ -128,6 +128,32 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
         }
 
         [Fact]
+        public void JoiningPathsShouldMergeDependenciesAndPropagate()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Push(0, 1),
+                DummyInstruction.JmpCond(1, 4),
+            
+                DummyInstruction.Push(2, 1),
+                DummyInstruction.Jmp(3, 5),
+            
+                DummyInstruction.Push(4, 1),
+            
+                DummyInstruction.Push(5, 1),
+                DummyInstruction.Pop(6, 2),
+                DummyInstruction.Ret(7)
+            };
+
+            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 0);
+            var dfg = _dfgBuilder.DataFlowGraph;
+        
+            Assert.Equal(
+                new HashSet<IDataFlowNode> { dfg.Nodes[2], dfg.Nodes[4] },
+                new HashSet<IDataFlowNode>(dfg.Nodes[6].StackDependencies[0].DataSources));
+        }
+
+        [Fact]
         public void JoiningPathsWithDifferentStackHeightsShouldThrow()
         {
             var instructions = new[]

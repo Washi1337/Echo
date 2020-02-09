@@ -20,10 +20,9 @@ namespace Echo.DataFlow.Collections
         /// Creates a new empty data source collection.
         /// </summary>
         /// <param name="owner">The symbolic value that owns this data source collection.</param>
-        internal DataSourceCollection(SymbolicValue<TContents> owner, DataFlowEdgeType type)
+        internal DataSourceCollection(DataDependency<TContents> owner)
             : this(owner, Enumerable.Empty<DataFlowNode<TContents>>())
         {
-            Type = type;
         }
 
         /// <summary>
@@ -31,7 +30,7 @@ namespace Echo.DataFlow.Collections
         /// </summary>
         /// <param name="owner">The symbolic value that owns this data source collection.</param>
         /// <param name="items">The items to add to the collection.</param>
-        public DataSourceCollection(SymbolicValue<TContents> owner, IEnumerable<DataFlowNode<TContents>> items)
+        public DataSourceCollection(DataDependency<TContents> owner, IEnumerable<DataFlowNode<TContents>> items)
         {
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
             _items = new HashSet<DataFlowNode<TContents>>(items);
@@ -40,12 +39,7 @@ namespace Echo.DataFlow.Collections
         /// <summary>
         /// Gets the owner of the collection.
         /// </summary>
-        public SymbolicValue<TContents> Owner
-        {
-            get;
-        }
-
-        public DataFlowEdgeType Type
+        public DataDependency<TContents> Owner
         {
             get;
         }
