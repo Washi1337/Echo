@@ -151,6 +151,14 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             Assert.Equal(
                 new HashSet<IDataFlowNode> { dfg.Nodes[2], dfg.Nodes[4] },
                 new HashSet<IDataFlowNode>(dfg.Nodes[6].StackDependencies[0].DataSources));
+            Assert.Equal(new[]
+            {
+                dfg.Nodes[6]
+            }, dfg.Nodes[2].GetDependants());
+            Assert.Equal(new[]
+            {
+                dfg.Nodes[6]
+            }, dfg.Nodes[4].GetDependants());
         }
 
         [Fact]

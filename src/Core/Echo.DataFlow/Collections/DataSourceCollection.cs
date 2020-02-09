@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Echo.DataFlow.Values;
 
 namespace Echo.DataFlow.Collections
 {
@@ -12,7 +11,7 @@ namespace Echo.DataFlow.Collections
     /// </summary>
     /// <typeparam name="TContents">The type of contents to store in each node.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class DataSourceCollection<TContents> : ICollection<DataFlowNode<TContents>>
+    public class DataSourceCollection<TContents> : ISet<DataFlowNode<TContents>>
     {
         private readonly HashSet<DataFlowNode<TContents>> _items;
 
@@ -69,6 +68,64 @@ namespace Echo.DataFlow.Collections
             }
 
             return false;
+        }
+
+        /// <inheritdoc />
+        public void ExceptWith(IEnumerable<DataFlowNode<TContents>> other)
+        {
+            foreach (var item in other)
+                Remove(item);
+        }
+
+        /// <inheritdoc />
+        public void IntersectWith(IEnumerable<DataFlowNode<TContents>> other)
+        {
+            var set = new HashSet<DataFlowNode<TContents>>(other);
+            foreach (var item in this)
+            {
+                if (!set.Contains(item))
+                    Remove(item);
+            }
+        }
+
+        /// <inheritdoc />
+        public bool IsProperSubsetOf(IEnumerable<DataFlowNode<TContents>> other) => 
+            _items.IsProperSubsetOf(other);
+
+        /// <inheritdoc />
+        public bool IsProperSupersetOf(IEnumerable<DataFlowNode<TContents>> other) => 
+            _items.IsProperSupersetOf(other);
+
+        /// <inheritdoc />
+        public bool IsSubsetOf(IEnumerable<DataFlowNode<TContents>> other) => 
+            _items.IsSubsetOf(other);
+
+        /// <inheritdoc />
+        public bool IsSupersetOf(IEnumerable<DataFlowNode<TContents>> other) => 
+            _items.IsSupersetOf(other);
+
+        /// <inheritdoc />
+        public bool Overlaps(IEnumerable<DataFlowNode<TContents>> other) => 
+            _items.Overlaps(other);
+
+        /// <inheritdoc />
+        public bool SetEquals(IEnumerable<DataFlowNode<TContents>> other) => 
+            _items.SetEquals(other);
+
+        /// <inheritdoc />
+        public void SymmetricExceptWith(IEnumerable<DataFlowNode<TContents>> other)
+        {
+            var items = other as DataFlowNode<TContents>[] ?? other.ToArray();
+            var intersection = this.Intersect(items);
+            UnionWith(items);
+            ExceptWith(intersection);
+        }
+
+        /// <inheritdoc />
+        public void UnionWith(IEnumerable<DataFlowNode<TContents>> other)
+        {
+            foreach (var item in other)
+                Add(item);
         }
 
         /// <inheritdoc />
