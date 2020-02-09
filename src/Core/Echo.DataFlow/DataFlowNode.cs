@@ -24,6 +24,7 @@ namespace Echo.DataFlow
             Id = id;
             Contents = contents;
             StackDependencies = new StackDependencyCollection<TContents>(this);
+            VariableDependencies = new VariableDependencyCollection<TContents>(this);
         }
 
         /// <summary>
@@ -83,8 +84,8 @@ namespace Echo.DataFlow
         {
             foreach (var source in StackDependencies.SelectMany(dep => dep.DataSources))
                 yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Stack);
-
-            // TODO: variable dependencies.
+            foreach (var source in VariableDependencies.Values.SelectMany(dep => dep.DataSources))
+                yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Variable);
         }
 
         IEnumerable<INode> INode.GetPredecessors() => Dependants;

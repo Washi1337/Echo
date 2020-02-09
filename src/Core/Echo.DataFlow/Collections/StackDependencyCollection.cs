@@ -13,21 +13,15 @@ namespace Echo.DataFlow.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class StackDependencyCollection<TContents> : Collection<DataDependency<TContents>>
     {
+        private readonly DataFlowNode<TContents> _owner;
+        
         /// <summary>
         /// Creates a new dependency collection for a node.
         /// </summary>
         /// <param name="owner">The owner node.</param>
         internal StackDependencyCollection(DataFlowNode<TContents> owner)
         {
-            Owner = owner ?? throw new ArgumentNullException(nameof(owner));
-        }
-
-        /// <summary>
-        /// Gets the owner node of this dependency collection.
-        /// </summary>
-        public DataFlowNode<TContents> Owner
-        {
-            get;
+            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
 
         private void AssertDependencyValidity(DataDependency<TContents> item)
@@ -38,7 +32,7 @@ namespace Echo.DataFlow.Collections
             if (item.Dependant != null)
                 throw new ArgumentException("Stack dependency was already added to another node.");
             
-            if (item.DataSources.Any(n => n.ParentGraph != Owner.ParentGraph))
+            if (item.DataSources.Any(n => n.ParentGraph != _owner.ParentGraph))
                 throw new ArgumentException("Dependency contains data sources from another graph.");
         }
 
@@ -46,12 +40,8 @@ namespace Echo.DataFlow.Collections
         protected override void InsertItem(int index, DataDependency<TContents> item)
         {
             AssertDependencyValidity(item);
-            
             base.InsertItem(index, item);
-            
-            item.Dependant = Owner;
-            foreach (var source in item.DataSources)
-                source.Dependants.Add(Owner);
+            item.Dependant = _owner;
         }
 
         /// <inheritdoc />
@@ -67,11 +57,7 @@ namespace Echo.DataFlow.Collections
         protected override void RemoveItem(int index)
         {
             var item = Items[index];
-            
             base.RemoveItem(index);
-            
-            foreach (var source in item.DataSources)
-                source.Dependants.Remove(Owner);
             item.Dependant = null;
         }
 

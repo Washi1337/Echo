@@ -83,9 +83,9 @@ namespace Echo.ControlFlow.Construction.Symbolic
         {
             var instruction = node.Contents;
             
-            // var readVariables = Architecture.GetReadVariables(instruction);
-            // foreach (var variable in readVariables)
-            //     node.VariableDependencies[variable].MergeWith(currentState.Variables[variable]);
+            var readVariables = Architecture.GetReadVariables(instruction);
+            foreach (var variable in readVariables)
+                node.VariableDependencies[variable].DataSources.UnionWith(currentState.Variables[variable].DataSources);
 
             var writtenVariables = Architecture.GetWrittenVariables(instruction);
             foreach (var variable in writtenVariables)
@@ -115,10 +115,9 @@ namespace Echo.ControlFlow.Construction.Symbolic
                 for (int i = 0; i < stackArgumentCount; i++)
                     node.StackDependencies.Add(new DataDependency<TInstruction>());
                 
-                //
-                // var readVariables = Architecture.GetReadVariables(instruction);
-                // foreach (var variable in readVariables)
-                //     node.VariableDependencies[variable] = new SymbolicValue<TInstruction>();
+                var readVariables = Architecture.GetReadVariables(instruction);
+                foreach (var variable in readVariables)
+                    node.VariableDependencies.Add(variable, new DataDependency<TInstruction>());
                 
                 DataFlowGraph.Nodes.Add(node);
             }

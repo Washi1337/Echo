@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Echo.DataFlow.Values;
-using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
 namespace Echo.DataFlow.Tests

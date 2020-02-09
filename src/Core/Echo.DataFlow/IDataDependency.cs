@@ -3,8 +3,7 @@ using System.Collections.Generic;
 namespace Echo.DataFlow
 {
     /// <summary>
-    /// Provides members for describing a symbolic value; a value that is not yet made concrete but can still be used for
-    /// certain types of flow analysis.  
+    /// Provides members for describing a dependency of a node in a data flow graph.
     /// </summary>
     public interface IDataDependency
     {
