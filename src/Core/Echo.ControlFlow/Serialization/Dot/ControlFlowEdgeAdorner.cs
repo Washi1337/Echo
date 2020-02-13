@@ -6,46 +6,46 @@ using Echo.Core.Graphing.Serialization.Dot;
 namespace Echo.ControlFlow.Serialization.Dot
 {
     /// <summary>
-    /// Represents 
+    /// Represents an adorner that styles edges in a control flow graph.
     /// </summary>
-    /// <typeparam name="TInstruction"></typeparam>
+    /// <typeparam name="TInstruction">The type of instructions the nodes contain.</typeparam>
     public class ControlFlowEdgeAdorner<TInstruction> : IDotEdgeAdorner
     {
         /// <summary>
         /// Gets or sets the edge style to use for normal fallthrough edges.
         /// </summary>
-        public ControlFlowEdgeStyle FallthroughStyle
+        public DotEntityStyle FallthroughStyle
         {
             get;
             set;
-        } = new ControlFlowEdgeStyle(null, null);
+        } = new DotEntityStyle(null, null);
 
         /// <summary>
         /// Gets or sets the edge style to use for any fallthrough edge originating from a branching node.
         /// </summary>
-        public ControlFlowEdgeStyle FalseStyle
+        public DotEntityStyle FalseStyle
         {
             get;
             set;
-        } = new ControlFlowEdgeStyle("red", null);
+        } = new DotEntityStyle("red", null);
 
         /// <summary>
         /// Gets or sets the edge style to use for any conditional edge.
         /// </summary>
-        public ControlFlowEdgeStyle TrueStyle
+        public DotEntityStyle TrueStyle
         {
             get;
             set;
-        } = new ControlFlowEdgeStyle("green", null);
+        } = new DotEntityStyle("green", null);
 
         /// <summary>
         /// Gets or sets the edge style to use for any abnormal edge.
         /// </summary>
-        public ControlFlowEdgeStyle AbnormalStyle
+        public DotEntityStyle AbnormalStyle
         {
             get;
             set;
-        } = new ControlFlowEdgeStyle("gray", "dashed");
+        } = new DotEntityStyle("gray", "dashed");
 
         /// <inheritdoc />
         public IDictionary<string, string> GetEdgeAttributes(IEdge edge)
