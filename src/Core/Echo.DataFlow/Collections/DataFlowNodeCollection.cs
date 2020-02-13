@@ -129,6 +129,14 @@ namespace Echo.DataFlow.Collections
         {
             if (_nodes.TryGetValue(offset, out var item))
             {
+                foreach (var dependent in item.GetDependants().ToArray())
+                {
+                    foreach (var dependency in dependent.StackDependencies)
+                        dependency.DataSources.Remove(item);
+                    foreach (var dependency in dependent.VariableDependencies)
+                        dependency.Value.DataSources.Remove(item);
+                }
+                
                 _nodes.Remove(offset);
                 item.ParentGraph = null;
                 return true;
@@ -138,17 +146,9 @@ namespace Echo.DataFlow.Collections
         }
 
         /// <inheritdoc />
-        public bool Remove(DataFlowNode<TContents> item)
-        {            
-            if (item != null && _nodes.Remove(item.Id))
-            {
-                item.ParentGraph = null;
-                return true;
-            }
+        public bool Remove(DataFlowNode<TContents> item) => 
+            item != null && Remove(item.Id);
 
-            return false;
-        }
-        
         /// <inheritdoc />
         public IEnumerator<DataFlowNode<TContents>> GetEnumerator() => _nodes.Values.GetEnumerator();
 

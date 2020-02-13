@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
 namespace Echo.DataFlow.Tests
@@ -122,6 +123,44 @@ namespace Echo.DataFlow.Tests
 
             n1.StackDependencies.Add(new DataDependency<int>());
             Assert.Throws<ArgumentException>(() => n1.StackDependencies[0].DataSources.Add(n2));
+        }
+
+        [Fact]
+        public void RemoveNodeShouldRemoveStackDeps()
+        {
+            var dfg = new DataFlowGraph<int>();
+            var n1 = dfg.Nodes.Add(1, 0);
+            var n2 = dfg.Nodes.Add(2, 0);
+            
+            n1.StackDependencies.Add(new DataDependency<int>(n2));
+            
+            Assert.Single(n1.StackDependencies[0].DataSources);
+            Assert.Single(n2.GetDependants());
+            
+            dfg.Nodes.Remove(n2);
+            
+            Assert.Empty(n1.StackDependencies[0].DataSources);
+            Assert.Empty(n2.GetDependants());
+        }
+
+        [Fact]
+        public void RemoveNodeShouldRemoveVarDeps()
+        {
+            var variable = new DummyVariable("V_1");
+            
+            var dfg = new DataFlowGraph<int>();
+            var n1 = dfg.Nodes.Add(1, 0);
+            var n2 = dfg.Nodes.Add(2, 0);
+
+            n1.VariableDependencies[variable] = new DataDependency<int>(n2);
+            
+            Assert.Single(n1.VariableDependencies[variable].DataSources);
+            Assert.Single(n2.GetDependants());
+            
+            dfg.Nodes.Remove(n2);
+            
+            Assert.Empty(n1.VariableDependencies[variable].DataSources);
+            Assert.Empty(n2.GetDependants());
         }
     }
 }
