@@ -144,6 +144,24 @@ namespace Echo.DataFlow.Tests
         }
 
         [Fact]
+        public void RemoveNodeShouldRemoveStackDependants()
+        {
+            var dfg = new DataFlowGraph<int>();
+            var n1 = dfg.Nodes.Add(1, 0);
+            var n2 = dfg.Nodes.Add(2, 0);
+            
+            n1.StackDependencies.Add(new DataDependency<int>(n2));
+            
+            Assert.Single(n1.StackDependencies[0].DataSources);
+            Assert.Single(n2.GetDependants());
+            
+            dfg.Nodes.Remove(n1);
+            
+            Assert.Empty(n1.StackDependencies[0].DataSources);
+            Assert.Empty(n2.GetDependants());
+        }
+
+        [Fact]
         public void RemoveNodeShouldRemoveVarDeps()
         {
             var variable = new DummyVariable("V_1");

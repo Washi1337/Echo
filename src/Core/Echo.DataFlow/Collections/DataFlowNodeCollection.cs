@@ -129,6 +129,7 @@ namespace Echo.DataFlow.Collections
         {
             if (_nodes.TryGetValue(offset, out var item))
             {
+                // Remove incident edges.
                 foreach (var dependent in item.GetDependants().ToArray())
                 {
                     foreach (var dependency in dependent.StackDependencies)
@@ -137,8 +138,15 @@ namespace Echo.DataFlow.Collections
                         dependency.Value.DataSources.Remove(item);
                 }
                 
+                foreach (var dependency in item.StackDependencies)
+                    dependency.DataSources.Clear();
+                foreach (var dependency in item.VariableDependencies.Values)
+                    dependency.DataSources.Clear();
+                
+                // Remove node.
                 _nodes.Remove(offset);
                 item.ParentGraph = null;
+                
                 return true;
             }
 
