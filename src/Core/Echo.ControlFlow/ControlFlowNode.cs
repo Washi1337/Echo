@@ -106,15 +106,13 @@ namespace Echo.ControlFlow
             get => _fallThroughEdge;
             set
             {
-                _fallThroughEdge?.Target.IncomingEdges.Remove(value);
-
-                if (value != null)
-                {
+                if (value is {})
                     AdjacencyCollection<TInstruction>.AssertEdgeValidity(this, ControlFlowEdgeType.FallThrough, value);
-                    value.Target.IncomingEdges.Add(value);
-                }
 
+                _fallThroughEdge?.Target.IncomingEdges.Remove(_fallThroughEdge);
                 _fallThroughEdge = value;
+                _fallThroughEdge?.Target.IncomingEdges.Add(value);
+
             }
         }
 

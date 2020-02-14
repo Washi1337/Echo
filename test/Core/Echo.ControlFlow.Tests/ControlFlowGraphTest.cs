@@ -131,6 +131,50 @@ namespace Echo.ControlFlow.Tests
                 n3a, n2, n3b
             }));
         }
+
+        [Fact]
+        public void RemoveNodeShouldRemoveIncomingEdges()
+        {
+            var graph = new ControlFlowGraph<int>();
+
+            var n1 = new ControlFlowNode<int>(1);
+            var n2 = new ControlFlowNode<int>(2);
+            
+            graph.Nodes.Add(n1);
+            graph.Nodes.Add(n2);
+
+            n1.ConnectWith(n2);
+
+            Assert.Single(n1.GetOutgoingEdges());
+            Assert.Single(n2.GetIncomingEdges());
+
+            graph.Nodes.Remove(n2);
+
+            Assert.Empty(n1.GetOutgoingEdges());
+            Assert.Empty(n2.GetIncomingEdges());
+        }
+
+        [Fact]
+        public void RemoveNodeShouldRemoveOutgoingEdges()
+        {
+            var graph = new ControlFlowGraph<int>();
+
+            var n1 = new ControlFlowNode<int>(1);
+            var n2 = new ControlFlowNode<int>(2);
+            
+            graph.Nodes.Add(n1);
+            graph.Nodes.Add(n2);
+
+            n1.ConnectWith(n2);
+
+            Assert.Single(n1.GetOutgoingEdges());
+            Assert.Single(n2.GetIncomingEdges());
+
+            graph.Nodes.Remove(n1);
+
+            Assert.Empty(n1.GetOutgoingEdges());
+            Assert.Empty(n2.GetIncomingEdges());
+        }
         
     }
 }

@@ -116,8 +116,34 @@ namespace Echo.ControlFlow.Collections
         {
             if (_nodes.TryGetValue(offset, out var item))
             {
+                // Remove outgoing edges.
+                item.FallThroughEdge = null;
+                item.ConditionalEdges.Clear();
+                item.AbnormalEdges.Clear();
+                
+                // Remove incoming edges.
+                foreach (var edge in item.IncomingEdges.ToArray())
+                {
+                    switch (edge.Type)
+                    {
+                        case ControlFlowEdgeType.FallThrough:
+                            edge.Origin.FallThroughEdge = null;
+                            break;
+                        case ControlFlowEdgeType.Conditional:
+                            edge.Origin.ConditionalEdges.Remove(edge);
+                            break;
+                        case ControlFlowEdgeType.Abnormal:
+                            edge.Origin.AbnormalEdges.Remove(edge);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+                
+                //Remove node.
                 _nodes.Remove(offset);
                 item.ParentGraph = null;
+                
                 return true;
             }
 
@@ -125,17 +151,9 @@ namespace Echo.ControlFlow.Collections
         }
 
         /// <inheritdoc />
-        public bool Remove(ControlFlowNode<TContents> item)
-        {            
-            if (item != null && _nodes.Remove(item.Offset))
-            {
-                item.ParentGraph = null;
-                return true;
-            }
+        public bool Remove(ControlFlowNode<TContents> item) => 
+            item != null && Remove(item.Offset);
 
-            return false;
-        }
-        
         /// <inheritdoc />
         public IEnumerator<ControlFlowNode<TContents>> GetEnumerator() => _nodes.Values.GetEnumerator();
 
