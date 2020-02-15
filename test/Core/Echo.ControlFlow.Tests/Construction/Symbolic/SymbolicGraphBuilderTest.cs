@@ -180,5 +180,47 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
 
             Assert.Throws<StackImbalanceException>(() => _cfgBuilder.ConstructFlowGraph(instructions, 0));
         }
+        
+        
+        [Fact]
+        public void JumpForwardToFarBlock()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Push(0, 1),
+                DummyInstruction.Jmp(1, 100),
+                
+                DummyInstruction.Pop(100, 1),
+                DummyInstruction.Ret(101),
+            };
+            
+            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 0);
+            
+            Assert.Equal(new[]
+            {
+                0L, 100L
+            }, cfg.Nodes.Select(n => n.Offset));
+        }
+
+        [Fact]
+        public void JumpBackToFarBlock()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Pop(0, 1),
+                DummyInstruction.Ret(1),
+                
+                DummyInstruction.Push(100, 1),
+                DummyInstruction.Jmp(101, 0),
+            };
+            
+            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 100);
+            
+            Assert.Equal(new[]
+            {
+                0L, 100L
+            }, cfg.Nodes.Select(n => n.Offset));
+        }
+
     }
 }

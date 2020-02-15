@@ -21,11 +21,11 @@ namespace Echo.ControlFlow.Tests.Construction.Static
         {
             var instructions = new[]
             {
-                DummyInstruction.Op(0, 0, 1),
-                DummyInstruction.Op(1, 0, 1),
+                DummyInstruction.Push(0, 1),
+                DummyInstruction.Push(1, 1),
                 DummyInstruction.Op(2, 2, 1),
-                DummyInstruction.Op(3, 0, 1),
-                DummyInstruction.Op(4, 0, 1),
+                DummyInstruction.Push(3, 1),
+                DummyInstruction.Push(4, 1),
                 DummyInstruction.Ret(5)
             };
             
@@ -35,14 +35,52 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             Assert.Equal(instructions, graph.Nodes.First().Contents.Instructions);
             Assert.Equal(graph.Nodes.First(), graph.Entrypoint);
         }
-        
+
+        [Fact]
+        public void JumpForwardToFarBlock()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Push(0, 1),
+                DummyInstruction.Jmp(1, 100),
+                
+                DummyInstruction.Pop(100, 1),
+                DummyInstruction.Ret(101),
+            };
+            
+            var graph = _builder.ConstructFlowGraph(instructions, 0);
+            Assert.Equal(new[]
+            {
+                0L, 100L
+            }, graph.Nodes.Select(n => n.Offset));
+        }
+
+        [Fact]
+        public void JumpBackToFarBlock()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Pop(0, 1),
+                DummyInstruction.Ret(1),
+                
+                DummyInstruction.Push(100, 1),
+                DummyInstruction.Jmp(101, 0),
+            };
+            
+            var graph = _builder.ConstructFlowGraph(instructions, 100);
+            Assert.Equal(new[]
+            {
+                0L, 100L
+            }, graph.Nodes.Select(n => n.Offset));
+        }
+
         [Fact]
         public void If()
         {
             var instructions = new[]
             {
                 // Entrypoint
-                DummyInstruction.Op(0, 0, 1),
+                DummyInstruction.Push(0, 1),
                 DummyInstruction.JmpCond(1, 5),
                 
                 // True
@@ -74,19 +112,19 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             var instructions = new[]
             {
                 // Entrypoint
-                DummyInstruction.Op(0, 0, 1),
-                DummyInstruction.Op(1, 1, 0),
+                DummyInstruction.Push(0, 1),
+                DummyInstruction.Pop(1, 1),
                 DummyInstruction.Jmp(2, 7),
                 
                 // Loop body
-                DummyInstruction.Op(3, 0, 1),
-                DummyInstruction.Op(4, 0, 1),
+                DummyInstruction.Push(3, 1),
+                DummyInstruction.Push(4, 1),
                 DummyInstruction.Op(5, 2, 1),
-                DummyInstruction.Op(6, 1, 0),
+                DummyInstruction.Pop(6, 1),
                 
                 // Loop header
-                DummyInstruction.Op(7, 0, 1),
-                DummyInstruction.Op(8, 0, 1),
+                DummyInstruction.Push(7, 1),
+                DummyInstruction.Push(8, 1),
                 DummyInstruction.Op(9, 2, 1),
                 DummyInstruction.JmpCond(10, 3),
                 
