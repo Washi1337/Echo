@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Blocks;
 using Echo.ControlFlow.Collections;
+using Echo.Core.Code;
 using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow
@@ -206,6 +207,64 @@ namespace Echo.ControlFlow
             return edge;
         }
 
+        /// <summary>
+        /// Splits the node and its embedded basic block in two nodes at the provided index, and connects the two
+        /// resulting nodes with a fallthrough edge.
+        /// </summary>
+        /// <param name="index">The index of the instruction</param>
+        /// <returns>The two resulting nodes.</returns>
+        /// <exception cref="InvalidOperationException">Occurs when the node cannot be split any further.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when the provided index falls outside the range of the instructions in the embedded basic block.
+        /// </exception>
+        public (ControlFlowNode<TInstruction> First, ControlFlowNode<TInstruction> Second) SplitAtIndex(int index)
+        {
+            if (Contents.Instructions.Count < 2)
+                throw new InvalidOperationException("Cannot split up a node with less than two instructions.");
+            if (index <= 0 || index >= Contents.Instructions.Count)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            // Collect instructions.
+            var instructions = new List<TInstruction>(Contents.Instructions.Count - index);
+            while (Contents.Instructions.Count != index)
+            {
+                instructions.Add(Contents.Instructions[index]);
+                Contents.Instructions.RemoveAt(index);
+            }
+            
+            // Create and add new node.
+            var newBlock = new BasicBlock<TInstruction>(ParentGraph.Architecture.GetOffset(instructions[0]), instructions);
+            var newNode = new ControlFlowNode<TInstruction>(newBlock.Offset, newBlock);
+            ParentGraph.Nodes.Add(newNode);
+
+            // Remove outgoing edges.
+            var edges = GetOutgoingEdges().ToArray();
+            ConditionalEdges.Clear();
+            AbnormalEdges.Clear();
+            FallThroughNeighbour = newNode;
+
+            // Move removed outgoing edges to new node.
+            foreach (var edge in edges)
+            {
+                switch (edge.Type)
+                {
+                    case ControlFlowEdgeType.FallThrough:
+                        newNode.FallThroughNeighbour = edge.Target;
+                        break;
+                    case ControlFlowEdgeType.Conditional:
+                        newNode.ConditionalEdges.Add(edge.Target);
+                        break;
+                    case ControlFlowEdgeType.Abnormal:
+                        newNode.AbnormalEdges.Add(edge.Target);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            return (this, newNode);
+        }
+        
         /// <summary>
         /// Gets a collection of all edges that target this node.
         /// </summary>

@@ -197,5 +197,100 @@ namespace Echo.ControlFlow.Tests
             }, new HashSet<ControlFlowNode<int>>(nodes[3].GetPredecessors()));
         }
 
+        [Fact]
+        public void SplitNodeShouldConnectUsingFallThrough()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            graph.Nodes.Add(new ControlFlowNode<int>(0, 0, 1, 2, 3, 4));
+
+            var (first, second) = graph.Nodes[0].SplitAtIndex(2);
+
+            Assert.Equal(new[] { 0, 1 }, first.Contents.Instructions);
+            Assert.Equal(new[] { 2, 3, 4 }, second.Contents.Instructions);
+            Assert.Same(first.FallThroughNeighbour, second);
+        }
+
+        [Fact]
+        public void SplitEmptyNodeShouldThrow()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            graph.Nodes.Add(new ControlFlowNode<int>(0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => graph.Nodes[0].SplitAtIndex(1));
+        }
+
+        [Fact]
+        public void SplitNodeWithSingleInstructionShouldThrow()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
+            Assert.Throws<InvalidOperationException>(() => graph.Nodes[0].SplitAtIndex(0));
+        }
+
+        [Fact]
+        public void SplitNodeAtHeaderShouldThrow()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            graph.Nodes.Add(new ControlFlowNode<int>(0, 0, 1, 2));
+            Assert.Throws<ArgumentOutOfRangeException>(() => graph.Nodes[0].SplitAtIndex(0));
+        }
+
+        [Fact]
+        public void SplitNodeAtFooterShouldThrow()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            graph.Nodes.Add(new ControlFlowNode<int>(0, 0, 1, 2));
+            Assert.Throws<ArgumentOutOfRangeException>(() => graph.Nodes[0].SplitAtIndex(3));
+        }
+
+        [Fact]
+        public void SplitNodeShouldTransferFallThroughEdge()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            
+            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
+            graph.Nodes.Add(new ControlFlowNode<int>(1, 1, 2));
+            graph.Nodes.Add(new ControlFlowNode<int>(3, 3));
+
+            graph.Nodes[0].ConnectWith(graph.Nodes[1]);
+            graph.Nodes[1].ConnectWith(graph.Nodes[3]);
+            
+            var (first, second) = graph.Nodes[1].SplitAtIndex(1);
+            
+            Assert.Same(graph.Nodes[3], second.FallThroughNeighbour); 
+        }
+
+        [Fact]
+        public void SplitNodeShouldTransferConditionalEdges()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            
+            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
+            graph.Nodes.Add(new ControlFlowNode<int>(1, 1, 2));
+            graph.Nodes.Add(new ControlFlowNode<int>(3, 3));
+            graph.Nodes.Add(new ControlFlowNode<int>(4, 4));
+
+            graph.Nodes[0].ConnectWith(graph.Nodes[1]);
+            graph.Nodes[1].ConnectWith(graph.Nodes[3], ControlFlowEdgeType.Conditional);
+            graph.Nodes[1].ConnectWith(graph.Nodes[4]);
+            
+            var (first, second) = graph.Nodes[1].SplitAtIndex(1);
+            
+            Assert.Same(graph.Nodes[4], second.FallThroughNeighbour);
+            Assert.Contains(graph.Nodes[3], second.ConditionalEdges.Select(e => e.Target));
+        }
+
+        [Fact]
+        public void SplitSelfLoopNode()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            
+            graph.Nodes.Add(new ControlFlowNode<int>(0, 0, 1));
+            graph.Nodes[0].FallThroughNeighbour = graph.Nodes[0];
+
+            var (first, second) = graph.Nodes[0].SplitAtIndex(1);
+            
+            Assert.Same(second, first.FallThroughNeighbour);
+            Assert.Same(first, second.FallThroughNeighbour);
+        }
     }
 }
