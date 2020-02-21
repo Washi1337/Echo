@@ -10,7 +10,7 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void Empty()
         {
-            var graph = new ControlFlowGraph<int>();
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
             
             Assert.Empty(graph.Nodes);
             Assert.Empty(graph.GetEdges());
@@ -19,7 +19,7 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void SingleNode()
         {
-            var graph = new ControlFlowGraph<int>();
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
 
             var node = new ControlFlowNode<int>(0, 0);
             graph.Nodes.Add(node);
@@ -31,7 +31,7 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void AddMultipleNodes()
         {
-            var graph = new ControlFlowGraph<int>();
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
 
             var nodes = new HashSet<ControlFlowNode<int>>
             {
@@ -48,7 +48,7 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void Entrypoint()
         {
-            var graph = new ControlFlowGraph<int>();
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
 
             var node = new ControlFlowNode<int>(0, 0);
             graph.Nodes.Add(node);
@@ -62,7 +62,7 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void AddEdge()
         {
-            var graph = new ControlFlowGraph<int>();
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
             
             var n1 = new ControlFlowNode<int>(0, 0);
             var n2 = new ControlFlowNode<int>(1, 1);
@@ -76,7 +76,7 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void AddMultipleEdges()
         {
-            var graph = new ControlFlowGraph<int>();
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
             
             var n1 = new ControlFlowNode<int>(0, 0);
             var n2 = new ControlFlowNode<int>(1, 1);
@@ -97,8 +97,8 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void AddFromAnotherGraph()
         {
-            var graph1 = new ControlFlowGraph<int>();
-            var graph2 = new ControlFlowGraph<int>();
+            var graph1 = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            var graph2 = new ControlFlowGraph<int>(IntArchitecture.Instance);
             
             var n1 = new ControlFlowNode<int>(0, 0);
             var n2 = new ControlFlowNode<int>(1, 1);
@@ -112,8 +112,8 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void AddManyFromAnotherGraph()
         {
-            var graph1 = new ControlFlowGraph<int>();
-            var graph2 = new ControlFlowGraph<int>();
+            var graph1 = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            var graph2 = new ControlFlowGraph<int>(IntArchitecture.Instance);
             
             var n1a = new ControlFlowNode<int>(0, 0);
             var n1b = new ControlFlowNode<int>(1, 1);
@@ -135,7 +135,7 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void RemoveNodeShouldRemoveIncomingEdges()
         {
-            var graph = new ControlFlowGraph<int>();
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
 
             var n1 = new ControlFlowNode<int>(1);
             var n2 = new ControlFlowNode<int>(2);
@@ -157,7 +157,7 @@ namespace Echo.ControlFlow.Tests
         [Fact]
         public void RemoveNodeShouldRemoveOutgoingEdges()
         {
-            var graph = new ControlFlowGraph<int>();
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
 
             var n1 = new ControlFlowNode<int>(1);
             var n2 = new ControlFlowNode<int>(2);

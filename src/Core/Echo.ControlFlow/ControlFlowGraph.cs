@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Collections;
+using Echo.Core.Code;
 using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow
@@ -18,8 +19,10 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Creates a new empty graph.
         /// </summary>
-        public ControlFlowGraph()
+        /// <param name="architecture">The architecture description of the instructions stored in the control flow graph.</param>
+        public ControlFlowGraph(IInstructionSetArchitecture<TInstruction> architecture)
         {
+            Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
             Nodes = new NodeCollection<TInstruction>(this);
         }
 
@@ -44,6 +47,14 @@ namespace Echo.ControlFlow
         /// Gets a collection of all basic blocks present in the graph.
         /// </summary>
         public NodeCollection<TInstruction> Nodes
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the architecture of the instructions that are stored in the control flow graph.
+        /// </summary>
+        public IInstructionSetArchitecture<TInstruction> Architecture
         {
             get;
         }

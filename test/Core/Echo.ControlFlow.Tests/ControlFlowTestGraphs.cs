@@ -6,7 +6,7 @@ namespace Echo.ControlFlow.Tests
     {
         public static ControlFlowGraph<DummyInstruction> CreateSingularGraph()
         {
-            var graph = new ControlFlowGraph<DummyInstruction>();
+            var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
             var n1 = new ControlFlowNode<DummyInstruction>(0, DummyInstruction.Ret(0));
 
@@ -18,7 +18,7 @@ namespace Echo.ControlFlow.Tests
 
         public static ControlFlowGraph<DummyInstruction> CreatePath()
         {
-            var graph = new ControlFlowGraph<DummyInstruction>();
+            var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
             var n1 = new ControlFlowNode<DummyInstruction>(0, 
                 DummyInstruction.Op(0, 0, 0));
@@ -44,7 +44,7 @@ namespace Echo.ControlFlow.Tests
 
         public static ControlFlowGraph<DummyInstruction> CreateIf()
         {
-            var graph = new ControlFlowGraph<DummyInstruction>();
+            var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
             var n1 = new ControlFlowNode<DummyInstruction>(0, 
                 DummyInstruction.Op(0, 0, 1),
@@ -68,7 +68,7 @@ namespace Echo.ControlFlow.Tests
         
         public static ControlFlowGraph<DummyInstruction> CreateIfElse()
         {
-            var graph = new ControlFlowGraph<DummyInstruction>();
+            var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
             var n1 = new ControlFlowNode<DummyInstruction>(0, 
                 DummyInstruction.Op(0, 0, 1), 
@@ -96,7 +96,7 @@ namespace Echo.ControlFlow.Tests
         
         public static ControlFlowGraph<DummyInstruction> CreateIfElseNested()
         {
-            var graph = new ControlFlowGraph<DummyInstruction>();
+            var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
             var n1 = new ControlFlowNode<DummyInstruction>(0, 
                 DummyInstruction.Op(0, 0, 1), 
@@ -134,7 +134,7 @@ namespace Echo.ControlFlow.Tests
 
         public static ControlFlowGraph<DummyInstruction> CreateLoop()
         {
-            var graph = new ControlFlowGraph<DummyInstruction>();
+            var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
             var n1 = new ControlFlowNode<DummyInstruction>(0, 
                 DummyInstruction.Jmp(0, 2));
@@ -162,7 +162,7 @@ namespace Echo.ControlFlow.Tests
 
         public static ControlFlowGraph<DummyInstruction> CreateSwitch()
         {
-            var graph = new ControlFlowGraph<DummyInstruction>();
+            var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
             var n1 = new ControlFlowNode<DummyInstruction>(0, 
                 DummyInstruction.Switch(0, 2, 3, 4, 5));

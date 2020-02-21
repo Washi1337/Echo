@@ -12,7 +12,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         [Fact]
         public void Simple()
         {
-            var cfg = new ControlFlowGraph<int>();
+            var cfg = new ControlFlowGraph<int>(IntArchitecture.Instance);
             
             var n = new ControlFlowNode<int>(0, 0);
             cfg.Nodes.Add(n);
@@ -25,7 +25,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         [Fact]
         public void Path()
         {
-            var cfg = new ControlFlowGraph<int>();
+            var cfg = new ControlFlowGraph<int>(IntArchitecture.Instance);
 
             var nodes = new ControlFlowNode<int>[3];
             for (int i = 0; i < nodes.Length; i++)
@@ -45,7 +45,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         [Fact]
         public void If()
         {
-            var cfg = new ControlFlowGraph<int>();
+            var cfg = new ControlFlowGraph<int>(IntArchitecture.Instance);
 
             var nodes = new ControlFlowNode<int>[4];
             for (int i = 0; i < nodes.Length; i++)
@@ -69,7 +69,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         [Fact]
         public void Loop()
         {        
-            var cfg = new ControlFlowGraph<int>();
+            var cfg = new ControlFlowGraph<int>(IntArchitecture.Instance);
 
             var nodes = new ControlFlowNode<int>[4];
             for (int i = 0; i < nodes.Length; i++)
@@ -97,7 +97,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             // http://www.sable.mcgill.ca/~hendren/621/ControlFlowAnalysis_Handouts.pdf
             // (slide 57)
             
-            var cfg = new ControlFlowGraph<int>();
+            var cfg = new ControlFlowGraph<int>(IntArchitecture.Instance);
 
             var nodes = new ControlFlowNode<int>[11];
             for (int i = 0; i < nodes.Length; i++)

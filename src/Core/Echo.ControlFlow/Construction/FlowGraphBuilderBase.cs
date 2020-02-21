@@ -56,7 +56,7 @@ namespace Echo.ControlFlow.Construction
         {
             var traversalResult = CollectInstructions(instructions, entrypoint);
 
-            var graph = new ControlFlowGraph<TInstruction>();
+            var graph = new ControlFlowGraph<TInstruction>(Architecture);
             CreateNodes(graph, traversalResult);
             ConnectNodes(graph, traversalResult);
             graph.Entrypoint = graph.GetNodeByOffset(entrypoint);

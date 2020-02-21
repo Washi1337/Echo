@@ -9,7 +9,7 @@ namespace Echo.ControlFlow.Tests
     {
         private static IList<ControlFlowNode<int>> CreateDummyGraph(int nodeCount)
         {
-            var graph = new ControlFlowGraph<int>();
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
 
             var nodes = new ControlFlowNode<int>[nodeCount];
             for (int i = 0; i < nodeCount; i++)
