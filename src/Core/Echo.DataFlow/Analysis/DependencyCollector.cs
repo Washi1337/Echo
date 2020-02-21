@@ -47,12 +47,19 @@ namespace Echo.DataFlow.Analysis
 
                     // Schedule variable dependencies.
                     foreach (var dependency in current.Node.VariableDependencies.Values)
-                        agenda.Push(new State<T>(dependency.DataSources.First(), false));
+                    {
+                        if (dependency.DataSources.Count > 0)
+                            agenda.Push(new State<T>(dependency.DataSources.First(), false));
+                    }
 
                     // Schedule stack dependencies, in reversed order to ensure that the first dependency is pushed
                     // last and therefore traversed first.
                     for (int i = current.Node.StackDependencies.Count - 1; i >= 0; i--)
-                        agenda.Push(new State<T>(current.Node.StackDependencies[i].DataSources.First(), false));
+                    {
+                        var dependency = current.Node.StackDependencies[i];
+                        if (dependency.DataSources.Count > 0)
+                            agenda.Push(new State<T>(dependency.DataSources.First(), false));
+                    }
                 }
                 else
                 {
