@@ -245,22 +245,7 @@ namespace Echo.ControlFlow
 
             // Move removed outgoing edges to new node.
             foreach (var edge in edges)
-            {
-                switch (edge.Type)
-                {
-                    case ControlFlowEdgeType.FallThrough:
-                        newNode.FallThroughNeighbour = edge.Target;
-                        break;
-                    case ControlFlowEdgeType.Conditional:
-                        newNode.ConditionalEdges.Add(edge.Target);
-                        break;
-                    case ControlFlowEdgeType.Abnormal:
-                        newNode.AbnormalEdges.Add(edge.Target);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+                newNode.ConnectWith(edge.Target, edge.Type);
 
             return (this, newNode);
         }

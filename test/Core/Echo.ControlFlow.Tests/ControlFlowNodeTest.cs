@@ -215,7 +215,7 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
             graph.Nodes.Add(new ControlFlowNode<int>(0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => graph.Nodes[0].SplitAtIndex(1));
+            Assert.Throws<InvalidOperationException>(() => graph.Nodes[0].SplitAtIndex(1));
         }
 
         [Fact]
