@@ -68,6 +68,16 @@ namespace Echo.ControlFlow.Blocks
             get;
         }
 
+        /// <summary>
+        /// Gets the first instruction that is evaluated when this basic block is executed.
+        /// </summary>
+        public TInstruction Header => Instructions.Count > 0 ? Instructions[0] : default;
+
+        /// <summary>
+        /// Gets the last instruction that is evaluated when this basic block is executed.
+        /// </summary>
+        public TInstruction Footer => Instructions.Count > 0 ? Instructions[Instructions.Count - 1] : default;
+
         /// <inheritdoc />
         public override string ToString()
         {
