@@ -13,12 +13,12 @@ namespace Echo.Platforms.DummyPlatform.Code
         
         public static DummyInstruction Push(long offset, int pushCount)
         {
-            return new DummyInstruction(offset, DummyOpCode.Op, 0, pushCount, 0, pushCount);
+            return new DummyInstruction(offset, DummyOpCode.Push, 0, pushCount, 0, pushCount);
         }
         
         public static DummyInstruction Pop(long offset, int popCount)
         {
-            return new DummyInstruction(offset, DummyOpCode.Op, popCount, 0, popCount, 0);
+            return new DummyInstruction(offset, DummyOpCode.Pop, popCount, 0, popCount, 0);
         }
 
         public static DummyInstruction Jmp(long offset, long target)

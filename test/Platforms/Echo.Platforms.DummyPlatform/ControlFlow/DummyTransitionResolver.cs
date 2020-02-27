@@ -37,6 +37,8 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
             return instruction.OpCode switch
             {
                 DummyOpCode.Op => GetFallthroughTransitions(nextState),
+                DummyOpCode.Push => GetFallthroughTransitions(nextState),
+                DummyOpCode.Pop => GetFallthroughTransitions(nextState),
                 DummyOpCode.Jmp => GetJumpTransitions(nextState, instruction),
                 DummyOpCode.JmpCond => GetJumpCondTransitions(nextState, instruction),
                 DummyOpCode.Ret => Enumerable.Empty<StateTransition<DummyInstruction>>(),

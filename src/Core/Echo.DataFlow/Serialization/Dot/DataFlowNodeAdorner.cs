@@ -22,16 +22,25 @@ namespace Echo.DataFlow.Serialization.Dot
         /// <inheritdoc />
         public IDictionary<string, string> GetNodeAttributes(INode node)
         {
-            if (node is DataFlowNode<TContents> n)
+            switch (node)
             {
-                return new Dictionary<string, string>
-                {
-                    ["shape"] = NodeShape,
-                    ["label"] = n.Contents.ToString()
-                };
+                case ExternalDataSource<TContents> externalDataSource:
+                    return new Dictionary<string, string>
+                    {
+                        ["shape"] = NodeShape,
+                        ["label"] = externalDataSource.Name
+                    };
+                
+                case DataFlowNode<TContents> dataFlowNode:
+                    return new Dictionary<string, string>
+                    {
+                        ["shape"] = NodeShape,
+                        ["label"] = dataFlowNode.Contents.ToString()
+                    };
+                
+                default:
+                    return null;
             }
-
-            return null;
         }
     }
 }

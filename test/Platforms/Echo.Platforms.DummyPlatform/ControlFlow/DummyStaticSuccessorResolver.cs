@@ -17,6 +17,8 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
             switch (instruction.OpCode)
             {
                 case DummyOpCode.Op:
+                case DummyOpCode.Push:
+                case DummyOpCode.Pop:
                     result.Add(new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough));
                     break;
                 case DummyOpCode.Jmp:
