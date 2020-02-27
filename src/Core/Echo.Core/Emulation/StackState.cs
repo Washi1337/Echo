@@ -48,6 +48,8 @@ namespace Echo.Core.Emulation
         /// <inheritdoc />
         public TValue Pop()
         {
+            AssertCanPop(1);
+            
             var top = Top;
             _stack.RemoveAt(Size - 1);
             return top;
@@ -56,6 +58,8 @@ namespace Echo.Core.Emulation
         /// <inheritdoc />
         public IList<TValue> Pop(int count, bool reversed = false)
         {
+            AssertCanPop(count);
+            
             var values = new TValue[count];
             if (count <= 0)
                 return values;
@@ -67,6 +71,12 @@ namespace Echo.Core.Emulation
                 Array.Reverse(values);
 
             return values;
+        }
+
+        private void AssertCanPop(int count)
+        {
+            if (Size < count)
+                throw new StackImbalanceException("Insufficient items on the stack.");
         }
 
         IStackState<TValue> IStackState<TValue>.Copy()

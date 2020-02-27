@@ -16,6 +16,19 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
         {
         }
 
+        public SymbolicProgramState<DummyInstruction> InitialState
+        {
+            get;
+            set;
+        } = new SymbolicProgramState<DummyInstruction>();
+
+        public override SymbolicProgramState<DummyInstruction> GetInitialState(long entrypointAddress)
+        {
+            var state = InitialState.Copy();
+            state.ProgramCounter = entrypointAddress;
+            return state;
+        }
+
         public override IEnumerable<StateTransition<DummyInstruction>> GetTransitions(SymbolicProgramState<DummyInstruction> currentState, DummyInstruction instruction)
         {
             var nextState = currentState.Copy();

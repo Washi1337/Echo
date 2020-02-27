@@ -3,6 +3,8 @@ using System.Linq;
 using Echo.ControlFlow.Construction.Symbolic;
 using Echo.Core.Emulation;
 using Echo.DataFlow;
+using Echo.DataFlow.Emulation;
+using Echo.DataFlow.Values;
 using Echo.Platforms.DummyPlatform.Code;
 using Echo.Platforms.DummyPlatform.ControlFlow;
 using Xunit;
@@ -220,6 +222,40 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             {
                 0L, 100L
             }, cfg.Nodes.Select(n => n.Offset));
+        }
+
+        [Fact]
+        public void EntryPointPopWithInitialStateEmptyShouldThrow()
+        {
+            _dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>();
+
+            var instructions = new[]
+            {
+                DummyInstruction.Pop(0, 1),
+                DummyInstruction.Ret(1),
+            };
+
+            Assert.Throws<StackImbalanceException>(() => _cfgBuilder.ConstructFlowGraph(instructions, 0));
+        }
+
+        [Fact]
+        public void EntryPointPopWithSingleItemOnStackShouldAddDependencyToExternalSource()
+        {
+            var argument = new ExternalDataSource<DummyInstruction>(-1, "Argument 1");
+            _dfgBuilder.DataFlowGraph.Nodes.Add(argument);
+            _dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>();
+            _dfgBuilder.InitialState.Stack.Push(new SymbolicValue<DummyInstruction>(argument));
+
+            var instructions = new[]
+            {
+                DummyInstruction.Pop(0, 1),
+                DummyInstruction.Ret(1),
+            };
+
+            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 0);
+            var dfg = _dfgBuilder.DataFlowGraph;
+
+            Assert.Equal(new[] {argument}, dfg.Nodes[0].StackDependencies[0].DataSources);
         }
 
     }
