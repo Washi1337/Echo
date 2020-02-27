@@ -13,7 +13,7 @@ namespace Echo.ControlFlow.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class NodeCollection<TContents> : ICollection<ControlFlowNode<TContents>>
     {
-        private readonly IDictionary<long, ControlFlowNode<TContents>> _nodes = new Dictionary<long, ControlFlowNode<TContents>>();
+        private readonly Dictionary<long, ControlFlowNode<TContents>> _nodes = new Dictionary<long, ControlFlowNode<TContents>>();
         private readonly ControlFlowGraph<TContents> _owner;
 
         internal NodeCollection(ControlFlowGraph<TContents> owner)
@@ -154,10 +154,47 @@ namespace Echo.ControlFlow.Collections
         public bool Remove(ControlFlowNode<TContents> item) => 
             item != null && Remove(item.Offset);
 
-        /// <inheritdoc />
-        public IEnumerator<ControlFlowNode<TContents>> GetEnumerator() => _nodes.Values.GetEnumerator();
+        /// <summary>
+        /// Obtains an enumerator that enumerates all nodes in the collection.
+        /// </summary>
+        /// <returns></returns>
+        public Enumerator GetEnumerator() => new Enumerator(this);
+
+        IEnumerator<ControlFlowNode<TContents>> IEnumerable<ControlFlowNode<TContents>>.GetEnumerator() =>
+            GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Represents an enumerator that enumerates all nodes in a control flow graph.
+        /// </summary>
+        public struct Enumerator : IEnumerator<ControlFlowNode<TContents>>
+        {
+            private Dictionary<long, ControlFlowNode<TContents>>.Enumerator _enumerator;
+
+            /// <summary>
+            /// Creates a new instance of the <see cref="Enumerator"/> structure.
+            /// </summary>
+            /// <param name="collection">The collection to enumerate.</param>
+            public Enumerator(NodeCollection<TContents> collection)
+            {
+                _enumerator = collection._nodes.GetEnumerator();
+            }
+
+            /// <inheritdoc />
+            public ControlFlowNode<TContents> Current => _enumerator.Current.Value;
+
+            object IEnumerator.Current => Current;
+
+            /// <inheritdoc />
+            public bool MoveNext() => _enumerator.MoveNext();
+
+            /// <inheritdoc />
+            public void Reset() => ((IEnumerator) _enumerator).Reset();
+
+            /// <inheritdoc />
+            public void Dispose() => _enumerator.Dispose();
+        }
         
     }
 }
