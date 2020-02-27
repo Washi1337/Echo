@@ -1,0 +1,49 @@
+using System;
+
+namespace Echo.DataFlow
+{
+    /// <summary>
+    /// Represents a data source that does not belong to a
+    /// </summary>
+    /// <typeparam name="TContents"></typeparam>
+    public class ExternalDataSource<TContents> : DataFlowNode<TContents>
+    {
+        /// <summary>
+        /// Creates a new external data source.
+        /// </summary>
+        /// <param name="id">The unique identifier of the data source. This should be a negative number.</param>
+        /// <param name="name">The display name of the external data source.</param>
+        public ExternalDataSource(long id, string name) 
+            : this(id, name, default)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new external data source.
+        /// </summary>
+        /// <param name="id">The unique identifier of the data source. This should be a negative number.</param>
+        /// <param name="name">The display name of the external data source.</param>
+        /// <param name="contents">The contents of the data flow node.</param>
+        public ExternalDataSource(long id, string name, TContents contents) 
+            : base(id, contents)
+        {
+            if (id >= 0)
+                throw new ArgumentException("Identifiers of external data sources should be negative.");
+            Name = name;
+        }
+
+        /// <summary>
+        /// Gets the name of the auxiliary data flow node.
+        /// </summary>
+        public string Name
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public override bool IsExternal => true;
+
+        /// <inheritdoc />
+        public override string ToString() => Name;
+    }
+}

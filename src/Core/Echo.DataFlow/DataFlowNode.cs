@@ -44,6 +44,8 @@ namespace Echo.DataFlow
             get;
         }
 
+        public virtual bool IsExternal => false;
+
         /// <summary>
         /// Gets the contents of the node.
         /// </summary>
