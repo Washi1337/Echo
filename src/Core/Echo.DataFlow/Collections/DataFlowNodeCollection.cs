@@ -140,8 +140,8 @@ namespace Echo.DataFlow.Collections
                 
                 foreach (var dependency in item.StackDependencies)
                     dependency.DataSources.Clear();
-                foreach (var dependency in item.VariableDependencies.Values)
-                    dependency.DataSources.Clear();
+                foreach (var entry in item.VariableDependencies)
+                    entry.Value.DataSources.Clear();
                 
                 // Remove node.
                 _nodes.Remove(offset);

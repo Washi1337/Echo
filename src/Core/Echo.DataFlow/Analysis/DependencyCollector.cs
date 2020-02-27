@@ -43,10 +43,10 @@ namespace Echo.DataFlow.Analysis
                         result.Add(dependency.DataSources.First());
                 }
                 
-                foreach (var dependency in node.VariableDependencies.Values)
+                foreach (var entry in node.VariableDependencies)
                 {
-                    if (dependency.IsKnown)
-                        result.Add(dependency.DataSources.First());
+                    if (entry.Value.IsKnown)
+                        result.Add(entry.Value.DataSources.First());
                 }
 
                 return result;
