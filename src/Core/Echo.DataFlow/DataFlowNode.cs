@@ -44,6 +44,9 @@ namespace Echo.DataFlow
             get;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the data flow node represents an external data source.
+        /// </summary>
         public virtual bool IsExternal => false;
 
         /// <summary>
@@ -75,6 +78,10 @@ namespace Echo.DataFlow
             get;
         } = new List<DataFlowNode<TContents>>();
 
+        /// <summary>
+        /// Obtains a collection of nodes that depend on this node.
+        /// </summary>
+        /// <returns>The dependant nodes.</returns>
         public IEnumerable<DataFlowNode<TContents>> GetDependants() => Dependants;
 
         IEnumerable<IEdge> INode.GetIncomingEdges()
