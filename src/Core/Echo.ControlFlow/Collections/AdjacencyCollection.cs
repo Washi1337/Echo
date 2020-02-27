@@ -15,8 +15,8 @@ namespace Echo.ControlFlow.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class AdjacencyCollection<TContents> : ICollection<ControlFlowEdge<TContents>>
     {
-        private readonly IDictionary<INode, ICollection<ControlFlowEdge<TContents>>> _neighbours 
-            = new Dictionary<INode, ICollection<ControlFlowEdge<TContents>>>();
+        private readonly Dictionary<INode, HashSet<ControlFlowEdge<TContents>>> _neighbours 
+            = new Dictionary<INode, HashSet<ControlFlowEdge<TContents>>>();
 
         private readonly ControlFlowEdgeType _edgeType;
         private int _count;
@@ -141,19 +141,6 @@ namespace Echo.ControlFlow.Collections
 
             return result;
         }
-        
-        /// <inheritdoc />
-        public IEnumerator<ControlFlowEdge<TContents>> GetEnumerator()
-        {
-            return _neighbours
-                .SelectMany(x => x.Value)
-                .GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
 
         internal static void AssertEdgeValidity(ControlFlowNode<TContents> owner, ControlFlowEdgeType type, ControlFlowEdge<TContents> item)
         {
@@ -178,5 +165,73 @@ namespace Echo.ControlFlow.Collections
             return edges;
         }
         
+        /// <summary>
+        /// Obtains an enumerator that enumerates all nodes in the collection.
+        /// </summary>
+        /// <returns></returns>
+        public Enumerator GetEnumerator() => new Enumerator(this);
+
+        IEnumerator<ControlFlowEdge<TContents>> IEnumerable<ControlFlowEdge<TContents>>.GetEnumerator() =>
+            GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Represents an enumerator that enumerates all nodes in a control flow graph.
+        /// </summary>
+        public struct Enumerator : IEnumerator<ControlFlowEdge<TContents>>
+        {
+            private Dictionary<INode, HashSet<ControlFlowEdge<TContents>>>.Enumerator _groupEnumerator;
+            private HashSet<ControlFlowEdge<TContents>>.Enumerator _itemIterator;
+            private bool _hasItemIterator;
+            private ControlFlowEdge<TContents> _current;
+
+            /// <summary>
+            /// Creates a new instance of the <see cref="Enumerator"/> structure.
+            /// </summary>
+            /// <param name="collection">The collection to enumerate.</param>
+            public Enumerator(AdjacencyCollection<TContents> collection)
+            {
+                _groupEnumerator = collection._neighbours.GetEnumerator();
+                _itemIterator = default;
+                _hasItemIterator = false;
+                _current = null;
+            }
+
+            /// <inheritdoc />
+            public ControlFlowEdge<TContents> Current => _current;
+
+            object IEnumerator.Current => Current;
+
+            /// <inheritdoc />
+            public bool MoveNext()
+            {
+                while (true)
+                {
+                    if (!_hasItemIterator)
+                    {
+                        if (!_groupEnumerator.MoveNext())
+                            return false;
+
+                        _itemIterator = _groupEnumerator.Current.Value.GetEnumerator();
+                        _hasItemIterator = true;
+                    }
+
+                    if (_itemIterator.MoveNext())
+                    {
+                        _current = _itemIterator.Current;
+                        return true;
+                    }
+
+                    _hasItemIterator = false;
+                }
+            }
+
+            /// <inheritdoc />
+            public void Reset() => ((IEnumerator) _groupEnumerator).Reset();
+
+            /// <inheritdoc />
+            public void Dispose() => _groupEnumerator.Dispose();
+        }
     }
 }

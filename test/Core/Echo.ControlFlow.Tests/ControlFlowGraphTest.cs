@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
@@ -174,6 +175,33 @@ namespace Echo.ControlFlow.Tests
 
             Assert.Empty(n1.GetOutgoingEdges());
             Assert.Empty(n2.GetIncomingEdges());
+        }
+
+        [Fact]
+        public void MultipleConditionalEdgesToSameNodeIsAllowed()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            
+            var n1 = new ControlFlowNode<int>(1);
+            var n2 = new ControlFlowNode<int>(2);
+            var n3 = new ControlFlowNode<int>(3);
+
+            graph.Nodes.AddRange(new[]
+            {
+                n1, n2, n3
+            });
+
+            n1.ConnectWith(n2);
+            n1.ConnectWith(n3, ControlFlowEdgeType.Conditional);
+            n1.ConnectWith(n3, ControlFlowEdgeType.Conditional);
+            n1.ConnectWith(n3, ControlFlowEdgeType.Conditional);
+            n1.ConnectWith(n3, ControlFlowEdgeType.Conditional);
+            
+            Assert.Same(n2, n1.FallThroughNeighbour);
+            Assert.Equal(new[]
+            {
+                n3, n3, n3, n3
+            }, n1.ConditionalEdges.Select(e => e.Target));
         }
         
     }
