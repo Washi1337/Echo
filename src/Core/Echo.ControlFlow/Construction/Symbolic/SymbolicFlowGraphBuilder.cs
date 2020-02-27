@@ -46,7 +46,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             
             var recordedStates = new Dictionary<long, SymbolicProgramState<TInstruction>>();
             var agenda = new Stack<SymbolicProgramState<TInstruction>>();
-            agenda.Push(new SymbolicProgramState<TInstruction>(entrypoint));
+            agenda.Push(TransitionResolver.GetInitialState(entrypoint));
 
             while (agenda.Count > 0)
             {

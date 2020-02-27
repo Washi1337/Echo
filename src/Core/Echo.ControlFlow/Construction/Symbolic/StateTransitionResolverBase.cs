@@ -41,6 +41,10 @@ namespace Echo.ControlFlow.Construction.Symbolic
         }
 
         /// <inheritdoc />
+        public virtual SymbolicProgramState<TInstruction> GetInitialState(long entrypointAddress) => 
+            new SymbolicProgramState<TInstruction>(entrypointAddress);
+
+        /// <inheritdoc />
         public abstract IEnumerable<StateTransition<TInstruction>> GetTransitions(SymbolicProgramState<TInstruction> currentState,
             TInstruction instruction);
 

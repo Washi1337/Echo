@@ -10,6 +10,13 @@ namespace Echo.ControlFlow.Construction.Symbolic
     public interface IStateTransitionResolver<TInstruction>
     {
         /// <summary>
+        /// Gets the initial state of the program at a provided entry point address.
+        /// </summary>
+        /// <param name="entrypointAddress">The entry point address.</param>
+        /// <returns>The object representing the initial state of the program.</returns>
+        SymbolicProgramState<TInstruction> GetInitialState(long entrypointAddress);
+
+        /// <summary>
         /// Resolves all possible program state transitions that the provided instruction can apply. 
         /// </summary>
         /// <param name="currentState">The current state of the program.</param>
