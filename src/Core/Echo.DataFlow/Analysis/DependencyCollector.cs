@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using Echo.Core.Graphing;
+using Echo.Core.Graphing.Analysis;
+using Echo.Core.Graphing.Analysis.Sorting;
 
 namespace Echo.DataFlow.Analysis
 {
@@ -18,76 +22,34 @@ namespace Echo.DataFlow.Analysis
         /// <exception cref="CyclicDependencyException">Occurs when there is a cyclic dependency in the graph.</exception>
         public static IEnumerable<DataFlowNode<T>> GetOrderedDependencies<T>(this DataFlowNode<T> node)
         {
-            // We find a topological sorting of the node using the altered DFS algorithm as described here:
-            // https://en.wikipedia.org/wiki/Topological_sorting
-            // The algorithm used to be recursive, but was rewritten to be iterative to avoid stack overflows. 
-
-            var result = new List<DataFlowNode<T>>();
-            var permanent = new HashSet<DataFlowNode<T>>();
-            var temporary = new HashSet<DataFlowNode<T>>();
-
-            var agenda = new Stack<State<T>>();
-            agenda.Push(new State<T>(node, false));
-
-            while (agenda.Count > 0)
+            try
             {
-                var current = agenda.Pop();
-                if (!current.HasTraversedDescendants)
+                var topologicalSorting = new TopologicalSorter<DataFlowNode<T>>(GetSortedOutgoingEdges);
+                return topologicalSorting.GetTopologicalSorting(node);
+            }
+            catch (CycleDetectedException ex)
+            {
+                throw new CyclicDependencyException("Cyclic dependency was detected.", ex);
+            }
+
+            static IReadOnlyList<DataFlowNode<T>> GetSortedOutgoingEdges(DataFlowNode<T> node)
+            {
+                var result = new List<DataFlowNode<T>>();
+                
+                // Prioritize stack dependencies over variable dependencies.
+                foreach (var dependency in node.StackDependencies)
                 {
-                    if (permanent.Contains(current.Node))
-                        continue;
-                    if (temporary.Contains(current.Node))
-                        throw new CyclicDependencyException();
-
-                    temporary.Add(current.Node);
-
-                    // Schedule remaining steps. We push this before pushing dependencies so it gets executed after
-                    // the dependencies are traversed.
-                    agenda.Push(new State<T>(current.Node, true));
-
-                    // Schedule variable dependencies.
-                    foreach (var dependency in current.Node.VariableDependencies.Values)
-                    {
-                        if (dependency.DataSources.Count > 0)
-                            agenda.Push(new State<T>(dependency.DataSources.First(), false));
-                    }
-
-                    // Schedule stack dependencies, in reversed order to ensure that the first dependency is pushed
-                    // last and therefore traversed first.
-                    for (int i = current.Node.StackDependencies.Count - 1; i >= 0; i--)
-                    {
-                        var dependency = current.Node.StackDependencies[i];
-                        if (dependency.DataSources.Count > 0)
-                            agenda.Push(new State<T>(dependency.DataSources.First(), false));
-                    }
+                    if (dependency.IsKnown)
+                        result.Add(dependency.DataSources.First());
                 }
-                else
+                
+                foreach (var dependency in node.VariableDependencies.Values)
                 {
-                    temporary.Remove(current.Node);
-                    permanent.Add(current.Node);
-                    result.Add(current.Node);
+                    if (dependency.IsKnown)
+                        result.Add(dependency.DataSources.First());
                 }
-            }
 
-            return result;
-        }
-
-        private readonly struct State<T>
-        {
-            public State(DataFlowNode<T> node, bool hasTraversedDescendants)
-            {
-                Node = node;
-                HasTraversedDescendants = hasTraversedDescendants;
-            }
-            
-            public DataFlowNode<T> Node
-            {
-                get;
-            }
-
-            public bool HasTraversedDescendants
-            {
-                get;
+                return result;
             }
         }
     }

@@ -3,9 +3,9 @@ using System;
 namespace Echo.DataFlow
 {
     /// <summary>
-    /// Represents a data source that does not belong to a
+    /// Represents an external data source in a data flow graph. 
     /// </summary>
-    /// <typeparam name="TContents"></typeparam>
+    /// <typeparam name="TContents">The type of contents to store in the node.</typeparam>
     public class ExternalDataSource<TContents> : DataFlowNode<TContents>
     {
         /// <summary>
