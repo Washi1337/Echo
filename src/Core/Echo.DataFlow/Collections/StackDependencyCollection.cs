@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -66,6 +68,65 @@ namespace Echo.DataFlow.Collections
         {
             while (Items.Count > 0)
                 RemoveAt(0);
+        }
+
+        /// <summary>
+        /// Gets the enumerator for this stack dependency collection.
+        /// </summary>
+        /// <returns></returns>
+        public new Enumerator GetEnumerator() => new Enumerator(this);
+
+        /// <summary>
+        /// Represents an enumerator for a stack dependency collection.
+        /// </summary>
+        public struct Enumerator : IEnumerator<DataDependency<TContents>>
+        {
+            private readonly StackDependencyCollection<TContents> _collection;
+            private DataDependency<TContents> _current;
+            private int _index;
+
+            /// <summary>
+            /// Creates a new instance of the <see cref="Enumerator"/> structure.
+            /// </summary>
+            /// <param name="collection">The collection to enumerate.</param>
+            public Enumerator(StackDependencyCollection<TContents> collection)
+                : this()
+            {
+                _collection = collection;
+                _index = -1;
+                _current = null;
+            }
+
+            /// <inheritdoc />
+            public DataDependency<TContents> Current => _current;
+
+            object IEnumerator.Current => Current;
+
+            /// <inheritdoc />
+            public bool MoveNext()
+            {
+                _index++;
+                if (_index < _collection.Count)
+                {
+                    _current = _collection[_index];
+                    return true;
+                }
+
+                _current = null;
+                return false;
+            }
+
+            /// <inheritdoc />
+            public void Reset()
+            {
+                _index = -1;
+                _current = null;
+            }
+
+            /// <inheritdoc />
+            public void Dispose()
+            {
+            }
         }
     }
 }
