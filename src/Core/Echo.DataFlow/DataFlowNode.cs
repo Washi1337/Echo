@@ -42,6 +42,7 @@ namespace Echo.DataFlow
         public long Id
         {
             get;
+            internal set;
         }
 
         /// <summary>

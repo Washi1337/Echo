@@ -153,6 +153,59 @@ namespace Echo.DataFlow.Collections
             return false;
         }
 
+        /// <summary>
+        /// Synchronizes all offsets of each node with the underlying instructions.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Occurs when one or more nodes are in a state that new offsets
+        /// cannot be determined. This includes duplicated offsets.</exception>
+        /// <remarks>
+        /// <para>
+        /// Because updating offsets is a relatively expensive task, calls to this method should be delayed as much as
+        /// possible.
+        /// </para>
+        /// <para>
+        /// This method will invalidate any enumerators that are enumerating this collection of nodes.
+        /// </para>
+        /// </remarks>
+        public void UpdateIndices()
+        {
+            var nodes = new Dictionary<long, DataFlowNode<TContents>>(Count);
+
+            // Verify whether all basic blocks are valid, i.e. all offsets can be obtained successfully and contain
+            // no duplicate offsets. If any problem arises we do not want to commit any changes to the node collection.
+            foreach (var entry in _nodes)
+            {
+                var node = entry.Value;
+                if (node.IsExternal)
+                {
+                    nodes.Add(entry.Key, entry.Value);
+                }
+                else
+                {
+                    long newOffset = _owner.Architecture.GetOffset(node.Contents);
+                    if (nodes.ContainsKey(newOffset))
+                    {
+                        throw new InvalidOperationException(
+                            $"Collection contains multiple instances of the offset {newOffset:X8}.");
+                    }
+
+                    nodes.Add(newOffset, node);
+                }
+            }
+
+            // Update the collection by editing the dictionary directly instead of using the public Clear and Add
+            // methods. The public methods remove any incident edges to each node, which means we'd have to add them 
+            // again. 
+
+            _nodes.Clear();
+
+            foreach (var entry in nodes)
+            {
+                entry.Value.Id = entry.Key;
+                _nodes.Add(entry.Key, entry.Value);
+            }
+        }
+
         /// <inheritdoc />
         public bool Remove(DataFlowNode<TContents> item) => 
             item != null && Remove(item.Id);
