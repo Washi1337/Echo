@@ -181,5 +181,50 @@ namespace Echo.DataFlow.Tests
             Assert.Empty(n1.VariableDependencies[variable].DataSources);
             Assert.Empty(n2.GetDependants());
         }
+        
+        [Theory]
+        [InlineData(DataDependencyType.Stack, false)]
+        [InlineData(DataDependencyType.Stack, true)]
+        [InlineData(DataDependencyType.Variable, false)]
+        [InlineData(DataDependencyType.Variable, true)]
+        public void DisconnectNodeShouldRemoveEdge(DataDependencyType edgeType, bool removeSourceNode)
+        {
+            var variable = new DummyVariable("var");
+            
+            var graph = new DataFlowGraph<int>(IntArchitecture.Instance);
+
+            var n1 = new DataFlowNode<int>(0, 0);
+            n1.StackDependencies.Add(new DataDependency<int>());
+            n1.VariableDependencies.Add(variable, new DataDependency<int>());
+            
+            var n2 = new DataFlowNode<int>(1, 1);
+
+            graph.Nodes.AddRange(new[]
+            {
+                n1,
+                n2
+            });
+
+            switch (edgeType)
+            {
+                case DataDependencyType.Stack:
+                    n1.StackDependencies[0].DataSources.Add(n2);
+                    break;
+                case DataDependencyType.Variable:
+                    n1.VariableDependencies[variable].DataSources.Add(n2);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(edgeType), edgeType, null);
+            }
+            
+            if (removeSourceNode)
+                n1.Disconnect();
+            else
+                n2.Disconnect();
+
+            Assert.Empty(n1.StackDependencies[0].DataSources);
+            Assert.Empty(n1.VariableDependencies[variable].DataSources);
+            Assert.Empty(n2.GetDependants());
+        }
     }
 }

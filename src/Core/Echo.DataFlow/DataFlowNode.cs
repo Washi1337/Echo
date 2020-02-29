@@ -114,6 +114,26 @@ namespace Echo.DataFlow
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Removes all incident edges (both incoming and outgoing edges) from the node, effectively isolating the node
+        /// in the graph. 
+        /// </summary>
+        public void Disconnect()
+        {
+            foreach (var dependency in StackDependencies)
+                dependency.DataSources.Clear();
+            foreach (var entry in VariableDependencies)
+                entry.Value.DataSources.Clear();
+
+            foreach (var dependant in Dependants.ToArray())
+            {
+                foreach (var dependency in dependant.StackDependencies)
+                    dependency.DataSources.Remove(this);
+                foreach (var entry in dependant.VariableDependencies)
+                    entry.Value.DataSources.Remove(this);
+            }
+        }
+
         /// <inheritdoc />
         public override string ToString() => $"{Id} ({Contents})";
     }
