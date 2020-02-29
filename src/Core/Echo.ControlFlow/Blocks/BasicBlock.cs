@@ -69,14 +69,19 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <summary>
+        /// Gets a value indicating whether the basic block contains any instruction.
+        /// </summary>
+        public bool IsEmpty => Instructions.Count == 0;
+
+        /// <summary>
         /// Gets the first instruction that is evaluated when this basic block is executed.
         /// </summary>
-        public TInstruction Header => Instructions.Count > 0 ? Instructions[0] : default;
+        public TInstruction Header => !IsEmpty ? Instructions[0] : default;
 
         /// <summary>
         /// Gets the last instruction that is evaluated when this basic block is executed.
         /// </summary>
-        public TInstruction Footer => Instructions.Count > 0 ? Instructions[Instructions.Count - 1] : default;
+        public TInstruction Footer => !IsEmpty ? Instructions[Instructions.Count - 1] : default;
 
         /// <inheritdoc />
         public override string ToString()
