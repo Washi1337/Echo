@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Echo.Platforms.DummyPlatform;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
@@ -17,7 +18,7 @@ namespace Echo.DataFlow.Tests
         [Fact]
         public void AddNodeToGraphShouldSetParentGraph()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var node = new DataFlowNode<int>(1, 2);
             dfg.Nodes.Add(node);
             Assert.Same(dfg, node.ParentGraph);
@@ -26,7 +27,7 @@ namespace Echo.DataFlow.Tests
         [Fact]
         public void RemoveNodeFromGraphShouldUnsetParentGraph()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var node = new DataFlowNode<int>(1, 2);
             dfg.Nodes.Add(node);
             dfg.Nodes.Remove(node);
@@ -36,7 +37,7 @@ namespace Echo.DataFlow.Tests
         [Fact]
         public void AddStackDependencyShouldSetDependant()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n0 = dfg.Nodes.Add(0, 0);
             var n1 = dfg.Nodes.Add(1, 1);
 
@@ -49,7 +50,7 @@ namespace Echo.DataFlow.Tests
         [Fact]
         public void RemoveStackDependencyShouldUnsetDependant()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n0 = dfg.Nodes.Add(0, 0);
             var n1 = dfg.Nodes.Add(1, 1);
 
@@ -62,7 +63,7 @@ namespace Echo.DataFlow.Tests
         [Fact]
         public void AddStackDependencyShouldAddToDependants()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n0 = dfg.Nodes.Add(0, 0);
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
@@ -81,7 +82,7 @@ namespace Echo.DataFlow.Tests
         [Fact]
         public void RemoveStackDependencyShouldAddToDependants()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n0 = dfg.Nodes.Add(0, 0);
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
@@ -102,10 +103,10 @@ namespace Echo.DataFlow.Tests
         [Fact]
         public void AddDependencyToAnotherGraphShouldThrow()
         {
-            var dfg1 = new DataFlowGraph<int>();
+            var dfg1 = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg1.Nodes.Add(1, 0);
             
-            var dfg2 = new DataFlowGraph<int>();
+            var dfg2 = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n2 = dfg2.Nodes.Add(2, 0);
 
             Assert.Throws<ArgumentException>(() =>
@@ -115,10 +116,10 @@ namespace Echo.DataFlow.Tests
         [Fact]
         public void AddDataSourceToAnotherGraphShouldThrow()
         {
-            var dfg1 = new DataFlowGraph<int>();
+            var dfg1 = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg1.Nodes.Add(1, 0);
             
-            var dfg2 = new DataFlowGraph<int>();
+            var dfg2 = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n2 = dfg2.Nodes.Add(2, 0);
 
             n1.StackDependencies.Add(new DataDependency<int>());
@@ -128,7 +129,7 @@ namespace Echo.DataFlow.Tests
         [Fact]
         public void RemoveNodeShouldRemoveStackDeps()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 0);
             var n2 = dfg.Nodes.Add(2, 0);
             
@@ -146,7 +147,7 @@ namespace Echo.DataFlow.Tests
         [Fact]
         public void RemoveNodeShouldRemoveStackDependants()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 0);
             var n2 = dfg.Nodes.Add(2, 0);
             
@@ -166,7 +167,7 @@ namespace Echo.DataFlow.Tests
         {
             var variable = new DummyVariable("V_1");
             
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 0);
             var n2 = dfg.Nodes.Add(2, 0);
 

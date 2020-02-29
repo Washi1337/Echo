@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using Echo.Core.Code;
 
-namespace Echo.ControlFlow.Tests
+namespace Echo.Platforms.DummyPlatform
 {
     public class IntArchitecture : IInstructionSetArchitecture<int>
     {
@@ -39,8 +38,8 @@ namespace Echo.ControlFlow.Tests
 
         public int GetStackPopCount(int instruction) => 0;
 
-        public IEnumerable<IVariable> GetReadVariables(int instruction) => ImmutableArray<IVariable>.Empty;
+        public IEnumerable<IVariable> GetReadVariables(int instruction) => new IVariable[0];
 
-        public IEnumerable<IVariable> GetWrittenVariables(int instruction) => ImmutableArray<IVariable>.Empty;
+        public IEnumerable<IVariable> GetWrittenVariables(int instruction) => new IVariable[0];
     }
 }

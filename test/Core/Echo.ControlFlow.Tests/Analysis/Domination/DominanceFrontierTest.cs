@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using Echo.ControlFlow.Analysis.Domination;
 using Echo.Core.Graphing;
-using Echo.Platforms.DummyPlatform.Code;
+using Echo.Platforms.DummyPlatform;
 using Xunit;
 
 namespace Echo.ControlFlow.Tests.Analysis.Domination
 {
-    
     public class DominanceFrontierTest
     {
         [Fact]

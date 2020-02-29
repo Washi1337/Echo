@@ -21,7 +21,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         public StateTransitionResolverBase(IInstructionSetArchitecture<TInstruction> architecture)
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
-            DataFlowGraph = new DataFlowGraph<TInstruction>();
+            DataFlowGraph = new DataFlowGraph<TInstruction>(architecture);
         }
 
         /// <summary>

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.Platforms.DummyPlatform.Code;
+using Echo.Platforms.DummyPlatform;
 using Xunit;
 
 namespace Echo.ControlFlow.Tests

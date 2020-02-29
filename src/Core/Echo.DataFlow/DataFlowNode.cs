@@ -42,6 +42,7 @@ namespace Echo.DataFlow
         public long Id
         {
             get;
+            internal set;
         }
 
         /// <summary>
@@ -55,6 +56,7 @@ namespace Echo.DataFlow
         public TContents Contents
         {
             get;
+            set;
         }
 
         /// <summary>
