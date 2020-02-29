@@ -328,6 +328,35 @@ namespace Echo.ControlFlow
                    || AbnormalEdges.Contains(neighbour);
         }
 
+        /// <summary>
+        /// Removes all incident edges (both incoming and outgoing edges) from the node, effectively isolating the node
+        /// in the graph. 
+        /// </summary>
+        public void Disconnect()
+        {
+            FallThroughEdge = null;
+            ConditionalEdges.Clear();
+            AbnormalEdges.Clear();
+
+            foreach (var incomingEdge in IncomingEdges.ToArray())
+            {
+                switch (incomingEdge.Type)
+                {
+                    case ControlFlowEdgeType.FallThrough:
+                        incomingEdge.Origin.FallThroughEdge = null;
+                        break;
+                    case ControlFlowEdgeType.Conditional:
+                        incomingEdge.Origin.ConditionalEdges.Remove(incomingEdge);
+                        break;
+                    case ControlFlowEdgeType.Abnormal:
+                        incomingEdge.Origin.AbnormalEdges.Remove(incomingEdge);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
         /// <inheritdoc />
         public override string ToString() => Offset.ToString("X8");
 

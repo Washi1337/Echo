@@ -293,5 +293,37 @@ namespace Echo.ControlFlow.Tests
             Assert.Same(second, first.FallThroughNeighbour);
             Assert.Same(first, second.FallThroughNeighbour);
         }
+
+        [Theory]
+        [InlineData(ControlFlowEdgeType.FallThrough, false)]
+        [InlineData(ControlFlowEdgeType.FallThrough, true)]
+        [InlineData(ControlFlowEdgeType.Conditional, false)]
+        [InlineData(ControlFlowEdgeType.Conditional, true)]
+        [InlineData(ControlFlowEdgeType.Abnormal, false)]
+        [InlineData(ControlFlowEdgeType.Abnormal, true)]
+        public void DisconnectNodeShouldRemoveEdge(ControlFlowEdgeType edgeType, bool removeSourceNode)
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+
+            var n1 = new ControlFlowNode<int>(0, 0);
+            var n2 = new ControlFlowNode<int>(1, 1);
+
+            graph.Nodes.AddRange(new[]
+            {
+                n1,
+                n2
+            });
+
+            n1.ConnectWith(n2, edgeType);
+            
+            if (removeSourceNode)
+                n1.Disconnect();
+            else
+                n2.Disconnect();
+
+            Assert.Empty(n1.GetOutgoingEdges());
+            Assert.Empty(n2.GetIncomingEdges());
+        }
+
     }
 }
