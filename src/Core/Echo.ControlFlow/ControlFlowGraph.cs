@@ -80,6 +80,5 @@ namespace Echo.ControlFlow
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
 
         IEnumerable<IEdge> IGraph.GetEdges() => GetEdges();
-
     }
 }

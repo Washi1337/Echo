@@ -75,6 +75,7 @@ namespace Echo.ControlFlow
         public long Offset
         {
             get;
+            internal set;
         }
 
         /// <inheritdoc />
