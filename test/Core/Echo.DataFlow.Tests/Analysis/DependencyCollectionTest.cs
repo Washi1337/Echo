@@ -1,4 +1,5 @@
 ﻿using Echo.DataFlow.Analysis;
+using Echo.Platforms.DummyPlatform;
 using Xunit;
 
 namespace Echo.DataFlow.Tests.Analysis
@@ -8,7 +9,7 @@ namespace Echo.DataFlow.Tests.Analysis
         [Fact]
         public void NoDependencies()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 1);
 
             Assert.Equal(new[]
@@ -20,7 +21,7 @@ namespace Echo.DataFlow.Tests.Analysis
         [Fact]
         public void SingleStackDependency()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
 
@@ -35,7 +36,7 @@ namespace Echo.DataFlow.Tests.Analysis
         [Fact]
         public void MultipleStackDependenciesShouldResultInOrder()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
             var n3 = dfg.Nodes.Add(3 , 3);
@@ -52,7 +53,7 @@ namespace Echo.DataFlow.Tests.Analysis
         [Fact]
         public void PathStackDependencyGraphShouldResultInOrder()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
             var n3 = dfg.Nodes.Add(3, 3);
@@ -69,7 +70,7 @@ namespace Echo.DataFlow.Tests.Analysis
         [Fact]
         public void TreeStackDependencyGraphShouldResultInOrder()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
             var n3 = dfg.Nodes.Add(3, 3);
@@ -90,7 +91,7 @@ namespace Echo.DataFlow.Tests.Analysis
         [Fact]
         public void MirroredTreeStackDependencyGraphShouldResultInOrder()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
             var n3 = dfg.Nodes.Add(3, 3);
@@ -111,7 +112,7 @@ namespace Echo.DataFlow.Tests.Analysis
         [Fact]
         public void ConvergingEvenDependencyPathsShouldFinishSubPathsBeforeGoingDeeper()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
             var n3 = dfg.Nodes.Add(3, 3);
@@ -131,7 +132,7 @@ namespace Echo.DataFlow.Tests.Analysis
         [Fact]
         public void ConvergingShortLongDependencyPathsShouldFinishSubPathsBeforeGoingDeeper()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
             var n3 = dfg.Nodes.Add(3, 3);
@@ -155,7 +156,7 @@ namespace Echo.DataFlow.Tests.Analysis
         [Fact]
         public void SelfLoopShouldThrowCyclicDependencyException()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 1);
             n1.StackDependencies.Add(new DataDependency<int>(n1));
 
@@ -165,7 +166,7 @@ namespace Echo.DataFlow.Tests.Analysis
         [Fact]
         public void ShortLoopShouldThrowCyclicDependencyException()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
             
@@ -178,7 +179,7 @@ namespace Echo.DataFlow.Tests.Analysis
         [Fact]
         public void LongLoopShouldThrowCyclicDependencyException()
         {
-            var dfg = new DataFlowGraph<int>();
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
             var n3 = dfg.Nodes.Add(3, 3);

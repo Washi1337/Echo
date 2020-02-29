@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Echo.Platforms.DummyPlatform;
 
 namespace Echo.ControlFlow.Tests
 {
