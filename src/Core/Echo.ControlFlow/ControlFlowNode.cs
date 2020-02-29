@@ -43,7 +43,7 @@ namespace Echo.ControlFlow
         /// <param name="offset">The offset of the node.</param>
         /// <param name="instructions">The basic block to store in the node.</param>
         public ControlFlowNode(long offset, IEnumerable<TInstruction> instructions)
-            : this(offset, new BasicBlock<TInstruction>(0, instructions))
+            : this(offset, new BasicBlock<TInstruction>(offset, instructions))
         {
         }
 
