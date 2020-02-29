@@ -72,5 +72,50 @@ namespace Echo.DataFlow.Tests
             n1.StackDependencies.Add(new DataDependency<int>(n0));
             Assert.Contains(dfg.GetEdges(), e => e.Origin == n1 && e.Target == n0);
         }
+
+        [Fact]
+        public void UpdateOffsetsWithNoChangeShouldReuseInstances()
+        {
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
+            var n0 = dfg.Nodes.Add(0, 0);
+            var n1 = dfg.Nodes.Add(1, 1);
+            
+            dfg.Nodes.UpdateIndices();
+
+            Assert.Same(n0, dfg.Nodes[0]);
+            Assert.Same(n1, dfg.Nodes[1]);
+        }
+
+        [Fact]
+        public void UpdateOffsetsWithChangeShouldReuseInstances()
+        {
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
+            var n0 = dfg.Nodes.Add(0, 0);
+            var n1 = dfg.Nodes.Add(1, 1);
+
+            n0.Contents = 2;
+            n1.Contents = 3; 
+            dfg.Nodes.UpdateIndices();
+
+            Assert.Same(n0, dfg.Nodes[2]);
+            Assert.Same(n1, dfg.Nodes[3]);
+        }
+
+        [Fact]
+        public void UpdateOffsetsWithDuplicatedOffsetsShouldThrowAndDiscard()
+        {
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
+            var n0 = dfg.Nodes.Add(0, 0);
+            var n1 = dfg.Nodes.Add(1, 1);
+            var n2 = dfg.Nodes.Add(2, 2);
+
+            n1.Contents = 4;
+            n2.Contents = 4; 
+            Assert.Throws<InvalidOperationException>(() => dfg.Nodes.UpdateIndices());
+
+            Assert.Equal(0, n0.Id);
+            Assert.Equal(1, n1.Id);
+            Assert.Equal(2, n2.Id);
+        }
     }
 }

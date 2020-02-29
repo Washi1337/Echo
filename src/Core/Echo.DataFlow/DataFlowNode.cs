@@ -56,6 +56,7 @@ namespace Echo.DataFlow
         public TContents Contents
         {
             get;
+            set;
         }
 
         /// <summary>
