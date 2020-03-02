@@ -67,6 +67,13 @@ namespace Echo.Core.Code
         /// <param name="instruction">The instruction to get the bytes from.</param>
         /// <returns>The instruction bytes.</returns>
         byte[] GetInstructionBytes(TInstruction instruction);
+
+        /// <summary>
+        /// Gets attributes associated to the instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction to get the attributes from.</param>
+        /// <returns>The attributes.</returns>
+        InstructionAttributes GetAttributes(TInstruction instruction);
         
         /// <summary>
         /// Gets a value indicating the number of values an instruction pushes on the stack.

@@ -82,6 +82,22 @@ namespace Echo.Platforms.AsmResolver
             throw new NotImplementedException();
         }
 
+        public InstructionAttributes GetAttributes(CilInstruction instruction)
+        {
+            var result = InstructionAttributes.None;
+            
+            result |= instruction.OpCode.FlowControl switch
+            {
+                CilFlowControl.Branch => InstructionAttributes.CanBranch,
+                CilFlowControl.ConditionalBranch => InstructionAttributes.CanBranch,
+                CilFlowControl.Return => InstructionAttributes.IsTerminator,
+                CilFlowControl.Throw => InstructionAttributes.IsTerminator,
+                _ => InstructionAttributes.None
+            };
+
+            return result;
+        }
+
         /// <inheritdoc />
         public int GetStackPushCount(CilInstruction instruction)
         {
