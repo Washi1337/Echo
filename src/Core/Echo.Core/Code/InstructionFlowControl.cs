@@ -3,15 +3,15 @@ using System;
 namespace Echo.Core.Code
 {
     /// <summary>
-    /// Provides members for describing various properties of an instruction. 
+    /// Provides members for describing various flow control properties of an instruction. 
     /// </summary>
     [Flags]
-    public enum InstructionAttributes
+    public enum InstructionFlowControl
     {
         /// <summary>
         /// Indicates the instruction does not have any specific attributes assigned to it.
         /// </summary>
-        None,
+        Fallthrough,
         
         /// <summary>
         /// Indicates the instruction might branch out from the normal control flow to a different instruction. 

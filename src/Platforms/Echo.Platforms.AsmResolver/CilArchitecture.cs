@@ -82,17 +82,17 @@ namespace Echo.Platforms.AsmResolver
             throw new NotImplementedException();
         }
 
-        public InstructionAttributes GetAttributes(CilInstruction instruction)
+        public InstructionFlowControl GetFlowControl(CilInstruction instruction)
         {
-            var result = InstructionAttributes.None;
+            var result = InstructionFlowControl.Fallthrough;
             
             result |= instruction.OpCode.FlowControl switch
             {
-                CilFlowControl.Branch => InstructionAttributes.CanBranch,
-                CilFlowControl.ConditionalBranch => InstructionAttributes.CanBranch,
-                CilFlowControl.Return => InstructionAttributes.IsTerminator,
-                CilFlowControl.Throw => InstructionAttributes.IsTerminator,
-                _ => InstructionAttributes.None
+                CilFlowControl.Branch => InstructionFlowControl.CanBranch,
+                CilFlowControl.ConditionalBranch => InstructionFlowControl.CanBranch,
+                CilFlowControl.Return => InstructionFlowControl.IsTerminator,
+                CilFlowControl.Throw => InstructionFlowControl.IsTerminator,
+                _ => InstructionFlowControl.Fallthrough
             };
 
             return result;

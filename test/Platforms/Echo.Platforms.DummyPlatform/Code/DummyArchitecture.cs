@@ -43,21 +43,15 @@ namespace Echo.Platforms.DummyPlatform.Code
         public byte[] GetInstructionBytes(DummyInstruction instruction) =>
             throw new System.NotImplementedException();
 
-        public InstructionAttributes GetAttributes(DummyInstruction instruction)
-        {
-            var result = InstructionAttributes.None;
-
-            result |= instruction.OpCode switch
+        public InstructionFlowControl GetFlowControl(DummyInstruction instruction) =>
+            instruction.OpCode switch
             {
-                DummyOpCode.Jmp => InstructionAttributes.CanBranch,
-                DummyOpCode.JmpCond => InstructionAttributes.CanBranch,
-                DummyOpCode.Ret => InstructionAttributes.IsTerminator,
-                DummyOpCode.Switch => InstructionAttributes.CanBranch,
-                _ => InstructionAttributes.None
+                DummyOpCode.Jmp => InstructionFlowControl.CanBranch,
+                DummyOpCode.JmpCond => InstructionFlowControl.CanBranch,
+                DummyOpCode.Ret => InstructionFlowControl.IsTerminator,
+                DummyOpCode.Switch => InstructionFlowControl.CanBranch,
+                _ => InstructionFlowControl.Fallthrough
             };
-            
-            return result;
-        }
 
         public int GetStackPushCount(DummyInstruction instruction) => 
             instruction.PushCount;

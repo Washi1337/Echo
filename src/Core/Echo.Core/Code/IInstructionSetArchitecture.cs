@@ -69,11 +69,11 @@ namespace Echo.Core.Code
         byte[] GetInstructionBytes(TInstruction instruction);
 
         /// <summary>
-        /// Gets attributes associated to the instruction.
+        /// Gets attributes associated to the flow control behaviour of the provided instruction.
         /// </summary>
         /// <param name="instruction">The instruction to get the attributes from.</param>
-        /// <returns>The attributes.</returns>
-        InstructionAttributes GetAttributes(TInstruction instruction);
+        /// <returns>The flow control attributes.</returns>
+        InstructionFlowControl GetFlowControl(TInstruction instruction);
         
         /// <summary>
         /// Gets a value indicating the number of values an instruction pushes on the stack.
