@@ -42,6 +42,16 @@ namespace Echo.ControlFlow.Collections
         }
 
         /// <summary>
+        /// Creates and adds a edge to the node with the provided address.
+        /// </summary>
+        /// <param name="neighbourAddress">The address of the new neighbouring node.</param>
+        /// <returns>The created edge.</returns>
+        public ControlFlowEdge<TContents> Add(long neighbourAddress)
+        {
+            return Add(Owner.ParentGraph.Nodes[neighbourAddress]);
+        }
+
+        /// <summary>
         /// Creates and adds a edge to the provided node.
         /// </summary>
         /// <param name="neighbour">The new neighbouring node.</param>
@@ -109,6 +119,17 @@ namespace Echo.ControlFlow.Collections
                 edges.CopyTo(array, arrayIndex);
                 arrayIndex += edges.Count;
             }
+        }
+
+        /// <summary>
+        /// Removes all edges originating from the current node to the neighbour with the provided address.
+        /// </summary>
+        /// <param name="neighbourAddress">The address of the neighbour to cut ties with.</param>
+        /// <returns><c>True</c> if at least one edge was removed, <c>false</c> otherwise.</returns>
+        public bool Remove(long neighbourAddress)
+        {
+            var nodes = Owner.ParentGraph.Nodes;
+            return nodes.Contains(neighbourAddress) && Remove(nodes[neighbourAddress]);
         }
         
         /// <summary>
