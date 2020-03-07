@@ -96,7 +96,7 @@ namespace Echo.ControlFlow
         public ControlFlowNode<TInstruction> FallThroughNeighbour
         {
             get => FallThroughEdge?.Target;
-            set => FallThroughEdge = new ControlFlowEdge<TInstruction>(this, value);
+            set => FallThroughEdge = value == null ? null : new ControlFlowEdge<TInstruction>(this, value);
         }
 
         /// <summary>
@@ -249,6 +249,57 @@ namespace Echo.ControlFlow
                 newNode.ConnectWith(edge.Target, edge.Type);
 
             return (this, newNode);
+        }
+
+        /// <summary>
+        /// Merges the current node with its fallthrough predecessor, by combining the two basic blocks together,
+        /// connecting the predecessor with the successors of the current node. and finally removing the current node.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Occurs when the node could not be merged because it has no fallthrough predecessor, has multiple predecessors,
+        /// or the predecessor has multiple successors which prohibit merging.
+        /// </exception>
+        public void MergeWithPredecessor()
+        {
+            if (IncomingEdges.Count == 0) 
+                throw new InvalidOperationException("Node does not have any predecessors.");
+            if (IncomingEdges.Count > 1) 
+                throw new InvalidOperationException("Node has too many predecessors.");
+
+            var incomingFallthrough = IncomingEdges
+                .FirstOrDefault(e => e.Type == ControlFlowEdgeType.FallThrough);
+
+            if (incomingFallthrough is null)
+                throw new InvalidOperationException("The incoming edge of the node is not a fallthrough edge.");
+
+            incomingFallthrough.Origin.MergeWithSuccessor();
+        }
+
+        /// <summary>
+        /// Merges the current node with its fallthrough neighbour, by combining the two basic blocks together,
+        /// connecting the node with the successors of the neighbour. and finally removing the neighbour node.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Occurs when the node could not be merged because it has no fallthrough neighbour, or has multiple successors.
+        /// </exception>
+        public void MergeWithSuccessor()
+        {
+            var successor = FallThroughNeighbour;
+            if (successor is null)
+                throw new InvalidOperationException("Node has no fallthrough neighbour to merge into.");
+            
+            if (ConditionalEdges.Count > 0 || AbnormalEdges.Count > 0)
+                throw new InvalidOperationException("Node has conditional and/or abnormal edges.");
+
+            foreach (var instruction in successor.Contents.Instructions)
+                Contents.Instructions.Add(instruction);
+            successor.Contents.Instructions.Clear();
+
+            FallThroughNeighbour = null;
+            foreach (var edge in successor.GetOutgoingEdges())
+                ConnectWith(edge.Target, edge.Type);
+
+            ParentGraph.Nodes.Remove(successor);
         }
         
         /// <summary>
