@@ -63,7 +63,7 @@ namespace Echo.ControlFlow.Editing
                 {
                     if (index > 0 && splitIfNotHeader)
                     {
-                        (node, _) = node.SplitAtIndex(index);
+                        (_, node) = node.SplitAtIndex(index);
                         hasSplitted = true;
                     }
 

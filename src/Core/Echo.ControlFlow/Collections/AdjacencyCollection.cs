@@ -18,12 +18,11 @@ namespace Echo.ControlFlow.Collections
         private readonly Dictionary<INode, HashSet<ControlFlowEdge<TContents>>> _neighbours 
             = new Dictionary<INode, HashSet<ControlFlowEdge<TContents>>>();
 
-        private readonly ControlFlowEdgeType _edgeType;
         private int _count;
-        
+
         internal AdjacencyCollection(ControlFlowNode<TContents> owner, ControlFlowEdgeType edgeType)
         {
-            _edgeType = edgeType;
+            EdgeType = edgeType;
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
 
@@ -32,7 +31,15 @@ namespace Echo.ControlFlow.Collections
 
         /// <inheritdoc />
         public bool IsReadOnly => false;
-        
+
+        /// <summary>
+        /// Gets the type of edges that are stored in this collection.
+        /// </summary>
+        public ControlFlowEdgeType EdgeType
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets the node that all edges are originating from.
         /// </summary>
@@ -58,7 +65,7 @@ namespace Echo.ControlFlow.Collections
         /// <returns>The created edge.</returns>
         public ControlFlowEdge<TContents> Add(ControlFlowNode<TContents> neighbour)
         {
-            var edge = new ControlFlowEdge<TContents>(Owner, neighbour, _edgeType);
+            var edge = new ControlFlowEdge<TContents>(Owner, neighbour, EdgeType);
             Add(edge);
             return edge;
         }
@@ -73,7 +80,7 @@ namespace Echo.ControlFlow.Collections
         /// </exception>
         public ControlFlowEdge<TContents> Add(ControlFlowEdge<TContents> edge)
         {
-            AssertEdgeValidity(Owner, _edgeType, edge);
+            AssertEdgeValidity(Owner, EdgeType, edge);
             GetEdges(edge.Target).Add(edge);
             edge.Target.IncomingEdges.Add(edge);
             _count++;
