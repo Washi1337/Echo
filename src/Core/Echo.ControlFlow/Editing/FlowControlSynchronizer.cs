@@ -15,8 +15,6 @@ namespace Echo.ControlFlow.Editing
     /// <typeparam name="TInstruction">The type of instructions the graph contains.</typeparam>
     public class FlowControlSynchronizer<TInstruction>
     {
-        private readonly List<long> _nodeOffsets = new List<long>();
-        
         /// <summary>
         /// Creates a new instance of the <see cref="FlowControlSynchronizer{TInstruction}"/> class.
         /// </summary>
@@ -51,43 +49,42 @@ namespace Echo.ControlFlow.Editing
         /// </summary>
         public bool UpdateFlowControl()
         {
-            bool changedAtLeastOnce = false;
-            
-            // Build up the index of nodes so we can find them quickly later.
-            BuildNodeOffsetIndex();
-            
-            // Continue the process until no more changes are applied.
-            bool changed = true;
-            while (changed)
+            var transaction = CreateEditTransaction();
+            if (transaction.Actions.Count > 0)
             {
-                changed = false;
-                foreach (var node in ControlFlowGraph.Nodes.ToArray())
-                    changed |= UpdateFlowControl(node);
-                changedAtLeastOnce |= changed;
+                transaction.Apply();
+                return true;
             }
 
-            return changedAtLeastOnce;
+            return false;
         }
 
-        /// <summary>
-        /// Pulls any updates regarding flow control from the basic block of the provided node into the graph.  
-        /// </summary>
-        /// <param name="node">The node to pull updates from.</param>
-        /// <returns><c>true</c> if any new updates were pulled from the node and the graph has changed, <c>false</c> otherwise.</returns>
-        public bool UpdateFlowControl(ControlFlowNode<TInstruction> node)
+        private ControlFlowGraphEditTransaction<TInstruction> CreateEditTransaction()
         {
-            bool changed = false;
+            var transaction = new ControlFlowGraphEditTransaction<TInstruction>(ControlFlowGraph);
+
+            foreach (var node in ControlFlowGraph.Nodes)
+                CheckForChangesInNode(transaction, node);
+                
+            return transaction;
+        }
+
+        private bool CheckForChangesInNode(
+            ControlFlowGraphEditTransaction<TInstruction> transaction,
+            ControlFlowNode<TInstruction> node)
+        {
+            bool hasChanges = false;
             
             // TODO: check branches inside a basic block.
 
-            changed |=  UpdateFooterFlowControl(node);
-
-            return changed;
+            hasChanges |= CheckForChangesInFooter(transaction, node);
+            return hasChanges;
         }
 
-        private bool UpdateFooterFlowControl(ControlFlowNode<TInstruction> node)
+        private bool CheckForChangesInFooter(
+            ControlFlowGraphEditTransaction<TInstruction> transaction,
+            ControlFlowNode<TInstruction> node)
         {
-            bool changed = false;
             var successors = SuccessorResolver.GetSuccessors(node.Contents.Footer);
 
             // Group successors by type:
@@ -119,160 +116,41 @@ namespace Echo.ControlFlow.Editing
                 }
             }
 
-            // Update all outgoing edges of the node.
-            changed |= UpdateFallThrough(node, fallthroughSuccessor);
-            changed |= UpdateAdjacencyLists(node.ConditionalEdges, conditionalSuccessors);
-            changed |= UpdateAdjacencyLists(node.AbnormalEdges, abnormalSuccessors);
-
-            return changed;
+            bool hasChanges = false;
+            hasChanges |= CheckIfFallThroughChanged(transaction, node, fallthroughSuccessor);
+            return hasChanges;
         }
 
-        private bool UpdateFallThrough(ControlFlowNode<TInstruction> node, in SuccessorInfo? successor)
+        private bool CheckIfFallThroughChanged(
+            ControlFlowGraphEditTransaction<TInstruction> transaction,
+            ControlFlowNode<TInstruction> node, 
+            in SuccessorInfo? successor)
         {
+            bool fallThroughChanged = false;
+            
             if (!successor.HasValue)
-            { 
-                if (node.FallThroughNeighbour is null)
-                    return false;
-
-                // Fall through neighbour was removed.
-                node.FallThroughNeighbour = null;
-                return true;
-            }
-            
-            if (node.FallThroughNeighbour is null || node.FallThroughNeighbour.Offset != successor.Value.DestinationAddress)
             {
-                // Fallthrough neighbour changed.
-                node.FallThroughNeighbour = FindNode(successor.Value.DestinationAddress);
-                return true;
+                if (node.FallThroughNeighbour is {})
+                    fallThroughChanged = true;
             }
-
-            return false;
-        }
-
-        private bool UpdateAdjacencyLists(AdjacencyCollection<TInstruction> edges, IReadOnlyList<SuccessorInfo> successors)
-        {
-            bool changed = successors.Count != edges.Count;
-
-            // Count the number of existing edges per neighbour.
-            var oldNeighbours = edges
-                .GroupBy(x => x.Target.Offset)
-                .ToDictionary(x => x.Key, x => x.Count());
-            
-            // Count the number of new edges per neighbour.
-            var newNeighbours = successors
-                .GroupBy(x => x.DestinationAddress)
-                .ToDictionary(x => x.Key, x => x.Count());
-
-            // Remove any removed neighbours.
-            foreach (var entry in oldNeighbours)
+            else if (node.FallThroughNeighbour is null || node.FallThroughNeighbour.Offset != successor.Value.DestinationAddress)
             {
-                if (!newNeighbours.TryGetValue(entry.Key, out int newCount))
-                {
-                    edges.Remove(entry.Key);
-                    changed = true;
-                }
+                fallThroughChanged = true;
             }
 
-            // Add any new edges.
-            foreach (var entry in newNeighbours)
+            if (fallThroughChanged)
             {
-                oldNeighbours.TryGetValue(entry.Key, out int oldCount);
-                for (int i = oldCount; i < entry.Value; i++)
-                {
-                    edges.Add(FindNode(entry.Key));
-                    changed = true;
-                }
+                var architecture = ControlFlowGraph.Architecture;
+                long? newFallThrough = successor?.DestinationAddress;
+                
+                var update = new UpdateFallThroughAction<TInstruction>(
+                    architecture.GetOffset(node.Contents.Footer), 
+                    newFallThrough);
+                
+                transaction.EnqueueAction(update);
             }
             
-            return changed;
-        }
-
-        public void BuildNodeOffsetIndex()
-        {
-            _nodeOffsets.Clear();
-            _nodeOffsets.Capacity = ControlFlowGraph.Nodes.Count;
-            foreach (var node in ControlFlowGraph.Nodes)
-                _nodeOffsets.Add(node.Offset);
-            _nodeOffsets.Sort();
-        }
-
-        private ControlFlowNode<TInstruction> FindNode(long offset)
-        {
-            // Shortcut: check if a node with the provided offset exists in the graph first.
-            if (ControlFlowGraph.Nodes.Contains(offset))
-                return ControlFlowGraph.Nodes[offset];
-
-            // Find the node that contains the offset.
-            return FindNodeSlow(offset);
-        }
-
-        private ControlFlowNode<TInstruction> FindNodeSlow(long offset)
-        {
-            int index = FindClosestNodeIndex(offset);
-            if (index != -1)
-            {
-                var node = ControlFlowGraph.Nodes[_nodeOffsets[index]];
-                index = FindInstructionIndex(node.Contents.Instructions, offset);
-                if (index != -1)
-                {
-                    var (a, _) = node.SplitAtIndex(index);
-                    return a;
-                }
-            }
-            
-            throw new ArgumentException($"Node containing offset {offset:X8} was not found.");
-        }
-
-        private int FindClosestNodeIndex(long offset)
-        {
-            int min = 0;
-            int max = _nodeOffsets.Count - 1;
-            int mid = 0;
-            
-            while (min <= max)
-            {
-                mid = (min + max) / 2;
-                if (offset < _nodeOffsets[mid])
-                    max = mid - 1;
-                else if (offset > _nodeOffsets[mid])
-                    min = mid + 1;
-                else
-                    break;
-            }
-
-            if (min > max)
-                return max;
-            
-            while (mid < _nodeOffsets.Count - 1)
-            {
-                if (_nodeOffsets[mid + 1] > offset)
-                    return mid;
-                mid++;
-            }
-            
-            return -1;
-        }
-
-        private int FindInstructionIndex(IList<TInstruction> instructions, long offset)
-        {
-            var architecture = ControlFlowGraph.Architecture;
-            
-            int min = 0;
-            int max = instructions.Count - 1;
-
-            while (min <= max)
-            {
-                int mid = (min + max) / 2;
-                long currentOffset = architecture.GetOffset(instructions[mid]);
-                if (offset < currentOffset)
-                    max = mid - 1;
-                else if (offset > currentOffset)
-                    min = mid + 1;
-                else
-                    return mid;
-            }
-
-            return -1;
+            return fallThroughChanged;
         }
 
         private static bool SplitsBasicBlock(InstructionFlowControl flowControl)
