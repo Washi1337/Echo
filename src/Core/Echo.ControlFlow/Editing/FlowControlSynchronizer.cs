@@ -102,20 +102,21 @@ namespace Echo.ControlFlow.Editing
                         else
                             fallthroughSuccessor = successor.DestinationAddress;
                         break;
-                    
+
                     case ControlFlowEdgeType.Conditional:
                         conditionalSuccessors.Add(successor.DestinationAddress);
                         break;
-                    
+
                     case ControlFlowEdgeType.Abnormal:
                         abnormalSuccessors.Add(successor.DestinationAddress);
                         break;
-                    
+
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
 
+            // Check if there are any changes to the outgoing edges.
             bool hasChanges = false;
             hasChanges |= CheckIfFallThroughChanged(transaction, node, fallthroughSuccessor);
             hasChanges |= CheckIfAdjacencyListChanged(transaction, node.ConditionalEdges, conditionalSuccessors);
@@ -129,14 +130,15 @@ namespace Echo.ControlFlow.Editing
             long? successorOffset)
         {
             bool fallThroughChanged = false;
-            
+
             if (!successorOffset.HasValue)
             {
                 if (node.FallThroughNeighbour is {})
-                    fallThroughChanged = true;
+                    fallThroughChanged = true; // Fallthrough was removed.
             }
             else if (node.FallThroughNeighbour is null || node.FallThroughNeighbour.Offset != successorOffset.Value)
             {
+                // Fallthrough was added or changed.
                 fallThroughChanged = true;
             }
 
@@ -159,39 +161,67 @@ namespace Echo.ControlFlow.Editing
             AdjacencyCollection<TInstruction> edges,
             IList<long> successorOffsets)
         {
+            var architecture = ControlFlowGraph.Architecture;
+            long branchOffset = architecture.GetOffset(edges.Owner.Contents.Footer);
+            
             bool hasChanges = successorOffsets.Count != edges.Count;
 
-            if (!hasChanges)
+            // Count the number of existing edges per neighbour.
+            var oldNeighbours = edges
+                .GroupBy(x => x.Target.Offset)
+                .ToDictionary(x => x.Key, x => x.Count());
+
+            // Count the number of new edges per neighbour.
+            var newNeighbours = successorOffsets
+                .GroupBy(x => x)
+                .ToDictionary(x => x.Key, x => x.Count());
+
+            // Check if any neighbours were completely removed.
+            foreach (var entry in oldNeighbours)
             {
-                // Count the number of existing edges per neighbour.
-                var oldNeighbours = edges
-                    .GroupBy(x => x.Target.Offset)
-                    .ToDictionary(x => x.Key, x => x.Count());
-
-                // Count the number of new edges per neighbour.
-                var newNeighbours = successorOffsets
-                    .GroupBy(x => x)
-                    .ToDictionary(x => x.Key, x => x.Count());
-
-                // Check if any edges were removed.
-                foreach (var entry in oldNeighbours)
+                if (!newNeighbours.ContainsKey(entry.Key))
                 {
-                    if (!newNeighbours.ContainsKey(entry.Key))
+                    int oldCount = entry.Value;
+                    for (int i = 0; i < oldCount; i++)
                     {
-                        hasChanges = true;
-                        break;
+                        transaction.EnqueueAction(new RemoveEdgeAction<TInstruction>(
+                            branchOffset,
+                            entry.Key,
+                            edges.EdgeType));
                     }
+
+                    hasChanges = true;
+                    break;
                 }
             }
 
-            if (hasChanges)
+            // Check if there are any new neighbours or changes in the count of edges to existing neighbours.
+            foreach (var entry in newNeighbours)
             {
-                var architecture = ControlFlowGraph.Architecture;
-                long branchOffset = architecture.GetOffset(edges.Owner.Contents.Footer);
+                long successorOffset = entry.Key;
+                int newCount = entry.Value;
 
-                var update = new UpdateAdjacencyListAction<TInstruction>(branchOffset, edges.EdgeType, successorOffsets);
+                // Get the original number of edges to the neighbour.
+                oldNeighbours.TryGetValue(successorOffset, out int oldCount);
 
-                transaction.EnqueueAction(update);
+                // Add new edges.
+                for (int i = oldCount; i < newCount; i++)
+                {
+                    transaction.EnqueueAction(new AddEdgeAction<TInstruction>(
+                        branchOffset,
+                        entry.Key,
+                        edges.EdgeType));
+                }
+
+                // Remove deleted edges.
+                for (int i = newCount; i < oldCount; i++)
+                {
+                    transaction.EnqueueAction(new RemoveEdgeAction<TInstruction>(
+                        branchOffset,
+                        entry.Key,
+                        edges.EdgeType));
+                }
+                
             }
             
             return hasChanges;

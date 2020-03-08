@@ -192,7 +192,10 @@ namespace Echo.ControlFlow.Collections
 
             return edges;
         }
-        
+
+        public IEnumerable<ControlFlowEdge<TContents>> GetEdgesToNeighbour(ControlFlowNode<TContents> target) => 
+            GetEdges(target);
+
         /// <summary>
         /// Obtains an enumerator that enumerates all nodes in the collection.
         /// </summary>

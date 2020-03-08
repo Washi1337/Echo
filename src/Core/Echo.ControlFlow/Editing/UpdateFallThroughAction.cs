@@ -2,23 +2,39 @@ using System;
 
 namespace Echo.ControlFlow.Editing
 {
+    /// <summary>
+    /// Represents an action that edits a control flow graph by updating the fallthrough edge of a single node.
+    /// </summary>
+    /// <typeparam name="TInstruction">The type of instructions stored in the control flow graph.</typeparam>
     public class UpdateFallThroughAction<TInstruction> : IControlFlowGraphEditAction<TInstruction>
     {
-        private bool _isApplied = false;
+        private bool _isApplied;
         private bool _hasSplitted;
         private long? _oldFallThroughOffset;
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="UpdateFallThroughAction{TInstruction}" /> class.
+        /// </summary>
+        /// <param name="branchOffset">The offset of the branching instruction.</param>
+        /// <param name="newFallThroughOffset">The offset to the new fallthrough neighbour, or <c>null</c> to remove the fallthrough edge.</param>
         public UpdateFallThroughAction(long branchOffset, long? newFallThroughOffset)
         {
             BranchOffset = branchOffset;
             NewFallThroughOffset = newFallThroughOffset;
         }
         
+        /// <summary>
+        /// Gets the offset to the branching instruction responsible for the fallthrough edge.
+        /// </summary>
         public long BranchOffset
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the offset to the new fallthrough neighbour. When this value is <c>null</c>, the removal of the
+        /// fallthrough edge is indicated.
+        /// </summary>
         public long? NewFallThroughOffset
         {
             get;
@@ -68,9 +84,7 @@ namespace Echo.ControlFlow.Editing
         }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"Update fallthrough edge {BranchOffset:X8}.";
-        }
+        public override string ToString() => 
+            $"Update fallthrough edge {BranchOffset:X8}.";
     }
 }

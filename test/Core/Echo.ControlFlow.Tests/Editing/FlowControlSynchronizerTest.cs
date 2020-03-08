@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Editing;
@@ -133,6 +134,84 @@ namespace Echo.ControlFlow.Tests.Editing
             
             Assert.Same(cfg.Nodes[13], cfg.Nodes[10].FallThroughNeighbour);
             Assert.Same(cfg.Nodes[13], cfg.Nodes[0].FallThroughNeighbour);
+        }
+
+        [Fact]
+        public void UpdateToInvalidBranchTargetShouldThrowAndDiscard()
+        {
+            var cfg = _builder.ConstructFlowGraph(new[]
+            {
+                DummyInstruction.Jmp(0, 10),
+                DummyInstruction.Ret(10), 
+            },0);
+
+            cfg.Nodes[0].Contents.Header.Operands[0] = 100L;
+            
+            var synchronizer = new FlowControlSynchronizer<DummyInstruction>(cfg, _builder.SuccessorResolver);
+            Assert.Throws<ArgumentException>(() => synchronizer.UpdateFlowControl());
+            
+            Assert.Same(cfg.Nodes[10], cfg.Nodes[0].FallThroughNeighbour);
+        }
+        
+        [Fact]
+        public void SplittedNodeShouldBeRemergedAfterDetectingInvalidFallThroughNeighbour()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Op(0, 0, 0), 
+                DummyInstruction.Jmp(1, 10),
+                DummyInstruction.Op(10, 0, 0),
+                DummyInstruction.Op(11, 0, 0),
+                DummyInstruction.Op(12, 0, 0), 
+                DummyInstruction.Jmp(13, 20),
+                DummyInstruction.Ret(20), 
+            };
+            var cfg = _builder.ConstructFlowGraph(instructions,0);
+
+            instructions[1].Operands[0] = 12L;
+            instructions[5].Operands[0] = 100L;
+            
+            var synchronizer = new FlowControlSynchronizer<DummyInstruction>(cfg, _builder.SuccessorResolver);
+            Assert.Throws<ArgumentException>(() => synchronizer.UpdateFlowControl());
+            
+            Assert.Same(cfg.Nodes[10], cfg.Nodes[0].FallThroughNeighbour);
+            Assert.False(cfg.Nodes.Contains(12));
+        }
+        
+        [Fact]
+        public void SplittedNodeShouldBeRemergedAfterDetectingInvalidConditionalNeighbour()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Op(0, 0, 0),
+                DummyInstruction.Switch(1, 2, 3, 4, 6),
+                
+                DummyInstruction.Jmp(2, 20),
+                
+                DummyInstruction.Jmp(3, 20),
+                
+                DummyInstruction.Op(4, 0, 0),
+                DummyInstruction.Jmp(5, 20),
+                
+                DummyInstruction.Jmp(6, 20),
+                
+                DummyInstruction.Ret(20),
+            };
+            var cfg = _builder.ConstructFlowGraph(instructions,0);
+
+            var targets = (long[]) instructions[1].Operands[0];
+            targets[2] = 5L;
+            targets[3] = 100L;
+            
+            var synchronizer = new FlowControlSynchronizer<DummyInstruction>(cfg, _builder.SuccessorResolver);
+            Assert.Throws<ArgumentException>(() => synchronizer.UpdateFlowControl());
+            
+            Assert.False(cfg.Nodes.Contains(5));
+            Assert.Equal(new[]
+            {
+                instructions[4],
+                instructions[5]
+            }, cfg.Nodes[4].Contents.Instructions);
         }
         
     }
