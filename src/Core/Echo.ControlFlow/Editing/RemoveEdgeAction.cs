@@ -42,7 +42,10 @@ namespace Echo.ControlFlow.Editing
 
             var incomingEdges = target.GetIncomingEdges().ToArray();
             if (incomingEdges.Length == 1 && incomingEdges[0].Type == ControlFlowEdgeType.FallThrough)
+            {
+                context.RemoveNodeFromIndex(target.Offset);
                 target.MergeWithPredecessor();
+            }
         }
 
         /// <inheritdoc />

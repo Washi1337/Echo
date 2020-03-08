@@ -9,7 +9,7 @@ namespace Echo.ControlFlow.Editing
     public class UpdateFallThroughAction<TInstruction> : IControlFlowGraphEditAction<TInstruction>
     {
         private bool _isApplied;
-        private bool _hasSplitted;
+        private bool _hasSplit;
         private long? _oldFallThroughOffset;
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Echo.ControlFlow.Editing
                 
             // Set new fallthrough neighbour.
             node.FallThroughNeighbour = NewFallThroughOffset.HasValue
-                ? context.FindNodeOrSplit(NewFallThroughOffset.Value, out _hasSplitted)
+                ? context.FindNodeOrSplit(NewFallThroughOffset.Value, out _hasSplit)
                 : null;
             
             _isApplied = true;
@@ -67,11 +67,12 @@ namespace Echo.ControlFlow.Editing
             
             var node = context.FindNode(BranchOffset);
             
-            // Re-merge node if it was splitted.
-            if (_hasSplitted)
+            // Re-merge node if it was split.
+            if (_hasSplit)
             {
                 var newNeighbour = node.FallThroughNeighbour;
                 node.FallThroughNeighbour = null;
+                context.RemoveNodeFromIndex(newNeighbour.Offset);
                 newNeighbour.MergeWithPredecessor();
             }
 
@@ -84,7 +85,8 @@ namespace Echo.ControlFlow.Editing
         }
 
         /// <inheritdoc />
-        public override string ToString() => 
-            $"Update fallthrough edge {BranchOffset:X8}.";
+        public override string ToString() => NewFallThroughOffset.HasValue
+            ? $"Update fallthrough edge {BranchOffset:X8} to {NewFallThroughOffset:X8}."
+            : $"Remove fallthrough edge at {BranchOffset:X8}.";
     }
 }

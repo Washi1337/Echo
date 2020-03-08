@@ -9,7 +9,7 @@ namespace Echo.ControlFlow.Editing
     /// <typeparam name="TInstruction">The type of instructions stored in the control flow graph.</typeparam>
     public class AddEdgeAction<TInstruction> : UpdateAdjacencyAction<TInstruction>
     {
-        private bool _hasSplitted;
+        private bool _hasSplit;
 
         /// <summary>
         /// Creates a new instance of the <see cref="AddEdgeAction{TInstruction}"/> class.
@@ -31,7 +31,7 @@ namespace Echo.ControlFlow.Editing
         protected override void OnApply(ControlFlowGraphEditContext<TInstruction> context)
         {
             var origin = context.FindNode(OriginOffset);
-            var target = context.FindNodeOrSplit(TargetOffset, out _hasSplitted);
+            var target = context.FindNodeOrSplit(TargetOffset, out _hasSplit);
             origin.ConnectWith(target, EdgeType);
         }
 
@@ -49,9 +49,12 @@ namespace Echo.ControlFlow.Editing
             };
             
             collection.Remove(collection.GetEdgesToNeighbour(target).First());
-            
-            if (_hasSplitted)
+
+            if (_hasSplit)
+            {
+                context.RemoveNodeFromIndex(target.Offset);
                 target.MergeWithPredecessor();
+            }
         }
 
         /// <inheritdoc />

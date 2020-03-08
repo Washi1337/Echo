@@ -50,9 +50,9 @@ namespace Echo.ControlFlow.Editing
         public bool UpdateFlowControl()
         {
             var transaction = CreateEditTransaction();
-            if (transaction.Actions.Count > 0)
+            if (transaction.Count > 0)
             {
-                transaction.Apply();
+                transaction.Apply(ControlFlowGraph);
                 return true;
             }
 
@@ -61,7 +61,7 @@ namespace Echo.ControlFlow.Editing
 
         private ControlFlowGraphEditTransaction<TInstruction> CreateEditTransaction()
         {
-            var transaction = new ControlFlowGraphEditTransaction<TInstruction>(ControlFlowGraph);
+            var transaction = new ControlFlowGraphEditTransaction<TInstruction>();
 
             foreach (var node in ControlFlowGraph.Nodes)
                 CheckForChangesInNode(transaction, node);
