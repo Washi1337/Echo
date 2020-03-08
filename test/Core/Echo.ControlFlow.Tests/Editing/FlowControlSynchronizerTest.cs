@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Editing.Synchronization;
 using Echo.Platforms.DummyPlatform.Code;
@@ -202,6 +203,54 @@ namespace Echo.ControlFlow.Tests.Editing
                 instructions[5]
             }, cfg.Nodes[4].Contents.Instructions);
         }
-        
+
+        [Fact]
+        public void AddBranchInMiddleOfBlockShouldSplit()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Op(0, 0, 0),
+                DummyInstruction.Op(1, 0, 0),
+                DummyInstruction.Op(2, 0, 0),
+                DummyInstruction.Op(3, 0, 0),
+                DummyInstruction.Ret(4),
+            };
+            var cfg = _builder.ConstructFlowGraph(instructions, 0);
+
+            cfg.Nodes[0].Contents.Instructions[1] = DummyInstruction.Jmp(1, 4);
+            cfg.UpdateFlowControl(_builder.SuccessorResolver);
+
+            Assert.True(cfg.Nodes.Contains(0));
+            Assert.True(cfg.Nodes.Contains(4));
+            Assert.Same(cfg.Nodes[4], cfg.Nodes[0].FallThroughNeighbour);
+        }
+
+        [Fact]
+        public void AddBranchInMiddleOfBlockShouldSplit2()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Push(0, 1),
+                DummyInstruction.Pop(1, 1),
+                DummyInstruction.Push(2, 1),
+                DummyInstruction.JmpCond(3, 5),
+                
+                DummyInstruction.Ret(4),
+                
+                DummyInstruction.Op(5, 0, 0),
+                DummyInstruction.Ret(6),
+            };
+            var cfg = _builder.ConstructFlowGraph(instructions, 0);
+
+            cfg.Nodes[0].Contents.Instructions[1] = DummyInstruction.JmpCond(1, 5);
+            cfg.Nodes[0].Contents.Instructions[3] = DummyInstruction.Pop(3, 1);
+            cfg.UpdateFlowControl(_builder.SuccessorResolver);
+
+            Assert.True(cfg.Nodes.Contains(2));
+            Assert.Same(cfg.Nodes[2], cfg.Nodes[0].FallThroughNeighbour);
+            Assert.Same(cfg.Nodes[5], cfg.Nodes[0].ConditionalEdges.First().Target);
+            Assert.Same(cfg.Nodes[4], cfg.Nodes[2].FallThroughNeighbour);
+            Assert.Empty(cfg.Nodes[2].ConditionalEdges);
+        }
     }
 }

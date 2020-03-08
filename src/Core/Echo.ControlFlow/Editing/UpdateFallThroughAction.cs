@@ -86,7 +86,7 @@ namespace Echo.ControlFlow.Editing
 
         /// <inheritdoc />
         public override string ToString() => NewFallThroughOffset.HasValue
-            ? $"Update fallthrough edge {BranchOffset:X8} to {NewFallThroughOffset:X8}."
-            : $"Remove fallthrough edge at {BranchOffset:X8}.";
+            ? $"Set fallthrough neighbour of {BranchOffset:X8} to {NewFallThroughOffset:X8}."
+            : $"Remove fallthrough neighbour of {BranchOffset:X8}.";
     }
 }
