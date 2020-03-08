@@ -182,6 +182,14 @@ namespace Echo.ControlFlow.Collections
                 throw new ArgumentException("Cannot add an edge originating from a different node.");
         }
 
+        /// <summary>
+        /// Obtains all edges to the provided neighbour, if any.
+        /// </summary>
+        /// <param name="target">The neighbouring node.</param>
+        /// <returns>The edges.</returns>
+        public IEnumerable<ControlFlowEdge<TContents>> GetEdgesToNeighbour(ControlFlowNode<TContents> target) => 
+            GetEdges(target);
+
         private ICollection<ControlFlowEdge<TContents>> GetEdges(INode target)
         {
             if (!_neighbours.TryGetValue(target, out var edges))
@@ -192,9 +200,6 @@ namespace Echo.ControlFlow.Collections
 
             return edges;
         }
-
-        public IEnumerable<ControlFlowEdge<TContents>> GetEdgesToNeighbour(ControlFlowNode<TContents> target) => 
-            GetEdges(target);
 
         /// <summary>
         /// Obtains an enumerator that enumerates all nodes in the collection.
