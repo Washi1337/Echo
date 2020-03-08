@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Collections;
-using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.Core.Code;
 
-namespace Echo.ControlFlow.Editing
+namespace Echo.ControlFlow.Editing.Synchronization
 {
     /// <summary>
     /// Provides a mechanism for pulling updates from basic blocks into a control flow graph. This includes splitting
@@ -20,11 +19,15 @@ namespace Echo.ControlFlow.Editing
         /// </summary>
         /// <param name="cfg">The control flow graph to update.</param>
         /// <param name="successorResolver">The object responsible for resolving successors of a single instruction.</param>
-        public FlowControlSynchronizer(ControlFlowGraph<TInstruction> cfg,
-            IStaticSuccessorResolver<TInstruction> successorResolver)
+        /// <param name="flags">The flags that dictate the strategy used for pulling basic block updates into a control flow graph.</param>
+        public FlowControlSynchronizer(
+            ControlFlowGraph<TInstruction> cfg,
+            IStaticSuccessorResolver<TInstruction> successorResolver, 
+            FlowControlSynchronizationFlags flags)
         {
             ControlFlowGraph = cfg ?? throw new ArgumentNullException(nameof(cfg));
             SuccessorResolver = successorResolver ?? throw new ArgumentNullException(nameof(successorResolver));
+            Flags = flags;
         }
         
         /// <summary>
@@ -44,12 +47,23 @@ namespace Echo.ControlFlow.Editing
         }
 
         /// <summary>
+        /// Gets the flags that dictate the strategy used for pulling basic block updates into a control flow graph.
+        /// </summary>
+        public FlowControlSynchronizationFlags Flags
+        {
+            get;
+        }
+
+        /// <summary>
         /// Traverses all nodes in the control flow graph, and synchronizes the structure of the graph with the contents
         /// of each basic block within the traversed nodes.
         /// </summary>
         public bool UpdateFlowControl()
         {
-            var transaction = CreateEditTransaction();
+            var transaction = new ControlFlowGraphEditTransaction<TInstruction>();
+            foreach (var node in ControlFlowGraph.Nodes)
+                CheckForChangesInNode(transaction, node);
+            
             if (transaction.Count > 0)
             {
                 transaction.Apply(ControlFlowGraph);
@@ -59,14 +73,22 @@ namespace Echo.ControlFlow.Editing
             return false;
         }
 
-        private ControlFlowGraphEditTransaction<TInstruction> CreateEditTransaction()
+        /// <summary>
+        /// Pulls any updates from the provided node into the structure of the control flow graph.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        public bool UpdateFlowControl(ControlFlowNode<TInstruction> node)
         {
             var transaction = new ControlFlowGraphEditTransaction<TInstruction>();
+            CheckForChangesInNode(transaction, node);
+            
+            if (transaction.Count > 0)
+            {
+                transaction.Apply(ControlFlowGraph);
+                return true;
+            }
 
-            foreach (var node in ControlFlowGraph.Nodes)
-                CheckForChangesInNode(transaction, node);
-                
-            return transaction;
+            return false;
         }
 
         private bool CheckForChangesInNode(
@@ -74,8 +96,11 @@ namespace Echo.ControlFlow.Editing
             ControlFlowNode<TInstruction> node)
         {
             bool hasChanges = false;
-            
-            // TODO: check branches inside a basic block.
+
+            if ((Flags & FlowControlSynchronizationFlags.TraverseEntireBasicBlock) != 0)
+            {
+                // TODO: check if block needs to be split up.
+            }
 
             hasChanges |= CheckForChangesInFooter(transaction, node);
             return hasChanges;

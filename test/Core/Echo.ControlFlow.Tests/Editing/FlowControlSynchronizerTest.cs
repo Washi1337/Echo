@@ -1,9 +1,6 @@
 using System;
-using System.IO;
 using Echo.ControlFlow.Construction.Static;
-using Echo.ControlFlow.Editing;
-using Echo.ControlFlow.Serialization.Dot;
-using Echo.Core.Graphing.Serialization.Dot;
+using Echo.ControlFlow.Editing.Synchronization;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
@@ -26,8 +23,7 @@ namespace Echo.ControlFlow.Tests.Editing
                 DummyInstruction.Ret(0)
             },0);
             
-            var synchronizer = new FlowControlSynchronizer<DummyInstruction>(cfg, _builder.SuccessorResolver);
-            Assert.False(synchronizer.UpdateFlowControl());
+            Assert.False(cfg.UpdateFlowControl(_builder.SuccessorResolver));
         }
 
         [Fact]
@@ -46,8 +42,7 @@ namespace Echo.ControlFlow.Tests.Editing
             // Change branch target of the first jmp to the ret at offset 20.
             cfg.Nodes[0].Contents.Footer.Operands[0] = 20L;
             
-            var synchronizer = new FlowControlSynchronizer<DummyInstruction>(cfg, _builder.SuccessorResolver);
-            Assert.True(synchronizer.UpdateFlowControl());
+            Assert.True(cfg.UpdateFlowControl(_builder.SuccessorResolver));
             Assert.Same(cfg.Nodes[20], cfg.Nodes[0].FallThroughNeighbour);
         }
 
@@ -72,8 +67,7 @@ namespace Echo.ControlFlow.Tests.Editing
             // Update branch target.
             cfg.Nodes[0].Contents.Footer.Operands[0] = 100L;
             
-            var synchronizer = new FlowControlSynchronizer<DummyInstruction>(cfg, _builder.SuccessorResolver);
-            Assert.True(synchronizer.UpdateFlowControl());
+            Assert.True(cfg.UpdateFlowControl(_builder.SuccessorResolver));
             Assert.Single(cfg.Nodes[0].ConditionalEdges);
             Assert.True(cfg.Nodes[0].ConditionalEdges.Contains(cfg.Nodes[100]));
         }
@@ -97,8 +91,7 @@ namespace Echo.ControlFlow.Tests.Editing
             var blockInstructions = cfg.Nodes[0].Contents.Instructions;
             blockInstructions[blockInstructions.Count - 1] = DummyInstruction.JmpCond(1, 20);
 
-            var synchronizer = new FlowControlSynchronizer<DummyInstruction>(cfg, _builder.SuccessorResolver);
-            Assert.True(synchronizer.UpdateFlowControl());
+            Assert.True(cfg.UpdateFlowControl(_builder.SuccessorResolver));
             Assert.Same(cfg.Nodes[2], cfg.Nodes[0].FallThroughNeighbour);
             Assert.Single(cfg.Nodes[0].ConditionalEdges);
             Assert.True(cfg.Nodes[0].ConditionalEdges.Contains(cfg.Nodes[20]));
@@ -126,8 +119,7 @@ namespace Echo.ControlFlow.Tests.Editing
             // Change jmp target to an instruction in the middle of node[10].
             cfg.Nodes[0].Contents.Footer.Operands[0] = 13L;
             
-            var synchronizer = new FlowControlSynchronizer<DummyInstruction>(cfg, _builder.SuccessorResolver);
-            Assert.True(synchronizer.UpdateFlowControl());
+            Assert.True(cfg.UpdateFlowControl(_builder.SuccessorResolver));
             
             Assert.True(cfg.Nodes.Contains(10), "Original target does not exist anymore.");
             Assert.True(cfg.Nodes.Contains(13), "Original target was not split up correctly.");
@@ -147,8 +139,7 @@ namespace Echo.ControlFlow.Tests.Editing
 
             cfg.Nodes[0].Contents.Header.Operands[0] = 100L;
             
-            var synchronizer = new FlowControlSynchronizer<DummyInstruction>(cfg, _builder.SuccessorResolver);
-            Assert.Throws<ArgumentException>(() => synchronizer.UpdateFlowControl());
+            Assert.Throws<ArgumentException>(() => cfg.UpdateFlowControl(_builder.SuccessorResolver));
             
             Assert.Same(cfg.Nodes[10], cfg.Nodes[0].FallThroughNeighbour);
         }
@@ -171,8 +162,7 @@ namespace Echo.ControlFlow.Tests.Editing
             instructions[1].Operands[0] = 12L;
             instructions[5].Operands[0] = 100L;
             
-            var synchronizer = new FlowControlSynchronizer<DummyInstruction>(cfg, _builder.SuccessorResolver);
-            Assert.Throws<ArgumentException>(() => synchronizer.UpdateFlowControl());
+            Assert.Throws<ArgumentException>(() => cfg.UpdateFlowControl(_builder.SuccessorResolver));
             
             Assert.Same(cfg.Nodes[10], cfg.Nodes[0].FallThroughNeighbour);
             Assert.False(cfg.Nodes.Contains(12));
@@ -203,8 +193,7 @@ namespace Echo.ControlFlow.Tests.Editing
             targets[2] = 5L;
             targets[3] = 100L;
             
-            var synchronizer = new FlowControlSynchronizer<DummyInstruction>(cfg, _builder.SuccessorResolver);
-            Assert.Throws<ArgumentException>(() => synchronizer.UpdateFlowControl());
+            Assert.Throws<ArgumentException>(() => cfg.UpdateFlowControl(_builder.SuccessorResolver));
             
             Assert.False(cfg.Nodes.Contains(5));
             Assert.Equal(new[]
