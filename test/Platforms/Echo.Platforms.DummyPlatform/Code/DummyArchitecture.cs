@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Construction;
@@ -41,6 +42,16 @@ namespace Echo.Platforms.DummyPlatform.Code
 
         public byte[] GetInstructionBytes(DummyInstruction instruction) =>
             throw new System.NotImplementedException();
+
+        public InstructionFlowControl GetFlowControl(DummyInstruction instruction) =>
+            instruction.OpCode switch
+            {
+                DummyOpCode.Jmp => InstructionFlowControl.CanBranch,
+                DummyOpCode.JmpCond => InstructionFlowControl.CanBranch,
+                DummyOpCode.Ret => InstructionFlowControl.IsTerminator,
+                DummyOpCode.Switch => InstructionFlowControl.CanBranch,
+                _ => InstructionFlowControl.Fallthrough
+            };
 
         public int GetStackPushCount(DummyInstruction instruction) => 
             instruction.PushCount;

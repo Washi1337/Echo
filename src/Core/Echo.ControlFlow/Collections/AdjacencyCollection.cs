@@ -18,12 +18,11 @@ namespace Echo.ControlFlow.Collections
         private readonly Dictionary<INode, HashSet<ControlFlowEdge<TContents>>> _neighbours 
             = new Dictionary<INode, HashSet<ControlFlowEdge<TContents>>>();
 
-        private readonly ControlFlowEdgeType _edgeType;
         private int _count;
-        
+
         internal AdjacencyCollection(ControlFlowNode<TContents> owner, ControlFlowEdgeType edgeType)
         {
-            _edgeType = edgeType;
+            EdgeType = edgeType;
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
 
@@ -32,7 +31,15 @@ namespace Echo.ControlFlow.Collections
 
         /// <inheritdoc />
         public bool IsReadOnly => false;
-        
+
+        /// <summary>
+        /// Gets the type of edges that are stored in this collection.
+        /// </summary>
+        public ControlFlowEdgeType EdgeType
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets the node that all edges are originating from.
         /// </summary>
@@ -42,13 +49,23 @@ namespace Echo.ControlFlow.Collections
         }
 
         /// <summary>
+        /// Creates and adds a edge to the node with the provided address.
+        /// </summary>
+        /// <param name="neighbourAddress">The address of the new neighbouring node.</param>
+        /// <returns>The created edge.</returns>
+        public ControlFlowEdge<TContents> Add(long neighbourAddress)
+        {
+            return Add(Owner.ParentGraph.Nodes[neighbourAddress]);
+        }
+
+        /// <summary>
         /// Creates and adds a edge to the provided node.
         /// </summary>
         /// <param name="neighbour">The new neighbouring node.</param>
         /// <returns>The created edge.</returns>
         public ControlFlowEdge<TContents> Add(ControlFlowNode<TContents> neighbour)
         {
-            var edge = new ControlFlowEdge<TContents>(Owner, neighbour, _edgeType);
+            var edge = new ControlFlowEdge<TContents>(Owner, neighbour, EdgeType);
             Add(edge);
             return edge;
         }
@@ -63,7 +80,7 @@ namespace Echo.ControlFlow.Collections
         /// </exception>
         public ControlFlowEdge<TContents> Add(ControlFlowEdge<TContents> edge)
         {
-            AssertEdgeValidity(Owner, _edgeType, edge);
+            AssertEdgeValidity(Owner, EdgeType, edge);
             GetEdges(edge.Target).Add(edge);
             edge.Target.IncomingEdges.Add(edge);
             _count++;
@@ -110,6 +127,17 @@ namespace Echo.ControlFlow.Collections
                 arrayIndex += edges.Count;
             }
         }
+
+        /// <summary>
+        /// Removes all edges originating from the current node to the neighbour with the provided address.
+        /// </summary>
+        /// <param name="neighbourAddress">The address of the neighbour to cut ties with.</param>
+        /// <returns><c>True</c> if at least one edge was removed, <c>false</c> otherwise.</returns>
+        public bool Remove(long neighbourAddress)
+        {
+            var nodes = Owner.ParentGraph.Nodes;
+            return nodes.Contains(neighbourAddress) && Remove(nodes[neighbourAddress]);
+        }
         
         /// <summary>
         /// Removes all edges originating from the current node to the provided neighbour.
@@ -154,6 +182,14 @@ namespace Echo.ControlFlow.Collections
                 throw new ArgumentException("Cannot add an edge originating from a different node.");
         }
 
+        /// <summary>
+        /// Obtains all edges to the provided neighbour, if any.
+        /// </summary>
+        /// <param name="target">The neighbouring node.</param>
+        /// <returns>The edges.</returns>
+        public IEnumerable<ControlFlowEdge<TContents>> GetEdgesToNeighbour(ControlFlowNode<TContents> target) => 
+            GetEdges(target);
+
         private ICollection<ControlFlowEdge<TContents>> GetEdges(INode target)
         {
             if (!_neighbours.TryGetValue(target, out var edges))
@@ -164,7 +200,7 @@ namespace Echo.ControlFlow.Collections
 
             return edges;
         }
-        
+
         /// <summary>
         /// Obtains an enumerator that enumerates all nodes in the collection.
         /// </summary>

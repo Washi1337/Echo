@@ -33,6 +33,8 @@ namespace Echo.Platforms.DummyPlatform
         public byte[] GetOperandBytes(int instruction) => new byte[0];
 
         public byte[] GetInstructionBytes(int instruction) => GetOpCodeBytes(instruction);
+        
+        public InstructionFlowControl GetFlowControl(int instruction) => InstructionFlowControl.Fallthrough;
 
         public int GetStackPushCount(int instruction) => 0;
 

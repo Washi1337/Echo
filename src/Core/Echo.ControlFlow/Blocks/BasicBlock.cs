@@ -82,7 +82,7 @@ namespace Echo.ControlFlow.Blocks
         /// Gets the last instruction that is evaluated when this basic block is executed.
         /// </summary>
         public TInstruction Footer => !IsEmpty ? Instructions[Instructions.Count - 1] : default;
-
+        
         /// <inheritdoc />
         public override string ToString()
         {
