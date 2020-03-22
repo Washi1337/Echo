@@ -27,8 +27,7 @@ namespace Echo.Core.Graphing.Analysis.Connectivity
             {
                 var start = nodes.First();
 
-                var stack = new Stack<INode>();
-                FillOrder(new HashSet<INode>(), stack, start);
+                var stack =  GetFillOrder(start);
                 
                 while (stack.Count > 0)
                 {
@@ -42,17 +41,56 @@ namespace Echo.Core.Graphing.Analysis.Connectivity
             return result;
         }
 
-        private static void FillOrder(ISet<INode> visited, Stack<INode> stack, INode start)
+        private static Stack<INode> GetFillOrder(INode start)
         {
+            // This used to be a recursive function, but was recoded to be iterative to avoid stack overflows.
+            
+            var result = new Stack<INode>();
+            
+            var visited = new HashSet<INode>();
             visited.Add(start);
             
-            foreach (var neighbour in start.GetSuccessors())
+            var agenda = new Stack<FillOrderState>();
+            agenda.Push(new FillOrderState(start, false));
+
+            while (agenda.Count > 0)
             {
-                if (!visited.Contains(neighbour))
-                    FillOrder(visited, stack, neighbour);
+                var currentState = agenda.Pop();
+                if (!currentState.HasTraversedSuccessors)
+                {
+                    visited.Add(currentState.Node);
+
+                    // Schedule current node first to get it post-processed after the successors.
+                    currentState.HasTraversedSuccessors = true;
+                    agenda.Push(currentState);
+
+                    // Schedule successors for initial processing.
+                    foreach (var successor in start.GetSuccessors())
+                    {
+                        if (!visited.Contains(successor))
+                            agenda.Push(new FillOrderState(successor, false));
+                    }
+                }
+                else
+                {
+                    // current node's successors were traversed, add to the resulting stack.
+                    result.Push(currentState.Node);
+                }
             }
 
-            stack.Push(start);
+            return result;
+        }
+
+        private struct FillOrderState
+        {
+            public FillOrderState(INode node, bool hasTraversedSuccessors)
+            {
+                Node = node;
+                HasTraversedSuccessors = hasTraversedSuccessors;
+            }
+            
+            public readonly INode Node;
+            public bool HasTraversedSuccessors;
         }
 
         private static ISet<INode> ReverseDepthFirstSearch(ISet<INode> visited, INode start)
