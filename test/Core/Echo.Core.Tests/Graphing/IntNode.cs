@@ -20,6 +20,10 @@ namespace Echo.Core.Tests.Graphing
             get;
         }
 
+        public int InDegree => _incomingEdges.Count;
+
+        public int OutDegree => _outgoingEdges.Count;
+
         public void ConnectWith(IntNode node)
         {
             var edge = new Edge(this, node);

@@ -23,6 +23,12 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// <inheritdoc />
         public long Id => OriginalNode.Id;
 
+        /// <inheritdoc />
+        int INode.InDegree => Parent is null ? 0 : 1;
+
+        /// <inheritdoc />
+        int INode.OutDegree => Children.Count;
+
         /// <summary>
         /// Gets the node that this tree node was derived from. 
         /// </summary>

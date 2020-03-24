@@ -14,6 +14,22 @@ namespace Echo.Core.Graphing
         {
             get;
         }
+
+        /// <summary>
+        /// Gets a value indicating the number of incoming edges that this node is incident to.
+        /// </summary>
+        int InDegree
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a value indicating the number of outgoing edges that this node is incident to.
+        /// </summary>
+        int OutDegree
+        {
+            get;
+        }
         
         /// <summary>
         /// Gets a collection of all edges that target this node.

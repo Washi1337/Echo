@@ -17,7 +17,6 @@ namespace Echo.ControlFlow
     {
         private ControlFlowEdge<TInstruction> _fallThroughEdge;
 
-
         /// <summary>
         /// Creates a new control flow graph node with an empty basic block, to be added to the graph.
         /// </summary>
@@ -80,6 +79,21 @@ namespace Echo.ControlFlow
 
         /// <inheritdoc />
         long INode.Id => Offset;
+
+        /// <inheritdoc />
+        public int InDegree => IncomingEdges.Count;
+
+        /// <inheritdoc />
+        public int OutDegree
+        {
+            get
+            {
+                int count = ConditionalEdges.Count + AbnormalEdges.Count;
+                if (FallThroughEdge is {})
+                    count++;
+                return count;
+            }
+        }
 
         /// <summary>
         /// Gets the user-defined contents of this node.
