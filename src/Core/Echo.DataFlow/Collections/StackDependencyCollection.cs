@@ -16,7 +16,7 @@ namespace Echo.DataFlow.Collections
     public class StackDependencyCollection<TContents> : Collection<DataDependency<TContents>>
     {
         private readonly DataFlowNode<TContents> _owner;
-        
+
         /// <summary>
         /// Creates a new dependency collection for a node.
         /// </summary>
@@ -25,6 +25,11 @@ namespace Echo.DataFlow.Collections
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
+
+        /// <summary>
+        /// Gets the total number of edges that are stored in this dependency collection.
+        /// </summary>
+        public int EdgeCount => Items.Sum(i => i.DataSources.Count);
 
         private void AssertDependencyValidity(DataDependency<TContents> item)
         {

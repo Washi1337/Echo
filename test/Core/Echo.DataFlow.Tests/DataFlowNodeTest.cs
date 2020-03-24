@@ -80,7 +80,7 @@ namespace Echo.DataFlow.Tests
         }
 
         [Fact]
-        public void RemoveStackDependencyShouldAddToDependants()
+        public void RemoveStackDependencyShouldRemoveFromDependants()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n0 = dfg.Nodes.Add(0, 0);
@@ -225,6 +225,65 @@ namespace Echo.DataFlow.Tests
             Assert.Empty(n1.StackDependencies[0].DataSources);
             Assert.Empty(n1.VariableDependencies[variable].DataSources);
             Assert.Empty(n2.GetDependants());
+        }
+
+        [Fact]
+        public void AddStackDependencyWithSingeSourceShouldSetDegree()
+        {
+            var graph = new DataFlowGraph<int>(IntArchitecture.Instance);
+
+            var n1 = graph.Nodes.Add(1, 1);
+            var n2 = graph.Nodes.Add(2, 2);
+            
+            Assert.Equal(0, n1.OutDegree);
+            Assert.Equal(0, n2.InDegree);
+            n1.StackDependencies.Add(new DataDependency<int>(n2));
+            Assert.Equal(1, n1.OutDegree);
+            Assert.Equal(1, n2.InDegree);
+        }
+
+        [Fact]
+        public void AddStackDependencyWithMultipleSourcesShouldSetDegree()
+        {
+            var graph = new DataFlowGraph<int>(IntArchitecture.Instance);
+
+            var n1 = graph.Nodes.Add(1, 1);
+            var n2 = graph.Nodes.Add(2, 2);
+            var n3 = graph.Nodes.Add(3, 3);
+            
+            Assert.Equal(0, n1.OutDegree);
+            n1.StackDependencies.Add(new DataDependency<int>(n2, n3));
+            Assert.Equal(2, n1.OutDegree);
+        }
+
+        [Fact]
+        public void AddVariableDependencyWithSingeSourceShouldSetDegree()
+        {
+            var variable = new DummyVariable("var1");
+            var graph = new DataFlowGraph<int>(IntArchitecture.Instance);
+
+            var n1 = graph.Nodes.Add(1, 1);
+            var n2 = graph.Nodes.Add(2, 2);
+            
+            Assert.Equal(0, n1.OutDegree);
+            n1.VariableDependencies.Add(variable, new DataDependency<int>(n2));
+            Assert.Equal(1, n1.OutDegree);
+            Assert.Equal(1, n2.InDegree);
+        }
+
+        [Fact]
+        public void AddVariableDependencyWithMultipleSourcesShouldSetDegree()
+        {
+            var variable = new DummyVariable("var1");
+            var graph = new DataFlowGraph<int>(IntArchitecture.Instance);
+
+            var n1 = graph.Nodes.Add(1, 1);
+            var n2 = graph.Nodes.Add(2, 2);
+            var n3 = graph.Nodes.Add(3, 3);
+            
+            Assert.Equal(0, n1.OutDegree);
+            n1.VariableDependencies.Add(variable, new DataDependency<int>(n2, n3));
+            Assert.Equal(2, n1.OutDegree);
         }
     }
 }

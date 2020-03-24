@@ -49,7 +49,7 @@ namespace Echo.DataFlow
         public int InDegree => Dependants.Count;
 
         /// <inheritdoc />
-        public int OutDegree => StackDependencies.Count + VariableDependencies.Count;
+        public int OutDegree => StackDependencies.EdgeCount + VariableDependencies.EdgeCount;
 
         /// <summary>
         /// Gets a value indicating whether the data flow node represents an external data source.
