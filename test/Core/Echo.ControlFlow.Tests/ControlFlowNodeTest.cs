@@ -31,19 +31,23 @@ namespace Echo.ControlFlow.Tests
             Assert.Equal(nodes[0], nodes[0].FallThroughEdge.Origin);
             Assert.Equal(nodes[1], nodes[0].FallThroughEdge.Target);
             Assert.Equal(ControlFlowEdgeType.FallThrough, nodes[0].FallThroughEdge.Type);
+            Assert.Equal(1, nodes[0].OutDegree);
+            Assert.Equal(1, nodes[1].InDegree);
         }
 
         [Fact]
         public void InvalidFallthroughEdge()
         {
             var nodes = CreateDummyGraph(2);
-            nodes[0].FallThroughEdge = new ControlFlowEdge<int>(nodes[0], nodes[1]);
-
+            
             Assert.Throws<ArgumentException>(
                 () => nodes[0].FallThroughEdge = new ControlFlowEdge<int>(nodes[1], nodes[0]));
             
             Assert.Throws<ArgumentException>(
                 () => nodes[0].FallThroughEdge = new ControlFlowEdge<int>(nodes[0], nodes[1], ControlFlowEdgeType.Conditional));
+            
+            Assert.Equal(0, nodes[0].OutDegree);
+            Assert.Equal(0, nodes[1].InDegree);
         }
         
         [Fact]
@@ -53,7 +57,10 @@ namespace Echo.ControlFlow.Tests
 
             var edge = nodes[0].ConditionalEdges.Add(
                 new ControlFlowEdge<int>(nodes[0], nodes[1], ControlFlowEdgeType.Conditional));
+            
             Assert.Contains(edge, nodes[0].ConditionalEdges);
+            Assert.Equal(1, nodes[0].OutDegree);
+            Assert.Equal(1, nodes[1].InDegree);
         }
         
         [Fact]
@@ -66,6 +73,8 @@ namespace Echo.ControlFlow.Tests
             Assert.Equal(nodes[0], edge.Origin);
             Assert.Equal(ControlFlowEdgeType.Conditional, edge.Type);
             Assert.Contains(edge, nodes[0].ConditionalEdges);
+            Assert.Equal(1, nodes[0].OutDegree);
+            Assert.Equal(1, nodes[1].InDegree);
         }
 
         [Fact]
@@ -78,6 +87,8 @@ namespace Echo.ControlFlow.Tests
             Assert.Equal(nodes[0], edge.Origin);
             Assert.Equal(ControlFlowEdgeType.Abnormal, edge.Type);
             Assert.Contains(edge, nodes[0].AbnormalEdges);
+            Assert.Equal(1, nodes[0].OutDegree);
+            Assert.Equal(1, nodes[1].InDegree);
         }
 
         [Fact]
@@ -140,6 +151,8 @@ namespace Echo.ControlFlow.Tests
             
             Assert.Equal(2, nodes[0].ConditionalEdges.Count);
             Assert.Equal(2, nodes[0].ParentGraph.GetEdges().Count());
+            Assert.Equal(2, nodes[0].OutDegree);
+            Assert.Equal(2, nodes[1].InDegree);
         }
 
         [Fact]

@@ -41,6 +41,11 @@ namespace Echo.DataFlow.Collections
         /// <inheritdoc />
         public int Count => _entries.Count;
 
+        /// <summary>
+        /// Gets the total number of edges that are stored in this dependency collection.
+        /// </summary>
+        public int EdgeCount => _entries.Sum(e => e.Value.DataSources.Count);
+
         /// <inheritdoc />
         public bool IsReadOnly => false;
 
