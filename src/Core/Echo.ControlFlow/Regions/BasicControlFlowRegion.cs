@@ -54,5 +54,20 @@ namespace Echo.ControlFlow.Regions
 
         /// <inheritdoc />
         public override IEnumerable<ControlFlowRegion<TInstruction>> GetSubRegions() => Regions;
+
+        /// <inheritdoc />
+        public override bool RemoveNode(ControlFlowNode<TInstruction> node)
+        {
+            if (Nodes.Remove(node))
+                return true;
+
+            foreach (var region in Regions)
+            {
+                if (region.RemoveNode(node))
+                    return true;
+            }
+
+            return false;
+        }
     }
 }

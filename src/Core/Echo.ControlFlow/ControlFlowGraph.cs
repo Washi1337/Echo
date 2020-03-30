@@ -92,5 +92,8 @@ namespace Echo.ControlFlow
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
 
         IEnumerable<ControlFlowRegion<TInstruction>> IControlFlowRegion<TInstruction>.GetSubRegions() => Regions;
+        
+        bool IControlFlowRegion<TInstruction>.RemoveNode(ControlFlowNode<TInstruction> node) => 
+            Nodes.Remove(node);
     }
 }

@@ -127,5 +127,39 @@ namespace Echo.ControlFlow.Tests.Regions
             
             Assert.Same(graph, node.ParentRegion);
         }
+
+        [Fact]
+        public void AddNodeFromAnotherRegionShouldThrow()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            var node = new ControlFlowNode<int>(0);
+            graph.Nodes.Add(node);
+            
+            var region1 = new BasicControlFlowRegion<int>();
+            var region2 = new BasicControlFlowRegion<int>();
+            graph.Regions.Add(region1);
+            graph.Regions.Add(region2);
+
+            region1.Nodes.Add(node);
+
+            Assert.Throws<ArgumentException>(() => region2.Nodes.Add(node));
+        }
+
+        [Fact]
+        public void RemoveNodeInRegionShouldRemoveFromRegion()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            var node = new ControlFlowNode<int>(0);
+            graph.Nodes.Add(node);
+            
+            var region = new BasicControlFlowRegion<int>();
+            graph.Regions.Add(region);
+            region.Nodes.Add(node);
+
+            graph.Nodes.Remove(node);
+            
+            Assert.Null(node.ParentRegion);
+            Assert.DoesNotContain(node, region.Nodes);
+        }
     }
 }

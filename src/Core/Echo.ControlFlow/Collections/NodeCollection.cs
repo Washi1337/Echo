@@ -145,6 +145,7 @@ namespace Echo.ControlFlow.Collections
                 
                 //Remove node.
                 _nodes.Remove(offset);
+                item.ParentRegion.RemoveNode(item);
                 item.ParentRegion = null;
                 
                 return true;

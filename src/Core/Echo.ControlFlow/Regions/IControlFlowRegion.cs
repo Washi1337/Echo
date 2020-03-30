@@ -9,6 +9,9 @@ namespace Echo.ControlFlow.Regions
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public interface IControlFlowRegion<TInstruction> : ISubGraph
     {
+        /// <summary>
+        /// Gets the parent graph this region is part of.
+        /// </summary>
         ControlFlowGraph<TInstruction> ParentGraph
         {
             get;
@@ -45,5 +48,11 @@ namespace Echo.ControlFlow.Regions
         /// <returns>The node.</returns>
         ControlFlowNode<TInstruction> GetNodeByOffset(long offset);
 
+        /// <summary>
+        /// Removes the node from the region.
+        /// </summary>
+        /// <param name="node">The node to remove.</param>
+        /// <returns><c>true</c> if the node was found and removed, <c>false</c> otherwise.</returns>
+        bool RemoveNode(ControlFlowNode<TInstruction> node);
     }
 }
