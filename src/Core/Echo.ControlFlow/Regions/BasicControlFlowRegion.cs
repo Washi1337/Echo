@@ -16,7 +16,8 @@ namespace Echo.ControlFlow.Regions
         /// </summary>
         public BasicControlFlowRegion()
         {
-            Regions = new ControlFlowRegionCollection<TInstruction>(this);
+            Regions = new RegionCollection<TInstruction>(this);
+            Nodes = new RegionNodeCollection<TInstruction>(this);
         }
         
         /// <summary>
@@ -25,15 +26,15 @@ namespace Echo.ControlFlow.Regions
         /// <remarks>
         /// This collection does not include any nodes in the nested sub regions.
         /// </remarks>
-        public IList<ControlFlowNode<TInstruction>> Nodes
+        public RegionNodeCollection<TInstruction> Nodes
         {
             get;
-        } = new List<ControlFlowNode<TInstruction>>();
+        }
 
         /// <summary>
         /// Gets a collection of nested sub regions that this region defines.
         /// </summary>
-        public ControlFlowRegionCollection<TInstruction> Regions
+        public RegionCollection<TInstruction> Regions
         {
             get;
         }

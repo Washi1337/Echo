@@ -11,6 +11,28 @@ namespace Echo.ControlFlow.Regions
     public abstract class ControlFlowRegion<TInstruction> : IControlFlowRegion<TInstruction>
     {
         /// <inheritdoc />
+        public ControlFlowGraph<TInstruction> ParentGraph
+        {
+            get
+            {
+                var region = ParentRegion;
+                while (true)
+                {
+                    switch (region)
+                    {
+                        case null:
+                            return null;
+                        case ControlFlowGraph<TInstruction> graph:
+                            return graph;
+                        default:
+                            region = region.ParentRegion;
+                            break;
+                    }
+                }
+            }
+        }
+
+        /// <inheritdoc />
         public IControlFlowRegion<TInstruction> ParentRegion
         {
             get;

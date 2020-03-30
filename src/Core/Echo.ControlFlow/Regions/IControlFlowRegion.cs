@@ -9,6 +9,11 @@ namespace Echo.ControlFlow.Regions
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public interface IControlFlowRegion<TInstruction> : ISubGraph
     {
+        ControlFlowGraph<TInstruction> ParentGraph
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets the parent region that this region is part of. 
         /// </summary>

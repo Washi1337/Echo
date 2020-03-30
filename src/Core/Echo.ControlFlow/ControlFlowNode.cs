@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Blocks;
 using Echo.ControlFlow.Collections;
+using Echo.ControlFlow.Regions;
 using Echo.Core.Code;
 using Echo.Core.Graphing;
 
@@ -63,6 +64,30 @@ namespace Echo.ControlFlow
         /// Gets the graph that contains this node, or <c>null</c> if the node is not added to any graph yet.  
         /// </summary>
         public ControlFlowGraph<TInstruction> ParentGraph
+        {
+            get
+            {
+                var region = ParentRegion;
+                while (true)
+                {
+                    switch (region)
+                    {
+                        case null:
+                            return null;
+                        case ControlFlowGraph<TInstruction> graph:
+                            return graph;
+                        default:
+                            region = region.ParentRegion;
+                            break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the graph region that contains this node, or <c>null</c> if the node is not added to any graph yet.  
+        /// </summary>
+        public IControlFlowRegion<TInstruction> ParentRegion
         {
             get;
             internal set;

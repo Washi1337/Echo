@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Echo.ControlFlow.Tests.Regions
 {
-    public class ControlFlowRegionCollectionTest
+    public class RegionCollectionTest
     {
         [Fact]
         public void AddSubRegionShouldSetParentRegion()
@@ -71,6 +71,61 @@ namespace Echo.ControlFlow.Tests.Regions
             graph1.Regions.Add(region);
 
             Assert.Throws<ArgumentException>(() => graph2.Regions.Add(region));
+        }
+
+        [Fact]
+        public void AddNodeNotAddedToGraphToRegionShouldThrow()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            var node = new ControlFlowNode<int>(0);
+            
+            var region = new BasicControlFlowRegion<int>();
+            graph.Regions.Add(region);
+
+            Assert.Throws<ArgumentException>(() => region.Nodes.Add(node));
+        }
+
+        [Fact]
+        public void AddNodeToNotAddedRegionShouldThrow()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            var node = new ControlFlowNode<int>(0);
+            graph.Nodes.Add(node);
+            
+            var region = new BasicControlFlowRegion<int>();
+
+            Assert.Throws<InvalidOperationException>(() => region.Nodes.Add(node));
+        }
+
+        [Fact]
+        public void AddNodeToRegionShouldSetParentRegion()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            var node = new ControlFlowNode<int>(0);
+            graph.Nodes.Add(node);
+            
+            var region = new BasicControlFlowRegion<int>();
+            graph.Regions.Add(region);
+
+            region.Nodes.Add(node);
+
+            Assert.Same(region, node.ParentRegion);
+        }
+
+        [Fact]
+        public void RemoveNodeShouldSetRegionBackToParentGraph()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            var node = new ControlFlowNode<int>(0);
+            graph.Nodes.Add(node);
+            
+            var region = new BasicControlFlowRegion<int>();
+            graph.Regions.Add(region);
+
+            region.Nodes.Add(node);
+            region.Nodes.Remove(node);
+            
+            Assert.Same(graph, node.ParentRegion);
         }
     }
 }

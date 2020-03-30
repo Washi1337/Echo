@@ -10,15 +10,15 @@ namespace Echo.ControlFlow.Collections
     /// </summary>
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class ControlFlowRegionCollection<TInstruction> : Collection<ControlFlowRegion<TInstruction>>
+    public class RegionCollection<TInstruction> : Collection<ControlFlowRegion<TInstruction>>
     {
         private readonly IControlFlowRegion<TInstruction> _owner;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="ControlFlowRegionCollection{TInstruction}"/> class.
+        /// Creates a new instance of the <see cref="RegionCollection{TInstruction}"/> class.
         /// </summary>
         /// <param name="owner">The owner of the sub regions.</param>
-        public ControlFlowRegionCollection(IControlFlowRegion<TInstruction> owner)
+        public RegionCollection(IControlFlowRegion<TInstruction> owner)
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
