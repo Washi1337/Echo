@@ -155,5 +155,35 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             var exit = loopHeader.FallThroughNeighbour;
             Assert.Empty(exit.GetOutgoingEdges());
         }
+
+        [Fact]
+        public void UnreachableNodesShouldNotBeIncluded()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Ret(0),
+                
+                DummyInstruction.Ret(10),
+            };
+            
+            var graph = _builder.ConstructFlowGraph(instructions, 0);
+            Assert.Contains(graph.Nodes, n => n.Offset == 0);
+            Assert.DoesNotContain(graph.Nodes, n => n.Offset == 10);
+        }
+
+        [Fact]
+        public void UnreachableNodesShouldBeIncludedIfKnownBlockHeader()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Ret(0),
+                
+                DummyInstruction.Ret(10),
+            };
+            
+            var graph = _builder.ConstructFlowGraph(instructions, 0, 10);
+            Assert.Contains(graph.Nodes, n => n.Offset == 0);
+            Assert.Contains(graph.Nodes, n => n.Offset == 10);
+        }
     }
 }

@@ -80,6 +80,7 @@ namespace Echo.ControlFlow.Construction
         /// </summary>
         /// <param name="instructions">The instructions to traverse.</param>
         /// <param name="entrypoint">The address of the first instruction to traverse.</param>
+        /// <param name="knownBlockHeaders">A list of known block headers that should be included in the traversal.</param>
         /// <returns>An object containing the result of the traversal, including the block headers and successors of
         /// each instruction.</returns>
         protected abstract IInstructionTraversalResult<TInstruction> CollectInstructions(
