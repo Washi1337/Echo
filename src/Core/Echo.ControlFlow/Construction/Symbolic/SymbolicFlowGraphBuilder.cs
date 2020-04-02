@@ -33,19 +33,24 @@ namespace Echo.ControlFlow.Construction.Symbolic
         }
 
         /// <inheritdoc />
-        protected override IInstructionTraversalResult<TInstruction> CollectInstructions(IInstructionProvider<TInstruction> instructions, long entrypoint)
+        protected override IInstructionTraversalResult<TInstruction> CollectInstructions(
+            IInstructionProvider<TInstruction> instructions, long entrypoint, long[] knownBlockHeaders)
         {
-            var result = TraverseInstructions(instructions, entrypoint);
+            var result = TraverseInstructions(instructions, entrypoint, knownBlockHeaders);
             DetermineBlockHeaders(result);
             return result;
         }
 
-        private InstructionTraversalResult<TInstruction> TraverseInstructions(IInstructionProvider<TInstruction> instructions, long entrypoint)
+        private InstructionTraversalResult<TInstruction> TraverseInstructions(
+            IInstructionProvider<TInstruction> instructions, long entrypoint, long[] knownBlockHeaders)
         {
             var result = new InstructionTraversalResult<TInstruction>();
             
             var recordedStates = new Dictionary<long, SymbolicProgramState<TInstruction>>();
+            
             var agenda = new Stack<SymbolicProgramState<TInstruction>>();
+            foreach (var header in knownBlockHeaders)
+                agenda.Push(TransitionResolver.GetInitialState(header));
             agenda.Push(TransitionResolver.GetInitialState(entrypoint));
 
             while (agenda.Count > 0)
