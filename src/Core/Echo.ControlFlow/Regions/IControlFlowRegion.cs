@@ -55,4 +55,20 @@ namespace Echo.ControlFlow.Regions
         /// <returns><c>true</c> if the node was found and removed, <c>false</c> otherwise.</returns>
         bool RemoveNode(ControlFlowNode<TInstruction> node);
     }
+    
+    public static class ControlFlowRegionExtensions
+    {
+        public static ExceptionHandlerRegion<TInstruction> GetParentExceptionHandler<TInstruction>(this IControlFlowRegion<TInstruction> self)
+        {
+            var region = self.ParentRegion;
+            while (region is {})
+            {
+                if (region is ExceptionHandlerRegion<TInstruction> ehRegion)
+                    return ehRegion;
+                region = region.ParentRegion;
+            }
+
+            return null;
+        }
+    }
 }

@@ -27,7 +27,7 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets the region of nodes that is protected by the exception handler. 
         /// </summary>
-        public ControlFlowRegion<TInstruction> ProtectedRegion
+        public BasicControlFlowRegion<TInstruction> ProtectedRegion
         {
             get;
         }
@@ -35,7 +35,7 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets the region of nodes that form the handler block.
         /// </summary>
-        public ControlFlowRegion<TInstruction> HandlerRegion
+        public BasicControlFlowRegion<TInstruction> HandlerRegion
         {
             get;
         }

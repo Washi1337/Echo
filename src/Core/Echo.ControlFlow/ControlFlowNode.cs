@@ -465,6 +465,9 @@ namespace Echo.ControlFlow
             RemoveFromAnyRegion();
             region.Nodes.Add(this);
         }
+
+        public ExceptionHandlerRegion<TInstruction> GetParentExceptionHandler() =>
+            ParentRegion?.GetParentExceptionHandler();
         
         /// <inheritdoc />
         public override string ToString() => Offset.ToString("X8");
