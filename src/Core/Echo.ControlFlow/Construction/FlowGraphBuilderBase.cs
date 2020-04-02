@@ -60,10 +60,27 @@ namespace Echo.ControlFlow.Construction
             var provider = new ListInstructionProvider<TInstruction>(Architecture, instructions.ToList());
             return ConstructFlowGraph(provider, entrypoint, knownBlockHeaders);
         }
+
+        /// <summary>
+        /// Constructs a control flow graph from a collection of instructions, starting at the provided entrypoint address.
+        /// </summary>
+        /// <param name="instructions">The instructions to graph.</param>
+        /// <param name="entrypoint">The address of the first instruction to traverse.</param>
+        /// <param name="knownBlockHeaders">A list of known block headers that should be included in the traversal.</param>
+        /// <returns>
+        /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
+        /// provided in <paramref name="entrypoint"/>.
+        /// </returns>
+        public ControlFlowGraph<TInstruction> ConstructFlowGraph(
+            IEnumerable<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders)
+        {
+            var provider = new ListInstructionProvider<TInstruction>(Architecture, instructions.ToList());
+            return ConstructFlowGraph(provider, entrypoint, knownBlockHeaders);
+        }
         
         /// <inheritdoc />
         public ControlFlowGraph<TInstruction> ConstructFlowGraph(
-            IInstructionProvider<TInstruction> instructions, long entrypoint, params long[] knownBlockHeaders)
+            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
             var traversalResult = CollectInstructions(instructions, entrypoint, knownBlockHeaders);
 
@@ -84,7 +101,7 @@ namespace Echo.ControlFlow.Construction
         /// <returns>An object containing the result of the traversal, including the block headers and successors of
         /// each instruction.</returns>
         protected abstract IInstructionTraversalResult<TInstruction> CollectInstructions(
-            IInstructionProvider<TInstruction> instructions, long entrypoint, long[] knownBlockHeaders);
+            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders);
 
         private void CreateNodes(ControlFlowGraph<TInstruction> graph, IInstructionTraversalResult<TInstruction> traversalResult)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction
@@ -19,8 +20,10 @@ namespace Echo.ControlFlow.Construction
         /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
         /// provided in <paramref name="entrypoint"/>.
         /// </returns>
-        ControlFlowGraph<TInstruction> ConstructFlowGraph(IInstructionProvider<TInstruction> instructions,
-            long entrypoint, params long[] knownBlockHeaders);
+        ControlFlowGraph<TInstruction> ConstructFlowGraph(
+            IInstructionProvider<TInstruction> instructions,
+            long entrypoint, 
+            IEnumerable<long> knownBlockHeaders);
     }
 
     /// <summary>
@@ -39,9 +42,30 @@ namespace Echo.ControlFlow.Construction
         /// provided in <paramref name="entrypoint"/>.
         /// </returns>
         public static ControlFlowGraph<TInstruction> ConstructFlowGraph<TInstruction>(
-            this IFlowGraphBuilder<TInstruction> self, IInstructionProvider<TInstruction> instructions, long entrypoint)
+            this IFlowGraphBuilder<TInstruction> self, 
+            IInstructionProvider<TInstruction> instructions, 
+            long entrypoint)
         {
             return self.ConstructFlowGraph(instructions, entrypoint, Array.Empty<long>());
+        }
+
+        /// <summary>
+        /// Constructs a control flow graph, starting at the provided entrypoint address.
+        /// </summary>
+        /// <param name="instructions">The instructions.</param>
+        /// <param name="entrypoint">The address of the first instruction to traverse.</param>
+        /// <param name="knownBlockHeaders">A list of known block headers that should be included in the traversal.</param>
+        /// <returns>
+        /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
+        /// provided in <paramref name="entrypoint"/>.
+        /// </returns>
+        public static ControlFlowGraph<TInstruction> ConstructFlowGraph<TInstruction>(
+            this IFlowGraphBuilder<TInstruction> self,
+            IInstructionProvider<TInstruction> instructions, 
+            long entrypoint, 
+            params long[] knownBlockHeaders)
+        {
+            return self.ConstructFlowGraph(instructions, entrypoint, knownBlockHeaders);
         }
 
     }

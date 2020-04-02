@@ -34,7 +34,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
 
         /// <inheritdoc />
         protected override IInstructionTraversalResult<TInstruction> CollectInstructions(
-            IInstructionProvider<TInstruction> instructions, long entrypoint, long[] knownBlockHeaders)
+            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
             var result = TraverseInstructions(instructions, entrypoint, knownBlockHeaders);
             DetermineBlockHeaders(result);
@@ -42,7 +42,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         }
 
         private InstructionTraversalResult<TInstruction> TraverseInstructions(
-            IInstructionProvider<TInstruction> instructions, long entrypoint, long[] knownBlockHeaders)
+            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
             var result = new InstructionTraversalResult<TInstruction>();
             
