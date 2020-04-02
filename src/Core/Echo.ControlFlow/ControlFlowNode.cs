@@ -447,6 +447,25 @@ namespace Echo.ControlFlow
             }
         }
 
+        /// <summary>
+        /// Removes the node out of any sub region in the graph.
+        /// </summary>
+        public void RemoveFromAnyRegion()
+        {
+            if (ParentRegion != ParentGraph)
+                ParentRegion.RemoveNode(this);
+        }
+
+        /// <summary>
+        /// Moves the node from its current region (if any) into the provided sub region.
+        /// </summary>
+        /// <param name="region">The region to move the node to.</param>
+        public void MoveToRegion(BasicControlFlowRegion<TInstruction> region)
+        {
+            RemoveFromAnyRegion();
+            region.Nodes.Add(this);
+        }
+        
         /// <inheritdoc />
         public override string ToString() => Offset.ToString("X8");
 
