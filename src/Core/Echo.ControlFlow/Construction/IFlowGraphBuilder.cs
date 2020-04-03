@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Echo.ControlFlow.Regions.Detection;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction
@@ -10,6 +12,14 @@ namespace Echo.ControlFlow.Construction
     /// <typeparam name="TInstruction">The type of instructions that the control flow graph will contain.</typeparam>
     public interface IFlowGraphBuilder<TInstruction>
     {
+        /// <summary>
+        /// Gets the architecture of the instructions to graph.
+        /// </summary>
+        IInstructionSetArchitecture<TInstruction> Architecture
+        {
+            get;
+        }
+
         /// <summary>
         /// Constructs a control flow graph, starting at the provided entrypoint address.
         /// </summary>
@@ -48,12 +58,31 @@ namespace Echo.ControlFlow.Construction
         {
             return self.ConstructFlowGraph(instructions, entrypoint, Array.Empty<long>());
         }
-
+        
         /// <summary>
-        /// Constructs a control flow graph, starting at the provided entrypoint address.
+        /// Constructs a control flow graph from a collection of instructions, starting at the provided entrypoint address.
         /// </summary>
         /// <param name="self">The control flow graph builder to use.</param>
-        /// <param name="instructions">The instructions.</param>
+        /// <param name="instructions">The instructions to graph.</param>
+        /// <param name="entrypoint">The address of the first instruction to traverse.</param>
+        /// <returns>
+        /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
+        /// provided in <paramref name="entrypoint"/>.
+        /// </returns>
+        public static ControlFlowGraph<TInstruction> ConstructFlowGraph<TInstruction>(
+            this IFlowGraphBuilder<TInstruction> self,
+            IEnumerable<TInstruction> instructions, 
+            long entrypoint)
+        {
+            var provider = new ListInstructionProvider<TInstruction>(self.Architecture, instructions.ToList());
+            return self.ConstructFlowGraph(provider, entrypoint, Array.Empty<long>());
+        }
+
+        /// <summary>
+        /// Constructs a control flow graph from a collection of instructions, starting at the provided entrypoint address.
+        /// </summary>
+        /// <param name="self">The control flow graph builder to use.</param>
+        /// <param name="instructions">The instructions to graph.</param>
         /// <param name="entrypoint">The address of the first instruction to traverse.</param>
         /// <param name="knownBlockHeaders">A list of known block headers that should be included in the traversal.</param>
         /// <returns>
@@ -62,12 +91,43 @@ namespace Echo.ControlFlow.Construction
         /// </returns>
         public static ControlFlowGraph<TInstruction> ConstructFlowGraph<TInstruction>(
             this IFlowGraphBuilder<TInstruction> self,
-            IInstructionProvider<TInstruction> instructions, 
+            IEnumerable<TInstruction> instructions, 
             long entrypoint, 
-            params long[] knownBlockHeaders)
+            IEnumerable<long> knownBlockHeaders)
         {
-            return self.ConstructFlowGraph(instructions, entrypoint, knownBlockHeaders);
+            var provider = new ListInstructionProvider<TInstruction>(self.Architecture, instructions.ToList());
+            return self.ConstructFlowGraph(provider, entrypoint, knownBlockHeaders);
         }
+
+        /// <summary>
+        /// Constructs a control flow graph from a collection of instructions, starting at the provided entrypoint address.
+        /// </summary>
+        /// <param name="self">The control flow graph builder to use.</param>
+        /// <param name="instructions">The instructions to graph.</param>
+        /// <param name="entrypoint">The address of the first instruction to traverse.</param>
+        /// <param name="exceptionHandlers">The set of exception handler ranges.</param>
+        /// <returns>
+        /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
+        /// provided in <paramref name="entrypoint"/>.
+        /// </returns>
+        public static ControlFlowGraph<TInstruction> ConstructFlowGraph<TInstruction>(
+            this IFlowGraphBuilder<TInstruction> self,
+            IEnumerable<TInstruction> instructions, 
+            long entrypoint, 
+            IEnumerable<ExceptionHandlerRange> exceptionHandlers)
+        {
+            var provider = new ListInstructionProvider<TInstruction>(self.Architecture, instructions.ToList());
+            
+            var knownBlockHeaders = new HashSet<long>();
+            foreach (var range in exceptionHandlers)
+            {
+                knownBlockHeaders.Add(range.ProtectedRange.Start);
+                knownBlockHeaders.Add(range.HandlerRange.Start);
+            }
+            
+            return self.ConstructFlowGraph(provider, entrypoint, knownBlockHeaders);
+        }
+        
 
     }
 }

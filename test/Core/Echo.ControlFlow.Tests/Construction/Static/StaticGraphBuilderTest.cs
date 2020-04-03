@@ -1,4 +1,5 @@
 using System.Linq;
+using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
@@ -181,7 +182,7 @@ namespace Echo.ControlFlow.Tests.Construction.Static
                 DummyInstruction.Ret(10),
             };
             
-            var graph = _builder.ConstructFlowGraph(instructions, 0, 10);
+            var graph = _builder.ConstructFlowGraph(instructions, 0, new long[] {10});
             Assert.Contains(graph.Nodes, n => n.Offset == 0);
             Assert.Contains(graph.Nodes, n => n.Offset == 10);
         }
@@ -196,7 +197,7 @@ namespace Echo.ControlFlow.Tests.Construction.Static
                 DummyInstruction.Ret(2),
             };
             
-            var graph = _builder.ConstructFlowGraph(instructions, 0, 1);
+            var graph = _builder.ConstructFlowGraph(instructions, 0, new long[] {1});
             Assert.Contains(graph.Nodes, n => n.Offset == 0);
             Assert.Contains(graph.Nodes, n => n.Offset == 1);
         }

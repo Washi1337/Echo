@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Regions.Detection;
 using Echo.Core.Code;
@@ -18,13 +19,9 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
                 architecture,
                 architecture.SuccessorResolver);
 
-            var knownBlockHeaders = ranges.SelectMany(r => new[]
-            {
-                r.ProtectedRange.Start, r.HandlerRange.Start
-            });
-            
-            var cfg = builder.ConstructFlowGraph(instructions, 0, knownBlockHeaders);
-            cfg.DetectExceptionHandlerRegions(ranges);
+            var rangesArray = ranges as ExceptionHandlerRange[] ?? ranges.ToArray();
+            var cfg = builder.ConstructFlowGraph(instructions, 0, rangesArray);
+            cfg.DetectExceptionHandlerRegions(rangesArray);
             
             return cfg;
         }
