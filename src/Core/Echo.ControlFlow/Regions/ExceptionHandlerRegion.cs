@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Echo.ControlFlow.Collections;
 
 namespace Echo.ControlFlow.Regions
 {
@@ -18,10 +19,8 @@ namespace Echo.ControlFlow.Regions
             {
                 ParentRegion = this
             };
-            HandlerRegion = new BasicControlFlowRegion<TInstruction>
-            {
-                ParentRegion = this
-            };
+            
+            HandlerRegions = new RegionCollection<TInstruction>(this);
         }
         
         /// <summary>
@@ -33,28 +32,28 @@ namespace Echo.ControlFlow.Regions
         }
 
         /// <summary>
-        /// Gets the region of nodes that form the handler block.
+        /// Gets the regions that form the handler blocks.
         /// </summary>
-        public BasicControlFlowRegion<TInstruction> HandlerRegion
+        public RegionCollection<TInstruction> HandlerRegions
         {
             get;
         }
-        
+
         /// <inheritdoc />
-        public override IEnumerable<ControlFlowNode<TInstruction>> GetNodes() => 
-            ProtectedRegion.GetNodes().Union(HandlerRegion.GetNodes());
+        public override IEnumerable<ControlFlowNode<TInstruction>> GetNodes() =>
+            GetSubRegions().SelectMany(r => r.GetNodes());
 
         /// <inheritdoc />
         public override IEnumerable<ControlFlowRegion<TInstruction>> GetSubRegions()
         {
-            return new[]
-            {
-                ProtectedRegion, HandlerRegion
-            };
+            yield return ProtectedRegion;
+
+            foreach (var handlerRegion in HandlerRegions)
+                yield return handlerRegion;
         }
 
         /// <inheritdoc />
-        public override bool RemoveNode(ControlFlowNode<TInstruction> node) => 
-            ProtectedRegion.RemoveNode(node) || HandlerRegion.RemoveNode(node);
+        public override bool RemoveNode(ControlFlowNode<TInstruction> node) =>
+            ProtectedRegion.RemoveNode(node) || HandlerRegions.Any(r => r.RemoveNode(node));
     }
 }

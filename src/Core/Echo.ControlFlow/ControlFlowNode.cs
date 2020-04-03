@@ -466,6 +466,12 @@ namespace Echo.ControlFlow
             region.Nodes.Add(this);
         }
 
+        /// <summary>
+        /// Obtains the parent exception handler region that this node resides in (if any).
+        /// </summary>
+        /// <returns>
+        /// The parent exception handler region, or <c>null</c> if the node is not part of any exception handler.
+        /// </returns>
         public ExceptionHandlerRegion<TInstruction> GetParentExceptionHandler() =>
             ParentRegion?.GetParentExceptionHandler();
         

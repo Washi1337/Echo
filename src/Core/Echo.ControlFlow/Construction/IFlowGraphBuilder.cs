@@ -52,6 +52,7 @@ namespace Echo.ControlFlow.Construction
         /// <summary>
         /// Constructs a control flow graph, starting at the provided entrypoint address.
         /// </summary>
+        /// <param name="self">The control flow graph builder to use.</param>
         /// <param name="instructions">The instructions.</param>
         /// <param name="entrypoint">The address of the first instruction to traverse.</param>
         /// <param name="knownBlockHeaders">A list of known block headers that should be included in the traversal.</param>

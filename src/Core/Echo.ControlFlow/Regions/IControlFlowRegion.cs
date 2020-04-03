@@ -56,8 +56,17 @@ namespace Echo.ControlFlow.Regions
         bool RemoveNode(ControlFlowNode<TInstruction> node);
     }
     
+    /// <summary>
+    /// Provides extensions to the <see cref="IControlFlowRegion{TInstruction}"/> interface.
+    /// </summary>
     public static class ControlFlowRegionExtensions
     {
+        /// <summary>
+        /// Obtains the parent exception handler region that this region resides in (if any).
+        /// </summary>
+        /// <returns>
+        /// The parent exception handler region, or <c>null</c> if the region is not part of any exception handler.
+        /// </returns>
         public static ExceptionHandlerRegion<TInstruction> GetParentExceptionHandler<TInstruction>(this IControlFlowRegion<TInstruction> self)
         {
             var region = self.ParentRegion;
