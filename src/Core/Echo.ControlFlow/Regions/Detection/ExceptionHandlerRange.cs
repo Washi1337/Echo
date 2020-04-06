@@ -17,6 +17,20 @@ namespace Echo.ControlFlow.Regions.Detection
         {
             ProtectedRange = protectedRange;
             HandlerRange = handlerRange;
+            UserData = null;
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ExceptionHandlerRange"/> structure.
+        /// </summary>
+        /// <param name="protectedRange">The range indicating the code that is protected by the handler.</param>
+        /// <param name="handlerRange">The range indicating the handler code.</param>
+        /// <param name="userData">A user defined tag that is added to the exception handler.</param>
+        public ExceptionHandlerRange(AddressRange protectedRange, AddressRange handlerRange, object userData)
+        {
+            ProtectedRange = protectedRange;
+            HandlerRange = handlerRange;
+            UserData = userData;
         }
         
         /// <summary>
@@ -36,10 +50,13 @@ namespace Echo.ControlFlow.Regions.Detection
         }
 
         /// <summary>
-        /// Determines whether the range is considered equal with the provided range.
+        /// Gets a user defined tag that is added to the exception handler.
         /// </summary>
-        /// <param name="other">The other range.</param>
-        /// <returns><c>true</c> if the ranges are considered equal, <c>false</c> otherwise.</returns>
+        public object UserData
+        {
+            get;
+        }
+
         public bool Equals(ExceptionHandlerRange other) => 
             ProtectedRange.Equals(other.ProtectedRange) && HandlerRange.Equals(other.HandlerRange);
 

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Echo.Core.Graphing;
 
 namespace Echo.ControlFlow.Regions
@@ -37,6 +36,15 @@ namespace Echo.ControlFlow.Regions
         {
             get;
             internal set;
+        }
+
+        /// <summary>
+        /// Gets or sets a user-defined tag that is assigned to this region. 
+        /// </summary>
+        public object Tag
+        {
+            get;
+            set;
         }
 
         /// <inheritdoc />

@@ -67,6 +67,7 @@ namespace Echo.ControlFlow.Regions.Detection
 
                 // Register handler region.
                 var handlerRegion = new BasicControlFlowRegion<TInstruction>();
+                handlerRegion.Tag = currentEHRange.UserData;
                 ehRegion.HandlerRegions.Add(handlerRegion);
                 rangeToRegion.Add(currentEHRange.HandlerRange, handlerRegion);
             }
