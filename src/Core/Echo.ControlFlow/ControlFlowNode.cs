@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Blocks;
 using Echo.ControlFlow.Collections;
+using Echo.ControlFlow.Regions;
 using Echo.Core.Code;
 using Echo.Core.Graphing;
 
@@ -63,6 +64,30 @@ namespace Echo.ControlFlow
         /// Gets the graph that contains this node, or <c>null</c> if the node is not added to any graph yet.  
         /// </summary>
         public ControlFlowGraph<TInstruction> ParentGraph
+        {
+            get
+            {
+                var region = ParentRegion;
+                while (true)
+                {
+                    switch (region)
+                    {
+                        case null:
+                            return null;
+                        case ControlFlowGraph<TInstruction> graph:
+                            return graph;
+                        default:
+                            region = region.ParentRegion;
+                            break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the graph region that contains this node, or <c>null</c> if the node is not added to any graph yet.  
+        /// </summary>
+        public IControlFlowRegion<TInstruction> ParentRegion
         {
             get;
             internal set;
@@ -422,6 +447,34 @@ namespace Echo.ControlFlow
             }
         }
 
+        /// <summary>
+        /// Removes the node out of any sub region in the graph.
+        /// </summary>
+        public void RemoveFromAnyRegion()
+        {
+            if (ParentRegion != ParentGraph)
+                ParentRegion.RemoveNode(this);
+        }
+
+        /// <summary>
+        /// Moves the node from its current region (if any) into the provided sub region.
+        /// </summary>
+        /// <param name="region">The region to move the node to.</param>
+        public void MoveToRegion(BasicControlFlowRegion<TInstruction> region)
+        {
+            RemoveFromAnyRegion();
+            region.Nodes.Add(this);
+        }
+
+        /// <summary>
+        /// Obtains the parent exception handler region that this node resides in (if any).
+        /// </summary>
+        /// <returns>
+        /// The parent exception handler region, or <c>null</c> if the node is not part of any exception handler.
+        /// </returns>
+        public ExceptionHandlerRegion<TInstruction> GetParentExceptionHandler() =>
+            ParentRegion?.GetParentExceptionHandler();
+        
         /// <inheritdoc />
         public override string ToString() => Offset.ToString("X8");
 

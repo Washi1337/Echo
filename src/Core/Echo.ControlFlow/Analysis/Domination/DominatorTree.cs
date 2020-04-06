@@ -241,10 +241,16 @@ namespace Echo.ControlFlow.Analysis.Domination
             _frontier = frontier;
         }
 
+        /// <inheritdoc />
         INode ISubGraph.GetNodeById(long id) => _nodes.Values.FirstOrDefault(n => n.Id == id);
 
+        /// <inheritdoc />
         IEnumerable<INode> ISubGraph.GetNodes() => _nodes.Values;
 
+        /// <inheritdoc />
+        public IEnumerable<ISubGraph> GetSubGraphs() => Enumerable.Empty<ISubGraph>();
+
+        /// <inheritdoc />
         IEnumerable<IEdge> IGraph.GetEdges() => 
             _nodes.Values.SelectMany(n => ((INode) n).GetOutgoingEdges());
     }

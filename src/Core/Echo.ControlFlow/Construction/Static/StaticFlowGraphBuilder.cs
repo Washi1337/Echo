@@ -42,16 +42,18 @@ namespace Echo.ControlFlow.Construction.Static
 
         /// <inheritdoc />
         protected override IInstructionTraversalResult<TInstruction> CollectInstructions(
-            IInstructionProvider<TInstruction> instructions, long entrypoint)
+            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
             var visited = new HashSet<long>();
             
             var result = new InstructionTraversalResult<TInstruction>();
             result.BlockHeaders.Add(entrypoint);
+            result.BlockHeaders.UnionWith(knownBlockHeaders);
 
-            // Start at the entrypoint.
+            // Start at the entrypoint and block headers.
             var agenda = new Stack<long>();
-            agenda.Push(entrypoint);
+            foreach (var header in result.BlockHeaders)
+                agenda.Push(header);
 
             while (agenda.Count > 0)
             {

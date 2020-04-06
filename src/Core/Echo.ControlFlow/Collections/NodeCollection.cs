@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Echo.ControlFlow.Blocks;
 
 namespace Echo.ControlFlow.Collections
 {
@@ -32,10 +33,12 @@ namespace Echo.ControlFlow.Collections
         /// </summary>
         /// <param name="offset">The node offset.</param>
         public ControlFlowNode<TContents> this[long offset] => _nodes[offset];
-
+        
         /// <inheritdoc />
         public void Add(ControlFlowNode<TContents> item)
         {
+            if (item is null)
+                throw new ArgumentNullException();
             if (item.ParentGraph == _owner)
                 return;
             if (item.ParentGraph != null)
@@ -44,7 +47,7 @@ namespace Echo.ControlFlow.Collections
                 throw new ArgumentException($"A node with offset 0x{item.Offset:X8} was already added to the graph.");
 
             _nodes.Add(item.Offset, item);
-            item.ParentGraph = _owner;
+            item.ParentRegion = _owner;
         }
 
         /// <summary>
@@ -71,7 +74,7 @@ namespace Echo.ControlFlow.Collections
             {
                 var node = nodes[i];
                 _nodes.Add(node.Offset, node);
-                node.ParentGraph = _owner;
+                node.ParentRegion = _owner;
             }
         }
         
@@ -142,7 +145,8 @@ namespace Echo.ControlFlow.Collections
                 
                 //Remove node.
                 _nodes.Remove(offset);
-                item.ParentGraph = null;
+                item.ParentRegion.RemoveNode(item);
+                item.ParentRegion = null;
                 
                 return true;
             }

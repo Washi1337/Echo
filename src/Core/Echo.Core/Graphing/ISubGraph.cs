@@ -19,5 +19,11 @@ namespace Echo.Core.Graphing
         /// </summary>
         /// <returns>The nodes.</returns>
         IEnumerable<INode> GetNodes();
+
+        /// <summary>
+        /// Gets a collection of sub graphs that this segment contains (if any).
+        /// </summary>
+        /// <returns>The sub graphs.</returns>
+        IEnumerable<ISubGraph> GetSubGraphs();
     }
 }

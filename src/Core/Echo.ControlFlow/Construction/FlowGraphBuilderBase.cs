@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Echo.ControlFlow.Regions.Detection;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction
@@ -19,42 +20,18 @@ namespace Echo.ControlFlow.Construction
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
         }
-        
-        /// <summary>
-        /// Gets the architecture of the instructions to graph.
-        /// </summary>
+
+        /// <inheritdoc />
         public IInstructionSetArchitecture<TInstruction> Architecture
         {
             get;
         }
-
-        /// <summary>
-        /// Constructs a control flow graph from a collection of instructions, starting at the provided entrypoint address.
-        /// </summary>
-        /// <param name="instructions">The instructions to graph.</param>
-        /// <param name="entrypoint">The address of the first instruction to traverse.</param>
-        /// <returns>
-        /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
-        /// provided in <paramref name="entrypoint"/>.
-        /// </returns>
-        public ControlFlowGraph<TInstruction> ConstructFlowGraph(IEnumerable<TInstruction> instructions, long entrypoint)
+        
+        /// <inheritdoc />
+        public ControlFlowGraph<TInstruction> ConstructFlowGraph(
+            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
-            var provider = new ListInstructionProvider<TInstruction>(Architecture, instructions.ToList());
-            return ConstructFlowGraph(provider, entrypoint);
-        }
-
-        /// <summary>
-        /// Constructs a control flow graph from a collection of instructions, starting at the provided entrypoint address.
-        /// </summary>
-        /// <param name="instructions">The instructions to graph.</param>
-        /// <param name="entrypoint">The address of the first instruction to traverse.</param>
-        /// <returns>
-        /// The constructed control flow graph, with the entrypoint set to the node containing the entrypoint address
-        /// provided in <paramref name="entrypoint"/>.
-        /// </returns>
-        public ControlFlowGraph<TInstruction> ConstructFlowGraph(IInstructionProvider<TInstruction> instructions, long entrypoint)
-        {
-            var traversalResult = CollectInstructions(instructions, entrypoint);
+            var traversalResult = CollectInstructions(instructions, entrypoint, knownBlockHeaders);
 
             var graph = new ControlFlowGraph<TInstruction>(Architecture);
             CreateNodes(graph, traversalResult);
@@ -69,10 +46,11 @@ namespace Echo.ControlFlow.Construction
         /// </summary>
         /// <param name="instructions">The instructions to traverse.</param>
         /// <param name="entrypoint">The address of the first instruction to traverse.</param>
+        /// <param name="knownBlockHeaders">A list of known block headers that should be included in the traversal.</param>
         /// <returns>An object containing the result of the traversal, including the block headers and successors of
         /// each instruction.</returns>
         protected abstract IInstructionTraversalResult<TInstruction> CollectInstructions(
-            IInstructionProvider<TInstruction> instructions, long entrypoint);
+            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders);
 
         private void CreateNodes(ControlFlowGraph<TInstruction> graph, IInstructionTraversalResult<TInstruction> traversalResult)
         {

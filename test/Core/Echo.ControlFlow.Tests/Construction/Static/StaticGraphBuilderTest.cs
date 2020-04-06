@@ -1,4 +1,5 @@
 using System.Linq;
+using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
@@ -154,6 +155,51 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             // Exit
             var exit = loopHeader.FallThroughNeighbour;
             Assert.Empty(exit.GetOutgoingEdges());
+        }
+
+        [Fact]
+        public void UnreachableNodesShouldNotBeIncluded()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Ret(0),
+                
+                DummyInstruction.Ret(10),
+            };
+            
+            var graph = _builder.ConstructFlowGraph(instructions, 0);
+            Assert.Contains(graph.Nodes, n => n.Offset == 0);
+            Assert.DoesNotContain(graph.Nodes, n => n.Offset == 10);
+        }
+
+        [Fact]
+        public void UnreachableNodesShouldBeIncludedIfKnownBlockHeader()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Ret(0),
+                
+                DummyInstruction.Ret(10),
+            };
+            
+            var graph = _builder.ConstructFlowGraph(instructions, 0, new long[] {10});
+            Assert.Contains(graph.Nodes, n => n.Offset == 0);
+            Assert.Contains(graph.Nodes, n => n.Offset == 10);
+        }
+
+        [Fact]
+        public void ExplicitBlockHeaderShouldAlwaysBeAdded()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Op(0, 0 ,0),
+                DummyInstruction.Op(1, 0 ,0),
+                DummyInstruction.Ret(2),
+            };
+            
+            var graph = _builder.ConstructFlowGraph(instructions, 0, new long[] {1});
+            Assert.Contains(graph.Nodes, n => n.Offset == 0);
+            Assert.Contains(graph.Nodes, n => n.Offset == 1);
         }
     }
 }

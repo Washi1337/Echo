@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Collections;
+using Echo.ControlFlow.Regions;
 using Echo.Core.Code;
 using Echo.Core.Graphing;
 
@@ -12,7 +13,7 @@ namespace Echo.ControlFlow
     /// object in a type safe manner. 
     /// </summary>
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
-    public class ControlFlowGraph<TInstruction> : IGraph
+    public class ControlFlowGraph<TInstruction> : IGraph, IControlFlowRegion<TInstruction>
     {
         private ControlFlowNode<TInstruction> _entrypoint;
 
@@ -24,6 +25,7 @@ namespace Echo.ControlFlow
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
             Nodes = new NodeCollection<TInstruction>(this);
+            Regions = new RegionCollection<TInstruction>(this);
         }
 
         /// <summary>
@@ -44,6 +46,14 @@ namespace Echo.ControlFlow
         }
 
         /// <summary>
+        /// Gets the architecture of the instructions that are stored in the control flow graph.
+        /// </summary>
+        public IInstructionSetArchitecture<TInstruction> Architecture
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets a collection of all basic blocks present in the graph.
         /// </summary>
         public NodeCollection<TInstruction> Nodes
@@ -52,33 +62,48 @@ namespace Echo.ControlFlow
         }
 
         /// <summary>
-        /// Gets the architecture of the instructions that are stored in the control flow graph.
+        /// Gets a collection of top-level regions that this control flow graph defines. 
         /// </summary>
-        public IInstructionSetArchitecture<TInstruction> Architecture
+        public RegionCollection<TInstruction> Regions
         {
             get;
         }
+
+        /// <inheritdoc />
+        ControlFlowGraph<TInstruction> IControlFlowRegion<TInstruction>.ParentGraph => null;
+
+        /// <inheritdoc />
+        IControlFlowRegion<TInstruction> IControlFlowRegion<TInstruction>.ParentRegion => null;
         
         /// <summary>
         /// Gets a collection of all edges that transfer control from one block to the other in the graph.
         /// </summary>
         /// <returns>The edges.</returns>
-        public IEnumerable<ControlFlowEdge<TInstruction>> GetEdges()
-        {
-            return Nodes.SelectMany(n => n.GetOutgoingEdges());
-        }
-
-        /// <summary>
-        /// Searches for a node in the control flow graph with the provided offset or identifier.
-        /// </summary>
-        /// <param name="offset">The offset of the node to find.</param>
-        /// <returns>The node.</returns>
-        public ControlFlowNode<TInstruction> GetNodeByOffset(long offset) => Nodes[offset];
-        
-        INode ISubGraph.GetNodeById(long id) => Nodes[id];
-
-        IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
+        public IEnumerable<ControlFlowEdge<TInstruction>> GetEdges() => 
+            Nodes.SelectMany(n => n.GetOutgoingEdges());
 
         IEnumerable<IEdge> IGraph.GetEdges() => GetEdges();
+
+        /// <inheritdoc />
+        public ControlFlowNode<TInstruction> GetNodeByOffset(long offset) => Nodes[offset];
+
+        /// <inheritdoc />
+        INode ISubGraph.GetNodeById(long id) => Nodes[id];
+
+        /// <inheritdoc />
+        IEnumerable<ControlFlowNode<TInstruction>> IControlFlowRegion<TInstruction>.GetNodes() => Nodes;
+
+        /// <inheritdoc />
+        IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
+
+        /// <inheritdoc />
+        IEnumerable<ISubGraph> ISubGraph.GetSubGraphs() => Regions;  
+
+        /// <inheritdoc />
+        IEnumerable<ControlFlowRegion<TInstruction>> IControlFlowRegion<TInstruction>.GetSubRegions() => Regions;
+        
+        /// <inheritdoc />
+        bool IControlFlowRegion<TInstruction>.RemoveNode(ControlFlowNode<TInstruction> node) => 
+            Nodes.Remove(node);
     }
 }

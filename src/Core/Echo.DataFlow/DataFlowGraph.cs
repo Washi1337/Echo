@@ -39,9 +39,14 @@ namespace Echo.DataFlow
             get;
         }
 
+        /// <inheritdoc />
         INode ISubGraph.GetNodeById(long id) => Nodes[id];
 
+        /// <inheritdoc />
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
+        
+        /// <inheritdoc />
+        IEnumerable<ISubGraph> ISubGraph.GetSubGraphs() => Enumerable.Empty<ISubGraph>();
 
         /// <inheritdoc />
         public IEnumerable<IEdge> GetEdges()
