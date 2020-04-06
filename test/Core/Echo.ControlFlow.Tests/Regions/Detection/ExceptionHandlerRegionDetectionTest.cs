@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Regions.Detection;
+using Echo.ControlFlow.Serialization.Dot;
 using Echo.Core.Code;
+using Echo.Core.Graphing.Serialization.Dot;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
@@ -91,11 +94,11 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
                 
                 // try start 2
                 DummyInstruction.Op(6, 0, 0),
-                DummyInstruction.Jmp(7, 5),
+                DummyInstruction.Jmp(7, 10),
                 
                 // handler start 2
                 DummyInstruction.Op(8, 0, 0),
-                DummyInstruction.Jmp(9, 5),
+                DummyInstruction.Jmp(9, 10),
                 
                 DummyInstruction.Ret(10),
             };
@@ -258,6 +261,13 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             Assert.Same(ehRegion2, cfg.Nodes[6].GetParentExceptionHandler());
             Assert.Same(ehRegion1, cfg.Nodes[8].GetParentExceptionHandler());
             Assert.Null(cfg.Nodes[9].GetParentExceptionHandler());
+            
+            using var fs = new StreamWriter("/home/washi/Desktop/output.dot");
+            var writer = new DotWriter(fs);
+            writer.NodeAdorner = new ControlFlowNodeAdorner<DummyInstruction>();
+            writer.EdgeAdorner = new ControlFlowEdgeAdorner<DummyInstruction>();
+            writer.SubGraphAdorner = new ExceptionHandlerAdorner<DummyInstruction>();
+            writer.Write(cfg);
         }
 
     }

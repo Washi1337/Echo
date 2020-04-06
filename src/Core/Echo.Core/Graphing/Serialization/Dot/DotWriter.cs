@@ -58,7 +58,7 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// Gets or sets the adorner to use for adorning the nodes in the final output.
         /// </summary>
         /// <remarks>
-        /// When this property is set to <c>null</c> no adornments will be added.
+        /// When this property is set to <c>null</c>, no adornments will be added.
         /// </remarks>
         public IDotNodeAdorner NodeAdorner
         {
@@ -70,9 +70,21 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// Gets or sets the adorner to use for adorning the edges in the final output.
         /// </summary>
         /// <remarks>
-        /// When this property is set to <c>null</c> no adornments will be added.
+        /// When this property is set to <c>null</c>, no adornments will be added.
         /// </remarks>
         public IDotEdgeAdorner EdgeAdorner
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the adorner to use for adorning the sub graphs in the final output.
+        /// </summary>
+        /// <remarks>
+        /// When this property is set to <c>null</c>, no adornments will be added.
+        /// </remarks>
+        public IDotSubGraphAdorner SubGraphAdorner
         {
             get;
             set;
@@ -84,21 +96,58 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <param name="graph">The graph to write.</param>
         public void Write(IGraph graph)
         {
-            WriteHeader();
+            WriteHeader("digraph", null);
             
+            var freeNodes = new HashSet<INode>(graph.GetNodes());
+            
+            // Sub graphs.
+            foreach (var subGraph in graph.GetSubGraphs())
+                WriteSubGraph(subGraph, freeNodes);
+
             // Nodes
-            foreach (var node in graph.GetNodes())
+            foreach (var node in freeNodes)
             {
                 if (SeparateNodesAndEdges
                     || !node.GetIncomingEdges().Any() && !node.GetOutgoingEdges().Any())
                 {
-                    Write(node, node.Id.ToString());
+                    WriteNode(node);
                 }
             }
 
             // Edges
             foreach (var edge in graph.GetEdges())
-                Write(edge);
+                WriteEdge(edge);
+
+            WriteFooter();
+        }
+
+        private void WriteSubGraph(ISubGraph subGraph, HashSet<INode> scope)
+        {
+            if (SubGraphAdorner is null)
+            {
+                WriteHeader("subgraph", null);
+            }
+            else
+            {
+                WriteHeader("subgraph", SubGraphAdorner.GetSubGraphName(subGraph));
+                
+                var attributes = SubGraphAdorner.GetSubGraphAttributes(subGraph);
+                if (attributes.Count > 0)
+                {
+                    string delimeter = (IncludeSemicolons ? ";" : string.Empty) + Environment.NewLine;
+                    WriteAttributes(attributes, delimeter);
+                    Writer.WriteLine();
+                }
+            }
+            
+            foreach (var nested in subGraph.GetSubGraphs())
+                WriteSubGraph(nested, scope);
+
+            foreach (var node in subGraph.GetNodes())
+            {
+                if (scope.Remove(node))
+                    WriteNode(node);
+            }
 
             WriteFooter();
         }
@@ -106,9 +155,16 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <summary>
         /// Appends the header of a new graph to the output stream.
         /// </summary>
-        protected virtual void WriteHeader()
+        protected virtual void WriteHeader(string graphType, string graphName)
         {
-            Writer.WriteLine("digraph {");
+            Writer.Write(graphType);
+            if (!string.IsNullOrEmpty(graphName))
+            {
+                Writer.Write(' ');
+                WriteIdentifier(graphName);
+            }
+            
+            Writer.WriteLine(" {");
         }
 
         /// <summary>
@@ -123,13 +179,12 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// Appends a single node definition to the output stream.
         /// </summary>
         /// <param name="node">The node to append.</param>
-        /// <param name="identifier">The identifier to use when referencing this node.</param>
-        protected virtual void Write(INode node, string identifier)
+        protected virtual void WriteNode(INode node)
         {
-            WriteIdentifier(identifier);
+            WriteIdentifier(node.Id.ToString());
             
             if (NodeAdorner != null)
-                WriteAttributes(NodeAdorner.GetNodeAttributes(node));
+                WriteEntityAttributes(NodeAdorner.GetNodeAttributes(node));
             
             WriteSemicolon();
             Writer.WriteLine();
@@ -139,39 +194,44 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// Appends an edge to the output stream.
         /// </summary>
         /// <param name="edge">The edge to append.</param>
-        protected virtual void Write(IEdge edge)
+        protected virtual void WriteEdge(IEdge edge)
         {
             WriteIdentifier(edge.Origin.Id.ToString());
             Writer.Write(" -> ");
             WriteIdentifier(edge.Target.Id.ToString());
 
             if (EdgeAdorner != null)
-                WriteAttributes(EdgeAdorner.GetEdgeAttributes(edge));
+                WriteEntityAttributes(EdgeAdorner.GetEdgeAttributes(edge));
 
             WriteSemicolon();
             Writer.WriteLine();
         }
 
-        private void WriteAttributes(IEnumerable<KeyValuePair<string, string>> attributes)
+        private void WriteEntityAttributes(IEnumerable<KeyValuePair<string, string>> attributes)
         {
             if (attributes == null)
                 return;
             
-            var array = attributes.ToArray();
+            var array = attributes as KeyValuePair<string, string>[] ?? attributes.ToArray();
             if (array.Length > 0)
             {
                 Writer.Write(" [");
-                for (int i = 0; i < array.Length; i++)
-                {
-                    WriteIdentifier(array[i].Key);
-                    Writer.Write('=');
-                    WriteIdentifier(array[i].Value);
-
-                    if (i < array.Length - 1)
-                        Writer.Write(", ");
-                }
-
+                WriteAttributes(array, ", ");
                 Writer.Write(']');
+            }
+        }
+
+        private void WriteAttributes(IEnumerable<KeyValuePair<string, string>> attributes, string delimeter)
+        {
+            var array = attributes as KeyValuePair<string, string>[] ?? attributes.ToArray();
+            for (int i = 0; i < array.Length; i++)
+            {
+                WriteIdentifier(array[i].Key);
+                Writer.Write('=');
+                WriteIdentifier(array[i].Value);
+
+                if (i < array.Length - 1)
+                    Writer.Write(delimeter);
             }
         }
 
