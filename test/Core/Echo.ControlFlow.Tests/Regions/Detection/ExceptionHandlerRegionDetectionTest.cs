@@ -261,13 +261,6 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             Assert.Same(ehRegion2, cfg.Nodes[6].GetParentExceptionHandler());
             Assert.Same(ehRegion1, cfg.Nodes[8].GetParentExceptionHandler());
             Assert.Null(cfg.Nodes[9].GetParentExceptionHandler());
-            
-            using var fs = new StreamWriter("/home/washi/Desktop/output.dot");
-            var writer = new DotWriter(fs);
-            writer.NodeAdorner = new ControlFlowNodeAdorner<DummyInstruction>();
-            writer.EdgeAdorner = new ControlFlowEdgeAdorner<DummyInstruction>();
-            writer.SubGraphAdorner = new ExceptionHandlerAdorner<DummyInstruction>();
-            writer.Write(cfg);
         }
 
     }
