@@ -64,6 +64,9 @@ namespace Echo.ControlFlow.Regions
         public abstract IEnumerable<ControlFlowRegion<TInstruction>> GetSubRegions();
 
         /// <inheritdoc />
+        IEnumerable<ISubGraph> ISubGraph.GetSubGraphs() => GetSubRegions();
+
+        /// <inheritdoc />
         public abstract bool RemoveNode(ControlFlowNode<TInstruction> node);
 
     }

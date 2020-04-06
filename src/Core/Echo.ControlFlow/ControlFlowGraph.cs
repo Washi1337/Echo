@@ -69,8 +69,10 @@ namespace Echo.ControlFlow
             get;
         }
 
+        /// <inheritdoc />
         ControlFlowGraph<TInstruction> IControlFlowRegion<TInstruction>.ParentGraph => null;
 
+        /// <inheritdoc />
         IControlFlowRegion<TInstruction> IControlFlowRegion<TInstruction>.ParentRegion => null;
         
         /// <summary>
@@ -85,14 +87,22 @@ namespace Echo.ControlFlow
         /// <inheritdoc />
         public ControlFlowNode<TInstruction> GetNodeByOffset(long offset) => Nodes[offset];
 
+        /// <inheritdoc />
         INode ISubGraph.GetNodeById(long id) => Nodes[id];
 
+        /// <inheritdoc />
         IEnumerable<ControlFlowNode<TInstruction>> IControlFlowRegion<TInstruction>.GetNodes() => Nodes;
 
+        /// <inheritdoc />
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
 
+        /// <inheritdoc />
+        IEnumerable<ISubGraph> ISubGraph.GetSubGraphs() => Regions;  
+
+        /// <inheritdoc />
         IEnumerable<ControlFlowRegion<TInstruction>> IControlFlowRegion<TInstruction>.GetSubRegions() => Regions;
         
+        /// <inheritdoc />
         bool IControlFlowRegion<TInstruction>.RemoveNode(ControlFlowNode<TInstruction> node) => 
             Nodes.Remove(node);
     }

@@ -24,8 +24,7 @@ namespace Echo.ControlFlow.Regions.Detection
             // Sort all ranges by their start and end offsets.
             var sortedRanges = ranges.ToList();
             sortedRanges.Sort();
-            
-            // 
+
             var rangeToRegionMapping = CreateEHRegions(cfg, sortedRanges);
             InsertNodesInEHRegions(cfg, sortedRanges, rangeToRegionMapping);
         }

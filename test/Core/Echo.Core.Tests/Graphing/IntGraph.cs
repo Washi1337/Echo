@@ -20,5 +20,7 @@ namespace Echo.Core.Tests.Graphing
         public IEnumerable<INode> GetNodes() => _nodes.Values;
 
         public IEnumerable<IEdge> GetEdges() => _nodes.SelectMany(n => n.Value.GetOutgoingEdges());
+
+        public IEnumerable<ISubGraph> GetSubGraphs() => Enumerable.Empty<ISubGraph>();
     }
 }
