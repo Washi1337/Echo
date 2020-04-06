@@ -9,4 +9,6 @@ Table of Contents
     - [2.2 Exporting graphs to dot files](Chapter2/Dot.md)
 - [3. Control Flow Analysis](Chapter3/README.md)
     - [3.1 Static Control Flow Graph Builders](Chapter3/StaticCfg.md)
-    - [3.2 Dominator Analysis](Chapter3/Dominators.md)
+    - [3.2 Symbolic Control Flow Graph Builders](Chapter3/SymbolicCfg.md)
+    - [3.3 Exception handlers](Chapter3/ExceptionHandlers.md)
+    - [3.4 Dominator Analysis](Chapter3/Dominators.md)

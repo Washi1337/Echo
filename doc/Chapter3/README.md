@@ -20,12 +20,19 @@ There are three main classes that are used to model CFGs. Given a `TInstruction`
 
 These classes implement the `INode`, `IEdge` and `IGraph` interfaces, and work therefore with all kinds of generic graph algorithms and export features.
 
+CFGs can also be subdivided into multiple regions. These are represented using the `IControlFlowRegion<TInstruction>` interface, and are accessible through the `Regions` property of the `ControlFlowGraph<Tinstruction>` class. Echo provides the following base implementations:
+- `BasicControlFlowRegion<TInstruction>`: A basic collection of nodes.
+- `ExceptionHandlerRegion<TInstruction>`: A region representing an exception handler, consisting of a protected region and a collection of handler regions. More about exception handlers [here](ExceptionHandlers.md).
+
+
 Constructing CFGs
 -----------------
 
 Echo supports constructing control flow graphs from chunks of code for a variety of platforms, provided that these platforms implement just a couple of interfaces.
 
 - [Static CFG construction](StaticCfg.md)
+- [Symbolic CFG construction](SymbolicCfg.md)
+- [Exception handler detection](ExceptionHandlers.md)
 
 Analysis of CFGs
 ----------------
