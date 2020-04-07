@@ -3,12 +3,30 @@ using System.Collections;
 
 namespace Echo.Concrete.Values.ValueType
 {
+    /// <summary>
+    /// Represents a primitive numerical value that might contain unknown bits.
+    /// </summary>
     public abstract class PrimitiveNumberValue : ValueTypeValue
     {
+        /// <summary>
+        /// Gets the raw bits of the primitive value.
+        /// </summary>
+        /// <returns>The raw bits.</returns>
+        /// <remarks>
+        /// The bits returned by this method assume the value is known entirely. Any bit that is marked unknown will be
+        /// set to 0. 
+        /// </remarks>
         public abstract BitArray GetBits();
         
+        /// <summary>
+        /// Gets the bit mask indicating the bits that are known.  
+        /// </summary>
+        /// <returns>
+        /// The bit mask. If bit at location <c>i</c> equals 1, bit <c>i</c> is known, and unknown otherwise.
+        /// </returns>
         public abstract BitArray GetMask();
-        
+
+        /// <inheritdoc />
         public override string ToString()
         {
             var bits = GetBits();

@@ -9,35 +9,66 @@ namespace Echo.Concrete.Values.ValueType
     /// </summary>
     public class Integer16 : PrimitiveNumberValue
     {
+        /// <summary>
+        /// Wraps an unsigned 16 bit integer into a fully concrete and known instance of <see cref="Integer16"/>.
+        /// </summary>
+        /// <param name="value">The 16 bit integer to wrap.</param>
+        /// <returns>The concrete 16 bit integer.</returns>
         public static implicit operator Integer16(ushort value)
         {
             return new Integer16(value);
         }
 
+        /// <summary>
+        /// Wraps a signed 16 bit integer into a fully concrete and known instance of <see cref="Integer16"/>.
+        /// </summary>
+        /// <param name="value">The 16 bit integer to wrap.</param>
+        /// <returns>The concrete 16 bit integer.</returns>
         public static implicit operator Integer16(short value)
         {
             return new Integer16(value);
         }
         
+        /// <summary>
+        /// Represents the bitmask that is used for a fully known concrete 16 bit integral value. 
+        /// </summary>
         public const ushort FullyKnownMask = 0xFFFF;
         
         private ushort _value;
         
+        /// <summary>
+        /// Creates a new, fully known concrete 16 bit integral value.
+        /// </summary>
+        /// <param name="value">The raw 16 bit value.</param>
         public Integer16(ushort value)
             : this(value, FullyKnownMask)
         {
         }
 
+        /// <summary>
+        /// Creates a new, fully known concrete 16 bit integral value.
+        /// </summary>
+        /// <param name="value">The raw 16 bit value.</param>
         public Integer16(short value)
             : this(value, FullyKnownMask)
         {
         }
 
+        /// <summary>
+        /// Creates a new, partially known concrete 16 bit integral value.
+        /// </summary>
+        /// <param name="value">The raw 16 bit value.</param>
+        /// <param name="mask">The bit mask indicating the bits that are known.</param>
         public Integer16(short value, ushort mask)
             : this(unchecked((ushort) value), mask)
         {
         }
 
+        /// <summary>
+        /// Creates a new, partially known concrete 16 bit integral value.
+        /// </summary>
+        /// <param name="value">The raw 16 bit value.</param>
+        /// <param name="mask">The bit mask indicating the bits that are known.</param>
         public Integer16(ushort value, ushort mask)
         {
             _value = value;
@@ -79,20 +110,13 @@ namespace Echo.Concrete.Values.ValueType
             set;
         }
 
-        public override BitArray GetBits()
-        {
-            return new BitArray(BitConverter.GetBytes(U16));
-        }
+        /// <inheritdoc />
+        public override BitArray GetBits() => new BitArray(BitConverter.GetBytes(U16));
 
-        public override BitArray GetMask()
-        {
-            return new BitArray(BitConverter.GetBytes(Mask));
-        }
+        /// <inheritdoc />
+        public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
 
-        public override IValue Copy()
-        {
-            return new Integer16(U16);
-        }
-        
+        /// <inheritdoc />
+        public override IValue Copy() => new Integer16(U16);
     }
 }

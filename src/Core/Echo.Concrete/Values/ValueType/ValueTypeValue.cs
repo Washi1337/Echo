@@ -19,6 +19,7 @@ namespace Echo.Concrete.Values.ValueType
             get;
         }
 
+        /// <inheritdoc />
         public abstract IValue Copy();
     }
 }
