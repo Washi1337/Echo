@@ -1,13 +1,29 @@
 using System;
 using System.Collections;
+using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
 {
     /// <summary>
     /// Represents a primitive numerical value that might contain unknown bits.
     /// </summary>
-    public abstract class PrimitiveNumberValue : ValueTypeValue
+    public abstract class PrimitiveNumberValue : IConcreteValue
     {
+        /// <inheritdoc />
+        public abstract bool IsKnown
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public abstract int Size
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public bool IsValueType => true;
+        
         /// <summary>
         /// Gets the raw bits of the primitive value.
         /// </summary>
@@ -45,7 +61,9 @@ namespace Echo.Concrete.Values.ValueType
             }
             
             return new string(result);
-        }   
-        
+        }
+
+        /// <inheritdoc />
+        public abstract IValue Copy();
     }
 }

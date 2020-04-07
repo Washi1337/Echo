@@ -7,6 +7,12 @@ namespace Echo.Concrete.Values
     /// </summary>
     public interface IConcreteValue : IValue
     {
-        
+        /// <summary>
+        /// Gets a value indicating whether the object is passed on by value or by reference. 
+        /// </summary>
+        bool IsValueType
+        {
+            get;
+        }
     }
 }
