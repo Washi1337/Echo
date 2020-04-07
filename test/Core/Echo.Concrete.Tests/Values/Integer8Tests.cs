@@ -1,4 +1,5 @@
 using Echo.Concrete.Values;
+using Echo.Concrete.Values.ValueType;
 using Xunit;
 
 namespace Echo.Concrete.Tests.Values

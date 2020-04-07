@@ -8,4 +8,8 @@
       <ProjectReference Include="..\Echo.Core\Echo.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Values\ReferenceType" />
+    </ItemGroup>
+
 </Project>

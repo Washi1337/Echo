@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 
-namespace Echo.Concrete.Values
+namespace Echo.Concrete.Values.ValueType
 {
     public abstract class PrimitiveNumberValue : ValueTypeValue
     {

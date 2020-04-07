@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using Echo.Core.Values;
 
-namespace Echo.Concrete.Values
+namespace Echo.Concrete.Values.ValueType
 {
     /// <summary>
     /// Represents a (partially) known concrete 16 bit integral value.
