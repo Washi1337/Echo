@@ -5,9 +5,9 @@ using Echo.Core.Values;
 namespace Echo.Concrete.Values.ValueType
 {
     /// <summary>
-    /// Represents a primitive numerical value that might contain unknown bits.
+    /// Represents a primitive integral value that might contain unknown bits.
     /// </summary>
-    public abstract class PrimitiveNumberValue : IConcreteValue
+    public abstract class IntegerValue : IConcreteValue
     {
         /// <inheritdoc />
         public abstract bool IsKnown

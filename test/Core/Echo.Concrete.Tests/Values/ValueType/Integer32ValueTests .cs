@@ -3,15 +3,15 @@ using Xunit;
 
 namespace Echo.Concrete.Tests.Values.ValueType
 {
-    public class Integer32Tests
+    public class Integer32ValueTests
     {
         [Fact]
         public void KnownValueSignUnsignedSame()
         {
-            var value = new Integer32(0x12345678);
+            var value = new Integer32Value(0x12345678);
 
             Assert.True(value.IsKnown);
-            Assert.Equal(Integer32.FullyKnownMask, value.Mask);
+            Assert.Equal(Integer32Value.FullyKnownMask, value.Mask);
             Assert.Equal(0x12345678u, value.U32);
             Assert.Equal(0x12345678, value.I32);
         }
@@ -19,10 +19,10 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [Fact]
         public void KnownValueSignUnsignedDifferent()
         {
-            var value = new Integer32(0x8000_0000);
+            var value = new Integer32Value(0x8000_0000);
 
             Assert.True(value.IsKnown);
-            Assert.Equal(Integer32.FullyKnownMask, value.Mask);
+            Assert.Equal(Integer32Value.FullyKnownMask, value.Mask);
             Assert.Equal(0x8000_0000, value.U32);
             Assert.Equal(-0x8000_0000, value.I32);
         }
@@ -30,7 +30,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [Fact]
         public void PartiallyUnknownValue()
         {
-            var value = new Integer32(
+            var value = new Integer32Value(
                 0b00110011_00110011_00001111_11110000, 
                 0b00110011_11001100_00110011_11001100);
             

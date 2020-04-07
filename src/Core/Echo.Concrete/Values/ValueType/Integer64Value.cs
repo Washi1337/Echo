@@ -7,26 +7,26 @@ namespace Echo.Concrete.Values.ValueType
     /// <summary>
     /// Represents a (partially) known concrete 64 bit integral value.
     /// </summary>
-    public class Integer64 : PrimitiveNumberValue
+    public class Integer64Value : IntegerValue
     {
         /// <summary>
-        /// Wraps an unsigned 64 bit integer into a fully concrete and known instance of <see cref="Integer64"/>.
+        /// Wraps an unsigned 64 bit integer into a fully concrete and known instance of <see cref="Integer64Value"/>.
         /// </summary>
         /// <param name="value">The 64 bit integer to wrap.</param>
         /// <returns>The concrete 64 bit integer.</returns>
-        public static implicit operator Integer64(ulong value)
+        public static implicit operator Integer64Value(ulong value)
         {
-            return new Integer64(value);
+            return new Integer64Value(value);
         }
 
         /// <summary>
-        /// Wraps a signed 64 bit integer into a fully concrete and known instance of <see cref="Integer64"/>.
+        /// Wraps a signed 64 bit integer into a fully concrete and known instance of <see cref="Integer64Value"/>.
         /// </summary>
         /// <param name="value">The 64 bit integer to wrap.</param>
         /// <returns>The concrete 64 bit integer.</returns>
-        public static implicit operator Integer64(long value)
+        public static implicit operator Integer64Value(long value)
         {
-            return new Integer64(value);
+            return new Integer64Value(value);
         }
         
         /// <summary>
@@ -40,7 +40,7 @@ namespace Echo.Concrete.Values.ValueType
         /// Creates a new, fully known concrete 64 bit integral value.
         /// </summary>
         /// <param name="value">The raw 64 bit value.</param>
-        public Integer64(ulong value)
+        public Integer64Value(ulong value)
             : this(value, FullyKnownMask)
         {
         }
@@ -49,7 +49,7 @@ namespace Echo.Concrete.Values.ValueType
         /// Creates a new, fully known concrete 64 bit integral value.
         /// </summary>
         /// <param name="value">The raw 64 bit value.</param>
-        public Integer64(long value)
+        public Integer64Value(long value)
             : this(value, FullyKnownMask)
         {
         }
@@ -59,7 +59,7 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         /// <param name="value">The raw 64 bit value.</param>
         /// <param name="mask">The bit mask indicating the bits that are known.</param>
-        public Integer64(long value, ulong mask)
+        public Integer64Value(long value, ulong mask)
             : this(unchecked((ulong) value), mask)
         {
         }
@@ -69,7 +69,7 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         /// <param name="value">The raw 64 bit value.</param>
         /// <param name="mask">The bit mask indicating the bits that are known.</param>
-        public Integer64(ulong value, ulong mask)
+        public Integer64Value(ulong value, ulong mask)
         {
             _value = value;
             Mask = mask;
@@ -117,6 +117,6 @@ namespace Echo.Concrete.Values.ValueType
         public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
 
         /// <inheritdoc />
-        public override IValue Copy() => new Integer64(U64);
+        public override IValue Copy() => new Integer64Value(U64);
     }
 }

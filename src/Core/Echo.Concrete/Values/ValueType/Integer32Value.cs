@@ -7,26 +7,26 @@ namespace Echo.Concrete.Values.ValueType
     /// <summary>
     /// Represents a (partially) known concrete 32 bit integral value.
     /// </summary>
-    public class Integer32 : PrimitiveNumberValue
+    public class Integer32Value : IntegerValue
     {
         /// <summary>
-        /// Wraps an unsigned 32 bit integer into a fully concrete and known instance of <see cref="Integer32"/>.
+        /// Wraps an unsigned 32 bit integer into a fully concrete and known instance of <see cref="Integer32Value"/>.
         /// </summary>
         /// <param name="value">The 32 bit integer to wrap.</param>
         /// <returns>The concrete 32 bit integer.</returns>
-        public static implicit operator Integer32(ushort value)
+        public static implicit operator Integer32Value(ushort value)
         {
-            return new Integer32(value);
+            return new Integer32Value(value);
         }
 
         /// <summary>
-        /// Wraps a signed 32 bit integer into a fully concrete and known instance of <see cref="Integer32"/>.
+        /// Wraps a signed 32 bit integer into a fully concrete and known instance of <see cref="Integer32Value"/>.
         /// </summary>
         /// <param name="value">The 32 bit integer to wrap.</param>
         /// <returns>The concrete 32 bit integer.</returns>
-        public static implicit operator Integer32(short value)
+        public static implicit operator Integer32Value(short value)
         {
-            return new Integer32(value);
+            return new Integer32Value(value);
         }
         
         /// <summary>
@@ -40,7 +40,7 @@ namespace Echo.Concrete.Values.ValueType
         /// Creates a new, fully known concrete 32 bit integral value.
         /// </summary>
         /// <param name="value">The raw 32 bit value.</param>
-        public Integer32(int value)
+        public Integer32Value(int value)
             : this(value, FullyKnownMask)
         {
         }
@@ -49,7 +49,7 @@ namespace Echo.Concrete.Values.ValueType
         /// Creates a new, fully known concrete 32 bit integral value.
         /// </summary>
         /// <param name="value">The raw 32 bit value.</param>
-        public Integer32(uint value)
+        public Integer32Value(uint value)
             : this(value, FullyKnownMask)
         {
         }
@@ -59,7 +59,7 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         /// <param name="value">The raw 32 bit value.</param>
         /// <param name="mask">The bit mask indicating the bits that are known.</param>
-        public Integer32(int value, uint mask)
+        public Integer32Value(int value, uint mask)
             : this(unchecked((uint) value), mask)
         {
         }
@@ -69,7 +69,7 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         /// <param name="value">The raw 32 bit value.</param>
         /// <param name="mask">The bit mask indicating the bits that are known.</param>
-        public Integer32(uint value, uint mask)
+        public Integer32Value(uint value, uint mask)
         {
             _value = value;
             Mask = mask;
@@ -117,6 +117,6 @@ namespace Echo.Concrete.Values.ValueType
         public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
 
         /// <inheritdoc />
-        public override IValue Copy() => new Integer32(U32);
+        public override IValue Copy() => new Integer32Value(U32);
     }
 }

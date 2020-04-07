@@ -6,26 +6,26 @@ namespace Echo.Concrete.Values.ValueType
     /// <summary>
     /// Represents a (partially) known concrete 8 bit integral value.
     /// </summary>
-    public class Integer8 : PrimitiveNumberValue
+    public class Integer8Value : IntegerValue
     {
         /// <summary>
-        /// Wraps an unsigned 8 bit integer into a fully concrete and known instance of <see cref="Integer8"/>.
+        /// Wraps an unsigned 8 bit integer into a fully concrete and known instance of <see cref="Integer8Value"/>.
         /// </summary>
         /// <param name="value">The 8 bit integer to wrap.</param>
         /// <returns>The concrete 8 bit integer.</returns>
-        public static implicit operator Integer8(byte value)
+        public static implicit operator Integer8Value(byte value)
         {
-            return new Integer8(value);
+            return new Integer8Value(value);
         }
 
         /// <summary>
-        /// Wraps a signed 8 bit integer into a fully concrete and known instance of <see cref="Integer8"/>.
+        /// Wraps a signed 8 bit integer into a fully concrete and known instance of <see cref="Integer8Value"/>.
         /// </summary>
         /// <param name="value">The 8 bit integer to wrap.</param>
         /// <returns>The concrete 8 bit integer.</returns>
-        public static implicit operator Integer8(sbyte value)
+        public static implicit operator Integer8Value(sbyte value)
         {
-            return new Integer8(value);
+            return new Integer8Value(value);
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Echo.Concrete.Values.ValueType
         /// Creates a new, fully known concrete 8 bit integral value.
         /// </summary>
         /// <param name="value">The raw 8 bit value.</param>
-        public Integer8(byte value)
+        public Integer8Value(byte value)
             : this(value, FullyKnownMask)
         {
         }
@@ -48,7 +48,7 @@ namespace Echo.Concrete.Values.ValueType
         /// Creates a new, fully known concrete 8 bit integral value.
         /// </summary>
         /// <param name="value">The raw 8 bit value.</param>
-        public Integer8(sbyte value)
+        public Integer8Value(sbyte value)
             : this(value, FullyKnownMask)
         {
         }
@@ -58,7 +58,7 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         /// <param name="value">The raw 8 bit value.</param>
         /// <param name="mask">The bit mask indicating the bits that are known.</param>
-        public Integer8(sbyte value, byte mask)
+        public Integer8Value(sbyte value, byte mask)
             : this(unchecked((byte) value), mask)
         {
         }
@@ -68,7 +68,7 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         /// <param name="value">The raw 8 bit value.</param>
         /// <param name="mask">The bit mask indicating the bits that are known.</param>
-        public Integer8(byte value, byte mask)
+        public Integer8Value(byte value, byte mask)
         {
             _value = value;
             Mask = mask;
@@ -116,6 +116,6 @@ namespace Echo.Concrete.Values.ValueType
         public override BitArray GetMask() => new BitArray(new[] {Mask});
 
         /// <inheritdoc />
-        public override IValue Copy() => new Integer8(U8);
+        public override IValue Copy() => new Integer8Value(U8);
     }
 }

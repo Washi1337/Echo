@@ -8,10 +8,10 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [Fact]
         public void KnownValueSignedUnsignedSame()
         {
-            var value = new Integer8(0x12);
+            var value = new Integer8Value(0x12);
 
             Assert.True(value.IsKnown);
-            Assert.Equal(Integer8.FullyKnownMask, value.Mask);
+            Assert.Equal(Integer8Value.FullyKnownMask, value.Mask);
             Assert.Equal(0x12, value.U8);
             Assert.Equal(0x12, value.I8);
         }
@@ -19,10 +19,10 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [Fact]
         public void KnownValueSignedUnsignedDifferent()
         {
-            var value = new Integer8(0x80);
+            var value = new Integer8Value(0x80);
 
             Assert.True(value.IsKnown);
-            Assert.Equal(Integer8.FullyKnownMask, value.Mask);
+            Assert.Equal(Integer8Value.FullyKnownMask, value.Mask);
             Assert.Equal(0x80, value.U8);
             Assert.Equal(-0x80, value.I8);
         }
@@ -30,7 +30,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [Fact]
         public void PartiallyUnknownValue()
         {
-            var value = new Integer8(
+            var value = new Integer8Value(
                 0b00110011, 
                 0b11101101);
             
