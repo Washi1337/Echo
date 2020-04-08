@@ -114,8 +114,47 @@ namespace Echo.Concrete.Values.ValueType
         public override BitArray GetBits() => new BitArray(BitConverter.GetBytes(U64));
 
         /// <inheritdoc />
-        public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
+        public override bool? GetBit(int index)
+        {
+            if (index < 0 || index >= 64)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            return ((Mask >> index) & 1) == 1 ? ((U64 >> index) & 1) == 1 : (bool?) null;
+        }
 
+        /// <inheritdoc />
+        public override void SetBit(int index, bool? value)
+        {
+            if (index < 0 || index >= 64)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            ulong mask = 1ul << index;
+
+            if (value.HasValue)
+            {
+                Mask |= mask;
+                U64 = (U64 & ~mask) | ((value.Value ? 1ul : 0ul) << index);
+            }
+            else
+            {
+                Mask &= ~mask;
+            }
+        }
+
+        /// <inheritdoc />
+        public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
+        
+        /// <inheritdoc />
+        public override void SetBits(BitArray bits, BitArray mask)
+        {
+            if (bits.Count != 64 || mask.Count != 64)
+                throw new ArgumentException("Number of bits is not 64.");
+            var buffer = new byte[8];
+            bits.CopyTo(buffer, 0);
+            U64 = BitConverter.ToUInt64(buffer, 0);
+            mask.CopyTo(buffer, 0);
+            Mask = BitConverter.ToUInt64(buffer, 0);
+        }
+        
         /// <inheritdoc />
         public override IValue Copy() => new Integer64Value(U64);
     }

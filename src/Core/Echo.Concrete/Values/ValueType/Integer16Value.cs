@@ -111,10 +111,49 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
+        public override bool? GetBit(int index)
+        {
+            if (index < 0 || index >= 16)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            return ((Mask >> index) & 1) == 1 ? ((U16 >> index) & 1) == 1 : (bool?) null;
+        }
+
+        /// <inheritdoc />
+        public override void SetBit(int index, bool? value)
+        {
+            if (index < 0 || index >= 16)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            ushort mask = (ushort) (1 << index);
+            
+            if (value.HasValue)
+            {
+                Mask |= mask;
+                U16 = (ushort) ((U16 & ~mask) | ((value.Value ? 1 : 0) << index));
+            }
+            else
+            {
+                Mask &= (ushort) ~mask;
+            }
+        }
+
+        /// <inheritdoc />
         public override BitArray GetBits() => new BitArray(BitConverter.GetBytes(U16));
 
         /// <inheritdoc />
         public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
+
+        /// <inheritdoc />
+        public override void SetBits(BitArray bits, BitArray mask)
+        {
+            if (bits.Count != 16 || mask.Count != 16)
+                throw new ArgumentException("Number of bits is not 16.");
+            var buffer = new byte[2];
+            bits.CopyTo(buffer, 0);
+            U16 = BitConverter.ToUInt16(buffer, 0);
+            mask.CopyTo(buffer, 0);
+            Mask = BitConverter.ToUInt16(buffer, 0);
+        }
 
         /// <inheritdoc />
         public override IValue Copy() => new Integer16Value(U16);

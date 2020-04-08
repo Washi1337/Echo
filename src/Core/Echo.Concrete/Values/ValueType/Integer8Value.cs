@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Echo.Core.Values;
 
@@ -110,12 +111,52 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
+        public override bool? GetBit(int index)
+        {
+            if (index < 0 || index >= 8)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            return ((Mask >> index) & 1) == 1 ? ((U8 >> index) & 1) == 1 : (bool?) null;
+        }
+
+        /// <inheritdoc />
+        public override void SetBit(int index, bool? value)
+        {
+            if (index < 0 || index >= 8)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            byte mask = (byte) (1 << index);
+            
+            if (value.HasValue)
+            {
+                Mask |= mask;
+                U8 = (byte) ((U8 & ~mask) | ((value.Value ? 1 : 0) << index));
+            }
+            else
+            {
+                Mask &= (byte) ~mask;
+            }
+        }
+
+        /// <inheritdoc />
         public override BitArray GetBits() => new BitArray(new[] {U8});
 
         /// <inheritdoc />
         public override BitArray GetMask() => new BitArray(new[] {Mask});
 
         /// <inheritdoc />
+        public override void SetBits(BitArray bits, BitArray mask)
+        {
+            if (bits.Count != 8 || mask.Count != 8)
+                throw new ArgumentException("Number of bits is not 8.");
+            var buffer = new byte[1];
+            bits.CopyTo(buffer, 0);
+            U8 = buffer[0];
+            mask.CopyTo(buffer, 0);
+            Mask = buffer[0];
+        }
+        
+        /// <inheritdoc />
         public override IValue Copy() => new Integer8Value(U8);
+
     }
 }
