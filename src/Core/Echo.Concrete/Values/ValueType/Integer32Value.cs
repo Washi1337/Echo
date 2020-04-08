@@ -157,16 +157,14 @@ namespace Echo.Concrete.Values.ValueType
         
         /// <inheritdoc />
         public override IValue Copy() => new Integer32Value(U32);
-
-        public void Add(Integer32Value other)
+        
+        /// <inheritdoc />
+        public override void Add(IntegerValue other)
         {
-            if (IsKnown && other.IsKnown)
-            {
-                U32 = unchecked(U32 + other.U32);
-                return;
-            }
-
-            
+            if (IsKnown && other.IsKnown && other is Integer32Value int32)
+                U32 += int32.U32;
+            else
+                base.Add(other);
         }
     }
 }

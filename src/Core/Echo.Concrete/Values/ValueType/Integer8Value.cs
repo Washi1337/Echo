@@ -158,5 +158,13 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override IValue Copy() => new Integer8Value(U8);
 
+        /// <inheritdoc />
+        public override void Add(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer8Value int8)
+                U8 += int8.U8;
+            else
+                base.Add(other);
+        }
     }
 }

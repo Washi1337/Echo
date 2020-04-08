@@ -157,5 +157,14 @@ namespace Echo.Concrete.Values.ValueType
 
         /// <inheritdoc />
         public override IValue Copy() => new Integer16Value(U16);
+
+        /// <inheritdoc />
+        public override void Add(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer16Value int16)
+                U16 += int16.U16;
+            else
+                base.Add(other);
+        }
     }
 }

@@ -157,5 +157,14 @@ namespace Echo.Concrete.Values.ValueType
         
         /// <inheritdoc />
         public override IValue Copy() => new Integer64Value(U64);
+        
+        /// <inheritdoc />
+        public override void Add(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer64Value int64)
+                U64 += int64.U64;
+            else
+                base.Add(other);
+        }
     }
 }
