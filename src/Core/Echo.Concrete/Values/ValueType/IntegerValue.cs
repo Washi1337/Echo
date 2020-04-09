@@ -419,26 +419,24 @@ namespace Echo.Concrete.Values.ValueType
 
         private IntegerValue Resize(int newBitLength, bool signExtend)
         {
-            var bits = GetBits();
-            var mask = GetMask();
-
             var newBits = new BitArray(newBitLength);
             var newMask = new BitArray(newBitLength, true);
 
             // Copy relevant bits.
-            int bitsToCopy = Math.Min(newBitLength, bits.Count);
+            int bitsToCopy = Math.Min(newBitLength, Size * 8);
             for (int i = 0; i < bitsToCopy; i++)
             {
-                newBits[i] = bits[i];
-                newMask[i] = mask[i];
+                var bit = GetBit(i);
+                newBits[i] = bit.GetValueOrDefault();
+                newMask[i] = bit.HasValue;
             }
 
             // Sign extend if necessary.
             if (signExtend)
             {
-                bool? sign = mask[bits.Length - 1] ? bits[bits.Length - 1] : (bool?) null;
+                bool? sign = GetBit(bitsToCopy - 1);
 
-                for (int i = bits.Count; i < newBitLength; i++)
+                for (int i = bitsToCopy; i < newBitLength; i++)
                 {
                     newBits[i] = sign.GetValueOrDefault();
                     newMask[i] = sign.HasValue;
