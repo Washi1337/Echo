@@ -87,70 +87,80 @@ namespace Echo.Concrete.Tests.Values.ValueType
             Assert.Throws<OverflowException>(() => new Integer8Value("10000000000000101"));
         }
 
-        [Fact]
-        public void AddFullyKnownValues()
+        [Theory]
+        [InlineData("00000000", "11111111")]
+        [InlineData("11111111", "00000000")]
+        [InlineData("????????", "????????")]
+        [InlineData("0011??00", "1100??00")]
+        public void Not(string input, string expected)
         {
-            var value1 = new Integer8Value(0b0001_0010);
-            var value2 = new Integer8Value(0b0011_0100);
-
-            value1.Add(value2);
+            var value1 = new Integer8Value(input);
             
-            Assert.Equal(0b0100_0110, value1.U8);
+            value1.Not();
+            
+            Assert.Equal(new Integer8Value(expected), value1);
         }
 
-        [Fact]
-        public void AddKnownBitToUnknownBitShouldResultInUnknownCarry()
+        [Theory]
+        [InlineData("00110101", "11101111", "00110101")]
+        [InlineData("00000000", "0000000?", "0000000?")]
+        [InlineData("0000000?", "0000000?", "0000000?")]
+        public void And(string a, string b, string expected)
         {
-            var value1 = new Integer8Value("0000000?");
-            var value2 = new Integer8Value("00000001");
-
-            value1.Add(value2);
+            var value1 = new Integer8Value(a);
+            var value2 = new Integer8Value(b);
             
-            Assert.Equal(0b1111_1100, value1.Mask);
+            value1.And(value2);
+            
+            Assert.Equal(new Integer8Value(expected), value1);
         }
 
-        [Fact]
-        public void AddUnknownBitToUnknownBitShouldResultInUnknownCarry()
+        [Theory]
+        [InlineData("00110101", "11101111", "11111111")]
+        [InlineData("00000000", "0000000?", "0000000?")]
+        [InlineData("0000000?", "0000000?", "0000000?")]
+        [InlineData("0010000?", "0001000?", "0011000?")]
+        public void Or(string a, string b, string expected)
         {
-            var value1 = new Integer8Value("0000000?");
-            var value2 = new Integer8Value("0000000?");
+            var value1 = new Integer8Value(a);
+            var value2 = new Integer8Value(b);
+            
+            value1.Or(value2);
+            
+            Assert.Equal(new Integer8Value(expected), value1);
+        }
+
+        [Theory]
+        [InlineData("00110101", "11101111", "11111111")]
+        [InlineData("00000000", "0000000?", "0000000?")]
+        [InlineData("0000000?", "0000000?", "0000000?")]
+        [InlineData("0010000?", "0011000?", "0001000?")]
+        public void Xor(string a, string b, string expected)
+        {
+            var value1 = new Integer8Value(a);
+            var value2 = new Integer8Value(b);
+            
+            value1.Or(value2);
+            
+            Assert.Equal(new Integer8Value(expected), value1);
+        }
+
+        [Theory]
+        [InlineData("00010010", "00110100", "01000110")]
+        [InlineData("00000000", "0000000?", "0000000?")]
+        [InlineData("00000001", "0000000?", "000000??")]
+        [InlineData("0000000?", "00000001", "000000??")]
+        [InlineData("0000000?", "0000000?", "000000??")]
+        [InlineData("0000??11", "00000001", "000?????")]
+        [InlineData("000??0??", "00000101", "00??????")]
+        public void Add(string a, string b, string expected)
+        {
+            var value1 = new Integer8Value(a);
+            var value2 = new Integer8Value(b);
 
             value1.Add(value2);
             
-            Assert.Equal(0b1111_1100, value1.Mask);
-        }
-        
-        [Fact]
-        public void AddKnownBitToUnknownBitsShouldResultInUnknownRippleCarry()
-        {
-            var value1 = new Integer8Value("000000??");
-            var value2 = new Integer8Value("00000001");
-
-            value1.Add(value2);
-            
-            Assert.Equal(0b1111_1000, value1.Mask);
-        }
-        
-        [Fact]
-        public void AddKnownBitToKnownBitsThatCarryOverToUnknownBitsShouldRippleCarry()
-        {
-            var value1 = new Integer8Value("0000??11");
-            var value2 = new Integer8Value("00000001");
-            
-            value1.Add(value2);
-            
-            Assert.Equal(0b1110_0011, value1.Mask);
-        }
-        
-        [Fact]
-        public void AddUnknownBitToKnownBitsThatCarryOverToUnknownBitsShouldRippleCarry()
-        {
-            var value1 = new Integer8Value("0000??11");
-            var value2 = new Integer8Value("0000000?");
-
-            value1.Add(value2);
-            
-            Assert.Equal(0b1110_0000, value1.Mask);
+            Assert.Equal(new Integer8Value(expected), value1);
         }
     }
 }

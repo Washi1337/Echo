@@ -65,6 +65,11 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="mask">The new bit mask indicating the known bits.</param>
         public abstract void SetBits(BitArray bits, BitArray mask);
 
+        /// <summary>
+        /// Parses a (partially) known bit string and sets the contents of integer to the parsed result.
+        /// </summary>
+        /// <param name="bitString">The bit string to parse.</param>
+        /// <exception cref="OverflowException"></exception>
         public void SetBits(string bitString)
         {
             var bits = new BitArray(Size * 8);
@@ -119,14 +124,83 @@ namespace Echo.Concrete.Values.ValueType
         public abstract IValue Copy();
 
         /// <summary>
+        /// Performs a bitwise not operation on the (partially) known integer value.
+        /// </summary>
+        public virtual void Not()
+        {
+            var bits = GetBits();
+            var mask = GetMask();
+            
+            bits.Not();
+            bits.And(mask);
+
+            SetBits(bits, mask);
+        }
+
+        /// <summary>
+        /// Performs a bitwise and operation with another (partially) known integer value.
+        /// </summary>
+        public virtual void And(IntegerValue other)
+        {
+            AssertSameBitSize(other);
+
+            var bits = GetBits();
+            bits.And(other.GetBits());
+
+            SetBits(bits, CombineKnownMasks(other));
+        }
+
+        /// <summary>
+        /// Performs a bitwise inclusive or operation with another (partially) known integer value.
+        /// </summary>
+        public virtual void Or(IntegerValue other)
+        {
+            AssertSameBitSize(other);
+            
+            var bits = GetBits();
+            bits.Or(other.GetBits());
+
+            SetBits(bits, CombineKnownMasks(other));
+        }
+
+        /// <summary>
+        /// Performs a bitwise exclusive or operation with another (partially) known integer value.
+        /// </summary>
+        public virtual void Xor(IntegerValue other)
+        {
+            AssertSameBitSize(other);
+            
+            var bits = GetBits();
+            bits.Xor(other.GetBits());
+
+            SetBits(bits, CombineKnownMasks(other));
+        }
+
+        private BitArray CombineKnownMasks(IntegerValue other)
+        {
+            var mask = GetMask();
+            if (!IsKnown || !other.IsKnown)
+            {
+                var otherMask = other.GetMask();
+
+                mask.Not();
+                otherMask.Not();
+
+                mask.Or(otherMask);
+                mask.Not();
+            }
+
+            return mask;
+        }
+
+        /// <summary>
         /// Adds a second (partially) known integer to the current integer. 
         /// </summary>
         /// <param name="other">The integer to add.</param>
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match.</exception>
         public virtual void Add(IntegerValue other)
         {
-            if (Size != other.Size)
-                throw new ArgumentException($"Cannot add a {other.Size * 8} bit integer to a {Size * 8} bit integer.");
+            AssertSameBitSize(other);
 
             var sum = new BitArray(Size * 8);
             var mask = new BitArray(Size * 8, true);
@@ -176,6 +250,35 @@ namespace Echo.Concrete.Values.ValueType
             }
 
             SetBits(sum, mask);
+        }
+
+        private void AssertSameBitSize(IntegerValue other)
+        {
+            if (Size != other.Size)
+                throw new ArgumentException($"Cannot perform a binary operation on a {other.Size * 8} bit integer and a {Size * 8} bit integer.");
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            if (obj is IntegerValue integerValue)
+            {
+                if (Size != integerValue.Size)
+                    return false;
+
+                return BitArrayComparer.Instance.Equals(GetBits(), integerValue.GetBits())
+                    || BitArrayComparer.Instance.Equals(GetMask(), integerValue.GetMask());
+            }
+
+            return false;
+        }
+
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return BitArrayComparer.Instance.GetHashCode(GetBits())
+                   ^ BitArrayComparer.Instance.GetHashCode(GetBits());
         }
     }
 }
