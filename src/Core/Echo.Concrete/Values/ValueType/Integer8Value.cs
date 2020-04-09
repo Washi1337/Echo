@@ -175,7 +175,7 @@ namespace Echo.Concrete.Values.ValueType
         }
         
         /// <inheritdoc />
-        public override IValue Copy() => new Integer8Value(U8);
+        public override IValue Copy() => new Integer8Value(U8, Mask);
 
         /// <inheritdoc />
         public override void Not()

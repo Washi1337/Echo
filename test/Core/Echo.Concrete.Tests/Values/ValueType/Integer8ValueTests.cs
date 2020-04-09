@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using Echo.Concrete.Values.ValueType;
 using Xunit;
 
@@ -213,5 +214,35 @@ namespace Echo.Concrete.Tests.Values.ValueType
             
             Assert.Equal(new Integer8Value(expected), value1);
         }
+
+        [Theory]
+        [InlineData("00000000", "00000000")]
+        [InlineData("00000001", "11111111")]
+        [InlineData("11111111", "00000001")]
+        [InlineData("01111111", "10000001")]
+        [InlineData("10000001", "01111111")]
+        public void TwosComplement(string input, string expected)
+        {
+            var value = new Integer8Value(input);
+            value.TwosComplement();
+            Assert.Equal(new Integer8Value(expected), value);
+        }
+
+        [Theory]
+        [InlineData("00001111", "00001000", "00000111")]
+        [InlineData("00001000", "00000001", "00000111")]
+        [InlineData("00001???", "00000001", "00000???")]
+        [InlineData("00001???", "0000000?", "0000????")]
+        [InlineData("00000000", "0000000?", "????????")]
+        public void Subtract(string a, string b, string expected)
+        {
+            var value1 = new Integer8Value(a);
+            var value2 = new Integer8Value(b);
+
+            value1.Subtract(value2);
+            
+            Assert.Equal(new Integer8Value(expected), value1);
+        }
+        
     }
 }

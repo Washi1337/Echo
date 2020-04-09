@@ -175,7 +175,7 @@ namespace Echo.Concrete.Values.ValueType
         }
         
         /// <inheritdoc />
-        public override IValue Copy() => new Integer32Value(U32);
+        public override IValue Copy() => new Integer32Value(U32, Mask);
 
         /// <inheritdoc />
         public override void Not()

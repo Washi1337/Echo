@@ -351,6 +351,31 @@ namespace Echo.Concrete.Values.ValueType
             SetBits(sum, mask);
         }
 
+        /// <summary>
+        /// Transforms the (partially) known integer into its twos complement.
+        /// </summary>
+        public void TwosComplement()
+        {
+            Not();
+            var one = new BitArray(Size * 8);
+            one[0] = true;
+            Add(new IntegerNValue(one));
+        }
+
+        /// <summary>
+        /// Subtracts a second (partially) known integer from the current integer. 
+        /// </summary>
+        /// <param name="other">The integer to subtract.</param>
+        /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match.</exception>
+        public void Subtract(IntegerValue other)
+        {
+            AssertSameBitSize(other);
+            
+            other = (IntegerValue) other.Copy();
+            other.TwosComplement();
+            Add(other);
+        }
+
         private void AssertSameBitSize(IntegerValue other)
         {
             if (Size != other.Size)
