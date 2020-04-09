@@ -60,6 +60,83 @@ namespace Echo.Concrete.Tests.Values.ValueType
             value.SetBit(index, expected);
             Assert.Equal(expected, value.GetBit(index));
         }
+
+        [Theory]
+        [InlineData("00000000", "11111111")]
+        [InlineData("11111111", "00000000")]
+        [InlineData("????????", "????????")]
+        [InlineData("0011??00", "1100??00")]
+        public void Not(string input, string expected)
+        {
+            var value1 = new Integer32Value(input);
+            
+            value1.Not();
+            
+            Assert.Equal(new Integer32Value(expected), value1);
+        }
+
+        [Theory]
+        [InlineData("00110101", "11101111", "00110101")]
+        [InlineData("00000000", "0000000?", "0000000?")]
+        [InlineData("0000000?", "0000000?", "0000000?")]
+        [InlineData("0000000?", "0000?000", "0000?00?")]
+        public void And(string a, string b, string expected)
+        {
+            var value1 = new Integer32Value(a);
+            var value2 = new Integer32Value(b);
+            
+            value1.And(value2);
+            
+            Assert.Equal(new Integer32Value(expected), value1);
+        }
+
+        [Theory]
+        [InlineData("00110101", "11101111", "11111111")]
+        [InlineData("00000000", "0000000?", "0000000?")]
+        [InlineData("0000000?", "0000000?", "0000000?")]
+        [InlineData("0010000?", "0001000?", "0011000?")]
+        public void Or(string a, string b, string expected)
+        {
+            var value1 = new Integer32Value(a);
+            var value2 = new Integer32Value(b);
+            
+            value1.Or(value2);
+            
+            Assert.Equal(new Integer32Value(expected), value1);
+        }
+
+        [Theory]
+        [InlineData("00110101", "11101111", "11111111")]
+        [InlineData("00000000", "0000000?", "0000000?")]
+        [InlineData("0000000?", "0000000?", "0000000?")]
+        [InlineData("0010000?", "0011000?", "0001000?")]
+        public void Xor(string a, string b, string expected)
+        {
+            var value1 = new Integer32Value(a);
+            var value2 = new Integer32Value(b);
+            
+            value1.Or(value2);
+            
+            Assert.Equal(new Integer32Value(expected), value1);
+        }
+
+        [Theory]
+        [InlineData("00010010", "00110100", "01000110")]
+        [InlineData("00000000", "0000000?", "0000000?")]
+        [InlineData("00000001", "0000000?", "000000??")]
+        [InlineData("0000000?", "00000001", "000000??")]
+        [InlineData("0000000?", "0000000?", "000000??")]
+        [InlineData("0000??11", "00000001", "000?????")]
+        [InlineData("000??0??", "00000101", "00??????")]
+        public void Add(string a, string b, string expected)
+        {
+            var value1 = new Integer32Value(a);
+            var value2 = new Integer32Value(b);
+
+            value1.Add(value2);
+            
+            Assert.Equal(new Integer32Value(expected), value1);
+        }
     }
 
 }

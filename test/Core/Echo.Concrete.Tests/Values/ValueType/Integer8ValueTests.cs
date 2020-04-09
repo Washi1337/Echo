@@ -105,6 +105,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [InlineData("00110101", "11101111", "00110101")]
         [InlineData("00000000", "0000000?", "0000000?")]
         [InlineData("0000000?", "0000000?", "0000000?")]
+        [InlineData("0000000?", "0000?000", "0000?00?")]
         public void And(string a, string b, string expected)
         {
             var value1 = new Integer8Value(a);

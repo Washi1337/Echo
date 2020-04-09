@@ -178,6 +178,63 @@ namespace Echo.Concrete.Values.ValueType
         public override IValue Copy() => new Integer8Value(U8);
 
         /// <inheritdoc />
+        public override void Not()
+        {
+            U8 = unchecked((byte) ~U8);
+        }
+
+        /// <inheritdoc />
+        public override void And(IntegerValue other)
+        {
+            if (other is Integer8Value int8)
+            {
+                unchecked
+                {
+                    U8 = (byte) (U8 & int8.U8);
+                    Mask = (byte) ~(~Mask | ~int8.Mask);
+                }
+                
+                return;
+            }
+            
+            base.And(other);
+        }
+
+        /// <inheritdoc />
+        public override void Or(IntegerValue other)
+        {
+            if (other is Integer8Value int8)
+            {
+                unchecked
+                {
+                    U8 = (byte) (U8 | int8.U8);
+                    Mask = (byte) ~(~Mask | ~int8.Mask);
+                }
+
+                return;
+            }
+            
+            base.Or(other);
+        }
+
+        /// <inheritdoc />
+        public override void Xor(IntegerValue other)
+        {
+            if (other is Integer8Value int8)
+            {
+                unchecked
+                {
+                    U8 = (byte) (U8 ^ int8.U8);
+                    Mask = (byte) ~(~Mask | ~int8.Mask);
+                }
+                
+                return;
+            }
+            
+            base.And(other);
+        }
+
+        /// <inheritdoc />
         public override void Add(IntegerValue other)
         {
             if (IsKnown && other.IsKnown && other is Integer8Value int8)

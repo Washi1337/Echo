@@ -178,6 +178,63 @@ namespace Echo.Concrete.Values.ValueType
         public override IValue Copy() => new Integer16Value(U16);
 
         /// <inheritdoc />
+        public override void Not()
+        {
+            U16 = unchecked((ushort) ~U16);
+        }
+
+        /// <inheritdoc />
+        public override void And(IntegerValue other)
+        {
+            if (other is Integer16Value int16)
+            {
+                unchecked
+                {
+                    U16 = (ushort) (U16 & int16.U16);
+                    Mask = (ushort) ~(~Mask | ~int16.Mask);
+                }
+                
+                return;
+            }
+            
+            base.And(other);
+        }
+
+        /// <inheritdoc />
+        public override void Or(IntegerValue other)
+        {
+            if (other is Integer16Value int16)
+            {
+                unchecked
+                {
+                    U16 = (ushort) (U16 | int16.U16);
+                    Mask = (ushort) ~(~Mask | ~int16.Mask);
+                }
+
+                return;
+            }
+            
+            base.Or(other);
+        }
+
+        /// <inheritdoc />
+        public override void Xor(IntegerValue other)
+        {
+            if (other is Integer16Value int16)
+            {
+                unchecked
+                {
+                    U16 = (ushort) (U16 ^ int16.U16);
+                    Mask = (ushort) ~(~Mask | ~int16.Mask);
+                }
+                
+                return;
+            }
+            
+            base.And(other);
+        }
+
+        /// <inheritdoc />
         public override void Add(IntegerValue other)
         {
             if (IsKnown && other.IsKnown && other is Integer16Value int16)

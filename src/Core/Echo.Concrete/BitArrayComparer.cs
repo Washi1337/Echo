@@ -3,13 +3,20 @@ using System.Collections.Generic;
 
 namespace Echo.Concrete
 {
+    /// <summary>
+    /// Represents a comparer that can compare bit arrays by their contents.
+    /// </summary>
     public class BitArrayComparer : EqualityComparer<BitArray>
     {
+        /// <summary>
+        /// Gets a reusable instance of the <see cref="BitArrayComparer"/> class.
+        /// </summary>
         public static BitArrayComparer Instance
         {
             get;
         } = new BitArrayComparer();
-        
+
+        /// <inheritdoc />
         public override bool Equals(BitArray x, BitArray y)
         {
             if (ReferenceEquals(x, y))
@@ -31,6 +38,7 @@ namespace Echo.Concrete
             return true;
         }
 
+        /// <inheritdoc />
         public override int GetHashCode(BitArray obj)
         {
             if (obj is null)

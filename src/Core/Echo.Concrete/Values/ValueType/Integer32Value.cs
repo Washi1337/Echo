@@ -176,6 +176,63 @@ namespace Echo.Concrete.Values.ValueType
         
         /// <inheritdoc />
         public override IValue Copy() => new Integer32Value(U32);
+
+        /// <inheritdoc />
+        public override void Not()
+        {
+            U32 = ~U32;
+        }
+
+        /// <inheritdoc />
+        public override void And(IntegerValue other)
+        {
+            if (other is Integer32Value int32)
+            {
+                unchecked
+                {
+                    U32 = U32 & int32.U32;
+                    Mask = ~(~Mask | ~int32.Mask);
+                }
+                
+                return;
+            }
+            
+            base.And(other);
+        }
+
+        /// <inheritdoc />
+        public override void Or(IntegerValue other)
+        {
+            if (other is Integer32Value int32)
+            {
+                unchecked
+                {
+                    U32 = U32 | int32.U32;
+                    Mask = ~(~Mask | ~int32.Mask);
+                }
+
+                return;
+            }
+            
+            base.Or(other);
+        }
+
+        /// <inheritdoc />
+        public override void Xor(IntegerValue other)
+        {
+            if (other is Integer32Value int32)
+            {
+                unchecked
+                {
+                    U32 = U32 ^ int32.U32;
+                    Mask = ~(~Mask | ~int32.Mask);
+                }
+                
+                return;
+            }
+            
+            base.And(other);
+        }
         
         /// <inheritdoc />
         public override void Add(IntegerValue other)

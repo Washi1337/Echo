@@ -176,6 +176,63 @@ namespace Echo.Concrete.Values.ValueType
         
         /// <inheritdoc />
         public override IValue Copy() => new Integer64Value(U64);
+
+        /// <inheritdoc />
+        public override void Not()
+        {
+            U64 = ~U64;
+        }
+
+        /// <inheritdoc />
+        public override void And(IntegerValue other)
+        {
+            if (other is Integer64Value int64)
+            {
+                unchecked
+                {
+                    U64 = U64 & int64.U64;
+                    Mask = ~(~Mask | ~int64.Mask);
+                }
+                
+                return;
+            }
+            
+            base.And(other);
+        }
+
+        /// <inheritdoc />
+        public override void Or(IntegerValue other)
+        {
+            if (other is Integer64Value int64)
+            {
+                unchecked
+                {
+                    U64 = U64 | int64.U64;
+                    Mask = ~(~Mask | ~int64.Mask);
+                }
+
+                return;
+            }
+            
+            base.Or(other);
+        }
+
+        /// <inheritdoc />
+        public override void Xor(IntegerValue other)
+        {
+            if (other is Integer64Value int64)
+            {
+                unchecked
+                {
+                    U64 = U64 ^ int64.U64;
+                    Mask = ~(~Mask | ~int64.Mask);
+                }
+                
+                return;
+            }
+            
+            base.And(other);
+        }
         
         /// <inheritdoc />
         public override void Add(IntegerValue other)
