@@ -273,7 +273,9 @@ namespace Echo.Concrete.Values.ValueType
             var bits = GetBits();
             var mask = GetMask();
 
-            bool? sign = mask[bits.Count - 1] ? bits[bits.Count - 1] : (bool?) null;
+            bool? sign = signExtend 
+                ? mask[bits.Count - 1] ? bits[bits.Count - 1] : (bool?) null 
+                : false;
             
             count = Math.Min(Size * 8, count);
             
