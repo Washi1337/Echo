@@ -354,7 +354,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <summary>
         /// Transforms the (partially) known integer into its twos complement.
         /// </summary>
-        public void TwosComplement()
+        public virtual void TwosComplement()
         {
             Not();
             var one = new BitArray(Size * 8);
@@ -367,7 +367,7 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         /// <param name="other">The integer to subtract.</param>
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match.</exception>
-        public void Subtract(IntegerValue other)
+        public virtual void Subtract(IntegerValue other)
         {
             AssertSameBitSize(other);
             

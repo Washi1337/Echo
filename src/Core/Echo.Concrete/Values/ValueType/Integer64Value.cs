@@ -242,5 +242,14 @@ namespace Echo.Concrete.Values.ValueType
             else
                 base.Add(other);
         }
+
+        /// <inheritdoc />
+        public override void Subtract(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer64Value int64)
+                U64 -= int64.U64;
+            else
+                base.Add(other);
+        }
     }
 }

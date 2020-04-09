@@ -42,6 +42,17 @@ namespace Echo.Concrete.Values.ValueType
             Bits = bits;
             Mask = knownMask;
         }
+        
+        /// <summary>
+        /// Parses a (partially) known bit string into an integer.
+        /// </summary>
+        /// <param name="bitString">The bit string to parse.</param>
+        public IntegerNValue(string bitString)
+        {
+            Bits = new BitArray(bitString.Length);
+            Mask = new BitArray(bitString.Length, true);
+            SetBits(bitString);
+        }
 
         /// <inheritdoc />
         public override bool IsKnown => BitArrayComparer.Instance.Equals(Mask, new BitArray(Size * 8, true));

@@ -242,5 +242,14 @@ namespace Echo.Concrete.Values.ValueType
             else
                 base.Add(other);
         }
+
+        /// <inheritdoc />
+        public override void Subtract(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer32Value int32)
+                U32 -= int32.U32;
+            else
+                base.Add(other);
+        }
     }
 }
