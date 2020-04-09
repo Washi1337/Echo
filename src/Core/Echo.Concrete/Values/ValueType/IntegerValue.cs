@@ -214,7 +214,7 @@ namespace Echo.Concrete.Values.ValueType
 
             SetBits(bits, CombineKnownMasks(other));
         }
-
+        
         private BitArray CombineKnownMasks(IntegerValue other)
         {
             var mask = GetMask();
@@ -230,6 +230,64 @@ namespace Echo.Concrete.Values.ValueType
             }
 
             return mask;
+        }
+
+        /// <summary>
+        /// Performs a bitwise shift to the left on this (partially) known integer.
+        /// </summary>
+        /// <param name="count">The number of bits to shift.</param>
+        public virtual void LeftShift(int count)
+        {
+            if (count == 0)
+                return;
+            
+            var bits = GetBits();
+            var mask = GetMask();
+
+            count = Math.Min(Size * 8, count);
+            
+            for (int i = 0; i < bits.Count - count; i++)
+            {
+                bits[i + count] = bits[i];
+                mask[i + count] = mask[i];
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                bits[i] = false;
+                mask[i] = true;
+            }
+        }
+
+        /// <summary>
+        /// Performs a bitwise shift to the right on this (partially) known integer.
+        /// </summary>
+        /// <param name="count">The number of bits to shift.</param>
+        /// <param name="signExtend">Indicates whether the sign bit should be extended or should always be filled
+        /// in with zeroes.</param> 
+        public virtual void RightShift(int count, bool signExtend)
+        {
+            if (count == 0)
+                return;
+            
+            var bits = GetBits();
+            var mask = GetMask();
+
+            bool? sign = mask[bits.Count - 1] ? bits[bits.Count - 1] : (bool?) null;
+            
+            count = Math.Min(Size * 8, count);
+            
+            for (int i = bits.Count - 1; i >= count; i--)
+            {
+                bits[i - count] = bits[i];
+                mask[i - count] = mask[i];
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                bits[bits.Count - 1 - i] = !sign.HasValue || sign.Value;
+                mask[bits.Count - 1 - i] = sign.HasValue;
+            }
         }
 
         /// <summary>

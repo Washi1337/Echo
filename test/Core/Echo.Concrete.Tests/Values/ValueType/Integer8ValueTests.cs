@@ -171,6 +171,32 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
+        [InlineData("00000001", 1, "00000010")]
+        [InlineData("0000000?", 1, "000000?0")]
+        [InlineData("00000001", 8, "00000000")]
+        [InlineData("01101100", 2, "00011011")]
+        public void LeftShift(string input, int count, string expected)
+        {
+            var value = new Integer8Value(input);
+            value.LeftShift(count);
+            Assert.Equal(new Integer8Value(expected), input);
+        }
+
+        [Theory]
+        [InlineData("00000001", 1, false, "00000000")]
+        [InlineData("10000000", 1, false, "01000000")]
+        [InlineData("10000000", 1, true, "11000000")]
+        [InlineData("?0000000", 1, false, "0?000000")]
+        [InlineData("?0000000", 1, true, "??000000")]
+        [InlineData("10000000", 8, false, "00000000")]
+        public void RightShift(string input, int count, bool signExtend, string expected)
+        {
+            var value = new Integer8Value(input);
+            value.RightShift(count, signExtend);
+            Assert.Equal(new Integer8Value(expected), input);
+        }
+
+        [Theory]
         [InlineData("00010010", "00110100", "01000110")]
         [InlineData("00000000", "0000000?", "0000000?")]
         [InlineData("00000001", "0000000?", "000000??")]
