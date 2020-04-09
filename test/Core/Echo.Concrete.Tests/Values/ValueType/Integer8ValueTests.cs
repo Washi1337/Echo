@@ -1,3 +1,4 @@
+using System;
 using Echo.Concrete.Values.ValueType;
 using Xunit;
 
@@ -52,6 +53,41 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Fact]
+        public void ParseFullyKnownBitString()
+        {
+            var value = new Integer8Value("00001100");
+            Assert.Equal(0b00001100, value.U8);
+        }
+
+        [Fact]
+        public void ParsePartiallyKnownBitString()
+        {
+            var value = new Integer8Value("000011??");
+            Assert.Equal(0b11111100, value.Mask);
+            Assert.Equal(0b00001100, value.U8 & value.Mask);
+        }
+
+        [Fact]
+        public void ParseFewerBits()
+        {
+            var value = new Integer8Value("101");
+            Assert.Equal(0b101, value.U8);
+        }
+
+        [Fact]
+        public void ParseWithMoreZeroes()
+        {
+            var value = new Integer8Value("0000000000000101");
+            Assert.Equal(0b101, value.U8);
+        }
+
+        [Fact]
+        public void ParseWithOverflow()
+        {
+            Assert.Throws<OverflowException>(() => new Integer8Value("10000000000000101"));
+        }
+
+        [Fact]
         public void AddFullyKnownValues()
         {
             var value1 = new Integer8Value(0b0001_0010);
@@ -65,10 +101,8 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [Fact]
         public void AddKnownBitToUnknownBitShouldResultInUnknownCarry()
         {
-            var value1 = new Integer8Value(
-                0b0000_0000,
-                0b1111_1110);
-            var value2 = new Integer8Value(0b0000_0001);
+            var value1 = new Integer8Value("0000000?");
+            var value2 = new Integer8Value("00000001");
 
             value1.Add(value2);
             
@@ -78,10 +112,8 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [Fact]
         public void AddUnknownBitToUnknownBitShouldResultInUnknownCarry()
         {
-            var value1 = new Integer8Value(
-                0b0000_0000,
-                0b1111_1110);
-            var value2 = new Integer8Value(0b0000_0000, 0b1111_1110);
+            var value1 = new Integer8Value("0000000?");
+            var value2 = new Integer8Value("0000000?");
 
             value1.Add(value2);
             
@@ -91,10 +123,8 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [Fact]
         public void AddKnownBitToUnknownBitsShouldResultInUnknownRippleCarry()
         {
-            var value1 = new Integer8Value(
-                0b0000_0000,
-                0b1111_1100);
-            var value2 = new Integer8Value(0b0000_0001);
+            var value1 = new Integer8Value("000000??");
+            var value2 = new Integer8Value("00000001");
 
             value1.Add(value2);
             
@@ -104,11 +134,9 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [Fact]
         public void AddKnownBitToKnownBitsThatCarryOverToUnknownBitsShouldRippleCarry()
         {
-            var value1 = new Integer8Value(
-                0b0000_0011,
-                0b1111_0011);
-            var value2 = new Integer8Value(0b0000_0001);
-
+            var value1 = new Integer8Value("0000??11");
+            var value2 = new Integer8Value("00000001");
+            
             value1.Add(value2);
             
             Assert.Equal(0b1110_0011, value1.Mask);
@@ -117,12 +145,8 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [Fact]
         public void AddUnknownBitToKnownBitsThatCarryOverToUnknownBitsShouldRippleCarry()
         {
-            var value1 = new Integer8Value(
-                0b0000_0011,
-                0b1111_0011);
-            var value2 = new Integer8Value(
-                0b0000_0000, 
-                0b1111_1110);
+            var value1 = new Integer8Value("0000??11");
+            var value2 = new Integer8Value("0000000?");
 
             value1.Add(value2);
             

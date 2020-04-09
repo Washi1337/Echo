@@ -65,6 +65,40 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="mask">The new bit mask indicating the known bits.</param>
         public abstract void SetBits(BitArray bits, BitArray mask);
 
+        public void SetBits(string bitString)
+        {
+            var bits = new BitArray(Size * 8);
+            var mask = new BitArray(Size * 8);
+
+            for (int i = 0; i < bitString.Length; i++)
+            {
+                bool? bit = bitString[bitString.Length - i - 1] switch
+                {
+                    '0' => false,
+                    '1' => true,
+                    '?' => null,
+                    _ => throw new FormatException()
+                };
+
+                if (i >= bits.Count)
+                {
+                    if (!bit.HasValue || bit.Value)
+                        throw new OverflowException();
+                }
+                else if (bit.HasValue)
+                {
+                    bits[i] = bit.Value;
+                    mask[i] = true;
+                }
+                else
+                {
+                    mask[i] = false;
+                }
+            }
+
+            SetBits(bits, mask);
+        } 
+
         /// <inheritdoc />
         public override string ToString()
         {

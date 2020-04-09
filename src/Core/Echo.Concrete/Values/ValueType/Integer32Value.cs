@@ -28,6 +28,16 @@ namespace Echo.Concrete.Values.ValueType
         {
             return new Integer32Value(value);
         }
+
+        /// <summary>
+        /// Parses a (partially) known bit string into an 32 bit integer.
+        /// </summary>
+        /// <param name="bitString">The bit string to parse.</param>
+        /// <returns>The 32 bit integer.</returns>
+        public static implicit operator Integer32Value(string bitString)
+        {
+            return new Integer32Value(bitString);
+        }
         
         /// <summary>
         /// Represents the bitmask that is used for a fully known concrete 32 bit integral value. 
@@ -73,6 +83,15 @@ namespace Echo.Concrete.Values.ValueType
         {
             _value = value;
             Mask = mask;
+        }
+
+        /// <summary>
+        /// Parses a (partially) known bit string into an 32 bit integer.
+        /// </summary>
+        /// <param name="bitString">The bit string to parse.</param>
+        public Integer32Value(string bitString)
+        {
+            SetBits(bitString);
         }
 
         /// <inheritdoc />
