@@ -25,6 +25,45 @@ namespace Echo.Concrete.Values.ValueType
         public bool IsValueType => true;
 
         /// <summary>
+        /// Determines whether the integer consists of only zeroes.
+        /// </summary>
+        /// <remarks>
+        /// If this value is <c>null</c>, it is unknown whether this value contains only zeroes.
+        /// </remarks>
+        public virtual bool? IsZero
+        {
+            get
+            {
+                var bits = GetBits();
+                
+                if (IsKnown)
+                    return BitArrayComparer.Instance.Equals(bits, new BitArray(bits.Count, false));;
+
+                var mask = GetMask();
+                bits.And(mask);
+                
+                var raw = new int[bits.Count / sizeof(int)];
+                bits.CopyTo(raw, 0);
+                
+                for (int i = 0; i < raw.Length; i++)
+                {
+                    if (raw[i] != 0)
+                        return false;
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the integer contains at least a single one in its bit string.
+        /// </summary>
+        /// <remarks>
+        /// If this value is <c>null</c>, it is unknown whether this value contains at least a single one in its bit string.
+        /// </remarks>
+        public virtual bool? IsNonZero => !IsZero;
+
+        /// <summary>
         /// Reads a single bit value at the provided index.
         /// </summary>
         /// <param name="index">The index of the bit to read.</param>
@@ -272,7 +311,6 @@ namespace Echo.Concrete.Values.ValueType
 
             return false;
         }
-
 
         /// <inheritdoc />
         public override int GetHashCode()

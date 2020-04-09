@@ -62,6 +62,34 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
+        [InlineData("0000000000000000", true)]
+        [InlineData("0000000000001010", false)]
+        [InlineData("0000101000000000", false)]
+        [InlineData("000000000000?0?0", null)]
+        [InlineData("00?00?0000000000", null)]
+        [InlineData("10?00?0000000000", false)]
+        public void IsZero(string input, bool? expected)
+        {
+            var value = new Integer16Value(input);
+            
+            Assert.Equal(expected, value.IsZero);
+        }
+
+        [Theory]
+        [InlineData("0000000000000000", false)]
+        [InlineData("0000000000001010", true)]
+        [InlineData("0000101000000000", true)]
+        [InlineData("000000000000?0?0", null)]
+        [InlineData("00?00?0000000000", null)]
+        [InlineData("10?00?0000000000", true)]
+        public void IsNonZero(string input, bool? expected)
+        {
+            var value = new Integer16Value(input);
+            
+            Assert.Equal(expected, value.IsNonZero);
+        }
+
+        [Theory]
         [InlineData("00000000", "11111111")]
         [InlineData("11111111", "00000000")]
         [InlineData("????????", "????????")]

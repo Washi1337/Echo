@@ -88,6 +88,30 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
+        [InlineData("00000000", true)]
+        [InlineData("00001010", false)]
+        [InlineData("0000?0?0", null)]
+        [InlineData("0100?0?0", false)]
+        public void IsZero(string input, bool? expected)
+        {
+            var value = new Integer8Value(input);
+            
+            Assert.Equal(expected, value.IsZero);
+        }
+
+        [Theory]
+        [InlineData("00000000", false)]
+        [InlineData("00001010", true)]
+        [InlineData("0000?0?0", null)]
+        [InlineData("0100?0?0", true)]
+        public void IsNonZero(string input, bool? expected)
+        {
+            var value = new Integer8Value(input);
+            
+            Assert.Equal(expected, value.IsNonZero);
+        }
+
+        [Theory]
         [InlineData("00000000", "11111111")]
         [InlineData("11111111", "00000000")]
         [InlineData("????????", "????????")]
