@@ -287,7 +287,7 @@ namespace Echo.Concrete.Values.ValueType
 
             for (int i = 0; i < count; i++)
             {
-                bits[bits.Count - 1 - i] = !sign.HasValue || sign.Value;
+                bits[bits.Count - 1 - i] = sign.GetValueOrDefault();
                 mask[bits.Count - 1 - i] = sign.HasValue;
             }
         }
@@ -374,6 +374,91 @@ namespace Echo.Concrete.Values.ValueType
             other = (IntegerValue) other.Copy();
             other.TwosComplement();
             Add(other);
+        }
+
+        /// <summary>
+        /// Extends the integer value to a bigger bit length.
+        /// </summary>
+        /// <param name="newBitLength">The new bit length to extend the integer to.</param>
+        /// <param name="signExtend">Indicates whether the sign bit should be extended.</param>
+        /// <returns>
+        /// The extended integer. If the provided size is either 8, 16, 32 or 64, this method will return an integer
+        /// using the specialized <see cref="Integer8Value"/>, <see cref="Integer16Value"/>, <see cref="Integer32Value"/>
+        /// or <see cref="Integer64Value"/> types.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Occurs when the new bit length is shorter than the current bit length.
+        /// </exception>
+        public virtual IntegerValue Extend(int newBitLength, bool signExtend)
+        {
+            if (Size * 8 > newBitLength)
+                throw new ArgumentException("New bit length is shorter than the current bit length.");
+
+            return Resize(newBitLength, signExtend);
+        }
+
+        /// <summary>
+        /// Truncates the integer value to a smaller bit length.
+        /// </summary>
+        /// <param name="newBitLength">The new bit length to truncate the integer to.</param>
+        /// <returns>
+        /// The truncated integer. If the provided size is either 8, 16, 32 or 64, this method will return an integer
+        /// using the specialized <see cref="Integer8Value"/>, <see cref="Integer16Value"/>, <see cref="Integer32Value"/>
+        /// or <see cref="Integer64Value"/> types.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Occurs when the new bit length is larger than the current bit length.
+        /// </exception>
+        public virtual IntegerValue Truncate(int newBitLength)
+        {
+            if (Size * 8 < newBitLength)
+                throw new ArgumentException("New bit length is larger than the current bit length.");
+
+            return Resize(newBitLength, false);
+        }
+
+        private IntegerValue Resize(int newBitLength, bool signExtend)
+        {
+            var bits = GetBits();
+            var mask = GetMask();
+
+            var newBits = new BitArray(newBitLength);
+            var newMask = new BitArray(newBitLength, true);
+
+            // Copy relevant bits.
+            int bitsToCopy = Math.Min(newBitLength, bits.Count);
+            for (int i = 0; i < bitsToCopy; i++)
+            {
+                newBits[i] = bits[i];
+                newMask[i] = mask[i];
+            }
+
+            // Sign extend if necessary.
+            if (signExtend)
+            {
+                bool? sign = mask[bits.Length - 1] ? bits[bits.Length - 1] : (bool?) null;
+
+                for (int i = bits.Count; i < newBitLength; i++)
+                {
+                    newBits[i] = sign.GetValueOrDefault();
+                    newMask[i] = sign.HasValue;
+                }
+            }
+
+            // Optimize to native integer types.
+            IntegerValue result = newBitLength switch
+            {
+                8 => new Integer8Value(0),
+                16 => new Integer16Value(0),
+                32 => new Integer32Value(0),
+                64 => new Integer64Value(0),
+                _ => new IntegerNValue(newBitLength / 8)
+            };
+
+            // Set contents.
+            result.SetBits(newBits, newMask);
+            
+            return result;
         }
 
         private void AssertSameBitSize(IntegerValue other)

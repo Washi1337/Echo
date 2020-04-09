@@ -160,5 +160,88 @@ namespace Echo.Concrete.Tests.Values.ValueType
             
             Assert.Equal(new IntegerNValue(expected), value1);
         }
+
+        [Fact]
+        public void Extend8BitsTo8Bits()
+        {
+            var value = new IntegerNValue("00110??0");
+            var newValue = value.Extend(8, false);
+            
+            Assert.IsAssignableFrom<Integer8Value>(newValue);
+            var int8Value = (Integer8Value) newValue;
+            Assert.Equal(0b0011_0000, int8Value.U8);
+            Assert.Equal(0b1111_1001, int8Value.Mask); 
+        }
+
+        [Theory]
+        [InlineData("1100??00", false, (ushort) 0b00000000_11000000, 0b11111111_11110011)]
+        [InlineData("1100??00", true, (ushort) 0b11111111_11000000, 0b11111111_11110011)]
+        [InlineData("0100??00", true, (ushort) 0b00000000_01000000, 0b11111111_11110011)]
+        [InlineData("?100??00", false, (ushort) 0b00000000_01000000, 0b11111111_01110011)]
+        [InlineData("?100??00", true, (ushort) 0b00000000_01000000, 0b00000000_01110011)]
+        public void Extend8BitsTo16Bits(string input, bool signExtend, ushort expectedBits, ushort expectedMask)
+        {
+            var value = new IntegerNValue(input);
+            var newValue = value.Extend(16, signExtend);
+                
+            Assert.IsAssignableFrom<Integer16Value>(newValue);
+            var int16Value = (Integer16Value) newValue;
+            Assert.Equal(expectedBits, int16Value.U16);
+            Assert.Equal(expectedMask, int16Value.Mask);
+        }
+
+        [Theory]
+        [InlineData("1100??00", false, 0b00000000_00000000_00000000_11000000, 0b11111111_11111111_11111111_11110011u)]
+        [InlineData("1100??00", true, 0b11111111_11111111_11111111_11000000, 0b11111111_11111111_11111111_11110011u)]
+        [InlineData("?100??00", false, 0b00000000_00000000_00000000_01000000, 0b11111111_11111111_11111111_01110011u)]
+        [InlineData("?100??00", true, 0b00000000_00000000_00000000_01000000, 0b00000000_00000000_00000000_01110011u)]
+        public void Extend8BitsTo32Bits(string input, bool signExtend, uint expectedBits, uint expectedMask)
+        {
+            var value = new IntegerNValue(input);
+            var newValue = value.Extend(32, signExtend);
+                
+            Assert.IsAssignableFrom<Integer32Value>(newValue);
+            var int32Value = (Integer32Value) newValue;
+            Assert.Equal(expectedBits, int32Value.U32);
+            Assert.Equal(expectedMask, int32Value.Mask);
+        }
+
+        [Theory]
+        [InlineData("1100??00", false,
+            0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_11000000UL, 
+            0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11110011UL)]
+        [InlineData("1100??00", true, 
+            0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11000000UL, 
+            0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11110011UL)]
+        [InlineData("?100??00", false, 
+            0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_01000000UL, 
+            0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_01110011UL)]
+        [InlineData("?100??00", true,
+            0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_01000000UL, 
+            0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_01110011UL)]
+        public void Extend8BitsTo64Bits(string input, bool signExtend, ulong expectedBits, ulong expectedMask)
+        {
+            var value = new IntegerNValue(input);
+            var newValue = value.Extend(64, signExtend);
+                
+            Assert.IsAssignableFrom<Integer64Value>(newValue);
+            var int64Value = (Integer64Value) newValue;
+            Assert.Equal(expectedBits, int64Value.U64);
+            Assert.Equal(expectedMask, int64Value.Mask);
+        }
+
+        [Theory]
+        [InlineData("1100110011110000", 0b11110000, 0b11111111)]
+        [InlineData("??00110011??0000", 0b11000000, 0b11001111)]
+        public void TruncateTo8Bits(string input, byte expectedBits, byte expectedMask)
+        {
+            var value = new IntegerNValue(input);
+            var newValue = value.Truncate(8);
+            
+            Assert.IsAssignableFrom<Integer8Value>(newValue);
+            var int8Value = (Integer8Value) newValue;
+            Assert.Equal(expectedBits, int8Value.U8);
+            Assert.Equal(expectedMask, int8Value.Mask);
+        }
     }
 }
