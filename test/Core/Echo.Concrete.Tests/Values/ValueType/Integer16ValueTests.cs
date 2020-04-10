@@ -90,10 +90,10 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00000000", "11111111")]
-        [InlineData("11111111", "00000000")]
-        [InlineData("????????", "????????")]
-        [InlineData("0011??00", "1100??00")]
+        [InlineData("1111111100000000", "0000000011111111")]
+        [InlineData("0000000011111111", "1111111100000000")]
+        [InlineData("????????????????", "????????????????")]
+        [InlineData("000000000011??00", "111111111100??11")]
         public void Not(string input, string expected)
         {
             var value1 = new Integer16Value(input);
@@ -104,7 +104,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00110101", "11101111", "00110101")]
+        [InlineData("00110101", "11101111", "00100101")]
         [InlineData("00000000", "0000000?", "0000000?")]
         [InlineData("0000000?", "0000000?", "0000000?")]
         [InlineData("0000000?", "0000?000", "0000?00?")]
@@ -134,7 +134,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00110101", "11101111", "11111111")]
+        [InlineData("00110101", "11101111", "11011010")]
         [InlineData("00000000", "0000000?", "0000000?")]
         [InlineData("0000000?", "0000000?", "0000000?")]
         [InlineData("0010000?", "0011000?", "0001000?")]
@@ -143,7 +143,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
             var value1 = new Integer16Value(a);
             var value2 = new Integer16Value(b);
             
-            value1.Or(value2);
+            value1.Xor(value2);
             
             Assert.Equal(new Integer16Value(expected), value1);
         }
@@ -154,7 +154,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [InlineData("00000001", "0000000?", "000000??")]
         [InlineData("0000000?", "00000001", "000000??")]
         [InlineData("0000000?", "0000000?", "000000??")]
-        [InlineData("0000??11", "00000001", "000?????")]
+        [InlineData("0000??11", "00000001", "000???00")]
         [InlineData("000??0??", "00000101", "00??????")]
         public void Add(string a, string b, string expected)
         {

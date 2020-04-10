@@ -249,7 +249,7 @@ namespace Echo.Concrete.Values.ValueType
             if (IsKnown && other.IsKnown && other is Integer16Value int16)
                 U16 -= int16.U16;
             else
-                base.Add(other);
+                base.Subtract(other);
         }
 
         /// <inheritdoc />

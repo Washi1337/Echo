@@ -249,7 +249,7 @@ namespace Echo.Concrete.Values.ValueType
             if (IsKnown && other.IsKnown && other is Integer64Value int64)
                 U64 -= int64.U64;
             else
-                base.Add(other);
+                base.Subtract(other);
         }
 
         /// <inheritdoc />

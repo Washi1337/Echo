@@ -114,7 +114,7 @@ namespace Echo.Concrete.Values.ValueType
         public void SetBits(string bitString)
         {
             var bits = new BitArray(Size * 8);
-            var mask = new BitArray(Size * 8);
+            var mask = new BitArray(Size * 8, true);
 
             for (int i = 0; i < bitString.Length; i++)
             {
@@ -283,7 +283,7 @@ namespace Echo.Concrete.Values.ValueType
             
             count = Math.Min(Size * 8, count);
             
-            for (int i = bits.Count - 1; i >= count; i--)
+            for (int i = count; i < bits.Count; i++)
             {
                 bits[i - count] = bits[i];
                 mask[i - count] = mask[i];
@@ -368,10 +368,57 @@ namespace Echo.Concrete.Values.ValueType
         public virtual void Subtract(IntegerValue other)
         {
             AssertSameBitSize(other);
-            
-            other = (IntegerValue) other.Copy();
-            other.TwosComplement();
-            Add(other);
+
+            var difference = new BitArray(Size * 8);
+            var mask = new BitArray(Size * 8, true);
+
+            bool? borrow = false;
+            for (int i = 0; i < difference.Length; i++)
+            {
+                bool? a = GetBit(i);
+                bool? b = other.GetBit(i);
+                
+                // Implement truth table.
+                (bool? d, bool? bOut) = (a, b, borrow) switch
+                {
+                    (false, false, false) => ((bool?) false, (bool?) false),
+                    (false, false, true) => (true, true),
+                    (false, false, null) => (null, null),
+                    (false, true, false) => (true, true),
+                    (false, true, true) => (false, true),
+                    (false, true, null) => (null, true),
+                    (false, null, false) => (null, null),
+                    (false, null, true) => (null, null),
+                    (false, null, null) => (null, null),
+                    
+                    (true, false, false) => (true, false),
+                    (true, false, true) => (false, false),
+                    (true, false, null) => (null, false),
+                    (true, true, false) => (false, false),
+                    (true, true, true) => (true, true),
+                    (true, true, null) => (null, null),
+                    (true, null, false) => (null, false),
+                    (true, null, true) => (null, null),
+                    (true, null, null) => (null, null),
+                    
+                    (null, false, false) => (null, false),
+                    (null, false, true) => (null, null),
+                    (null, false, null) => (null, null),
+                    (null, true, false) => (null, null),
+                    (null, true, true) => (null, true),
+                    (null, true, null) => (null, null),
+                    (null, null, false) => (null, null),
+                    (null, null, true) => (null, null),
+                    (null, null, null) => (null, null),
+                    
+                };
+
+                difference[i] = d.GetValueOrDefault();
+                mask[i] = d.HasValue;
+                borrow = bOut;
+            }
+
+            SetBits(difference, mask);
         }
 
         /// <summary>
@@ -629,7 +676,7 @@ namespace Echo.Concrete.Values.ValueType
                     return false;
 
                 return BitArrayComparer.Instance.Equals(GetBits(), integerValue.GetBits())
-                    || BitArrayComparer.Instance.Equals(GetMask(), integerValue.GetMask());
+                    && BitArrayComparer.Instance.Equals(GetMask(), integerValue.GetMask());
             }
 
             return false;

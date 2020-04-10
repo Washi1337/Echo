@@ -249,7 +249,7 @@ namespace Echo.Concrete.Values.ValueType
             if (IsKnown && other.IsKnown && other is Integer8Value int8)
                 U8 -= int8.U8;
             else
-                base.Add(other);
+                base.Subtract(other);
         }
 
         /// <inheritdoc />

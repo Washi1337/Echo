@@ -116,7 +116,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [InlineData("00000000", "11111111")]
         [InlineData("11111111", "00000000")]
         [InlineData("????????", "????????")]
-        [InlineData("0011??00", "1100??00")]
+        [InlineData("0011??00", "1100??11")]
         public void Not(string input, string expected)
         {
             var value1 = new Integer8Value(input);
@@ -127,7 +127,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00110101", "11101111", "00110101")]
+        [InlineData("00110101", "11101111", "00100101")]
         [InlineData("00000000", "0000000?", "0000000?")]
         [InlineData("0000000?", "0000000?", "0000000?")]
         [InlineData("0000000?", "0000?000", "0000?00?")]
@@ -157,7 +157,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00110101", "11101111", "11111111")]
+        [InlineData("00110101", "11101111", "11011010")]
         [InlineData("00000000", "0000000?", "0000000?")]
         [InlineData("0000000?", "0000000?", "0000000?")]
         [InlineData("0010000?", "0011000?", "0001000?")]
@@ -166,7 +166,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
             var value1 = new Integer8Value(a);
             var value2 = new Integer8Value(b);
             
-            value1.Or(value2);
+            value1.Xor(value2);
             
             Assert.Equal(new Integer8Value(expected), value1);
         }
@@ -175,7 +175,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [InlineData("00000001", 1, "00000010")]
         [InlineData("0000000?", 1, "000000?0")]
         [InlineData("00000001", 8, "00000000")]
-        [InlineData("01101100", 2, "00011011")]
+        [InlineData("01101100", 2, "10110000")]
         public void LeftShift(string input, int count, string expected)
         {
             var value = new Integer8Value(input);
@@ -203,7 +203,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [InlineData("00000001", "0000000?", "000000??")]
         [InlineData("0000000?", "00000001", "000000??")]
         [InlineData("0000000?", "0000000?", "000000??")]
-        [InlineData("0000??11", "00000001", "000?????")]
+        [InlineData("0000??11", "00000001", "000???00")]
         [InlineData("000??0??", "00000101", "00??????")]
         public void Add(string a, string b, string expected)
         {
@@ -247,7 +247,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [Theory]
         [InlineData("00001111", "00001000", "00000111")]
         [InlineData("00001000", "00000001", "00000111")]
-        [InlineData("00001???", "00000001", "00000???")]
+        [InlineData("00001???", "00000001", "0000????")]
         [InlineData("00001???", "0000000?", "0000????")]
         [InlineData("00000000", "0000000?", "????????")]
         public void Subtract(string a, string b, string expected)

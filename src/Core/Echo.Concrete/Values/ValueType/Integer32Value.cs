@@ -249,7 +249,7 @@ namespace Echo.Concrete.Values.ValueType
             if (IsKnown && other.IsKnown && other is Integer32Value int32)
                 U32 -= int32.U32;
             else
-                base.Add(other);
+                base.Subtract(other);
         }
 
         /// <inheritdoc />
