@@ -185,10 +185,47 @@ namespace Echo.Concrete.Values.ValueType
         {
             AssertSameBitSize(other);
 
-            var bits = GetBits();
-            bits.And(other.GetBits());
+            BitArray bits;
+            BitArray mask;
+            
+            if (IsKnown && other.IsKnown)
+            {
+                // Catch common case where everything is known.
+                
+                bits = GetBits();
+                bits.And(other.GetBits());
+                mask = GetMask();
+            }
+            else
+            {
+                // Some bits are unknown, perform operation manually.
 
-            SetBits(bits, CombineKnownMasks(other));
+                bits = new BitArray(Size * 8);
+                mask = new BitArray(Size * 8, true);
+
+                for (int i = 0; i < mask.Count; i++)
+                {
+                    bool? result = (GetBit(i), other.GetBit(i)) switch
+                    {
+                        (false, false) => false,
+                        (false, true) => false,
+                        (false, null) => false,
+
+                        (true, false) => false,
+                        (true, true) => true,
+                        (true, null) => null,
+
+                        (null, false) => false,
+                        (null, true) => null,
+                        (null, null) => null,
+                    };
+
+                    bits[i] = result.GetValueOrDefault();
+                    mask[i] = result.HasValue;
+                }
+            }
+
+            SetBits(bits, mask);
         }
 
         /// <summary>
@@ -197,11 +234,48 @@ namespace Echo.Concrete.Values.ValueType
         public virtual void Or(IntegerValue other)
         {
             AssertSameBitSize(other);
-            
-            var bits = GetBits();
-            bits.Or(other.GetBits());
 
-            SetBits(bits, CombineKnownMasks(other));
+            BitArray bits;
+            BitArray mask;
+            
+            if (IsKnown && other.IsKnown)
+            {
+                // Catch common case where everything is known.
+                
+                bits = GetBits();
+                bits.Or(other.GetBits());
+                mask = GetMask();
+            }
+            else
+            {
+                // Some bits are unknown, perform operation manually.
+                
+                bits = new BitArray(Size * 8);
+                mask = new BitArray(Size * 8, true);
+
+                for (int i = 0; i < mask.Count; i++)
+                {
+                    bool? result = (GetBit(i), other.GetBit(i)) switch
+                    {
+                        (false, false) => false,
+                        (false, true) => true,
+                        (false, null) => null,
+
+                        (true, false) => true,
+                        (true, true) => true,
+                        (true, null) => true,
+
+                        (null, false) => null,
+                        (null, true) => true,
+                        (null, null) => null,
+                    };
+
+                    bits[i] = result.GetValueOrDefault();
+                    mask[i] = result.HasValue;
+                }
+            }
+
+            SetBits(bits, mask);
         }
 
         /// <summary>

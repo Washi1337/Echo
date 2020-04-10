@@ -103,9 +103,9 @@ namespace Echo.Concrete.Tests.Values.ValueType
 
         [Theory]
         [InlineData("00110101", "11101111", "00100101")]
-        [InlineData("00000000", "0000000?", "0000000?")]
+        [InlineData("00000000", "0000000?", "00000000")]
         [InlineData("0000000?", "0000000?", "0000000?")]
-        [InlineData("0000000?", "0000?000", "0000?00?")]
+        [InlineData("0000000?", "0000?000", "00000000")]
         public void And(string a, string b, string expected)
         {
             var value1 = new Integer32Value(a);

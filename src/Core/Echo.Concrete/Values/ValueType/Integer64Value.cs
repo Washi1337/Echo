@@ -38,14 +38,14 @@ namespace Echo.Concrete.Values.ValueType
         {
             return new Integer64Value(bitString);
         }
-        
+
         /// <summary>
         /// Represents the bitmask that is used for a fully known concrete 64 bit integral value. 
         /// </summary>
         public const ulong FullyKnownMask = 0xFFFFFFFF_FFFFFFFF;
-        
+
         private ulong _value;
-        
+
         /// <summary>
         /// Creates a new, fully known concrete 64 bit integral value.
         /// </summary>
@@ -99,6 +99,17 @@ namespace Echo.Concrete.Values.ValueType
 
         /// <inheritdoc />
         public override int Size => sizeof(ulong);
+
+        /// <inheritdoc />
+        public override bool? IsZero
+        {
+            get
+            {
+                if (IsKnown)
+                    return U64 == 0;
+                return base.IsZero;
+            }
+        }
 
         /// <summary>
         /// Gets the signed representation of this 64 bit value.
@@ -161,7 +172,7 @@ namespace Echo.Concrete.Values.ValueType
 
         /// <inheritdoc />
         public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
-        
+
         /// <inheritdoc />
         public override void SetBits(BitArray bits, BitArray mask)
         {
@@ -173,7 +184,7 @@ namespace Echo.Concrete.Values.ValueType
             mask.CopyTo(buffer, 0);
             Mask = BitConverter.ToUInt64(buffer, 0);
         }
-        
+
         /// <inheritdoc />
         public override IValue Copy() => new Integer64Value(U64, Mask);
 
@@ -186,54 +197,30 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override void And(IntegerValue other)
         {
-            if (other is Integer64Value int64)
-            {
-                unchecked
-                {
-                    U64 = U64 & int64.U64;
-                    Mask = ~(~Mask | ~int64.Mask);
-                }
-                
-                return;
-            }
-            
-            base.And(other);
+            if (IsKnown && other.IsKnown && other is Integer64Value int64)
+                U64 = U64 & int64.U64;
+            else
+                base.And(other);
         }
 
         /// <inheritdoc />
         public override void Or(IntegerValue other)
         {
-            if (other is Integer64Value int64)
-            {
-                unchecked
-                {
-                    U64 = U64 | int64.U64;
-                    Mask = ~(~Mask | ~int64.Mask);
-                }
-
-                return;
-            }
-            
-            base.Or(other);
+            if (IsKnown && other.IsKnown && other is Integer64Value int64)
+                U64 = U64 | int64.U64;
+            else
+                base.Or(other);
         }
 
         /// <inheritdoc />
         public override void Xor(IntegerValue other)
         {
-            if (other is Integer64Value int64)
-            {
-                unchecked
-                {
-                    U64 = U64 ^ int64.U64;
-                    Mask = ~(~Mask | ~int64.Mask);
-                }
-                
-                return;
-            }
-            
-            base.And(other);
+            if (IsKnown && other.IsKnown && other is Integer64Value int64)
+                U64 = U64 ^ int64.U64;
+            else
+                base.Xor(other);
         }
-        
+
         /// <inheritdoc />
         public override void Add(IntegerValue other)
         {
@@ -264,8 +251,8 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override bool? IsEqualTo(IntegerValue other)
         {
-            return IsKnown && other.IsKnown && other is Integer64Value int64 
-                ? U64 == int64.U64 
+            return IsKnown && other.IsKnown && other is Integer64Value int64
+                ? U64 == int64.U64
                 : (bool?) null;
         }
 
@@ -283,7 +270,7 @@ namespace Echo.Concrete.Values.ValueType
         {
             if (IsKnown && other.IsKnown && other is Integer64Value int64)
                 return U64 < int64.U64;
-            
+
             return base.IsLessThan(other);
         }
     }

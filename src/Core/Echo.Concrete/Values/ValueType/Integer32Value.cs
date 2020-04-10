@@ -100,6 +100,17 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override int Size => sizeof(uint);
 
+        /// <inheritdoc />
+        public override bool? IsZero
+        {
+            get
+            {
+                if (IsKnown)
+                    return U32 == 0;
+                return base.IsZero;
+            }
+        }
+        
         /// <summary>
         /// Gets the signed representation of this 32 bit value.
         /// </summary>
@@ -186,54 +197,30 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override void And(IntegerValue other)
         {
-            if (other is Integer32Value int32)
-            {
-                unchecked
-                {
-                    U32 = U32 & int32.U32;
-                    Mask = ~(~Mask | ~int32.Mask);
-                }
-                
-                return;
-            }
-            
-            base.And(other);
+            if (IsKnown && other.IsKnown && other is Integer32Value int32)
+                U32 = U32 & int32.U32;
+            else
+                base.And(other);
         }
 
         /// <inheritdoc />
         public override void Or(IntegerValue other)
         {
-            if (other is Integer32Value int32)
-            {
-                unchecked
-                {
-                    U32 = U32 | int32.U32;
-                    Mask = ~(~Mask | ~int32.Mask);
-                }
-
-                return;
-            }
-            
-            base.Or(other);
+            if (IsKnown && other.IsKnown && other is Integer32Value int32)
+                U32 = U32 | int32.U32;
+            else
+                base.Or(other);
         }
 
         /// <inheritdoc />
         public override void Xor(IntegerValue other)
         {
-            if (other is Integer32Value int32)
-            {
-                unchecked
-                {
-                    U32 = U32 ^ int32.U32;
-                    Mask = ~(~Mask | ~int32.Mask);
-                }
-                
-                return;
-            }
-            
-            base.And(other);
+            if (IsKnown && other.IsKnown && other is Integer32Value int32)
+                U32 = U32 ^ int32.U32;
+            else
+                base.Xor(other);
         }
-        
+
         /// <inheritdoc />
         public override void Add(IntegerValue other)
         {

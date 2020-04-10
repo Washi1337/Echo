@@ -38,14 +38,14 @@ namespace Echo.Concrete.Values.ValueType
         {
             return new Integer8Value(bitString);
         }
-        
+
         /// <summary>
         /// Represents the bitmask that is used for a fully known concrete 8 bit integral value. 
         /// </summary>
         public const byte FullyKnownMask = 0xFF;
-        
+
         private byte _value;
-        
+
         /// <summary>
         /// Creates a new, fully known concrete 8 bit integral value.
         /// </summary>
@@ -100,6 +100,17 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override int Size => sizeof(byte);
 
+        /// <inheritdoc />
+        public override bool? IsZero
+        {
+            get
+            {
+                if (IsKnown)
+                    return U8 == 0;
+                return base.IsZero;
+            }
+        }
+
         /// <summary>
         /// Gets the signed representation of this 8 bit value.
         /// </summary>
@@ -144,7 +155,7 @@ namespace Echo.Concrete.Values.ValueType
                 throw new ArgumentOutOfRangeException(nameof(index));
 
             byte mask = (byte) (1 << index);
-            
+
             if (value.HasValue)
             {
                 Mask |= mask;
@@ -157,10 +168,16 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override BitArray GetBits() => new BitArray(new[] {U8});
+        public override BitArray GetBits() => new BitArray(new[]
+        {
+            U8
+        });
 
         /// <inheritdoc />
-        public override BitArray GetMask() => new BitArray(new[] {Mask});
+        public override BitArray GetMask() => new BitArray(new[]
+        {
+            Mask
+        });
 
         /// <inheritdoc />
         public override void SetBits(BitArray bits, BitArray mask)
@@ -173,7 +190,7 @@ namespace Echo.Concrete.Values.ValueType
             mask.CopyTo(buffer, 0);
             Mask = buffer[0];
         }
-        
+
         /// <inheritdoc />
         public override IValue Copy() => new Integer8Value(U8, Mask);
 
@@ -186,52 +203,28 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override void And(IntegerValue other)
         {
-            if (other is Integer8Value int8)
-            {
-                unchecked
-                {
-                    U8 = (byte) (U8 & int8.U8);
-                    Mask = (byte) ~(~Mask | ~int8.Mask);
-                }
-                
-                return;
-            }
-            
-            base.And(other);
+            if (IsKnown && other.IsKnown && other is Integer8Value int8)
+                U8 = (byte) (U8 & int8.U8);
+            else
+                base.And(other);
         }
 
         /// <inheritdoc />
         public override void Or(IntegerValue other)
         {
-            if (other is Integer8Value int8)
-            {
-                unchecked
-                {
-                    U8 = (byte) (U8 | int8.U8);
-                    Mask = (byte) ~(~Mask | ~int8.Mask);
-                }
-
-                return;
-            }
-            
-            base.Or(other);
+            if (IsKnown && other.IsKnown && other is Integer8Value int8)
+                U8 = (byte) (U8 | int8.U8);
+            else
+                base.Or(other);
         }
 
         /// <inheritdoc />
         public override void Xor(IntegerValue other)
         {
-            if (other is Integer8Value int8)
-            {
-                unchecked
-                {
-                    U8 = (byte) (U8 ^ int8.U8);
-                    Mask = (byte) ~(~Mask | ~int8.Mask);
-                }
-                
-                return;
-            }
-            
-            base.And(other);
+            if (IsKnown && other.IsKnown && other is Integer8Value int8)
+                U8 = (byte) (U8 ^ int8.U8);
+            else
+                base.Xor(other);
         }
 
         /// <inheritdoc />
@@ -264,8 +257,8 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override bool? IsEqualTo(IntegerValue other)
         {
-            return IsKnown && other.IsKnown && other is Integer8Value int8 
-                ? U8 == int8.U8 
+            return IsKnown && other.IsKnown && other is Integer8Value int8
+                ? U8 == int8.U8
                 : (bool?) null;
         }
 
@@ -283,7 +276,7 @@ namespace Echo.Concrete.Values.ValueType
         {
             if (IsKnown && other.IsKnown && other is Integer8Value int8)
                 return U8 < int8.U8;
-            
+
             return base.IsLessThan(other);
         }
     }

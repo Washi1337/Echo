@@ -38,14 +38,14 @@ namespace Echo.Concrete.Values.ValueType
         {
             return new Integer16Value(bitString);
         }
-        
+
         /// <summary>
         /// Represents the bitmask that is used for a fully known concrete 16 bit integral value. 
         /// </summary>
         public const ushort FullyKnownMask = 0xFFFF;
-        
+
         private ushort _value;
-        
+
         /// <summary>
         /// Creates a new, fully known concrete 16 bit integral value.
         /// </summary>
@@ -100,6 +100,17 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override int Size => sizeof(ushort);
 
+        /// <inheritdoc />
+        public override bool? IsZero
+        {
+            get
+            {
+                if (IsKnown)
+                    return U16 == 0;
+                return base.IsZero;
+            }
+        }
+
         /// <summary>
         /// Gets the signed representation of this 16 bit value.
         /// </summary>
@@ -144,7 +155,7 @@ namespace Echo.Concrete.Values.ValueType
                 throw new ArgumentOutOfRangeException(nameof(index));
 
             ushort mask = (ushort) (1 << index);
-            
+
             if (value.HasValue)
             {
                 Mask |= mask;
@@ -186,52 +197,28 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override void And(IntegerValue other)
         {
-            if (other is Integer16Value int16)
-            {
-                unchecked
-                {
-                    U16 = (ushort) (U16 & int16.U16);
-                    Mask = (ushort) ~(~Mask | ~int16.Mask);
-                }
-                
-                return;
-            }
-            
-            base.And(other);
+            if (IsKnown && other.IsKnown && other is Integer16Value int16)
+                U16 = (ushort) (U16 & int16.U16);
+            else
+                base.And(other);
         }
 
         /// <inheritdoc />
         public override void Or(IntegerValue other)
         {
-            if (other is Integer16Value int16)
-            {
-                unchecked
-                {
-                    U16 = (ushort) (U16 | int16.U16);
-                    Mask = (ushort) ~(~Mask | ~int16.Mask);
-                }
-
-                return;
-            }
-            
-            base.Or(other);
+            if (IsKnown && other.IsKnown && other is Integer16Value int16)
+                U16 = (ushort) (U16 | int16.U16);
+            else
+                base.Or(other);
         }
 
         /// <inheritdoc />
         public override void Xor(IntegerValue other)
         {
-            if (other is Integer16Value int16)
-            {
-                unchecked
-                {
-                    U16 = (ushort) (U16 ^ int16.U16);
-                    Mask = (ushort) ~(~Mask | ~int16.Mask);
-                }
-                
-                return;
-            }
-            
-            base.And(other);
+            if (IsKnown && other.IsKnown && other is Integer16Value int16)
+                U16 = (ushort) (U16 ^ int16.U16);
+            else
+                base.Xor(other);
         }
 
         /// <inheritdoc />
@@ -264,8 +251,8 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override bool? IsEqualTo(IntegerValue other)
         {
-            return IsKnown && other.IsKnown && other is Integer16Value int16 
-                ? U16 == int16.U16 
+            return IsKnown && other.IsKnown && other is Integer16Value int16
+                ? U16 == int16.U16
                 : (bool?) null;
         }
 
@@ -283,7 +270,7 @@ namespace Echo.Concrete.Values.ValueType
         {
             if (IsKnown && other.IsKnown && other is Integer16Value int16)
                 return U16 < int16.U16;
-            
+
             return base.IsLessThan(other);
         }
     }
