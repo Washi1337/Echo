@@ -207,17 +207,13 @@ namespace Echo.Concrete.Values.ValueType
                 {
                     bool? result = (GetBit(i), other.GetBit(i)) switch
                     {
-                        (false, false) => false,
-                        (false, true) => false,
-                        (false, null) => false,
-
-                        (true, false) => false,
                         (true, true) => true,
-                        (true, null) => null,
 
-                        (null, false) => false,
+                        (true, null) => null,
                         (null, true) => null,
                         (null, null) => null,
+                        
+                        _ => false,
                     };
 
                     bits[i] = result.GetValueOrDefault();
@@ -258,16 +254,12 @@ namespace Echo.Concrete.Values.ValueType
                     bool? result = (GetBit(i), other.GetBit(i)) switch
                     {
                         (false, false) => false,
-                        (false, true) => true,
-                        (false, null) => null,
-
-                        (true, false) => true,
-                        (true, true) => true,
-                        (true, null) => true,
 
                         (null, false) => null,
-                        (null, true) => true,
                         (null, null) => null,
+                        (false, null) => null,
+                        
+                        _ => true,
                     };
 
                     bits[i] = result.GetValueOrDefault();
@@ -306,44 +298,16 @@ namespace Echo.Concrete.Values.ValueType
 
                 for (int i = 0; i < mask.Count; i++)
                 {
-                    bool? result = (GetBit(i), other.GetBit(i)) switch
-                    {
-                        (false, false) => false,
-                        (false, true) => true,
-                        (false, null) => null,
-
-                        (true, false) => true,
-                        (true, true) => false,
-                        (true, null) => null,
-
-                        (null, false) => null,
-                        (null, true) => null,
-                        (null, null) => null,
-                    };
-
+                    bool? a = GetBit(i);
+                    bool? b = other.GetBit(i);
+                    bool? result = a.HasValue && b.HasValue ? a.Value ^ b.Value : (bool?) null;
+                    
                     bits[i] = result.GetValueOrDefault();
                     mask[i] = result.HasValue;
                 }
             }
 
             SetBits(bits, mask);
-        }
-        
-        private BitArray CombineKnownMasks(IntegerValue other)
-        {
-            var mask = GetMask();
-            if (!IsKnown || !other.IsKnown)
-            {
-                var otherMask = other.GetMask();
-
-                mask.Not();
-                otherMask.Not();
-
-                mask.Or(otherMask);
-                mask.Not();
-            }
-
-            return mask;
         }
 
         /// <summary>
@@ -494,34 +458,26 @@ namespace Echo.Concrete.Values.ValueType
                 (bool? d, bool? bOut) = (a, b, borrow) switch
                 {
                     (false, false, false) => ((bool?) false, (bool?) false),
+                    
+                    (true, true, true) => (true, true),
                     (false, false, true) => (true, true),
-                    (false, false, null) => (null, null),
                     (false, true, false) => (true, true),
-                    (false, true, true) => (false, true),
-                    (false, true, null) => (null, true),
-                    (false, null, false) => (null, null),
-                    (false, null, true) => (null, null),
-                    (false, null, null) => (null, null),
                     
                     (true, false, false) => (true, false),
-                    (true, false, true) => (false, false),
-                    (true, false, null) => (null, false),
-                    (true, true, false) => (false, false),
-                    (true, true, true) => (true, true),
-                    (true, true, null) => (null, null),
-                    (true, null, false) => (null, false),
-                    (true, null, true) => (null, null),
-                    (true, null, null) => (null, null),
                     
-                    (null, false, false) => (null, false),
-                    (null, false, true) => (null, null),
-                    (null, false, null) => (null, null),
-                    (null, true, false) => (null, null),
+                    (false, true, true) => (false, true),
+                    
+                    (true, false, true) => (false, false),
+                    (true, true, false) => (false, false),
+                    
                     (null, true, true) => (null, true),
-                    (null, true, null) => (null, null),
-                    (null, null, false) => (null, null),
-                    (null, null, true) => (null, null),
-                    (null, null, null) => (null, null),
+                    (false, true, null) => (null, true),
+                    
+                    (true, false, null) => (null, false),
+                    (true, null, false) => (null, false),
+                    (null, false, false) => (null, false),
+                    
+                    _ => (null, null),
                     
                 };
 
