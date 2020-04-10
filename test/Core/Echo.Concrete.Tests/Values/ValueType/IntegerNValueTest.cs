@@ -161,6 +161,22 @@ namespace Echo.Concrete.Tests.Values.ValueType
             Assert.Equal(new IntegerNValue(expected), value1);
         }
 
+        [Theory]
+        [InlineData("00000000", "00000000", "00000000")]
+        [InlineData("00000001", "00000000", "00000000")]
+        [InlineData("00000011", "00000010", "00000110")]
+        [InlineData("000000?1", "00000010", "00000?10")]
+        [InlineData("00001001", "00110011", "11001011")]
+        public void Multiply(string a, string b, string expected)
+        {
+            var value1 = new IntegerNValue(a);
+            var value2 = new IntegerNValue(b);
+
+            value1.Multiply(value2);
+            
+            Assert.Equal(new IntegerNValue(expected), value1);
+        }
+
         [Fact]
         public void Extend8BitsTo8Bits()
         {

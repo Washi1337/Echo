@@ -251,5 +251,14 @@ namespace Echo.Concrete.Values.ValueType
             else
                 base.Add(other);
         }
+
+        /// <inheritdoc />
+        public override void Multiply(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer32Value int32)
+                U32 *= int32.U32;
+            else
+                base.Multiply(other);
+        }
     }
 }

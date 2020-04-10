@@ -246,7 +246,7 @@ namespace Echo.Concrete.Values.ValueType
 
             count = Math.Min(Size * 8, count);
             
-            for (int i = 0; i < bits.Count - count; i++)
+            for (int i = bits.Count - count - 1; i >= 0; i--)
             {
                 bits[i + count] = bits[i];
                 mask[i + count] = mask[i];
@@ -257,6 +257,8 @@ namespace Echo.Concrete.Values.ValueType
                 bits[i] = false;
                 mask[i] = true;
             }
+
+            SetBits(bits, mask);
         }
 
         /// <summary>
@@ -290,6 +292,8 @@ namespace Echo.Concrete.Values.ValueType
                 bits[bits.Count - 1 - i] = sign.GetValueOrDefault();
                 mask[bits.Count - 1 - i] = sign.HasValue;
             }
+
+            SetBits(bits, mask);
         }
 
         /// <summary>
@@ -374,6 +378,34 @@ namespace Echo.Concrete.Values.ValueType
             other = (IntegerValue) other.Copy();
             other.TwosComplement();
             Add(other);
+        }
+
+        /// <summary>
+        /// Multiplies the current integer with a second (partially) known integer.
+        /// </summary>
+        /// <param name="other">The integer to multiply with.</param>
+        /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match.</exception>
+        public virtual void Multiply(IntegerValue other)
+        {
+            AssertSameBitSize(other);
+
+            var copy = (IntegerValue) Copy();
+            var result = new IntegerNValue(Size);
+
+            int lastShift = 0;
+            for (int i = 0; i < Size * 8; i++)
+            {
+                bool? bit = other.GetBit(i);
+                
+                if (!bit.HasValue || bit.Value)
+                {
+                    copy.LeftShift(i - lastShift);
+                    result.Add(copy);
+                    lastShift = i;
+                }
+            }
+            
+            SetBits(result.Bits, result.Mask);
         }
 
         /// <summary>
