@@ -313,38 +313,25 @@ namespace Echo.Concrete.Values.ValueType
             {
                 bool? a = GetBit(i);
                 bool? b = other.GetBit(i);
-
+                
                 (bool? s, bool? c) = (a, b, carry) switch
                 {
                     (false, false, false) => ((bool?) false, (bool?) false),
-                    (false, false, true) => (true, false),
-                    (false, false, null) => (null, false),
-                    (false, true, false) => (true, false),
-                    (false, true, true) => (false, true),
-                    (false, true, null) => (null, null),
-                    (false, null, false) => (null, false),
-                    (false, null, true) => (null, null),
-                    (false, null, null) => (null, null),
-
-                    (true, false, false) => (true, false),
-                    (true, false, true) => (false, true),
-                    (true, false, null) => (null, null),
-                    (true, true, false) => (false, true),
                     (true, true, true) => (true, true),
-                    (true, true, null) => (null, null),
-                    (true, null, false) => (null, null),
-                    (true, null, true) => (null, null),
-                    (true, null, null) => (null, null),
-
+                    
+                    (true, false, false) => (true, false),
+                    (false, true, false) => (true, false),
+                    (false, false, true) => (true, false),
+                    
                     (null, false, false) => (null, false),
-                    (null, false, true) => (null, null),
-                    (null, false, null) => (null, null),
-                    (null, true, false) => (null, null),
-                    (null, true, true) => (null, null),
-                    (null, true, null) => (null, null),
-                    (null, null, false) => (null, null),
-                    (null, null, true) => (null, null),
-                    (null, null, null) => (null, null),
+                    (false, null, false) => (null, false),
+                    (false, false, null) => (null, false),
+                    
+                    (false, true, true) => (false, true),
+                    (true, false, true) => (false, true),
+                    (true, true, false) => (false, true),
+                    
+                    _ => (null, null),
                 };
 
                 sum[i] = s.GetValueOrDefault();

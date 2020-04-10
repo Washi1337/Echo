@@ -115,13 +115,22 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00010010", "00110100", "01000110")]
+        
+        // Basic truth table tests.
+        [InlineData("00000000", "00000000", "00000000")]
+        [InlineData("00000000", "00000001", "00000001")]
         [InlineData("00000000", "0000000?", "0000000?")]
+        [InlineData("00000001", "00000000", "00000001")]
+        [InlineData("00000001", "00000001", "00000010")]
         [InlineData("00000001", "0000000?", "000000??")]
+        [InlineData("0000000?", "00000000", "0000000?")]
         [InlineData("0000000?", "00000001", "000000??")]
         [InlineData("0000000?", "0000000?", "000000??")]
+        
+        // Some regression
         [InlineData("0000??11", "00000001", "000?????")]
         [InlineData("000??0??", "00000101", "00??????")]
+        [InlineData("00010010", "00110100", "01000110")]
         public void Add(string a, string b, string expected)
         {
             var value1 = new IntegerNValue(a);
