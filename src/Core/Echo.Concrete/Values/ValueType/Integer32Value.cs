@@ -260,5 +260,31 @@ namespace Echo.Concrete.Values.ValueType
             else
                 base.Multiply(other);
         }
+
+        /// <inheritdoc />
+        public override bool? IsEqualTo(IntegerValue other)
+        {
+            return IsKnown && other.IsKnown && other is Integer32Value int32 
+                ? U32 == int32.U32 
+                : (bool?) null;
+        }
+
+        /// <inheritdoc />
+        public override bool? IsGreaterThan(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer32Value int32)
+                return U32 > int32.U32;
+
+            return base.IsGreaterThan(other);
+        }
+
+        /// <inheritdoc />
+        public override bool? IsLessThan(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer32Value int32)
+                return U32 < int32.U32;
+            
+            return base.IsLessThan(other);
+        }
     }
 }

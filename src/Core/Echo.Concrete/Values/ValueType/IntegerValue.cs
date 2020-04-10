@@ -433,7 +433,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="other">The other integer.</param>
         /// <returns><c>true</c> if the integers are equal, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public virtual bool? IsEqualTo(IntegerNValue other)
+        public virtual bool? IsEqualTo(IntegerValue other)
         {
             if (!IsKnown)
                 return null;
@@ -446,7 +446,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="other">The other integer.</param>
         /// <returns><c>true</c> if the current integer is greater than the provided integer, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public virtual bool? IsGreaterThan(IntegerNValue other)
+        public virtual bool? IsGreaterThan(IntegerValue other)
         {
             // The following implements the "truth" table:
             // "-" indicates we do not know the answer yet.
@@ -492,7 +492,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="other">The other integer.</param>
         /// <returns><c>true</c> if the current integer is less than the provided integer, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public virtual bool? IsLessThan(IntegerNValue other)
+        public virtual bool? IsLessThan(IntegerValue other)
         {
             // The following implements the "truth" table:
             // "-" indicates we do not know the answer yet.
