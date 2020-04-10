@@ -183,6 +183,16 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         public virtual void And(IntegerValue other)
         {
+            // The following implements the following truth table:
+            //
+            //    | 0 | 1 | ?
+            // ---+---+---+---
+            //  0 | 0 | 0 | 0
+            //  --+---+---+---
+            //  1 | 0 | 1 | ?
+            //  --+---+---+---
+            //  ? | 0 | ? | ?
+            
             AssertSameBitSize(other);
 
             BitArray bits;
@@ -208,7 +218,6 @@ namespace Echo.Concrete.Values.ValueType
                     bool? result = (GetBit(i), other.GetBit(i)) switch
                     {
                         (true, true) => true,
-
                         (true, null) => null,
                         (null, true) => null,
                         (null, null) => null,
@@ -229,6 +238,16 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         public virtual void Or(IntegerValue other)
         {
+            // The following implements the following truth table:
+            //
+            //    | 0 | 1 | ?
+            // ---+---+---+---
+            //  0 | 0 | 1 | ?
+            //  --+---+---+---
+            //  1 | 1 | 1 | 1
+            //  --+---+---+---
+            //  ? | ? | 1 | ?
+            
             AssertSameBitSize(other);
 
             BitArray bits;
@@ -254,7 +273,6 @@ namespace Echo.Concrete.Values.ValueType
                     bool? result = (GetBit(i), other.GetBit(i)) switch
                     {
                         (false, false) => false,
-
                         (null, false) => null,
                         (null, null) => null,
                         (false, null) => null,
@@ -275,7 +293,16 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         public virtual void Xor(IntegerValue other)
         {
-
+            // The following implements the following truth table:
+            //
+            //    | 0 | 1 | ?
+            // ---+---+---+---
+            //  0 | 0 | 1 | ?
+            //  --+---+---+---
+            //  1 | 1 | 0 | ?
+            //  --+---+---+---
+            //  ? | ? | ? | ?
+            
             AssertSameBitSize(other);
 
             BitArray bits;
