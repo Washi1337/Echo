@@ -283,12 +283,50 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         public virtual void Xor(IntegerValue other)
         {
-            AssertSameBitSize(other);
-            
-            var bits = GetBits();
-            bits.Xor(other.GetBits());
 
-            SetBits(bits, CombineKnownMasks(other));
+            AssertSameBitSize(other);
+
+            BitArray bits;
+            BitArray mask;
+            
+            if (IsKnown && other.IsKnown)
+            {
+                // Catch common case where everything is known.
+                
+                bits = GetBits();
+                bits.Xor(other.GetBits());
+                mask = GetMask();
+            }
+            else
+            {
+                // Some bits are unknown, perform operation manually.
+
+                bits = new BitArray(Size * 8);
+                mask = new BitArray(Size * 8, true);
+
+                for (int i = 0; i < mask.Count; i++)
+                {
+                    bool? result = (GetBit(i), other.GetBit(i)) switch
+                    {
+                        (false, false) => false,
+                        (false, true) => true,
+                        (false, null) => null,
+
+                        (true, false) => true,
+                        (true, true) => false,
+                        (true, null) => null,
+
+                        (null, false) => null,
+                        (null, true) => null,
+                        (null, null) => null,
+                    };
+
+                    bits[i] = result.GetValueOrDefault();
+                    mask[i] = result.HasValue;
+                }
+            }
+
+            SetBits(bits, mask);
         }
         
         private BitArray CombineKnownMasks(IntegerValue other)
