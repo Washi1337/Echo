@@ -63,6 +63,8 @@ namespace Echo.Concrete.Values.ValueType
         /// </remarks>
         public virtual bool? IsNonZero => !IsZero;
 
+        public virtual bool? GetLastBit() => GetBit(Size * 8 - 1);
+
         /// <summary>
         /// Reads a single bit value at the provided index.
         /// </summary>
@@ -303,6 +305,10 @@ namespace Echo.Concrete.Values.ValueType
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match.</exception>
         public virtual void Add(IntegerValue other)
         {
+            // The following implements a ripple full adder, with unknown bits taken into account. 
+            // Essentially, this means that any unknown bit added to another bit results in an unknown sum and/or carry
+            // bit.
+            
             AssertSameBitSize(other);
 
             var sum = new BitArray(Size * 8);
@@ -314,6 +320,7 @@ namespace Echo.Concrete.Values.ValueType
                 bool? a = GetBit(i);
                 bool? b = other.GetBit(i);
                 
+                // Implement truth table.
                 (bool? s, bool? c) = (a, b, carry) switch
                 {
                     (false, false, false) => ((bool?) false, (bool?) false),
@@ -376,23 +383,152 @@ namespace Echo.Concrete.Values.ValueType
         {
             AssertSameBitSize(other);
 
-            var copy = (IntegerValue) Copy();
+            // We implement the standard multiplication by adding and shifting, but instead of storing all intermediate
+            // results, we can precompute the two possible intermediate results and shift those and add them to an end
+            // result to preserve time and memory.
+            
+            // First possible intermediate result is the current value multiplied by 0. It is redundant to compute this.
+            
+            // Second possibility is the current value multiplied by 1.
+            var multipliedByOne = (IntegerValue) Copy();
+            
+            // Third possibility is thee current value multiplied by ?. This is effectively marking all set bits unknown.  
+            // TODO: We could probably optimise the following operations for the native integer types. 
+            var multipliedByUnknown = (IntegerValue) Copy();
+            var mask = multipliedByOne.GetMask();
+            mask.Not();
+            mask.Or(multipliedByOne.GetBits());
+            mask.Not();
+            multipliedByUnknown.SetBits(multipliedByUnknown.GetBits(), mask);
+            
+            // Final result.
             var result = new IntegerNValue(Size);
 
-            int lastShift = 0;
+            int lastShiftByOne = 0;
+            int lastShiftByUnknown = 0;
             for (int i = 0; i < Size * 8; i++)
             {
                 bool? bit = other.GetBit(i);
                 
-                if (!bit.HasValue || bit.Value)
+                if (!bit.HasValue)
                 {
-                    copy.LeftShift(i - lastShift);
-                    result.Add(copy);
-                    lastShift = i;
+                    multipliedByUnknown.LeftShift(i - lastShiftByUnknown);
+                    result.Add(multipliedByUnknown);
+                    lastShiftByUnknown = i;
+                }
+                else if (bit.Value)
+                {
+                    multipliedByOne.LeftShift(i - lastShiftByOne);
+                    result.Add(multipliedByOne);
+                    lastShiftByOne = i;
                 }
             }
             
             SetBits(result.Bits, result.Mask);
+        }
+
+        /// <summary>
+        /// Determines whether the integer is equal to the provided integer.
+        /// </summary>
+        /// <param name="other">The other integer.</param>
+        /// <returns><c>true</c> if the integers are equal, <c>false</c> if not, and
+        /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
+        public virtual bool? IsEqualTo(IntegerNValue other)
+        {
+            if (!IsKnown)
+                return null;
+            return Equals(other);
+        }
+
+        /// <summary>
+        /// Determines whether the integer is greater than the provided integer.
+        /// </summary>
+        /// <param name="other">The other integer.</param>
+        /// <returns><c>true</c> if the current integer is greater than the provided integer, <c>false</c> if not, and
+        /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
+        public virtual bool? IsGreaterThan(IntegerNValue other)
+        {
+            // The following implements the "truth" table:
+            // "-" indicates we do not know the answer yet.
+            //
+            //    | 0 | 1 | ?
+            // ---+---+---+---
+            //  0 | - | 0 | 0
+            //  --+---+---+---
+            //  1 | 1 | - | ?
+            //  --+---+---+---
+            //  ? | ? | 0 | ?
+            
+            AssertSameBitSize(other);
+
+            for (int i = Size * 8 - 1; i >= 0; i--)
+            {
+                bool? a = GetBit(i);
+                bool? b = other.GetBit(i);
+
+                switch (a, b)
+                {
+                    case (false, true):
+                    case (false, null):
+                    case (null, true):
+                        return false;
+                    
+                    case (true, false):
+                        return true;
+                    
+                    case (true, null):
+                    case (null, false):
+                    case (null, null):
+                        return null;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the integer is less than the provided integer.
+        /// </summary>
+        /// <param name="other">The other integer.</param>
+        /// <returns><c>true</c> if the current integer is less than the provided integer, <c>false</c> if not, and
+        /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
+        public virtual bool? IsLessThan(IntegerNValue other)
+        {
+            // The following implements the "truth" table:
+            // "-" indicates we do not know the answer yet.
+            //
+            //    | 0 | 1 | ?
+            // ---+---+---+---
+            //  0 | - | 1 | ?
+            //  --+---+---+---
+            //  1 | 0 | - | 0
+            //  --+---+---+---
+            //  ? | 0 | ? | ?
+            
+            AssertSameBitSize(other);
+
+            for (int i = Size * 8 - 1; i >= 0; i--)
+            {
+                bool? a = GetBit(i);
+                bool? b = other.GetBit(i);
+
+                switch (a, b)
+                {
+                    case (false, true):
+                        return true;
+                    
+                    case (true, false):
+                    case (true, null):
+                    case (null, false):
+                        return false;
+                    
+                    case (false, null):
+                    case (null, true):
+                        return null;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

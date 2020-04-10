@@ -25,7 +25,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="bits">The raw bits of the integer.</param>
         public IntegerNValue(BitArray bits)
         {
-            Bits = bits;
+            Bits = (BitArray) bits.Clone();
             Mask = new BitArray(bits.Count, true);
         }
 
@@ -39,8 +39,8 @@ namespace Echo.Concrete.Values.ValueType
             if (bits.Count != knownMask.Count)
                 throw new ArgumentException("Known bit mask does not have the same bit-length as the raw value.");
             
-            Bits = bits;
-            Mask = knownMask;
+            Bits = (BitArray) bits.Clone();
+            Mask = (BitArray) knownMask.Clone();
         }
         
         /// <summary>
@@ -105,8 +105,8 @@ namespace Echo.Concrete.Values.ValueType
             if (bits.Count != mask.Count)
                 throw new ArgumentException("Known bit mask does not have the same bit-length as the raw value.");
             
-            Bits = bits;
-            Mask = mask;
+            Bits = (BitArray) bits.Clone();
+            Mask = (BitArray) mask.Clone();
         }
     }
 }
