@@ -63,6 +63,10 @@ namespace Echo.Concrete.Values.ValueType
         /// </remarks>
         public virtual bool? IsNonZero => !IsZero;
 
+        /// <summary>
+        /// Gets the most significant bit of the integer value.
+        /// </summary>
+        /// <returns></returns>
         public virtual bool? GetLastBit() => GetBit(Size * 8 - 1);
 
         /// <summary>

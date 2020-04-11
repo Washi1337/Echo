@@ -5,6 +5,14 @@
         <LangVersion>8</LangVersion>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\Echo.Platforms.AsmResolver.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\Echo.Platforms.AsmResolver.xml</DocumentationFile>
+    </PropertyGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\..\..\deps\AsmResolver\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
       <ProjectReference Include="..\..\..\deps\AsmResolver\src\AsmResolver.PE\AsmResolver.PE.csproj" />

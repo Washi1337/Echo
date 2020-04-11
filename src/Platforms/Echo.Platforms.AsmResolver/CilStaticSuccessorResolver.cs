@@ -12,13 +12,19 @@ namespace Echo.Platforms.AsmResolver
     /// </summary>
     public class CilStaticSuccessorResolver : IStaticSuccessorResolver<CilInstruction>
     {
+        /// <summary>
+        /// Gets a reusable singleton instance of the static successor resolver for the CIL architecture.
+        /// </summary>
         public static CilStaticSuccessorResolver Instance
         {
             get;
         } = new CilStaticSuccessorResolver();
-        
+
+        /// <inheritdoc />
         public ICollection<SuccessorInfo> GetSuccessors(CilInstruction instruction)
         {
+            // Multiplex based on flow control.
+            
             switch (instruction.OpCode.FlowControl)
             {
                 case CilFlowControl.Break:
@@ -47,6 +53,8 @@ namespace Echo.Platforms.AsmResolver
 
         private static ICollection<SuccessorInfo> GetFallThroughTransitions(CilInstruction instruction)
         {
+            // Fallthrough instructions always move to the next instruction.
+            
             return new[]
             {
                 CreateFallThroughTransition(instruction)
@@ -55,6 +63,8 @@ namespace Echo.Platforms.AsmResolver
 
         private static ICollection<SuccessorInfo> GetUnconditionalBranchTransitions(CilInstruction instruction)
         {
+            // Unconditional branches always move to the instruction referenced in the operand.
+            
             var label = (ICilLabel) instruction.Operand;
             return new[]
             {
@@ -64,6 +74,8 @@ namespace Echo.Platforms.AsmResolver
 
         private static ICollection<SuccessorInfo> GetConditionalBranchTransitions(CilInstruction instruction)
         {
+            // Conditional branches can reference one or more instructions in the operand.
+            
             var result = new List<SuccessorInfo>(1);
             switch (instruction.Operand)
             {
@@ -77,6 +89,7 @@ namespace Echo.Platforms.AsmResolver
                     break;
             }
 
+            // Add the successor that transfers control to the next instruction (= false edge).
             result.Add(CreateFallThroughTransition(instruction));
             return result;
         }

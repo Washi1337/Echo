@@ -38,12 +38,18 @@ namespace Echo.Concrete.Emulation
             get;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating the execution should terminate.
+        /// </summary>
         public bool Exit
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the final result of the execution of the program.
+        /// </summary>
         public ExecutionResult Result
         {
             get;
