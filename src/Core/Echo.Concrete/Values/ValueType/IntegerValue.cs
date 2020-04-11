@@ -781,7 +781,7 @@ namespace Echo.Concrete.Values.ValueType
         public override int GetHashCode()
         {
             return BitArrayComparer.Instance.GetHashCode(GetBits())
-                   ^ BitArrayComparer.Instance.GetHashCode(GetBits());
+                   ^ BitArrayComparer.Instance.GetHashCode(GetMask());
         }
     }
 }
