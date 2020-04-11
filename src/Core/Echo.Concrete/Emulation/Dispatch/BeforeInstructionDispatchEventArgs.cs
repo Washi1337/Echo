@@ -20,7 +20,23 @@ namespace Echo.Concrete.Emulation.Dispatch
         /// Gets or sets a value indicating whether the instruction is handled and should not be dispatched to the
         /// default operation handler.
         /// </summary>
+        /// <remarks>
+        /// When this property is set to <c>true</c>, the <see cref="ResultOverride"/> must be set to a non-null value.
+        /// Otherwise, a <see cref="DispatchException"/> might be thrown by the dispatcher.
+        /// </remarks>
         public bool Handled
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the dispatch result when this instruction is handled externally. 
+        /// </summary>
+        /// <remarks>
+        /// This value is ignored when the <see cref="Handled"/> property is set to <c>false</c>.
+        /// </remarks>
+        public DispatchResult ResultOverride
         {
             get;
             set;

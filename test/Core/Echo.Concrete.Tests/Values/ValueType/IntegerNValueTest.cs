@@ -49,7 +49,6 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [InlineData("0000000?", "0000000?", "0000000?")]
         [InlineData("0000000?", "0000?000", "00000000")]
         [InlineData("00000001", "0000000?", "0000000?")]
-        [InlineData("00000000", "0000000?", "00000000")]
         public void And(string a, string b, string expected)
         {
             var value1 = new IntegerNValue(a);
