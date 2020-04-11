@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
@@ -9,6 +10,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
     /// </summary>
     public interface ICilOpCodeHandler
     {
+        /// <summary>
+        /// Gets a collection of operation codes that are supported by this handler.
+        /// </summary>
+        IReadOnlyCollection<CilCode> SupportedOpCodes
+        {
+            get;
+        }
+        
         /// <summary>
         /// Executes an instruction in the provided context.
         /// </summary>

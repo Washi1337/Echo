@@ -5,8 +5,14 @@ namespace Echo.Concrete.Emulation.Dispatch
     /// <summary>
     /// Represents a result produced after dispatching an instruction to an operation code handler. 
     /// </summary>
-    public class DispatchResult
+    public struct DispatchResult
     {
+        public bool Exit
+        {
+            get;
+            set;
+        }
+        
         /// <summary>
         /// Gets a value indicating the execution of an instruction was successful.
         /// </summary>
