@@ -1,3 +1,4 @@
+using System;
 using Echo.Concrete.Values;
 
 namespace Echo.Concrete.Emulation
@@ -8,16 +9,21 @@ namespace Echo.Concrete.Emulation
     public class ExecutionResult
     {
         /// <summary>
-        /// Creates a new instance of the <see cref="ExecutionResult"/> class.
+        /// Gets a value indicating whether the execution finished successfully.
         /// </summary>
-        /// <param name="returnValue">The produced return value.</param>
-        public ExecutionResult(IConcreteValue returnValue)
+        public bool IsSuccess => Exception is null;
+
+        /// <summary>
+        /// Gets or sets the exception that was thrown during the execution of the program (if any).
+        /// </summary>
+        public Exception Exception
         {
-            ReturnValue = returnValue;
+            get;
+            set;
         }
 
         /// <summary>
-        /// Gets the return value that was produced (if any).
+        /// Gets or sets the return value that was produced (if any).
         /// </summary>
         /// <remarks>
         /// A value of <c>null</c> indicates no value was produced.

@@ -19,6 +19,7 @@ namespace Echo.Concrete.Emulation
         {
             ProgramState = programState ?? throw new ArgumentNullException(nameof(programState));
             CancellationToken = cancellationToken;
+            Result = new ExecutionResult();
         }
         
         /// <summary>
@@ -33,6 +34,17 @@ namespace Echo.Concrete.Emulation
         /// Gets the cancellation token to use for cancelling the execution.
         /// </summary>
         public CancellationToken CancellationToken
+        {
+            get;
+        }
+
+        public bool Exit
+        {
+            get;
+            set;
+        }
+
+        public ExecutionResult Result
         {
             get;
         }
