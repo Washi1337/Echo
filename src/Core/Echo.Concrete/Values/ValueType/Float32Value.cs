@@ -24,13 +24,13 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="value">The raw 32 bit value.</param>
         public Float32Value(float value)
         {
-            R4 = value;
+            F32 = value;
         }
 
         /// <summary>
         /// Gets or sets the raw floating point value.
         /// </summary>
-        public float R4
+        public float F32
         {
             get;
             set;
@@ -46,9 +46,23 @@ namespace Echo.Concrete.Values.ValueType
         public bool IsValueType => true;
         
         /// <inheritdoc />
-        public IValue Copy() => new Float32Value(R4);
+        public IValue Copy() => new Float32Value(F32);
 
         /// <inheritdoc />
-        public override string ToString() => R4.ToString(CultureInfo.InvariantCulture);
+        public override string ToString() => F32.ToString(CultureInfo.InvariantCulture);
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            
+            return obj is Float32Value value && F32.Equals(value.F32);;
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode() => F32.GetHashCode();
     }
 }

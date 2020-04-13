@@ -1,5 +1,6 @@
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
+using Echo.Concrete.Values;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
@@ -65,6 +66,46 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
             var result = _dispatcher.Execute(_context, new CilInstruction(code.ToOpCode()));
             Assert.True(result.IsSuccess);
             Assert.Equal(new Integer32Value(expected), _context.ProgramState.Stack.Top);
+        }
+
+        [Fact]
+        public void LdcR4()
+        {
+            var result = _dispatcher.Execute(_context, new CilInstruction(CilOpCodes.Ldc_R4, 1.23f));
+            Assert.True(result.IsSuccess);
+            Assert.Equal(new Float32Value(1.23f), _context.ProgramState.Stack.Top);
+        }
+
+        [Fact]
+        public void LdcR8()
+        {
+            var result = _dispatcher.Execute(_context, new CilInstruction(CilOpCodes.Ldc_R8, 1.23D));
+            Assert.True(result.IsSuccess);
+            Assert.Equal(new Float64Value(1.23D), _context.ProgramState.Stack.Top);
+        }
+
+        [Fact]
+        public void Pop()
+        {
+            _context.ProgramState.Stack.Push(new UnknownValue());
+            var result = _dispatcher.Execute(_context, new CilInstruction(CilOpCodes.Pop));
+            Assert.True(result.IsSuccess);
+            Assert.Equal(0, _context.ProgramState.Stack.Size);
+        }
+
+        [Fact]
+        public void DupWithValueType()
+        {
+            var value = new Integer32Value(1234);
+            _context.ProgramState.Stack.Push(value);
+            
+            var result = _dispatcher.Execute(_context, new CilInstruction(CilOpCodes.Dup));
+            
+            Assert.True(result.IsSuccess);
+            Assert.Equal(2, _context.ProgramState.Stack.Size);
+            Assert.All(
+                _context.ProgramState.Stack.GetAllStackSlots(), 
+                v => Assert.Equal(v, value));
         }
     }
 }
