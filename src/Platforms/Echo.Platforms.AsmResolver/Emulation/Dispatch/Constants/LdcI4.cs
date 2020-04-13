@@ -4,7 +4,7 @@ using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values.ValueType;
 
-namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Handlers
+namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
 {
     /// <summary>
     /// Provides a handler for instructions with any variant of the LDC.I4 operation codes.
