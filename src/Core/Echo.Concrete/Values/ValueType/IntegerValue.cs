@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Text;
+using Echo.Concrete.Extensions;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -38,18 +39,20 @@ namespace Echo.Concrete.Values.ValueType
                 var bits = GetBits();
                 
                 if (IsKnown)
-                    return BitArrayComparer.Instance.Equals(bits, new BitArray(bits.Count, false));;
+                    return BitArrayComparer.Instance.Equals(bits, new BitArray(bits.Count, false));
 
+                
                 var mask = GetMask();
                 bits.And(mask);
                 
-                var raw = new int[bits.Count / sizeof(int)];
-                bits.CopyTo(raw, 0);
+                var raw = bits.AsSpan();
                 
                 for (int i = 0; i < raw.Length; i++)
                 {
                     if (raw[i] != 0)
+                    {
                         return false;
+                    }
                 }
 
                 return null;
