@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Echo.Concrete.Extensions;
 
 namespace Echo.Concrete
 {
@@ -23,19 +25,8 @@ namespace Echo.Concrete
                 return true;
             if (x is null || y is null || x.Count != y.Count)
                 return false;
-            
-            var xRawBits = new int[x.Count / sizeof(int)];
-            var yRawBits = new int[y.Count / sizeof(int)];
-            x.CopyTo(xRawBits, 0);
-            y.CopyTo(yRawBits, 0);
 
-            for (int i = 0; i < xRawBits.Length; i++)
-            {
-                if (xRawBits[i] != yRawBits[i])
-                    return false;
-            }
-
-            return true;
+            return x.AsSpan().SequenceEqual(y.AsSpan());
         }
 
         /// <inheritdoc />
@@ -44,8 +35,7 @@ namespace Echo.Concrete
             if (obj is null)
                 return 0;
 
-            var raw = new int[obj.Count / sizeof(int)];
-            obj.CopyTo(raw, 0);
+            var raw = obj.AsSpan();
             
             int hashCode = 0;
             for (int i = 0; i < raw.Length; i++)
