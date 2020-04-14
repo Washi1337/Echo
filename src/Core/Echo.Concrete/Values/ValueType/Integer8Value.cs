@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Echo.Concrete.Extensions;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -184,11 +185,9 @@ namespace Echo.Concrete.Values.ValueType
         {
             if (bits.Count != 8 || mask.Count != 8)
                 throw new ArgumentException("Number of bits is not 8.");
-            var buffer = new byte[1];
-            bits.CopyTo(buffer, 0);
-            U8 = buffer[0];
-            mask.CopyTo(buffer, 0);
-            Mask = buffer[0];
+            
+            U8 = bits.AsByteSpan()[0];
+            Mask = mask.AsByteSpan()[0];
         }
 
         /// <inheritdoc />

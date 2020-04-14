@@ -1,5 +1,7 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections;
+using Echo.Concrete.Extensions;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -178,11 +180,9 @@ namespace Echo.Concrete.Values.ValueType
         {
             if (bits.Count != 32 || mask.Count != 32)
                 throw new ArgumentException("Number of bits is not 32.");
-            var buffer = new byte[4];
-            bits.CopyTo(buffer, 0);
-            U32 = BitConverter.ToUInt32(buffer, 0);
-            mask.CopyTo(buffer, 0);
-            Mask = BitConverter.ToUInt32(buffer, 0);
+
+            U32 = BinaryPrimitives.ReadUInt32LittleEndian(bits.AsByteSpan());
+            Mask = BinaryPrimitives.ReadUInt32LittleEndian(mask.AsByteSpan());
         }
         
         /// <inheritdoc />

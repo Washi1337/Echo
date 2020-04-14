@@ -1,5 +1,7 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections;
+using Echo.Concrete.Extensions;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -178,11 +180,9 @@ namespace Echo.Concrete.Values.ValueType
         {
             if (bits.Count != 64 || mask.Count != 64)
                 throw new ArgumentException("Number of bits is not 64.");
-            var buffer = new byte[8];
-            bits.CopyTo(buffer, 0);
-            U64 = BitConverter.ToUInt64(buffer, 0);
-            mask.CopyTo(buffer, 0);
-            Mask = BitConverter.ToUInt64(buffer, 0);
+
+            U64 = BinaryPrimitives.ReadUInt64LittleEndian(bits.AsByteSpan());
+            Mask = BinaryPrimitives.ReadUInt64LittleEndian(mask.AsByteSpan());
         }
 
         /// <inheritdoc />

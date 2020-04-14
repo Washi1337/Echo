@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Text;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -152,17 +153,22 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override string ToString()
         {
-            var result = new char[Size * 8];
-            
-            for (int i = 0; i < result.Length; i++)
+            var size = Size * 8;
+            var sb = new StringBuilder(size);
+            for (int i = size - 1; i >= 0; i--)
             {
-                bool? bit = GetBit(i);
-                result[result.Length - i - 1] = bit.HasValue
-                    ? bit.Value ? '1' : '0'
-                    : '?';
+                var bit = GetBit(i);
+                if (bit.HasValue)
+                {
+                    sb.Append(bit.Value ? '1' : '0');
+                }
+                else
+                {
+                    sb.Append('?');
+                }
             }
             
-            return new string(result);
+            return sb.ToString();
         }
 
         /// <inheritdoc />
