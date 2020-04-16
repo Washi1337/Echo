@@ -119,12 +119,25 @@ namespace Echo.Concrete.Values
             }
         }
 
+        /// <summary>
+        /// Compares two <see cref="MagicBox{T}"/>'s
+        /// </summary>
+        /// <remarks>
+        /// This overload exists to avoid a nasty boxing allocation
+        /// </remarks>
+        /// <param name="other">The <see cref="MagicBox{T}"/> to compare to</param>
+        /// <returns>Whether the two <see cref="MagicBox{T}"/>'s are equal</returns>
+        public bool Equals(MagicBox<T> other)
+        {
+            return GetBitsUnsafe().SequenceEqual(other.GetBitsUnsafe());
+        }
+
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
             if (obj is MagicBox<T> other)
             {
-                return GetBitsUnsafe().SequenceEqual(other.GetBitsUnsafe());
+                return Equals(other);
             }
 
             return false;
