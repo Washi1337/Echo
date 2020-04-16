@@ -4,8 +4,16 @@ using System.Text;
 
 namespace Echo.Concrete.Values
 {
+    /// <summary>
+    /// Performs various dark magic to achieve raw bit manipulation
+    /// </summary>
+    /// <typeparam name="T">Determines the size of the <see cref="MagicBox{T}"/></typeparam>
     public struct MagicBox<T> where T : unmanaged
     {
+        /// <summary>
+        /// Creates a new <see cref="MagicBox{T}"/> with the given <paramref name="value"/>
+        /// </summary>
+        /// <param name="value">The value to initialize the <see cref="MagicBox{T}"/> with</param>
         public MagicBox(T value)
         {
             _value = value;
@@ -13,6 +21,10 @@ namespace Echo.Concrete.Values
 
         private T _value;
 
+        /// <summary>
+        /// Gets the bit at the <paramref name="index"/>
+        /// </summary>
+        /// <param name="index">The index to get the bit at</param>
         public bool this[int index]
         {
             get
@@ -39,19 +51,20 @@ namespace Echo.Concrete.Values
             }
         }
 
-        public unsafe Span<byte> GetBitsUnsafe()
-        {
-            return new Span<byte>(Unsafe.AsPointer(ref this), sizeof(T));
-        }
-
+        /// <summary>
+        /// Gets the raw bits of <see cref="MagicBox{T}"/>
+        /// </summary>
+        /// <param name="buffer">The buffer to copy the raw bits into</param>
         public unsafe void GetBits(Span<byte> buffer)
         {
-            fixed (MagicBox<T>* ptr = &this)
-            {
-                new Span<byte>(ptr, Unsafe.SizeOf<T>()).CopyTo(buffer);
-            }
+            ref var source = ref Unsafe.As<T, byte>(ref _value);
+            ref var destination = ref buffer[0];
+            Unsafe.CopyBlockUnaligned(ref destination, ref source, (uint) sizeof(T));
         }
 
+        /// <summary>
+        /// Performs a bitwise NOT operation on <see cref="MagicBox{T}"/>
+        /// </summary>
         public void Not()
         {
             var span = GetBitsUnsafe();
@@ -61,6 +74,10 @@ namespace Echo.Concrete.Values
             }
         }
 
+        /// <summary>
+        /// Performs a bitwise AND operation between two <see cref="MagicBox{T}"/>'s
+        /// </summary>
+        /// <param name="other">The right side of the expression</param>
         public void And(MagicBox<T> other)
         {
             var @this = GetBitsUnsafe();
@@ -72,6 +89,10 @@ namespace Echo.Concrete.Values
             }
         }
 
+        /// <summary>
+        /// Performs a bitwise OR operation between two <see cref="MagicBox{T}"/>'s
+        /// </summary>
+        /// <param name="other">The right side of the expression</param>
         public void Or(MagicBox<T> other)
         {
             var @this = GetBitsUnsafe();
@@ -83,6 +104,10 @@ namespace Echo.Concrete.Values
             }
         }
 
+        /// <summary>
+        /// Performs a bitwise XOR operation between two <see cref="MagicBox{T}"/>'s
+        /// </summary>
+        /// <param name="other">The right side of the expression</param>
         public void Xor(MagicBox<T> other)
         {
             var @this = GetBitsUnsafe();
@@ -95,7 +120,7 @@ namespace Echo.Concrete.Values
         }
 
         /// <inheritdoc />
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             if (obj is MagicBox<T> other)
             {
@@ -108,13 +133,16 @@ namespace Echo.Concrete.Values
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            var hash = 0;
-            foreach (var bit in GetBitsUnsafe())
+            unchecked
             {
-                hash += bit * 397;
-            }
+                var hash = 0;
+                foreach (var bit in GetBitsUnsafe())
+                {
+                    hash += bit * 397;
+                }
 
-            return 0x5321 ^ (hash * 679);
+                return 0x5321 ^ (hash * 679);
+            }
         }
 
         /// <inheritdoc />
@@ -131,11 +159,28 @@ namespace Echo.Concrete.Values
             return sb.ToString();
         }
 
+        private unsafe Span<byte> GetBitsUnsafe()
+        {
+            return new Span<byte>(Unsafe.AsPointer(ref this), sizeof(T));
+        }
+        
+        /// <summary>
+        /// Gets the raw <typeparamref name="T"/> value from a <see cref="MagicBox{T}"/>
+        /// </summary>
+        /// <param name="magicBox">The <see cref="MagicBox{T}"/> to get the raw value of</param>
+        /// <returns>The raw <typeparamref name="T"/> <paramref name="magicBox"/> contained</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator T(MagicBox<T> magicBox)
         {
             return magicBox._value;
         }
 
+        /// <summary>
+        /// Creates a new <see cref="MagicBox{T}"/> with the provided value
+        /// </summary>
+        /// <param name="value">The value to initialize with</param>
+        /// <returns>A new <see cref="MagicBox{T}"/> instance initialized with <paramref name="value"/></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator MagicBox<T>(T value)
         {
             return new MagicBox<T>(value);
