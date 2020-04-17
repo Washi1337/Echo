@@ -150,7 +150,7 @@ namespace Echo.Concrete.Values
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void ValidateIndex(int index)
         {
-            var max = _span.Length * 8 - 1;
+            var max = _span.Length * 8;
             if (index < 0 || index > max)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), $"Index must be 0 < x < {max}");
