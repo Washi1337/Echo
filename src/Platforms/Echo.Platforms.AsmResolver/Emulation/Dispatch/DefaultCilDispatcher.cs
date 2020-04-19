@@ -90,7 +90,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
                 var handler = GetOpCodeHandler(instruction);
                 result = handler.Execute(context, instruction);
             }
-
+ 
             OnAfterInstructionDispatch(new AfterInstructionDispatchEventArgs<CilInstruction>(context, instruction, result));
             return result;
         }
