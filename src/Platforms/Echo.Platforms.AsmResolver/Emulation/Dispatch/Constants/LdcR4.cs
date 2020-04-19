@@ -7,7 +7,7 @@ using Echo.Concrete.Values.ValueType;
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
 {
     /// <summary>
-    /// Provides a handler for instructions with the ldc.r4 operation code.
+    /// Provides a handler for instructions with the <see cref="CilOpCodes.Ldc_R4"/> operation code.
     /// </summary>
     public class LdcR4 : FallThroughOpCodeHandler
     {

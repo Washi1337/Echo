@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 ? (IntegerValue) new Integer32Value((uint) (value & 0xFFFFFFFF))
                 : new Integer64Value(value);
         }
-        
+
         /// <summary>
         /// Converts the provided (partially) known integer value to a native integer.
         /// </summary>
@@ -34,9 +34,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             int newSize = is32Bit ? sizeof(uint) : sizeof(ulong);
 
             if (newSize < value.Size)
-                _value = value.Truncate(newSize);
+                _value = value.Truncate(newSize * 8);
             else if (newSize > value.Size)
-                _value = value.Extend(newSize, false);
+                _value = value.Extend(newSize * 8, false);
             else
                 _value = (IntegerValue) value.Copy();
         }

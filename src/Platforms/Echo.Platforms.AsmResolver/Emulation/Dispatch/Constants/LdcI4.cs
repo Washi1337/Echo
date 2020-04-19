@@ -7,7 +7,7 @@ using Echo.Concrete.Values.ValueType;
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
 {
     /// <summary>
-    /// Provides a handler for instructions with any variant of the LDC.I4 operation codes.
+    /// Provides a handler for instructions with any variant of the <see cref="CilOpCodes.Ldc_I4"/> operation codes.
     /// </summary>
     public class LdcI4 : FallThroughOpCodeHandler
     {

@@ -7,20 +7,20 @@ using Echo.Concrete.Values.ValueType;
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 {
     /// <summary>
-    /// Provides a handler for instructions with the <see cref="CilOpCodes.Add"/> operation code.
+    /// Provides a handler for instructions with the <see cref="CilOpCodes.Sub"/> operation code.
     /// </summary>
-    public class Add : BinaryNumericOperator
+    public class Sub : BinaryNumericOperator
     {
         /// <inheritdoc />
         public override IReadOnlyCollection<CilCode> SupportedOpCodes => new[]
         {
-            CilCode.Add
+            CilCode.Sub
         };
 
         /// <inheritdoc />
         protected override DispatchResult Execute(ExecutionContext context, Float64Value left, Float64Value right)
         {
-            left.F64 += right.F64;
+            left.F64 -= right.F64;
             context.ProgramState.Stack.Push(left);
             return new DispatchResult();
         }
@@ -28,7 +28,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <inheritdoc />
         protected override DispatchResult Execute(ExecutionContext context, IntegerValue left, IntegerValue right)
         {
-            left.Add(right);
+            left.Subtract(right);
             context.ProgramState.Stack.Push(left);
             return new DispatchResult();
         }
