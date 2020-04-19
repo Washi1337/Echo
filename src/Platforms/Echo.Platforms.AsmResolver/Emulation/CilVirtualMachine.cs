@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Cil;
@@ -16,27 +17,43 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// Provides a dispatcher based implementation for a virtual machine, capable of emulating a single managed method
     /// body implemented using the CIL instruction set.
     /// </summary>
-    public class CilVirtualMachine : IVirtualMachine<CilInstruction>
+    public class CilVirtualMachine : IVirtualMachine<CilInstruction>, IServiceProvider, ICilRuntimeEnvironment
     {
         /// <inheritdoc />
         public event EventHandler<ExecutionTerminatedEventArgs> ExecutionTerminated;
-        
+     
+        private readonly IDictionary<Type, object> _services = new Dictionary<Type, object>();
         private readonly CilMethodBody _methodBody;
-        private readonly CilArchitecture _architecture;
 
         /// <summary>
         /// Creates a new instance of the <see cref="CilVirtualMachine"/>. 
         /// </summary>
         /// <param name="methodBody">The method body to emulate.</param>
-        public CilVirtualMachine(CilMethodBody methodBody)
+        /// <param name="is32Bit">Indicates whether the virtual machine should run in 32-bit mode or in 64-bit mode.</param>
+        public CilVirtualMachine(CilMethodBody methodBody, bool is32Bit)
         {
+            Is32Bit = is32Bit;
             _methodBody = methodBody ?? throw new ArgumentNullException(nameof(methodBody));
-            _architecture = new CilArchitecture(methodBody);
+            Architecture = new CilArchitecture(methodBody);
             
             Status = VirtualMachineStatus.Idle;
             CurrentState = new CilProgramState();
-            Instructions = new ListInstructionProvider<CilInstruction>(_architecture, methodBody.Instructions);
+            Instructions = new ListInstructionProvider<CilInstruction>(Architecture, methodBody.Instructions);
             Dispatcher = new DefaultCilDispatcher();
+            
+            _services[typeof(ICilRuntimeEnvironment)] = this;
+        }
+
+        /// <inheritdoc />
+        public IInstructionSetArchitecture<CilInstruction> Architecture
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public bool Is32Bit
+        {
+            get;
         }
 
         /// <inheritdoc />
@@ -70,7 +87,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <inheritdoc />
         public ExecutionResult Execute(CancellationToken cancellationToken)
         {
-            var context = new ExecutionContext(CurrentState, cancellationToken);
+            var context = new ExecutionContext(this, CurrentState, cancellationToken);
 
             try
             {
@@ -113,9 +130,10 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Invoked when the execution of the virtual machine is terminated.
         /// </summary>
         /// <param name="e">The arguments describing the event.</param>
-        protected virtual void OnExecutionTerminated(ExecutionTerminatedEventArgs e)
-        {
+        protected virtual void OnExecutionTerminated(ExecutionTerminatedEventArgs e) => 
             ExecutionTerminated?.Invoke(this, e);
-        }
+
+        object IServiceProvider.GetService(Type serviceType) => 
+            _services[serviceType];
     }
 }

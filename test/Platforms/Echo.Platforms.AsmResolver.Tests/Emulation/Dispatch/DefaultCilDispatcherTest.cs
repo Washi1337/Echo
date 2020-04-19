@@ -1,22 +1,46 @@
+using System;
+using System.ComponentModel.Design;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Values;
 using Echo.Concrete.Values.ValueType;
+using Echo.Core.Code;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
+using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
 {
-    public class DefaultCilDispatcherTest
+    public class DefaultCilDispatcherTest : IClassFixture<MockModuleProvider>
     {
         private readonly DefaultCilDispatcher _dispatcher;
         private readonly ExecutionContext _context;
 
-        public DefaultCilDispatcherTest()
+        public DefaultCilDispatcherTest(MockModuleProvider moduleProvider)
         {
             _dispatcher = new DefaultCilDispatcher();
-            _context = new ExecutionContext(new CilProgramState(), default);
+
+            var dummyModule = moduleProvider.GetModule();
+
+            var dummyMethod = new MethodDefinition(
+                "MockMethod",
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(dummyModule.CorLibTypeFactory.Void));
+            dummyMethod.CilMethodBody = new CilMethodBody(dummyMethod);
+            
+            var container = new ServiceContainer();
+            container.AddService(typeof(ICilRuntimeEnvironment), new MockCilRuntimeEnvironment
+            {
+                Is32Bit = false,
+                Architecture = new CilArchitecture(dummyMethod.CilMethodBody)
+            });
+            
+            _context = new ExecutionContext(container, new CilProgramState(), default);
         }
         
         [Fact]

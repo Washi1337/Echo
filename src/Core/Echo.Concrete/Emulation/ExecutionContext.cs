@@ -8,15 +8,21 @@ namespace Echo.Concrete.Emulation
     /// <summary>
     /// Provides a context for executing instructions within a virtual machine. 
     /// </summary>
-    public class ExecutionContext
+    public class ExecutionContext : IServiceProvider
     {
+        private readonly IServiceProvider _serviceProvider;
+
         /// <summary>
         /// Creates a new instance of the <see cref="ExecutionContext"/> class.
         /// </summary>
         /// <param name="programState">The current state of the program.</param>
         /// <param name="cancellationToken">The cancellation token to use for cancelling the execution.</param>
-        public ExecutionContext(IProgramState<IConcreteValue> programState, CancellationToken cancellationToken)
+        public ExecutionContext(
+            IServiceProvider serviceProvider,
+            IProgramState<IConcreteValue> programState, 
+            CancellationToken cancellationToken)
         {
+            _serviceProvider = serviceProvider;
             ProgramState = programState ?? throw new ArgumentNullException(nameof(programState));
             CancellationToken = cancellationToken;
             Result = new ExecutionResult();
@@ -54,5 +60,9 @@ namespace Echo.Concrete.Emulation
         {
             get;
         }
+
+        public object GetService(Type serviceType) => _serviceProvider.GetService(serviceType);
+
+        public TService GetService<TService>() => (TService) _serviceProvider.GetService(typeof(TService));
     }
 }
