@@ -27,10 +27,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <inheritdoc />
         public DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
         {
-            var value2 = context.ProgramState.Stack.Pop();
-            var value1 = context.ProgramState.Stack.Pop();
-
-            var (left, right) = PrepareIntegers(value1, value2);
+            var (left, right) = PopArguments(context);
 
             var result = (left, right) switch
             {
@@ -66,8 +63,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <returns>The result of the operation.</returns>
         protected abstract DispatchResult Execute(ExecutionContext context, IntegerValue left, IntegerValue right);
 
-        private (IConcreteValue, IConcreteValue) PrepareIntegers(IConcreteValue value1, IConcreteValue value2)
+        private static (IConcreteValue, IConcreteValue) PopArguments(ExecutionContext context)
         {
+            var value2 = context.ProgramState.Stack.Pop();
+            var value1 = context.ProgramState.Stack.Pop();
+
             return (value1, value2) switch
             {
                 (Integer32Value a, Integer32Value b) => (a, b),
