@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core.Values;
@@ -18,11 +17,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// </summary>
         /// <param name="value">The known integer value.</param>
         /// <param name="is32Bit">Indicates whether the integer should be resized to 32-bits or 64-bits.</param>
-        public NativeIntegerValue(IntPtr value, bool is32Bit)
+        public NativeIntegerValue(long value, bool is32Bit)
         {
             _value = is32Bit
-                ? (IntegerValue) new Integer32Value(value.ToInt32())
-                : new Integer64Value(value.ToInt64());
+                ? (IntegerValue) new Integer32Value((uint) (value & 0xFFFFFFFF))
+                : new Integer64Value(value);
         }
         
         /// <summary>

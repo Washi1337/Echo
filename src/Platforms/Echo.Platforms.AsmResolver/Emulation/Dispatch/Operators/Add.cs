@@ -18,6 +18,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         };
 
         /// <inheritdoc />
+        protected override DispatchResult Execute(ExecutionContext context, Float64Value left, Float64Value right)
+        {
+            left.F64 += right.F64;
+            context.ProgramState.Stack.Push(left);
+            return new DispatchResult();
+        }
+
+        /// <inheritdoc />
         protected override DispatchResult Execute(ExecutionContext context, IntegerValue left, IntegerValue right)
         {
             left.Add(right);
