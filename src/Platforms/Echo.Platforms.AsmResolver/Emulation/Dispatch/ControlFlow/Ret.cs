@@ -21,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         {
             return new DispatchResult
             {
-                Exit = true
+                HasTerminated = true
             };
         }
     }
