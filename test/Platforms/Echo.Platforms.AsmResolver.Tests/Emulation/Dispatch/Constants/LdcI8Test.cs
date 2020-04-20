@@ -13,11 +13,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Constants
         }
 
         [Fact]
-        public void LdcR8()
+        public void LdcI8()
         {
-            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldc_R8, 1.23D));
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldc_I8, 0x0123456789ABCDEFL));
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Float64Value(1.23D), ExecutionContext.ProgramState.Stack.Top);
+            Assert.Equal(new Integer64Value(0x0123456789ABCDEFL), ExecutionContext.ProgramState.Stack.Top);
         }
     }
 }
