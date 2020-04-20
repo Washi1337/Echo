@@ -8,14 +8,14 @@ using Echo.Concrete.Emulation.Dispatch;
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
 {
     /// <summary>
-    /// Provides a handler for instructions with a variation of the <see cref="CilOpCodes.Stloc"/> operation code.
+    /// Provides a handler for instructions with a variation of the <see cref="CilOpCodes.Ldarg"/> operation code.
     /// </summary>
-    public class StLoc : FallThroughOpCodeHandler
+    public class LdArg : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
         public override IReadOnlyCollection<CilCode> SupportedOpCodes => new[]
         {
-            CilCode.Stloc, CilCode.Stloc_0, CilCode.Stloc_1, CilCode.Stloc_2, CilCode.Stloc_3, CilCode.Stloc_S
+            CilCode.Ldarg, CilCode.Ldarg_0, CilCode.Ldarg_1, CilCode.Ldarg_2, CilCode.Ldarg_3, CilCode.Ldarg_S
         };
 
         /// <inheritdoc />
@@ -23,13 +23,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
             var variable = environment.Architecture
-                .GetWrittenVariables(instruction)
+                .GetReadVariables(instruction)
                 .First();
             
-            if (!(variable is CilVariable))
+            if (!(variable is CilParameter))
                 throw new InvalidProgramException();
             
-            context.ProgramState.Variables[variable] = context.ProgramState.Stack.Pop();
+            context.ProgramState.Stack.Push(context.ProgramState.Variables[variable]);
             return base.Execute(context, instruction);
         }
     }

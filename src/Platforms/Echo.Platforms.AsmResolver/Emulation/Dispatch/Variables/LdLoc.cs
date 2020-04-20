@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
@@ -24,6 +25,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             var variable = environment.Architecture
                 .GetReadVariables(instruction)
                 .First();
+            
+            if (!(variable is CilVariable))
+                throw new InvalidProgramException();
             
             context.ProgramState.Stack.Push(context.ProgramState.Variables[variable]);
             return base.Execute(context, instruction);

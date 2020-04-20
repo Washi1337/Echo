@@ -10,12 +10,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
     /// <summary>
     /// Provides a handler for instructions with a variation of the <see cref="CilOpCodes.Stloc"/> operation code.
     /// </summary>
-    public class StLoc : FallThroughOpCodeHandler
+    public class StArg : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
         public override IReadOnlyCollection<CilCode> SupportedOpCodes => new[]
         {
-            CilCode.Stloc, CilCode.Stloc_0, CilCode.Stloc_1, CilCode.Stloc_2, CilCode.Stloc_3, CilCode.Stloc_S
+            CilCode.Starg, CilCode.Starg_S
         };
 
         /// <inheritdoc />
@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
                 .GetWrittenVariables(instruction)
                 .First();
             
-            if (!(variable is CilVariable))
+            if (!(variable is CilParameter))
                 throw new InvalidProgramException();
             
             context.ProgramState.Variables[variable] = context.ProgramState.Stack.Pop();
