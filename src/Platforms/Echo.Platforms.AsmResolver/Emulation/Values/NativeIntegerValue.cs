@@ -11,7 +11,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     public class NativeIntegerValue : IntegerValue
     {
         private readonly IntegerValue _value;
-
+        
         /// <summary>
         /// Creates a fully known native integer value.
         /// </summary>
@@ -22,6 +22,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             _value = is32Bit
                 ? (IntegerValue) new Integer32Value((uint) (value & 0xFFFFFFFF))
                 : new Integer64Value(value);
+        }
+
+        /// <summary>
+        /// Parses a (partially) known bit string into an integer.
+        /// </summary>
+        /// <param name="bitString">The bit string to parse.</param>
+        /// <param name="is32Bit">Indicates whether the integer should be resized to 32-bits or 64-bits.</param>
+        public NativeIntegerValue(string bitString, bool is32Bit)
+            : this(new IntegerNValue(bitString), is32Bit)
+        {
         }
 
         /// <summary>
