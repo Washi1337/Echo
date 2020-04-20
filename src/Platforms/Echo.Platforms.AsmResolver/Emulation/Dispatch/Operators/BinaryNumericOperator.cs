@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
     /// Provides a base for all binary numeric operation codes.
     /// </summary>
     /// <remarks>
-    /// Handlers that inherit from this class evaluate instructions with two operands and follow table III.1.5 in
+    /// Handlers that inherit from this class evaluate instructions with two operands and follow table III.1.2 in
     /// the ECMA-335, 6th edition (June 2012). 
     /// </remarks>
     public abstract class BinaryNumericOperator : ICilOpCodeHandler
@@ -33,10 +33,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
             {
                 (IntegerValue a, IntegerValue b) => Execute(context, a, b),
                 (Float64Value a, Float64Value b) => Execute(context, a, b),
-                _ => new DispatchResult
-                {
-                    Exception = new InvalidProgramException()
-                }
+                _ => throw new InvalidProgramException()
             };
 
             if (result.IsSuccess)
