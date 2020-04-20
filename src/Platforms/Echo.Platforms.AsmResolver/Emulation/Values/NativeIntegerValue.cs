@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core.Values;
@@ -74,5 +75,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
         /// <inheritdoc />
         public override void SetBits(BitArray bits, BitArray mask) => _value.SetBits(bits, mask);
+
+        /// <inheritdoc />
+        public override void MarkFullyUnknown() => _value.MarkFullyUnknown();
+
+        /// <summary>
+        /// Converts the native integer value to a 64-bit integer.
+        /// </summary>
+        /// <returns></returns>
+        public Integer64Value ToInt64()
+        {
+            return _value switch
+            {
+                Integer64Value int64 => int64,
+                Integer32Value int32 => new Integer64Value(int32.I32, int32.Mask | 0xFFFFFFFF_00000000),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
     }
 }

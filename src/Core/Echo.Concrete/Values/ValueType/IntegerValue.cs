@@ -756,6 +756,8 @@ namespace Echo.Concrete.Values.ValueType
             return result;
         }
 
+        public abstract void MarkFullyUnknown();
+
         private void AssertSameBitSize(IntegerValue other)
         {
             if (Size != other.Size)

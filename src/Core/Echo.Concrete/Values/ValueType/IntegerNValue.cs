@@ -107,6 +107,13 @@ namespace Echo.Concrete.Values.ValueType
             
             Bits = (BitArray) bits.Clone();
             Mask = (BitArray) mask.Clone();
+        }      
+        
+        /// <inheritdoc />
+        public override void MarkFullyUnknown()
+        {
+            Mask.SetAll(false);
         }
+
     }
 }
