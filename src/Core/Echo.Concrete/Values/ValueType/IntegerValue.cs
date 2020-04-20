@@ -24,12 +24,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public bool IsValueType => true;
 
-        /// <summary>
-        /// Determines whether the integer consists of only zeroes.
-        /// </summary>
-        /// <remarks>
-        /// If this value is <c>null</c>, it is unknown whether this value contains only zeroes.
-        /// </remarks>
+        /// <inheritdoc />
         public virtual bool? IsZero
         {
             get
@@ -55,13 +50,14 @@ namespace Echo.Concrete.Values.ValueType
             }
         }
 
-        /// <summary>
-        /// Determines whether the integer contains at least a single one in its bit string.
-        /// </summary>
-        /// <remarks>
-        /// If this value is <c>null</c>, it is unknown whether this value contains at least a single one in its bit string.
-        /// </remarks>
+        /// <inheritdoc />
         public virtual bool? IsNonZero => !IsZero;
+
+        /// <inheritdoc />
+        public bool? IsPositive => GetLastBit();
+
+        /// <inheritdoc />
+        public bool? IsNegative => !GetLastBit();
 
         public virtual bool? GetLastBit() => GetBit(Size * 8 - 1);
 

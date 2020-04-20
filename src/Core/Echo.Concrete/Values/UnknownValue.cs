@@ -11,11 +11,23 @@ namespace Echo.Concrete.Values
         public bool IsKnown => false;
 
         /// <inheritdoc />
-        public int Size => 0;
+        int IValue.Size => 0;
 
         /// <inheritdoc />
-        public bool IsValueType => false;
+        bool IConcreteValue.IsValueType => false;
 
+        /// <inheritdoc />
+        bool? IConcreteValue.IsZero => null;
+
+        /// <inheritdoc />
+        bool? IConcreteValue.IsNonZero => null;
+
+        /// <inheritdoc />
+        bool? IConcreteValue.IsPositive => null;
+
+        /// <inheritdoc />
+        bool? IConcreteValue.IsNegative => null;
+        
         /// <inheritdoc />
         public IValue Copy() => new UnknownValue();
     }
