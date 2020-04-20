@@ -44,6 +44,18 @@ namespace Echo.Concrete.Values.ValueType
 
         /// <inheritdoc />
         public bool IsValueType => true;
+
+        /// <inheritdoc />
+        public bool? IsZero => F64 == 0;
+
+        /// <inheritdoc />
+        public bool? IsNonZero => F64 != 0;
+
+        /// <inheritdoc />
+        public bool? IsPositive => F64 > 0;
+
+        /// <inheritdoc />
+        public bool? IsNegative => F64 < 0;
         
         /// <inheritdoc />
         public IValue Copy() => new Float64Value(F64);
