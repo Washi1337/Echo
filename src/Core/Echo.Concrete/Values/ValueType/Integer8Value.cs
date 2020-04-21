@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using Echo.Concrete.Extensions;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -168,26 +167,22 @@ namespace Echo.Concrete.Values.ValueType
             }
         }
 
+        /// <param name="buffer"></param>
         /// <inheritdoc />
-        public override BitArray GetBits() => new BitArray(new[]
-        {
-            U8
-        });
+        public override void GetBits(Span<byte> buffer) => buffer[0] = U8;
+
+        /// <param name="buffer"></param>
+        /// <inheritdoc />
+        public override void GetMask(Span<byte> buffer) => buffer[0] = Mask;
 
         /// <inheritdoc />
-        public override BitArray GetMask() => new BitArray(new[]
+        public override void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            Mask
-        });
-
-        /// <inheritdoc />
-        public override void SetBits(BitArray bits, BitArray mask)
-        {
-            if (bits.Count != 8 || mask.Count != 8)
+            if (bits.Length != 8 || mask.Length != 8)
                 throw new ArgumentException("Number of bits is not 8.");
             
-            U8 = bits.AsByteSpan()[0];
-            Mask = mask.AsByteSpan()[0];
+            U8 = bits[0];
+            Mask = mask[0];
         }
 
         /// <inheritdoc />
