@@ -14,6 +14,14 @@ namespace Echo.Concrete.Values.ReferenceType
         private readonly IConcreteValue[] _values;
 
         /// <summary>
+        /// Creates a new empty array.
+        /// </summary>
+        public ArrayValue()
+        {
+            _values = new IConcreteValue[0];
+        }
+
+        /// <summary>
         /// Creates a new array filled with copies of the provided default value.
         /// </summary>
         /// <param name="length">The length of the array.</param>
