@@ -5,15 +5,15 @@ using System.Text;
 namespace Echo.Concrete.Values
 {
     /// <summary>
-    /// Performs various dark magic to achieve raw bit manipulation
+    /// A simple data structure to manipulate individual bits
     /// </summary>
-    public readonly ref struct MagicBox
+    public readonly ref struct BitField
     {
         /// <summary>
-        /// Creates a new <see cref="MagicBox"/> with the given <paramref name="span"/>
+        /// Creates a new <see cref="BitField"/> with the given <paramref name="span"/>
         /// </summary>
-        /// <param name="span">The value to initialize the <see cref="MagicBox"/> with</param>
-        public MagicBox(Span<byte> span)
+        /// <param name="span">The value to initialize the <see cref="BitField"/> with</param>
+        public BitField(Span<byte> span)
         {
             _span = span;
         }
@@ -48,7 +48,7 @@ namespace Echo.Concrete.Values
         }
 
         /// <summary>
-        /// Performs a bitwise NOT operation on <see cref="MagicBox"/>
+        /// Performs a bitwise NOT operation on <see cref="BitField"/>
         /// </summary>
         public void Not()
         {
@@ -59,10 +59,10 @@ namespace Echo.Concrete.Values
         }
 
         /// <summary>
-        /// Performs a bitwise AND operation between two <see cref="MagicBox"/>'s
+        /// Performs a bitwise AND operation between two <see cref="BitField"/>'s
         /// </summary>
         /// <param name="other">The right side of the expression</param>
-        public void And(MagicBox other)
+        public void And(BitField other)
         {
             for (var i = 0; i < other._span.Length; i++)
             {
@@ -71,10 +71,10 @@ namespace Echo.Concrete.Values
         }
 
         /// <summary>
-        /// Performs a bitwise OR operation between two <see cref="MagicBox"/>'s
+        /// Performs a bitwise OR operation between two <see cref="BitField"/>'s
         /// </summary>
         /// <param name="other">The right side of the expression</param>
-        public void Or(MagicBox other)
+        public void Or(BitField other)
         {
             for (var i = 0; i < other._span.Length; i++)
             {
@@ -83,10 +83,10 @@ namespace Echo.Concrete.Values
         }
 
         /// <summary>
-        /// Performs a bitwise XOR operation between two <see cref="MagicBox"/>'s
+        /// Performs a bitwise XOR operation between two <see cref="BitField"/>'s
         /// </summary>
         /// <param name="other">The right side of the expression</param>
-        public void Xor(MagicBox other)
+        public void Xor(BitField other)
         {
             for (var i = 0; i < other._span.Length; i++)
             {
@@ -95,14 +95,14 @@ namespace Echo.Concrete.Values
         }
 
         /// <summary>
-        /// Compares two <see cref="MagicBox"/>'s
+        /// Compares two <see cref="BitField"/>'s
         /// </summary>
         /// <remarks>
         /// This overload exists to avoid a nasty boxing allocation
         /// </remarks>
-        /// <param name="other">The <see cref="MagicBox"/> to compare to</param>
-        /// <returns>Whether the two <see cref="MagicBox"/>'s are equal</returns>
-        public bool Equals(MagicBox other)
+        /// <param name="other">The <see cref="BitField"/> to compare to</param>
+        /// <returns>Whether the two <see cref="BitField"/>'s are equal</returns>
+        public bool Equals(BitField other)
         {
             return _span.SequenceEqual(other._span);
         }
@@ -110,7 +110,7 @@ namespace Echo.Concrete.Values
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (obj is MagicBox other)
+            if (obj is BitField other)
             {
                 return Equals(other);
             }
