@@ -517,9 +517,10 @@ namespace Echo.Concrete.Values.ValueType
         public virtual void TwosComplement()
         {
             Not();
-            var one = new BitArray(Size * 8);
-            one[0] = true;
-            Add(new IntegerNValue(one));
+            Span<byte> buffer = stackalloc byte[Size];
+            new BitField(buffer) { [0] = true };
+
+            Add(new IntegerNValue(buffer));
         }
 
         /// <summary>
