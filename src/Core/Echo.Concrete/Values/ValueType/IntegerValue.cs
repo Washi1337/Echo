@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Text;
-using Echo.Concrete.Extensions;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -36,20 +35,34 @@ namespace Echo.Concrete.Values.ValueType
         {
             get
             {
-                var bits = GetBits();
-                
-                if (IsKnown)
-                    return BitArrayComparer.Instance.Equals(bits, new BitArray(bits.Count, false));
+                Span<byte> bits = stackalloc byte[Size];
+                GetBits(bits);
 
-                
-                var mask = GetMask();
-                bits.And(mask);
-                
-                var raw = bits.AsSpan();
-                
-                for (int i = 0; i < raw.Length; i++)
+                if (IsKnown)
                 {
-                    if (raw[i] != 0)
+                    for (var i = 0; i < Size; i++)
+                    {
+                        if (bits[i] != 0)
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+
+                Span<byte> mask = stackalloc byte[Size];
+                GetMask(mask);
+                
+                var bitField = new BitField(bits);
+                var maskField = new BitField(mask);
+                
+                bitField.And(maskField);
+                
+                for (int i = 0; i < bits.Length; i++)
+                {
+                    if (bits[i] != 0)
                     {
                         return false;
                     }
@@ -88,31 +101,33 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="value">The new value of the bit to write. <c>null</c> indicates an unknown bit value.</param>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when an invalid index was provided.</exception>
         public abstract void SetBit(int index, bool? value);
-        
+
         /// <summary>
         /// Gets the raw bits of the primitive value.
         /// </summary>
+        /// <param name="buffer"></param>
         /// <returns>The raw bits.</returns>
         /// <remarks>
         /// The bits returned by this method assume the value is known entirely. Any bit that is marked unknown will be
         /// set to 0. 
         /// </remarks>
-        public abstract BitArray GetBits();
+        public abstract void GetBits(Span<byte> buffer);
 
         /// <summary>
         /// Gets the bit mask indicating the bits that are known.  
         /// </summary>
+        /// <param name="buffer"></param>
         /// <returns>
         /// The bit mask. If bit at location <c>i</c> equals 1, bit <c>i</c> is known, and unknown otherwise.
         /// </returns>
-        public abstract BitArray GetMask();
+        public abstract void GetMask(Span<byte> buffer);
 
         /// <summary>
         /// Replaces the raw contents of the integer with the provided bits and known mask.
         /// </summary>
         /// <param name="bits">The new bit values.</param>
         /// <param name="mask">The new bit mask indicating the known bits.</param>
-        public abstract void SetBits(BitArray bits, BitArray mask);
+        public abstract void SetBits(Span<byte> bits, Span<byte> mask);
 
         /// <summary>
         /// Parses a (partially) known bit string and sets the contents of integer to the parsed result.
@@ -121,8 +136,12 @@ namespace Echo.Concrete.Values.ValueType
         /// <exception cref="OverflowException"></exception>
         public void SetBits(string bitString)
         {
-            var bits = new BitArray(Size * 8);
-            var mask = new BitArray(Size * 8, true);
+            Span<byte> backingBits = stackalloc byte[Size];
+            Span<byte> backingMask = stackalloc byte[Size];
+            backingMask.Fill(0xFF);
+            
+            var bits = new BitField(backingBits);
+            var mask = new BitField(backingMask);
 
             for (int i = 0; i < bitString.Length; i++)
             {
@@ -134,7 +153,7 @@ namespace Echo.Concrete.Values.ValueType
                     _ => throw new FormatException()
                 };
 
-                if (i >= bits.Count)
+                if (i >= backingBits.Length)
                 {
                     if (!bit.HasValue || bit.Value)
                         throw new OverflowException();
@@ -142,7 +161,6 @@ namespace Echo.Concrete.Values.ValueType
                 else if (bit.HasValue)
                 {
                     bits[i] = bit.Value;
-                    mask[i] = true;
                 }
                 else
                 {
@@ -150,7 +168,7 @@ namespace Echo.Concrete.Values.ValueType
                 }
             }
 
-            SetBits(bits, mask);
+            SetBits(backingBits, backingMask);
         } 
 
         /// <inheritdoc />
@@ -182,13 +200,19 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         public virtual void Not()
         {
-            var bits = GetBits();
-            var mask = GetMask();
+            Span<byte> bitsBuffer = stackalloc byte[Size];
+            Span<byte> maskBuffer = stackalloc byte[Size];
+            
+            GetBits(bitsBuffer);
+            GetMask(maskBuffer);
+            
+            var bits = new BitField(bitsBuffer);
+            var mask = new BitField(maskBuffer);
             
             bits.Not();
             bits.And(mask);
 
-            SetBits(bits, mask);
+            SetBits(bitsBuffer, maskBuffer);
         }
 
         /// <summary>
@@ -208,25 +232,29 @@ namespace Echo.Concrete.Values.ValueType
             
             AssertSameBitSize(other);
 
-            BitArray bits;
-            BitArray mask;
+            Span<byte> bits = stackalloc byte[Size];
+            Span<byte> mask = stackalloc byte[Size];
             
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
+
+                Span<byte> otherBits = stackalloc byte[Size];
                 
-                bits = GetBits();
-                bits.And(other.GetBits());
-                mask = GetMask();
+                GetBits(bits);
+                other.GetBits(otherBits);
+                
+                new BitField(bits).And(new BitField(otherBits));
+                GetMask(mask);
             }
             else
             {
                 // Some bits are unknown, perform operation manually.
+                
+                var bitField = new BitField(bits);
+                var maskField = new BitField(mask);
 
-                bits = new BitArray(Size * 8);
-                mask = new BitArray(Size * 8, true);
-
-                for (int i = 0; i < mask.Count; i++)
+                for (int i = 0; i < mask.Length; i++)
                 {
                     bool? result = (GetBit(i), other.GetBit(i)) switch
                     {
@@ -238,8 +266,8 @@ namespace Echo.Concrete.Values.ValueType
                         _ => false,
                     };
 
-                    bits[i] = result.GetValueOrDefault();
-                    mask[i] = result.HasValue;
+                    bitField[i] = result.GetValueOrDefault();
+                    maskField[i] = result.HasValue;
                 }
             }
 
@@ -263,25 +291,29 @@ namespace Echo.Concrete.Values.ValueType
             
             AssertSameBitSize(other);
 
-            BitArray bits;
-            BitArray mask;
+            Span<byte> bits = stackalloc byte[Size];
+            Span<byte> mask = stackalloc byte[Size];
             
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
+
+                Span<byte> otherBits = stackalloc byte[Size];
                 
-                bits = GetBits();
-                bits.Or(other.GetBits());
-                mask = GetMask();
+                GetBits(bits);
+                other.GetBits(otherBits);
+                
+                new BitField(bits).Or(new BitField(otherBits));
+                GetMask(mask);
             }
             else
             {
                 // Some bits are unknown, perform operation manually.
                 
-                bits = new BitArray(Size * 8);
-                mask = new BitArray(Size * 8, true);
-
-                for (int i = 0; i < mask.Count; i++)
+                var bitField = new BitField(bits);
+                var maskField = new BitField(mask);
+                
+                for (int i = 0; i < mask.Length; i++)
                 {
                     bool? result = (GetBit(i), other.GetBit(i)) switch
                     {
@@ -293,8 +325,8 @@ namespace Echo.Concrete.Values.ValueType
                         _ => true,
                     };
 
-                    bits[i] = result.GetValueOrDefault();
-                    mask[i] = result.HasValue;
+                    bitField[i] = result.GetValueOrDefault();
+                    maskField[i] = result.HasValue;
                 }
             }
 
@@ -318,32 +350,36 @@ namespace Echo.Concrete.Values.ValueType
             
             AssertSameBitSize(other);
 
-            BitArray bits;
-            BitArray mask;
+            Span<byte> bits = stackalloc byte[Size];
+            Span<byte> mask = stackalloc byte[Size];
             
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
+
+                Span<byte> otherBits = stackalloc byte[Size];
+                GetBits(bits);
+                other.GetBits(otherBits);
                 
-                bits = GetBits();
-                bits.Xor(other.GetBits());
-                mask = GetMask();
+                
+                new BitField(bits).Xor(new BitField(otherBits));
+                GetMask(mask);
             }
             else
             {
                 // Some bits are unknown, perform operation manually.
+                
+                var bitField = new BitField(bits);
+                var maskField = new BitField(mask);
 
-                bits = new BitArray(Size * 8);
-                mask = new BitArray(Size * 8, true);
-
-                for (int i = 0; i < mask.Count; i++)
+                for (int i = 0; i < mask.Length; i++)
                 {
                     bool? a = GetBit(i);
                     bool? b = other.GetBit(i);
                     bool? result = a.HasValue && b.HasValue ? a.Value ^ b.Value : (bool?) null;
                     
-                    bits[i] = result.GetValueOrDefault();
-                    mask[i] = result.HasValue;
+                    bitField[i] = result.GetValueOrDefault();
+                    maskField[i] = result.HasValue;
                 }
             }
 
@@ -358,13 +394,16 @@ namespace Echo.Concrete.Values.ValueType
         {
             if (count == 0)
                 return;
+
+            Span<byte> bitsBuffer = stackalloc byte[Size];
+            Span<byte> maskBuffer = stackalloc byte[Size];
             
-            var bits = GetBits();
-            var mask = GetMask();
+            var bits = new BitField(bitsBuffer);
+            var mask = new BitField(maskBuffer);
 
             count = Math.Min(Size * 8, count);
             
-            for (int i = bits.Count - count - 1; i >= 0; i--)
+            for (int i = bitsBuffer.Length - count - 1; i >= 0; i--)
             {
                 bits[i + count] = bits[i];
                 mask[i + count] = mask[i];
@@ -376,7 +415,7 @@ namespace Echo.Concrete.Values.ValueType
                 mask[i] = true;
             }
 
-            SetBits(bits, mask);
+            SetBits(bitsBuffer, maskBuffer);
         }
 
         /// <summary>
@@ -389,17 +428,20 @@ namespace Echo.Concrete.Values.ValueType
         {
             if (count == 0)
                 return;
+
+            Span<byte> bitsBuffer = stackalloc byte[Size];
+            Span<byte> maskBuffer = stackalloc byte[Size];
             
-            var bits = GetBits();
-            var mask = GetMask();
+            var bits = new BitField(bitsBuffer);
+            var mask = new BitField(maskBuffer);
 
             bool? sign = signExtend 
-                ? mask[bits.Count - 1] ? bits[bits.Count - 1] : (bool?) null 
+                ? mask[bitsBuffer.Length - 1] ? bits[bitsBuffer.Length - 1] : (bool?) null 
                 : false;
             
             count = Math.Min(Size * 8, count);
             
-            for (int i = count; i < bits.Count; i++)
+            for (int i = count; i < bitsBuffer.Length; i++)
             {
                 bits[i - count] = bits[i];
                 mask[i - count] = mask[i];
@@ -407,11 +449,11 @@ namespace Echo.Concrete.Values.ValueType
 
             for (int i = 0; i < count; i++)
             {
-                bits[bits.Count - 1 - i] = sign.GetValueOrDefault();
-                mask[bits.Count - 1 - i] = sign.HasValue;
+                bits[bitsBuffer.Length - 1 - i] = sign.GetValueOrDefault();
+                mask[bitsBuffer.Length - 1 - i] = sign.HasValue;
             }
 
-            SetBits(bits, mask);
+            SetBits(bitsBuffer, maskBuffer);
         }
 
         /// <summary>
@@ -427,11 +469,15 @@ namespace Echo.Concrete.Values.ValueType
             
             AssertSameBitSize(other);
 
-            var sum = new BitArray(Size * 8);
-            var mask = new BitArray(Size * 8, true);
+            Span<byte> sumBuffer = stackalloc byte[Size];
+            Span<byte> maskBuffer = stackalloc byte[Size];
+            maskBuffer.Fill(0xFF);
+            
+            var sum = new BitField(sumBuffer);
+            var mask = new BitField(maskBuffer);
 
             bool? carry = false;
-            for (int i = 0; i < sum.Length; i++)
+            for (int i = 0; i < sumBuffer.Length; i++)
             {
                 bool? a = GetBit(i);
                 bool? b = other.GetBit(i);
@@ -462,7 +508,7 @@ namespace Echo.Concrete.Values.ValueType
                 carry = c;
             }
 
-            SetBits(sum, mask);
+            SetBits(sumBuffer, maskBuffer);
         }
 
         /// <summary>
@@ -485,11 +531,15 @@ namespace Echo.Concrete.Values.ValueType
         {
             AssertSameBitSize(other);
 
-            var difference = new BitArray(Size * 8);
-            var mask = new BitArray(Size * 8, true);
+            Span<byte> differenceBuffer = stackalloc byte[Size];
+            Span<byte> maskBuffer = stackalloc byte[Size];
+            maskBuffer.Fill(0xFF);
+            
+            var difference = new BitField(differenceBuffer);
+            var mask = new BitField(maskBuffer);
 
             bool? borrow = false;
-            for (int i = 0; i < difference.Length; i++)
+            for (int i = 0; i < differenceBuffer.Length; i++)
             {
                 bool? a = GetBit(i);
                 bool? b = other.GetBit(i);
@@ -526,7 +576,7 @@ namespace Echo.Concrete.Values.ValueType
                 borrow = bOut;
             }
 
-            SetBits(difference, mask);
+            SetBits(differenceBuffer, maskBuffer);
         }
 
         /// <summary>
@@ -548,13 +598,26 @@ namespace Echo.Concrete.Values.ValueType
             var multipliedByOne = (IntegerValue) Copy();
             
             // Third possibility is thee current value multiplied by ?. This is effectively marking all set bits unknown.  
-            // TODO: We could probably optimise the following operations for the native integer types. 
+            // TODO: We could probably optimise the following operations for the native integer types.
             var multipliedByUnknown = (IntegerValue) Copy();
-            var mask = multipliedByOne.GetMask();
+
+            Span<byte> maskBuffer = stackalloc byte[Size];
+            multipliedByOne.GetMask(maskBuffer);
+
+            Span<byte> bitsBuffer = stackalloc byte[Size];
+            multipliedByOne.GetBits(bitsBuffer);
+            
+            var mask = new BitField(maskBuffer);
+            var bits = new BitField(bitsBuffer);
+            
             mask.Not();
-            mask.Or(multipliedByOne.GetBits());
+            mask.Or(bits);
             mask.Not();
-            multipliedByUnknown.SetBits(multipliedByUnknown.GetBits(), mask);
+
+            Span<byte> unknownBits = stackalloc byte[Size];
+            multipliedByUnknown.GetBits(unknownBits);
+            
+            multipliedByUnknown.SetBits(unknownBits, maskBuffer);
             
             // Final result.
             var result = new IntegerNValue(Size);
@@ -578,8 +641,13 @@ namespace Echo.Concrete.Values.ValueType
                     lastShiftByOne = i;
                 }
             }
+
+            Span<byte> resultBits = stackalloc byte[Size];
+            Span<byte> resultMask = stackalloc byte[Size];
+            result.GetBits(resultBits);
+            result.GetMask(resultMask);
             
-            SetBits(result.Bits, result.Mask);
+            SetBits(resultBits, resultMask);
         }
 
         /// <summary>
@@ -729,8 +797,12 @@ namespace Echo.Concrete.Values.ValueType
 
         private IntegerValue Resize(int newBitLength, bool signExtend)
         {
-            var newBits = new BitArray(newBitLength);
-            var newMask = new BitArray(newBitLength, true);
+            Span<byte> newBitsBuffer = stackalloc byte[newBitLength / 8];
+            Span<byte> newMaskBuffer = stackalloc byte[newBitLength / 8];
+            newMaskBuffer.Fill(0xFF);
+            
+            var newBits = new BitField(newBitsBuffer);
+            var newMask = new BitField(newMaskBuffer);
 
             // Copy relevant bits.
             int bitsToCopy = Math.Min(newBitLength, Size * 8);
@@ -764,7 +836,7 @@ namespace Echo.Concrete.Values.ValueType
             };
 
             // Set contents.
-            result.SetBits(newBits, newMask);
+            result.SetBits(newBitsBuffer, newMaskBuffer);
             
             return result;
         }
@@ -783,8 +855,21 @@ namespace Echo.Concrete.Values.ValueType
                 if (Size != integerValue.Size)
                     return false;
 
-                return BitArrayComparer.Instance.Equals(GetBits(), integerValue.GetBits())
-                    && BitArrayComparer.Instance.Equals(GetMask(), integerValue.GetMask());
+                Span<byte> one = stackalloc byte[Size];
+                Span<byte> two = stackalloc byte[Size];
+                
+                GetBits(one);
+                integerValue.GetBits(two);
+
+                if (new BitField(one).Equals(new BitField(two)) == false)
+                {
+                    return false;
+                }
+                
+                GetMask(one);
+                integerValue.GetMask(two);
+                
+                return new BitField(one).Equals(new BitField(two));
             }
 
             return false;
@@ -793,8 +878,12 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return BitArrayComparer.Instance.GetHashCode(GetBits())
-                   ^ BitArrayComparer.Instance.GetHashCode(GetMask());
+            Span<byte> bitsBuffer = stackalloc byte[Size];
+            Span<byte> maskBuffer = stackalloc byte[Size];
+            GetBits(bitsBuffer);
+            GetMask(maskBuffer);
+            
+            return new BitField(bitsBuffer).GetHashCode() ^ new BitField(maskBuffer).GetHashCode();
         }
     }
 }
