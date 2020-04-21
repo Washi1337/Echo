@@ -45,12 +45,9 @@ namespace Echo.Concrete.Tests.Values.ValueType
         {
             var value = new Integer8Value(0b0001_0010);
 
-            var bits = new bool[8];
-            value.GetBits().CopyTo(bits, 0);
-            Assert.Equal(new[]
-            {
-                false, true, false, false, true, false, false, false
-            }, bits);
+            var bits = new byte[1];
+            value.GetBits(bits);
+            Assert.Equal(0b0001_0010, bits[0]);
         }
 
         [Fact]
