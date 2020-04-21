@@ -1,7 +1,6 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections;
-using Echo.Concrete.Extensions;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -169,20 +168,22 @@ namespace Echo.Concrete.Values.ValueType
             }
         }
 
+        /// <param name="buffer"></param>
         /// <inheritdoc />
-        public override BitArray GetBits() => new BitArray(BitConverter.GetBytes(U32));
+        public override void GetBits(Span<byte> buffer) => BinaryPrimitives.WriteUInt32LittleEndian(buffer, U32);
+
+        /// <param name="buffer"></param>
+        /// <inheritdoc />
+        public override void GetMask(Span<byte> buffer) => BinaryPrimitives.WriteUInt32LittleEndian(buffer, Mask);
 
         /// <inheritdoc />
-        public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
-
-        /// <inheritdoc />
-        public override void SetBits(BitArray bits, BitArray mask)
+        public override void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            if (bits.Count != 32 || mask.Count != 32)
+            if (bits.Length != 32 || mask.Length != 32)
                 throw new ArgumentException("Number of bits is not 32.");
 
-            U32 = BinaryPrimitives.ReadUInt32LittleEndian(bits.AsByteSpan());
-            Mask = BinaryPrimitives.ReadUInt32LittleEndian(mask.AsByteSpan());
+            U32 = BinaryPrimitives.ReadUInt32LittleEndian(bits);
+            Mask = BinaryPrimitives.ReadUInt32LittleEndian(mask);
         }
         
         /// <inheritdoc />
