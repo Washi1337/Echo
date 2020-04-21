@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType

@@ -1,6 +1,5 @@
 using System;
 using System.Buffers.Binary;
-using System.Collections;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
