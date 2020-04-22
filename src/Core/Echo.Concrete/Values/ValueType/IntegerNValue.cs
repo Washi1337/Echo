@@ -109,18 +109,28 @@ namespace Echo.Concrete.Values.ValueType
             get;
         }
 
+        private Span<byte> Bits
+        {
+            get => _bits.AsSpan(0, Size);
+        }
+
+        private Span<byte> Mask
+        {
+            get => _mask.AsSpan(0, Size);
+        }
+
         private readonly byte[] _bits;
 
         private readonly byte[] _mask;
 
         /// <inheritdoc />
-        public override IValue Copy() => new IntegerNValue(_bits.AsSpan(0, Size), _mask.AsSpan(0, Size));
+        public override IValue Copy() => new IntegerNValue(Bits, Mask);
 
         /// <inheritdoc />
         public override bool? GetBit(int index)
         {
-            var bits = new BitField(_bits.AsSpan(0, Size));
-            var mask = new BitField(_mask.AsSpan(0, Size));
+            var bits = new BitField(Bits);
+            var mask = new BitField(Mask);
             
             return !mask[index] ? (bool?) null : bits[index];
         }
@@ -128,8 +138,8 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override void SetBit(int index, bool? value)
         {
-            var bits = new BitField(_bits.AsSpan(0, Size));
-            var mask = new BitField(_mask.AsSpan(0, Size));
+            var bits = new BitField(Bits);
+            var mask = new BitField(Mask);
             
             mask[index] = value.HasValue;
             bits[index] = !value.HasValue || value.Value;
@@ -137,11 +147,11 @@ namespace Echo.Concrete.Values.ValueType
 
         /// <param name="buffer"></param>
         /// <inheritdoc />
-        public override void GetBits(Span<byte> buffer) => _bits.AsSpan(0, Size).CopyTo(buffer);
+        public override void GetBits(Span<byte> buffer) => Bits.CopyTo(buffer);
 
         /// <param name="buffer"></param>
         /// <inheritdoc />
-        public override void GetMask(Span<byte> buffer) => _mask.AsSpan(0, Size).CopyTo(buffer);
+        public override void GetMask(Span<byte> buffer) => Mask.CopyTo(buffer);
 
         /// <inheritdoc />
         public override void SetBits(Span<byte> bits, Span<byte> mask)
@@ -153,14 +163,12 @@ namespace Echo.Concrete.Values.ValueType
             
             bits.CopyTo(_bits);
             mask.CopyTo(_mask);
-            Bits = (BitArray) bits.Clone();
-            Mask = (BitArray) mask.Clone();
         }      
         
         /// <inheritdoc />
         public override void MarkFullyUnknown()
         {
-            Mask.SetAll(false);
+            Mask.Fill(0);
         }
 
     }
