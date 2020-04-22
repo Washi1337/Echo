@@ -114,7 +114,7 @@ namespace Echo.Concrete.Values.ValueType
         private readonly byte[] _mask;
 
         /// <inheritdoc />
-        public override IValue Copy() => new IntegerNValue(_bits, _mask);
+        public override IValue Copy() => new IntegerNValue(_bits.AsSpan(0, Size), _mask.AsSpan(0, Size));
 
         /// <inheritdoc />
         public override bool? GetBit(int index)
