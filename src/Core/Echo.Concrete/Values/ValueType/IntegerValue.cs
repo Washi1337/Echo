@@ -254,7 +254,7 @@ namespace Echo.Concrete.Values.ValueType
                 var bitField = new BitField(bits);
                 var maskField = new BitField(mask);
 
-                for (int i = 0; i < mask.Length; i++)
+                for (int i = 0; i < mask.Length * 8; i++)
                 {
                     bool? result = (GetBit(i), other.GetBit(i)) switch
                     {
@@ -313,7 +313,7 @@ namespace Echo.Concrete.Values.ValueType
                 var bitField = new BitField(bits);
                 var maskField = new BitField(mask);
                 
-                for (int i = 0; i < mask.Length; i++)
+                for (int i = 0; i < mask.Length * 8; i++)
                 {
                     bool? result = (GetBit(i), other.GetBit(i)) switch
                     {
@@ -372,7 +372,7 @@ namespace Echo.Concrete.Values.ValueType
                 var bitField = new BitField(bits);
                 var maskField = new BitField(mask);
 
-                for (int i = 0; i < mask.Length; i++)
+                for (int i = 0; i < mask.Length * 8; i++)
                 {
                     bool? a = GetBit(i);
                     bool? b = other.GetBit(i);
