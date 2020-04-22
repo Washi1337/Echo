@@ -60,9 +60,9 @@ namespace Echo.Concrete.Values.ValueType
                 
                 bitField.And(maskField);
                 
-                for (int i = 0; i < bits.Length; i++)
+                for (int i = 0; i < bits.Length * 8; i++)
                 {
-                    if (bits[i] != 0)
+                    if (bitField[i])
                     {
                         return false;
                     }
@@ -396,7 +396,10 @@ namespace Echo.Concrete.Values.ValueType
                 return;
 
             Span<byte> bitsBuffer = stackalloc byte[Size];
+            GetBits(bitsBuffer);
+            
             Span<byte> maskBuffer = stackalloc byte[Size];
+            GetMask(maskBuffer);
             
             var bits = new BitField(bitsBuffer);
             var mask = new BitField(maskBuffer);
@@ -430,13 +433,16 @@ namespace Echo.Concrete.Values.ValueType
                 return;
 
             Span<byte> bitsBuffer = stackalloc byte[Size];
+            GetBits(bitsBuffer);
+            
             Span<byte> maskBuffer = stackalloc byte[Size];
+            GetMask(maskBuffer);
             
             var bits = new BitField(bitsBuffer);
             var mask = new BitField(maskBuffer);
 
             bool? sign = signExtend 
-                ? mask[bitsBuffer.Length - 1] ? bits[bitsBuffer.Length - 1] : (bool?) null 
+                ? mask[8 * bitsBuffer.Length - 1] ? bits[8 * bitsBuffer.Length - 1] : (bool?) null 
                 : false;
             
             count = Math.Min(Size * 8, count);
@@ -449,8 +455,8 @@ namespace Echo.Concrete.Values.ValueType
 
             for (int i = 0; i < count; i++)
             {
-                bits[bitsBuffer.Length - 1 - i] = sign.GetValueOrDefault();
-                mask[bitsBuffer.Length - 1 - i] = sign.HasValue;
+                bits[8 * bitsBuffer.Length - 1 - i] = sign.GetValueOrDefault();
+                mask[8 * bitsBuffer.Length - 1 - i] = sign.HasValue;
             }
 
             SetBits(bitsBuffer, maskBuffer);
