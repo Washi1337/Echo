@@ -93,7 +93,7 @@ namespace Echo.Concrete.Values.ValueType
             {
                 for (var i = 0; i < Size; i++)
                 {
-                    if (_mask[i] != 0)
+                    if (_mask[i] != 0xFF)
                     {
                         return false;
                     }
@@ -119,8 +119,8 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override bool? GetBit(int index)
         {
-            var bits = new BitField(_bits);
-            var mask = new BitField(_mask);
+            var bits = new BitField(_bits.AsSpan(0, Size));
+            var mask = new BitField(_mask.AsSpan(0, Size));
             
             return !mask[index] ? (bool?) null : bits[index];
         }
@@ -128,8 +128,8 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override void SetBit(int index, bool? value)
         {
-            var bits = new BitField(_bits);
-            var mask = new BitField(_mask);
+            var bits = new BitField(_bits.AsSpan(0, Size));
+            var mask = new BitField(_mask.AsSpan(0, Size));
             
             mask[index] = value.HasValue;
             bits[index] = !value.HasValue || value.Value;
@@ -137,11 +137,11 @@ namespace Echo.Concrete.Values.ValueType
 
         /// <param name="buffer"></param>
         /// <inheritdoc />
-        public override void GetBits(Span<byte> buffer) => _bits.AsSpan().Slice(0, Size).CopyTo(buffer);
+        public override void GetBits(Span<byte> buffer) => _bits.AsSpan(0, Size).CopyTo(buffer);
 
         /// <param name="buffer"></param>
         /// <inheritdoc />
-        public override void GetMask(Span<byte> buffer) => _mask.AsSpan().Slice(0, Size).CopyTo(buffer);
+        public override void GetMask(Span<byte> buffer) => _mask.AsSpan(0, Size).CopyTo(buffer);
 
         /// <inheritdoc />
         public override void SetBits(Span<byte> bits, Span<byte> mask)
