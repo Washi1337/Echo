@@ -153,7 +153,7 @@ namespace Echo.Concrete.Values.ValueType
                     _ => throw new FormatException()
                 };
 
-                if (i >= backingBits.Length)
+                if (i >= 8 * backingBits.Length)
                 {
                     if (!bit.HasValue || bit.Value)
                         throw new OverflowException();
