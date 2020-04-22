@@ -178,7 +178,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            if (bits.Length != 64 || mask.Length != 64)
+            if (bits.Length != 8 || mask.Length != 8)
                 throw new ArgumentException("Number of bits is not 64.");
 
             U64 = BinaryPrimitives.ReadUInt64LittleEndian(bits);

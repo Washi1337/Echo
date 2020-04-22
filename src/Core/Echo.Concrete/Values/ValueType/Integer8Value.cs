@@ -177,7 +177,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            if (bits.Length != 8 || mask.Length != 8)
+            if (bits.Length != 1 || mask.Length != 1)
                 throw new ArgumentException("Number of bits is not 8.");
             
             U8 = bits[0];

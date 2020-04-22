@@ -178,7 +178,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            if (bits.Length != 16 || mask.Length != 16)
+            if (bits.Length != 2 || mask.Length != 2)
                 throw new ArgumentException("Number of bits is not 16.");
             
             U16 = BinaryPrimitives.ReadUInt16LittleEndian(bits);
