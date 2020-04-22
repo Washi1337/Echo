@@ -110,11 +110,8 @@ namespace Echo.Concrete.Values
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (obj is BitField other)
-            {
-                return Equals(other);
-            }
-
+            // Since this is a ref struct, it will
+            // never equal any reference type
             return false;
         }
 
