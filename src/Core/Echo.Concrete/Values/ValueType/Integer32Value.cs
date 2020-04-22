@@ -143,9 +143,19 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override bool? GetBit(int index)
         {
+            Span<byte> bitsBuffer = stackalloc byte[Size];
+            GetBits(bitsBuffer);
+
+            Span<byte> maskBuffer = stackalloc byte[Size];
+            GetMask(maskBuffer);
+            
+            var bits = new BitField(bitsBuffer);
+            var mask = new BitField(maskBuffer);
+            
             if (index < 0 || index >= 32)
                 throw new ArgumentOutOfRangeException(nameof(index));
-            return ((Mask >> index) & 1) == 1 ? ((U32 >> index) & 1) == 1 : (bool?) null;
+
+            return mask[index] ? bits[index] : (bool?) null;
         }
 
         /// <inheritdoc />
@@ -154,17 +164,30 @@ namespace Echo.Concrete.Values.ValueType
             if (index < 0 || index >= 32)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
-            uint mask = 1u << index;
+            Span<byte> bitsBuffer = stackalloc byte[Size];
+            GetBits(bitsBuffer);
+
+            Span<byte> maskBuffer = stackalloc byte[Size];
+            GetMask(maskBuffer);
+            
+            var bits = new BitField(bitsBuffer);
+            var mask = new BitField(maskBuffer);
             
             if (value.HasValue)
             {
-                Mask |= mask;
-                U32 = (U32 & ~mask) | ((value.Value ? 1u : 0u) << index);
+                mask[index] = true;
+                mask.Not();
+                bits.And(mask);
+                mask.Not();
+
+                bits[index] = value.Value;
             }
             else
             {
-                Mask &= ~mask;
+                mask[index] = false;
             }
+            
+            SetBits(bitsBuffer, maskBuffer);
         }
 
         /// <param name="buffer"></param>
