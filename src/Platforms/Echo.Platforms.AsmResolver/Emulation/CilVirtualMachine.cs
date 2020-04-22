@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Cil;
@@ -16,27 +17,56 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// Provides a dispatcher based implementation for a virtual machine, capable of emulating a single managed method
     /// body implemented using the CIL instruction set.
     /// </summary>
-    public class CilVirtualMachine : IVirtualMachine<CilInstruction>
+    public class CilVirtualMachine : IVirtualMachine<CilInstruction>, IServiceProvider, ICilRuntimeEnvironment
     {
         /// <inheritdoc />
         public event EventHandler<ExecutionTerminatedEventArgs> ExecutionTerminated;
-        
-        private readonly CilMethodBody _methodBody;
-        private readonly CilArchitecture _architecture;
+     
+        private readonly IDictionary<Type, object> _services = new Dictionary<Type, object>();
 
         /// <summary>
         /// Creates a new instance of the <see cref="CilVirtualMachine"/>. 
         /// </summary>
         /// <param name="methodBody">The method body to emulate.</param>
-        public CilVirtualMachine(CilMethodBody methodBody)
+        /// <param name="is32Bit">Indicates whether the virtual machine should run in 32-bit mode or in 64-bit mode.</param>
+        public CilVirtualMachine(CilMethodBody methodBody, bool is32Bit)
+            : this
+            (
+                new ListInstructionProvider<CilInstruction>(
+                    new CilArchitecture(methodBody), methodBody.Instructions),
+                is32Bit
+            )
         {
-            _methodBody = methodBody ?? throw new ArgumentNullException(nameof(methodBody));
-            _architecture = new CilArchitecture(methodBody);
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="CilVirtualMachine"/>. 
+        /// </summary>
+        /// <param name="instructions">The instructions to emulate..</param>
+        /// <param name="is32Bit">Indicates whether the virtual machine should run in 32-bit mode or in 64-bit mode.</param>
+        public CilVirtualMachine(IInstructionProvider<CilInstruction> instructions, bool is32Bit)
+        {
+            Instructions = instructions;
+            Architecture = instructions.Architecture;
             
+            Is32Bit = is32Bit;
             Status = VirtualMachineStatus.Idle;
             CurrentState = new CilProgramState();
-            Instructions = new ListInstructionProvider<CilInstruction>(_architecture, methodBody.Instructions);
             Dispatcher = new DefaultCilDispatcher();
+            
+            _services[typeof(ICilRuntimeEnvironment)] = this;
+        }
+
+        /// <inheritdoc />
+        public IInstructionSetArchitecture<CilInstruction> Architecture
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public bool Is32Bit
+        {
+            get;
         }
 
         /// <inheritdoc />
@@ -70,7 +100,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <inheritdoc />
         public ExecutionResult Execute(CancellationToken cancellationToken)
         {
-            var context = new ExecutionContext(CurrentState, cancellationToken);
+            var context = new ExecutionContext(this, CurrentState, cancellationToken);
 
             try
             {
@@ -87,14 +117,18 @@ namespace Echo.Platforms.AsmResolver.Emulation
                     // Execute.
                     var result = Dispatcher.Execute(context, currentInstruction);
                     
-                    // Handle exceptions thrown by the instruction. 
-                    if (!result.IsSuccess)
+                    if (result.IsSuccess)
                     {
+                        context.Exit = result.HasTerminated;
+                    }
+                    else
+                    {
+                        // Handle exceptions thrown by the instruction. 
                         // TODO: process exception handlers.
-                        
+
                         // Note: We don't throw the user-code exception to conform with spec of the virtual machine
                         // interface.
-                        
+
                         context.Exit = true;
                         context.Result.Exception = result.Exception;
                     }
@@ -113,9 +147,10 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Invoked when the execution of the virtual machine is terminated.
         /// </summary>
         /// <param name="e">The arguments describing the event.</param>
-        protected virtual void OnExecutionTerminated(ExecutionTerminatedEventArgs e)
-        {
+        protected virtual void OnExecutionTerminated(ExecutionTerminatedEventArgs e) => 
             ExecutionTerminated?.Invoke(this, e);
-        }
+
+        object IServiceProvider.GetService(Type serviceType) => 
+            _services[serviceType];
     }
 }

@@ -153,6 +153,15 @@ namespace Echo.Concrete.Values.ValueType
             
             bits.CopyTo(_bits);
             mask.CopyTo(_mask);
+            Bits = (BitArray) bits.Clone();
+            Mask = (BitArray) mask.Clone();
+        }      
+        
+        /// <inheritdoc />
+        public override void MarkFullyUnknown()
+        {
+            Mask.SetAll(false);
         }
+
     }
 }

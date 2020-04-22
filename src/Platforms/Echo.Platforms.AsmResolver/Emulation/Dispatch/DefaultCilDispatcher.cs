@@ -17,20 +17,23 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
 
         private static IEnumerable<ICilOpCodeHandler> GetOrCreateHandlersInModule(Module module)
         {
-            if (!HandlerInstances.TryGetValue(module, out var handlers))
-            {  
-                handlers = new List<ICilOpCodeHandler>();
-                
-                foreach (var type in module.GetTypes())
+            lock (HandlerInstances)
+            {
+                if (!HandlerInstances.TryGetValue(module, out var handlers))
                 {
-                    if (!type.IsAbstract && typeof(ICilOpCodeHandler).IsAssignableFrom(type))
-                        handlers.Add((ICilOpCodeHandler) Activator.CreateInstance(type));
+                    handlers = new List<ICilOpCodeHandler>();
+
+                    foreach (var type in module.GetTypes())
+                    {
+                        if (!type.IsAbstract && typeof(ICilOpCodeHandler).IsAssignableFrom(type))
+                            handlers.Add((ICilOpCodeHandler) Activator.CreateInstance(type));
+                    }
+
+                    HandlerInstances.Add(module, handlers);
                 }
 
-                HandlerInstances.Add(module, handlers);
+                return handlers;
             }
-
-            return handlers;
         }
         
         /// <inheritdoc />
@@ -87,7 +90,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
                 var handler = GetOpCodeHandler(instruction);
                 result = handler.Execute(context, instruction);
             }
-
+ 
             OnAfterInstructionDispatch(new AfterInstructionDispatchEventArgs<CilInstruction>(context, instruction, result));
             return result;
         }

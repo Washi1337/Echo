@@ -23,6 +23,7 @@ namespace Echo.Concrete.Emulation.Dispatch
         /// <remarks>
         /// When this property is set to <c>true</c>, the <see cref="ResultOverride"/> property will be used as the
         /// final emulation result.
+        /// </remarks>
         public bool Handled
         {
             get;

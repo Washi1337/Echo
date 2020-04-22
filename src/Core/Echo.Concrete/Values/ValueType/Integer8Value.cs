@@ -272,5 +272,11 @@ namespace Echo.Concrete.Values.ValueType
 
             return base.IsLessThan(other);
         }
+        
+        /// <inheritdoc />
+        public override void MarkFullyUnknown()
+        {
+            Mask = 0;
+        }
     }
 }
