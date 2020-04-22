@@ -63,10 +63,10 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="bitString">The bit string to parse.</param>
         public IntegerNValue(string bitString)
         {
-            _bits = ArrayPool<byte>.Shared.Rent(bitString.Length);
-            _mask = ArrayPool<byte>.Shared.Rent(bitString.Length);
+            _bits = ArrayPool<byte>.Shared.Rent(bitString.Length / 8);
+            _mask = ArrayPool<byte>.Shared.Rent(bitString.Length / 8);
 
-            Size = bitString.Length;
+            Size = bitString.Length / 8;
             SetBits(bitString);
         }
 
@@ -137,11 +137,11 @@ namespace Echo.Concrete.Values.ValueType
 
         /// <param name="buffer"></param>
         /// <inheritdoc />
-        public override void GetBits(Span<byte> buffer) => _bits.CopyTo(buffer);
+        public override void GetBits(Span<byte> buffer) => _bits.AsSpan().Slice(0, Size).CopyTo(buffer);
 
         /// <param name="buffer"></param>
         /// <inheritdoc />
-        public override void GetMask(Span<byte> buffer) => _mask.CopyTo(buffer);
+        public override void GetMask(Span<byte> buffer) => _mask.AsSpan().Slice(0, Size).CopyTo(buffer);
 
         /// <inheritdoc />
         public override void SetBits(Span<byte> bits, Span<byte> mask)
