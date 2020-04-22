@@ -233,19 +233,19 @@ namespace Echo.Concrete.Values.ValueType
             AssertSameBitSize(other);
 
             Span<byte> bits = stackalloc byte[Size];
+            GetBits(bits);
+            
             Span<byte> mask = stackalloc byte[Size];
+            GetMask(mask);
             
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
 
                 Span<byte> otherBits = stackalloc byte[Size];
-                
-                GetBits(bits);
                 other.GetBits(otherBits);
                 
                 new BitField(bits).And(new BitField(otherBits));
-                GetMask(mask);
             }
             else
             {
@@ -292,19 +292,19 @@ namespace Echo.Concrete.Values.ValueType
             AssertSameBitSize(other);
 
             Span<byte> bits = stackalloc byte[Size];
+            GetBits(bits);
+            
             Span<byte> mask = stackalloc byte[Size];
+            GetMask(mask);
             
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
 
                 Span<byte> otherBits = stackalloc byte[Size];
-                
-                GetBits(bits);
                 other.GetBits(otherBits);
                 
                 new BitField(bits).Or(new BitField(otherBits));
-                GetMask(mask);
             }
             else
             {
@@ -351,19 +351,19 @@ namespace Echo.Concrete.Values.ValueType
             AssertSameBitSize(other);
 
             Span<byte> bits = stackalloc byte[Size];
+            GetBits(bits);
+            
             Span<byte> mask = stackalloc byte[Size];
+            GetMask(mask);
             
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
 
                 Span<byte> otherBits = stackalloc byte[Size];
-                GetBits(bits);
                 other.GetBits(otherBits);
                 
-                
                 new BitField(bits).Xor(new BitField(otherBits));
-                GetMask(mask);
             }
             else
             {
