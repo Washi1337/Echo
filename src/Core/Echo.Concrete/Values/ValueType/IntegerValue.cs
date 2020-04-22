@@ -403,7 +403,7 @@ namespace Echo.Concrete.Values.ValueType
 
             count = Math.Min(Size * 8, count);
             
-            for (int i = bitsBuffer.Length - count - 1; i >= 0; i--)
+            for (int i = 8 * bitsBuffer.Length - count - 1; i >= 0; i--)
             {
                 bits[i + count] = bits[i];
                 mask[i + count] = mask[i];
@@ -441,7 +441,7 @@ namespace Echo.Concrete.Values.ValueType
             
             count = Math.Min(Size * 8, count);
             
-            for (int i = count; i < bitsBuffer.Length; i++)
+            for (int i = count; i < bitsBuffer.Length * 8; i++)
             {
                 bits[i - count] = bits[i];
                 mask[i - count] = mask[i];
@@ -477,7 +477,7 @@ namespace Echo.Concrete.Values.ValueType
             var mask = new BitField(maskBuffer);
 
             bool? carry = false;
-            for (int i = 0; i < sumBuffer.Length; i++)
+            for (int i = 0; i < sumBuffer.Length * 8; i++)
             {
                 bool? a = GetBit(i);
                 bool? b = other.GetBit(i);
@@ -540,7 +540,7 @@ namespace Echo.Concrete.Values.ValueType
             var mask = new BitField(maskBuffer);
 
             bool? borrow = false;
-            for (int i = 0; i < differenceBuffer.Length; i++)
+            for (int i = 0; i < differenceBuffer.Length * 8; i++)
             {
                 bool? a = GetBit(i);
                 bool? b = other.GetBit(i);
