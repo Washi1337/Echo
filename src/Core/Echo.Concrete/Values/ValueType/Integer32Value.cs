@@ -164,30 +164,17 @@ namespace Echo.Concrete.Values.ValueType
             if (index < 0 || index >= 32)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
-            Span<byte> bitsBuffer = stackalloc byte[Size];
-            GetBits(bitsBuffer);
-
-            Span<byte> maskBuffer = stackalloc byte[Size];
-            GetMask(maskBuffer);
-            
-            var bits = new BitField(bitsBuffer);
-            var mask = new BitField(maskBuffer);
+            uint mask = 1u << index;
             
             if (value.HasValue)
             {
-                mask[index] = true;
-                mask.Not();
-                bits.And(mask);
-                mask.Not();
-
-                bits[index] = value.Value;
+                Mask |= mask;
+                U32 = (U32 & ~mask) | ((value.Value ? 1u : 0u) << index);
             }
             else
             {
-                mask[index] = false;
+                Mask &= ~mask;
             }
-            
-            SetBits(bitsBuffer, maskBuffer);
         }
 
         /// <inheritdoc />
