@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
@@ -19,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 
         /// <inheritdoc />
         protected override DispatchResult Execute(ExecutionContext context, Float64Value left, Float64Value right) => 
-            throw new DispatchException("And instructions cannot be evaluated on floating point values.");
+            new DispatchResult(new InvalidProgramException());
 
         /// <inheritdoc />
         protected override DispatchResult Execute(ExecutionContext context, IntegerValue left, IntegerValue right)
