@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
@@ -40,6 +41,23 @@ namespace Echo.Concrete.Tests.Values.ReferenceType
             var array = new ArrayValue(elements);
             
             Assert.Equal(elements, array);
+        }
+
+        [Fact]
+        public void ShallowCopyShouldReferenceSameArray()
+        {
+            var array = new ArrayValue(new IConcreteValue[]
+            {
+                new Integer32Value(0), new Integer32Value(1), new Integer32Value(2),
+            });
+
+            var copy = (ArrayValue) array.Copy();
+
+            Assert.NotSame(array, copy);
+            Assert.Equal((IEnumerable<IConcreteValue>) array, copy);
+            
+            copy[0] = new Integer32Value(1234);
+            Assert.Equal(new Integer32Value(1234), array[0]);
         }
     }
 }
