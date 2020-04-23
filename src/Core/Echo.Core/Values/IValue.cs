@@ -22,7 +22,7 @@ namespace Echo.Core.Values
         }
 
         /// <summary>
-        /// Creates an exact copy of the value.
+        /// Creates a shallow copy of the value.
         /// </summary>
         /// <returns>The copied value.</returns>
         IValue Copy();
