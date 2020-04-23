@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Constants
         {
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldc_R4, 1.23f));
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Float32Value(1.23f), ExecutionContext.ProgramState.Stack.Top);
+            Assert.Equal(new Float64Value(1.23f), ExecutionContext.ProgramState.Stack.Top);
         }
     }
 }

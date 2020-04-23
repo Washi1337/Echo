@@ -31,7 +31,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
             {
                 Float64Value float64Value => Execute(context, float64Value),
                 IntegerValue integerValue => Execute(context, integerValue),
-                _ => throw new InvalidProgramException()
+                _ => new DispatchResult(new InvalidProgramException())
             };
 
             if (result.IsSuccess)

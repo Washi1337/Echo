@@ -19,8 +19,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         };
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, Float64Value value) => 
-            throw new InvalidProgramException();
+        protected override DispatchResult Execute(ExecutionContext context, Float64Value value) =>
+            new DispatchResult(new InvalidProgramException());
 
         /// <inheritdoc />
         protected override DispatchResult Execute(ExecutionContext context, IntegerValue value)

@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
             {
                 (IntegerValue value, int shiftCount) => Execute(context, instruction, value, shiftCount),
                 (IntegerValue value, null) => ExecuteDefault(context, value, left),
-                _ => throw new InvalidProgramException()
+                _ => new DispatchResult(new InvalidProgramException())
             };
 
             if (result.IsSuccess)
@@ -73,7 +73,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
                 {
                     Integer32Value int32 => int32.I32,
                     NativeIntegerValue nativeInt => (int?) nativeInt.ToInt64().I64,
-                    _ => throw new InvalidProgramException()
+                    _ => null
                 };
             }
 

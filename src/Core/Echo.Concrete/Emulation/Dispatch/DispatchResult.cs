@@ -7,6 +7,12 @@ namespace Echo.Concrete.Emulation.Dispatch
     /// </summary>
     public struct DispatchResult
     {
+        public DispatchResult( Exception exception)
+        {
+            HasTerminated = false;
+            Exception = exception;
+        }
+        
         /// <summary>
         /// Gets or sets a value indicating whether the execution of the program was terminated.
         /// </summary>
