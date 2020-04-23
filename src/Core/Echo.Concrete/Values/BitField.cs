@@ -35,14 +35,15 @@ namespace Echo.Concrete.Values
             set
             {
                 ValidateIndex(index);
+                var div = Math.DivRem(index, 8, out var q);
                 
                 if (value)
                 {
-                    _span[Math.DivRem(index, 8, out var q)] |= (byte) (1 << q);
+                    _span[div] |= (byte) (1 << q);
                 }
                 else
                 {
-                    _span[Math.DivRem(index, 8, out var q)] &= (byte) ~(1 << q);
+                    _span[div] &= (byte) ~(1 << q);
                 }
             }
         }
