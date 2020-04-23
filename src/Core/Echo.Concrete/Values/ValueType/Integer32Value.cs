@@ -190,11 +190,9 @@ namespace Echo.Concrete.Values.ValueType
             SetBits(bitsBuffer, maskBuffer);
         }
 
-        /// <param name="buffer"></param>
         /// <inheritdoc />
         public override void GetBits(Span<byte> buffer) => BinaryPrimitives.WriteUInt32LittleEndian(buffer, U32);
 
-        /// <param name="buffer"></param>
         /// <inheritdoc />
         public override void GetMask(Span<byte> buffer) => BinaryPrimitives.WriteUInt32LittleEndian(buffer, Mask);
 

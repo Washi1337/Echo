@@ -10,6 +10,10 @@ namespace Echo.Concrete.Values.ValueType
     /// </summary>
     public class IntegerNValue : IntegerValue
     {
+        private readonly byte[] _bits;
+
+        private readonly byte[] _mask;
+        
         /// <summary>
         /// Creates a new zero integer.
         /// </summary>
@@ -119,10 +123,6 @@ namespace Echo.Concrete.Values.ValueType
             get => _mask.AsSpan(0, Size);
         }
 
-        private readonly byte[] _bits;
-
-        private readonly byte[] _mask;
-
         /// <inheritdoc />
         public override IValue Copy() => new IntegerNValue(Bits, Mask);
 
@@ -145,11 +145,9 @@ namespace Echo.Concrete.Values.ValueType
             bits[index] = !value.HasValue || value.Value;
         }
 
-        /// <param name="buffer"></param>
         /// <inheritdoc />
         public override void GetBits(Span<byte> buffer) => Bits.CopyTo(buffer);
 
-        /// <param name="buffer"></param>
         /// <inheritdoc />
         public override void GetMask(Span<byte> buffer) => Mask.CopyTo(buffer);
 

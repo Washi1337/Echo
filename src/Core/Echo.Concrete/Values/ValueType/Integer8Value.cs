@@ -166,11 +166,9 @@ namespace Echo.Concrete.Values.ValueType
             }
         }
 
-        /// <param name="buffer"></param>
         /// <inheritdoc />
         public override void GetBits(Span<byte> buffer) => buffer[0] = U8;
 
-        /// <param name="buffer"></param>
         /// <inheritdoc />
         public override void GetMask(Span<byte> buffer) => buffer[0] = Mask;
 

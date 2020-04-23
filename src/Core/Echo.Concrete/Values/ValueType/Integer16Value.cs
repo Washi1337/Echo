@@ -167,11 +167,9 @@ namespace Echo.Concrete.Values.ValueType
             }
         }
 
-        /// <param name="buffer"></param>
         /// <inheritdoc />
         public override void GetBits(Span<byte> buffer) => BinaryPrimitives.WriteUInt16LittleEndian(buffer, U16);
 
-        /// <param name="buffer"></param>
         /// <inheritdoc />
         public override void GetMask(Span<byte> buffer) => BinaryPrimitives.WriteUInt16LittleEndian(buffer, Mask);
 
