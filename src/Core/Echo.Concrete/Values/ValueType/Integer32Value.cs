@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Buffers.Binary;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -143,9 +143,19 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override bool? GetBit(int index)
         {
+            Span<byte> bitsBuffer = stackalloc byte[Size];
+            GetBits(bitsBuffer);
+
+            Span<byte> maskBuffer = stackalloc byte[Size];
+            GetMask(maskBuffer);
+            
+            var bits = new BitField(bitsBuffer);
+            var mask = new BitField(maskBuffer);
+            
             if (index < 0 || index >= 32)
                 throw new ArgumentOutOfRangeException(nameof(index));
-            return ((Mask >> index) & 1) == 1 ? ((U32 >> index) & 1) == 1 : (bool?) null;
+
+            return mask[index] ? bits[index] : (bool?) null;
         }
 
         /// <inheritdoc />
@@ -168,21 +178,19 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override BitArray GetBits() => new BitArray(BitConverter.GetBytes(U32));
+        public override void GetBits(Span<byte> buffer) => BinaryPrimitives.WriteUInt32LittleEndian(buffer, U32);
 
         /// <inheritdoc />
-        public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
+        public override void GetMask(Span<byte> buffer) => BinaryPrimitives.WriteUInt32LittleEndian(buffer, Mask);
 
         /// <inheritdoc />
-        public override void SetBits(BitArray bits, BitArray mask)
+        public override void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            if (bits.Count != 32 || mask.Count != 32)
+            if (bits.Length != 4 || mask.Length != 4)
                 throw new ArgumentException("Number of bits is not 32.");
-            var buffer = new byte[4];
-            bits.CopyTo(buffer, 0);
-            U32 = BitConverter.ToUInt32(buffer, 0);
-            mask.CopyTo(buffer, 0);
-            Mask = BitConverter.ToUInt32(buffer, 0);
+
+            U32 = BinaryPrimitives.ReadUInt32LittleEndian(bits);
+            Mask = BinaryPrimitives.ReadUInt32LittleEndian(mask);
         }
         
         /// <inheritdoc />

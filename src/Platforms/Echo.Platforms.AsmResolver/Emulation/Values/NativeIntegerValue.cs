@@ -68,13 +68,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public override void SetBit(int index, bool? value) => _value.SetBit(index, value);
 
         /// <inheritdoc />
-        public override BitArray GetBits() => _value.GetBits();
+        public override void GetBits(Span<byte> buffer) => _value.GetBits(buffer);
 
         /// <inheritdoc />
-        public override BitArray GetMask() => _value.GetMask();
+        public override void GetMask(Span<byte> buffer) => _value.GetMask(buffer);
 
         /// <inheritdoc />
-        public override void SetBits(BitArray bits, BitArray mask) => _value.SetBits(bits, mask);
+        public override void SetBits(Span<byte> bits, Span<byte> mask) => _value.SetBits(bits, mask);
 
         /// <inheritdoc />
         public override void MarkFullyUnknown() => _value.MarkFullyUnknown();

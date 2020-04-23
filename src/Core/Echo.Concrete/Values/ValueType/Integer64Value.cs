@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Buffers.Binary;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -141,7 +141,7 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override BitArray GetBits() => new BitArray(BitConverter.GetBytes(U64));
+        public override void GetBits(Span<byte> buffer) => BinaryPrimitives.WriteUInt64LittleEndian(buffer, U64);
 
         /// <inheritdoc />
         public override bool? GetBit(int index)
@@ -171,18 +171,16 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
+        public override void GetMask(Span<byte> buffer) => BinaryPrimitives.WriteUInt64LittleEndian(buffer, Mask);
 
         /// <inheritdoc />
-        public override void SetBits(BitArray bits, BitArray mask)
+        public override void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            if (bits.Count != 64 || mask.Count != 64)
+            if (bits.Length != 8 || mask.Length != 8)
                 throw new ArgumentException("Number of bits is not 64.");
-            var buffer = new byte[8];
-            bits.CopyTo(buffer, 0);
-            U64 = BitConverter.ToUInt64(buffer, 0);
-            mask.CopyTo(buffer, 0);
-            Mask = BitConverter.ToUInt64(buffer, 0);
+
+            U64 = BinaryPrimitives.ReadUInt64LittleEndian(bits);
+            Mask = BinaryPrimitives.ReadUInt64LittleEndian(mask);
         }
 
         /// <inheritdoc />

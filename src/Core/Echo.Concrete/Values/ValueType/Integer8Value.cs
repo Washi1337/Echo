@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -168,27 +167,19 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override BitArray GetBits() => new BitArray(new[]
-        {
-            U8
-        });
+        public override void GetBits(Span<byte> buffer) => buffer[0] = U8;
 
         /// <inheritdoc />
-        public override BitArray GetMask() => new BitArray(new[]
-        {
-            Mask
-        });
+        public override void GetMask(Span<byte> buffer) => buffer[0] = Mask;
 
         /// <inheritdoc />
-        public override void SetBits(BitArray bits, BitArray mask)
+        public override void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            if (bits.Count != 8 || mask.Count != 8)
+            if (bits.Length != 1 || mask.Length != 1)
                 throw new ArgumentException("Number of bits is not 8.");
-            var buffer = new byte[1];
-            bits.CopyTo(buffer, 0);
-            U8 = buffer[0];
-            mask.CopyTo(buffer, 0);
-            Mask = buffer[0];
+            
+            U8 = bits[0];
+            Mask = mask[0];
         }
 
         /// <inheritdoc />
