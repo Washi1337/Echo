@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
@@ -49,7 +48,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                 return new DispatchResult(new IndexOutOfRangeException());
             
             // Push value stored in array.
-            var value = GetValue(context, instruction.OpCode.Code, arrayValue, index.Value);
+            var value = GetValue(context, instruction, arrayValue, index.Value);
 
             stack.Push(value);
             return base.Execute(context, instruction);
@@ -59,10 +58,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         /// Obtains the value in the array using the provided operation code.
         /// </summary>
         /// <param name="context">The context in which the instruction is being executed in.</param>
-        /// <param name="code">The operation to perform.</param>
+        /// <param name="instruction">The instruction that is being executed.</param>
         /// <param name="array">The array to get the element from.</param>
         /// <param name="index">The index of the element to get.</param>
         /// <returns>The value.</returns>
-        protected abstract IConcreteValue GetValue(ExecutionContext context, CilCode code, ArrayValue array, int index);
+        protected abstract IConcreteValue GetValue(
+            ExecutionContext context, 
+            CilInstruction instruction,
+            ArrayValue array,
+            int index);
     }
 }

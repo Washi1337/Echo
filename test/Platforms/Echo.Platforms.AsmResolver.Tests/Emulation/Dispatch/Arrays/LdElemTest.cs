@@ -110,5 +110,40 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             Assert.False(result.IsSuccess);
             Assert.IsAssignableFrom<IndexOutOfRangeException>(result.Exception);
         }
+
+        [Fact]
+        public void LdElemR4ShouldExtendToFloat64()
+        {
+            var stack = ExecutionContext.ProgramState.Stack;
+            var array = new ArrayValue(new IConcreteValue[]
+            {
+                new Float32Value(1.23f), 
+            });
+            stack.Push(array);
+            stack.Push(new Integer32Value(0));
+            
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_R4));
+            
+            Assert.True(result.IsSuccess);
+            Assert.Equal(new Float64Value(1.23f), stack.Top);
+        }
+
+        [Fact]
+        public void LdElemR8CopyFloat64()
+        {
+            var stack = ExecutionContext.ProgramState.Stack;
+            var array = new ArrayValue(new IConcreteValue[]
+            {
+                new Float64Value(1.23D), 
+            });
+            stack.Push(array);
+            stack.Push(new Integer32Value(0));
+            
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_R4));
+            
+            Assert.True(result.IsSuccess);
+            Assert.NotSame(array[0], stack.Top);
+            Assert.Equal(new Float64Value(1.23D), stack.Top);
+        }
     }
 }

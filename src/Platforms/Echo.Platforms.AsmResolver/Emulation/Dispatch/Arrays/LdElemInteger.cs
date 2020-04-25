@@ -28,18 +28,20 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         };
 
         /// <inheritdoc />
-        protected override IConcreteValue GetValue(ExecutionContext context, CilCode code, ArrayValue array, int index)
+        protected override IConcreteValue GetValue(ExecutionContext context, CilInstruction instruction, ArrayValue array,
+            int index)
         {
             bool is32Bit = context.GetService<ICilRuntimeEnvironment>().Is32Bit;
-            
+            var code = instruction.OpCode.Code;
             var integerValue = array[index] as IntegerValue;
-            
+
             if (integerValue is null)
                 return GetUnknownInteger(code, is32Bit);
 
             var result = GetKnownInteger(code, integerValue, is32Bit);
             if (code == CilCode.Ldelem_I)
                 result = new NativeIntegerValue(result, is32Bit);
+            
             return result;
         }
 
