@@ -44,6 +44,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                     new NotSupportedException("Obtaining values from indices with unknown bits is not supported."));
             }
 
+            // Check if in bounds.
+            if (index < 0 || index >= arrayValue.Length)
+                return new DispatchResult(new IndexOutOfRangeException());
+            
             // Push value stored in array.
             var value = GetValue(context, instruction.OpCode.Code, arrayValue, index.Value);
 

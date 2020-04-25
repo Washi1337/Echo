@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
@@ -87,6 +88,27 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             Assert.True(result.IsSuccess);
             Assert.Equal(new Integer32Value(expectedValue), stack.Top);
         }
-        
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(3)]
+        [InlineData(100)]
+        public void ArrayAccessOutOfBoundsShouldThrow(int index)
+        {
+            var stack = ExecutionContext.ProgramState.Stack;
+            var array = new ArrayValue(new IConcreteValue[]
+            {
+                new Integer32Value(0),
+                new Integer32Value(1),
+                new Integer32Value(2),
+            });
+            stack.Push(array);
+            stack.Push(new Integer32Value(index));
+            
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
+            
+            Assert.False(result.IsSuccess);
+            Assert.IsAssignableFrom<IndexOutOfRangeException>(result.Exception);
+        }
     }
 }
