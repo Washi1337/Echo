@@ -24,7 +24,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             IEnumerable<TInstruction> instructions, 
             IStateTransitionResolver<TInstruction> transitionResolver)
         {
-            Instructions = new ListInstructionProvider<TInstruction>(architecture, instructions);
+            Instructions = new StaticToSymbolicAdapter<TInstruction>(architecture, instructions);
             TransitionResolver = transitionResolver ?? throw new ArgumentNullException(nameof(transitionResolver));
         }
         
@@ -37,6 +37,20 @@ namespace Echo.ControlFlow.Construction.Symbolic
             IStaticInstructionProvider<TInstruction> instructions, 
             IStateTransitionResolver<TInstruction> transitionResolver)
         {
+            Instructions = new StaticToSymbolicAdapter<TInstruction>(
+                instructions ?? throw new ArgumentNullException(nameof(instructions)));
+            TransitionResolver = transitionResolver ?? throw new ArgumentNullException(nameof(transitionResolver));
+        }
+        
+        /// <summary>
+        /// Creates a new symbolic control flow graph builder using the provided program state transition resolver.  
+        /// </summary>
+        /// <param name="instructions">The instructions to traverse.</param>
+        /// <param name="transitionResolver">The transition resolver to use for inferring branch targets.</param>
+        public SymbolicFlowGraphBuilder(
+            ISymbolicInstructionProvider<TInstruction> instructions, 
+            IStateTransitionResolver<TInstruction> transitionResolver)
+        {
             Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
             TransitionResolver = transitionResolver ?? throw new ArgumentNullException(nameof(transitionResolver));
         }
@@ -44,7 +58,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <summary>
         /// Gets the instructions to traverse.
         /// </summary>
-        public IStaticInstructionProvider<TInstruction> Instructions
+        public ISymbolicInstructionProvider<TInstruction> Instructions
         {
             get;
         }
@@ -91,7 +105,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
                 // instruction and (re)visit all its successors.
                 if (recordedStatesChanged)
                 {
-                    var instruction = Instructions.GetInstructionAtOffset(currentState.ProgramCounter);
+                    var instruction = Instructions.GetCurrentInstruction(currentState);
                     var instructionInfo = InvalidateKnownSuccessors(result, currentState, instruction);
                     ResolveAndScheduleSuccessors(currentState, instructionInfo, agenda);
                 }
