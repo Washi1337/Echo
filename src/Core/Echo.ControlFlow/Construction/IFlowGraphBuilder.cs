@@ -57,7 +57,6 @@ namespace Echo.ControlFlow.Construction
         /// Constructs a control flow graph from a collection of instructions, starting at the provided entrypoint address.
         /// </summary>
         /// <param name="self">The control flow graph builder to use.</param>
-        /// <param name="instructions">The instructions to graph.</param>
         /// <param name="entrypoint">The address of the first instruction to traverse.</param>
         /// <param name="exceptionHandlers">The set of exception handler ranges.</param>
         /// <returns>

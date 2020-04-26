@@ -21,6 +21,8 @@ namespace Echo.ControlFlow.Construction.Static
         /// <summary>
         /// Creates a new static graph builder using the provided instruction successor resolver.
         /// </summary>
+        /// <param name="architecture">The architecture of the instructions.</param>
+        /// <param name="instructions">The instructions to traverse.</param>
         /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
         public StaticFlowGraphBuilder(
@@ -35,6 +37,7 @@ namespace Echo.ControlFlow.Construction.Static
         /// <summary>
         /// Creates a new static graph builder using the provided instruction successor resolver.
         /// </summary>
+        /// <param name="instructions">The instructions to traverse.</param>
         /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
         public StaticFlowGraphBuilder(
@@ -45,6 +48,9 @@ namespace Echo.ControlFlow.Construction.Static
             SuccessorResolver = successorResolver ?? throw new ArgumentNullException(nameof(successorResolver));
         }
 
+        /// <summary>
+        /// Gets the instructions to traverse.
+        /// </summary>
         public IInstructionProvider<TInstruction> Instructions
         {
             get;

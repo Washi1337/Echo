@@ -16,6 +16,8 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <summary>
         /// Creates a new symbolic control flow graph builder using the provided program state transition resolver.  
         /// </summary>
+        /// <param name="architecture">The architecture of the instructions.</param>
+        /// <param name="instructions">The instructions to traverse.</param>
         /// <param name="transitionResolver">The transition resolver to use for inferring branch targets.</param>
         public SymbolicFlowGraphBuilder(
             IInstructionSetArchitecture<TInstruction> architecture,
@@ -29,6 +31,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <summary>
         /// Creates a new symbolic control flow graph builder using the provided program state transition resolver.  
         /// </summary>
+        /// <param name="instructions">The instructions to traverse.</param>
         /// <param name="transitionResolver">The transition resolver to use for inferring branch targets.</param>
         public SymbolicFlowGraphBuilder(
             IInstructionProvider<TInstruction> instructions, 
@@ -38,6 +41,9 @@ namespace Echo.ControlFlow.Construction.Symbolic
             TransitionResolver = transitionResolver ?? throw new ArgumentNullException(nameof(transitionResolver));
         }
 
+        /// <summary>
+        /// Gets the instructions to traverse.
+        /// </summary>
         public IInstructionProvider<TInstruction> Instructions
         {
             get;
