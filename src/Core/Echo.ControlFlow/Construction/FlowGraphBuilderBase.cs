@@ -12,26 +12,16 @@ namespace Echo.ControlFlow.Construction
     /// <typeparam name="TInstruction">The type of instructions to store in the control flow graph.</typeparam>
     public abstract class FlowGraphBuilderBase<TInstruction> : IFlowGraphBuilder<TInstruction>
     {
-        /// <summary>
-        /// Initializes the flow graph builder with an architecture.
-        /// </summary>
-        /// <param name="architecture">The architecture of the instructions to graph.</param>
-        protected FlowGraphBuilderBase(IInstructionSetArchitecture<TInstruction> architecture)
-        {
-            Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
-        }
-
         /// <inheritdoc />
-        public IInstructionSetArchitecture<TInstruction> Architecture
+        public abstract IInstructionSetArchitecture<TInstruction> Architecture
         {
             get;
         }
         
         /// <inheritdoc />
-        public ControlFlowGraph<TInstruction> ConstructFlowGraph(
-            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders)
+        public ControlFlowGraph<TInstruction> ConstructFlowGraph(long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
-            var traversalResult = CollectInstructions(instructions, entrypoint, knownBlockHeaders);
+            var traversalResult = CollectInstructions(entrypoint, knownBlockHeaders);
 
             var graph = new ControlFlowGraph<TInstruction>(Architecture);
             CreateNodes(graph, traversalResult);
@@ -44,13 +34,12 @@ namespace Echo.ControlFlow.Construction
         /// <summary>
         /// Traverses the instructions and records block headers and successor information about each traversed instruction.
         /// </summary>
-        /// <param name="instructions">The instructions to traverse.</param>
         /// <param name="entrypoint">The address of the first instruction to traverse.</param>
         /// <param name="knownBlockHeaders">A list of known block headers that should be included in the traversal.</param>
         /// <returns>An object containing the result of the traversal, including the block headers and successors of
         /// each instruction.</returns>
         protected abstract IInstructionTraversalResult<TInstruction> CollectInstructions(
-            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders);
+            long entrypoint, IEnumerable<long> knownBlockHeaders);
 
         private void CreateNodes(ControlFlowGraph<TInstruction> graph, IInstructionTraversalResult<TInstruction> traversalResult)
         {
@@ -101,5 +90,6 @@ namespace Echo.ControlFlow.Construction
                 }
             }
         }
+        
     }
 }

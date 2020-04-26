@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Symbolic;
@@ -14,13 +15,19 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
 {
     public class SymbolicGraphBuilderTest
     {
-        private readonly SymbolicFlowGraphBuilder<DummyInstruction> _cfgBuilder;
-        private readonly DummyTransitionResolver _dfgBuilder;
-
-        public SymbolicGraphBuilderTest()
+        private static (ControlFlowGraph<DummyInstruction> cfg, DataFlowGraph<DummyInstruction> dfg) BuildControlFlowGraph(
+            DummyInstruction[] instructions,
+            long entrypoint = 0,
+            IEnumerable<long> knownBlockHeaders = null)
         {
-            _dfgBuilder = new DummyTransitionResolver();
-            _cfgBuilder = new SymbolicFlowGraphBuilder<DummyInstruction>(DummyArchitecture.Instance, _dfgBuilder);
+            var dfgBuilder = new DummyTransitionResolver();
+            var cfgBuilder = new SymbolicFlowGraphBuilder<DummyInstruction>(
+                DummyArchitecture.Instance,
+                instructions,
+                dfgBuilder);
+
+            var cfg = cfgBuilder.ConstructFlowGraph(entrypoint, knownBlockHeaders ?? ImmutableArray<long>.Empty);
+            return (cfg, dfgBuilder.DataFlowGraph);
         }
 
         [Fact]
@@ -31,8 +38,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 DummyInstruction.Ret(0)
             };
 
-            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 0);
-            var dfg = _dfgBuilder.DataFlowGraph;
+            var (cfg, dfg) = BuildControlFlowGraph(instructions);
             
             Assert.Empty(dfg.Nodes[0].StackDependencies);
         }
@@ -47,8 +53,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 DummyInstruction.Ret(2)
             };
 
-            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 0);
-            var dfg = _dfgBuilder.DataFlowGraph;
+            var (cfg, dfg) = BuildControlFlowGraph(instructions);
             
             Assert.Single(dfg.Nodes[1].StackDependencies);
             Assert.Equal(dfg.Nodes[0], dfg.Nodes[1].StackDependencies[0].DataSources.First());
@@ -67,8 +72,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 DummyInstruction.Ret(4)
             };
 
-            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 0);
-            var dfg = _dfgBuilder.DataFlowGraph;
+            var (cfg, dfg) = BuildControlFlowGraph(instructions);
             
             Assert.Equal(3, dfg.Nodes[3].StackDependencies.Count);
             Assert.Equal(new[]
@@ -95,8 +99,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 DummyInstruction.Ret(6)
             };
 
-            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 0);
-            var dfg = _dfgBuilder.DataFlowGraph;
+            var (cfg, dfg) = BuildControlFlowGraph(instructions);
             
             Assert.Single(dfg.Nodes[3].StackDependencies);
             Assert.Equal(dfg.Nodes[0], dfg.Nodes[3].StackDependencies[0].DataSources.First());
@@ -121,8 +124,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 DummyInstruction.Ret(6)
             };
 
-            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 0);
-            var dfg = _dfgBuilder.DataFlowGraph;
+            var (cfg, dfg) = BuildControlFlowGraph(instructions);
         
             Assert.Single(dfg.Nodes[5].StackDependencies);
             Assert.Equal(
@@ -148,8 +150,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 DummyInstruction.Ret(7)
             };
 
-            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 0);
-            var dfg = _dfgBuilder.DataFlowGraph;
+            var (cfg, dfg) = BuildControlFlowGraph(instructions);
         
             Assert.Equal(
                 new HashSet<IDataFlowNode> { dfg.Nodes[2], dfg.Nodes[4] },
@@ -181,7 +182,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 DummyInstruction.Ret(6)
             };
 
-            Assert.Throws<StackImbalanceException>(() => _cfgBuilder.ConstructFlowGraph(instructions, 0));
+            Assert.Throws<StackImbalanceException>(() => BuildControlFlowGraph(instructions));
         }
         
         
@@ -197,7 +198,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 DummyInstruction.Ret(101),
             };
             
-            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 0);
+            var (cfg, dfg) = BuildControlFlowGraph(instructions);
             
             Assert.Equal(new[]
             {
@@ -217,7 +218,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 DummyInstruction.Jmp(101, 0),
             };
             
-            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 100);
+            var (cfg, dfg) = BuildControlFlowGraph(instructions, 100);
             
             Assert.Equal(new[]
             {
@@ -228,33 +229,46 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
         [Fact]
         public void EntryPointPopWithInitialStateEmptyShouldThrow()
         {
-            _dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>();
-
             var instructions = new[]
             {
                 DummyInstruction.Pop(0, 1),
                 DummyInstruction.Ret(1),
             };
+            
+            var dfgBuilder = new DummyTransitionResolver
+            {
+                InitialState = new SymbolicProgramState<DummyInstruction>()
+            };
 
-            Assert.Throws<StackImbalanceException>(() => _cfgBuilder.ConstructFlowGraph(instructions, 0));
+            var cfgBuilder = new SymbolicFlowGraphBuilder<DummyInstruction>(
+                DummyArchitecture.Instance,
+                instructions,
+                dfgBuilder);
+
+            Assert.Throws<StackImbalanceException>(() => cfgBuilder.ConstructFlowGraph(0));
         }
 
         [Fact]
         public void EntryPointPopWithSingleItemOnStackShouldAddDependencyToExternalSource()
         {
-            var argument = new ExternalDataSource<DummyInstruction>(-1, "Argument 1");
-            _dfgBuilder.DataFlowGraph.Nodes.Add(argument);
-            _dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>();
-            _dfgBuilder.InitialState.Stack.Push(new SymbolicValue<DummyInstruction>(argument));
-
             var instructions = new[]
             {
                 DummyInstruction.Pop(0, 1),
                 DummyInstruction.Ret(1),
             };
 
-            var cfg = _cfgBuilder.ConstructFlowGraph(instructions, 0);
-            var dfg = _dfgBuilder.DataFlowGraph;
+            var dfgBuilder = new DummyTransitionResolver();
+            var argument = new ExternalDataSource<DummyInstruction>(-1, "Argument 1");
+            dfgBuilder.DataFlowGraph.Nodes.Add(argument);
+            dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>();
+            dfgBuilder.InitialState.Stack.Push(new SymbolicValue<DummyInstruction>(argument));
+
+            var cfgBuilder = new SymbolicFlowGraphBuilder<DummyInstruction>(
+                DummyArchitecture.Instance,
+                instructions,
+                dfgBuilder);
+            cfgBuilder.ConstructFlowGraph(0);
+            var dfg = dfgBuilder.DataFlowGraph;
 
             Assert.Equal(new[] {argument}, dfg.Nodes[0].StackDependencies[0].DataSources);
         }

@@ -21,16 +21,37 @@ namespace Echo.ControlFlow.Construction.Static
         /// <summary>
         /// Creates a new static graph builder using the provided instruction successor resolver.
         /// </summary>
-        /// <param name="architecture">The architecture of the instructions to graph.</param>
         /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
         public StaticFlowGraphBuilder(
             IInstructionSetArchitecture<TInstruction> architecture,
+            IEnumerable<TInstruction> instructions, 
             IStaticSuccessorResolver<TInstruction> successorResolver)
-            : base(architecture)
         {
+            Instructions = new ListInstructionProvider<TInstruction>(architecture, instructions);
             SuccessorResolver = successorResolver ?? throw new ArgumentNullException(nameof(successorResolver));
         }
+        
+        /// <summary>
+        /// Creates a new static graph builder using the provided instruction successor resolver.
+        /// </summary>
+        /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
+        /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
+        public StaticFlowGraphBuilder(
+            IInstructionProvider<TInstruction> instructions, 
+            IStaticSuccessorResolver<TInstruction> successorResolver)
+        {
+            Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
+            SuccessorResolver = successorResolver ?? throw new ArgumentNullException(nameof(successorResolver));
+        }
+
+        public IInstructionProvider<TInstruction> Instructions
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public override IInstructionSetArchitecture<TInstruction> Architecture => Instructions.Architecture;
 
         /// <summary>
         /// Gets the object used to determine the successors of a single instruction.
@@ -41,8 +62,7 @@ namespace Echo.ControlFlow.Construction.Static
         }
 
         /// <inheritdoc />
-        protected override IInstructionTraversalResult<TInstruction> CollectInstructions(
-            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders)
+        protected override IInstructionTraversalResult<TInstruction> CollectInstructions(long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
             var visited = new HashSet<long>();
             
@@ -63,7 +83,7 @@ namespace Echo.ControlFlow.Construction.Static
                 if (visited.Add(currentOffset))
                 {
                     // Get the instruction at the provided offset and figure out successors.
-                    var instruction = instructions.GetInstructionAtOffset(currentOffset);
+                    var instruction = Instructions.GetInstructionAtOffset(currentOffset);
                     var currentSuccessors = SuccessorResolver.GetSuccessors(instruction);
                     
                     // Store collected data.
@@ -99,6 +119,7 @@ namespace Echo.ControlFlow.Construction.Static
 
             return result;
         }
+
     }
     
 }

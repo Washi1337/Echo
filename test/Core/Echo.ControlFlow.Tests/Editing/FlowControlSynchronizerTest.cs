@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
@@ -10,28 +12,32 @@ namespace Echo.ControlFlow.Tests.Editing
 {
     public class FlowControlSynchronizerTest
     {
-        private readonly StaticFlowGraphBuilder<DummyInstruction> _builder;
-
-        public FlowControlSynchronizerTest()
+        private static ControlFlowGraph<DummyInstruction> BuildControlFlowGraph(DummyInstruction[] instructions,
+            long entrypoint = 0, IEnumerable<long> knownBlockHeaders = null)
         {
-            _builder = new StaticFlowGraphBuilder<DummyInstruction>(DummyArchitecture.Instance, DummyArchitecture.Instance.SuccessorResolver);
+            var builder = new StaticFlowGraphBuilder<DummyInstruction>(
+                DummyArchitecture.Instance,
+                instructions,
+                DummyArchitecture.Instance.SuccessorResolver);
+
+            return builder.ConstructFlowGraph(entrypoint, knownBlockHeaders ?? ImmutableArray<long>.Empty);
         }
         
         [Fact]
         public void NoChangeShouldResultInNoChangeInTheGraph()
         {
-            var cfg = _builder.ConstructFlowGraph(new[]
+            var cfg = BuildControlFlowGraph(new[]
             { 
                 DummyInstruction.Ret(0)
-            },0);
+            });
             
-            Assert.False(cfg.UpdateFlowControl(_builder.SuccessorResolver));
+            Assert.False(cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
         }
 
         [Fact]
         public void BranchTargetChangeToAnotherNodeHeaderShouldUpdateFallThroughEdge()
         {
-            var cfg = _builder.ConstructFlowGraph(new[]
+            var cfg = BuildControlFlowGraph(new[]
             { 
                 DummyInstruction.Op(0,0, 0),
                 DummyInstruction.Jmp(1, 10),
@@ -39,19 +45,19 @@ namespace Echo.ControlFlow.Tests.Editing
                 DummyInstruction.Jmp(10, 20),
                 
                 DummyInstruction.Ret(20)
-            },0);
+            });
             
             // Change branch target of the first jmp to the ret at offset 20.
             cfg.Nodes[0].Contents.Footer.Operands[0] = 20L;
             
-            Assert.True(cfg.UpdateFlowControl(_builder.SuccessorResolver));
+            Assert.True(cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
             Assert.Same(cfg.Nodes[20], cfg.Nodes[0].FallThroughNeighbour);
         }
 
         [Fact]
         public void ConditionalBranchTargetChangeToAnotherNodeHeaderShouldUpdateConditionalEdge()
         {
-            var cfg = _builder.ConstructFlowGraph(new[]
+            var cfg = BuildControlFlowGraph(new[]
             { 
                 DummyInstruction.Push(0,1),
                 DummyInstruction.JmpCond(1, 20),
@@ -69,7 +75,7 @@ namespace Echo.ControlFlow.Tests.Editing
             // Update branch target.
             cfg.Nodes[0].Contents.Footer.Operands[0] = 100L;
             
-            Assert.True(cfg.UpdateFlowControl(_builder.SuccessorResolver));
+            Assert.True(cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
             Assert.Single(cfg.Nodes[0].ConditionalEdges);
             Assert.True(cfg.Nodes[0].ConditionalEdges.Contains(cfg.Nodes[100]));
         }
@@ -77,7 +83,7 @@ namespace Echo.ControlFlow.Tests.Editing
         [Fact]
         public void SwapUnconditionalWithConditionalBranchShouldUpdateFallThroughAndConditionalEdge()
         {
-            var cfg = _builder.ConstructFlowGraph(new[]
+            var cfg = BuildControlFlowGraph(new[]
             { 
                 DummyInstruction.Push(0,1),
                 DummyInstruction.Jmp(1, 10),
@@ -93,7 +99,7 @@ namespace Echo.ControlFlow.Tests.Editing
             var blockInstructions = cfg.Nodes[0].Contents.Instructions;
             blockInstructions[blockInstructions.Count - 1] = DummyInstruction.JmpCond(1, 20);
 
-            Assert.True(cfg.UpdateFlowControl(_builder.SuccessorResolver));
+            Assert.True(cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
             Assert.Same(cfg.Nodes[2], cfg.Nodes[0].FallThroughNeighbour);
             Assert.Single(cfg.Nodes[0].ConditionalEdges);
             Assert.True(cfg.Nodes[0].ConditionalEdges.Contains(cfg.Nodes[20]));
@@ -116,12 +122,12 @@ namespace Echo.ControlFlow.Tests.Editing
                 
                 DummyInstruction.Ret(16)
             };
-            var cfg = _builder.ConstructFlowGraph(instructions,0);
+            var cfg = BuildControlFlowGraph(instructions,0);
 
             // Change jmp target to an instruction in the middle of node[10].
             cfg.Nodes[0].Contents.Footer.Operands[0] = 13L;
             
-            Assert.True(cfg.UpdateFlowControl(_builder.SuccessorResolver));
+            Assert.True(cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
             
             Assert.True(cfg.Nodes.Contains(10), "Original target does not exist anymore.");
             Assert.True(cfg.Nodes.Contains(13), "Original target was not split up correctly.");
@@ -133,7 +139,7 @@ namespace Echo.ControlFlow.Tests.Editing
         [Fact]
         public void UpdateToInvalidBranchTargetShouldThrowAndDiscard()
         {
-            var cfg = _builder.ConstructFlowGraph(new[]
+            var cfg = BuildControlFlowGraph(new[]
             {
                 DummyInstruction.Jmp(0, 10),
                 DummyInstruction.Ret(10), 
@@ -141,7 +147,7 @@ namespace Echo.ControlFlow.Tests.Editing
 
             cfg.Nodes[0].Contents.Header.Operands[0] = 100L;
             
-            Assert.Throws<ArgumentException>(() => cfg.UpdateFlowControl(_builder.SuccessorResolver));
+            Assert.Throws<ArgumentException>(() => cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
             
             Assert.Same(cfg.Nodes[10], cfg.Nodes[0].FallThroughNeighbour);
         }
@@ -159,12 +165,12 @@ namespace Echo.ControlFlow.Tests.Editing
                 DummyInstruction.Jmp(13, 20),
                 DummyInstruction.Ret(20), 
             };
-            var cfg = _builder.ConstructFlowGraph(instructions,0);
+            var cfg = BuildControlFlowGraph(instructions,0);
 
             instructions[1].Operands[0] = 12L;
             instructions[5].Operands[0] = 100L;
             
-            Assert.Throws<ArgumentException>(() => cfg.UpdateFlowControl(_builder.SuccessorResolver));
+            Assert.Throws<ArgumentException>(() => cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
             
             Assert.Same(cfg.Nodes[10], cfg.Nodes[0].FallThroughNeighbour);
             Assert.False(cfg.Nodes.Contains(12));
@@ -189,13 +195,13 @@ namespace Echo.ControlFlow.Tests.Editing
                 
                 DummyInstruction.Ret(20),
             };
-            var cfg = _builder.ConstructFlowGraph(instructions,0);
+            var cfg = BuildControlFlowGraph(instructions,0);
 
             var targets = (long[]) instructions[1].Operands[0];
             targets[2] = 5L;
             targets[3] = 100L;
             
-            Assert.Throws<ArgumentException>(() => cfg.UpdateFlowControl(_builder.SuccessorResolver));
+            Assert.Throws<ArgumentException>(() => cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
             
             Assert.False(cfg.Nodes.Contains(5));
             Assert.Equal(new[]
@@ -216,10 +222,10 @@ namespace Echo.ControlFlow.Tests.Editing
                 DummyInstruction.Op(3, 0, 0),
                 DummyInstruction.Ret(4),
             };
-            var cfg = _builder.ConstructFlowGraph(instructions, 0);
+            var cfg = BuildControlFlowGraph(instructions, 0);
 
             cfg.Nodes[0].Contents.Instructions[1] = DummyInstruction.Jmp(1, 4);
-            cfg.UpdateFlowControl(_builder.SuccessorResolver);
+            cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver);
 
             Assert.True(cfg.Nodes.Contains(0));
             Assert.True(cfg.Nodes.Contains(4));
@@ -241,11 +247,11 @@ namespace Echo.ControlFlow.Tests.Editing
                 DummyInstruction.Op(5, 0, 0),
                 DummyInstruction.Ret(6),
             };
-            var cfg = _builder.ConstructFlowGraph(instructions, 0);
+            var cfg = BuildControlFlowGraph(instructions, 0);
 
             cfg.Nodes[0].Contents.Instructions[1] = DummyInstruction.JmpCond(1, 5);
             cfg.Nodes[0].Contents.Instructions[3] = DummyInstruction.Pop(3, 1);
-            cfg.UpdateFlowControl(_builder.SuccessorResolver);
+            cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver);
 
             Assert.True(cfg.Nodes.Contains(2));
             Assert.Same(cfg.Nodes[2], cfg.Nodes[0].FallThroughNeighbour);
