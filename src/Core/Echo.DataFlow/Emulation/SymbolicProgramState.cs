@@ -65,7 +65,7 @@ namespace Echo.DataFlow.Emulation
         /// Creates a deep copy of the snapshot. This includes copying the state of the stack and each variable.
         /// </summary>
         /// <returns>The copied program state.</returns>
-        public SymbolicProgramState<TInstruction> Copy()
+        public virtual SymbolicProgramState<TInstruction> Copy()
         {
             return new SymbolicProgramState<TInstruction>(ProgramCounter, Stack.Copy(), Variables.Copy());
         }

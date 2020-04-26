@@ -27,18 +27,40 @@ var architecture = mew DummyArchitecture();
 var resolver = new DummyTransitionResolver(architecture);
 ```
 
+### Preparing the Instructions
+
+Next, we need our instructions. We can use any instance of `IEnumerable<TInstruction>` to instantiate a `SymbolicFlowGraphBuilder`:
+```csharp
+var instructions = new List<DummyInstruction> { ... }
+var builder = new SymbolicFlowGraphBuilder<DummyInstruction>(architecture, instructions, resolver);
+```
+
+or use an instance of a class implementing the `IStaticInstructionProvider<TInstruction>` interface:
+
+```csharp
+var instructions = new ListInstructionProvider<DummyInstruction>(architecture, new List<DummyInstruction> { ... });
+var builder = new SymbolicFlowGraphBuilder<DummyInstruction>(instructions, resolver);
+```
+
+If decoding instructions requires more than just the current value of the program counter register, it is also possible to specify an `ISymbolicInstructionProvider<TInstruction>` instead. This takes an entire program state instead of just the program counter.
+
+```csharp
+ISymbolicInstructionProvider<TInstruction> instructions = ...
+var builder = new SymbolicFlowGraphBuilder<DummyInstruction>(instructions, resolver);
+```
+
+### Building the graph
+
 Building our control flow graph is then very similar to the static control flow graph builder. Given the entrypoint address stored in a variable `entrypointAddress` of type `long`, we can construct the control flow graph using:
 
 ```csharp
-var builder = new SymbolicFlowGraphBuilder<DummyInstruction>(architecture, resolver);
-ControlFlowGraph<DummyInstruction> cfg = builder.ConstructFlowGraph(instructions, entrypointAddress);
-
+ControlFlowGraph<DummyInstruction> cfg = builder.ConstructFlowGraph(entrypointAddress);
 ```
 
 A nice by-product of most symbolic transition resolvers is that it automatically also creates a data flow graph during the traversal of instructions.
 
 ```csharp
-DataFlowGraph<DummyInstruction> dfg = builder.DataFlowGraph;
+DataFlowGraph<DummyInstruction> dfg = resolver.DataFlowGraph;
 ```
 
 How it works

@@ -16,13 +16,55 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <summary>
         /// Creates a new symbolic control flow graph builder using the provided program state transition resolver.  
         /// </summary>
-        /// <param name="architecture">The architecture of the instructions to graph.</param>
+        /// <param name="architecture">The architecture of the instructions.</param>
+        /// <param name="instructions">The instructions to traverse.</param>
         /// <param name="transitionResolver">The transition resolver to use for inferring branch targets.</param>
-        public SymbolicFlowGraphBuilder(IInstructionSetArchitecture<TInstruction> architecture, IStateTransitionResolver<TInstruction> transitionResolver)
-            : base(architecture)
+        public SymbolicFlowGraphBuilder(
+            IInstructionSetArchitecture<TInstruction> architecture,
+            IEnumerable<TInstruction> instructions, 
+            IStateTransitionResolver<TInstruction> transitionResolver)
         {
+            Instructions = new StaticToSymbolicAdapter<TInstruction>(architecture, instructions);
             TransitionResolver = transitionResolver ?? throw new ArgumentNullException(nameof(transitionResolver));
         }
+        
+        /// <summary>
+        /// Creates a new symbolic control flow graph builder using the provided program state transition resolver.  
+        /// </summary>
+        /// <param name="instructions">The instructions to traverse.</param>
+        /// <param name="transitionResolver">The transition resolver to use for inferring branch targets.</param>
+        public SymbolicFlowGraphBuilder(
+            IStaticInstructionProvider<TInstruction> instructions, 
+            IStateTransitionResolver<TInstruction> transitionResolver)
+        {
+            Instructions = new StaticToSymbolicAdapter<TInstruction>(
+                instructions ?? throw new ArgumentNullException(nameof(instructions)));
+            TransitionResolver = transitionResolver ?? throw new ArgumentNullException(nameof(transitionResolver));
+        }
+        
+        /// <summary>
+        /// Creates a new symbolic control flow graph builder using the provided program state transition resolver.  
+        /// </summary>
+        /// <param name="instructions">The instructions to traverse.</param>
+        /// <param name="transitionResolver">The transition resolver to use for inferring branch targets.</param>
+        public SymbolicFlowGraphBuilder(
+            ISymbolicInstructionProvider<TInstruction> instructions, 
+            IStateTransitionResolver<TInstruction> transitionResolver)
+        {
+            Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
+            TransitionResolver = transitionResolver ?? throw new ArgumentNullException(nameof(transitionResolver));
+        }
+
+        /// <summary>
+        /// Gets the instructions to traverse.
+        /// </summary>
+        public ISymbolicInstructionProvider<TInstruction> Instructions
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public override IInstructionSetArchitecture<TInstruction> Architecture => Instructions.Architecture;
 
         /// <summary>
         /// Gets the object responsible for resolving every transition in the program state that an instruction might introduce. 
@@ -34,15 +76,15 @@ namespace Echo.ControlFlow.Construction.Symbolic
 
         /// <inheritdoc />
         protected override IInstructionTraversalResult<TInstruction> CollectInstructions(
-            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders)
+            long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
-            var result = TraverseInstructions(instructions, entrypoint, knownBlockHeaders);
+            var result = TraverseInstructions(entrypoint, knownBlockHeaders);
             DetermineBlockHeaders(result);
             return result;
         }
 
         private InstructionTraversalResult<TInstruction> TraverseInstructions(
-            IInstructionProvider<TInstruction> instructions, long entrypoint, IEnumerable<long> knownBlockHeaders)
+            long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
             var result = new InstructionTraversalResult<TInstruction>();
             
@@ -63,7 +105,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
                 // instruction and (re)visit all its successors.
                 if (recordedStatesChanged)
                 {
-                    var instruction = instructions.GetInstructionAtOffset(currentState.ProgramCounter);
+                    var instruction = Instructions.GetCurrentInstruction(currentState);
                     var instructionInfo = InvalidateKnownSuccessors(result, currentState, instruction);
                     ResolveAndScheduleSuccessors(currentState, instructionInfo, agenda);
                 }
