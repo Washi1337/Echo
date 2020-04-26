@@ -34,7 +34,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <param name="instructions">The instructions to traverse.</param>
         /// <param name="transitionResolver">The transition resolver to use for inferring branch targets.</param>
         public SymbolicFlowGraphBuilder(
-            IInstructionProvider<TInstruction> instructions, 
+            IStaticInstructionProvider<TInstruction> instructions, 
             IStateTransitionResolver<TInstruction> transitionResolver)
         {
             Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
@@ -44,7 +44,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <summary>
         /// Gets the instructions to traverse.
         /// </summary>
-        public IInstructionProvider<TInstruction> Instructions
+        public IStaticInstructionProvider<TInstruction> Instructions
         {
             get;
         }

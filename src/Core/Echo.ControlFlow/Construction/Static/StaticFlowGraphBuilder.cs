@@ -41,7 +41,7 @@ namespace Echo.ControlFlow.Construction.Static
         /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
         public StaticFlowGraphBuilder(
-            IInstructionProvider<TInstruction> instructions, 
+            IStaticInstructionProvider<TInstruction> instructions, 
             IStaticSuccessorResolver<TInstruction> successorResolver)
         {
             Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
@@ -51,7 +51,7 @@ namespace Echo.ControlFlow.Construction.Static
         /// <summary>
         /// Gets the instructions to traverse.
         /// </summary>
-        public IInstructionProvider<TInstruction> Instructions
+        public IStaticInstructionProvider<TInstruction> Instructions
         {
             get;
         }
