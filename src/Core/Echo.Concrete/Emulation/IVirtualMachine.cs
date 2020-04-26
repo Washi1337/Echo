@@ -36,7 +36,7 @@ namespace Echo.Concrete.Emulation
         /// <summary>
         /// Gets the instructions in memory to be executed.
         /// </summary>
-        IInstructionProvider<TInstruction> Instructions
+        IStaticInstructionProvider<TInstruction> Instructions
         {
             get;
         }

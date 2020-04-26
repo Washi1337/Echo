@@ -44,7 +44,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <param name="instructions">The instructions to emulate..</param>
         /// <param name="is32Bit">Indicates whether the virtual machine should run in 32-bit mode or in 64-bit mode.</param>
-        public CilVirtualMachine(IInstructionProvider<CilInstruction> instructions, bool is32Bit)
+        public CilVirtualMachine(IStaticInstructionProvider<CilInstruction> instructions, bool is32Bit)
         {
             Instructions = instructions;
             Architecture = instructions.Architecture;
@@ -83,7 +83,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <inheritdoc />
-        public IInstructionProvider<CilInstruction> Instructions
+        public IStaticInstructionProvider<CilInstruction> Instructions
         {
             get;
         }
