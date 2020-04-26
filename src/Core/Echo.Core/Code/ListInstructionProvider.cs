@@ -4,10 +4,10 @@ using System.Collections.Generic;
 namespace Echo.Core.Code
 {
     /// <summary>
-    /// Wraps a simple collection of instructions in a basic implementation of an <see cref="IInstructionProvider{TInstruction}"/>.
+    /// Wraps a simple collection of instructions in a basic implementation of an <see cref="IStaticInstructionProvider{TInstruction}"/>.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to store.</typeparam>
-    public class ListInstructionProvider<TInstruction> : IInstructionProvider<TInstruction>
+    public class ListInstructionProvider<TInstruction> : IStaticInstructionProvider<TInstruction>
     {
         private readonly IDictionary<long, TInstruction> _instructions = new Dictionary<long, TInstruction>();
 

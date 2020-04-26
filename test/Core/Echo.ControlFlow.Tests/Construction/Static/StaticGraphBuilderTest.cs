@@ -1,5 +1,6 @@
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
@@ -8,15 +9,17 @@ namespace Echo.ControlFlow.Tests.Construction.Static
 {
     public class StaticGraphBuilderTest
     {
-        private readonly StaticFlowGraphBuilder<DummyInstruction> _builder;
-
-        public StaticGraphBuilderTest()
+        private static ControlFlowGraph<DummyInstruction> BuildControlFlowGraph(DummyInstruction[] instructions,
+            long entrypoint = 0, IEnumerable<long> knownBlockHeaders = null)
         {
-            _builder = new StaticFlowGraphBuilder<DummyInstruction>(
+            var builder = new StaticFlowGraphBuilder<DummyInstruction>(
                 DummyArchitecture.Instance,
+                instructions,
                 DummyArchitecture.Instance.SuccessorResolver);
+
+            return builder.ConstructFlowGraph(entrypoint, knownBlockHeaders ?? ImmutableArray<long>.Empty);
         }
-        
+
         [Fact]
         public void SingleBlock()
         {
@@ -29,9 +32,9 @@ namespace Echo.ControlFlow.Tests.Construction.Static
                 DummyInstruction.Push(4, 1),
                 DummyInstruction.Ret(5)
             };
-            
-            var graph = _builder.ConstructFlowGraph(instructions, 0);
-            
+
+            var graph = BuildControlFlowGraph(instructions);
+
             Assert.Single(graph.Nodes);
             Assert.Equal(instructions, graph.Nodes.First().Contents.Instructions);
             Assert.Equal(graph.Nodes.First(), graph.Entrypoint);
@@ -48,8 +51,8 @@ namespace Echo.ControlFlow.Tests.Construction.Static
                 DummyInstruction.Pop(100, 1),
                 DummyInstruction.Ret(101),
             };
-            
-            var graph = _builder.ConstructFlowGraph(instructions, 0);
+
+            var graph = BuildControlFlowGraph(instructions);
             Assert.Equal(new[]
             {
                 0L, 100L
@@ -68,7 +71,7 @@ namespace Echo.ControlFlow.Tests.Construction.Static
                 DummyInstruction.Jmp(101, 0),
             };
             
-            var graph = _builder.ConstructFlowGraph(instructions, 100);
+            var graph = BuildControlFlowGraph(instructions, 100);
             Assert.Equal(new[]
             {
                 0L, 100L
@@ -97,7 +100,7 @@ namespace Echo.ControlFlow.Tests.Construction.Static
                 DummyInstruction.Ret(7)
             };
             
-            var graph = _builder.ConstructFlowGraph(instructions, 0);
+            var graph = BuildControlFlowGraph(instructions);
 
             Assert.Equal(4, graph.Nodes.Count);
             Assert.Single(graph.Entrypoint.ConditionalEdges);
@@ -134,7 +137,7 @@ namespace Echo.ControlFlow.Tests.Construction.Static
                 DummyInstruction.Ret(12)
             };
             
-            var graph = _builder.ConstructFlowGraph(instructions, 0);
+            var graph = BuildControlFlowGraph(instructions);
             
             Assert.Equal(4, graph.Nodes.Count);
             
@@ -167,7 +170,7 @@ namespace Echo.ControlFlow.Tests.Construction.Static
                 DummyInstruction.Ret(10),
             };
             
-            var graph = _builder.ConstructFlowGraph(instructions, 0);
+            var graph = BuildControlFlowGraph(instructions);
             Assert.Contains(graph.Nodes, n => n.Offset == 0);
             Assert.DoesNotContain(graph.Nodes, n => n.Offset == 10);
         }
@@ -182,7 +185,7 @@ namespace Echo.ControlFlow.Tests.Construction.Static
                 DummyInstruction.Ret(10),
             };
             
-            var graph = _builder.ConstructFlowGraph(instructions, 0, new long[] {10});
+            var graph = BuildControlFlowGraph(instructions, 0, new long[] {10});
             Assert.Contains(graph.Nodes, n => n.Offset == 0);
             Assert.Contains(graph.Nodes, n => n.Offset == 10);
         }
@@ -197,7 +200,7 @@ namespace Echo.ControlFlow.Tests.Construction.Static
                 DummyInstruction.Ret(2),
             };
             
-            var graph = _builder.ConstructFlowGraph(instructions, 0, new long[] {1});
+            var graph = BuildControlFlowGraph(instructions, 0, new long[] {1});
             Assert.Contains(graph.Nodes, n => n.Offset == 0);
             Assert.Contains(graph.Nodes, n => n.Offset == 1);
         }

@@ -20,10 +20,11 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             var architecture = DummyArchitecture.Instance;
             var builder = new StaticFlowGraphBuilder<DummyInstruction>(
                 architecture,
+                instructions,
                 architecture.SuccessorResolver);
 
             var rangesArray = ranges as ExceptionHandlerRange[] ?? ranges.ToArray();
-            var cfg = builder.ConstructFlowGraph(instructions, 0, rangesArray);
+            var cfg = builder.ConstructFlowGraph(0, rangesArray);
             cfg.DetectExceptionHandlerRegions(rangesArray);
             
             return cfg;

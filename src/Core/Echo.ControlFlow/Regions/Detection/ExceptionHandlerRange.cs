@@ -57,6 +57,11 @@ namespace Echo.ControlFlow.Regions.Detection
             get;
         }
 
+        /// <summary>
+        /// Determines whether two exception handlers are considered equal.
+        /// </summary>
+        /// <param name="other">The other exception handler.</param>
+        /// <returns><c>true</c> if the handler is equal, <c>false</c> otherwise.</returns>
         public bool Equals(ExceptionHandlerRange other) => 
             ProtectedRange.Equals(other.ProtectedRange) && HandlerRange.Equals(other.HandlerRange);
 
