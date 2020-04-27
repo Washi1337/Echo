@@ -1,5 +1,5 @@
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete.Values.ValueType;
+using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
@@ -15,7 +15,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Miscellaneous
         [Fact]
         public void DupWithValueType()
         {
-            var value = new Integer32Value(1234);
+            var value = new I4Value(1234);
             ExecutionContext.ProgramState.Stack.Push(value);
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Dup));

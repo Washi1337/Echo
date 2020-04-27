@@ -67,13 +67,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 
             return (value1, value2) switch
             {
-                (Integer32Value a, Integer32Value b) => (a, b),
-                (Integer64Value a, Integer64Value b) => (a, b),
+                (I4Value a, I4Value b) => (a, b),
+                (I8Value a, I8Value b) => (a, b),
                 (NativeIntegerValue a, NativeIntegerValue b) => (a, b),
-                (Float64Value a, Float64Value b) => (a, b),
+                (FValue a, FValue b) => (a, b),
 
-                (Integer32Value a, NativeIntegerValue b) => (new NativeIntegerValue(a, b.Size == 4), b),
-                (NativeIntegerValue a, Integer32Value b) => (a, new NativeIntegerValue(b, a.Size == 4)),
+                (I4Value a, NativeIntegerValue b) => (new NativeIntegerValue(a, b.Size == 4), b),
+                (NativeIntegerValue a, I4Value b) => (a, new NativeIntegerValue(b, a.Size == 4)),
 
                 _ => (null, null),
             };

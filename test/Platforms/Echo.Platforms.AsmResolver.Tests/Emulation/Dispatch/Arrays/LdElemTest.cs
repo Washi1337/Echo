@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         [InlineData(1, 0xB)]
         [InlineData(2, 0xC)]
         [InlineData(3, 0xD)]
-        public void LdelemI4UsingInt32Index(int index, int expectedValue)
+        public void LdelemI4UsingI4Index(int index, int expectedValue)
         {
             var stack = ExecutionContext.ProgramState.Stack;
             
@@ -31,12 +31,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
                 new Integer32Value(0xA), new Integer32Value(0xB), new Integer32Value(0xC), new Integer32Value(0xD),  
             });
             stack.Push(array);
-            stack.Push(new Integer32Value(index));
+            stack.Push(new I4Value(index));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
             
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(expectedValue), stack.Top);
+            Assert.Equal(new I4Value(expectedValue), stack.Top);
         }
 
         [Theory]
@@ -59,7 +59,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
             
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(expectedValue), stack.Top);
+            Assert.Equal(new I4Value(expectedValue), stack.Top);
         }
 
         [Theory]
@@ -81,12 +81,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
                 new Integer32Value(arrayElementValue),
             });
             stack.Push(array);
-            stack.Push(new Integer32Value(0));
+            stack.Push(new I4Value(0));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(code.ToOpCode()));
             
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(expectedValue), stack.Top);
+            Assert.Equal(new I4Value(expectedValue), stack.Top);
         }
 
         [Theory]
@@ -103,7 +103,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
                 new Integer32Value(2),
             });
             stack.Push(array);
-            stack.Push(new Integer32Value(index));
+            stack.Push(new I4Value(index));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
             
@@ -120,12 +120,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
                 new Float32Value(1.23f), 
             });
             stack.Push(array);
-            stack.Push(new Integer32Value(0));
+            stack.Push(new I4Value(0));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_R4));
             
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Float64Value(1.23f), stack.Top);
+            Assert.Equal(new FValue(1.23f), stack.Top);
         }
 
         [Fact]
@@ -137,13 +137,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
                 new Float64Value(1.23D), 
             });
             stack.Push(array);
-            stack.Push(new Integer32Value(0));
+            stack.Push(new I4Value(0));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_R4));
             
             Assert.True(result.IsSuccess);
             Assert.NotSame(array[0], stack.Top);
-            Assert.Equal(new Float64Value(1.23D), stack.Top);
+            Assert.Equal(new FValue(1.23D), stack.Top);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using Echo.Concrete.Values.ValueType;
+using Echo.Core.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
@@ -89,7 +90,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public FValue InterpretAsR8() => this;
 
         /// <inheritdoc />
-        public OValue InterpretAsRef() => new OValue(null);
+        public OValue InterpretAsRef(bool is32Bit) => new OValue(null, is32Bit);
 
         /// <inheritdoc />
         public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed)
@@ -161,5 +162,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
         /// <inheritdoc />
         public FValue ConvertToR() => this;
+
+        /// <inheritdoc />
+        public override IValue Copy() => new FValue(F64);
     }
 }

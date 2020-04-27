@@ -1,5 +1,5 @@
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete.Values.ValueType;
+using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Constants
         {
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldc_R4, 1.23f));
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Float64Value(1.23f), ExecutionContext.ProgramState.Stack.Top);
+            Assert.Equal(new FValue(1.23f), ExecutionContext.ProgramState.Stack.Top);
         }
     }
 }

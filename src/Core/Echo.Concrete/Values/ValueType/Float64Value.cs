@@ -58,7 +58,7 @@ namespace Echo.Concrete.Values.ValueType
         public bool? IsNegative => F64 < 0;
         
         /// <inheritdoc />
-        public IValue Copy() => new Float64Value(F64);
+        public virtual IValue Copy() => new Float64Value(F64);
 
         /// <inheritdoc />
         public override string ToString() => F64.ToString(CultureInfo.InvariantCulture);

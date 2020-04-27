@@ -71,7 +71,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
             {
                 shiftCount = value2 switch
                 {
-                    Integer32Value int32 => int32.I32,
+                    I4Value int32 => int32.I32,
                     NativeIntegerValue nativeInt => (int?) nativeInt.ToInt64().I64,
                     _ => null
                 };

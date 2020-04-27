@@ -127,7 +127,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public FValue InterpretAsR8() => ((ICliValue) _value).InterpretAsR8();
 
         /// <inheritdoc />
-        public OValue InterpretAsRef() => ((ICliValue) _value).InterpretAsRef();
+        public OValue InterpretAsRef(bool is32Bit) => ((ICliValue) _value).InterpretAsRef(is32Bit);
 
         /// <inheritdoc />
         public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed) => 

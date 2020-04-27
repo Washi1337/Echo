@@ -1,5 +1,5 @@
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete.Values.ValueType;
+using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
             var instruction = new CilInstruction(CilOpCodes.Brfalse, new CilOffsetLabel(0x1234));
             int expectedOffset = expectedToHaveTakenBranch ? 0x1234 : instruction.Offset + instruction.Size;
             
-            ExecutionContext.ProgramState.Stack.Push(new Integer32Value(value));
+            ExecutionContext.ProgramState.Stack.Push(new I4Value(value));
             var result = Dispatcher.Execute(ExecutionContext, instruction);
             
             Assert.True(result.IsSuccess);

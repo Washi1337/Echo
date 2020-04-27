@@ -141,10 +141,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// When this CLI value is already a 64 bit floating point number, the same instance is returned.
         /// </remarks>
         FValue InterpretAsR8();
-        
+
         /// <summary>
         /// Interprets the bits stored in the value as an object reference.
         /// </summary>
+        /// <param name="is32Bit">Indicates whether the reference to the object should be 32 bits or 64 bits wide.</param>
         /// <returns>The object reference.</returns>
         /// <exception cref="InvalidOperationException">
         /// Occurs when the size of the CLI value is too small for it to be interpretable as an object reference.
@@ -152,7 +153,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <remarks>
         /// When this CLI value is already an object reference, the same instance is returned.
         /// </remarks>
-        OValue InterpretAsRef();
+        OValue InterpretAsRef(bool is32Bit);
 
         /// <summary>
         /// Converts the CLI value to a signed native integer.

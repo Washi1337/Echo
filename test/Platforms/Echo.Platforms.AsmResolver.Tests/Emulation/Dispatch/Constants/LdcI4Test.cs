@@ -1,5 +1,5 @@
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete.Values.ValueType;
+using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Constants
         {
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldc_I4, 1234));
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(1234), ExecutionContext.ProgramState.Stack.Top);
+            Assert.Equal(new I4Value(1234), ExecutionContext.ProgramState.Stack.Top);
         }
 
         [Fact]
@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Constants
         {
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldc_I4_S, (sbyte) -128));
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(-128), ExecutionContext.ProgramState.Stack.Top);
+            Assert.Equal(new I4Value(-128), ExecutionContext.ProgramState.Stack.Top);
         }
 
         [Theory]
@@ -43,7 +43,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Constants
         {
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(code.ToOpCode()));
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(expected), ExecutionContext.ProgramState.Stack.Top);
+            Assert.Equal(new I4Value(expected), ExecutionContext.ProgramState.Stack.Top);
         }
     }
 }

@@ -15,55 +15,60 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         }
 
         [Fact]
-        public void ShiftSignedInteger32()
+        public void ShiftSignedI4()
         {
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Integer32Value(0b11111111_00001111_00110011_01010101));
-            stack.Push(new Integer32Value(1));
+            stack.Push(new I4Value(unchecked((int) 0b11111111_00001111_00110011_01010101)));
+            stack.Push(new I4Value(1));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Shr));
             
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(0b11111111_10000111_10011001_10101010), stack.Top);
+            Assert.Equal(new I4Value(unchecked((int) 0b11111111_10000111_10011001_10101010)), stack.Top);
         }
 
         [Fact]
-        public void ShiftSignedInteger64()
+        public void ShiftSignedI8()
         {
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Integer64Value(0b11111111_00001111_00110011_01010101_00001111_00110011_01010101_00000000));
-            stack.Push(new Integer32Value(1));
+            stack.Push(new I8Value(
+                unchecked((long) 0b11111111_00001111_00110011_01010101_00001111_00110011_01010101_00000000)));
+            stack.Push(new I4Value(1));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Shr));
             
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer64Value(0b11111111_10000111_10011001_10101010_10000111_10011001_10101010_10000000), stack.Top);
+            Assert.Equal(new I8Value(
+                    unchecked((long) 0b11111111_10000111_10011001_10101010_10000111_10011001_10101010_10000000)),
+                stack.Top);
         }
 
         [Fact]
-        public void ShiftUnsignedInteger32()
+        public void ShiftUnsignedI4()
         {
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Integer32Value(0b11111111_00001111_00110011_01010101));
-            stack.Push(new Integer32Value(1));
+            stack.Push(new I4Value(unchecked((int) 0b11111111_00001111_00110011_01010101)));
+            stack.Push(new I4Value(1));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Shr_Un));
             
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(0b01111111_10000111_10011001_10101010), stack.Top);
+            Assert.Equal(new I4Value(0b01111111_10000111_10011001_10101010), stack.Top);
         }
 
         [Fact]
-        public void ShiftUnsignedInteger64()
+        public void ShiftUnsignedI8()
         {
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Integer64Value(0b11111111_00001111_00110011_01010101_00001111_00110011_01010101_00000000));
-            stack.Push(new Integer32Value(1));
+            stack.Push(new I8Value(
+                unchecked((long) 0b11111111_00001111_00110011_01010101_00001111_00110011_01010101_00000000)));
+            stack.Push(new I4Value(1));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Shr_Un));
             
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer64Value(0b01111111_10000111_10011001_10101010_10000111_10011001_10101010_10000000), stack.Top);
+            Assert.Equal(new I8Value(0b01111111_10000111_10011001_10101010_10000111_10011001_10101010_10000000),
+                stack.Top);
         }
     }
 }

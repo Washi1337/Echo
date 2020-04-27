@@ -15,38 +15,38 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         }
 
         [Fact]
-        public void OrInteger32()
+        public void OrI4()
         {
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Integer32Value(0b00110011));
-            stack.Push(new Integer32Value(0b00001111));
+            stack.Push(new I4Value(0b00110011));
+            stack.Push(new I4Value(0b00001111));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Or));
             
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(0b00111111), stack.Top);
+            Assert.Equal(new I4Value(0b00111111), stack.Top);
         }
         
         [Fact]
-        public void OrInteger64()
+        public void OrI8()
         {
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Integer64Value(0b00110011));
-            stack.Push(new Integer64Value(0b00001111));
+            stack.Push(new I8Value(0b00110011));
+            stack.Push(new I8Value(0b00001111));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Or));
             
             Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer64Value(0b00111111), stack.Top);
+            Assert.Equal(new I8Value(0b00111111), stack.Top);
         }
 
         [Fact]
-        public void OrInteger32WithNativeInteger()
+        public void OrI4WithNativeInteger()
         {
             bool is32Bit = ExecutionContext.GetService<ICilRuntimeEnvironment>().Is32Bit;
             
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Integer32Value(0b00110011));
+            stack.Push(new I4Value(0b00110011));
             stack.Push(new NativeIntegerValue(0b00001111, is32Bit));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Or));
@@ -59,8 +59,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         public void OrMismatchIntegers()
         {
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Integer32Value(0));
-            stack.Push(new Integer64Value(1));
+            stack.Push(new I4Value(0));
+            stack.Push(new I8Value(1));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Or));
             Assert.False(result.IsSuccess);

@@ -9,21 +9,24 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     public class OValue : ICliValue
     {
         private readonly bool? _isNull;
+        private readonly bool _is32Bit;
 
         /// <summary>
         /// Creates a new object reference value.
         /// </summary>
         /// <param name="isNull">Indicates whether the value is null or not.</param>
-        public OValue(bool? isNull)
+        /// <param name="is32Bit"></param>
+        public OValue(bool? isNull, bool is32Bit)
         {
             _isNull = isNull;
+            _is32Bit = is32Bit;
         }
 
         /// <inheritdoc />
         public bool IsKnown => _isNull.HasValue;
 
         /// <inheritdoc />
-        public int Size => 4;
+        public int Size => _is32Bit ? 4 : 8;
 
         /// <inheritdoc />
         public bool IsValueType => false;
@@ -41,7 +44,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool? IsNegative => false;
 
         /// <inheritdoc />
-        public IValue Copy() => new OValue(_isNull);
+        public IValue Copy() => new OValue(_isNull, _is32Bit);
 
         /// <inheritdoc />
         public NativeIntegerValue InterpretAsI(bool is32Bit)
@@ -89,13 +92,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public FValue InterpretAsR8() => new FValue(0); // TODO: return unknown float.
 
         /// <inheritdoc />
-        public OValue InterpretAsRef() => this;
+        public OValue InterpretAsRef(bool is32Bit) => this;
 
         /// <inheritdoc />
-        public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed) => InterpretAsI(is32Bit);
+        public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsI(is32Bit);
+        }
 
         /// <inheritdoc />
-        public NativeIntegerValue ConvertToU(bool is32Bit, bool unsigned, out bool overflowed) => InterpretAsI(is32Bit);
+        public NativeIntegerValue ConvertToU(bool is32Bit, bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsU(is32Bit);
+        }
 
         /// <inheritdoc />
         public I4Value ConvertToI1(bool unsigned, out bool overflowed) => throw new InvalidCastException();

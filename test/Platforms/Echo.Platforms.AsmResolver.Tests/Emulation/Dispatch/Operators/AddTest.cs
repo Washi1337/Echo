@@ -18,28 +18,28 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         public void AddInt32ToInt32ShouldResultInInt32()
         {
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Integer32Value(5678));
-            stack.Push(new Integer32Value(1234));
+            stack.Push(new I4Value(5678));
+            stack.Push(new I4Value(1234));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Add));
             
             Assert.True(result.IsSuccess);
-            Assert.IsAssignableFrom<Integer32Value>(stack.Top);
-            Assert.Equal(6912, ((Integer32Value) stack.Top).I32);
+            Assert.IsAssignableFrom<I4Value>(stack.Top);
+            Assert.Equal(6912, ((I4Value) stack.Top).I32);
         }
 
         [Fact]
         public void AddInt64ToInt64ShouldResultInInt64()
         {
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Integer64Value(5678));
-            stack.Push(new Integer64Value(1234));
+            stack.Push(new I8Value(5678));
+            stack.Push(new I8Value(1234));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Add));
             
             Assert.True(result.IsSuccess);
-            Assert.IsAssignableFrom<Integer64Value>(stack.Top);
-            Assert.Equal(6912, ((Integer64Value) stack.Top).I64);
+            Assert.IsAssignableFrom<I8Value>(stack.Top);
+            Assert.Equal(6912, ((I8Value) stack.Top).I64);
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
             
             var stack = ExecutionContext.ProgramState.Stack;
             stack.Push(new NativeIntegerValue(5678, is32Bit));
-            stack.Push(new Integer32Value(1234));
+            stack.Push(new I4Value(1234));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Add));
             
@@ -78,22 +78,22 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         public void AddFloatToFloatShouldResultInFloat()
         {
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Float64Value(5.678));
-            stack.Push(new Float64Value(1.234));
+            stack.Push(new FValue(5.678));
+            stack.Push(new FValue(1.234));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Add));
             
             Assert.True(result.IsSuccess);
-            Assert.IsAssignableFrom<Float64Value>(stack.Top);
-            Assert.Equal(new Float64Value(6.912), stack.Top);
+            Assert.IsAssignableFrom<FValue>(stack.Top);
+            Assert.Equal(new FValue(6.912), stack.Top);
         }
 
         [Fact]
         public void AddInt32ToInt64ShouldThrow()
         {
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(new Integer32Value(5678));
-            stack.Push(new Integer64Value(1234));
+            stack.Push(new I4Value(5678));
+            stack.Push(new I8Value(1234));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Add));
             
