@@ -9,10 +9,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// Represents a native integer that is either 32-bits or 64-bits long, depending on the architecture the program
     /// is running on.
     /// </summary>
-    public class NativeIntegerValue : IntegerValue
+    public class NativeIntegerValue : IntegerValue, ICliValue
     {
         private readonly IntegerValue _value;
-        
+
         /// <summary>
         /// Creates a fully known native integer value.
         /// </summary>
@@ -91,6 +91,121 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 Integer32Value int32 => new Integer64Value(int32.I32, int32.Mask | 0xFFFFFFFF_00000000),
                 _ => throw new ArgumentOutOfRangeException()
             };
+        }
+
+        public NativeIntegerValue InterpretAsI(bool is32Bit)
+        {
+            return ((ICliValue) _value).InterpretAsI(is32Bit);
+        }
+
+        public NativeIntegerValue InterpretAsU(bool is32Bit)
+        {
+            return ((ICliValue) _value).InterpretAsU(is32Bit);
+        }
+
+        public I4Value InterpretAsI1()
+        {
+            return ((ICliValue) _value).InterpretAsI1();
+        }
+
+        public I4Value InterpretAsU1()
+        {
+            return ((ICliValue) _value).InterpretAsU1();
+        }
+
+        public I4Value InterpretAsI2()
+        {
+            return ((ICliValue) _value).InterpretAsI2();
+        }
+
+        public I4Value InterpretAsU2()
+        {
+            return ((ICliValue) _value).InterpretAsU2();
+        }
+
+        public I4Value InterpretAsI4()
+        {
+            return ((ICliValue) _value).InterpretAsI4();
+        }
+
+        public I4Value InterpretAsU4()
+        {
+            return ((ICliValue) _value).InterpretAsU4();
+        }
+
+        public I8Value InterpretAsI8()
+        {
+            return ((ICliValue) _value).InterpretAsI8();
+        }
+
+        public FValue InterpretAsR4()
+        {
+            return ((ICliValue) _value).InterpretAsR4();
+        }
+
+        public FValue InterpretAsR8()
+        {
+            return ((ICliValue) _value).InterpretAsR8();
+        }
+
+        public OValue InterpretAsRef()
+        {
+            return ((ICliValue) _value).InterpretAsRef();
+        }
+
+        public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed)
+        {
+            return ((ICliValue) _value).ConvertToI(is32Bit, unsigned, out overflowed);
+        }
+
+        public NativeIntegerValue ConvertToU(bool is32Bit, bool unsigned, out bool overflowed)
+        {
+            return ((ICliValue) _value).ConvertToU(is32Bit, unsigned, out overflowed);
+        }
+
+        public I4Value ConvertToI1(bool unsigned, out bool overflowed)
+        {
+            return ((ICliValue) _value).ConvertToI1(unsigned, out overflowed);
+        }
+
+        public I4Value ConvertToU1(bool unsigned, out bool overflowed)
+        {
+            return ((ICliValue) _value).ConvertToU1(unsigned, out overflowed);
+        }
+
+        public I4Value ConvertToI2(bool unsigned, out bool overflowed)
+        {
+            return ((ICliValue) _value).ConvertToI2(unsigned, out overflowed);
+        }
+
+        public I4Value ConvertToU2(bool unsigned, out bool overflowed)
+        {
+            return ((ICliValue) _value).ConvertToU2(unsigned, out overflowed);
+        }
+
+        public I4Value ConvertToI4(bool unsigned, out bool overflowed)
+        {
+            return ((ICliValue) _value).ConvertToI4(unsigned, out overflowed);
+        }
+
+        public I4Value ConvertToU4(bool unsigned, out bool overflowed)
+        {
+            return ((ICliValue) _value).ConvertToU4(unsigned, out overflowed);
+        }
+
+        public I8Value ConvertToI8(bool unsigned, out bool overflowed)
+        {
+            return ((ICliValue) _value).ConvertToI8(unsigned, out overflowed);
+        }
+
+        public I8Value ConvertToU8(bool unsigned, out bool overflowed)
+        {
+            return ((ICliValue) _value).ConvertToU8(unsigned, out overflowed);
+        }
+
+        public FValue ConvertToR()
+        {
+            return ((ICliValue) _value).ConvertToR();
         }
     }
 }
