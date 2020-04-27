@@ -93,119 +93,83 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             };
         }
 
-        public NativeIntegerValue InterpretAsI(bool is32Bit)
-        {
-            return ((ICliValue) _value).InterpretAsI(is32Bit);
-        }
+        /// <inheritdoc />
+        public NativeIntegerValue InterpretAsI(bool is32Bit) => ((ICliValue) _value).InterpretAsI(is32Bit);
 
-        public NativeIntegerValue InterpretAsU(bool is32Bit)
-        {
-            return ((ICliValue) _value).InterpretAsU(is32Bit);
-        }
+        /// <inheritdoc />
+        public NativeIntegerValue InterpretAsU(bool is32Bit) => ((ICliValue) _value).InterpretAsU(is32Bit);
 
-        public I4Value InterpretAsI1()
-        {
-            return ((ICliValue) _value).InterpretAsI1();
-        }
+        /// <inheritdoc />
+        public I4Value InterpretAsI1() => ((ICliValue) _value).InterpretAsI1();
 
-        public I4Value InterpretAsU1()
-        {
-            return ((ICliValue) _value).InterpretAsU1();
-        }
+        /// <inheritdoc />
+        public I4Value InterpretAsU1() => ((ICliValue) _value).InterpretAsU1();
 
-        public I4Value InterpretAsI2()
-        {
-            return ((ICliValue) _value).InterpretAsI2();
-        }
+        /// <inheritdoc />
+        public I4Value InterpretAsI2() => ((ICliValue) _value).InterpretAsI2();
 
-        public I4Value InterpretAsU2()
-        {
-            return ((ICliValue) _value).InterpretAsU2();
-        }
+        /// <inheritdoc />
+        public I4Value InterpretAsU2() => ((ICliValue) _value).InterpretAsU2();
 
-        public I4Value InterpretAsI4()
-        {
-            return ((ICliValue) _value).InterpretAsI4();
-        }
+        /// <inheritdoc />
+        public I4Value InterpretAsI4() => ((ICliValue) _value).InterpretAsI4();
 
-        public I4Value InterpretAsU4()
-        {
-            return ((ICliValue) _value).InterpretAsU4();
-        }
+        /// <inheritdoc />
+        public I4Value InterpretAsU4() => ((ICliValue) _value).InterpretAsU4();
 
-        public I8Value InterpretAsI8()
-        {
-            return ((ICliValue) _value).InterpretAsI8();
-        }
+        /// <inheritdoc />
+        public I8Value InterpretAsI8() => ((ICliValue) _value).InterpretAsI8();
 
-        public FValue InterpretAsR4()
-        {
-            return ((ICliValue) _value).InterpretAsR4();
-        }
+        /// <inheritdoc />
+        public FValue InterpretAsR4() => ((ICliValue) _value).InterpretAsR4();
 
-        public FValue InterpretAsR8()
-        {
-            return ((ICliValue) _value).InterpretAsR8();
-        }
+        /// <inheritdoc />
+        public FValue InterpretAsR8() => ((ICliValue) _value).InterpretAsR8();
 
-        public OValue InterpretAsRef()
-        {
-            return ((ICliValue) _value).InterpretAsRef();
-        }
+        /// <inheritdoc />
+        public OValue InterpretAsRef() => ((ICliValue) _value).InterpretAsRef();
 
-        public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed)
-        {
-            return ((ICliValue) _value).ConvertToI(is32Bit, unsigned, out overflowed);
-        }
+        /// <inheritdoc />
+        public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed) => 
+            ((ICliValue) _value).ConvertToI(is32Bit, unsigned, out overflowed);
 
-        public NativeIntegerValue ConvertToU(bool is32Bit, bool unsigned, out bool overflowed)
-        {
-            return ((ICliValue) _value).ConvertToU(is32Bit, unsigned, out overflowed);
-        }
+        /// <inheritdoc />
+        public NativeIntegerValue ConvertToU(bool is32Bit, bool unsigned, out bool overflowed) => 
+            ((ICliValue) _value).ConvertToU(is32Bit, unsigned, out overflowed);
 
-        public I4Value ConvertToI1(bool unsigned, out bool overflowed)
-        {
-            return ((ICliValue) _value).ConvertToI1(unsigned, out overflowed);
-        }
+        /// <inheritdoc />
+        public I4Value ConvertToI1(bool unsigned, out bool overflowed) => 
+            ((ICliValue) _value).ConvertToI1(unsigned, out overflowed);
 
-        public I4Value ConvertToU1(bool unsigned, out bool overflowed)
-        {
-            return ((ICliValue) _value).ConvertToU1(unsigned, out overflowed);
-        }
+        /// <inheritdoc />
+        public I4Value ConvertToU1(bool unsigned, out bool overflowed) => 
+            ((ICliValue) _value).ConvertToU1(unsigned, out overflowed);
 
-        public I4Value ConvertToI2(bool unsigned, out bool overflowed)
-        {
-            return ((ICliValue) _value).ConvertToI2(unsigned, out overflowed);
-        }
+        /// <inheritdoc />
+        public I4Value ConvertToI2(bool unsigned, out bool overflowed) => 
+            ((ICliValue) _value).ConvertToI2(unsigned, out overflowed);
 
-        public I4Value ConvertToU2(bool unsigned, out bool overflowed)
-        {
-            return ((ICliValue) _value).ConvertToU2(unsigned, out overflowed);
-        }
+        /// <inheritdoc />
+        public I4Value ConvertToU2(bool unsigned, out bool overflowed) => 
+            ((ICliValue) _value).ConvertToU2(unsigned, out overflowed);
 
-        public I4Value ConvertToI4(bool unsigned, out bool overflowed)
-        {
-            return ((ICliValue) _value).ConvertToI4(unsigned, out overflowed);
-        }
+        /// <inheritdoc />
+        public I4Value ConvertToI4(bool unsigned, out bool overflowed) => 
+            ((ICliValue) _value).ConvertToI4(unsigned, out overflowed);
 
-        public I4Value ConvertToU4(bool unsigned, out bool overflowed)
-        {
-            return ((ICliValue) _value).ConvertToU4(unsigned, out overflowed);
-        }
+        /// <inheritdoc />
+        public I4Value ConvertToU4(bool unsigned, out bool overflowed) => 
+            ((ICliValue) _value).ConvertToU4(unsigned, out overflowed);
 
-        public I8Value ConvertToI8(bool unsigned, out bool overflowed)
-        {
-            return ((ICliValue) _value).ConvertToI8(unsigned, out overflowed);
-        }
+        /// <inheritdoc />
+        public I8Value ConvertToI8(bool unsigned, out bool overflowed) => 
+            ((ICliValue) _value).ConvertToI8(unsigned, out overflowed);
 
-        public I8Value ConvertToU8(bool unsigned, out bool overflowed)
-        {
-            return ((ICliValue) _value).ConvertToU8(unsigned, out overflowed);
-        }
+        /// <inheritdoc />
+        public I8Value ConvertToU8(bool unsigned, out bool overflowed) => 
+            ((ICliValue) _value).ConvertToU8(unsigned, out overflowed);
 
-        public FValue ConvertToR()
-        {
-            return ((ICliValue) _value).ConvertToR();
-        }
+        /// <inheritdoc />
+        public FValue ConvertToR() => ((ICliValue) _value).ConvertToR();
     }
 }
