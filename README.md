@@ -10,7 +10,7 @@ Build Status
 
 | Branch | Status (Linux)                                                                  |
 |--------|---------------------------------------------------------------------------------|
-| master | ![Linux](https://github.com/Washi1337/Echo/workflows/.NET%20Core/badge.svg)     |
+| master | ![Linux](https://github.com/Washi1337/Echo/workflows/Linux/badge.svg)           |
 
 
 Compiling
