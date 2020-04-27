@@ -41,7 +41,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             if (!is32Bit)
                 throw new InvalidOperationException();
-            return new NativeIntegerValue(I32, true);
+            return new NativeIntegerValue(this, true);
         }
 
         /// <inheritdoc />
@@ -49,13 +49,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             if (!is32Bit)
                 throw new InvalidOperationException();
-            return new NativeIntegerValue(U32, true);
+            return new NativeIntegerValue(this, true);
         }
 
         /// <inheritdoc />
         public I4Value InterpretAsI1()
         {
-            uint signMask = GetLastBit().HasValue ? 0xFFFFFF00 : 0;
+            uint signMask = GetBit(7).HasValue ? 0xFFFFFF00 : 0;
             int newValue = (I32 & 0xFF) | ~((I32 & 0x80) - 1);
             return new I4Value(newValue, (Mask & 0xFF) | signMask);
         }
@@ -66,7 +66,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <inheritdoc />
         public I4Value InterpretAsI2()
         {
-            uint signMask = GetLastBit().HasValue ? 0xFFFF0000 : 0;
+            uint signMask = GetBit(15).HasValue ? 0xFFFF0000 : 0;
             int newValue = (I32 & 0xFFFF) | ~((I32 & 0x8000) - 1);
             return new I4Value(newValue, (Mask & 0xFFFF) | signMask);
         }
