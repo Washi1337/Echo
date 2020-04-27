@@ -42,143 +42,86 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
         /// <inheritdoc />
         public IValue Copy() => new OValue(_isNull);
-        
+
         /// <inheritdoc />
         public NativeIntegerValue InterpretAsI(bool is32Bit)
         {
-            throw new NotImplementedException();
+            var value = new NativeIntegerValue(0, is32Bit);
+            if (!_isNull.GetValueOrDefault())
+                value.MarkFullyUnknown();
+            return value;
         }
 
         /// <inheritdoc />
         public NativeIntegerValue InterpretAsU(bool is32Bit)
         {
-            throw new NotImplementedException();
+            var value = new NativeIntegerValue(0, is32Bit);
+            if (!_isNull.GetValueOrDefault())
+                value.MarkFullyUnknown();
+            return value;
         }
 
         /// <inheritdoc />
-        public I4Value InterpretAsI1()
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value InterpretAsI1() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFFFF00);
 
         /// <inheritdoc />
-        public I4Value InterpretAsU1()
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value InterpretAsU1() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFFFF00);
 
         /// <inheritdoc />
-        public I4Value InterpretAsI2()
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value InterpretAsI2() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFF0000);
 
         /// <inheritdoc />
-        public I4Value InterpretAsU2()
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value InterpretAsU2() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFF0000);
 
         /// <inheritdoc />
-        public I4Value InterpretAsI4()
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value InterpretAsI4() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0x00000000);
 
         /// <inheritdoc />
-        public I4Value InterpretAsU4()
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value InterpretAsU4() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0x00000000);
 
         /// <inheritdoc />
-        public I8Value InterpretAsI8()
-        {
-            throw new NotImplementedException();
-        }
+        public I8Value InterpretAsI8() => new I8Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF_FFFFFFFF : 0);
 
         /// <inheritdoc />
-        public FValue InterpretAsR4()
-        {
-            throw new NotImplementedException();
-        }
+        public FValue InterpretAsR4() => new FValue(0); // TODO: return unknown float.
 
         /// <inheritdoc />
-        public FValue InterpretAsR8()
-        {
-            throw new NotImplementedException();
-        }
+        public FValue InterpretAsR8() => new FValue(0); // TODO: return unknown float.
 
         /// <inheritdoc />
-        public OValue InterpretAsRef()
-        {
-            throw new NotImplementedException();
-        }
+        public OValue InterpretAsRef() => this;
 
         /// <inheritdoc />
-        public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed)
-        {
-            throw new NotImplementedException();
-        }
+        public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed) => InterpretAsI(is32Bit);
 
         /// <inheritdoc />
-        public NativeIntegerValue ConvertToU(bool is32Bit, bool unsigned, out bool overflowed)
-        {
-            throw new NotImplementedException();
-        }
+        public NativeIntegerValue ConvertToU(bool is32Bit, bool unsigned, out bool overflowed) => InterpretAsI(is32Bit);
 
         /// <inheritdoc />
-        public I4Value ConvertToI1(bool unsigned, out bool overflowed)
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value ConvertToI1(bool unsigned, out bool overflowed) => throw new InvalidCastException();
 
         /// <inheritdoc />
-        public I4Value ConvertToU1(bool unsigned, out bool overflowed)
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value ConvertToU1(bool unsigned, out bool overflowed) => throw new InvalidCastException();
 
         /// <inheritdoc />
-        public I4Value ConvertToI2(bool unsigned, out bool overflowed)
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value ConvertToI2(bool unsigned, out bool overflowed) => throw new InvalidCastException();
 
         /// <inheritdoc />
-        public I4Value ConvertToU2(bool unsigned, out bool overflowed)
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value ConvertToU2(bool unsigned, out bool overflowed) => throw new InvalidCastException();
 
         /// <inheritdoc />
-        public I4Value ConvertToI4(bool unsigned, out bool overflowed)
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value ConvertToI4(bool unsigned, out bool overflowed) => throw new InvalidCastException();
 
         /// <inheritdoc />
-        public I4Value ConvertToU4(bool unsigned, out bool overflowed)
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value ConvertToU4(bool unsigned, out bool overflowed) => throw new InvalidCastException();
 
         /// <inheritdoc />
-        public I8Value ConvertToI8(bool unsigned, out bool overflowed)
-        {
-            throw new NotImplementedException();
-        }
+        public I8Value ConvertToI8(bool unsigned, out bool overflowed) => throw new InvalidCastException();
 
         /// <inheritdoc />
-        public I8Value ConvertToU8(bool unsigned, out bool overflowed)
-        {
-            throw new NotImplementedException();
-        }
+        public I8Value ConvertToU8(bool unsigned, out bool overflowed) => throw new InvalidCastException();
 
         /// <inheritdoc />
-        public FValue ConvertToR()
-        {
-            throw new NotImplementedException();
-        }
+        public FValue ConvertToR() => throw new InvalidCastException();
     }
 }
