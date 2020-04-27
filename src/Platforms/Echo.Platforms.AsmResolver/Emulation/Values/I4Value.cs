@@ -39,139 +39,146 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <inheritdoc />
         public NativeIntegerValue InterpretAsI(bool is32Bit)
         {
-            throw new NotImplementedException();
+            if (!is32Bit)
+                throw new InvalidOperationException();
+            return new NativeIntegerValue(I32, true);
         }
 
         /// <inheritdoc />
         public NativeIntegerValue InterpretAsU(bool is32Bit)
         {
-            throw new NotImplementedException();
+            if (!is32Bit)
+                throw new InvalidOperationException();
+            return new NativeIntegerValue(U32, true);
         }
 
         /// <inheritdoc />
         public I4Value InterpretAsI1()
         {
-            throw new NotImplementedException();
+            uint signMask = GetLastBit().HasValue ? 0xFFFFFF00 : 0;
+            return new I4Value(I32 & 0xFF, (Mask & 0xFF) | signMask);
         }
 
         /// <inheritdoc />
-        public I4Value InterpretAsU1()
-        {
-            throw new NotImplementedException();
-        }
+        public I4Value InterpretAsU1() => new I4Value(I32 & 0xFF, (Mask & 0xFF) | 0xFFFFFF00);
 
         /// <inheritdoc />
         public I4Value InterpretAsI2()
         {
-            throw new NotImplementedException();
+            uint signMask = GetLastBit().HasValue ? 0xFFFF0000 : 0;
+            return new I4Value(I32 & 0xFFFF, (Mask & 0xFFFF) | signMask);
         }
 
         /// <inheritdoc />
-        public I4Value InterpretAsU2()
+        public I4Value InterpretAsU2() => new I4Value(I32 & 0xFFFF, (Mask & 0xFFFF) | 0xFFFF0000);
+
+        /// <inheritdoc />
+        public I4Value InterpretAsI4() => this;
+
+        /// <inheritdoc />
+        public I4Value InterpretAsU4() => this;
+
+        /// <inheritdoc />
+        public I8Value InterpretAsI8() => throw new InvalidOperationException();
+
+        /// <inheritdoc />
+        public unsafe FValue InterpretAsR4()
         {
-            throw new NotImplementedException();
+            int bits = I32;
+            return new FValue(*(float*) bits);
         }
 
         /// <inheritdoc />
-        public I4Value InterpretAsI4()
-        {
-            throw new NotImplementedException();
-        }
+        public FValue InterpretAsR8() => throw new InvalidOperationException();
 
         /// <inheritdoc />
-        public I4Value InterpretAsU4()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public I8Value InterpretAsI8()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public FValue InterpretAsR4()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public FValue InterpretAsR8()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public OValue InterpretAsRef()
-        {
-            throw new NotImplementedException();
-        }
+        public OValue InterpretAsRef() => new OValue(IsZero);
 
         /// <inheritdoc />
         public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed)
         {
-            throw new NotImplementedException();
+            overflowed = is32Bit && unsigned && U32 > int.MaxValue;
+            return new NativeIntegerValue(this, is32Bit);
         }
 
         /// <inheritdoc />
         public NativeIntegerValue ConvertToU(bool is32Bit, bool unsigned, out bool overflowed)
         {
-            throw new NotImplementedException();
+            overflowed = !unsigned && I32 < 0;
+            return new NativeIntegerValue(this, is32Bit);
         }
 
         /// <inheritdoc />
         public I4Value ConvertToI1(bool unsigned, out bool overflowed)
         {
-            throw new NotImplementedException();
+            overflowed = unsigned
+                ? U32 > sbyte.MaxValue // || U32 < sbyte.MinValue;
+                : I32 < sbyte.MinValue || I32 > sbyte.MaxValue;
+
+            return InterpretAsI1();
         }
 
         /// <inheritdoc />
         public I4Value ConvertToU1(bool unsigned, out bool overflowed)
         {
-            throw new NotImplementedException();
+            overflowed = unsigned
+                ? U32 > byte.MaxValue // || U32 < byte.MinValue;
+                : I32 < byte.MinValue || I32 > byte.MaxValue;
+
+            return InterpretAsU1();
         }
 
         /// <inheritdoc />
         public I4Value ConvertToI2(bool unsigned, out bool overflowed)
         {
-            throw new NotImplementedException();
+            overflowed = unsigned
+                ? U32 > short.MaxValue // || U32 < short.MinValue;
+                : I32 < short.MinValue || I32 > short.MaxValue;
+
+            return InterpretAsI2();
         }
 
         /// <inheritdoc />
         public I4Value ConvertToU2(bool unsigned, out bool overflowed)
         {
-            throw new NotImplementedException();
+            overflowed = unsigned
+                ? U32 > ushort.MaxValue // || U32 < ushort.MinValue;
+                : I32 < ushort.MinValue || I32 > ushort.MaxValue;
+
+            return InterpretAsU2();
         }
 
         /// <inheritdoc />
         public I4Value ConvertToI4(bool unsigned, out bool overflowed)
         {
-            throw new NotImplementedException();
+            overflowed = unsigned && U32 > int.MaxValue; // || U32 < int.MinValue;
+            return this;
         }
 
         /// <inheritdoc />
         public I4Value ConvertToU4(bool unsigned, out bool overflowed)
         {
-            throw new NotImplementedException();
+            overflowed = !unsigned && I32 < uint.MinValue; // || I32 > uint.MaxValue;
+            return this;
         }
 
         /// <inheritdoc />
         public I8Value ConvertToI8(bool unsigned, out bool overflowed)
         {
-            throw new NotImplementedException();
+            overflowed = false;
+            ulong signMask = GetLastBit().HasValue ? 0xFFFFFFFF00000000ul : 0ul;
+            return new I8Value(unsigned ? U32 : (long) I32, Mask | signMask);
         }
 
         /// <inheritdoc />
         public I8Value ConvertToU8(bool unsigned, out bool overflowed)
         {
-            throw new NotImplementedException();
+            overflowed = !unsigned && I32 < 0;
+            ulong signMask = GetLastBit().HasValue ? 0xFFFFFFFF00000000ul : 0ul;
+            return new I8Value(unsigned ? U32 : (long) I32, Mask | signMask);
         }
 
         /// <inheritdoc />
-        public FValue ConvertToR()
-        {
-            throw new NotImplementedException();
-        }
+        public FValue ConvertToR() => new FValue(U32);
     }
 }
