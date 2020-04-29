@@ -1,3 +1,4 @@
+using Echo.Concrete.Values;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core.Values;
 
@@ -91,7 +92,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public OValue InterpretAsRef(bool is32Bit) => new OValue(IsZero, is32Bit);
+        public OValue InterpretAsRef(bool is32Bit) => new OValue(null, IsZero.GetValueOrDefault(), true);
 
         /// <inheritdoc />
         public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed)

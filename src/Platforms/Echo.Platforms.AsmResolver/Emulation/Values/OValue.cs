@@ -1,4 +1,5 @@
 using System;
+using Echo.Concrete.Values;
 using Echo.Core.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
@@ -8,24 +9,45 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// </summary>
     public class OValue : ICliValue
     {
-        private readonly bool? _isNull;
+        /// <summary>
+        /// Creates a new null reference value.
+        /// </summary>
+        /// <param name="is32Bit">Indicates whether the reference to the object is 32 or 64 bits wide.</param>
+        public OValue(bool is32Bit)
+        {
+            IsKnown = true;
+            Is32Bit = is32Bit;
+        }
 
         /// <summary>
         /// Creates a new object reference value.
         /// </summary>
-        /// <param name="isNull">Indicates whether the value is null or not.</param>
+        /// <param name="objectValue">The referenced value.</param>
+        /// <param name="isKnown">Indicates whether the value is known.</param>
         /// <param name="is32Bit">Indicates whether the reference to the object is 32 or 64 bits wide.</param>
-        public OValue(bool? isNull, bool is32Bit)
+        public OValue(IConcreteValue objectValue, bool isKnown, bool is32Bit)
         {
-            _isNull = isNull;
+            ObjectValue = objectValue;
+            IsKnown = isKnown;
             Is32Bit = is32Bit;
+        }
+
+        /// <summary>
+        /// Gets the object that was referenced.
+        /// </summary>
+        public IConcreteValue ObjectValue
+        {
+            get;
         }
         
         /// <inheritdoc />
         public CliValueType CliValueType => CliValueType.O;
 
         /// <inheritdoc />
-        public bool IsKnown => _isNull.HasValue;
+        public bool IsKnown
+        {
+            get;
+        }
 
         /// <summary>
         /// Gets a value indicating whether the reference to the object is 32 or 64 bits wide.
@@ -42,25 +64,25 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool IsValueType => false;
 
         /// <inheritdoc />
-        public bool? IsZero => _isNull;
+        public bool? IsZero => IsKnown ? ObjectValue is null : (bool?) null;
 
         /// <inheritdoc />
-        public bool? IsNonZero => !_isNull;
+        public bool? IsNonZero => !IsZero;
 
         /// <inheritdoc />
-        public bool? IsPositive => _isNull.GetValueOrDefault();
+        public bool? IsPositive => !IsZero;
 
         /// <inheritdoc />
         public bool? IsNegative => false;
 
         /// <inheritdoc />
-        public virtual IValue Copy() => new OValue(_isNull, Is32Bit);
+        public virtual IValue Copy() => new OValue(ObjectValue, IsKnown, Is32Bit);
 
         /// <inheritdoc />
         public NativeIntegerValue InterpretAsI(bool is32Bit)
         {
             var value = new NativeIntegerValue(0, is32Bit);
-            if (!_isNull.GetValueOrDefault())
+            if (!IsZero.GetValueOrDefault())
                 value.MarkFullyUnknown();
             return value;
         }
@@ -69,31 +91,31 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public NativeIntegerValue InterpretAsU(bool is32Bit)
         {
             var value = new NativeIntegerValue(0, is32Bit);
-            if (!_isNull.GetValueOrDefault())
+            if (!IsZero.GetValueOrDefault())
                 value.MarkFullyUnknown();
             return value;
         }
 
         /// <inheritdoc />
-        public I4Value InterpretAsI1() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFFFF00);
+        public I4Value InterpretAsI1() => new I4Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFFFF00);
 
         /// <inheritdoc />
-        public I4Value InterpretAsU1() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFFFF00);
+        public I4Value InterpretAsU1() => new I4Value(0, !IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFFFF00);
 
         /// <inheritdoc />
-        public I4Value InterpretAsI2() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFF0000);
+        public I4Value InterpretAsI2() => new I4Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFF0000);
 
         /// <inheritdoc />
-        public I4Value InterpretAsU2() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFF0000);
+        public I4Value InterpretAsU2() => new I4Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFF0000);
 
         /// <inheritdoc />
-        public I4Value InterpretAsI4() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0x00000000);
+        public I4Value InterpretAsI4() => new I4Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0x00000000);
 
         /// <inheritdoc />
-        public I4Value InterpretAsU4() => new I4Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF : 0x00000000);
+        public I4Value InterpretAsU4() => new I4Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0x00000000);
 
         /// <inheritdoc />
-        public I8Value InterpretAsI8() => new I8Value(0, !_isNull.GetValueOrDefault() ? 0xFFFFFFFF_FFFFFFFF : 0);
+        public I8Value InterpretAsI8() => new I8Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF_FFFFFFFF : 0);
 
         /// <inheritdoc />
         public FValue InterpretAsR4() => new FValue(0); // TODO: return unknown float.

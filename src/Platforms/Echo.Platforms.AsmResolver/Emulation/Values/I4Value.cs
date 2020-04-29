@@ -1,4 +1,5 @@
 using System;
+using Echo.Concrete.Values;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core.Values;
 
@@ -102,7 +103,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             if (!is32Bit)
                 throw new InvalidOperationException();
-            return new OValue(IsZero, true);
+            return new OValue(null, IsZero.GetValueOrDefault(), true);
         }
 
         /// <inheritdoc />
