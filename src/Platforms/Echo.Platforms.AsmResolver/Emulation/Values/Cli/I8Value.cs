@@ -2,7 +2,7 @@ using Echo.Concrete.Values;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core.Values;
 
-namespace Echo.Platforms.AsmResolver.Emulation.Values
+namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 {
     /// <summary>
     /// Represents a 64 bit integer value on the evaluation stack of the Common Language Infrastructure (CLI).

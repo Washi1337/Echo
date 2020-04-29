@@ -2,7 +2,7 @@ using System;
 using Echo.Concrete.Values;
 using Echo.Core.Values;
 
-namespace Echo.Platforms.AsmResolver.Emulation.Values
+namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 {
     /// <summary>
     /// Represents an object reference on the evaluation stack of the Common Language Infrastructure (CLI).

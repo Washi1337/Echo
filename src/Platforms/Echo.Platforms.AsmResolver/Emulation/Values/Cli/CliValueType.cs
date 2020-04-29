@@ -1,4 +1,4 @@
-namespace Echo.Platforms.AsmResolver.Emulation.Values
+namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 {
     /// <summary>
     /// Provides members for describing all different types of values that can be stored

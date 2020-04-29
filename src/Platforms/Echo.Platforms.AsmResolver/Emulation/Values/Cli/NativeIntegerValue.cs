@@ -3,7 +3,7 @@ using System.Collections;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core.Values;
 
-namespace Echo.Platforms.AsmResolver.Emulation.Values
+namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 {
     /// <summary>
     /// Represents a native integer that is either 32-bits or 64-bits long, depending on the architecture the program

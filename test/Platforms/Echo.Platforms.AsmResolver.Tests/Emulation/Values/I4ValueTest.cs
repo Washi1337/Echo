@@ -1,4 +1,4 @@
-using Echo.Platforms.AsmResolver.Emulation.Values;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Values

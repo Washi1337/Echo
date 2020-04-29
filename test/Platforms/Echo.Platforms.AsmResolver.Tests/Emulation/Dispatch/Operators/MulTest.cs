@@ -1,7 +1,7 @@
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation;
-using Echo.Platforms.AsmResolver.Emulation.Values;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
