@@ -18,7 +18,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
         }
 
-         /// <inheritdoc />
+        /// <inheritdoc />
+        public CliValueType CliValueType => CliValueType.F;
+
+        /// <inheritdoc />
         public NativeIntegerValue InterpretAsI(bool is32Bit)
         {
             throw new NotImplementedException();

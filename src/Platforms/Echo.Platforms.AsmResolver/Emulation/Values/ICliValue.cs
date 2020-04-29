@@ -9,6 +9,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     public interface ICliValue : IConcreteValue
     {
         /// <summary>
+        /// Gets the CLI type classification of the value.
+        /// </summary>
+        CliValueType CliValueType
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Interprets the bits stored in the value as a signed native integer.
         /// </summary>
         /// <param name="is32Bit">Determines whether the native integer is 32 bits or 64 bits wide.</param>

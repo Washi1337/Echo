@@ -51,6 +51,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             else
                 _value = (IntegerValue) value.Copy();
         }
+        
+        /// <inheritdoc />
+        public CliValueType CliValueType => CliValueType.NativeInt;
 
         /// <inheritdoc />
         public override bool IsKnown => _value.IsKnown;

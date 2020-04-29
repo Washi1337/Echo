@@ -9,24 +9,34 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     public class OValue : ICliValue
     {
         private readonly bool? _isNull;
-        private readonly bool _is32Bit;
 
         /// <summary>
         /// Creates a new object reference value.
         /// </summary>
         /// <param name="isNull">Indicates whether the value is null or not.</param>
-        /// <param name="is32Bit"></param>
+        /// <param name="is32Bit">Indicates whether the reference to the object is 32 or 64 bits wide.</param>
         public OValue(bool? isNull, bool is32Bit)
         {
             _isNull = isNull;
-            _is32Bit = is32Bit;
+            Is32Bit = is32Bit;
         }
+        
+        /// <inheritdoc />
+        public CliValueType CliValueType => CliValueType.O;
 
         /// <inheritdoc />
         public bool IsKnown => _isNull.HasValue;
 
+        /// <summary>
+        /// Gets a value indicating whether the reference to the object is 32 or 64 bits wide.
+        /// </summary>
+        public bool Is32Bit
+        {
+            get;
+        }
+
         /// <inheritdoc />
-        public int Size => _is32Bit ? 4 : 8;
+        public int Size => Is32Bit ? 4 : 8;
 
         /// <inheritdoc />
         public bool IsValueType => false;
@@ -44,7 +54,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool? IsNegative => false;
 
         /// <inheritdoc />
-        public IValue Copy() => new OValue(_isNull, _is32Bit);
+        public virtual IValue Copy() => new OValue(_isNull, Is32Bit);
 
         /// <inheritdoc />
         public NativeIntegerValue InterpretAsI(bool is32Bit)

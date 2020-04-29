@@ -36,6 +36,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             : base(bitString)
         {
         }
+        
+        /// <inheritdoc />
+        public CliValueType CliValueType => CliValueType.Int32;
 
         /// <inheritdoc />
         public NativeIntegerValue InterpretAsI(bool is32Bit)
