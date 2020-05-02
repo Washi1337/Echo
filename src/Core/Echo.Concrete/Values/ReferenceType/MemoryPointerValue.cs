@@ -13,7 +13,6 @@ namespace Echo.Concrete.Values.ReferenceType
     {
         private readonly Memory<byte> _memory;
         private readonly Memory<byte> _knownBitMask;
-        private readonly bool _is32Bit;
 
         /// <summary>
         /// Creates a new memory pointer value.
@@ -25,7 +24,12 @@ namespace Echo.Concrete.Values.ReferenceType
         {
             _memory = memory;
             _knownBitMask = knownBitMask;
-            _is32Bit = is32Bit;
+            Is32Bit = is32Bit;
+        }
+
+        public bool Is32Bit
+        {
+            get;
         }
 
         /// <inheritdoc />
@@ -52,7 +56,7 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <remarks>
         /// This property represents the size of the pointer, and not the size of the memory chunk that is referenced.
         /// </remarks>
-        public int Size => _is32Bit ? 4 : 8;
+        public int Size => Is32Bit ? 4 : 8;
 
         /// <inheritdoc />
         public bool IsValueType => false;
@@ -286,7 +290,7 @@ namespace Echo.Concrete.Values.ReferenceType
         }
 
         /// <inheritdoc />
-        public IValue Copy() => new MemoryPointerValue(_memory, _knownBitMask, _is32Bit);
+        public IValue Copy() => new MemoryPointerValue(_memory, _knownBitMask, Is32Bit);
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void AssertOffsetValidity(int offset, int size)
