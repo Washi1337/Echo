@@ -31,6 +31,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
+        public bool Is32Bit => Environment.Is32Bit;
+
+        /// <inheritdoc />
         public ICliValue ToCliValue(IConcreteValue value, TypeSignature originalType)
         {
             return originalType.ElementType switch
@@ -140,7 +143,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <returns>The marshalled value.</returns>
         protected virtual  NativeIntegerValue IntToI(IntegerValue value)
         {
-            return new NativeIntegerValue(value, Environment.Is32Bit);
+            return new NativeIntegerValue(value, Is32Bit);
         }
 
         /// <summary>
@@ -170,7 +173,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <returns>The marshalled value.</returns>
         protected virtual OValue ObjectToO(IConcreteValue value)
         {
-            return new OValue(value, value.IsKnown, Environment.Is32Bit);
+            return new OValue(value, value.IsKnown, Is32Bit);
         }
         
         /// <inheritdoc />
@@ -220,12 +223,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
                 case ElementType.I:
                 {
-                    return value.InterpretAsI(Environment.Is32Bit);
+                    return value.InterpretAsI(Is32Bit);
                 }
 
                 case ElementType.U:
                 {
-                    return value.InterpretAsU(Environment.Is32Bit);
+                    return value.InterpretAsU(Is32Bit);
                 }
 
                 case ElementType.Object:
@@ -233,7 +236,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 case ElementType.SzArray:
                 case ElementType.String:
                 {
-                    return value.InterpretAsRef(Environment.Is32Bit).ObjectValue;
+                    return value.InterpretAsRef(Is32Bit).ObjectValue;
                 }
                 
                 default:

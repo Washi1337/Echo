@@ -11,6 +11,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     public interface ICliMarshaller
     {
         /// <summary>
+        /// Gets a value indicating this marshaller assumes a 32 bit or a 64 bit architecture.
+        /// </summary>
+        bool Is32Bit
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Wraps a concrete value into a CLI value.
         /// </summary>
         /// <param name="value">The value to marshal.</param>

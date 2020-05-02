@@ -9,6 +9,7 @@ using Echo.Concrete.Values;
 using Echo.Core.Code;
 using Echo.Core.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
+using Echo.Platforms.AsmResolver.Emulation.Values;
 using ExecutionContext = Echo.Concrete.Emulation.ExecutionContext;
 
 namespace Echo.Platforms.AsmResolver.Emulation
@@ -55,6 +56,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Dispatcher = new DefaultCilDispatcher();
             
             _services[typeof(ICilRuntimeEnvironment)] = this;
+            _services[typeof(ICliMarshaller)] = new CliMarshaller(this);
         }
 
         /// <inheritdoc />
