@@ -18,22 +18,26 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public static int GetSize(this TypeSignature type, bool is32Bit)
         {
             // TODO: replace length calculation with future AsmResolver GetSize methods.
-            return type.ElementType switch
+            
+            if (type.Namespace != "System")
+                throw new NotSupportedException();
+            
+            return type.Name switch
             {
-                ElementType.Boolean => 4,
-                ElementType.Char => 2,
-                ElementType.I1 => 1,
-                ElementType.U1 => 1,
-                ElementType.I2 => 2,
-                ElementType.U2 => 2,
-                ElementType.I4 => 4,
-                ElementType.U4 => 4,
-                ElementType.I8 => 8,
-                ElementType.U8 => 8,
-                ElementType.R4 => 4,
-                ElementType.R8 => 8,
-                ElementType.I => is32Bit ? 4 : 8,
-                ElementType.U => is32Bit ? 4 : 8,
+                nameof(Boolean) => 4,
+                nameof(Char) => 2, 
+                nameof(SByte) => 1,
+                nameof(Byte) => 1,
+                nameof(Int16) => 2,
+                nameof(UInt16) => 2,
+                nameof(Int32) => 4,
+                nameof(UInt32) => 4,
+                nameof(Int64) => 8,
+                nameof(UInt64) => 8,
+                nameof(Single) => 8,
+                nameof(Double) => 8,
+                nameof(IntPtr) => is32Bit ? 4 : 8,
+                nameof(UIntPtr) => is32Bit ? 4 : 8,
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
