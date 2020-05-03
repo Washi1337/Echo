@@ -78,7 +78,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public bool IsKnown => _contents.IsKnown;
+        public bool IsKnown => true;
 
         /// <inheritdoc />
         public int Size => _contents.Size;

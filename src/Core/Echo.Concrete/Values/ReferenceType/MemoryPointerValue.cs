@@ -36,19 +36,7 @@ namespace Echo.Concrete.Values.ReferenceType
         }
 
         /// <inheritdoc />
-        public bool IsKnown
-        {
-            get
-            {
-                foreach (byte b in _memory.Span)
-                {
-                    if (b != 0xFF)
-                        return false;
-                }
-
-                return true;
-            }
-        }
+        public bool IsKnown => true;
 
         /// <summary>
         /// Gets the length of the memory chunk that is referenced.
