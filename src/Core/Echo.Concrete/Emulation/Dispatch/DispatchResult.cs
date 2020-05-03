@@ -7,7 +7,23 @@ namespace Echo.Concrete.Emulation.Dispatch
     /// </summary>
     public struct DispatchResult
     {
-        public DispatchResult( Exception exception)
+        /// <summary>
+        /// Creates a new dispatch result indicating a successful dispatch and execution of the instruction. 
+        /// </summary>
+        /// <returns>The dispatch result.</returns>
+        public static DispatchResult Success() => new DispatchResult();
+        
+        /// <summary>
+        /// Creates a new dispatch result indicating an invalid program was detected. 
+        /// </summary>
+        /// <returns>The dispatch result.</returns>
+        public static DispatchResult InvalidProgram() => new DispatchResult(new InvalidProgramException());
+
+        /// <summary>
+        /// Creates a new dispatch result with the provided exception.
+        /// </summary>
+        /// <param name="exception">The exception that occured during the execution of the instruction.</param>
+        public DispatchResult(Exception exception)
         {
             HasTerminated = false;
             Exception = exception;

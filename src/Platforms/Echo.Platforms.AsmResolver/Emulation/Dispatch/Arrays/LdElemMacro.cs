@@ -4,6 +4,7 @@ using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
 {
@@ -29,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         };
 
         /// <inheritdoc />
-        protected override IConcreteValue GetValue(ExecutionContext context, CilInstruction instruction, IDotNetArrayValue array,
+        protected override IConcreteValue GetElementValue(ExecutionContext context, CilInstruction instruction, IDotNetArrayValue array,
             int index)
         {
             var marshaller = context.GetService<ICilRuntimeEnvironment>().CliMarshaller;
@@ -47,6 +48,28 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                 CilCode.Ldelem_R4 => array.LoadElementR4(index, marshaller),
                 CilCode.Ldelem_R8 => array.LoadElementR8(index, marshaller),
                 CilCode.Ldelem_Ref => array.LoadElementRef(index, marshaller),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        /// <inheritdoc />
+        protected override IConcreteValue GetUnknownElementValue(ExecutionContext context, CilInstruction instruction)
+        {        
+            var environment = context.GetService<ICilRuntimeEnvironment>();
+
+            return instruction.OpCode.Code switch
+            {
+                CilCode.Ldelem_I => new I4Value(0,0),
+                CilCode.Ldelem_I1 => new I4Value(0,0),
+                CilCode.Ldelem_I2 => new I4Value(0,0),
+                CilCode.Ldelem_I4 => new I4Value(0,0),
+                CilCode.Ldelem_I8 => new I8Value(0,0),
+                CilCode.Ldelem_U1 => new I4Value(0,0),
+                CilCode.Ldelem_U2 => new I4Value(0,0),
+                CilCode.Ldelem_U4 => new I4Value(0,0),
+                CilCode.Ldelem_R4 => new FValue(0),
+                CilCode.Ldelem_R8 => new FValue(0),
+                CilCode.Ldelem_Ref => new OValue(null, false, environment.Is32Bit),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }

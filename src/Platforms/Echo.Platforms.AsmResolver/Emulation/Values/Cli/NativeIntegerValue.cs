@@ -83,15 +83,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public override void MarkFullyUnknown() => _value.MarkFullyUnknown();
 
         /// <summary>
-        /// Converts the native integer value to a 64-bit integer.
+        /// When the value is fully known, gets the raw integer value stored in this native integer as an int64.
         /// </summary>
-        /// <returns></returns>
-        public Integer64Value ToInt64()
+        /// <returns>The integer, sign extended to a 64 bit integer.</returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public long ToKnownI64()
         {
+            if (IsKnown)
+                throw new InvalidOperationException("Value is not fully known.");
+            
             return _value switch
             {
-                Integer64Value int64 => int64,
-                Integer32Value int32 => new Integer64Value(int32.I32, int32.Mask | 0xFFFFFFFF_00000000),
+                Integer32Value int32 => int32.I32,
+                Integer64Value int64 => int64.I64,
                 _ => throw new ArgumentOutOfRangeException()
             };
         }

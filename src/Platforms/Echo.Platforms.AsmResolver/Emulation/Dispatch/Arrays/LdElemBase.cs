@@ -3,8 +3,6 @@ using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values;
-using Echo.Concrete.Values.ReferenceType;
-using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -21,37 +19,33 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             var stack = context.ProgramState.Stack;
             
             // Pop arguments.
-            var indexValue = stack.Pop();
-            var arrayValue = stack.Pop() as OValue;
+            var indexValue = (ICliValue) stack.Pop();
+            var arrayValue = (ICliValue) stack.Pop();
 
-            // Extract actual integer index.
-            int? index = indexValue switch
+            // Check if both array and index are known.
+            if (!arrayValue.IsKnown || !indexValue.IsKnown)
             {
-                Integer32Value i32 => i32.I32,
-                NativeIntegerValue nativeInt => (int) nativeInt.ToInt64().I64,
-                _ => null
-            };
-
-            // Check for invalid CIL.
-            if (arrayValue is null || index is null || !(arrayValue.ObjectValue is IDotNetArrayValue dotNetArray))
-                return new DispatchResult(new InvalidProgramException());
-
-            // Check if index is actually known.
-            if (!indexValue.IsKnown)
-            {
-                // TODO: dispatch event, allowing the user to handle unknown array indices.
-                throw new DispatchException("Could not obtain an element from an array.",
-                    new NotSupportedException("Obtaining values from indices with unknown bits is not supported."));
+                stack.Push(GetUnknownElementValue(context, instruction));
+                return base.Execute(context, instruction);
             }
+
+            // Expect an int32 or a native int for index, and extract its value.
+            if (indexValue.CliValueType != CliValueType.Int32 && indexValue.CliValueType != CliValueType.NativeInt)
+                return DispatchResult.InvalidProgram();
+            
+            int index = indexValue.InterpretAsI4().I32;
+
+            // Expect an O value with a .NET array in it.
+            if (!(arrayValue is OValue { ObjectValue: IDotNetArrayValue dotNetArray }))
+                return DispatchResult.InvalidProgram();
 
             // Check if in bounds.
             if (index < 0 || index >= dotNetArray.Length)
                 return new DispatchResult(new IndexOutOfRangeException());
             
             // Push value stored in array.
-            var value = GetValue(context, instruction, dotNetArray, index.Value);
-
-            stack.Push(value);
+            stack.Push(GetElementValue(context, instruction, dotNetArray, index));
+            
             return base.Execute(context, instruction);
         }
 
@@ -63,10 +57,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         /// <param name="array">The array to get the element from.</param>
         /// <param name="index">The index of the element to get.</param>
         /// <returns>The value.</returns>
-        protected abstract IConcreteValue GetValue(
+        protected abstract IConcreteValue GetElementValue(
             ExecutionContext context,
             CilInstruction instruction,
             IDotNetArrayValue array,
             int index);
+
+        /// <summary>
+        /// Creates a fully unknown value that was read from the array. 
+        /// </summary>
+        /// <param name="context">The context in which the instruction is being executed in.</param>
+        /// <param name="instruction">The instruction that is being executed.</param>
+        /// <returns>The value.</returns>
+        /// <remarks>
+        /// This method is called when either the array or the index of the requested element is not fully known.
+        /// </remarks>
+        protected abstract IConcreteValue GetUnknownElementValue(ExecutionContext context, CilInstruction instruction);
     }
 }
