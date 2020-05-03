@@ -1,14 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values;
+using Echo.Concrete.Values.ReferenceType;
 using Echo.Core.Code;
 using Echo.Core.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
+using Echo.Platforms.AsmResolver.Emulation.Values;
 using ExecutionContext = Echo.Concrete.Emulation.ExecutionContext;
 
 namespace Echo.Platforms.AsmResolver.Emulation
@@ -32,8 +36,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public CilVirtualMachine(CilMethodBody methodBody, bool is32Bit)
             : this
             (
-                new ListInstructionProvider<CilInstruction>(
-                    new CilArchitecture(methodBody), methodBody.Instructions),
+                methodBody.Owner.Module,
+                new ListInstructionProvider<CilInstruction>(new CilArchitecture(methodBody), methodBody.Instructions),
                 is32Bit
             )
         {
@@ -42,10 +46,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Creates a new instance of the <see cref="CilVirtualMachine"/>. 
         /// </summary>
+        /// <param name="module">The module in which the CIL runs in.</param>
         /// <param name="instructions">The instructions to emulate..</param>
         /// <param name="is32Bit">Indicates whether the virtual machine should run in 32-bit mode or in 64-bit mode.</param>
-        public CilVirtualMachine(IStaticInstructionProvider<CilInstruction> instructions, bool is32Bit)
+        public CilVirtualMachine(ModuleDefinition module, IStaticInstructionProvider<CilInstruction> instructions, bool is32Bit)
         {
+            Module = module;
             Instructions = instructions;
             Architecture = instructions.Architecture;
             
@@ -53,6 +59,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Status = VirtualMachineStatus.Idle;
             CurrentState = new CilProgramState();
             Dispatcher = new DefaultCilDispatcher();
+            CliMarshaller = new DefaultCliMarshaller(this);
             
             _services[typeof(ICilRuntimeEnvironment)] = this;
         }
@@ -67,6 +74,19 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public bool Is32Bit
         {
             get;
+        }
+
+        /// <inheritdoc />
+        public ModuleDefinition Module
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public ICliMarshaller CliMarshaller
+        {
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -152,5 +172,33 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
         object IServiceProvider.GetService(Type serviceType) => 
             _services[serviceType];
+
+        /// <inheritdoc />
+        public MemoryPointerValue AllocateMemory(int size, bool initializeWithZeroes)
+        {
+            var memory = new Memory<byte>(new byte[size]);
+            var knownBitMask = new Memory<byte>(new byte[size]);
+            if (initializeWithZeroes)
+                knownBitMask.Span.Fill(0xFF);
+            return new MemoryPointerValue(memory, knownBitMask, Is32Bit);
+        }
+
+        /// <inheritdoc />
+        public IDotNetArrayValue AllocateArray(TypeSignature elementType, int length)
+        {
+            if (elementType.IsValueType)
+            {
+                int size = length * elementType.GetSize(Is32Bit);
+                var memory = AllocateMemory(size, true);
+                return new ValueTypeArrayValue(elementType, memory);
+            }
+            
+            throw new NotSupportedException();
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+        }
     }
 }

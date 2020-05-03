@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
-using Echo.Concrete.Values.ValueType;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
 {
@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
         /// <inheritdoc />
         public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
         {
-            context.ProgramState.Stack.Push(new Float64Value((float) instruction.Operand));
+            context.ProgramState.Stack.Push(new FValue((float) instruction.Operand));
             return base.Execute(context, instruction);
         }
     }

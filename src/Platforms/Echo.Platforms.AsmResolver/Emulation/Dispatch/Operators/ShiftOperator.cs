@@ -4,7 +4,7 @@ using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values.ValueType;
-using Echo.Platforms.AsmResolver.Emulation.Values;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 {
@@ -71,7 +71,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
             {
                 shiftCount = value2 switch
                 {
-                    Integer32Value int32 => int32.I32,
+                    I4Value int32 => int32.I32,
                     NativeIntegerValue nativeInt => (int?) nativeInt.ToInt64().I64,
                     _ => null
                 };

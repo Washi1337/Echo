@@ -1,10 +1,8 @@
 using System;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete.Values;
-using Echo.Concrete.Values.ReferenceType;
-using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation;
-using Echo.Platforms.AsmResolver.Emulation.Values;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
@@ -22,21 +20,25 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         [InlineData(1, 0xB)]
         [InlineData(2, 0xC)]
         [InlineData(3, 0xD)]
-        public void LdelemI4UsingInt32Index(int index, int expectedValue)
+        public void LdelemI4UsingI4Index(int index, int expectedValue)
         {
-            var stack = ExecutionContext.ProgramState.Stack;
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var marshaller = environment.CliMarshaller;
             
-            var array = new ArrayValue(new IConcreteValue[]
-            {
-                new Integer32Value(0xA), new Integer32Value(0xB), new Integer32Value(0xC), new Integer32Value(0xD),  
-            });
-            stack.Push(array);
-            stack.Push(new Integer32Value(index));
+            var array = environment.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
+            array.StoreElementI4(0, new I4Value(0xA), marshaller);
+            array.StoreElementI4(1, new I4Value(0xB), marshaller);
+            array.StoreElementI4(2, new I4Value(0xC), marshaller);
+            array.StoreElementI4(3, new I4Value(0xD), marshaller);
+
+            var stack = ExecutionContext.ProgramState.Stack;
+            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(new I4Value(index));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
             
-            Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(expectedValue), stack.Top);
+            Assert.True(result.IsSuccess, $"Unexpected {result.Exception?.GetType()}: {result.Exception?.Message}");
+            Assert.Equal(new I4Value(expectedValue), stack.Top);
         }
 
         [Theory]
@@ -46,20 +48,44 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         [InlineData(3, 0xD)]
         public void LdelemI4UsingNativeIntegerIndex(long index, int expectedValue)
         {
-            bool is32Bit = ExecutionContext.GetService<ICilRuntimeEnvironment>().Is32Bit;
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var marshaller = environment.CliMarshaller;
+            
+            var array = environment.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
+            array.StoreElementI4(0, new I4Value(0xA), marshaller);
+            array.StoreElementI4(1, new I4Value(0xB), marshaller);
+            array.StoreElementI4(2, new I4Value(0xC), marshaller);
+            array.StoreElementI4(3, new I4Value(0xD), marshaller);
             
             var stack = ExecutionContext.ProgramState.Stack;
-            var array = new ArrayValue(new IConcreteValue[]
-            {
-                new Integer32Value(0xA), new Integer32Value(0xB), new Integer32Value(0xC), new Integer32Value(0xD),  
-            });
-            stack.Push(array);
-            stack.Push(new NativeIntegerValue(index, is32Bit));
+            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(new NativeIntegerValue(index, environment.Is32Bit));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
             
-            Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(expectedValue), stack.Top);
+            Assert.True(result.IsSuccess, $"Unexpected {result.Exception?.GetType()}: {result.Exception?.Message}");
+            Assert.Equal(new I4Value(expectedValue), stack.Top);
+        }
+
+        [Fact]
+        public void LdElemI8OnLastIndexOfInt8ArrayShouldReturnZeroes()
+        {
+            // NOTE: This is undocumented behaviour.
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var marshaller = environment.CliMarshaller;
+            
+            var array = environment.AllocateArray(environment.Module.CorLibTypeFactory.Byte, 10);
+            for (int i = 0; i < array.Length; i++)
+                array.StoreElementU1(i, new I4Value(i), marshaller);
+            
+            var stack = ExecutionContext.ProgramState.Stack;
+            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(new I4Value(9));
+            
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I8));
+            
+            Assert.True(result.IsSuccess, $"Unexpected {result.Exception?.GetType()}: {result.Exception?.Message}");
+            Assert.Equal(new I8Value(0), stack.Top);
         }
 
         [Theory]
@@ -75,18 +101,20 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         [InlineData(CilCode.Ldelem_U4, 0x0F007F00, 0x0F007F00)]
         public void LdelemOnInt32ArrayShouldTruncateAndSignExtendWhenNecessary(CilCode code, int arrayElementValue, int expectedValue)
         {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var marshaller = environment.CliMarshaller;
+            
+            var array = environment.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 1);
+            array.StoreElementI4(0, new I4Value(arrayElementValue), marshaller);
+            
             var stack = ExecutionContext.ProgramState.Stack;
-            var array = new ArrayValue(new IConcreteValue[]
-            {
-                new Integer32Value(arrayElementValue),
-            });
-            stack.Push(array);
-            stack.Push(new Integer32Value(0));
+            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(new I4Value(0));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(code.ToOpCode()));
             
-            Assert.True(result.IsSuccess);
-            Assert.Equal(new Integer32Value(expectedValue), stack.Top);
+            Assert.True(result.IsSuccess, $"Unexpected {result.Exception?.GetType()}: {result.Exception?.Message}");
+            Assert.Equal(new I4Value(expectedValue), stack.Top);
         }
 
         [Theory]
@@ -95,15 +123,17 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         [InlineData(100)]
         public void ArrayAccessOutOfBoundsShouldThrow(int index)
         {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var marshaller = environment.CliMarshaller;
+            
+            var array = environment.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 3);
+            array.StoreElementI4(0, new I4Value(0), marshaller);
+            array.StoreElementI4(1, new I4Value(1), marshaller);
+            array.StoreElementI4(2, new I4Value(2), marshaller);
+            
             var stack = ExecutionContext.ProgramState.Stack;
-            var array = new ArrayValue(new IConcreteValue[]
-            {
-                new Integer32Value(0),
-                new Integer32Value(1),
-                new Integer32Value(2),
-            });
-            stack.Push(array);
-            stack.Push(new Integer32Value(index));
+            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(new I4Value(index));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
             
@@ -112,38 +142,41 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         }
 
         [Fact]
-        public void LdElemR4ShouldExtendToFloat64()
+        public void LdElemR4OnSingleArray()
         {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var marshaller = environment.CliMarshaller;
+            
+            var array = environment.AllocateArray(environment.Module.CorLibTypeFactory.Single, 1);
+            array.StoreElementR4(0, new FValue(1.23f), marshaller);
+            
             var stack = ExecutionContext.ProgramState.Stack;
-            var array = new ArrayValue(new IConcreteValue[]
-            {
-                new Float32Value(1.23f), 
-            });
-            stack.Push(array);
-            stack.Push(new Integer32Value(0));
+            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(new I4Value(0));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_R4));
             
-            Assert.True(result.IsSuccess);
-            Assert.Equal(new Float64Value(1.23f), stack.Top);
+            Assert.True(result.IsSuccess, $"Unexpected {result.Exception?.GetType()}: {result.Exception?.Message}");
+            Assert.Equal(new FValue(1.23f), stack.Top);
         }
 
         [Fact]
-        public void LdElemR8CopyFloat64()
+        public void LdElemR8OnDoubleArray()
         {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var marshaller = environment.CliMarshaller;
+            
+            var array = environment.AllocateArray(environment.Module.CorLibTypeFactory.Double, 1);
+            array.StoreElementR8(0, new FValue(1.23D), marshaller);
+            
             var stack = ExecutionContext.ProgramState.Stack;
-            var array = new ArrayValue(new IConcreteValue[]
-            {
-                new Float64Value(1.23D), 
-            });
-            stack.Push(array);
-            stack.Push(new Integer32Value(0));
+            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(new I4Value(0));
             
-            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_R4));
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_R8));
             
-            Assert.True(result.IsSuccess);
-            Assert.NotSame(array[0], stack.Top);
-            Assert.Equal(new Float64Value(1.23D), stack.Top);
+            Assert.True(result.IsSuccess, $"Unexpected {result.Exception?.GetType()}: {result.Exception?.Message}");
+            Assert.Equal(new FValue(1.23D), stack.Top);
         }
     }
 }
