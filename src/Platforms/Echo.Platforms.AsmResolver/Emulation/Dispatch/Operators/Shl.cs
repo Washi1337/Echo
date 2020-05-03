@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         {
             value.LeftShift(shiftCount);
             context.ProgramState.Stack.Push(value);
-            return new DispatchResult();
+            return DispatchResult.Success();
         }
     }
 }

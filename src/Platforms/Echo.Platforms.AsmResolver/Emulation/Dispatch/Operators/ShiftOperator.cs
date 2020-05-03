@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
             {
                 (IntegerValue value, int shiftCount) => Execute(context, instruction, value, shiftCount),
                 (IntegerValue value, null) => ExecuteDefault(context, value, left),
-                _ => new DispatchResult(new InvalidProgramException())
+                _ => DispatchResult.InvalidProgram()
             };
 
             if (result.IsSuccess)
@@ -47,7 +47,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
                 value.MarkFullyUnknown();
 
             context.ProgramState.Stack.Push(left);
-            return new DispatchResult();
+            return DispatchResult.Success();
         }
 
         /// <summary>

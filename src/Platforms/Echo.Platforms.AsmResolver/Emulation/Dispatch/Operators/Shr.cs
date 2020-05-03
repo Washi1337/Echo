@@ -24,7 +24,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         {
             value.RightShift(shiftCount, instruction.OpCode.Code == CilCode.Shr);
             context.ProgramState.Stack.Push(value);
-            return new DispatchResult();
+            return DispatchResult.Success();
         }
     }
 }

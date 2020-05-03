@@ -36,7 +36,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
             }
 
             context.ProgramState.ProgramCounter = newOffset;
-            return new DispatchResult();
+            return DispatchResult.Success();
         }
 
         /// <summary>

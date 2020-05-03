@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         {
             value.F64 = -value.F64;
             context.ProgramState.Stack.Push(value);
-            return new DispatchResult();
+            return DispatchResult.Success();
         }
 
         /// <inheritdoc />
@@ -30,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         {
             value.TwosComplement();
             context.ProgramState.Stack.Push(value);
-            return new DispatchResult();
+            return DispatchResult.Success();
         }
     }
 }

@@ -27,12 +27,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
             
             int popCount = environment.Architecture.GetStackPopCount(instruction);
             if (context.ProgramState.Stack.Size != popCount)
-            {
-                return new DispatchResult
-                {
-                    Exception = new InvalidProgramException()
-                };
-            }
+                return DispatchResult.InvalidProgram();
 
             // Pop result.
             if (popCount == 1)

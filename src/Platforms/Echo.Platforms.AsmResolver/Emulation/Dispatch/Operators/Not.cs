@@ -20,14 +20,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 
         /// <inheritdoc />
         protected override DispatchResult Execute(ExecutionContext context, Float64Value value) =>
-            new DispatchResult(new InvalidProgramException());
+            DispatchResult.InvalidProgram();
 
         /// <inheritdoc />
         protected override DispatchResult Execute(ExecutionContext context, IntegerValue value)
         {
             value.Not();
             context.ProgramState.Stack.Push(value);
-            return new DispatchResult();
+            return DispatchResult.Success();
         }
     }
 }

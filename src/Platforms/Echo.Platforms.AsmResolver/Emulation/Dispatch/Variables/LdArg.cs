@@ -27,7 +27,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
                 .First();
             
             if (!(variable is CilParameter))
-                return new DispatchResult(new InvalidProgramException());
+                return DispatchResult.InvalidProgram();
             
             context.ProgramState.Stack.Push(context.ProgramState.Variables[variable]);
             return base.Execute(context, instruction);
