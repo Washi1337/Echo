@@ -67,6 +67,27 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             Assert.Equal(new I4Value(expectedValue), stack.Top);
         }
 
+        [Fact]
+        public void LdElemI8OnLastIndexOfInt8ArrayShouldReturnZeroes()
+        {
+            // NOTE: This is undocumented behaviour.
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var marshaller = environment.CliMarshaller;
+            
+            var array = environment.AllocateArray(environment.Module.CorLibTypeFactory.Byte, 10);
+            for (int i = 0; i < array.Length; i++)
+                array.StoreElementU1(i, new I4Value(i), marshaller);
+            
+            var stack = ExecutionContext.ProgramState.Stack;
+            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(new I4Value(9));
+            
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I8));
+            
+            Assert.True(result.IsSuccess, $"Unexpected {result.Exception?.GetType()}: {result.Exception?.Message}");
+            Assert.Equal(new I8Value(0), stack.Top);
+        }
+
         [Theory]
         [InlineData(CilCode.Ldelem_I1, 0x00FF0080, -0x80)]
         [InlineData(CilCode.Ldelem_U1, 0x00FF0080, 0x80)]
