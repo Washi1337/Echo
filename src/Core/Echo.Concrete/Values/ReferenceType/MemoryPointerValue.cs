@@ -18,7 +18,7 @@ namespace Echo.Concrete.Values.ReferenceType
         /// Creates a new memory pointer value.
         /// </summary>
         /// <param name="memory">The referenced memory.</param>
-        /// <param name="knownBitMask">The bit mask indiating the known and unknown bits.</param>
+        /// <param name="knownBitMask">The bit mask indicating the known and unknown bits.</param>
         /// <param name="is32Bit">Indicates the pointer is 32 bit or 64 bit wide.</param>
         public MemoryPointerValue(Memory<byte> memory, Memory<byte> knownBitMask, bool is32Bit)
         {
@@ -27,6 +27,9 @@ namespace Echo.Concrete.Values.ReferenceType
             Is32Bit = is32Bit;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the pointer is 32 bit or 64 bit wide.
+        /// </summary>
         public bool Is32Bit
         {
             get;
