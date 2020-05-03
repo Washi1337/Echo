@@ -84,11 +84,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         }
 
         /// <inheritdoc />
-        public FValue InterpretAsR4()
-        {
-            double bits = F64;
-            return new FValue(*(float*) &bits);
-        }
+        public FValue InterpretAsR4() => new FValue((float) F64);
 
         /// <inheritdoc />
         public FValue InterpretAsR8() => this;

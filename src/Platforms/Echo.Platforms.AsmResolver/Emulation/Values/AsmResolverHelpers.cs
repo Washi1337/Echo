@@ -4,8 +4,17 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
+    /// <summary>
+    /// Provides extension methods to the AsmResolver API.
+    /// </summary>
     public static class AsmResolverHelpers
     {
+        /// <summary>
+        /// Computes the raw size of a type signature.
+        /// </summary>
+        /// <param name="type">The type to get the size of.</param>
+        /// <param name="is32Bit">Indicates pointers are 32 or 64 bits wide.</param>
+        /// <returns>The size in bytes.</returns>
         public static int GetSize(this TypeSignature type, bool is32Bit)
         {
             // TODO: replace length calculation with future AsmResolver GetSize methods.

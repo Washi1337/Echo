@@ -6,6 +6,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Emulation;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
+using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
@@ -18,19 +19,21 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
             Dispatcher = new DefaultCilDispatcher();
 
             var dummyModule = moduleProvider.GetModule();
-
             var dummyMethod = new MethodDefinition(
                 "MockMethod",
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(dummyModule.CorLibTypeFactory.Void));
             dummyMethod.CilMethodBody = new CilMethodBody(dummyMethod);
-            
-            var container = new ServiceContainer();
-            container.AddService(typeof(ICilRuntimeEnvironment), new MockCilRuntimeEnvironment
+                
+            var environment = new MockCilRuntimeEnvironment
             {
                 Is32Bit = false,
-                Architecture = new CilArchitecture(dummyMethod.CilMethodBody)
-            });
+                Architecture = new CilArchitecture(dummyMethod.CilMethodBody),
+                Module = dummyModule,
+            };
+
+            var container = new ServiceContainer();
+            container.AddService(typeof(ICilRuntimeEnvironment), environment);
             
             ExecutionContext = new ExecutionContext(container, new CilProgramState(), default);
         }

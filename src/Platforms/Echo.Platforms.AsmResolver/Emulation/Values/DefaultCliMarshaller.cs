@@ -11,13 +11,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// Provides a default implementation of the <see cref="ICliMarshaller"/> interface, which marshals concrete values
     /// put into variables and fields within a .NET program to values on the evaluation stack of the CLI and vice versa. 
     /// </summary>
-    public class CliMarshaller : ICliMarshaller
+    public class DefaultCliMarshaller : ICliMarshaller
     {
         /// <summary>
-        /// Creates a new instance of the <see cref="CliMarshaller"/> class.
+        /// Creates a new instance of the <see cref="DefaultCliMarshaller"/> class.
         /// </summary>
         /// <param name="environment">The environment this marshaller is for.</param>
-        public CliMarshaller(ICilRuntimeEnvironment environment)
+        public DefaultCliMarshaller(ICilRuntimeEnvironment environment)
         {
             Environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
@@ -72,7 +72,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             if (value is Integer8Value int8)
             {
                 uint signMask = !signed || int8.GetBit(7).HasValue ? 0xFFFFFF00 : 0;
-                return new I4Value(int8.I8, int8.Mask | signMask);
+                return new I4Value(signed ? int8.I8 : (int) int8.U8, int8.Mask | signMask);
             }
 
             return new I4Value(0, 0);
@@ -94,7 +94,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             if (value is Integer16Value int16)
             {
                 uint signMask = !signed || int16.GetBit(15).HasValue ? 0xFFFF0000 : 0;
-                return new I4Value(int16.I16, int16.Mask | signMask);
+                return new I4Value(signed ? int16.I16 : (int) int16.U16, int16.Mask | signMask);
             }
 
             return new I4Value(0, 0);

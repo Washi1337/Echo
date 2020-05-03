@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
@@ -31,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         protected override IConcreteValue GetValue(ExecutionContext context, CilInstruction instruction, IDotNetArrayValue array,
             int index)
         {
-            var marshaller = context.GetService<ICliMarshaller>();
+            var marshaller = context.GetService<ICilRuntimeEnvironment>().CliMarshaller;
 
             return instruction.OpCode.Code switch
             {
@@ -46,6 +47,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                 CilCode.Ldelem_R4 => array.LoadElementR4(index, marshaller),
                 CilCode.Ldelem_R8 => array.LoadElementR8(index, marshaller),
                 CilCode.Ldelem_Ref => array.LoadElementRef(index, marshaller),
+                _ => throw new ArgumentOutOfRangeException()
             };
         }
         
