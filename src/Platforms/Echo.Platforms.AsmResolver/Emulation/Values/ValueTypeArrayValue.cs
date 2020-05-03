@@ -236,6 +236,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 _contents.WriteInteger64(index * sizeof(uint), new Integer64Value(0, 0));
         }
 
-
+        /// <inheritdoc />
+        public override string ToString() => $"{ElementType.FullName}[{Length}]";
     }
 }

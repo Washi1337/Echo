@@ -187,5 +187,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 
         /// <inheritdoc />
         public override IValue Copy() => new I8Value(I64, Mask);
+        
+        /// <inheritdoc />
+        public override string ToString() => $"int64 ({base.ToString()})";
     }
 }

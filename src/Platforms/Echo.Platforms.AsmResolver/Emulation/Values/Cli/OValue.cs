@@ -166,5 +166,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 
         /// <inheritdoc />
         public FValue ConvertToR() => throw new InvalidCastException();
+        
+        /// <inheritdoc />
+        public override string ToString() => $"O ({ObjectValue})";
     }
 }

@@ -194,5 +194,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 
         /// <inheritdoc />
         public override IValue Copy() => new I4Value(I32, Mask);
+        
+        /// <inheritdoc />
+        public override string ToString() => $"int32 ({base.ToString()})";
     }
 }

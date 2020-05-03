@@ -174,5 +174,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 
         /// <inheritdoc />
         public FValue ConvertToR() => ((ICliValue) _value).ConvertToR();
+        
+        /// <inheritdoc />
+        public override string ToString() => $"native int ({base.ToString()})";
     }
 }
