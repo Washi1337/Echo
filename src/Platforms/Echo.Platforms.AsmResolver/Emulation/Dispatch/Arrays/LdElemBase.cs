@@ -5,6 +5,7 @@ using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
+using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
@@ -21,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             
             // Pop arguments.
             var indexValue = stack.Pop();
-            var arrayValue = stack.Pop() as ArrayValue;
+            var arrayValue = stack.Pop() as OValue;
 
             // Extract actual integer index.
             int? index = indexValue switch
@@ -32,7 +33,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             };
 
             // Check for invalid CIL.
-            if (arrayValue is null || index is null)
+            if (arrayValue is null || index is null || !(arrayValue.ObjectValue is IDotNetArrayValue dotNetArray))
                 return new DispatchResult(new InvalidProgramException());
 
             // Check if index is actually known.
@@ -44,11 +45,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             }
 
             // Check if in bounds.
-            if (index < 0 || index >= arrayValue.Length)
+            if (index < 0 || index >= dotNetArray.Length)
                 return new DispatchResult(new IndexOutOfRangeException());
             
             // Push value stored in array.
-            var value = GetValue(context, instruction, arrayValue, index.Value);
+            var value = GetValue(context, instruction, dotNetArray, index.Value);
 
             stack.Push(value);
             return base.Execute(context, instruction);
@@ -63,9 +64,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         /// <param name="index">The index of the element to get.</param>
         /// <returns>The value.</returns>
         protected abstract IConcreteValue GetValue(
-            ExecutionContext context, 
+            ExecutionContext context,
             CilInstruction instruction,
-            ArrayValue array,
+            IDotNetArrayValue array,
             int index);
     }
 }

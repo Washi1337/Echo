@@ -25,28 +25,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             ElementType = elementType;
             _contents = contents;
-
-            // TODO: replace length calculation with future AsmResolver GetSize methods.
-            int elementSize = elementType.ElementType switch
-            {
-                AsmResElementType.Boolean => 4,
-                AsmResElementType.Char => 2,
-                AsmResElementType.I1 => 1,
-                AsmResElementType.U1 => 1,
-                AsmResElementType.I2 => 2,
-                AsmResElementType.U2 => 2,
-                AsmResElementType.I4 => 4,
-                AsmResElementType.U4 => 4,
-                AsmResElementType.I8 => 8,
-                AsmResElementType.U8 => 8,
-                AsmResElementType.R4 => 4,
-                AsmResElementType.R8 => 8,
-                AsmResElementType.I => contents.Is32Bit ? 4 : 8,
-                AsmResElementType.U => contents.Is32Bit ? 4 : 8,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-            Length = _contents.Length / elementSize;
+            Length = _contents.Length / elementType.GetSize(contents.Is32Bit);
         }
 
         /// <inheritdoc />
@@ -86,6 +65,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
         /// <inheritdoc />
         public bool? IsNegative => false;
+
+        /// <inheritdoc />
+        public NativeIntegerValue LoadElementI(int index, ICliMarshaller marshaller)
+        {
+            var value = _contents.Is32Bit
+                ? (IntegerValue) _contents.ReadInteger32(index * sizeof(int))
+                : _contents.ReadInteger64(index * sizeof(long));
+
+            return (NativeIntegerValue) marshaller.ToCliValue(value, CorLibTypeFactory.IntPtr);
+        }
 
         /// <inheritdoc />
         public I4Value LoadElementI1(int index, ICliMarshaller marshaller)
@@ -163,6 +152,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public OValue LoadElementRef(int index, ICliMarshaller marshaller)
         {
             return new OValue(null, false, marshaller.Is32Bit);
+        }
+
+        /// <inheritdoc />
+        public void StoreElementI(int index, NativeIntegerValue value, ICliMarshaller marshaller)
+        {
+            var ctsValue = marshaller.ToCtsValue(value, CorLibTypeFactory.IntPtr);
+            if (_contents.Is32Bit)
+                _contents.WriteInteger32(index * sizeof(uint), (Integer32Value) ctsValue);
+            else
+                _contents.WriteInteger64(index * sizeof(uint), (Integer64Value) ctsValue);
         }
 
         /// <inheritdoc />
