@@ -58,8 +58,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <param name="contents">The raw contents of the array.</param>
         public ValueTypeArrayValue(TypeSignature elementType, MemoryPointerValue contents)
         {
-            ElementType = elementType;
-            _contents = contents;
+            ElementType = elementType ?? throw new ArgumentNullException(nameof(elementType));
+            _contents = contents ?? throw new ArgumentNullException(nameof(contents));
             Length = _contents.Length / elementType.GetSize(contents.Is32Bit);
         }
 
