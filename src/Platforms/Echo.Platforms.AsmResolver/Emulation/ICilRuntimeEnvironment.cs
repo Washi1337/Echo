@@ -47,27 +47,11 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
-        /// Allocates a chunk of addressable memory on the virtual heap, and returns a pointer value to the start of
-        /// the memory chunk.  
+        /// Gets the object responsible for allocating memory on the virtual heap of the virtual machine.
         /// </summary>
-        /// <param name="size">The size of the region to allocate.</param>
-        /// <param name="initializeWithZeroes">Indicates the memory region should be initialized with zeroes.</param>
-        /// <returns>A pointer to the memory.</returns>
-        MemoryPointerValue AllocateMemory(int size, bool initializeWithZeroes);
-
-        /// <summary>
-        /// Allocates an array on the virtual heap.
-        /// </summary>
-        /// <param name="elementType">The type of elements to store in the array.</param>
-        /// <param name="length">The number of elements.</param>
-        /// <returns>The array.</returns>
-        IDotNetArrayValue AllocateArray(TypeSignature elementType, int length);
-
-        /// <summary>
-        /// Gets the string value for the fully known string literal.
-        /// </summary>
-        /// <param name="value">The string literal.</param>
-        /// <returns>The string value.</returns>
-        StringValue GetStringValue(string value);
+        IMemoryAllocator MemoryAllocator
+        {
+            get;
+        }
     }
 }

@@ -30,6 +30,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
                 Is32Bit = false,
                 Architecture = new CilArchitecture(dummyMethod.CilMethodBody),
                 Module = dummyModule,
+                MemoryAllocator = new DefaultMemoryAllocator(false)
             };
 
             var container = new ServiceContainer();

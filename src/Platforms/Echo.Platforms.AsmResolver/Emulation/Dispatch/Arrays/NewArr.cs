@@ -31,7 +31,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             
             var elementType = ((ITypeDefOrRef) instruction.Operand).ToTypeSignature();
             int size = sizeValue.InterpretAsI4().I32;
-            var array = environment.AllocateArray(elementType, size);
+            var array = environment.MemoryAllocator.AllocateArray(elementType, size);
             
             stack.Push(environment.CliMarshaller.ToCliValue(array, new SzArrayTypeSignature(elementType)));
             

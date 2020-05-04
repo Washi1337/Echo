@@ -24,7 +24,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
             
             string rawValue = (string) instruction.Operand;
             var cliValue = marshaller.ToCliValue(
-                environment.GetStringValue(rawValue),
+                environment.MemoryAllocator.GetStringValue(rawValue),
                 environment.Module.CorLibTypeFactory.String);
             
             context.ProgramState.Stack.Push(cliValue);
