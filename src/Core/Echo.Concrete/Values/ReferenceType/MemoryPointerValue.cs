@@ -63,6 +63,66 @@ namespace Echo.Concrete.Values.ReferenceType
 
         /// <inheritdoc />
         public bool? IsNegative => false;
+
+        /// <summary>
+        /// Reads raw contents of the memory block. 
+        /// </summary>
+        /// <param name="offset">The offset to start reading.</param>
+        /// <param name="memoryBuffer">The memory buffer to copy data to.</param>
+        /// <remarks>
+        /// This method has undefined behaviour if the memory contains unknown bits.
+        /// </remarks>
+        public void ReadBytes(int offset, Span<byte> memoryBuffer)
+        {
+            var slicedMemory = _memory.Span.Slice(offset);
+            slicedMemory.CopyTo(memoryBuffer);
+        }
+
+        /// <summary>
+        /// Reads raw contents of the memory block. 
+        /// </summary>
+        /// <param name="offset">The offset to start reading.</param>
+        /// <param name="memoryBuffer">The memory buffer to copy data to.</param>
+        /// <param name="knownBitmaskBuffer">The buffer to copy the known bitmask to.</param>
+        public void ReadBytes(int offset, Span<byte> memoryBuffer, Span<byte> knownBitmaskBuffer)
+        {
+            var slicedMemory = _memory.Span.Slice(offset);
+            var slicedBitMask = _knownBitMask.Span.Slice(offset);
+
+            slicedMemory.CopyTo(memoryBuffer);
+            slicedBitMask.CopyTo(knownBitmaskBuffer);
+        }
+        
+        /// <summary>
+        /// Writes raw data to the memory block as fully known bytes.
+        /// </summary>
+        /// <param name="offset">The offset to start writing.</param>
+        /// <param name="data">The data to write.</param>
+        public void WriteBytes(int offset, ReadOnlySpan<byte> data)
+        {
+            var slicedMemory = _memory.Span.Slice(offset);
+            var slicedBitMask = _knownBitMask.Span.Slice(offset);
+            
+            data.CopyTo(slicedMemory);
+            slicedBitMask.Fill(0xFF);
+        }
+
+        /// <summary>
+        /// Writes raw data to the memory block.
+        /// </summary>
+        /// <param name="offset">The offset to start writing.</param>
+        /// <param name="data">The data to write.</param>
+        /// <param name="knownBitMask">
+        /// The bitmask indicating the bits that are known within the data referenced by <paramref name="data"/>.
+        /// </param>
+        public void WriteBytes(int offset, ReadOnlySpan<byte> data, ReadOnlySpan<byte> knownBitMask)
+        {
+            var slicedMemory = _memory.Span.Slice(offset);
+            var slicedBitMask = _knownBitMask.Span.Slice(offset);
+            
+            data.CopyTo(slicedMemory);
+            knownBitMask.CopyTo(slicedBitMask);
+        }
         
         /// <summary>
         /// Reads a single 8 bit integer at the provided offset.

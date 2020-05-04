@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
@@ -11,6 +13,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
 {
     public sealed class MockCilRuntimeEnvironment : ICilRuntimeEnvironment
     {
+        private readonly IDictionary<string, StringValue> _cachedStrings = new Dictionary<string,StringValue>();
+
         public MockCilRuntimeEnvironment()
         {
             CliMarshaller = new DefaultCliMarshaller(this);
@@ -40,6 +44,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
             set;
         }
 
+        /// <inheritdoc />
         public MemoryPointerValue AllocateMemory(int size, bool initializeWithZeroes)
         {
             var memory = new Memory<byte>(new byte[size]);
@@ -49,6 +54,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
             return new MemoryPointerValue(memory, knownBitMask, Is32Bit);
         }
 
+        /// <inheritdoc />
         public IDotNetArrayValue AllocateArray(TypeSignature elementType, int length)
         {
             if (elementType.IsValueType)
@@ -59,6 +65,21 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
             }
             
             throw new NotSupportedException();
+        }
+
+        /// <inheritdoc />
+        public StringValue GetStringValue(string value)
+        {
+            if (!_cachedStrings.TryGetValue(value, out var stringValue))
+            {
+                var rawMemory = AllocateMemory(value.Length * 2, false);
+                var span = new ReadOnlySpan<byte>(Encoding.Unicode.GetBytes(value));
+                rawMemory.WriteBytes(0, span);
+                stringValue = new StringValue(rawMemory);
+                _cachedStrings.Add(value, stringValue);
+            }
+
+            return stringValue;
         }
 
         public void Dispose()

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
@@ -27,6 +28,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public event EventHandler<ExecutionTerminatedEventArgs> ExecutionTerminated;
      
         private readonly IDictionary<Type, object> _services = new Dictionary<Type, object>();
+        private readonly IDictionary<string, StringValue> _cachedStrings = new Dictionary<string, StringValue>();
 
         /// <summary>
         /// Creates a new instance of the <see cref="CilVirtualMachine"/>. 
@@ -194,6 +196,21 @@ namespace Echo.Platforms.AsmResolver.Emulation
             }
             
             throw new NotSupportedException();
+        }
+
+        /// <inheritdoc />
+        public StringValue GetStringValue(string value)
+        {
+            if (!_cachedStrings.TryGetValue(value, out var stringValue))
+            {
+                var rawMemory = AllocateMemory(value.Length * 2, false);
+                var span = new ReadOnlySpan<byte>(Encoding.Unicode.GetBytes(value));
+                rawMemory.WriteBytes(0, span);
+                stringValue = new StringValue(rawMemory);
+                _cachedStrings.Add(value, stringValue);
+            }
+
+            return stringValue;
         }
 
         /// <inheritdoc />

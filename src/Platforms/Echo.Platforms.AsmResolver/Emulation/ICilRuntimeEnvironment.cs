@@ -62,5 +62,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="length">The number of elements.</param>
         /// <returns>The array.</returns>
         IDotNetArrayValue AllocateArray(TypeSignature elementType, int length);
+
+        /// <summary>
+        /// Gets the string value for the fully known string literal.
+        /// </summary>
+        /// <param name="value">The string literal.</param>
+        /// <returns>The string value.</returns>
+        StringValue GetStringValue(string value);
     }
 }
