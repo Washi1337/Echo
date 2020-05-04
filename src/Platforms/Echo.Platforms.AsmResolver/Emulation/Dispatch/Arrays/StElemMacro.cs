@@ -7,6 +7,9 @@ using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
 {
+    /// <summary>
+    /// Provides a base handler for instructions with one of the <see cref="CilOpCodes.Stelem"/> macro operation codes.
+    /// </summary>
     public class StElemMacro : StElemBase
     {
         /// <inheritdoc />
@@ -24,42 +27,42 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
 
         /// <inheritdoc />
         protected override void StoreElement(ExecutionContext context, CilInstruction instruction,
-            IDotNetArrayValue dotNetArray, int index, ICliValue valueValue)
+            IDotNetArrayValue dotNetArray, int index, ICliValue value)
         {
             var marshaller = context.GetService<ICilRuntimeEnvironment>().CliMarshaller;
 
             switch (instruction.OpCode.Code)
             {
                 case CilCode.Stelem_I:
-                    dotNetArray.StoreElementI(index, valueValue.InterpretAsI(marshaller.Is32Bit), marshaller);
+                    dotNetArray.StoreElementI(index, value.InterpretAsI(marshaller.Is32Bit), marshaller);
                     break;
                 
                 case CilCode.Stelem_I1:
-                    dotNetArray.StoreElementI1(index, valueValue.InterpretAsI1(), marshaller);
+                    dotNetArray.StoreElementI1(index, value.InterpretAsI1(), marshaller);
                     break;
                 
                 case CilCode.Stelem_I2:
-                    dotNetArray.StoreElementI2(index, valueValue.InterpretAsI2(), marshaller);
+                    dotNetArray.StoreElementI2(index, value.InterpretAsI2(), marshaller);
                     break;
                 
                 case CilCode.Stelem_I4:
-                    dotNetArray.StoreElementI4(index, valueValue.InterpretAsI4(), marshaller);
+                    dotNetArray.StoreElementI4(index, value.InterpretAsI4(), marshaller);
                     break;
                 
                 case CilCode.Stelem_I8:
-                    dotNetArray.StoreElementI8(index, valueValue.InterpretAsI8(), marshaller);
+                    dotNetArray.StoreElementI8(index, value.InterpretAsI8(), marshaller);
                     break;
                 
                 case CilCode.Stelem_R4:
-                    dotNetArray.StoreElementR4(index, valueValue.InterpretAsR4(), marshaller);
+                    dotNetArray.StoreElementR4(index, value.InterpretAsR4(), marshaller);
                     break;
                 
                 case CilCode.Stelem_R8:
-                    dotNetArray.StoreElementR8(index, valueValue.InterpretAsR8(), marshaller);
+                    dotNetArray.StoreElementR8(index, value.InterpretAsR8(), marshaller);
                     break;
                 
                 case CilCode.Stelem_Ref:
-                    dotNetArray.StoreElementRef(index, valueValue.InterpretAsRef(marshaller.Is32Bit), marshaller);
+                    dotNetArray.StoreElementRef(index, value.InterpretAsRef(marshaller.Is32Bit), marshaller);
                     break;
                 
                 default:

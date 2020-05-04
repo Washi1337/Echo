@@ -4,6 +4,7 @@ using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values.ValueType;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 {
@@ -29,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 
             var result = argument switch
             {
-                Float64Value float64Value => Execute(context, float64Value),
+                FValue float64Value => Execute(context, float64Value),
                 IntegerValue integerValue => Execute(context, integerValue),
                 _ => DispatchResult.InvalidProgram()
             };

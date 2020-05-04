@@ -7,6 +7,9 @@ using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
 {
+    /// <summary>
+    /// Provides a base handler for instructions with any variant of the <see cref="CilOpCodes.Stelem"/> operation codes.
+    /// </summary>
     public abstract class StElemBase : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
@@ -45,11 +48,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             return base.Execute(context, instruction);
         }
 
+        /// <summary>
+        /// Stores an element in the provided array using the instruction's operation code.
+        /// </summary>
+        /// <param name="context">The execution context the instruction is being executed in.</param>
+        /// <param name="instruction">The instruction that is being executed.</param>
+        /// <param name="dotNetArray">The array to store the value in.</param>
+        /// <param name="index">The index to store the element at.</param>
+        /// <param name="value">The value of the element.</param>
         protected abstract void StoreElement(
             ExecutionContext context,
             CilInstruction instruction,
             IDotNetArrayValue dotNetArray,
             int index,
-            ICliValue valueValue);
+            ICliValue value);
     }
 }
