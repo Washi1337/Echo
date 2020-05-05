@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
             var result = (left, right) switch
             {
                 (IntegerValue a, IntegerValue b) => Execute(context, a, b),
-                (Float64Value a, Float64Value b) => Execute(context, a, b),
+                (FValue a, FValue b) => Execute(context, a, b),
                 _ => DispatchResult.InvalidProgram(),
             };
 
@@ -49,7 +49,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <param name="left">The left side of the operation.</param>
         /// <param name="right">The right side of the operation.</param>
         /// <returns>The result of the operation.</returns>
-        protected abstract DispatchResult Execute(ExecutionContext context, Float64Value left, Float64Value right);
+        protected abstract DispatchResult Execute(ExecutionContext context, FValue left, FValue right);
 
         /// <summary>
         /// Performs the operation on the two pushed integers.

@@ -3,6 +3,7 @@ using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values.ValueType;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 {
@@ -18,7 +19,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         };
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, Float64Value left, Float64Value right)
+        protected override DispatchResult Execute(ExecutionContext context, FValue left, FValue right)
         {
             left.F64 *= right.F64;
             context.ProgramState.Stack.Push(left);
