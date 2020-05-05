@@ -137,7 +137,7 @@ namespace Echo.Concrete.Values
             var size = _span.Length * 8;
             var sb = new StringBuilder(size);
 
-            for (var i = 0; i < size; i++)
+            for (var i = size - 1; i >= 0; i--)
             {
                 sb.Append(this[i] ? '1' : '0');
             }
