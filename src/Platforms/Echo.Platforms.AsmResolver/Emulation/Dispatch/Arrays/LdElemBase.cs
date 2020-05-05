@@ -2,7 +2,6 @@ using System;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
-using Echo.Concrete.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -32,19 +31,36 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             // Expect an int32 or a native int for index, and extract its value.
             if (indexValue.CliValueType != CliValueType.Int32 && indexValue.CliValueType != CliValueType.NativeInt)
                 return DispatchResult.InvalidProgram();
-            
             int index = indexValue.InterpretAsI4().I32;
 
-            // Expect an O value with a .NET array in it.
-            if (!(arrayValue is OValue { ObjectValue: IDotNetArrayValue dotNetArray }))
-                return DispatchResult.InvalidProgram();
+            // Obtain element.
+            ICliValue elementValue; 
+            switch (arrayValue)
+            {
+                case OValue nullValue when nullValue.IsZero.GetValueOrDefault():
+                    // Pushed array object is null.
+                    return new DispatchResult(new NullReferenceException());
+                
+                case OValue { ObjectValue: IDotNetArrayValue dotNetArray }:
+                    // Check if within bounds.
+                    if (index < 0 || index >= dotNetArray.Length)
+                        return new DispatchResult(new IndexOutOfRangeException());
+                    
+                    // Read value.
+                    elementValue = GetElementValue(context, instruction, dotNetArray, index);
+                    break;
+                
+                case OValue _:
+                    // Undefined behaviour when this operation is applied on any other kind of object.
+                    elementValue = GetUnknownElementValue(context, instruction);
+                    break;
+                
+                default:
+                    return DispatchResult.InvalidProgram();
+            }
 
-            // Check if in bounds.
-            if (index < 0 || index >= dotNetArray.Length)
-                return new DispatchResult(new IndexOutOfRangeException());
-            
             // Push value stored in array.
-            stack.Push(GetElementValue(context, instruction, dotNetArray, index));
+            stack.Push(elementValue);
             
             return base.Execute(context, instruction);
         }
@@ -57,7 +73,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         /// <param name="array">The array to get the element from.</param>
         /// <param name="index">The index of the element to get.</param>
         /// <returns>The value.</returns>
-        protected abstract IConcreteValue GetElementValue(
+        protected abstract ICliValue GetElementValue(
             ExecutionContext context,
             CilInstruction instruction,
             IDotNetArrayValue array,
@@ -72,6 +88,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         /// <remarks>
         /// This method is called when either the array or the index of the requested element is not fully known.
         /// </remarks>
-        protected abstract IConcreteValue GetUnknownElementValue(ExecutionContext context, CilInstruction instruction);
+        protected abstract ICliValue GetUnknownElementValue(ExecutionContext context, CilInstruction instruction);
     }
 }

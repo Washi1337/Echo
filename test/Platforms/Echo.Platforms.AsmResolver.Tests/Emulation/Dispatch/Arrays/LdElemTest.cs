@@ -178,5 +178,49 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             Assert.True(result.IsSuccess, $"Unexpected {result.Exception?.GetType()}: {result.Exception?.Message}");
             Assert.Equal(new FValue(1.23D), stack.Top);
         }
+
+        [Fact]
+        public void LdElemOnNullShouldThrowNullReferenceException()
+        {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+
+            var stack = ExecutionContext.ProgramState.Stack;
+            stack.Push(OValue.Null(environment.Is32Bit));
+            stack.Push(new I4Value(0));
+
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
+            
+            Assert.False(result.IsSuccess);
+            Assert.IsAssignableFrom<NullReferenceException>(result.Exception);
+        }
+
+        [Fact]
+        public void LdElemOnNonArrayObjectShouldNotThrow()
+        {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+
+            var stack = ExecutionContext.ProgramState.Stack;
+            var stringValue = environment.MemoryAllocator.GetStringValue("Hello, world!");
+            stack.Push(environment.CliMarshaller.ToCliValue(stringValue, environment.Module.CorLibTypeFactory.String));
+            stack.Push(new I4Value(0));
+
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
+            
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public void LdElemOnValueTypeShouldThrowInvalidProgram()
+        {
+            var stack = ExecutionContext.ProgramState.Stack;
+
+            stack.Push(new I4Value(1234));
+            stack.Push(new I4Value(0));
+
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
+            
+            Assert.False(result.IsSuccess);
+            Assert.IsAssignableFrom<InvalidProgramException>(result.Exception);
+        }
     }
 }

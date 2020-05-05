@@ -30,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         };
 
         /// <inheritdoc />
-        protected override IConcreteValue GetElementValue(ExecutionContext context, CilInstruction instruction, IDotNetArrayValue array,
+        protected override ICliValue GetElementValue(ExecutionContext context, CilInstruction instruction, IDotNetArrayValue array,
             int index)
         {
             var marshaller = context.GetService<ICilRuntimeEnvironment>().CliMarshaller;
@@ -53,7 +53,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         }
 
         /// <inheritdoc />
-        protected override IConcreteValue GetUnknownElementValue(ExecutionContext context, CilInstruction instruction)
+        protected override ICliValue GetUnknownElementValue(ExecutionContext context, CilInstruction instruction)
         {        
             var environment = context.GetService<ICilRuntimeEnvironment>();
 

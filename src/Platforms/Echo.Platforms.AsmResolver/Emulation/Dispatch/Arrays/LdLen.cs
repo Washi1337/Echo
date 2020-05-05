@@ -31,14 +31,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             switch (argument)
             {
                 case OValue nullValue when nullValue.IsZero.GetValueOrDefault():
+                    // Pushed object is null.
                     return new DispatchResult(new NullReferenceException());
                 
                 case OValue { ObjectValue: IDotNetArrayValue arrayValue }:
+                    // Get length of the array and wrap in native int.
                     lengthValue = new NativeIntegerValue(arrayValue.Length, environment.Is32Bit);
                     break;
                 
                 case OValue _:
-                    // Undefined behaviour when this happens on any other kind of object.
+                    // Undefined behaviour when this operation is applied on any other kind of object.
                     lengthValue = new NativeIntegerValue(0, 0, environment.Is32Bit);
                     break;
 
