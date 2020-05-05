@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
-using Echo.Concrete.Values;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -33,6 +31,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
             {
                 (IntegerValue a, IntegerValue b) => Execute(context, a, b),
                 (FValue a, FValue b) => Execute(context, a, b),
+                (OValue a, OValue b) => Execute(context, a, b),
                 _ => DispatchResult.InvalidProgram(),
             };
 
@@ -59,5 +58,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <param name="right">The right side of the operation.</param>
         /// <returns>The result of the operation.</returns>
         protected abstract DispatchResult Execute(ExecutionContext context, IntegerValue left, IntegerValue right);
+
+        /// <summary>
+        /// Performs the operation on the two pushed object references.
+        /// </summary>
+        /// <param name="context">The context to execute the instruction in.</param>
+        /// <param name="left">The left side of the operation.</param>
+        /// <param name="right">The right side of the operation.</param>
+        /// <returns>The result of the operation.</returns>
+        protected abstract DispatchResult Execute(ExecutionContext context, OValue left, OValue right);
     }
 }

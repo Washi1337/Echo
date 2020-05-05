@@ -30,5 +30,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
             context.ProgramState.Stack.Push(left);
             return DispatchResult.Success();
         }
+
+        /// <inheritdoc />
+        protected override DispatchResult Execute(ExecutionContext context, OValue left, OValue right) => 
+            DispatchResult.InvalidProgram();
     }
 }
