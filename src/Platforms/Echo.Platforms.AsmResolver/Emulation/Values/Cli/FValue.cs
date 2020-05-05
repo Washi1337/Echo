@@ -162,6 +162,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         }
 
         /// <inheritdoc />
+        public FValue ConvertToR4() => new FValue((float) F64);
+
+        /// <inheritdoc />
+        public FValue ConvertToR8() => this;
+        
+        /// <inheritdoc />
         public FValue ConvertToR() => this;
 
         /// <inheritdoc />

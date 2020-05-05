@@ -246,7 +246,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         I8Value ConvertToU8(bool unsigned, out bool overflowed);
         
         /// <summary>
-        /// Converts the CLI value to a floating point number.
+        /// Converts the CLI value to a 32 bit floating point number.
+        /// </summary>
+        /// <returns>The converted value.</returns>
+        FValue ConvertToR4();
+        
+        /// <summary>
+        /// Converts the CLI value to a 64 floating point number.
+        /// </summary>
+        /// <returns>The converted value.</returns>
+        FValue ConvertToR8();
+        
+        /// <summary>
+        /// Interprets the CLI value as an unsigned integer and converts it to a native sized floating point number.
         /// </summary>
         /// <returns>The converted value.</returns>
         FValue ConvertToR();

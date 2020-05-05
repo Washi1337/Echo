@@ -162,6 +162,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public I8Value ConvertToU8(bool unsigned, out bool overflowed) => throw new InvalidCastException();
 
         /// <inheritdoc />
+        public FValue ConvertToR4() => throw new InvalidCastException();
+
+        /// <inheritdoc />
+        public FValue ConvertToR8() => throw new InvalidCastException();
+
+        /// <inheritdoc />
         public FValue ConvertToR() => throw new InvalidCastException();
         
         /// <inheritdoc />

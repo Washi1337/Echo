@@ -188,6 +188,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// <inheritdoc />
         public I8Value ConvertToU8(bool unsigned, out bool overflowed) => 
             ((ICliValue) _value).ConvertToU8(unsigned, out overflowed);
+        
+        /// <inheritdoc />
+        public FValue ConvertToR4() => 
+            ((ICliValue) _value).ConvertToR4();
+
+        /// <inheritdoc />
+        public FValue ConvertToR8() =>
+            ((ICliValue) _value).ConvertToR8();
 
         /// <inheritdoc />
         public FValue ConvertToR() => ((ICliValue) _value).ConvertToR();

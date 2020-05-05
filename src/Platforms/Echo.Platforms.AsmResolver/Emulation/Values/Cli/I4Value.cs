@@ -190,6 +190,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         }
 
         /// <inheritdoc />
+        // ReSharper disable once RedundantCast
+        public FValue ConvertToR4() => new FValue((float) I32);
+
+        /// <inheritdoc />
+        // ReSharper disable once RedundantCast
+        public FValue ConvertToR8() => new FValue((double) I32);
+
+        /// <inheritdoc />
         public FValue ConvertToR() => new FValue(U32);
 
         /// <inheritdoc />
