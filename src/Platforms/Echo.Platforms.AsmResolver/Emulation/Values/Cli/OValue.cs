@@ -10,14 +10,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
     public class OValue : ICliValue
     {
         /// <summary>
-        /// Creates a new null reference value.
+        /// Creates a new null object reference value. 
         /// </summary>
         /// <param name="is32Bit">Indicates whether the reference to the object is 32 or 64 bits wide.</param>
-        public OValue(bool is32Bit)
-        {
-            IsKnown = true;
-            Is32Bit = is32Bit;
-        }
+        /// <returns>The null reference.</returns>
+        public static OValue Null(bool is32Bit) => new OValue(null, true, is32Bit);
 
         /// <summary>
         /// Creates a new object reference value.
