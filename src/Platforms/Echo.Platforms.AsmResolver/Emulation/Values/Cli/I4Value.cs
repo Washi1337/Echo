@@ -178,8 +178,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public I8Value ConvertToI8(bool unsigned, out bool overflowed)
         {
             overflowed = false;
-            ulong signMask = GetLastBit().HasValue ? 0xFFFFFFFF00000000ul : 0ul;
-            return new I8Value(I32, Mask | signMask);
+            ulong signMask = !unsigned || GetLastBit().HasValue ? 0xFFFFFFFF00000000ul : 0ul;
+            return new I8Value(unsigned ? (long) U32 : I32, Mask | signMask);
         }
 
         /// <inheritdoc />

@@ -99,7 +99,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Values
         [InlineData(1, false, 1u, false)]
         [InlineData(1, true, 1u, false)]
         [InlineData(int.MinValue, false, int.MinValue, false)]
-        [InlineData(int.MinValue, true, int.MinValue, false)]
+        [InlineData(int.MinValue, true, 0x80000000L, false)]
         public void ConvertToI8(int value, bool unsigned, long? expectedValue, bool expectedToOverflow)
         {
             var i4Value = new I4Value(value);

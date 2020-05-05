@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
-using Echo.Concrete.Values;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Miscellaneous
 {
@@ -21,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Miscellaneous
         public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
         {
             var stack = context.ProgramState.Stack;
-            stack.Push((IConcreteValue) stack.Top.Copy());
+            stack.Push((ICliValue) stack.Top.Copy());
             return base.Execute(context, instruction);
         }
     }
