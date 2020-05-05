@@ -660,8 +660,28 @@ namespace Echo.Concrete.Values.ValueType
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
         public virtual bool? IsEqualTo(IntegerValue other)
         {
-            if (!IsKnown)
+            if (!IsKnown || !other.IsKnown)
+            {
+                // We are dealing with at least one unknown bit in the bit fields.
+                // Conclusion is therefore either false or unknown.
+                
+                if (Size != other.Size)
+                    return false;
+
+                // Check if we definitely know this is not equal to the other.
+                // TODO: this could probably use performance improvements.
+                for (int i = 0; i < Size * 8; i++)
+                {
+                    bool? a = GetBit(i);
+                    bool? b = other.GetBit(i);
+
+                    if (a.HasValue && b.HasValue && a.Value != b.Value)
+                        return false;
+                }
+
                 return null;
+            }
+            
             return Equals(other);
         }
 

@@ -173,6 +173,7 @@ namespace Echo.Concrete.Values.ValueType
             }
             else
             {
+                U32 = U32 & ~mask;
                 Mask &= ~mask;
             }
         }
@@ -259,9 +260,14 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override bool? IsEqualTo(IntegerValue other)
         {
-            return IsKnown && other.IsKnown && other is Integer32Value int32 
-                ? U32 == int32.U32 
-                : (bool?) null;
+            if (other is Integer32Value int32)
+            {
+                if (IsKnown && other.IsKnown)
+                    return U32 == int32.U32;
+                return U32 == int32.U32 ? null : (bool?) false;
+            }
+
+            return base.IsEqualTo(other);
         }
 
         /// <inheritdoc />

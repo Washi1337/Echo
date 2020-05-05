@@ -163,6 +163,7 @@ namespace Echo.Concrete.Values.ValueType
             }
             else
             {
+                U16 = (ushort) (U16 & ~mask);
                 Mask &= (ushort) ~mask;
             }
         }
@@ -249,9 +250,14 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override bool? IsEqualTo(IntegerValue other)
         {
-            return IsKnown && other.IsKnown && other is Integer16Value int16
-                ? U16 == int16.U16
-                : (bool?) null;
+            if (other is Integer16Value int16)
+            {
+                if (IsKnown && other.IsKnown)
+                    return U16 == int16.U16;
+                return U16 == int16.U16 ? null : (bool?) false;
+            }
+
+            return base.IsEqualTo(other);
         }
 
         /// <inheritdoc />

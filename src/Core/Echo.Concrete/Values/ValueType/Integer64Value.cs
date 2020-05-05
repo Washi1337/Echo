@@ -166,6 +166,7 @@ namespace Echo.Concrete.Values.ValueType
             }
             else
             {
+                U64 = U64 & ~mask;
                 Mask &= ~mask;
             }
         }
@@ -249,9 +250,14 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override bool? IsEqualTo(IntegerValue other)
         {
-            return IsKnown && other.IsKnown && other is Integer64Value int64
-                ? U64 == int64.U64
-                : (bool?) null;
+            if (other is Integer64Value int64)
+            {
+                if (IsKnown && other.IsKnown)
+                    return U64 == int64.U64;
+                return U64 == int64.U64 ? null : (bool?) false;
+            }
+
+            return base.IsEqualTo(other);
         }
 
         /// <inheritdoc />

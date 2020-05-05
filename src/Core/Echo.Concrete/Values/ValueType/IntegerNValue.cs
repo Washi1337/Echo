@@ -132,7 +132,7 @@ namespace Echo.Concrete.Values.ValueType
             var bits = new BitField(Bits);
             var mask = new BitField(Mask);
             
-            return !mask[index] ? (bool?) null : bits[index];
+            return mask[index] ? bits[index] : (bool?) null;
         }
 
         /// <inheritdoc />
@@ -142,7 +142,7 @@ namespace Echo.Concrete.Values.ValueType
             var mask = new BitField(Mask);
             
             mask[index] = value.HasValue;
-            bits[index] = !value.HasValue || value.Value;
+            bits[index] = value.GetValueOrDefault();
         }
 
         /// <inheritdoc />

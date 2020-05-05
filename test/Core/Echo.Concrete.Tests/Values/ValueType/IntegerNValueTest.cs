@@ -278,6 +278,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [InlineData("01010101", "01010101", true)]
         [InlineData("01010101", "10101010", false)]
         [InlineData("010?0101", "01010101", null)]
+        [InlineData("010?0111", "01010101", false)]
         public void IsEqualTo(string a, string b, bool? expected)
         {
             var value1 = new IntegerNValue(a);

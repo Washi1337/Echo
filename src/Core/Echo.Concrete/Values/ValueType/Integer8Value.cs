@@ -162,6 +162,7 @@ namespace Echo.Concrete.Values.ValueType
             }
             else
             {
+                U8 = (byte) (U8 & ~mask);
                 Mask &= (byte) ~mask;
             }
         }
@@ -248,9 +249,14 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override bool? IsEqualTo(IntegerValue other)
         {
-            return IsKnown && other.IsKnown && other is Integer8Value int8
-                ? U8 == int8.U8
-                : (bool?) null;
+            if (other is Integer8Value int8)
+            {
+                if (IsKnown && other.IsKnown)
+                    return U8 == int8.U8;
+                return U8 == int8.U8 ? null : (bool?) false;
+            }
+
+            return base.IsEqualTo(other);
         }
 
         /// <inheritdoc />
