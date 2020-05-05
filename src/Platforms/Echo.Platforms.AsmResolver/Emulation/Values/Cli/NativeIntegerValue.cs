@@ -26,6 +26,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         }
 
         /// <summary>
+        /// Creates a partially known native integer value.
+        /// </summary>
+        /// <param name="value">The integer value.</param>
+        /// <param name="knownBitmask">The bitmask indicating the known bits of <paramref name="value"/>.</param>
+        /// <param name="is32Bit">Indicates whether the integer should be resized to 32-bits or 64-bits.</param>
+        public NativeIntegerValue(long value, ulong knownBitmask, bool is32Bit)
+        {
+            _value = is32Bit
+                ? (IntegerValue) new I4Value((int) (value & 0xFFFFFFFF), (uint) (knownBitmask & 0xFFFFFFFF))
+                : new I8Value(value, knownBitmask);
+        }
+
+        /// <summary>
         /// Parses a (partially) known bit string into an integer.
         /// </summary>
         /// <param name="bitString">The bit string to parse.</param>
