@@ -35,17 +35,25 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             int index = indexValue.InterpretAsI4().I32;
 
             // Expect an O value with a .NET array in it.
-            if (!(arrayValue is OValue { ObjectValue: IDotNetArrayValue dotNetArray }))
-                return DispatchResult.InvalidProgram();
+            switch (arrayValue)
+            {
+                case OValue nullValue when nullValue.IsZero.GetValueOrDefault():
+                    // Pushed array object is null.
+                    return new DispatchResult(new NullReferenceException());
+                
+                case OValue { ObjectValue: IDotNetArrayValue dotNetArray }:
+                    // Check if in bounds.
+                    if (index < 0 || index >= dotNetArray.Length)
+                        return new DispatchResult(new IndexOutOfRangeException());
+            
+                    // Push value stored in array.
+                    StoreElement(context, instruction, dotNetArray, index, valueValue);
+                    return base.Execute(context, instruction);
+                
+                default:
+                    return DispatchResult.InvalidProgram();
 
-            // Check if in bounds.
-            if (index < 0 || index >= dotNetArray.Length)
-                return new DispatchResult(new IndexOutOfRangeException());
-            
-            // Push value stored in array.
-            StoreElement(context, instruction, dotNetArray, index, valueValue);
-            
-            return base.Execute(context, instruction);
+            }
         }
 
         /// <summary>
