@@ -23,15 +23,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
             FValue left, FValue right)
         {
-            // C# compiler emits cgt for the ">" operator with floating point operands.
-            
-            bool result = double.IsNaN(left.F64) || double.IsNaN(right.F64)
-                ? instruction.OpCode.Code == CilCode.Cgt_Un
-                : left.F64 > right.F64; 
-
-            var i4Result = new I4Value(result ? 1 : 0);
-            context.ProgramState.Stack.Push(i4Result);
-            return DispatchResult.Success();
+            bool result = left.IsGreaterThan(right, instruction.OpCode.Code == CilCode.Cgt_Un);
+            return ConvertToI4AndReturnSuccess(context, result);
         }
 
         /// <inheritdoc />

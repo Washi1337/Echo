@@ -23,6 +23,34 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// <inheritdoc />
         public CliValueType CliValueType => CliValueType.F;
 
+        /// <summary>
+        /// Determines whether the floating point value is considered greater than the provided floating point value.
+        /// </summary>
+        /// <param name="other">The other floating point value.</param>
+        /// <param name="allowUnordered">Determines the return value when one of the values is NaN.</param>
+        /// <returns><c>true</c> if the current value is greater than the provided value, <c>false</c> otherwise.</returns>
+        public bool IsGreaterThan(FValue other, bool allowUnordered)
+        {
+            // C# compiler emits cgt for the ">" operator with floating point operands.
+            return double.IsNaN(F64) || double.IsNaN(other.F64)
+                ? allowUnordered
+                : F64 > other.F64;
+        }
+
+        /// <summary>
+        /// Determines whether the floating point value is considered less than the provided floating point value.
+        /// </summary>
+        /// <param name="other">The other floating point value.</param>
+        /// <param name="allowUnordered">Determines the return value when one of the values is NaN.</param>
+        /// <returns><c>true</c> if the current value is less than the provided value, <c>false</c> otherwise.</returns>
+        public bool IsLessThan(FValue other, bool allowUnordered)
+        {
+            // C# compiler emits clt for the "<" operator with floating point operands.
+            return double.IsNaN(F64) || double.IsNaN(other.F64)
+                ? allowUnordered
+                : F64 < other.F64;
+        }
+
         /// <inheritdoc />
         public NativeIntegerValue InterpretAsI(bool is32Bit)
         {
