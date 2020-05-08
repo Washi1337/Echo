@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
             IntegerValue left, IntegerValue right)
         {
-            var result = left.IsEqualTo(right);
+            bool? result = left.IsEqualTo(right);
             
             var i4Result = new I4Value(result.GetValueOrDefault() ? 1 : 0, 0xFFFFFFFEu | (result.HasValue ? 1u : 0u));
             context.ProgramState.Stack.Push(i4Result);
@@ -43,12 +43,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
             OValue left, OValue right)
         {
-            bool? result;
-
-            if (left.IsKnown && right.IsKnown)
-                result = ReferenceEquals(left.ObjectValue, right.ObjectValue);
-            else
-                result = null;
+            bool? result = left.IsEqualTo(right);
 
             var i4Result = new I4Value(result.GetValueOrDefault() ? 1 : 0, 0xFFFFFFFEu | (result.HasValue ? 1u : 0u));
             context.ProgramState.Stack.Push(i4Result);

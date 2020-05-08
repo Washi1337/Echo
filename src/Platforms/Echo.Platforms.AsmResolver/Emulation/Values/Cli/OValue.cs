@@ -76,6 +76,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public virtual IValue Copy() => new OValue(ObjectValue, IsKnown, Is32Bit);
 
         /// <summary>
+        /// Determines whether the object is equal to the provided object.
+        /// </summary>
+        /// <param name="other">The other object.</param>
+        /// <returns><c>true</c> if the object are equal, <c>false</c> if not, and
+        /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
+        public bool? IsEqualTo(OValue other)
+        {
+            return IsKnown && IsKnown 
+                ? (bool?) ReferenceEquals(ObjectValue, other.ObjectValue) 
+                : null;
+        }
+        
+        /// <summary>
         /// Determines whether the current object reference is considered greater than the provided object reference.
         /// </summary>
         /// <param name="other">The other object reference.</param>
