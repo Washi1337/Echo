@@ -38,15 +38,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <inheritdoc />
         protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, OValue left, OValue right)
         {
-            // clt[.un] can be used on object references for null checks. 
-            
-            bool? result = left switch
-            {
-                {IsZero: false} when right is { IsZero: true } => false,
-                {IsZero: true} when right is { IsZero: false } => true,
-                _ => null
-            };
-
+            bool? result = left.IsLessThan(right);
             return ConvertToI4AndReturnSuccess(context, result);
         }
 

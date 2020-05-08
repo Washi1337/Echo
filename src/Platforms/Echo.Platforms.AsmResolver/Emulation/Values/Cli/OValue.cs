@@ -75,6 +75,42 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// <inheritdoc />
         public virtual IValue Copy() => new OValue(ObjectValue, IsKnown, Is32Bit);
 
+        /// <summary>
+        /// Determines whether the current object reference is considered greater than the provided object reference.
+        /// </summary>
+        /// <param name="other">The other object reference.</param>
+        /// <returns><c>true</c> if the current value is greater than the provided value, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// This method is only really reliable when one of the values is the null value. 
+        /// </remarks>
+        public bool? IsGreaterThan(OValue other)
+        {
+            return IsZero switch
+            {
+                false when other is { IsZero: true } => true,
+                true when other is { IsZero: false } => false,
+                _ => null
+            };
+        }
+
+        /// <summary>
+        /// Determines whether the current object reference is considered less than the provided object reference.
+        /// </summary>
+        /// <param name="other">The other object reference.</param>
+        /// <returns><c>true</c> if the current value is less than the provided value, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// This method is only really reliable when one of the values is the null value. 
+        /// </remarks>
+        public bool? IsLessThan(OValue other)
+        {
+            return IsZero switch
+            {
+                false when other is { IsZero: true } => false,
+                true when other is { IsZero: false } => true,
+                _ => null
+            };
+        }
+        
         /// <inheritdoc />
         public NativeIntegerValue InterpretAsI(bool is32Bit)
         {
