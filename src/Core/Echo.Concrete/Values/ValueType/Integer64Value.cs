@@ -261,21 +261,21 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override bool? IsGreaterThan(IntegerValue other)
+        public override bool? IsGreaterThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer64Value int64)
-                return U64 > int64.U64;
+                return signed ? I64 > int64.I64 : U64 > int64.U64;
 
-            return base.IsGreaterThan(other);
+            return base.IsGreaterThan(other, signed);
         }
 
         /// <inheritdoc />
-        public override bool? IsLessThan(IntegerValue other)
+        public override bool? IsLessThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer64Value int64)
-                return U64 < int64.U64;
+                return signed ? I64 < int64.I64 : U64 < int64.U64;
 
-            return base.IsLessThan(other);
+            return base.IsLessThan(other, signed);
         }
 
         /// <inheritdoc />

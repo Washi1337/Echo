@@ -689,10 +689,14 @@ namespace Echo.Concrete.Values.ValueType
         /// Determines whether the integer is greater than the provided integer.
         /// </summary>
         /// <param name="other">The other integer.</param>
+        /// <param name="signed">Indicates the integers should be interpreted as signed or unsigned integers.</param>
         /// <returns><c>true</c> if the current integer is greater than the provided integer, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public virtual bool? IsGreaterThan(IntegerValue other)
+        public virtual bool? IsGreaterThan(IntegerValue other, bool signed)
         {
+            if (signed)
+                return null; // TODO: support signed comparisons.
+
             // The following implements the "truth" table:
             // "-" indicates we do not know the answer yet.
             //
@@ -735,10 +739,14 @@ namespace Echo.Concrete.Values.ValueType
         /// Determines whether the integer is less than the provided integer.
         /// </summary>
         /// <param name="other">The other integer.</param>
+        /// <param name="signed">Indicates the integers should be interpreted as signed or unsigned integers.</param>
         /// <returns><c>true</c> if the current integer is less than the provided integer, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public virtual bool? IsLessThan(IntegerValue other)
+        public virtual bool? IsLessThan(IntegerValue other, bool signed)
         {
+            if (signed)
+                return null; // TODO: support signed comparisons.
+
             // The following implements the "truth" table:
             // "-" indicates we do not know the answer yet.
             //
