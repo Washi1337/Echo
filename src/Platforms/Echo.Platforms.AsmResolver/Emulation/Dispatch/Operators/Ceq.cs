@@ -19,7 +19,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         };
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, FValue left, FValue right)
+        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
+            FValue left, FValue right)
         {
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             var i4Result = new I4Value(left.F64 == right.F64 ? 1 : 0);
@@ -28,7 +29,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, IntegerValue left, IntegerValue right)
+        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
+            IntegerValue left, IntegerValue right)
         {
             var result = left.IsEqualTo(right);
             
@@ -38,7 +40,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, OValue left, OValue right)
+        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
+            OValue left, OValue right)
         {
             bool? result;
 
