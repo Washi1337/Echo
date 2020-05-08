@@ -19,20 +19,23 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         };
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, IntegerValue left, IntegerValue right)
+        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction,
+            IntegerValue left, IntegerValue right)
         {
             return left.IsEqualTo(right);
         }
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, FValue left, FValue right)
+        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction,
+            FValue left, FValue right)
         {
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             return left.F64 == right.F64;
         }
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, OValue left, OValue right)
+        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction,
+            OValue left, OValue right)
         {
             return left.IsKnown && right.IsKnown
                 ? (bool?) ReferenceEquals(left.ObjectValue, right.ObjectValue)
