@@ -260,21 +260,21 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override bool? IsGreaterThan(IntegerValue other)
+        public override bool? IsGreaterThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer8Value int8)
-                return U8 > int8.U8;
+                return signed ? I8 > int8.I8 : U8 > int8.U8;
 
-            return base.IsGreaterThan(other);
+            return base.IsGreaterThan(other, signed);
         }
 
         /// <inheritdoc />
-        public override bool? IsLessThan(IntegerValue other)
+        public override bool? IsLessThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer8Value int8)
-                return U8 < int8.U8;
+                return signed ? I8 < int8.I8 : U8 < int8.U8;
 
-            return base.IsLessThan(other);
+            return base.IsLessThan(other, signed);
         }
         
         /// <inheritdoc />
