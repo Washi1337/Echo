@@ -45,7 +45,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             Assert.IsAssignableFrom<IDotNetArrayValue>(array);
             var dotNetArray = (IDotNetArrayValue) array;
             
-            Assert.Equal(elementTypeSig.FullName, dotNetArray.ElementType.FullName);
+            Assert.Equal(elementTypeSig.FullName, dotNetArray.Type.GetUnderlyingTypeDefOrRef().FullName);
             Assert.Equal(length, dotNetArray.Length);
         }
         

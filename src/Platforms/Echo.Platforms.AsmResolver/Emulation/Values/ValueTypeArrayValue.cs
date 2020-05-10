@@ -58,18 +58,20 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <param name="contents">The raw contents of the array.</param>
         public ValueTypeArrayValue(TypeSignature elementType, MemoryPointerValue contents)
         {
-            ElementType = elementType ?? throw new ArgumentNullException(nameof(elementType));
+            Type = new SzArrayTypeSignature(elementType ?? throw new ArgumentNullException(nameof(elementType)));
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
             Length = _contents.Length / elementType.GetSize(contents.Is32Bit);
         }
 
-        /// <inheritdoc />
-        public TypeSignature ElementType
+        public SzArrayTypeSignature Type
         {
             get;
         }
 
-        private CorLibTypeFactory CorLibTypeFactory => ElementType.Module.CorLibTypeFactory;
+        /// <inheritdoc />
+        TypeSignature IDotNetValue.Type => Type;
+
+        private CorLibTypeFactory CorLibTypeFactory => Type.Module.CorLibTypeFactory;
 
         /// <inheritdoc />
         public int Length
@@ -84,7 +86,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public int Size => _contents.Size;
 
         /// <inheritdoc />
-        public IValue Copy() => new ValueTypeArrayValue(ElementType, _contents);
+        public IValue Copy() => new ValueTypeArrayValue(Type.BaseType, _contents);
 
         /// <inheritdoc />
         public bool IsValueType => false;
@@ -354,6 +356,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"{ElementType.FullName}[{Length}]";
+        public override string ToString() => $"{Type.BaseType.FullName}[{Length}]";
     }
 }

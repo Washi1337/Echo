@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Platforms.AsmResolver.Emulation.Values;
@@ -13,13 +14,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
     public class DefaultMemoryAllocator : IMemoryAllocator
     {
         private readonly IDictionary<string, StringValue> _cachedStrings = new Dictionary<string, StringValue>();
+        private readonly ModuleDefinition _contextModule;
 
         /// <summary>
         /// Creates a new instance of the <see cref="DefaultMemoryAllocator"/> class.
         /// </summary>
         /// <param name="is32Bit">Indicates the allocator is using 32 or 64 bit wide pointers.</param>
-        public DefaultMemoryAllocator(bool is32Bit)
+        public DefaultMemoryAllocator(ModuleDefinition contextModule, bool is32Bit)
         {
+            _contextModule = contextModule;
             Is32Bit = is32Bit;
         }
         
@@ -62,7 +65,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 var rawMemory = AllocateMemory(value.Length * 2, false);
                 var span = new ReadOnlySpan<byte>(Encoding.Unicode.GetBytes(value));
                 rawMemory.WriteBytes(0, span);
-                stringValue = new StringValue(rawMemory);
+                stringValue = new StringValue(_contextModule.CorLibTypeFactory.String, rawMemory);
                 _cachedStrings.Add(value, stringValue);
             }
 

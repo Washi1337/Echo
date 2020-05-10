@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var stack = ExecutionContext.ProgramState.Stack;
             
             var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Int32, length);
-            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(marshaller.ToCliValue(array, array.Type));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldlen));
             

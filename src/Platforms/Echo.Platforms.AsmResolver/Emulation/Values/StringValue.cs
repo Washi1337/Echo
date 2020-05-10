@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using AsmResolver.DotNet.Signatures;
 using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
@@ -10,7 +11,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// <summary>
     /// Represents an unicode string value. 
     /// </summary>
-    public class StringValue : IConcreteValue
+    public class StringValue : IDotNetValue
     {
         private readonly MemoryPointerValue _contents;
 
@@ -21,11 +22,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <exception cref="ArgumentException">
         /// Occurs when the memory block referenced by <paramref name="contents"/> is of an invalid size.
         /// </exception>
-        public StringValue(MemoryPointerValue contents)
+        public StringValue(TypeSignature stringType, MemoryPointerValue contents)
         {
+            Type = stringType ?? throw new ArgumentNullException(nameof(stringType));
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
             if (contents.Length % sizeof(char) != 0)
                 throw new ArgumentException($"Length of raw string memory must be a multiple of two.");
+        }
+
+        /// <inheritdoc />
+        public TypeSignature Type
+        {
+            get;
         }
 
         /// <summary>
@@ -55,7 +63,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool? IsNegative => false;
 
         /// <inheritdoc />
-        public IValue Copy() => new StringValue(_contents);
+        public IValue Copy() => new StringValue(Type, _contents);
 
         /// <summary>
         /// Gets a single character stored in the string.

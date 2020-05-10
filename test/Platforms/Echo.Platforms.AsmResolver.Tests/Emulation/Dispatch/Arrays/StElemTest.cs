@@ -28,7 +28,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
 
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(marshaller.ToCliValue(array, array.Type));
             stack.Push(new I4Value(index));
             stack.Push(new I4Value(value));
 
@@ -52,7 +52,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
 
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(marshaller.ToCliValue(array, array.Type));
             stack.Push(new NativeIntegerValue(index, environment.Is32Bit));
             stack.Push(new I4Value(value));
 
@@ -74,7 +74,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Byte, 10);
             
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(marshaller.ToCliValue(array, array.Type));
             stack.Push(new I4Value(index));
             stack.Push(new I4Value(0x04030201));
 
