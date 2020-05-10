@@ -63,6 +63,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             Length = _contents.Length / elementType.GetSize(contents.Is32Bit);
         }
 
+        /// <summary>
+        /// Gets the array type.
+        /// </summary>
         public SzArrayTypeSignature Type
         {
             get;

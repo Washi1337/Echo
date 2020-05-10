@@ -18,6 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <summary>
         /// Creates a new string value.
         /// </summary>
+        /// <param name="stringType">The string type signature.</param>
         /// <param name="contents">The raw contents of the string.</param>
         /// <exception cref="ArgumentException">
         /// Occurs when the memory block referenced by <paramref name="contents"/> is of an invalid size.

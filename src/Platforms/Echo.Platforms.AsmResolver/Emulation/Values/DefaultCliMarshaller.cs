@@ -2,6 +2,7 @@ using System;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Values;
+using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -173,7 +174,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <returns>The marshalled value.</returns>
         protected virtual OValue ObjectToO(IConcreteValue value)
         {
-            return new OValue(value, value.IsKnown, Is32Bit);
+            var referencedObject = value is ObjectReference objectReference
+                ? objectReference.ReferencedObject 
+                : value;
+
+            return new OValue(referencedObject, value.IsKnown, Is32Bit);
         }
         
         /// <inheritdoc />
@@ -237,6 +242,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 case ElementType.String:
                 {
                     return value.InterpretAsRef(Is32Bit).ReferencedObject;
+                }
+
+                case ElementType.Class:
+                {
+                    var oValue = value.InterpretAsRef(Is32Bit);
+                    return new ObjectReference(oValue.ReferencedObject, oValue.IsKnown, Is32Bit);
                 }
                 
                 default:

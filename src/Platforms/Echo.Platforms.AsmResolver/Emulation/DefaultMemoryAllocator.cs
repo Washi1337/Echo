@@ -9,7 +9,7 @@ using Echo.Platforms.AsmResolver.Emulation.Values;
 namespace Echo.Platforms.AsmResolver.Emulation
 {
     /// <summary>
-    /// Provides a default implementation of the <see cref="IMemoryAllocator"/> interface.
+    /// Provides a default implementation of the <see cref="IMemoryAllocator"/> interface for a single .NET module.
     /// </summary>
     public class DefaultMemoryAllocator : IMemoryAllocator
     {
@@ -19,6 +19,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Creates a new instance of the <see cref="DefaultMemoryAllocator"/> class.
         /// </summary>
+        /// <param name="contextModule">The module that this allocator is associated to.</param>
         /// <param name="is32Bit">Indicates the allocator is using 32 or 64 bit wide pointers.</param>
         public DefaultMemoryAllocator(ModuleDefinition contextModule, bool is32Bit)
         {
