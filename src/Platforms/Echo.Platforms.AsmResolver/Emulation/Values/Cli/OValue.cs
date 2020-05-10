@@ -1,5 +1,6 @@
 using System;
 using Echo.Concrete.Values;
+using Echo.Concrete.Values.ReferenceType;
 using Echo.Core.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
@@ -7,7 +8,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
     /// <summary>
     /// Represents an object reference on the evaluation stack of the Common Language Infrastructure (CLI).
     /// </summary>
-    public class OValue : ICliValue
+    public class OValue : ObjectReference, ICliValue
     {
         /// <summary>
         /// Creates a new null object reference value. 
@@ -19,61 +20,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// <summary>
         /// Creates a new object reference value.
         /// </summary>
-        /// <param name="objectValue">The referenced value.</param>
+        /// <param name="referencedObject">The referenced value.</param>
         /// <param name="isKnown">Indicates whether the value is known.</param>
         /// <param name="is32Bit">Indicates whether the reference to the object is 32 or 64 bits wide.</param>
-        public OValue(IConcreteValue objectValue, bool isKnown, bool is32Bit)
+        public OValue(IConcreteValue referencedObject, bool isKnown, bool is32Bit)
+            : base(referencedObject, isKnown, is32Bit)
         {
-            ObjectValue = objectValue;
-            IsKnown = isKnown;
-            Is32Bit = is32Bit;
-        }
-
-        /// <summary>
-        /// Gets the object that was referenced.
-        /// </summary>
-        public IConcreteValue ObjectValue
-        {
-            get;
         }
         
         /// <inheritdoc />
-        public CliValueType CliValueType => CliValueType.O;
+        public CliValueType CliValueType => CliValueType.O; 
 
         /// <inheritdoc />
-        public bool IsKnown
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the reference to the object is 32 or 64 bits wide.
-        /// </summary>
-        public bool Is32Bit
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        public int Size => Is32Bit ? 4 : 8;
-
-        /// <inheritdoc />
-        public bool IsValueType => false;
-
-        /// <inheritdoc />
-        public bool? IsZero => IsKnown ? ObjectValue is null : (bool?) null;
-
-        /// <inheritdoc />
-        public bool? IsNonZero => !IsZero;
-
-        /// <inheritdoc />
-        public bool? IsPositive => !IsZero;
-
-        /// <inheritdoc />
-        public bool? IsNegative => false;
-
-        /// <inheritdoc />
-        public virtual IValue Copy() => new OValue(ObjectValue, IsKnown, Is32Bit);
+        public override IValue Copy() => new OValue(ReferencedObject, IsKnown, Is32Bit);
 
         /// <summary>
         /// Determines whether the object is equal to the provided object.
@@ -84,7 +43,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public bool? IsEqualTo(OValue other)
         {
             return IsKnown && IsKnown 
-                ? (bool?) ReferenceEquals(ObjectValue, other.ObjectValue) 
+                ? (bool?) ReferenceEquals(ReferencedObject, other.ReferencedObject) 
                 : null;
         }
         
@@ -220,6 +179,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public FValue ConvertToR() => throw new InvalidCastException();
         
         /// <inheritdoc />
-        public override string ToString() => $"O ({ObjectValue})";
+        public override string ToString() => $"O ({ReferencedObject})";
     }
 }

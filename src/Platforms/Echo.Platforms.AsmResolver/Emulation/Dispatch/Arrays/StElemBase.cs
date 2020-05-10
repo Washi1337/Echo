@@ -37,11 +37,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             // Expect an O value with a .NET array in it.
             switch (arrayValue)
             {
-                case OValue nullValue when nullValue.IsZero.GetValueOrDefault():
+                case OValue { IsZero: true }:
                     // Pushed array object is null.
                     return new DispatchResult(new NullReferenceException());
                 
-                case OValue { ObjectValue: IDotNetArrayValue dotNetArray }:
+                case OValue { ReferencedObject: IDotNetArrayValue dotNetArray }:
                     // Check if in bounds.
                     if (index < 0 || index >= dotNetArray.Length)
                         return new DispatchResult(new IndexOutOfRangeException());

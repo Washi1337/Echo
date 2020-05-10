@@ -236,7 +236,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 case ElementType.SzArray:
                 case ElementType.String:
                 {
-                    return value.InterpretAsRef(Is32Bit).ObjectValue;
+                    return value.InterpretAsRef(Is32Bit).ReferencedObject;
                 }
                 
                 default:

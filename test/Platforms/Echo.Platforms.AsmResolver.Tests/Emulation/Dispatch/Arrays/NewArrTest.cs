@@ -41,7 +41,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             
             Assert.True(result.IsSuccess);
             Assert.IsAssignableFrom<OValue>(stack.Top);
-            var array = ((OValue) stack.Top).ObjectValue;
+            var array = ((OValue) stack.Top).ReferencedObject;
             Assert.IsAssignableFrom<IDotNetArrayValue>(array);
             var dotNetArray = (IDotNetArrayValue) array;
             

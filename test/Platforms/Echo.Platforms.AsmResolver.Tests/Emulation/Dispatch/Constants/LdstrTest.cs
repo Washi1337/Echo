@@ -25,8 +25,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Constants
             var top = ExecutionContext.ProgramState.Stack.Top;
             Assert.IsAssignableFrom<OValue>(top);
             var oValue = (OValue) top;
-            Assert.IsAssignableFrom<StringValue>(oValue.ObjectValue);
-            var stringValue = (StringValue) oValue.ObjectValue;
+            Assert.IsAssignableFrom<StringValue>(oValue.ReferencedObject);
+            var stringValue = (StringValue) oValue.ReferencedObject;
             Assert.Equal(stringLiteral, stringValue.ToString());
         }
     }

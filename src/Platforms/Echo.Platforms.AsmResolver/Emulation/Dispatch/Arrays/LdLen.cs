@@ -30,11 +30,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             var argument = stack.Pop();
             switch (argument)
             {
-                case OValue nullValue when nullValue.IsZero.GetValueOrDefault():
+                case OValue { IsZero: true }:
                     // Pushed object is null.
                     return new DispatchResult(new NullReferenceException());
                 
-                case OValue { ObjectValue: IDotNetArrayValue arrayValue }:
+                case OValue { ReferencedObject: IDotNetArrayValue arrayValue }:
                     // Get length of the array and wrap in native int.
                     lengthValue = new NativeIntegerValue(arrayValue.Length, environment.Is32Bit);
                     break;

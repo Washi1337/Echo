@@ -38,7 +38,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
             OValue left, OValue right)
         {
             return left.IsKnown && right.IsKnown
-                ? (bool?) ReferenceEquals(left.ObjectValue, right.ObjectValue)
+                ? (bool?) ReferenceEquals(left.ReferencedObject, right.ReferencedObject)
                 : null;
         }
     }
