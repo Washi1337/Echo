@@ -101,18 +101,5 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.IsAssignableFrom<NullReferenceException>(result.Exception);
         }
         
-        // Disable unassigned field warnings. 
-#pragma warning disable 649  
-        
-        private class SimpleClass
-        {
-            public int IntField;
-            public string StringField;
-            public SimpleClass SimpleClassField;
-        }
-        
-        // Restore unassigned field warnings.
-#pragma warning restore 649
-        
     }
 }
