@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
+using Echo.Platforms.AsmResolver.Emulation.Invocation;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
 {
@@ -48,7 +50,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         public DefaultCilDispatcher()
             : this(typeof(DefaultCilDispatcher).Module)
         {
-            
         }
 
         /// <summary>
@@ -72,6 +73,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         public IDictionary<CilCode, ICilOpCodeHandler> DispatcherTable
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets the object responsible for making calls to procedures outside of the method body.
+        /// </summary>
+        public IMethodInvoker MethodInvoker
+        {
+            get;
+            set;
         }
         
         /// <inheritdoc />
