@@ -44,11 +44,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
             set;
         }
 
-        public IMethodInvoker MethodInvoker
+        public HookedMethodInvoker MethodInvoker
         {
             get;
             set;
         }
+
+        IMethodInvoker ICilRuntimeEnvironment.MethodInvoker => this.MethodInvoker;
 
         public void Dispose()
         {

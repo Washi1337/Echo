@@ -35,7 +35,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
                 Architecture = new CilArchitecture(dummyMethod.CilMethodBody),
                 Module = dummyModule,
                 MemoryAllocator = new DefaultMemoryAllocator(dummyModule, is32Bit),
-                MethodInvoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(is32Bit))
+                MethodInvoker = new HookedMethodInvoker(new ReturnUnknownMethodInvoker(new UnknownValueFactory(is32Bit)))
             };
 
             var container = new ServiceContainer();

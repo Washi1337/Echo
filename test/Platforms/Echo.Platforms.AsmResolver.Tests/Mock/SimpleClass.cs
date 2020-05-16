@@ -7,5 +7,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
         public int IntField;
         public string StringField;
         public SimpleClass SimpleClassField;
+
+        public void InstanceMethod()
+        {
+        }
+
+        public virtual void VirtualInstanceMethod()
+        {
+        }
     }
 }
