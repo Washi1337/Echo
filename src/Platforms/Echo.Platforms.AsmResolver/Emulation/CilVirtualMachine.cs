@@ -10,7 +10,9 @@ using Echo.Concrete.Values;
 using Echo.Core.Code;
 using Echo.Core.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
+using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using ExecutionContext = Echo.Concrete.Emulation.ExecutionContext;
 
 namespace Echo.Platforms.AsmResolver.Emulation
@@ -56,7 +58,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Is32Bit = is32Bit;
             Status = VirtualMachineStatus.Idle;
             CurrentState = new CilProgramState();
-            Dispatcher = new DefaultCilDispatcher();
+            Dispatcher = new DefaultCilDispatcher(new ReturnUnknownMethodInvoker(new UnknownValueFactory(is32Bit)));
             CliMarshaller = new DefaultCliMarshaller(this);
             MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
             

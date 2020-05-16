@@ -47,16 +47,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         /// <summary>
         /// Creates a new CIL dispatcher using the handlers defined in the current module. 
         /// </summary>
-        public DefaultCilDispatcher()
-            : this(typeof(DefaultCilDispatcher).Module)
+        public DefaultCilDispatcher(IMethodInvoker methodInvoker)
+            : this(methodInvoker, typeof(DefaultCilDispatcher).Module)
         {
         }
 
         /// <summary>
         /// Creates a new CIL dispatcher using the handlers defined in the provided module. 
         /// </summary>
-        public DefaultCilDispatcher(Module handlerModule)
+        public DefaultCilDispatcher(IMethodInvoker methodInvoker, Module handlerModule)
         {
+            MethodInvoker = methodInvoker ?? throw new ArgumentNullException(nameof(methodInvoker));
+            
             var table = new Dictionary<CilCode, ICilOpCodeHandler>();
             foreach (var handler in GetOrCreateHandlersInModule(handlerModule))
             {

@@ -10,13 +10,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
     /// Provides an implementation for an <see cref="IMethodInvoker"/> that always returns an unknown value when the
     /// called method is non-void.
     /// </summary>
-    public class AlwaysReturnUnknownMethodInvoker : IMethodInvoker
+    public class ReturnUnknownMethodInvoker : IMethodInvoker
     {
         /// <summary>
-        /// Creates a new instance of the <see cref="AlwaysReturnUnknownMethodInvoker"/> class.
+        /// Creates a new instance of the <see cref="ReturnUnknownMethodInvoker"/> class.
         /// </summary>
         /// <param name="unknownValueFactory">The factory responsible for constructing the unknown values.</param>
-        public AlwaysReturnUnknownMethodInvoker(IUnknownValueFactory unknownValueFactory)
+        public ReturnUnknownMethodInvoker(IUnknownValueFactory unknownValueFactory)
         {
             UnknownValueFactory = unknownValueFactory ?? throw new ArgumentNullException(nameof(unknownValueFactory));
         }
