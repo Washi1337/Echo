@@ -20,8 +20,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
         {
             const bool is32Bit = false;
             
-            var invoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(is32Bit));
-            Dispatcher = new DefaultCilDispatcher(invoker);
+            Dispatcher = new DefaultCilDispatcher();
 
             var dummyModule = moduleProvider.GetModule();
             var dummyMethod = new MethodDefinition(
@@ -35,7 +34,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
                 Is32Bit = is32Bit,
                 Architecture = new CilArchitecture(dummyMethod.CilMethodBody),
                 Module = dummyModule,
-                MemoryAllocator = new DefaultMemoryAllocator(dummyModule, is32Bit)
+                MemoryAllocator = new DefaultMemoryAllocator(dummyModule, is32Bit),
+                MethodInvoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(is32Bit))
             };
 
             var container = new ServiceContainer();

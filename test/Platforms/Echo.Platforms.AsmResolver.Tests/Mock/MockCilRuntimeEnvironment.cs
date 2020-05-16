@@ -2,6 +2,7 @@ using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Core.Code;
 using Echo.Platforms.AsmResolver.Emulation;
+using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 
 namespace Echo.Platforms.AsmResolver.Tests.Mock
@@ -38,6 +39,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
         }
 
         public IMemoryAllocator MemoryAllocator
+        {
+            get;
+            set;
+        }
+
+        public IMethodInvoker MethodInvoker
         {
             get;
             set;

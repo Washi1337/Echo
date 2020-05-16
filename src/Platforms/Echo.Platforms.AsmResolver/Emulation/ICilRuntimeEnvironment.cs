@@ -4,6 +4,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Core.Code;
+using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation
@@ -50,6 +51,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets the object responsible for allocating memory on the virtual heap of the virtual machine.
         /// </summary>
         IMemoryAllocator MemoryAllocator
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the object responsible for making calls to procedures outside of the method body.
+        /// </summary>
+        public IMethodInvoker MethodInvoker
         {
             get;
         }

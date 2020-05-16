@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
-using Echo.Platforms.AsmResolver.Emulation.Invocation;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
 {
@@ -47,18 +45,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         /// <summary>
         /// Creates a new CIL dispatcher using the handlers defined in the current module. 
         /// </summary>
-        public DefaultCilDispatcher(IMethodInvoker methodInvoker)
-            : this(methodInvoker, typeof(DefaultCilDispatcher).Module)
+        public DefaultCilDispatcher()
+            : this(typeof(DefaultCilDispatcher).Module)
         {
         }
 
         /// <summary>
         /// Creates a new CIL dispatcher using the handlers defined in the provided module. 
         /// </summary>
-        public DefaultCilDispatcher(IMethodInvoker methodInvoker, Module handlerModule)
+        public DefaultCilDispatcher(Module handlerModule)
         {
-            MethodInvoker = methodInvoker ?? throw new ArgumentNullException(nameof(methodInvoker));
-            
             var table = new Dictionary<CilCode, ICilOpCodeHandler>();
             foreach (var handler in GetOrCreateHandlersInModule(handlerModule))
             {
@@ -75,15 +71,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         public IDictionary<CilCode, ICilOpCodeHandler> DispatcherTable
         {
             get;
-        }
-
-        /// <summary>
-        /// Gets the object responsible for making calls to procedures outside of the method body.
-        /// </summary>
-        public IMethodInvoker MethodInvoker
-        {
-            get;
-            set;
         }
         
         /// <inheritdoc />

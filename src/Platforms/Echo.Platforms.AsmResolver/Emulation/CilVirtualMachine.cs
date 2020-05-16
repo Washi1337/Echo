@@ -58,9 +58,10 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Is32Bit = is32Bit;
             Status = VirtualMachineStatus.Idle;
             CurrentState = new CilProgramState();
-            Dispatcher = new DefaultCilDispatcher(new ReturnUnknownMethodInvoker(new UnknownValueFactory(is32Bit)));
+            Dispatcher = new DefaultCilDispatcher();
             CliMarshaller = new DefaultCliMarshaller(this);
             MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
+            MethodInvoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(is32Bit));
             
             _services[typeof(ICilRuntimeEnvironment)] = this;
         }
@@ -111,6 +112,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
         /// <inheritdoc />
         public IMemoryAllocator MemoryAllocator
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public IMethodInvoker MethodInvoker
         {
             get;
             set;
