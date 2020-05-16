@@ -1,5 +1,6 @@
 using System;
 using Echo.Concrete.Values;
+using Echo.Concrete.Values.ReferenceType;
 using Echo.Core.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
@@ -7,122 +8,31 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
     /// <summary>
     /// Represents an object reference on the evaluation stack of the Common Language Infrastructure (CLI).
     /// </summary>
-    public class OValue : ICliValue
+    public class OValue : ObjectReference, ICliValue
     {
         /// <summary>
         /// Creates a new null object reference value. 
         /// </summary>
         /// <param name="is32Bit">Indicates whether the reference to the object is 32 or 64 bits wide.</param>
         /// <returns>The null reference.</returns>
-        public static OValue Null(bool is32Bit) => new OValue(null, true, is32Bit);
+        public new static OValue Null(bool is32Bit) => new OValue(null, true, is32Bit);
 
         /// <summary>
         /// Creates a new object reference value.
         /// </summary>
-        /// <param name="objectValue">The referenced value.</param>
+        /// <param name="referencedObject">The referenced value.</param>
         /// <param name="isKnown">Indicates whether the value is known.</param>
         /// <param name="is32Bit">Indicates whether the reference to the object is 32 or 64 bits wide.</param>
-        public OValue(IConcreteValue objectValue, bool isKnown, bool is32Bit)
+        public OValue(IConcreteValue referencedObject, bool isKnown, bool is32Bit)
+            : base(referencedObject, isKnown, is32Bit)
         {
-            ObjectValue = objectValue;
-            IsKnown = isKnown;
-            Is32Bit = is32Bit;
-        }
-
-        /// <summary>
-        /// Gets the object that was referenced.
-        /// </summary>
-        public IConcreteValue ObjectValue
-        {
-            get;
         }
         
         /// <inheritdoc />
-        public CliValueType CliValueType => CliValueType.O;
+        public CliValueType CliValueType => CliValueType.O; 
 
         /// <inheritdoc />
-        public bool IsKnown
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the reference to the object is 32 or 64 bits wide.
-        /// </summary>
-        public bool Is32Bit
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        public int Size => Is32Bit ? 4 : 8;
-
-        /// <inheritdoc />
-        public bool IsValueType => false;
-
-        /// <inheritdoc />
-        public bool? IsZero => IsKnown ? ObjectValue is null : (bool?) null;
-
-        /// <inheritdoc />
-        public bool? IsNonZero => !IsZero;
-
-        /// <inheritdoc />
-        public bool? IsPositive => !IsZero;
-
-        /// <inheritdoc />
-        public bool? IsNegative => false;
-
-        /// <inheritdoc />
-        public virtual IValue Copy() => new OValue(ObjectValue, IsKnown, Is32Bit);
-
-        /// <summary>
-        /// Determines whether the object is equal to the provided object.
-        /// </summary>
-        /// <param name="other">The other object.</param>
-        /// <returns><c>true</c> if the object are equal, <c>false</c> if not, and
-        /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public bool? IsEqualTo(OValue other)
-        {
-            return IsKnown && IsKnown 
-                ? (bool?) ReferenceEquals(ObjectValue, other.ObjectValue) 
-                : null;
-        }
-        
-        /// <summary>
-        /// Determines whether the current object reference is considered greater than the provided object reference.
-        /// </summary>
-        /// <param name="other">The other object reference.</param>
-        /// <returns><c>true</c> if the current value is greater than the provided value, <c>false</c> otherwise.</returns>
-        /// <remarks>
-        /// This method is only really reliable when one of the values is the null value. 
-        /// </remarks>
-        public bool? IsGreaterThan(OValue other)
-        {
-            return IsZero switch
-            {
-                false when other is { IsZero: true } => true,
-                true when other is { IsZero: false } => false,
-                _ => null
-            };
-        }
-
-        /// <summary>
-        /// Determines whether the current object reference is considered less than the provided object reference.
-        /// </summary>
-        /// <param name="other">The other object reference.</param>
-        /// <returns><c>true</c> if the current value is less than the provided value, <c>false</c> otherwise.</returns>
-        /// <remarks>
-        /// This method is only really reliable when one of the values is the null value. 
-        /// </remarks>
-        public bool? IsLessThan(OValue other)
-        {
-            return IsZero switch
-            {
-                false when other is { IsZero: true } => false,
-                true when other is { IsZero: false } => true,
-                _ => null
-            };
-        }
+        public override IValue Copy() => new OValue(ReferencedObject, IsKnown, Is32Bit);
         
         /// <inheritdoc />
         public NativeIntegerValue InterpretAsI(bool is32Bit)
@@ -220,6 +130,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public FValue ConvertToR() => throw new InvalidCastException();
         
         /// <inheritdoc />
-        public override string ToString() => $"O ({ObjectValue})";
+        public override string ToString() => $"O ({ReferencedObject})";
     }
 }

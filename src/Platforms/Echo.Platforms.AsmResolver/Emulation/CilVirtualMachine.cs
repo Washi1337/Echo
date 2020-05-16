@@ -58,7 +58,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             CurrentState = new CilProgramState();
             Dispatcher = new DefaultCilDispatcher();
             CliMarshaller = new DefaultCliMarshaller(this);
-            MemoryAllocator = new DefaultMemoryAllocator(is32Bit);
+            MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
             
             _services[typeof(ICilRuntimeEnvironment)] = this;
         }

@@ -41,11 +41,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             
             Assert.True(result.IsSuccess);
             Assert.IsAssignableFrom<OValue>(stack.Top);
-            var array = ((OValue) stack.Top).ObjectValue;
+            var array = ((OValue) stack.Top).ReferencedObject;
             Assert.IsAssignableFrom<IDotNetArrayValue>(array);
             var dotNetArray = (IDotNetArrayValue) array;
             
-            Assert.Equal(elementTypeSig.FullName, dotNetArray.ElementType.FullName);
+            Assert.Equal(elementTypeSig.FullName, dotNetArray.Type.GetUnderlyingTypeDefOrRef().FullName);
             Assert.Equal(length, dotNetArray.Length);
         }
         

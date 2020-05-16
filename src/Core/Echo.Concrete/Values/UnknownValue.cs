@@ -30,5 +30,8 @@ namespace Echo.Concrete.Values
         
         /// <inheritdoc />
         public IValue Copy() => new UnknownValue();
+
+        /// <inheritdoc />
+        public override string ToString() => "?";
     }
 }

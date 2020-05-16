@@ -7,16 +7,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// <summary>
     /// Represents an array-like value that can be used in the context of executing CIL code. 
     /// </summary>
-    public interface IDotNetArrayValue : IConcreteValue
+    public interface IDotNetArrayValue : IDotNetValue
     {
-        /// <summary>
-        /// Gets the type of elements the array stores.
-        /// </summary>
-        TypeSignature ElementType
-        {
-            get;
-        }
-
         /// <summary>
         /// Gets the length of the array structure.
         /// </summary>

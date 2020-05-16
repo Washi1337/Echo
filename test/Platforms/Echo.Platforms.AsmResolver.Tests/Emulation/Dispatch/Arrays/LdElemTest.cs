@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             array.StoreElementI4(3, new I4Value(0xD), marshaller);
 
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(marshaller.ToCliValue(array, array.Type));
             stack.Push(new I4Value(index));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
@@ -58,7 +58,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             array.StoreElementI4(3, new I4Value(0xD), marshaller);
             
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(marshaller.ToCliValue(array, array.Type));
             stack.Push(new NativeIntegerValue(index, environment.Is32Bit));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
@@ -79,7 +79,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
                 array.StoreElementU1(i, new I4Value(i), marshaller);
             
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(marshaller.ToCliValue(array, array.Type));
             stack.Push(new I4Value(9));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I8));
@@ -108,7 +108,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             array.StoreElementI4(0, new I4Value(arrayElementValue), marshaller);
             
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(marshaller.ToCliValue(array, array.Type));
             stack.Push(new I4Value(0));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(code.ToOpCode()));
@@ -132,7 +132,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             array.StoreElementI4(2, new I4Value(2), marshaller);
             
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(marshaller.ToCliValue(array, array.Type));
             stack.Push(new I4Value(index));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_I4));
@@ -151,7 +151,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             array.StoreElementR4(0, new FValue(1.23f), marshaller);
             
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(marshaller.ToCliValue(array, array.Type));
             stack.Push(new I4Value(0));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_R4));
@@ -170,7 +170,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             array.StoreElementR8(0, new FValue(1.23D), marshaller);
             
             var stack = ExecutionContext.ProgramState.Stack;
-            stack.Push(marshaller.ToCliValue(array, new SzArrayTypeSignature(array.ElementType)));
+            stack.Push(marshaller.ToCliValue(array, array.Type));
             stack.Push(new I4Value(0));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem_R8));
