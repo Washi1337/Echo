@@ -30,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         }
 
         /// <inheritdoc />
-        public ICliValue Invoke(MethodDefinition method, IEnumerable<ICliValue> arguments)
+        public ICliValue Invoke(IMethodDescriptor method, IEnumerable<ICliValue> arguments)
         {
             var returnType = method.Signature.ReturnType;
             return returnType.ElementType != ElementType.Void 

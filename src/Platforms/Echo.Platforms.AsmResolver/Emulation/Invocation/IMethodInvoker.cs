@@ -17,6 +17,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// <returns>
         /// The return value of the method, or <c>null</c> if the method returned <see cref="System.Void"/>.
         /// </returns>
-        ICliValue Invoke(MethodDefinition method, IEnumerable<ICliValue> arguments);
+        ICliValue Invoke(IMethodDescriptor method, IEnumerable<ICliValue> arguments);
     }
 }
