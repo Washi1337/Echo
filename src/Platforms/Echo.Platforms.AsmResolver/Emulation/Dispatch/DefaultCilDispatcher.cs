@@ -48,7 +48,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         public DefaultCilDispatcher()
             : this(typeof(DefaultCilDispatcher).Module)
         {
-            
         }
 
         /// <summary>

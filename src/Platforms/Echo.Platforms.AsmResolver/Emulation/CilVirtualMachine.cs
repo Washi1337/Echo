@@ -10,7 +10,9 @@ using Echo.Concrete.Values;
 using Echo.Core.Code;
 using Echo.Core.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
+using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using ExecutionContext = Echo.Concrete.Emulation.ExecutionContext;
 
 namespace Echo.Platforms.AsmResolver.Emulation
@@ -59,6 +61,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Dispatcher = new DefaultCilDispatcher();
             CliMarshaller = new DefaultCliMarshaller(this);
             MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
+            MethodInvoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(is32Bit));
             
             _services[typeof(ICilRuntimeEnvironment)] = this;
         }
@@ -109,6 +112,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
         /// <inheritdoc />
         public IMemoryAllocator MemoryAllocator
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public IMethodInvoker MethodInvoker
         {
             get;
             set;

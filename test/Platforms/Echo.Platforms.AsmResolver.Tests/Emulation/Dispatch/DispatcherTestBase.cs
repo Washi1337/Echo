@@ -6,7 +6,9 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Emulation;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
+using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
@@ -16,6 +18,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
     {
         public DispatcherTestBase(MockModuleProvider moduleProvider)
         {
+            const bool is32Bit = false;
+            
             Dispatcher = new DefaultCilDispatcher();
 
             var dummyModule = moduleProvider.GetModule();
@@ -27,10 +31,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
                 
             var environment = new MockCilRuntimeEnvironment
             {
-                Is32Bit = false,
+                Is32Bit = is32Bit,
                 Architecture = new CilArchitecture(dummyMethod.CilMethodBody),
                 Module = dummyModule,
-                MemoryAllocator = new DefaultMemoryAllocator(dummyModule, false)
+                MemoryAllocator = new DefaultMemoryAllocator(dummyModule, is32Bit),
+                MethodInvoker = new HookedMethodInvoker(new ReturnUnknownMethodInvoker(new UnknownValueFactory(is32Bit)))
             };
 
             var container = new ServiceContainer();
