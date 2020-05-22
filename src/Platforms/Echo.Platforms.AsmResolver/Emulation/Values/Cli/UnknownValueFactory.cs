@@ -1,5 +1,5 @@
 using System;
-using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli

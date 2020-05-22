@@ -1,4 +1,5 @@
-using AsmResolver.DotNet.Signatures;
+
+using AsmResolver.DotNet.Signatures.Types;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 {

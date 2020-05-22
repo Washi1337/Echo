@@ -1,6 +1,5 @@
 using System;
-using AsmResolver.DotNet.Signatures;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.DotNet.Signatures.Types;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {

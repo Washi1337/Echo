@@ -1,7 +1,6 @@
 using System;
 using System.Text;
-using AsmResolver.DotNet.Signatures;
-using Echo.Concrete.Values;
+using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core.Values;
