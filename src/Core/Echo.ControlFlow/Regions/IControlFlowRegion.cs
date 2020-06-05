@@ -28,6 +28,8 @@ namespace Echo.ControlFlow.Regions
             get;
         }
         
+        ControlFlowNode<TInstruction> GetEntrypoint();
+        
         /// <summary>
         /// Gets a collection of all nested regions defined in this region.
         /// </summary>

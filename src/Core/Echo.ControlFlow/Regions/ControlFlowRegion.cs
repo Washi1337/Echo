@@ -48,6 +48,9 @@ namespace Echo.ControlFlow.Regions
         }
 
         /// <inheritdoc />
+        public abstract ControlFlowNode<TInstruction> GetEntrypoint();
+
+        /// <inheritdoc />
         public virtual ControlFlowNode<TInstruction> GetNodeByOffset(long offset)
         {
             foreach (var region in GetSubRegions())

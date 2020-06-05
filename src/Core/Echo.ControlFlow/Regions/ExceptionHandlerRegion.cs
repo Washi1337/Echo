@@ -22,7 +22,7 @@ namespace Echo.ControlFlow.Regions
             
             HandlerRegions = new RegionCollection<TInstruction>(this);
         }
-        
+
         /// <summary>
         /// Gets the region of nodes that is protected by the exception handler. 
         /// </summary>
@@ -38,6 +38,9 @@ namespace Echo.ControlFlow.Regions
         {
             get;
         }
+
+        /// <inheritdoc />
+        public override ControlFlowNode<TInstruction> GetEntrypoint() => ProtectedRegion.Entrypoint;
 
         /// <inheritdoc />
         public override IEnumerable<ControlFlowNode<TInstruction>> GetNodes() =>

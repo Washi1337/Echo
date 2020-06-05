@@ -9,6 +9,8 @@ namespace Echo.ControlFlow.Regions
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public class BasicControlFlowRegion<TInstruction> : ControlFlowRegion<TInstruction>
     {
+        private ControlFlowNode<TInstruction> _entrypoint;
+
         /// <summary>
         /// Creates a new instance of the <see cref="BasicControlFlowRegion{TInstruction}"/> class.
         /// </summary>
@@ -17,7 +19,13 @@ namespace Echo.ControlFlow.Regions
             Regions = new RegionCollection<TInstruction>(this);
             Nodes = new RegionNodeCollection<TInstruction>(this);
         }
-        
+
+        public ControlFlowNode<TInstruction> Entrypoint
+        {
+            get => _entrypoint;
+            set => _entrypoint = value;
+        }
+
         /// <summary>
         /// Gets a collection of top-level nodes that this region consists of.
         /// </summary>
@@ -49,6 +57,9 @@ namespace Echo.ControlFlow.Regions
                     yield return node;
             }
         }
+
+        /// <inheritdoc />
+        public override ControlFlowNode<TInstruction> GetEntrypoint() => Entrypoint;
 
         /// <inheritdoc />
         public override IEnumerable<ControlFlowRegion<TInstruction>> GetSubRegions() => Regions;
