@@ -26,14 +26,9 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <inheritdoc />
-        public TResult AcceptVisitor<TResult>(IBlockVisitor<TInstruction, TResult> visitor) => visitor.VisitScopeBlock(this);
+        public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitScopeBlock(this);
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            var builder = new StringBuilder();
-            string newLine = Environment.NewLine;
-            return "{" + newLine + string.Join(newLine, Blocks) + newLine + "}";
-        }
+        public override string ToString() => BlockFormatter<TInstruction>.Format(this);
     }
 }

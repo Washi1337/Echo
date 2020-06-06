@@ -85,14 +85,7 @@ namespace Echo.ControlFlow.Blocks
         public TInstruction Footer => !IsEmpty ? Instructions[Instructions.Count - 1] : default;
         
         /// <inheritdoc />
-        public override string ToString()
-        {
-            var builder = new StringBuilder();
-            builder.AppendLine($"Block_{Offset:X8}:");
-            foreach (var instruction in Instructions)
-                builder.AppendLine(instruction.ToString());
-            return builder.ToString();
-        }
+        public override string ToString() => BlockFormatter<TInstruction>.Format(this);
 
         IEnumerable<BasicBlock<TInstruction>> IBlock<TInstruction>.GetAllBlocks()
         {
@@ -100,6 +93,6 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <inheritdoc />
-        public TResult AcceptVisitor<TResult>(IBlockVisitor<TInstruction, TResult> visitor) => visitor.VisitBasicBlock(this);
+        public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitBasicBlock(this);
     }
 }

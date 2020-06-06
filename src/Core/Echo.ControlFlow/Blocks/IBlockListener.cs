@@ -1,21 +1,26 @@
 namespace Echo.ControlFlow.Blocks
 {
     /// <summary>
-    /// Provides members for visiting blocks in a scoped block tree. 
+    /// Provides members for listening to events raised by the <see cref="BlockWalker{TInstruction}"/> class. 
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions in the blocks.</typeparam>
-    public interface IBlockVisitor<TInstruction>
+    public interface IBlockListener<TInstruction>
     {
         /// <summary>
         /// Visits a basic block.
         /// </summary>
         /// <param name="block">The block.</param>
         void VisitBasicBlock(BasicBlock<TInstruction> block);
-        
+
         /// <summary>
-        /// Visits a scope block.
+        /// Enters a scope block.
         /// </summary>
         /// <param name="block">The block.</param>
-        void VisitScopeBlock(ScopeBlock<TInstruction> block);
+        void EnterScopeBlock(ScopeBlock<TInstruction> block);
+        
+        /// <summary>
+        /// Exits a scope block.
+        /// </summary>
+        void ExitScopeBlock(ScopeBlock<TInstruction> block);
     }
 }
