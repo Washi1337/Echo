@@ -28,6 +28,10 @@ namespace Echo.ControlFlow.Regions
             get;
         }
         
+        /// <summary>
+        /// Obtains the first node that is executed in the region (if available).
+        /// </summary>
+        /// <returns>The node, or <c>null</c> if no entrypoint was specified..</returns>
         ControlFlowNode<TInstruction> GetEntrypoint();
         
         /// <summary>

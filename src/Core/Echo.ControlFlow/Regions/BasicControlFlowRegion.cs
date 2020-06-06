@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Echo.ControlFlow.Collections;
 
@@ -20,6 +21,9 @@ namespace Echo.ControlFlow.Regions
             Nodes = new RegionNodeCollection<TInstruction>(this);
         }
 
+        /// <summary>
+        /// Gets or sets the first node that is executed in the region.
+        /// </summary>
         public ControlFlowNode<TInstruction> Entrypoint
         {
             get => _entrypoint;
