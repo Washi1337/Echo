@@ -67,8 +67,12 @@ namespace Echo.ControlFlow.Serialization.Blocks
 
             // Figure out common region depth.
             int commonDepth = 1;
-            while (commonDepth < largestPossibleCommonDepth && scopeStack[commonDepth].Region != activeRegions[commonDepth])
+            while (commonDepth < largestPossibleCommonDepth)
+            {
+                if (scopeStack[commonDepth].Region != activeRegions[commonDepth])
+                    break;
                 commonDepth++;
+            }
 
             // Leave for every left region a scope block.   
             while (scopeStack.Count > commonDepth)
@@ -123,7 +127,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             var ehRegion = node.GetParentExceptionHandler();
             while (ehRegion is {})
             {
-                if (ehRegion.ProtectedRegion.GetNodeByOffset(node.Offset) != null)
+                if (node.IsInRegion(ehRegion.ProtectedRegion))
                 {
                     foreach (var handlerRegion in ehRegion.HandlerRegions)
                     {
@@ -155,6 +159,11 @@ namespace Echo.ControlFlow.Serialization.Blocks
             public ScopeBlock<TInstruction> Block
             {
                 get;
+            }
+
+            public override string ToString()
+            {
+                return $"{Region.GetType().Name}, Offset: {Region.GetEntrypoint().Offset:X8}";
             }
         }
     }
