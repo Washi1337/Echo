@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Echo.ControlFlow.Blocks
 {
@@ -86,13 +87,19 @@ namespace Echo.ControlFlow.Blocks
         /// <inheritdoc />
         public override string ToString()
         {
-            string newLine = Environment.NewLine;
-            return "{" + newLine + string.Join(newLine, Instructions) + newLine + "}";
+            var builder = new StringBuilder();
+            builder.AppendLine($"Block_{Offset:X8}:");
+            foreach (var instruction in Instructions)
+                builder.AppendLine(instruction.ToString());
+            return builder.ToString();
         }
 
         IEnumerable<BasicBlock<TInstruction>> IBlock<TInstruction>.GetAllBlocks()
         {
             return new[] {this};
         }
+
+        /// <inheritdoc />
+        public TResult AcceptVisitor<TResult>(IBlockVisitor<TInstruction, TResult> visitor) => visitor.VisitBasicBlock(this);
     }
 }

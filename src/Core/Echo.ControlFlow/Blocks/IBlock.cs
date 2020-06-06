@@ -13,5 +13,7 @@ namespace Echo.ControlFlow.Blocks
         /// </summary>
         /// <returns>The ordered basic blocks.</returns>
         IEnumerable<BasicBlock<TInstruction>> GetAllBlocks();
+
+        TResult AcceptVisitor<TResult>(IBlockVisitor<TInstruction, TResult> visitor);
     }
 }

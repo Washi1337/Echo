@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Echo.ControlFlow.Blocks
 {
@@ -25,8 +26,12 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <inheritdoc />
+        public TResult AcceptVisitor<TResult>(IBlockVisitor<TInstruction, TResult> visitor) => visitor.VisitScopeBlock(this);
+
+        /// <inheritdoc />
         public override string ToString()
         {
+            var builder = new StringBuilder();
             string newLine = Environment.NewLine;
             return "{" + newLine + string.Join(newLine, Blocks) + newLine + "}";
         }
