@@ -111,6 +111,52 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
                 order.Select(b => b.Offset));
         }
 
+        [Fact]
+        public void WeirdOrder()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Op(0, 0, 0),
+                DummyInstruction.Op(1, 0, 0),
+                DummyInstruction.Op(2, 0, 0),
+                DummyInstruction.Jmp(3, 6),
+                
+                DummyInstruction.Op(4, 0, 0),
+                DummyInstruction.Ret(5),
+                
+                DummyInstruction.Op(6, 0, 0),
+                DummyInstruction.Op(7, 0, 0),
+                DummyInstruction.Jmp(8, 15),
+                
+                DummyInstruction.Op(9, 0, 0),
+                DummyInstruction.Op(10, 0, 0),
+                DummyInstruction.Jmp(11, 4),
+                
+                DummyInstruction.Op(12, 0, 0),
+                DummyInstruction.Op(13, 0, 0),
+                DummyInstruction.Jmp(14, 9),
+                
+                DummyInstruction.Op(15, 0, 0),
+                DummyInstruction.Op(16, 0, 0),
+                DummyInstruction.Jmp(17, 12),
+            };
+
+            var cfgBuilder = new StaticFlowGraphBuilder<DummyInstruction>(
+                DummyArchitecture.Instance,
+                instructions,
+                DummyArchitecture.Instance.SuccessorResolver);
+                
+            var cfg = cfgBuilder.ConstructFlowGraph(0);
+            var blockBuilder = new BlockBuilder<DummyInstruction>();
+            var rootScope = blockBuilder.ConstructBlocks(cfg);
+            
+            var order = rootScope.GetAllBlocks().ToArray();
+            Assert.Equal(
+                new long[] {0,6,15,12,9,4} ,
+                order.Select(b => b.Offset));
+        }
+        
+
         private static ControlFlowGraph<DummyInstruction> ConstructGraphWithEHRegions(IEnumerable<DummyInstruction> instructions, IEnumerable<ExceptionHandlerRange> ranges)
         {
             var architecture = DummyArchitecture.Instance;
