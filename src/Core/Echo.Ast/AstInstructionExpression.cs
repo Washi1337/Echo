@@ -11,9 +11,11 @@ namespace Echo.Ast
         /// <summary>
         /// Creates a new instruction expression
         /// </summary>
+        /// <param name="id"><inheritdoc cref="AstNodeBase(long)"/></param>
         /// <param name="instruction">The instruction</param>
         /// <param name="arguments">Arguments of the expression</param>
-        public AstInstructionExpression(TInstruction instruction, IList<AstExpressionBase> arguments)
+        public AstInstructionExpression(long id, TInstruction instruction, IList<AstExpressionBase> arguments)
+            : base(id)
         {
             Instruction = instruction;
             Arguments = arguments;

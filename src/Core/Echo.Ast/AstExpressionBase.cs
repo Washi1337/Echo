@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Echo.Ast
+﻿namespace Echo.Ast
 {
     /// <summary>
     /// A base type for expression nodes in an AST
@@ -8,9 +6,7 @@ namespace Echo.Ast
     public abstract class AstExpressionBase : AstNodeBase
     {
         /// <inheritdoc />
-        public override IDictionary<string, object> UserData
-        {
-            get;
-        } = new Dictionary<string, object>();
+        protected AstExpressionBase(long id) 
+            : base(id) { }
     }
 }
