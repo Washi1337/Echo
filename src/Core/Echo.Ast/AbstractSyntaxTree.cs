@@ -15,6 +15,14 @@ namespace Echo.Ast
             : base(0) { }
 
         /// <summary>
+        /// IDK
+        /// </summary>
+        public IList<AbstractSyntaxTree> Nested
+        {
+            get;
+        } = new List<AbstractSyntaxTree>();
+
+        /// <summary>
         /// The tree's statements
         /// </summary>
         public IList<AstStatementBase> Statements
@@ -25,7 +33,11 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override IEnumerable<AstNodeBase> GetChildren()
         {
-            return Statements;
+            foreach (var stmt in Statements)
+                yield return stmt;
+            
+            foreach (var nest in Nested)
+                yield return nest;
         }
     }
 }
