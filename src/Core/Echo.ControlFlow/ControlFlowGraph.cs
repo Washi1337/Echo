@@ -97,7 +97,9 @@ namespace Echo.ControlFlow
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
 
         /// <inheritdoc />
-        IEnumerable<ISubGraph> ISubGraph.GetSubGraphs() => Regions;  
+        IEnumerable<ISubGraph> ISubGraph.GetSubGraphs() => Regions;
+
+        ControlFlowNode<TInstruction> IControlFlowRegion<TInstruction>.GetEntrypoint() => Entrypoint;
 
         /// <inheritdoc />
         IEnumerable<ControlFlowRegion<TInstruction>> IControlFlowRegion<TInstruction>.GetSubRegions() => Regions;

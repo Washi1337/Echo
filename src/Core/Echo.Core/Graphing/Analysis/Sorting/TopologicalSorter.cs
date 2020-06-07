@@ -83,7 +83,11 @@ namespace Echo.Core.Graphing.Analysis.Sorting
                     if (permanent.Contains(current.Node))
                         continue;
                     if (temporary.Contains(current.Node))
+                    {
+                        if (IgnoreCycles)
+                            continue;
                         throw new CycleDetectedException();
+                    }
 
                     temporary.Add(current.Node);
 
