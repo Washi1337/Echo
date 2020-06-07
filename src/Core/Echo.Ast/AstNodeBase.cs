@@ -114,9 +114,12 @@ namespace Echo.Ast
         private IEnumerable<AstNodeBase> GetAllChildren()
         {
             var children = new List<AstNodeBase>();
-            
+
             foreach (var child in GetChildren())
+            {
+                children.Add(child);
                 children.AddRange(child.GetAllChildren());
+            }
 
             return children;
         }
