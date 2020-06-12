@@ -11,11 +11,11 @@ namespace Echo.Ast
         /// <summary>
         /// Creates a new AST
         /// </summary>
-        public AbstractSyntaxTree()
-            : base(0) { }
+        public AbstractSyntaxTree(long id = 0)
+            : base(id) { }
 
         /// <summary>
-        /// IDK
+        /// Nested trees
         /// </summary>
         public IList<AbstractSyntaxTree> Nested
         {
