@@ -9,6 +9,9 @@ using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 {
+    /// <summary>
+    /// Provides a handler for instructions with the <see cref="CilOpCodes.Stfld"/> operation code.
+    /// </summary>
     public class StFld : FallThroughOpCodeHandler
     {
         /// <inheritdoc />

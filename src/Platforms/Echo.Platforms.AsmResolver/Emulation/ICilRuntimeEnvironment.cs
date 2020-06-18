@@ -58,9 +58,18 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets the object responsible for making calls to procedures outside of the method body.
         /// </summary>
-        public IMethodInvoker MethodInvoker
+        IMethodInvoker MethodInvoker
         {
             get;
         }
+
+        /// <summary>
+        /// Gets the object responsible for maintaining static fields within the virtual machine.
+        /// </summary>
+        StaticFieldFactory StaticFieldFactory
+        {
+            get;
+        }
+        
     }
 }

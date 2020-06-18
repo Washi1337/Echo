@@ -50,7 +50,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
             set;
         }
 
-        IMethodInvoker ICilRuntimeEnvironment.MethodInvoker => this.MethodInvoker;
+        public StaticFieldFactory StaticFieldFactory
+        {
+            get;
+        } = new StaticFieldFactory();
+
+        IMethodInvoker ICilRuntimeEnvironment.MethodInvoker => MethodInvoker;
 
         public void Dispose()
         {
