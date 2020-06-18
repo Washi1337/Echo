@@ -129,6 +129,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public StaticFieldFactory StaticFieldFactory
         {
             get;
+            set;
         }
 
         /// <summary>
