@@ -1,7 +1,7 @@
 using System;
 using AsmResolver.DotNet;
+using Echo.Concrete.Values;
 using Echo.Core.Code;
-using Echo.Platforms.AsmResolver.Emulation.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
@@ -38,7 +38,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets or sets the value assigned to the static field.
         /// </summary>
-        public IDotNetValue Value
+        public IConcreteValue Value
         {
             get;
             set;
