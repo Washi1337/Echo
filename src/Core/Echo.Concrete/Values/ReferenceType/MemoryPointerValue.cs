@@ -232,6 +232,12 @@ namespace Echo.Concrete.Values.ReferenceType
         }
 
         /// <inheritdoc />
+        public IPointerValue Add(int offset) => new RelativePointerValue(this, offset);
+
+        /// <inheritdoc />
+        public IPointerValue Subtract(int offset) => new RelativePointerValue(this, -offset);
+
+        /// <inheritdoc />
         public IValue Copy() => new MemoryPointerValue(_memory, _knownBitMask, Is32Bit);
 
         [MethodImpl(MethodImplOptions.NoInlining)]

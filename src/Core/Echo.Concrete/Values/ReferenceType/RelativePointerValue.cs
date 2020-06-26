@@ -62,9 +62,6 @@ namespace Echo.Concrete.Values.ReferenceType
         public bool? IsNegative => false;
 
         /// <inheritdoc />
-        public IValue Copy() => new RelativePointerValue(_basePointer, _baseOffset);
-
-        /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer) => 
             _basePointer.ReadBytes(_baseOffset + offset, memoryBuffer);
 
@@ -121,5 +118,16 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <inheritdoc />
         public void WriteFloat64(int offset, Float64Value value) => 
             _basePointer.WriteFloat64(_baseOffset + offset, value);
+
+        /// <inheritdoc />
+        public IPointerValue Add(int offset) =>
+            new RelativePointerValue(_basePointer, _baseOffset + offset);
+
+        /// <inheritdoc />
+        public IPointerValue Subtract(int offset) => 
+            new RelativePointerValue(_basePointer, _baseOffset - offset);
+
+        /// <inheritdoc />
+        public IValue Copy() => new RelativePointerValue(_basePointer, _baseOffset);
     }
 }
