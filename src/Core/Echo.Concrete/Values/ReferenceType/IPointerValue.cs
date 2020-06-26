@@ -9,6 +9,14 @@ namespace Echo.Concrete.Values.ReferenceType
     public interface IPointerValue : IConcreteValue
     {
         /// <summary>
+        /// Gets a value indicating whether the pointer is 32 bit or 64 bit wide.
+        /// </summary>
+        bool Is32Bit
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Reads raw contents of the memory block. 
         /// </summary>
         /// <param name="offset">The offset to start reading.</param>
@@ -91,7 +99,7 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <exception cref="ArgumentOutOfRangeException">
         /// Occurs when the offset does not fall within the memory range.
         /// </exception>
-        unsafe Float32Value ReadFloat32(int offset);
+        Float32Value ReadFloat32(int offset);
 
         /// <summary>
         /// Reads a single 64 bit floating point number at the provided offset.
@@ -101,7 +109,7 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <exception cref="ArgumentOutOfRangeException">
         /// Occurs when the offset does not fall within the memory range.
         /// </exception>
-        unsafe Float64Value ReadFloat64(int offset);
+        Float64Value ReadFloat64(int offset);
 
         /// <summary>
         /// Writes a single 8 bit integer at the provided offset.
@@ -151,7 +159,7 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <exception cref="ArgumentOutOfRangeException">
         /// Occurs when the offset does not fall within the memory range.
         /// </exception>
-        unsafe void WriteFloat32(int offset, Float32Value value);
+        void WriteFloat32(int offset, Float32Value value);
 
         /// <summary>
         /// Writes a single 64 bit floating point number at the provided offset.
@@ -161,6 +169,6 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <exception cref="ArgumentOutOfRangeException">
         /// Occurs when the offset does not fall within the memory range.
         /// </exception>
-        unsafe void WriteFloat64(int offset, Float64Value value);
+        void WriteFloat64(int offset, Float64Value value);
     }
 }

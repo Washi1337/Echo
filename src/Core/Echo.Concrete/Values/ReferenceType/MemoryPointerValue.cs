@@ -27,9 +27,7 @@ namespace Echo.Concrete.Values.ReferenceType
             Is32Bit = is32Bit;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the pointer is 32 bit or 64 bit wide.
-        /// </summary>
+        /// <inheritdoc />
         public bool Is32Bit
         {
             get;
