@@ -241,11 +241,11 @@ namespace Echo.Concrete.Values.ReferenceType
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void AssertOffsetValidity(int offset, int size)
         {
-            if (OffsetIsInRange(offset, size))
+            if (!OffsetIsInRange(offset, size))
                 throw new ArgumentOutOfRangeException(nameof(offset));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool OffsetIsInRange(int offset, int size) => offset < 0 || offset >= _memory.Length - size + 1;
+        private bool OffsetIsInRange(int offset, int size) => offset >= 0 && offset < _memory.Length - size + 1;
     }
 }
