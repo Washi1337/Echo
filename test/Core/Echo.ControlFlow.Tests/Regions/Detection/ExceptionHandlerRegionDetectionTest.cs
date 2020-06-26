@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Regions.Detection;
-using Echo.ControlFlow.Serialization.Dot;
 using Echo.Core.Code;
-using Echo.Core.Graphing.Serialization.Dot;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
