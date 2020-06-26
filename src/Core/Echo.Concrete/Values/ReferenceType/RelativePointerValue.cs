@@ -10,6 +10,15 @@ namespace Echo.Concrete.Values.ReferenceType
     public class RelativePointerValue : IPointerValue
     {
         /// <summary>
+        /// Creates a new null pointer value.
+        /// </summary>
+        /// <param name="isKnown">Indicates whether the pointer is known.</param>
+        public RelativePointerValue(bool isKnown)
+        {
+            IsKnown = isKnown;
+        }
+        
+        /// <summary>
         /// Creates a new relative pointer value.
         /// </summary>
         /// <param name="basePointer">The base memory pointer.</param>
@@ -27,6 +36,7 @@ namespace Echo.Concrete.Values.ReferenceType
         {
             BasePointer = basePointer;
             CurrentOffset = offset;
+            IsKnown = basePointer.IsKnown;
         }
 
         /// <summary>
@@ -52,7 +62,10 @@ namespace Echo.Concrete.Values.ReferenceType
         public bool Is32Bit => BasePointer.Is32Bit;
 
         /// <inheritdoc />
-        public bool IsKnown => true;
+        public bool IsKnown
+        {
+            get;
+        };
 
         /// <inheritdoc />
         /// <remarks>

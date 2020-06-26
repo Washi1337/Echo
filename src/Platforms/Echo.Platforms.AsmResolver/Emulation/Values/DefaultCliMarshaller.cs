@@ -53,6 +53,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 ElementType.R8 => Float64ToR8((Float64Value) value),
                 ElementType.I => IntToI(value as IntegerValue),
                 ElementType.U => IntToI(value as IntegerValue),
+                ElementType.Ptr => PtrToPointerValue(value as IPointerValue),
                 _ => ObjectToO(value)
             };
         }
@@ -180,6 +181,26 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
             return new OValue(referencedObject, value.IsKnown, Is32Bit);
         }
+
+        /// <summary>
+        /// Converts the provided object value to a type O object reference.
+        /// </summary>
+        /// <param name="value">The value to marshal.</param>
+        /// <returns>The marshalled value.</returns>
+        protected virtual PointerValue PtrToPointerValue(IConcreteValue value)
+        {
+            switch (value)
+            {
+                case RelativePointerValue relativePointerValue:
+                    return new PointerValue(relativePointerValue.BasePointer, relativePointerValue.CurrentOffset);
+                
+                case IPointerValue pointerValue:
+                    return new PointerValue(pointerValue);
+
+                default:
+                    return new PointerValue(false);
+            }
+        }
         
         /// <inheritdoc />
         public IConcreteValue ToCtsValue(ICliValue value, TypeSignature targetType)
@@ -248,6 +269,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 {
                     var oValue = value.InterpretAsRef(Is32Bit);
                     return new ObjectReference(oValue.ReferencedObject, oValue.IsKnown, Is32Bit);
+                }
+
+                case ElementType.Ptr:
+                {
+                    var ptrValue = (PointerValue) value;
+                    return new RelativePointerValue(ptrValue.BasePointer, ptrValue.CurrentOffset);
                 }
                 
                 default:

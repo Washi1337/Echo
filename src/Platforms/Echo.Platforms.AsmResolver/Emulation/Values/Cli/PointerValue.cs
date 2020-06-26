@@ -9,6 +9,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
     public class PointerValue : RelativePointerValue, ICliValue
     {
         /// <summary>
+        /// Creates a new null pointer value.
+        /// </summary>
+        /// <param name="isKnown">Indicates whether the pointer is known.</param>
+        public PointerValue(bool isKnown)
+            : base(isKnown)
+        {
+        }
+
+        /// <summary>
         /// Creates a new pointer value.
         /// </summary>
         /// <param name="basePointer">The base pointer value.</param>
