@@ -102,14 +102,16 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <inheritdoc />
         public Integer8Value ReadInteger8(int offset)
         {
-            AssertOffsetValidity(offset, sizeof(byte));
-            return new Integer8Value(_memory.Span[offset], _knownBitMask.Span[offset]);
+            return OffsetIsInRange(offset, sizeof(byte))
+                ? new Integer8Value(_memory.Span[offset], _knownBitMask.Span[offset])
+                : new Integer8Value(0, 0);
         }
 
         /// <inheritdoc />
         public Integer16Value ReadInteger16(int offset)
         {
-            AssertOffsetValidity(offset, sizeof(ushort));
+            if (!OffsetIsInRange(offset, sizeof(ushort)))
+                return new Integer16Value(0, 0);
             
             ReadOnlySpan<byte> memorySpan = _memory.Span.Slice(offset, 2);
             ReadOnlySpan<byte> knownBitsSpan = _knownBitMask.Span.Slice(offset, 2);
@@ -122,7 +124,8 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <inheritdoc />
         public Integer32Value ReadInteger32(int offset)
         {
-            AssertOffsetValidity(offset, sizeof(uint));
+            if (!OffsetIsInRange(offset, sizeof(uint)))
+                return new Integer32Value(0, 0);
             
             ReadOnlySpan<byte> memorySpan = _memory.Span.Slice(offset, 4);
             ReadOnlySpan<byte> knownBitsSpan =  _knownBitMask.Span.Slice(offset, 4);
@@ -135,7 +138,8 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <inheritdoc />
         public Integer64Value ReadInteger64(int offset)
         {
-            AssertOffsetValidity(offset, sizeof(ulong));
+            if (!OffsetIsInRange(offset, sizeof(ulong)))
+                return new Integer64Value(0, 0);
             
             ReadOnlySpan<byte> memorySpan = _memory.Span.Slice(offset, 8);
             ReadOnlySpan<byte> knownBitsSpan =  _knownBitMask.Span.Slice(offset, 8);
@@ -232,19 +236,16 @@ namespace Echo.Concrete.Values.ReferenceType
         }
 
         /// <inheritdoc />
-        public IPointerValue Add(int offset) => new RelativePointerValue(this, offset);
-
-        /// <inheritdoc />
-        public IPointerValue Subtract(int offset) => new RelativePointerValue(this, -offset);
-
-        /// <inheritdoc />
         public IValue Copy() => new MemoryPointerValue(_memory, _knownBitMask, Is32Bit);
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void AssertOffsetValidity(int offset, int size)
         {
-            if (offset < 0 || offset >= _memory.Length - size + 1)
+            if (OffsetIsInRange(offset, size))
                 throw new ArgumentOutOfRangeException(nameof(offset));
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool OffsetIsInRange(int offset, int size) => offset < 0 || offset >= _memory.Length - size + 1;
     }
 }

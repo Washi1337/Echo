@@ -170,10 +170,5 @@ namespace Echo.Concrete.Values.ReferenceType
         /// Occurs when the offset does not fall within the memory range.
         /// </exception>
         void WriteFloat64(int offset, Float64Value value);
-
-        
-        IPointerValue Add(int offset);
-
-        IPointerValue Subtract(int offset);
     }
 }

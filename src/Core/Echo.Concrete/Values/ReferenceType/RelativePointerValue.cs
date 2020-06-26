@@ -9,9 +9,6 @@ namespace Echo.Concrete.Values.ReferenceType
     /// </summary>
     public class RelativePointerValue : IPointerValue
     {
-        private readonly IPointerValue _basePointer;
-        private readonly int _baseOffset;
-
         /// <summary>
         /// Creates a new relative pointer value.
         /// </summary>
@@ -25,17 +22,34 @@ namespace Echo.Concrete.Values.ReferenceType
         /// Creates a new relative pointer value.
         /// </summary>
         /// <param name="basePointer">The base memory pointer.</param>
-        /// <param name="baseOffset">The base offset.</param>
-        public RelativePointerValue(IPointerValue basePointer, int baseOffset)
+        /// <param name="offset">The offset relative to the base po[inter.</param>
+        public RelativePointerValue(IPointerValue basePointer, int offset)
         {
-            _basePointer = basePointer ?? throw new ArgumentNullException(nameof(basePointer));
-            _baseOffset = baseOffset;
+            BasePointer = basePointer;
+            CurrentOffset = offset;
+        }
+
+        /// <summary>
+        /// Gets the base memory pointer. 
+        /// </summary>
+        public IPointerValue BasePointer
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets or sets the current offset relative to the base pointer.
+        /// </summary>
+        public int CurrentOffset
+        {
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets a value indicating whether the pointer is 32 bit or 64 bit wide.
         /// </summary>
-        public bool Is32Bit => _basePointer.Is32Bit;
+        public bool Is32Bit => BasePointer.Is32Bit;
 
         /// <inheritdoc />
         public bool IsKnown => true;
@@ -50,10 +64,10 @@ namespace Echo.Concrete.Values.ReferenceType
         public bool IsValueType => false;
 
         /// <inheritdoc />
-        public bool? IsZero => false;
+        public bool? IsZero => BasePointer is null;
 
         /// <inheritdoc />
-        public bool? IsNonZero => true;
+        public bool? IsNonZero => !IsZero;
 
         /// <inheritdoc />
         public bool? IsPositive => true;
@@ -63,71 +77,67 @@ namespace Echo.Concrete.Values.ReferenceType
 
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer) => 
-            _basePointer.ReadBytes(_baseOffset + offset, memoryBuffer);
+            BasePointer.ReadBytes(CurrentOffset + offset, memoryBuffer);
 
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer, Span<byte> knownBitmaskBuffer) => 
-            _basePointer.ReadBytes(_baseOffset + offset, memoryBuffer, knownBitmaskBuffer);
+            BasePointer.ReadBytes(CurrentOffset + offset, memoryBuffer, knownBitmaskBuffer);
 
         /// <inheritdoc />
         public void WriteBytes(int offset, ReadOnlySpan<byte> data) => 
-            _basePointer.WriteBytes(_baseOffset + offset, data);
+            BasePointer.WriteBytes(CurrentOffset + offset, data);
 
         /// <inheritdoc />
         public void WriteBytes(int offset, ReadOnlySpan<byte> data, ReadOnlySpan<byte> knownBitMask) => 
-            _basePointer.WriteBytes(_baseOffset + offset, data, knownBitMask);
+            BasePointer.WriteBytes(CurrentOffset + offset, data, knownBitMask);
 
         /// <inheritdoc />
-        public Integer8Value ReadInteger8(int offset) => _basePointer.ReadInteger8(_baseOffset + offset);
+        public Integer8Value ReadInteger8(int offset) => BasePointer.ReadInteger8(CurrentOffset + offset);
 
         /// <inheritdoc />
-        public Integer16Value ReadInteger16(int offset) => _basePointer.ReadInteger16(_baseOffset + offset);
+        public Integer16Value ReadInteger16(int offset) => BasePointer.ReadInteger16(CurrentOffset + offset);
 
         /// <inheritdoc />
-        public Integer32Value ReadInteger32(int offset) => _basePointer.ReadInteger32(_baseOffset + offset);
+        public Integer32Value ReadInteger32(int offset) => BasePointer.ReadInteger32(CurrentOffset + offset);
 
         /// <inheritdoc />
-        public Integer64Value ReadInteger64(int offset) => _basePointer.ReadInteger64(_baseOffset + offset);
+        public Integer64Value ReadInteger64(int offset) => BasePointer.ReadInteger64(CurrentOffset + offset);
 
         /// <inheritdoc />
-        public Float32Value ReadFloat32(int offset) => _basePointer.ReadFloat32(_baseOffset + offset);
+        public Float32Value ReadFloat32(int offset) => BasePointer.ReadFloat32(CurrentOffset + offset);
 
         /// <inheritdoc />
-        public Float64Value ReadFloat64(int offset) => _basePointer.ReadFloat64(_baseOffset + offset);
+        public Float64Value ReadFloat64(int offset) => BasePointer.ReadFloat64(CurrentOffset + offset);
 
         /// <inheritdoc />
         public void WriteInteger8(int offset, Integer8Value value) => 
-            _basePointer.WriteInteger8(_baseOffset + offset, value);
+            BasePointer.WriteInteger8(CurrentOffset + offset, value);
 
         /// <inheritdoc />
         public void WriteInteger16(int offset, Integer16Value value) => 
-            _basePointer.WriteInteger16(_baseOffset + offset, value);
+            BasePointer.WriteInteger16(CurrentOffset + offset, value);
 
         /// <inheritdoc />
         public void WriteInteger32(int offset, Integer32Value value) => 
-            _basePointer.WriteInteger32(_baseOffset + offset, value);
+            BasePointer.WriteInteger32(CurrentOffset + offset, value);
 
         /// <inheritdoc />
         public void WriteInteger64(int offset, Integer64Value value) => 
-            _basePointer.WriteInteger64(_baseOffset + offset, value);
+            BasePointer.WriteInteger64(CurrentOffset + offset, value);
 
         /// <inheritdoc />
         public void WriteFloat32(int offset, Float32Value value) => 
-            _basePointer.WriteFloat32(_baseOffset + offset, value);
+            BasePointer.WriteFloat32(CurrentOffset + offset, value);
 
         /// <inheritdoc />
         public void WriteFloat64(int offset, Float64Value value) => 
-            _basePointer.WriteFloat64(_baseOffset + offset, value);
+            BasePointer.WriteFloat64(CurrentOffset + offset, value);
+
+        public void Add(int offset) => CurrentOffset += offset;
+
+        public void Subtract(int offset) => CurrentOffset -= offset;
 
         /// <inheritdoc />
-        public IPointerValue Add(int offset) =>
-            new RelativePointerValue(_basePointer, _baseOffset + offset);
-
-        /// <inheritdoc />
-        public IPointerValue Subtract(int offset) => 
-            new RelativePointerValue(_basePointer, _baseOffset - offset);
-
-        /// <inheritdoc />
-        public IValue Copy() => new RelativePointerValue(_basePointer, _baseOffset);
+        public IValue Copy() => new RelativePointerValue(BasePointer, CurrentOffset);
     }
 }
