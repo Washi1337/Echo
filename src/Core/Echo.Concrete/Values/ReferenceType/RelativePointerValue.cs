@@ -65,7 +65,7 @@ namespace Echo.Concrete.Values.ReferenceType
         public bool IsKnown
         {
             get;
-        };
+        }
 
         /// <inheritdoc />
         /// <remarks>

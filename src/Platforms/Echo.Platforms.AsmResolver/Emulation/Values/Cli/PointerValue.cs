@@ -76,34 +76,74 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public OValue InterpretAsRef(bool is32Bit) => new OValue(null, false, is32Bit);
 
         /// <inheritdoc />
-        public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed) => InterpretAsI(is32Bit);
+        public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsI(is32Bit);
+        }
 
         /// <inheritdoc />
-        public NativeIntegerValue ConvertToU(bool is32Bit, bool unsigned, out bool overflowed) => InterpretAsU(is32Bit);
+        public NativeIntegerValue ConvertToU(bool is32Bit, bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsU(is32Bit);
+        }
 
         /// <inheritdoc />
-        public I4Value ConvertToI1(bool unsigned, out bool overflowed) => InterpretAsI1();
+        public I4Value ConvertToI1(bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsI1();
+        }
 
         /// <inheritdoc />
-        public I4Value ConvertToU1(bool unsigned, out bool overflowed) => InterpretAsU1();
+        public I4Value ConvertToU1(bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsU1();
+        }
 
         /// <inheritdoc />
-        public I4Value ConvertToI2(bool unsigned, out bool overflowed) => InterpretAsI2();
+        public I4Value ConvertToI2(bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsI2();
+        }
 
         /// <inheritdoc />
-        public I4Value ConvertToU2(bool unsigned, out bool overflowed) => InterpretAsU2();
+        public I4Value ConvertToU2(bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsU2();
+        }
 
         /// <inheritdoc />
-        public I4Value ConvertToI4(bool unsigned, out bool overflowed) => InterpretAsI4();
+        public I4Value ConvertToI4(bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsI4();
+        }
 
         /// <inheritdoc />
-        public I4Value ConvertToU4(bool unsigned, out bool overflowed) => InterpretAsU4();
+        public I4Value ConvertToU4(bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsU4();
+        }
 
         /// <inheritdoc />
-        public I8Value ConvertToI8(bool unsigned, out bool overflowed) => InterpretAsI8();
+        public I8Value ConvertToI8(bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsI8();
+        }
 
         /// <inheritdoc />
-        public I8Value ConvertToU8(bool unsigned, out bool overflowed) => InterpretAsI8();
+        public I8Value ConvertToU8(bool unsigned, out bool overflowed)
+        {
+            overflowed = false;
+            return InterpretAsI8();
+        }
 
         /// <inheritdoc />
         public FValue ConvertToR4() => InterpretAsR4();
