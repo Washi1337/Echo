@@ -1,17 +1,11 @@
 using System;
 using AsmResolver.DotNet.Signatures.Types;
-using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
-using Echo.Core.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
-    /// <summary>
-    /// Represents an array that contains values that are inheriting from <see cref="ValueType"/>, and are passed on by
-    /// value rather than by reference.
-    /// </summary>
-    public class ValueTypeArrayValue : IDotNetArrayValue
+    public partial class LowLevelObjectValue : IDotNetArrayValue
     {
         // -------------------------
         // Implementation rationale
@@ -46,65 +40,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         // method IsInRange next to AssertIndexValidity to make sure that even if the index is technically valid,
         // the memory address is also valid, and otherwise return 0.
         
-        /// <summary>
-        /// The pointer to the raw data of the array.
-        /// </summary>
-        private readonly MemoryPointerValue _contents;
-
-        /// <summary>
-        /// Creates a new value type array. 
-        /// </summary>
-        /// <param name="elementType">The element type of the array.</param>
-        /// <param name="contents">The raw contents of the array.</param>
-        public ValueTypeArrayValue(TypeSignature elementType, MemoryPointerValue contents)
-        {
-            Type = new SzArrayTypeSignature(elementType ?? throw new ArgumentNullException(nameof(elementType)));
-            _contents = contents ?? throw new ArgumentNullException(nameof(contents));
-            Length = _contents.Length / elementType.GetSize(contents.Is32Bit);
-        }
-
-        /// <summary>
-        /// Gets the array type.
-        /// </summary>
-        public SzArrayTypeSignature Type
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        TypeSignature IDotNetValue.Type => Type;
-
-        private CorLibTypeFactory CorLibTypeFactory => Type.Module.CorLibTypeFactory;
-
         /// <inheritdoc />
         public int Length
         {
-            get;
+            get
+            {
+                var elementType = Type is SzArrayTypeSignature szArrayType
+                    ? szArrayType.BaseType
+                    : Type.Module.CorLibTypeFactory.Byte;
+                return _contents.Length / elementType.GetSize(_contents.Is32Bit);
+            }
         }
-
-        /// <inheritdoc />
-        public bool IsKnown => true;
-
-        /// <inheritdoc />
-        public int Size => _contents.Size;
-
-        /// <inheritdoc />
-        public IValue Copy() => new ValueTypeArrayValue(Type.BaseType, _contents);
-
-        /// <inheritdoc />
-        public bool IsValueType => false;
-
-        /// <inheritdoc />
-        public bool? IsZero => false;
-
-        /// <inheritdoc />
-        public bool? IsNonZero => true;
-
-        /// <inheritdoc />
-        public bool? IsPositive => true;
-
-        /// <inheritdoc />
-        public bool? IsNegative => false;
 
         private void AssertIndexValidity(int index)
         {
@@ -112,10 +58,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 throw new IndexOutOfRangeException();
         }
 
-        private bool IsInRange(int index, int elementSize)
-        {
-            return index * elementSize < _contents.Length;
-        }
+        private bool OffsetIsInRange(int index, int elementSize) => index * elementSize < _contents.Length;
         
         /// <inheritdoc />
         public NativeIntegerValue LoadElementI(int index, ICliMarshaller marshaller)
@@ -125,13 +68,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             IntegerValue rawValue;
             if (_contents.Is32Bit)
             {
-                rawValue = IsInRange(index, sizeof(uint))
+                rawValue = OffsetIsInRange(index, sizeof(uint))
                     ? _contents.ReadInteger32(index * sizeof(uint))
                     : new Integer32Value(0);
             }
             else
             {
-                rawValue = IsInRange(index, sizeof(ulong))
+                rawValue = OffsetIsInRange(index, sizeof(ulong))
                     ? _contents.ReadInteger64(index * sizeof(ulong))
                     : new Integer64Value(0);
             }
@@ -144,7 +87,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            var rawValue = IsInRange(index, sizeof(sbyte))
+            var rawValue = OffsetIsInRange(index, sizeof(sbyte))
                 ? _contents.ReadInteger8(index * sizeof(sbyte))
                 : new Integer8Value(0);
             
@@ -156,7 +99,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            var rawValue = IsInRange(index, sizeof(short))
+            var rawValue = OffsetIsInRange(index, sizeof(short))
                 ? _contents.ReadInteger16(index * sizeof(short))
                 : new Integer16Value(0);
             
@@ -168,7 +111,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            var rawValue = IsInRange(index, sizeof(int))
+            var rawValue = OffsetIsInRange(index, sizeof(int))
                 ? _contents.ReadInteger32(index * sizeof(int))
                 : new Integer32Value(0);
             
@@ -180,7 +123,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
             
-            var rawValue = IsInRange(index, sizeof(long))
+            var rawValue = OffsetIsInRange(index, sizeof(long))
                 ? _contents.ReadInteger64(index * sizeof(long))
                 : new Integer64Value(0);
             
@@ -192,7 +135,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
             
-            var rawValue = IsInRange(index, sizeof(byte))
+            var rawValue = OffsetIsInRange(index, sizeof(byte))
                 ? _contents.ReadInteger8(index * sizeof(byte))
                 : new Integer8Value(0);
             
@@ -204,7 +147,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
             
-            var rawValue = IsInRange(index, sizeof(ushort))
+            var rawValue = OffsetIsInRange(index, sizeof(ushort))
                 ? _contents.ReadInteger16(index * sizeof(ushort))
                 : new Integer16Value(0);
             
@@ -216,7 +159,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
             
-            var rawValue = IsInRange(index, sizeof(uint))
+            var rawValue = OffsetIsInRange(index, sizeof(uint))
                 ? _contents.ReadInteger32(index * sizeof(uint))
                 : new Integer32Value(0);
             
@@ -228,7 +171,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
             
-            var rawValue = IsInRange(index, sizeof(float))
+            var rawValue = OffsetIsInRange(index, sizeof(float))
                 ? _contents.ReadFloat32(index * sizeof(float))
                 : new Float32Value(0);
             
@@ -240,7 +183,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
             
-            var rawValue = IsInRange(index, sizeof(double))
+            var rawValue = OffsetIsInRange(index, sizeof(double))
                 ? _contents.ReadFloat64(index * sizeof(double))
                 : new Float64Value(0);
             
@@ -358,7 +301,5 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 _contents.WriteInteger64(index * sizeof(uint), new Integer64Value(0, 0));
         }
 
-        /// <inheritdoc />
-        public override string ToString() => $"{Type.BaseType.FullName}[{Length}]";
     }
 }

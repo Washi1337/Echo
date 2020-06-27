@@ -38,8 +38,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var field = simpleClassType.Fields.First(f => f.Name == fieldName);
 
             // Create new virtual instance and push on stack. 
-            var value = new CompoundObjectValue(simpleClassType.ToTypeSignature(), environment.Is32Bit);
-            value[field] = fieldValue;
+            var value = new HighLevelObjectValue(simpleClassType.ToTypeSignature(), environment.Is32Bit);
+            value.SetFieldValue(field, fieldValue);
             stack.Push(environment.CliMarshaller.ToCliValue(value, simpleClassType.ToTypeSignature()));
 
             // Test ldfld.
@@ -76,7 +76,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void ReadObjectReferenceFieldWithNonNullValue()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldContents = new CompoundObjectValue(LookupTestType(typeof(SimpleClass)).ToTypeSignature(), environment.Is32Bit);
+            var fieldContents = new HighLevelObjectValue(LookupTestType(typeof(SimpleClass)).ToTypeSignature(), environment.Is32Bit);
             var fieldValue = new ObjectReference(fieldContents, environment.Is32Bit);
             Verify(nameof(SimpleClass.SimpleClassField), fieldValue, new OValue(fieldValue.ReferencedObject, true, environment.Is32Bit));
         }
