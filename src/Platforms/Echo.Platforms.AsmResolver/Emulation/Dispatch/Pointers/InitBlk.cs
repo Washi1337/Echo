@@ -25,9 +25,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             var stack = context.ProgramState.Stack;
 
             // Pop arguments.
-            var address = (ICliValue) stack.Pop();
-            var initValue = (ICliValue) stack.Pop();
             var lengthValue = (ICliValue) stack.Pop();
+            var initValue = (ICliValue) stack.Pop();
+            var address = (ICliValue) stack.Pop();
 
             // Interpret arguments.
             if (!(address is IPointerValue pointerValue))
@@ -44,7 +44,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             data.Fill((byte) (byteInitValue.U32 & 0xFF));
             
             Span<byte> bitmask = stackalloc byte[length];
-            data.Fill((byte) (byteInitValue.Mask & 0xFF));
+            bitmask.Fill((byte) (byteInitValue.Mask & 0xFF));
 
             // Write data.
             pointerValue.WriteBytes(0, data, bitmask);
