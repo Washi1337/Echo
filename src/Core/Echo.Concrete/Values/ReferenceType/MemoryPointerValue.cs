@@ -65,15 +65,15 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer)
         {
-            var slicedMemory = _memory.Span.Slice(offset);
+            var slicedMemory = _memory.Span.Slice(offset, memoryBuffer.Length);
             slicedMemory.CopyTo(memoryBuffer);
         }
 
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer, Span<byte> knownBitmaskBuffer)
         {
-            var slicedMemory = _memory.Span.Slice(offset);
-            var slicedBitMask = _knownBitMask.Span.Slice(offset);
+            var slicedMemory = _memory.Span.Slice(offset, memoryBuffer.Length);
+            var slicedBitMask = _knownBitMask.Span.Slice(offset, memoryBuffer.Length);
 
             slicedMemory.CopyTo(memoryBuffer);
             slicedBitMask.CopyTo(knownBitmaskBuffer);
@@ -92,8 +92,8 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <inheritdoc />
         public void WriteBytes(int offset, ReadOnlySpan<byte> data, ReadOnlySpan<byte> knownBitMask)
         {
-            var slicedMemory = _memory.Span.Slice(offset);
-            var slicedBitMask = _knownBitMask.Span.Slice(offset);
+            var slicedMemory = _memory.Span.Slice(offset, data.Length);
+            var slicedBitMask = _knownBitMask.Span.Slice(offset, data.Length);
             
             data.CopyTo(slicedMemory);
             knownBitMask.CopyTo(slicedBitMask);

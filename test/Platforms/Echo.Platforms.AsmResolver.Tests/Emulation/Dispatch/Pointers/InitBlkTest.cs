@@ -32,6 +32,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             
             Assert.True(result.IsSuccess);
             Assert.Equal(0x01010101_01010101ul, memory.ReadInteger64(0).U64);
+            Assert.Equal(0ul, memory.ReadInteger64(8).U64);
         }
 
         [Fact]
@@ -53,6 +54,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             Assert.Equal(
                 new Integer64Value("0011??000011??000011??000011??000011??000011??000011??000011??00"),
                 memory.ReadInteger64(0));
+            Assert.Equal(0ul, memory.ReadInteger64(8).U64);
         }
     }
 }
