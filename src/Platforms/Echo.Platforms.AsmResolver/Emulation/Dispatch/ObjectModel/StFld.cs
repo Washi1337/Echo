@@ -38,8 +38,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 case OValue { IsZero: true }:
                     return new DispatchResult(new NullReferenceException());
                 
-                case OValue { ReferencedObject: CompoundObjectValue compoundObject }:
-                    compoundObject[field] = environment.CliMarshaller.ToCtsValue(fieldValue, field.Signature.FieldType);
+                case OValue { ReferencedObject: HighLevelObjectValue compoundObject }:
+                    compoundObject.SetFieldValue(field,
+                        environment.CliMarshaller.ToCtsValue(fieldValue, field.Signature.FieldType));
                     break;
                 
                 default:

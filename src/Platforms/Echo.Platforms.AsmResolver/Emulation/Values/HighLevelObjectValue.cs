@@ -10,19 +10,19 @@ using Echo.Core.Values;
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
     /// <summary>
-    /// Represents an object that consists of a collection of fields.
+    /// Provides a high level implementation of an object that consists of a collection of fields.
     /// </summary>
     /// <remarks>
-    /// Instances of the <see cref="CompoundObjectValue"/> class are passed on by-value. They are used for representing
+    /// Instances of the <see cref="HighLevelObjectValue"/> class are passed on by-value. They are used for representing
     /// instances of value types, or the object referenced in an object reference.
     /// </remarks>
-    public class CompoundObjectValue : IDotNetValue
+    public class HighLevelObjectValue : IDotNetObjectValue
     {
-        private readonly IDictionary<FieldDefinition, IConcreteValue> _fieldValues =
-            new Dictionary<FieldDefinition, IConcreteValue>();
+        private readonly IDictionary<IFieldDescriptor, IConcreteValue> _fieldValues =
+            new Dictionary<IFieldDescriptor, IConcreteValue>();
         private readonly bool _is32Bit;
 
-        private CompoundObjectValue(TypeSignature objectType, IDictionary<FieldDefinition, IConcreteValue> values,
+        private HighLevelObjectValue(TypeSignature objectType, IDictionary<IFieldDescriptor, IConcreteValue> values,
             bool is32Bit)
         {
             _is32Bit = is32Bit;
@@ -37,7 +37,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <param name="objectType">The type of the object.</param>
         /// <param name="is32Bit">Indicates any pointer that is defined in this object is 32 or 64 bits wide.</param>
         /// <exception cref="NotSupportedException"></exception>
-        public CompoundObjectValue(TypeSignature objectType, bool is32Bit)
+        public HighLevelObjectValue(TypeSignature objectType, bool is32Bit)
         {
             _is32Bit = is32Bit;
             Type = objectType ?? throw new ArgumentNullException(nameof(objectType));
@@ -61,28 +61,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             get;
         }
-
-        /// <summary>
-        /// Gets or sets the value of a field stored in the object.
-        /// </summary>
-        /// <param name="field">The field.</param>
-        /// <exception cref="ArgumentException">Thrown when the field is not defined in this object.</exception>
-        public IConcreteValue this[FieldDefinition field]
-        {
-            get
-            {
-                if (!_fieldValues.TryGetValue(field, out var value))
-                    throw new ArgumentException($"Field {field} is not defined in this object.");
-                return value;
-            }
-            set
-            {
-                if (!_fieldValues.ContainsKey(field))
-                    throw new ArgumentException($"Field {field} is not defined in this object.");
-                _fieldValues[field] = value;
-            }
-        }
-
+        
         /// <inheritdoc />
         public bool IsKnown => true;
 
@@ -105,7 +84,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool? IsNegative => false;
 
         /// <inheritdoc />
-        public IValue Copy() => new CompoundObjectValue(Type, _fieldValues, _is32Bit);
+        public IValue Copy() => new HighLevelObjectValue(Type, _fieldValues, _is32Bit);
 
         private void InitializeFields()
         {
@@ -120,6 +99,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
                 type = type.BaseType?.Resolve();
             }
+        }
+
+        /// <inheritdoc />
+        public IConcreteValue GetFieldValue(IFieldDescriptor field)
+        {
+            if (!_fieldValues.TryGetValue(field, out var value))
+                throw new ArgumentException($"Field {field} is not defined in this object.");
+            return value;
+        }
+
+        /// <inheritdoc />
+        public void SetFieldValue(IFieldDescriptor field, IConcreteValue value)
+        {
+            if (!_fieldValues.ContainsKey(field))
+                throw new ArgumentException($"Field {field} is not defined in this object.");
+            _fieldValues[field] = value;
         }
 
         /// <inheritdoc />

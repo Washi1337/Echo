@@ -85,7 +85,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var objectType = _type.ToTypeSignature();
             var objectRef = new ObjectReference(
-                new CompoundObjectValue(objectType, environment.Is32Bit),
+                new HighLevelObjectValue(objectType, environment.Is32Bit),
                 environment.Is32Bit);
             
             var stack = ExecutionContext.ProgramState.Stack;

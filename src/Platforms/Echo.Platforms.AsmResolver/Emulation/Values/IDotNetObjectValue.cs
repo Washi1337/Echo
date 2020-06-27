@@ -4,7 +4,7 @@ using Echo.Concrete.Values;
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
     /// <summary>
-    /// Represents a compound object consisting of fields.
+    /// Represents an object consisting of a collection of fields.
     /// </summary>
     public interface IDotNetObjectValue : IDotNetValue
     {
