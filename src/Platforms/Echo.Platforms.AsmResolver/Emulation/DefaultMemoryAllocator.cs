@@ -52,7 +52,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             {
                 int size = length * elementType.GetSize(Is32Bit);
                 var memory = AllocateMemory(size, true);
-                return new LowLevelObjectValue(elementType, memory);
+                return new LowLevelObjectValue(new SzArrayTypeSignature(elementType), memory);
             }
             
             throw new NotSupportedException();
