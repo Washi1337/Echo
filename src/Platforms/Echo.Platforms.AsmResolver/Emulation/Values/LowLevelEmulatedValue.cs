@@ -11,7 +11,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// Represents an array that contains values that are inheriting from <see cref="ValueType"/>, and are passed on by
     /// value rather than by reference.
     /// </summary>
-    public class ValueTypeArrayValue : IDotNetArrayValue
+    public class LowLevelEmulatedValue : IDotNetArrayValue, IPointerValue
     {
         // -------------------------
         // Implementation rationale
@@ -56,7 +56,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// </summary>
         /// <param name="elementType">The element type of the array.</param>
         /// <param name="contents">The raw contents of the array.</param>
-        public ValueTypeArrayValue(TypeSignature elementType, MemoryPointerValue contents)
+        public LowLevelEmulatedValue(TypeSignature elementType, MemoryPointerValue contents)
         {
             Type = new SzArrayTypeSignature(elementType ?? throw new ArgumentNullException(nameof(elementType)));
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
@@ -84,12 +84,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
         /// <inheritdoc />
         public bool IsKnown => true;
-
+        
+        /// <inheritdoc />
+        public bool Is32Bit => _contents.Is32Bit;
+        
         /// <inheritdoc />
         public int Size => _contents.Size;
 
         /// <inheritdoc />
-        public IValue Copy() => new ValueTypeArrayValue(Type.BaseType, _contents);
+        public IValue Copy() => new LowLevelEmulatedValue(Type.BaseType, _contents);
 
         /// <inheritdoc />
         public bool IsValueType => false;
@@ -360,5 +363,43 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
         /// <inheritdoc />
         public override string ToString() => $"{Type.BaseType.FullName}[{Length}]";
+
+        #region IPointerValue members
+
+        void IPointerValue.ReadBytes(int offset, Span<byte> memoryBuffer) => _contents.ReadBytes(offset, memoryBuffer);
+
+        void IPointerValue.ReadBytes(int offset, Span<byte> memoryBuffer, Span<byte> knownBitmaskBuffer) => 
+            _contents.ReadBytes(offset, memoryBuffer, knownBitmaskBuffer);
+
+        void IPointerValue.WriteBytes(int offset, ReadOnlySpan<byte> data) => _contents.WriteBytes(offset, data);
+
+        void IPointerValue.WriteBytes(int offset, ReadOnlySpan<byte> data, ReadOnlySpan<byte> knownBitMask) => 
+            _contents.WriteBytes(offset, data, knownBitMask);
+
+        Integer8Value IPointerValue.ReadInteger8(int offset) => _contents.ReadInteger8(offset);
+
+        Integer16Value IPointerValue.ReadInteger16(int offset) => _contents.ReadInteger16(offset);
+
+        Integer32Value IPointerValue.ReadInteger32(int offset) => _contents.ReadInteger32(offset);
+
+        Integer64Value IPointerValue.ReadInteger64(int offset) => _contents.ReadInteger64(offset);
+
+        Float32Value IPointerValue.ReadFloat32(int offset) => _contents.ReadFloat32(offset);
+
+        Float64Value IPointerValue.ReadFloat64(int offset) => _contents.ReadFloat64(offset);
+
+        void IPointerValue.WriteInteger8(int offset, Integer8Value value) => _contents.WriteInteger8(offset, value);
+
+        void IPointerValue.WriteInteger16(int offset, Integer16Value value) => _contents.WriteInteger16(offset, value);
+
+        void IPointerValue.WriteInteger32(int offset, Integer32Value value) => _contents.WriteInteger32(offset, value);
+
+        void IPointerValue.WriteInteger64(int offset, Integer64Value value) => _contents.WriteInteger64(offset, value);
+
+        void IPointerValue.WriteFloat32(int offset, Float32Value value) => _contents.WriteFloat32(offset, value);
+
+        void IPointerValue.WriteFloat64(int offset, Float64Value value) => _contents.WriteFloat64(offset, value);
+        
+        #endregion
     }
 }
