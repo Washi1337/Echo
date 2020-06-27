@@ -11,7 +11,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// Represents an array that contains values that are inheriting from <see cref="ValueType"/>, and are passed on by
     /// value rather than by reference.
     /// </summary>
-    public class LowLevelEmulatedValue : IDotNetArrayValue, IPointerValue
+    public class LowLevelObjectValue : IDotNetArrayValue, IPointerValue
     {
         // -------------------------
         // Implementation rationale
@@ -56,7 +56,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// </summary>
         /// <param name="elementType">The element type of the array.</param>
         /// <param name="contents">The raw contents of the array.</param>
-        public LowLevelEmulatedValue(TypeSignature elementType, MemoryPointerValue contents)
+        public LowLevelObjectValue(TypeSignature elementType, MemoryPointerValue contents)
         {
             Type = new SzArrayTypeSignature(elementType ?? throw new ArgumentNullException(nameof(elementType)));
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
@@ -92,7 +92,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public int Size => _contents.Size;
 
         /// <inheritdoc />
-        public IValue Copy() => new LowLevelEmulatedValue(Type.BaseType, _contents);
+        public IValue Copy() => new LowLevelObjectValue(Type.BaseType, _contents);
 
         /// <inheritdoc />
         public bool IsValueType => false;
