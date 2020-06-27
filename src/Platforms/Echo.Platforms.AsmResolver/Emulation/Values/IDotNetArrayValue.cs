@@ -1,5 +1,3 @@
-using AsmResolver.DotNet.Signatures;
-using Echo.Concrete.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
