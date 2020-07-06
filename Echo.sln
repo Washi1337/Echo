@@ -44,6 +44,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Platforms", "Platforms", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Platforms.AsmResolver", "src\Platforms\Echo.Platforms.AsmResolver\Echo.Platforms.AsmResolver.csproj", "{5D96542A-444E-4F49-A790-8754BEA122E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Platforms.AsmResolver.Tests", "test\Platforms\Echo.Platforms.AsmResolver.Tests\Echo.Platforms.AsmResolver.Tests.csproj", "{A7CE0238-23EF-4432-9FC6-85D050BB7C85}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -106,6 +108,10 @@ Global
 		{5D96542A-444E-4F49-A790-8754BEA122E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D96542A-444E-4F49-A790-8754BEA122E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D96542A-444E-4F49-A790-8754BEA122E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7CE0238-23EF-4432-9FC6-85D050BB7C85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7CE0238-23EF-4432-9FC6-85D050BB7C85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7CE0238-23EF-4432-9FC6-85D050BB7C85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7CE0238-23EF-4432-9FC6-85D050BB7C85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7C8344E1-C809-412F-9284-13F98345DF27} = {8344861B-4B03-495F-A6B5-54BF6EF37B4C}
@@ -127,5 +133,6 @@ Global
 		{43D59EAE-F0F6-45EF-9607-66D1CAE2178C} = {CE367AD0-5215-4C57-9EE9-E195131D91DE}
 		{EA562E5E-02F2-42B8-9774-0EB6D2C7E2BE} = {7B5309CC-0188-475C-9449-074CAA925A4B}
 		{5D96542A-444E-4F49-A790-8754BEA122E0} = {EA562E5E-02F2-42B8-9774-0EB6D2C7E2BE}
+		{A7CE0238-23EF-4432-9FC6-85D050BB7C85} = {895F6ABB-3011-4F65-A814-046B5C1B2DD0}
 	EndGlobalSection
 EndGlobal

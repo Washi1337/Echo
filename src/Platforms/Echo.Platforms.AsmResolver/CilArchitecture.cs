@@ -82,6 +82,7 @@ namespace Echo.Platforms.AsmResolver
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public InstructionFlowControl GetFlowControl(CilInstruction instruction)
         {
             var result = InstructionFlowControl.Fallthrough;

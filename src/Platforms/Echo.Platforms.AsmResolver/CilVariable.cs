@@ -27,6 +27,6 @@ namespace Echo.Platforms.AsmResolver
         }
 
         /// <inheritdoc />
-        public string Name => "V_" + Variable.Index;
+        public string Name => $"V_{Variable.Index}";
     }
 }

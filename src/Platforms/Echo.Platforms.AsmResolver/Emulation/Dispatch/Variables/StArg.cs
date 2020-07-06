@@ -1,0 +1,46 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using AsmResolver.PE.DotNet.Cil;
+using Echo.Concrete.Emulation;
+using Echo.Concrete.Emulation.Dispatch;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
+
+namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
+{
+    /// <summary>
+    /// Provides a handler for instructions with a variation of the <see cref="CilOpCodes.Stloc"/> operation code.
+    /// </summary>
+    public class StArg : FallThroughOpCodeHandler
+    {
+        /// <inheritdoc />
+        public override IReadOnlyCollection<CilCode> SupportedOpCodes => new[]
+        {
+            CilCode.Starg, CilCode.Starg_S
+        };
+
+        /// <inheritdoc />
+        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        {
+            var environment = context.GetService<ICilRuntimeEnvironment>();
+            var variable = environment.Architecture
+                .GetWrittenVariables(instruction)
+                .First();
+            
+            switch (variable)
+            {
+                case CilParameter parameter:
+                    var value = environment.CliMarshaller.ToCtsValue(
+                        (ICliValue) context.ProgramState.Stack.Pop(),
+                        parameter.Parameter.ParameterType);
+
+                    context.ProgramState.Variables[variable] = value;
+                    return base.Execute(context, instruction);
+                
+                default:
+                    return DispatchResult.InvalidProgram();
+            }
+        }
+        
+    }
+}

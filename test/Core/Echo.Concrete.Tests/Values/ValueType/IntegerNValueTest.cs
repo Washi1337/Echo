@@ -49,7 +49,6 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [InlineData("0000000?", "0000000?", "0000000?")]
         [InlineData("0000000?", "0000?000", "00000000")]
         [InlineData("00000001", "0000000?", "0000000?")]
-        [InlineData("00000000", "0000000?", "00000000")]
         public void And(string a, string b, string expected)
         {
             var value1 = new IntegerNValue(a);
@@ -279,6 +278,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
         [InlineData("01010101", "01010101", true)]
         [InlineData("01010101", "10101010", false)]
         [InlineData("010?0101", "01010101", null)]
+        [InlineData("010?0111", "01010101", false)]
         public void IsEqualTo(string a, string b, bool? expected)
         {
             var value1 = new IntegerNValue(a);
@@ -288,35 +288,35 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00000000", "00000000", false)]
-        [InlineData("00000000", "00000001", true)]
-        [InlineData("00000001", "00010000", true)]
-        [InlineData("00000001", "00000000", false)]
-        [InlineData("0000000?", "00000000", false)]
-        [InlineData("0000001?", "000101??", true)]
-        [InlineData("000101??", "0000001?", false)]
-        [InlineData("0000000?", "000?0000", null)]
-        public void IsLessThan(string a, string b, bool? expected)
+        [InlineData("00000000", "00000000", false, false)]
+        [InlineData("00000000", "00000001", false, true)]
+        [InlineData("00000001", "00010000", false, true)]
+        [InlineData("00000001", "00000000", false, false)]
+        [InlineData("0000000?", "00000000", false, false)]
+        [InlineData("0000001?", "000101??", false, true)]
+        [InlineData("000101??", "0000001?", false, false)]
+        [InlineData("0000000?", "000?0000", false, null)]
+        public void IsLessThan(string a, string b, bool signed, bool? expected)
         {
             var value1 = new IntegerNValue(a);
             var value2 = new IntegerNValue(b);
-            
-            Assert.Equal(expected, value1.IsLessThan(value2));
+
+            Assert.Equal(expected, value1.IsLessThan(value2, signed));
         }
 
         [Theory]
-        [InlineData("00000000", "00000000", false)]
-        [InlineData("00000001", "00000000", true)]
-        [InlineData("00000001", "00010000", false)]
-        [InlineData("00010000", "00000001", true)]
-        [InlineData("0001000?", "00001000", true)]
-        [InlineData("000101??", "0000001?", true)]
-        public void IsGreaterThan(string a, string b, bool? expected)
+        [InlineData("00000000", "00000000", false, false)]
+        [InlineData("00000001", "00000000", false, true)]
+        [InlineData("00000001", "00010000", false, false)]
+        [InlineData("00010000", "00000001", false, true)]
+        [InlineData("0001000?", "00001000", false, true)]
+        [InlineData("000101??", "0000001?", false, true)]
+        public void IsGreaterThan(string a, string b, bool signed, bool? expected)
         {
             var value1 = new IntegerNValue(a);
             var value2 = new IntegerNValue(b);
-            
-            Assert.Equal(expected, value1.IsGreaterThan(value2));
+
+            Assert.Equal(expected, value1.IsGreaterThan(value2, signed));
         }
     }
 }
