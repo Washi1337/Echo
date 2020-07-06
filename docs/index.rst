@@ -36,3 +36,13 @@ Table of Contents:
    control-flow/exception-handlers
    control-flow/dominators
 
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Data flow
+   :name: sec-data-flow
+
+   data-flow/basics
+   data-flow/construction
+

@@ -9,9 +9,6 @@ A control flow graph (CFG) is a graph where each node corresponds to one basic b
 The figure below depicts a control flow graph of a very simple if-statement:
 
 .. image:: img/if.png
-    :width: 200px
-    :align: center
-    :height: 100px
     :alt: A control flow graph of an if statement.
 
 Control Flow Graph Models
