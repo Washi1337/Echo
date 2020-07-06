@@ -4,6 +4,7 @@ using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
 {
@@ -26,11 +27,20 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
                 .GetWrittenVariables(instruction)
                 .First();
             
-            if (!(variable is CilVariable))
-                return DispatchResult.InvalidProgram();
-            
-            context.ProgramState.Variables[variable] = context.ProgramState.Stack.Pop();
-            return base.Execute(context, instruction);
+            switch (variable)
+            {
+                case CilVariable cilVariable:
+                    var value = environment.CliMarshaller.ToCtsValue(
+                        (ICliValue) context.ProgramState.Stack.Pop(),
+                        cilVariable.Variable.VariableType);
+
+                    context.ProgramState.Variables[variable] = value;
+                    return base.Execute(context, instruction);
+                
+                default:
+                    return DispatchResult.InvalidProgram();
+            }
         }
+        
     }
 }

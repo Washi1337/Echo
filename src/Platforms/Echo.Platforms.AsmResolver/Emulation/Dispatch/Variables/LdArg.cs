@@ -25,12 +25,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             var variable = environment.Architecture
                 .GetReadVariables(instruction)
                 .First();
-            
-            if (!(variable is CilParameter))
-                return DispatchResult.InvalidProgram();
-            
-            context.ProgramState.Stack.Push(context.ProgramState.Variables[variable]);
-            return base.Execute(context, instruction);
+
+            switch (variable)
+            {
+                case CilParameter parameter:
+                    var value = environment.CliMarshaller.ToCliValue(
+                        context.ProgramState.Variables[variable],
+                        parameter.Parameter.ParameterType);
+                    
+                    context.ProgramState.Stack.Push(value);
+                    return base.Execute(context, instruction);
+                
+                default:
+                    return DispatchResult.InvalidProgram();
+            }
         }
+        
     }
 }
