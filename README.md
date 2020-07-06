@@ -23,7 +23,7 @@ Not all projects need to be built for a working binary to be produced. Only the 
 
 Documentation
 -------------
-Check out the [wiki](https://echo.readthedocs.org/) for guides and information on how to use the library!
+Check out the [wiki](???) for guides and information on how to use the library!
 
 Contributing
 ------------
