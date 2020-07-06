@@ -1,5 +1,5 @@
-AsmResolver
-===========
+Echo
+====
 
 This is the documentation of the Echo project. Echo is a generic, static analysis, symbolic execution and emulation framework, that aims to help out with binary code analysis for a variety of platforms.
 
