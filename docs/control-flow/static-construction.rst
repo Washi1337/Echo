@@ -61,9 +61,9 @@ Now we can build our control flow graph from our list. Given the entrypoint addr
 How it works
 ------------
 
-A static control flow graph builder performs a recursive traversal over all instructions, starting at a provided entrypoint, and adds for every branching opcode an edge in the control flow graph. By repeatedly using the provided `IStaticInstructionProvider` and the `IStaticSuccessorResolver` instances, it collects every instruction and determines the outgoing edges of each basic block.
+A static control flow graph builder performs a recursive traversal over all instructions, starting at a provided entrypoint, and adds for every branching opcode an edge in the control flow graph. By repeatedly using the provided ``IStaticInstructionProvider`` and the ``IStaticSuccessorResolver`` instances, it collects every instruction and determines the outgoing edges of each basic block.
 
-The reason why a separate interface `IStaticInstructionProvider<TInstruction>` is used over a normal `IEnumerable<TInstruction>`, is because a normal list might not always be the most efficient data structure to obtain instructions at very specific offsets. Furthermore, this also allows for disassemblers to implement this interface, and decode instructions on-the-fly while simultanuously building the control flow graph.
+The reason why a separate interface ``IStaticInstructionProvider<TInstruction>`` is used over a normal ``IEnumerable<TInstruction>``, is because a normal list might not always be the most efficient data structure to obtain instructions at very specific offsets. Furthermore, this also allows for disassemblers to implement this interface, and decode instructions on-the-fly while simultanuously building the control flow graph.
 
 This means it is a very efficient algorithm that scales linearly in the number of instructions to be processed, and it is usually enough for most simple instruction sets such as CIL from .NET or bytecode from the JVM, and could work for a lot of cases of native platforms such as x86.
 

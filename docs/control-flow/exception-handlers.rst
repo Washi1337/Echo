@@ -9,7 +9,9 @@ Exception Handler Models
 Exception handlers are modelled using the ``ExceptionHandlerRegion<TInstruction>`` class, which implements ``IControlFlowRegion<TInstruction>``, and can therefore be added to the `Regions` property of a control flow graph, or any other sub region inside the control flow graph.
 
 The ``ExceptionHandlerRegion<TInstruction>`` class consists of two parts:
+
 - The ``ProtectedRegion``: This is also known as the try block of the exception handler. It is the sub region of the CFG that is protected by this exception handler from exceptions.
+
 - The ``HandlerRegions``: A collection of regions that represent the handler blocks. Control might be transferred to one of these regions whenever an exception occures in the protected region.
 
 Detecting Exception Handler Regions

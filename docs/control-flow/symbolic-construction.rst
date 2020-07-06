@@ -41,14 +41,14 @@ Next, we need our instructions. We can use any instance of ``IEnumerable<TInstru
     var builder = new SymbolicFlowGraphBuilder<DummyInstruction>(architecture, instructions, resolver);
 
 
-or use an instance of a class implementing the `IStaticInstructionProvider<TInstruction>` interface:
+or use an instance of a class implementing the ``IStaticInstructionProvider<TInstruction>`` interface:
 
 .. code-block:: csharp
 
     var instructions = new ListInstructionProvider<DummyInstruction>(architecture, new List<DummyInstruction> { ... });
     var builder = new SymbolicFlowGraphBuilder<DummyInstruction>(instructions, resolver);
 
-If decoding instructions requires more than just the current value of the program counter register, it is also possible to specify an `ISymbolicInstructionProvider<TInstruction>` instead. This takes an entire program state instead of just the program counter.
+If decoding instructions requires more than just the current value of the program counter register, it is also possible to specify an ``ISymbolicInstructionProvider<TInstruction>`` instead. This takes an entire program state instead of just the program counter.
 
 .. code-block:: csharp
 

@@ -24,9 +24,9 @@ Different platforms have different features and instruction sets. Therefore, for
 
 A platform typically implements at least the following interfaces from the core libraries:
 
-- Code model interfaces: 
-    - ``IInstructionSetArchitecture<TInstruction>``: An interface representing an instruction set architecture (ISA) and is used to extract various kinds of information from a single instruction modelled by ``TInstruction``    
+- **Code model interfaces**: 
+    - ``IInstructionSetArchitecture<TInstruction>``: An interface representing an instruction set architecture (ISA) and is used to extract various kinds of information from a single instruction modelled by ``TInstruction``.
     - ``IVariable``: An interface describing a single variable.
 
-- Emulation interfaces:
+- **Emulation interfaces**:
     - ``IProgramState``: An interface describing what the current state of a program at a given point in time might look like. This includes (global) variables, the stack and memory state.

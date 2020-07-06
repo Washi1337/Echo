@@ -25,7 +25,7 @@ There are three main classes that are used to model CFGs. Given a ``TInstruction
 
 These classes implement the ``INode``, ``IEdge`` and ``IGraph`` interfaces, and work therefore with all kinds of generic graph algorithms and export features.
 
-CFGs can also be subdivided into multiple regions. These are represented using the `IControlFlowRegion<TInstruction>` interface, and are accessible through the `Regions` property of the `ControlFlowGraph<Tinstruction>` class. Echo provides the following base implementations:
+CFGs can also be subdivided into multiple regions. These are represented using the ``IControlFlowRegion<TInstruction>`` interface, and are accessible through the ``Regions`` property of the ``ControlFlowGraph<Tinstruction>`` class. Echo provides the following base implementations:
 
 - ``BasicControlFlowRegion<TInstruction>``: A basic collection of nodes.
 - ``ExceptionHandlerRegion<TInstruction>``: A region representing an exception handler, consisting of a protected region and a collection of handler regions.
@@ -88,3 +88,4 @@ Updating any of the three properties will automatically update the return value 
     node1.ConnectWith(node2);
 
     var incomingEdge = node2.GetIncomingEdges().First();
+

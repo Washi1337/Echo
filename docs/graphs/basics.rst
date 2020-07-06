@@ -56,7 +56,7 @@ Example implementations
 Various parts of Echo implement the graph interfaces:
 
 - Control Flow Graphs (CFGs)
-- [Dominator trees
+- Dominator trees
 - Data Flow Graphs (DFGs)
 
 

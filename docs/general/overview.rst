@@ -20,12 +20,13 @@ This especially becomes an issue when we look at really obscure instruction sets
 Writing static analysis tools for these kinds of platforms with the same kind of capabilities as the ones for more well-known platforms, would require lots of time and effort, even though the algorithms are more or less the same.
 
 Project Echo tries to solve this by abstracting away the underlying instruction set through a set of interfaces that try to capture all similarities between different platforms. 
-A developer could then "simply" implement these interfaces and describe _what_ a specific platform looks like, and not having to worry about how to implement complicated analysis algorithms for their instruction set.
+A developer could then "simply" implement these interfaces and describe `what` a specific platform looks like, and not having to worry about how to implement complicated analysis algorithms for their instruction set.
 
 Goals
 -----
 
 The goals of Project Echo include (but are not limited to):
+
 - To provide a model for program code of a variety of platforms.
 - To provide a framework that models the state of a program, including variables, stack, and memory. 
 - To provide the ability to analyse the control and data flow within chunks of code.
