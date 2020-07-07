@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Platforms.AsmResolver.Emulation.Values;
@@ -14,6 +15,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     public class DefaultMemoryAllocator : IMemoryAllocator
     {
         private readonly IDictionary<string, StringValue> _cachedStrings = new Dictionary<string, StringValue>();
+        private readonly IDictionary<ITypeDescriptor, TypeMemoryLayout> _memoryLayouts = new Dictionary<ITypeDescriptor, TypeMemoryLayout>();
         private readonly ModuleDefinition _contextModule;
 
         /// <summary>
@@ -71,6 +73,24 @@ namespace Echo.Platforms.AsmResolver.Emulation
             }
 
             return stringValue;
+        }
+
+        /// <inheritdoc />
+        public TypeMemoryLayout GetTypeMemoryLayout(ITypeDescriptor type)
+        {
+            if (!_memoryLayouts.TryGetValue(type, out var memoryLayout))
+            {
+                memoryLayout = type switch
+                {
+                    ITypeDefOrRef typeDefOrRef => typeDefOrRef.GetImpliedMemoryLayout(Is32Bit),
+                    TypeSignature signature => signature.GetImpliedMemoryLayout(Is32Bit),
+                    _ => throw new ArgumentOutOfRangeException(nameof(type))
+                };
+
+                _memoryLayouts[type] = memoryLayout;
+            }
+
+            return memoryLayout;
         }
 
         /// <inheritdoc />
