@@ -155,6 +155,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public FValue ConvertToR() => InterpretAsR8();
 
         /// <inheritdoc />
-        public IValue Copy() => new PointerValue(BasePointer, CurrentOffset);
+        IValue IValue.Copy() => new PointerValue(BasePointer, CurrentOffset);
     }
 }
