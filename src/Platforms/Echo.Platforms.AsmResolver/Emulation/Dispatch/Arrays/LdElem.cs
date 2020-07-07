@@ -8,6 +8,9 @@ using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
 {
+    /// <summary>
+    /// Provides a handler for instructions with the <see cref="CilOpCodes.Ldelem"/> operation code.
+    /// </summary>
     public class LdElem : LdElemBase
     {
         /// <inheritdoc />

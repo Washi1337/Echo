@@ -248,5 +248,6 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             Assert.True(result.IsSuccess, $"Unexpected {result.Exception?.GetType()}: {result.Exception?.Message}");
             Assert.Equal(new I4Value(expectedValue), stack.Top);
         }
+
     }
 }
