@@ -18,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             get;
         }
 
-        IConcreteValue LoadElement(int index, TypeMemoryLayout typeLayout, ICliMarshaller marshaller);
+        ICliValue LoadElement(int index, TypeMemoryLayout typeLayout, ICliMarshaller marshaller);
 
         /// <summary>
         /// Loads an element of the array as a native sized integer.

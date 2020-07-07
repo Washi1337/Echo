@@ -2,14 +2,13 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
 {
     /// <summary>
-    /// Provides a handler for instructions that obtain an integral value from an array.
+    /// Provides a handler for instructions with the <see cref="CilOpCodes.Ldelem"/> operation code.
     /// </summary>
     public class LdElemMacro : LdElemBase
     {

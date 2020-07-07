@@ -65,7 +65,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         private bool OffsetIsInRange(int index, int elementSize) => index * elementSize < _contents.Length;
 
         /// <inheritdoc />
-        public IConcreteValue LoadElement(int index, TypeMemoryLayout typeLayout, ICliMarshaller marshaller)
+        public ICliValue LoadElement(int index, TypeMemoryLayout typeLayout, ICliMarshaller marshaller)
         {
             AssertIndexValidity(index);
             return marshaller.ToCliValue(ReadStruct(index * Size, typeLayout), typeLayout.Type.ToTypeSignature());
