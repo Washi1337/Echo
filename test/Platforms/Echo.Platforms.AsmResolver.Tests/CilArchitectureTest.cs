@@ -9,7 +9,7 @@ namespace Echo.Platforms.AsmResolver.Tests
     public class CilArchitectureTest
     {
         [Fact]
-        public void StaticMethodParameterReferences()
+        public void GetReadParametersInStaticContextShouldStartAtZeroIndex()
         {
             var module = ModuleDefinition.FromFile(typeof(TestClass).Assembly.Location);
             var type = (TypeDefinition) module.LookupMember(typeof(TestClass).MetadataToken);
@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         }
         
         [Fact]
-        public void InstanceMethodParameterReferences()
+        public void GetReadParametersInInstanceContextShouldStartAtThisParameter()
         {
             var module = ModuleDefinition.FromFile(typeof(TestClass).Assembly.Location);
             var type = (TypeDefinition) module.LookupMember(typeof(TestClass).MetadataToken);
