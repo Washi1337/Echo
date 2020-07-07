@@ -48,7 +48,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 var elementType = Type is SzArrayTypeSignature szArrayType
                     ? szArrayType.BaseType
                     : Type.Module.CorLibTypeFactory.Byte;
-                return _contents.Length / elementType.GetSize(_contents.Is32Bit);
+
+                var elementTypeLayout = _memoryAllocator.GetTypeMemoryLayout(elementType);
+                return _contents.Length / (int) elementTypeLayout.Size;
             }
         }
 

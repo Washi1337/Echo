@@ -66,7 +66,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool IsKnown => true;
 
         /// <inheritdoc />
-        public int Size => Type.GetSize(_is32Bit);
+        public int Size => _is32Bit ? 4 : 8;
 
         /// <inheritdoc />
         public bool IsValueType => true;
