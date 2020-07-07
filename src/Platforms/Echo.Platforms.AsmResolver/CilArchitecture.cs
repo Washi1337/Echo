@@ -13,8 +13,8 @@ namespace Echo.Platforms.AsmResolver
     public class CilArchitecture : IInstructionSetArchitecture<CilInstruction>
     {
         private readonly CilMethodBody _parentBody;
-        private readonly CilVariable[] _variables;
-        private readonly CilParameter[] _parameters;
+        private readonly IList<CilVariable> _variables;
+        private readonly IList<CilParameter> _parameters;
 
         /// <summary>
         /// Creates a new CIL architecture description based on a CIL method body.
@@ -30,7 +30,10 @@ namespace Echo.Platforms.AsmResolver
             
             _parameters = parentBody.Owner.Parameters
                 .Select(p => new CilParameter(p))
-                .ToArray();
+                .ToList();
+
+            if (parentBody.Owner.Signature.HasThis)
+                _parameters.Insert(0, new CilParameter(parentBody.Owner.Parameters.ThisParameter));
         }
 
         /// <summary>
@@ -126,7 +129,7 @@ namespace Echo.Platforms.AsmResolver
             {
                 return new[]
                 {
-                    _parameters[instruction.GetParameter(_parentBody.Owner.Parameters).Index]
+                    _parameters[instruction.GetParameter(_parentBody.Owner.Parameters).MethodSignatureIndex]
                 };
             }
 
@@ -148,7 +151,7 @@ namespace Echo.Platforms.AsmResolver
             {
                 return new[]
                 {
-                    _parameters[instruction.GetParameter(_parentBody.Owner.Parameters).Index]
+                    _parameters[instruction.GetParameter(_parentBody.Owner.Parameters).MethodSignatureIndex]
                 };
             }
 
