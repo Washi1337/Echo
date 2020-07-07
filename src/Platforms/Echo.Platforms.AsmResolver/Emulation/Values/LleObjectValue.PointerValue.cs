@@ -1,9 +1,7 @@
 using System;
 using AsmResolver.DotNet.Memory;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Values;
-using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values

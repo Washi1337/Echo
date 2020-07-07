@@ -63,6 +63,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool? IsNegative => false;
 
         /// <inheritdoc />
+        /// <inheritdoc />
         public IValue Copy() => new LleObjectValue(_memoryAllocator, Type, _contents);
         
         /// <inheritdoc />

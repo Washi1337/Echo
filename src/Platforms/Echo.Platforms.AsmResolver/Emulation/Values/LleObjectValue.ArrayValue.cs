@@ -1,7 +1,6 @@
 using System;
 using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
-using Echo.Concrete.Values;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
