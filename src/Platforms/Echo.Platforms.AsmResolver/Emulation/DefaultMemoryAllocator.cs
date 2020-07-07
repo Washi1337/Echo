@@ -78,6 +78,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <inheritdoc />
         public TypeMemoryLayout GetTypeMemoryLayout(ITypeDescriptor type)
         {
+            type = _contextModule.CorLibTypeFactory.FromType(type) ?? type;
             if (!_memoryLayouts.TryGetValue(type, out var memoryLayout))
             {
                 memoryLayout = type switch

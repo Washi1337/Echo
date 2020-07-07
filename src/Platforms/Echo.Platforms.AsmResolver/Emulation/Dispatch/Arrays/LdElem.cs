@@ -21,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
 
-            var type = (ITypeDefOrRef) instruction.Operand;
+            var type = (ITypeDescriptor) instruction.Operand;
             var typeLayout = environment.MemoryAllocator.GetTypeMemoryLayout(type);
 
             return array.LoadElement(index, typeLayout, environment.CliMarshaller);
