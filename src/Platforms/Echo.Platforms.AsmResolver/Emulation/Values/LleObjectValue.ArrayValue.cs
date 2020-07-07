@@ -1,5 +1,7 @@
 using System;
+using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
+using Echo.Concrete.Values;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -61,7 +63,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         private bool OffsetIsInRange(int index, int elementSize) => index * elementSize < _contents.Length;
-        
+
+        /// <inheritdoc />
+        public IConcreteValue LoadElement(int index, TypeMemoryLayout typeLayout, ICliMarshaller marshaller)
+        {
+            AssertIndexValidity(index);
+            return marshaller.ToCliValue(ReadStruct(index * Size, typeLayout), typeLayout.Type.ToTypeSignature());
+        }
+
         /// <inheritdoc />
         public NativeIntegerValue LoadElementI(int index, ICliMarshaller marshaller)
         {
@@ -197,6 +206,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
             return new OValue(null, false, marshaller.Is32Bit);
+        }
+
+        /// <inheritdoc />
+        public void StoreElement(int index, TypeMemoryLayout typeLayout, ICliValue value, ICliMarshaller marshaller)
+        {
+            AssertIndexValidity(index);
+            WriteStruct(index * Size, typeLayout, marshaller.ToCtsValue(value, typeLayout.Type.ToTypeSignature()));
         }
 
         /// <inheritdoc />

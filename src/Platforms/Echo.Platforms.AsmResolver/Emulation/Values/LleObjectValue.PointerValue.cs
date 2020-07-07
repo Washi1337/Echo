@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Values;
@@ -42,9 +43,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public Float64Value ReadFloat64(int offset) => _contents.ReadFloat64(offset);
 
         /// <inheritdoc />
-        public IConcreteValue ReadStruct(int offset, TypeSignature type)
+        public IConcreteValue ReadStruct(int offset, TypeMemoryLayout typeLayout)
         {
-            return type.ElementType switch
+            return typeLayout.Type.ToTypeSignature().ElementType switch
             {
                 ElementType.Boolean => ReadInteger8(offset),
                 ElementType.Char => ReadInteger16(offset),
@@ -58,18 +59,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 ElementType.U8 => ReadInteger64(offset),
                 ElementType.R4 => ReadFloat32(offset),
                 ElementType.R8 => ReadFloat64(offset),
-                ElementType.ValueType => ReadStructSlow(offset, type),
+                ElementType.ValueType => ReadStructSlow(offset, typeLayout),
                 ElementType.I => Is32Bit ? (IntegerValue) ReadInteger32(offset) : ReadInteger64(offset),
                 ElementType.U => Is32Bit ? (IntegerValue) ReadInteger32(offset) : ReadInteger64(offset),
-                ElementType.Enum => ReadStruct(offset, type.Resolve().GetEnumUnderlyingType()),
+                ElementType.Enum => ReadStruct(offset, _memoryAllocator.GetTypeMemoryLayout(typeLayout.Type.Resolve().GetEnumUnderlyingType())),
                 _ => new UnknownValue()
             };
         }
 
-        private IConcreteValue ReadStructSlow(int offset, TypeSignature type)
+        private IConcreteValue ReadStructSlow(int offset, TypeMemoryLayout typeLayout)
         {
-            var typeLayout = _memoryAllocator.GetTypeMemoryLayout(type);
-
             Span<byte> contents = stackalloc byte[(int) typeLayout.Size];
             Span<byte> bitmask = stackalloc byte[(int) typeLayout.Size];
             _contents.ReadBytes(offset, contents, bitmask);
@@ -98,9 +97,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public void WriteFloat64(int offset, Float64Value value) => _contents.WriteFloat64(offset, value);
 
         /// <inheritdoc />
-        public void WriteStruct(int offset, TypeSignature type, IConcreteValue value)
+        public void WriteStruct(int offset, TypeMemoryLayout typeLayout, IConcreteValue value)
         {
-            switch (type.ElementType)
+            switch (typeLayout.Type.ToTypeSignature().ElementType)
             {
                 case ElementType.Boolean:
                 case ElementType.I1:
@@ -137,11 +136,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                     break;
                 
                 case ElementType.ValueType:
-                    WriteStructSlow(offset, type, value);
+                    WriteStructSlow(offset, typeLayout, value);
                     break;
                 
                 case ElementType.Enum:
-                    WriteStruct(offset, type.Resolve().GetEnumUnderlyingType(), value);
+                    WriteStruct(offset, _memoryAllocator.GetTypeMemoryLayout(typeLayout.Type.Resolve().GetEnumUnderlyingType()), value);
                     break;
                 
                 case ElementType.String:
@@ -165,10 +164,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             }
         }
 
-        private void WriteStructSlow(int offset, TypeSignature type, IConcreteValue value)
+        private void WriteStructSlow(int offset, TypeMemoryLayout typeLayout, IConcreteValue value)
         {
-            var typeLayout = _memoryAllocator.GetTypeMemoryLayout(type);
-
             Span<byte> contents = stackalloc byte[(int) typeLayout.Size];
             Span<byte> bitmask = stackalloc byte[(int) typeLayout.Size];
             
