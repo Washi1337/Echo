@@ -8,7 +8,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// <summary>
     /// Represents a low level implementation of an object.
     /// </summary>
-    public partial class LowLevelObjectValue 
+    public partial class LleObjectValue 
     {
         private readonly IMemoryAllocator _memoryAllocator;
 
@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <param name="memoryAllocator">The object responsible for memory management in the virtual machine.</param>
         /// <param name="valueType">The type of the object.</param>
         /// <param name="contents">The raw contents of the array.</param>
-        public LowLevelObjectValue(IMemoryAllocator memoryAllocator, TypeSignature valueType, MemoryPointerValue contents)
+        public LleObjectValue(IMemoryAllocator memoryAllocator, TypeSignature valueType, MemoryPointerValue contents)
         {
             Type = valueType;
             _memoryAllocator = memoryAllocator ?? throw new ArgumentNullException(nameof(memoryAllocator));
@@ -63,7 +63,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool? IsNegative => false;
 
         /// <inheritdoc />
-        public IValue Copy() => new LowLevelObjectValue(_memoryAllocator, Type, _contents);
+        public IValue Copy() => new LleObjectValue(_memoryAllocator, Type, _contents);
         
         /// <inheritdoc />
         public override string ToString() => $"{Type.FullName} ({_contents.Length.ToString()} bytes)";

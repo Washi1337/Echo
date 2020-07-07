@@ -5,7 +5,7 @@ using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
-    public partial class LowLevelObjectValue : IDotNetArrayValue
+    public partial class LleObjectValue : IDotNetArrayValue
     {
         // -------------------------
         // Implementation rationale

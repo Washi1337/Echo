@@ -13,16 +13,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// Provides a high level implementation of an object that consists of a collection of fields.
     /// </summary>
     /// <remarks>
-    /// Instances of the <see cref="HighLevelObjectValue"/> class are passed on by-value. They are used for representing
+    /// Instances of the <see cref="HleObjectValue"/> class are passed on by-value. They are used for representing
     /// instances of value types, or the object referenced in an object reference.
     /// </remarks>
-    public class HighLevelObjectValue : IDotNetObjectValue
+    public class HleObjectValue : IDotNetObjectValue
     {
         private readonly IDictionary<IFieldDescriptor, IConcreteValue> _fieldValues =
             new Dictionary<IFieldDescriptor, IConcreteValue>();
         private readonly bool _is32Bit;
 
-        private HighLevelObjectValue(TypeSignature objectType, IDictionary<IFieldDescriptor, IConcreteValue> values,
+        private HleObjectValue(TypeSignature objectType, IDictionary<IFieldDescriptor, IConcreteValue> values,
             bool is32Bit)
         {
             _is32Bit = is32Bit;
@@ -37,7 +37,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <param name="objectType">The type of the object.</param>
         /// <param name="is32Bit">Indicates any pointer that is defined in this object is 32 or 64 bits wide.</param>
         /// <exception cref="NotSupportedException"></exception>
-        public HighLevelObjectValue(TypeSignature objectType, bool is32Bit)
+        public HleObjectValue(TypeSignature objectType, bool is32Bit)
         {
             _is32Bit = is32Bit;
             Type = objectType ?? throw new ArgumentNullException(nameof(objectType));
@@ -84,7 +84,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool? IsNegative => false;
 
         /// <inheritdoc />
-        public IValue Copy() => new HighLevelObjectValue(Type, _fieldValues, _is32Bit);
+        public IValue Copy() => new HleObjectValue(Type, _fieldValues, _is32Bit);
 
         private void InitializeFields()
         {

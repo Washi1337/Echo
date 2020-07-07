@@ -38,7 +38,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var field = simpleClassType.Fields.First(f => f.Name == fieldName);
 
             // Create new virtual instance and push on stack. 
-            var value = new HighLevelObjectValue(simpleClassType.ToTypeSignature(), environment.Is32Bit);
+            var value = new HleObjectValue(simpleClassType.ToTypeSignature(), environment.Is32Bit);
             stack.Push(environment.CliMarshaller.ToCliValue(value, simpleClassType.ToTypeSignature()));
             stack.Push(stackValue);
 
@@ -77,7 +77,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void WriteObjectReferenceFieldWithNonNullValue()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldContents = new HighLevelObjectValue(LookupTestType(typeof(SimpleClass)).ToTypeSignature(), environment.Is32Bit);
+            var fieldContents = new HleObjectValue(LookupTestType(typeof(SimpleClass)).ToTypeSignature(), environment.Is32Bit);
             var fieldValue = new ObjectReference(fieldContents, environment.Is32Bit);
             var stackValue = environment.CliMarshaller.ToCliValue(fieldValue, _module.CorLibTypeFactory.Object);
             Verify(nameof(SimpleClass.SimpleClassField), stackValue, fieldValue);

@@ -54,7 +54,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             {
                 int size = length * (int) GetTypeMemoryLayout(elementType).Size;
                 var memory = AllocateMemory(size, true);
-                return new LowLevelObjectValue(this, new SzArrayTypeSignature(elementType), memory);
+                return new LleObjectValue(this, new SzArrayTypeSignature(elementType), memory);
             }
             
             throw new NotSupportedException();

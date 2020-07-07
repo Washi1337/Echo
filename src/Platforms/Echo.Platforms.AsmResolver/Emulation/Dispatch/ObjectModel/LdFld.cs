@@ -40,7 +40,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 case OValue { IsZero: true }:
                     return new DispatchResult(new NullReferenceException());
                 
-                case OValue { ReferencedObject: HighLevelObjectValue compoundObject }:
+                case OValue { ReferencedObject: HleObjectValue compoundObject }:
                     fieldValue = compoundObject.GetFieldValue(field);
                     break;
                 
