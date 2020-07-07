@@ -1,11 +1,12 @@
 using System;
+using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
-    public partial class LowLevelObjectValue : IDotNetArrayValue
+    public partial class LleObjectValue : IDotNetArrayValue
     {
         // -------------------------
         // Implementation rationale
@@ -48,7 +49,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 var elementType = Type is SzArrayTypeSignature szArrayType
                     ? szArrayType.BaseType
                     : Type.Module.CorLibTypeFactory.Byte;
-                return _contents.Length / elementType.GetSize(_contents.Is32Bit);
+
+                var elementTypeLayout = _memoryAllocator.GetTypeMemoryLayout(elementType);
+                return _contents.Length / (int) elementTypeLayout.Size;
             }
         }
 
@@ -59,7 +62,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         private bool OffsetIsInRange(int index, int elementSize) => index * elementSize < _contents.Length;
-        
+
+        /// <inheritdoc />
+        public ICliValue LoadElement(int index, TypeMemoryLayout typeLayout, ICliMarshaller marshaller)
+        {
+            AssertIndexValidity(index);
+            var elementValue = ReadStruct(index * (int) typeLayout.Size, typeLayout);
+            return marshaller.ToCliValue(elementValue, typeLayout.Type.ToTypeSignature());
+        }
+
         /// <inheritdoc />
         public NativeIntegerValue LoadElementI(int index, ICliMarshaller marshaller)
         {
@@ -195,6 +206,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
             return new OValue(null, false, marshaller.Is32Bit);
+        }
+
+        /// <inheritdoc />
+        public void StoreElement(int index, TypeMemoryLayout typeLayout, ICliValue value, ICliMarshaller marshaller)
+        {
+            AssertIndexValidity(index);
+            var elementValue = marshaller.ToCtsValue(value, typeLayout.Type.ToTypeSignature());
+            WriteStruct(index * (int)typeLayout.Size, typeLayout, elementValue);
         }
 
         /// <inheritdoc />

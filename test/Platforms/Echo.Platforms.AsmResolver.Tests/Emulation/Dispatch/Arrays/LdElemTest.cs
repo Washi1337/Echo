@@ -222,5 +222,32 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             Assert.False(result.IsSuccess);
             Assert.IsAssignableFrom<InvalidProgramException>(result.Exception);
         }
+
+        [Theory]
+        [InlineData(0, 0xA)]
+        [InlineData(1, 0xB)]
+        [InlineData(2, 0xC)]
+        [InlineData(3, 0xD)]
+        public void LdElemWithInt32ShouldResultInI4Value(int index, int expectedValue)
+        {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var marshaller = environment.CliMarshaller;
+            
+            var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
+            array.StoreElementI4(0, new I4Value(0xA), marshaller);
+            array.StoreElementI4(1, new I4Value(0xB), marshaller);
+            array.StoreElementI4(2, new I4Value(0xC), marshaller);
+            array.StoreElementI4(3, new I4Value(0xD), marshaller);
+
+            var stack = ExecutionContext.ProgramState.Stack;
+            stack.Push(marshaller.ToCliValue(array, array.Type));
+            stack.Push(new I4Value(index));
+
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldelem, environment.Module.CorLibTypeFactory.Int32.Type));
+            
+            Assert.True(result.IsSuccess, $"Unexpected {result.Exception?.GetType()}: {result.Exception?.Message}");
+            Assert.Equal(new I4Value(expectedValue), stack.Top);
+        }
+
     }
 }

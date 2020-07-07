@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Platforms.AsmResolver.Emulation.Values;
@@ -14,6 +15,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     public class DefaultMemoryAllocator : IMemoryAllocator
     {
         private readonly IDictionary<string, StringValue> _cachedStrings = new Dictionary<string, StringValue>();
+        private readonly IDictionary<ITypeDescriptor, TypeMemoryLayout> _memoryLayouts = new Dictionary<ITypeDescriptor, TypeMemoryLayout>();
         private readonly ModuleDefinition _contextModule;
 
         /// <summary>
@@ -50,12 +52,31 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             if (elementType.IsValueType)
             {
-                int size = length * elementType.GetSize(Is32Bit);
+                int size = length * (int) GetTypeMemoryLayout(elementType).Size;
                 var memory = AllocateMemory(size, true);
-                return new LowLevelObjectValue(new SzArrayTypeSignature(elementType), memory);
+                return new LleObjectValue(this, new SzArrayTypeSignature(elementType), memory);
             }
             
             throw new NotSupportedException();
+        }
+
+        /// <inheritdoc />
+        public IDotNetObjectValue AllocateObject(TypeSignature type)
+        {
+            IDotNetObjectValue result;
+            
+            if (type.IsValueType)
+            {
+                var memoryLayout = GetTypeMemoryLayout(type);
+                var contents = AllocateMemory((int) memoryLayout.Size, true);
+                result = new LleObjectValue(this, type, contents);
+            }
+            else
+            {
+                result = new HleObjectValue(type, Is32Bit);
+            }
+
+            return result;
         }
 
         /// <inheritdoc />
@@ -71,6 +92,25 @@ namespace Echo.Platforms.AsmResolver.Emulation
             }
 
             return stringValue;
+        }
+
+        /// <inheritdoc />
+        public TypeMemoryLayout GetTypeMemoryLayout(ITypeDescriptor type)
+        {
+            type = _contextModule.CorLibTypeFactory.FromType(type) ?? type;
+            if (!_memoryLayouts.TryGetValue(type, out var memoryLayout))
+            {
+                memoryLayout = type switch
+                {
+                    ITypeDefOrRef typeDefOrRef => typeDefOrRef.GetImpliedMemoryLayout(Is32Bit),
+                    TypeSignature signature => signature.GetImpliedMemoryLayout(Is32Bit),
+                    _ => throw new ArgumentOutOfRangeException(nameof(type))
+                };
+
+                _memoryLayouts[type] = memoryLayout;
+            }
+
+            return memoryLayout;
         }
 
         /// <inheritdoc />

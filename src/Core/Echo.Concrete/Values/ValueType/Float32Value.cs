@@ -1,3 +1,5 @@
+using System;
+using System.Buffers.Binary;
 using System.Globalization;
 using Echo.Core.Values;
 
@@ -6,7 +8,7 @@ namespace Echo.Concrete.Values.ValueType
     /// <summary>
     /// Represents a fully known concrete 32 bit floating point numerical value.
     /// </summary>
-    public class Float32Value : IConcreteValue
+    public class Float32Value : IValueTypeValue
     {
         /// <summary>
         /// Wraps a 32 bit floating point number into an instance of <see cref="Float32Value"/>.
@@ -56,6 +58,33 @@ namespace Echo.Concrete.Values.ValueType
 
         /// <inheritdoc />
         public bool? IsNegative => F32 < 0;
+
+        /// <inheritdoc />
+        public unsafe void GetBits(Span<byte> buffer)
+        {
+            // HACK: .NET standard 2.0 does not provide a method to write floating point numbers to a span.
+            
+            float value = F32;
+            uint rawBits = *(uint*) &value;
+            BinaryPrimitives.WriteUInt32LittleEndian(buffer, rawBits);
+        }
+
+        /// <inheritdoc />
+        public void GetMask(Span<byte> buffer)
+        {
+            // TODO: support unknown bits in float.
+            buffer.Fill(0);
+        }
+
+        /// <inheritdoc />
+        public unsafe void SetBits(Span<byte> bits, Span<byte> mask)
+        {
+            // HACK: .NET standard 2.0 does not provide a method to read floating point numbers from a span.
+            // TODO: support unknown bits in float.
+            
+            uint rawBits = BinaryPrimitives.ReadUInt32LittleEndian(bits);
+            F32 = *(float*) &rawBits;
+        }
 
         /// <inheritdoc />
         public IValue Copy() => new Float32Value(F32);

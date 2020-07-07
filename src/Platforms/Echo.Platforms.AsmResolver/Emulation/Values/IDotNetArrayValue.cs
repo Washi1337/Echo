@@ -1,3 +1,6 @@
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Memory;
+using Echo.Concrete.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
@@ -14,6 +17,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             get;
         }
+
+        ICliValue LoadElement(int index, TypeMemoryLayout typeLayout, ICliMarshaller marshaller);
 
         /// <summary>
         /// Loads an element of the array as a native sized integer.
@@ -103,13 +108,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <returns>The element.</returns>
         OValue LoadElementRef(int index, ICliMarshaller marshaller);
 
+        void StoreElement(int index, TypeMemoryLayout typeLayout, ICliValue value, ICliMarshaller marshaller);
+        
         /// <summary>
         /// Replaces an element in the array with the provided native sized integer.
         /// </summary>
         /// <param name="index">The index of the element to replace.</param>
         /// <param name="value">The value to replace the element with.</param>
         /// <param name="marshaller">The marshaller to use for converting the raw value to a value the CTS operates on.</param>
-        public void StoreElementI(int index, NativeIntegerValue value, ICliMarshaller marshaller);
+        void StoreElementI(int index, NativeIntegerValue value, ICliMarshaller marshaller);
 
         /// <summary>
         /// Replaces an element in the array with the provided signed 8 bit integer.

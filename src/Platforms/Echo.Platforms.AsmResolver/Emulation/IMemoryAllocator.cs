@@ -1,4 +1,6 @@
 using System;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Platforms.AsmResolver.Emulation.Values;
@@ -27,11 +29,20 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The array.</returns>
         IDotNetArrayValue AllocateArray(TypeSignature elementType, int length);
 
+        IDotNetObjectValue AllocateObject(TypeSignature type);
+
         /// <summary>
         /// Gets the string value for the fully known string literal.
         /// </summary>
         /// <param name="value">The string literal.</param>
         /// <returns>The string value.</returns>
         StringValue GetStringValue(string value);
+
+        /// <summary>
+        /// Gets the raw memory layout of a type within the virtual machine.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>The memory layout.</returns>
+        TypeMemoryLayout GetTypeMemoryLayout(ITypeDescriptor type);
     }
 }

@@ -78,7 +78,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 
                     case ElementType.Class:
                         // NOTE: This has an issue where fields defined in super classes of type will not be included.
-                        return new OValue(new HighLevelObjectValue(type, Is32Bit), true, Is32Bit);
+                        return new OValue(new HleObjectValue(type, Is32Bit), true, Is32Bit);
 
                     case ElementType.MVar:
                     case ElementType.Var:

@@ -115,5 +115,29 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             Assert.False(result.IsSuccess);
             Assert.IsAssignableFrom<InvalidProgramException>(result.Exception);
         }
+
+        [Theory]
+        [InlineData(0, 0xA)]
+        [InlineData(1, 0xB)]
+        [InlineData(2, 0xC)]
+        [InlineData(3, 0xD)]
+        public void StelemWithInt32ShouldStoreAsInteger32(int index, int value)
+        {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var marshaller = environment.CliMarshaller;
+            
+            var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
+
+            var stack = ExecutionContext.ProgramState.Stack;
+            stack.Push(marshaller.ToCliValue(array, array.Type));
+            stack.Push(new I4Value(index));
+            stack.Push(new I4Value(value));
+
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Stelem, environment.Module.CorLibTypeFactory.Int32.Type));
+            
+            Assert.True(result.IsSuccess);
+            Assert.Equal(0, stack.Size);
+            Assert.Equal(value, array.LoadElementI4(index, marshaller).I32);
+        }
     }
 }

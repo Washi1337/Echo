@@ -46,7 +46,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             // Create object instance of type and push.
             var objectType = _type.ToTypeSignature();
             var objectRef = new ObjectReference(
-                new HighLevelObjectValue(objectType, environment.Is32Bit),
+                new HleObjectValue(objectType, environment.Is32Bit),
                 environment.Is32Bit);
             stack.Push(environment.CliMarshaller.ToCliValue(objectRef, objectType));
 
@@ -69,7 +69,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var objectTypeSig = objectTypeDef.ToTypeSignature();
             
             var objectRef = new ObjectReference(
-                new HighLevelObjectValue(objectTypeSig, environment.Is32Bit),
+                new HleObjectValue(objectTypeSig, environment.Is32Bit),
                 environment.Is32Bit);
             
             // Push object.
