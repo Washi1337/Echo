@@ -61,6 +61,25 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <inheritdoc />
+        public IDotNetObjectValue AllocateObject(TypeSignature type)
+        {
+            IDotNetObjectValue result;
+            
+            if (type.IsValueType)
+            {
+                var memoryLayout = GetTypeMemoryLayout(type);
+                var contents = AllocateMemory((int) memoryLayout.Size, true);
+                result = new LleObjectValue(this, type, contents);
+            }
+            else
+            {
+                result = new HleObjectValue(type, Is32Bit);
+            }
+
+            return result;
+        }
+
+        /// <inheritdoc />
         public StringValue GetStringValue(string value)
         {
             if (!_cachedStrings.TryGetValue(value, out var stringValue))

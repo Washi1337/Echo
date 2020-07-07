@@ -29,6 +29,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The array.</returns>
         IDotNetArrayValue AllocateArray(TypeSignature elementType, int length);
 
+        IDotNetObjectValue AllocateObject(TypeSignature type);
+
         /// <summary>
         /// Gets the string value for the fully known string literal.
         /// </summary>
