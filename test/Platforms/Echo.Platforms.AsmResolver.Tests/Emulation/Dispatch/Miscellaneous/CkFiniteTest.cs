@@ -27,6 +27,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Miscellaneous
             
             Assert.False(result.IsSuccess);
             Assert.Equal(result.Exception.Message,new ArithmeticException().Message);
+            Assert.Equal(1,ExecutionContext.ProgramState.Stack.Size);
+
         }
         
         [Fact]
@@ -38,6 +40,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Miscellaneous
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ckfinite));
             
             Assert.True(result.IsSuccess);
+            Assert.Equal(1,ExecutionContext.ProgramState.Stack.Size);
         }
     }
 }

@@ -22,13 +22,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Miscellaneous
         /// <inheritdoc />
         public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
         {
-            var val = context.ProgramState.Stack.Pop();
+            var val = context.ProgramState.Stack.Top;
             if (val is FValue value)
             {
                 if (double.IsNaN(value.F64) || double.IsInfinity(value.F64))
                     return new DispatchResult(new ArithmeticException());
             }
-
+            
             return base.Execute(context, instruction);
         }
     }
