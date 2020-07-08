@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -25,6 +26,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
         {
             LastInvokedMethod = method;
             return _original.Invoke(method, arguments);
+        }
+
+        public ICliValue InvokeIndirect(ICliValue address, MethodSignature methodSig, IEnumerable<ICliValue> arguments)
+        {
+            return _original.InvokeIndirect(address,methodSig, arguments);
         }
     }
 }

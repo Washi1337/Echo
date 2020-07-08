@@ -23,15 +23,29 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 .Pop(argumentCount, true)
                 .Cast<ICliValue>()
                 .ToList();
-            
+
             // Dispatch
             var methodDispatch = DevirtualizeMethod(instruction, arguments);
             if (methodDispatch.Exception != null)
                 return new DispatchResult(methodDispatch.Exception);
-            
+
             // Invoke.
             bool pushesValue = environment.Architecture.GetStackPushCount(instruction) > 0;
-            var result = environment.MethodInvoker.Invoke(methodDispatch.ResultingMethod, arguments);
+            ICliValue result;
+
+            if (methodDispatch.ResultingMethod != null)
+            {
+                result = environment.MethodInvoker.Invoke(methodDispatch.ResultingMethod, arguments);
+            }
+            else if (methodDispatch.ResultingMethodSignature != null)
+            {
+                var address = arguments.Last();
+                arguments.Remove(address);
+                result = environment.MethodInvoker.InvokeIndirect(address, methodDispatch.ResultingMethodSignature,
+                    arguments);
+            }
+            else
+                result = null;
 
             // Push result if necessary.
             if (result is null)
@@ -49,7 +63,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     throw new DispatchException(
                         "Method was not expected to return a value, but the method invoker returned a non-null value.");
                 }
-                
+
                 context.ProgramState.Stack.Push(result);
             }
 
