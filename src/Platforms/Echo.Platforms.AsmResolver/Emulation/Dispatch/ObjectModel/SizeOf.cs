@@ -7,7 +7,7 @@ using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 {
     /// <summary>
-    /// //
+    /// Provides a handle for instructions with the <see cref="CilOpCodes.Sizeof"/> operation code.
     /// </summary>
     public sealed class SizeOf : FallThroughOpCodeHandler
     {
@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var layout = allocator.GetTypeMemoryLayout(type);
             context.ProgramState.Stack.Push(new I4Value((int) layout.Size));
 
-            return DispatchResult.Success();
+            return base.Execute(context, instruction);
         }
     }
 }
