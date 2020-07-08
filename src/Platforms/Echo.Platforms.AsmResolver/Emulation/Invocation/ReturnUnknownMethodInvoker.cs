@@ -33,9 +33,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         public ICliValue Invoke(IMethodDescriptor method, IEnumerable<ICliValue> arguments)
         {
             var returnType = method.Signature.ReturnType;
-            return returnType.ElementType != ElementType.Void 
-                ? UnknownValueFactory.CreateUnknown(returnType) 
-                : null;
+
+            if (returnType.ElementType != ElementType.Void)
+                return UnknownValueFactory.CreateUnknown(returnType);
+            else
+                return method.Resolve().IsConstructor
+                    ? UnknownValueFactory.CreateUnknown(method.DeclaringType.ToTypeSignature())
+                    : null;
         }
     }
 }
