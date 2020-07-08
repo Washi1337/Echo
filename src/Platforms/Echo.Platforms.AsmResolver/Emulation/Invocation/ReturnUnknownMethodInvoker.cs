@@ -50,7 +50,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         private ICliValue CreateReturnValue(MethodSignature methodSig)
         {
             var returnType = methodSig.ReturnType;
-            return returnType.ElementType != ElementType.Void ? UnknownValueFactory.CreateUnknown(returnType) : null;
+            return returnType.ElementType != ElementType.Void 
+                ? UnknownValueFactory.CreateUnknown(returnType) 
+                : null;
         }
     }
 }

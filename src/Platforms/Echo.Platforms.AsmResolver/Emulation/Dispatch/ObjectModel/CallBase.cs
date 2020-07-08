@@ -45,7 +45,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     arguments);
             }
             else
+            {
                 result = null;
+            }
 
             // Push result if necessary.
             if (result is null)

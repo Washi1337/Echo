@@ -43,13 +43,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 return new DispatchResult(methodDispatch.Exception);
 
             // Invoke.
-            bool pushesValue = environment.Architecture.GetStackPushCount(instruction) > 0;
 
             var result = environment.MethodInvoker.Invoke(method, arguments);
 
-            if (result == null && pushesValue)
+            if (result == null)
                 context.ProgramState.Stack.Push(cilValueObject);
-            else if(pushesValue)
+            else
                 context.ProgramState.Stack.Push(result);
 
             return base.Execute(context, instruction);
