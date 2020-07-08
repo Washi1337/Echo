@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var layout = allocator.GetTypeMemoryLayout(type);
             context.ProgramState.Stack.Push(new I4Value((int) layout.Size));
 
-            return DispatchResult.Success();
+            return base.Execute(context, instruction);
         }
     }
 }
