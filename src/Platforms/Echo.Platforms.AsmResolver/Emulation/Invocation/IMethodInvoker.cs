@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation
@@ -18,5 +19,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// The return value of the method, or <c>null</c> if the method returned <see cref="System.Void"/>.
         /// </returns>
         ICliValue Invoke(IMethodDescriptor method, IEnumerable<ICliValue> arguments);
+        
+        /// <summary>
+        /// Invokes a function pointer and returns the result.
+        /// </summary>
+        /// <param name="address">The method pointer.</param>
+        /// <param name="methodSig">The method signature.</param>
+        /// <param name="arguments">The arguments passed onto the method.</param>
+        /// <returns>
+        /// The return value of the method, or <c>null</c> if the method returned <see cref="System.Void"/>.
+        /// </returns>
+        ICliValue InvokeIndirect(ICliValue address,MethodSignature methodSig, IEnumerable<ICliValue> arguments);
     }
 }
