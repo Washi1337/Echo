@@ -11,7 +11,15 @@ namespace Echo.Platforms.Iced
     public class X86Architecture : IInstructionSetArchitecture<Instruction>
     {
         private readonly Formatter _formatter = new NasmFormatter();
+        private readonly InstructionInfoFactory _infoFactory = new InstructionInfoFactory();
+        private readonly IDictionary<Register, X86RegisterVariable> _registers = new Dictionary<Register, X86RegisterVariable>();
 
+        public X86Architecture()
+        {
+            foreach (Register register in Enum.GetValues(typeof(Register)))
+                _registers[register] = new X86RegisterVariable(register);
+        }
+        
         /// <inheritdoc />
         public long GetOffset(Instruction instruction) => (long) instruction.IP;
 
@@ -88,13 +96,48 @@ namespace Echo.Platforms.Iced
         /// <inheritdoc />
         public IEnumerable<IVariable> GetReadVariables(Instruction instruction)
         {
-            throw new NotImplementedException();
+            IList<IVariable> result = null;
+            
+            ref readonly var info = ref _infoFactory.GetInfo(instruction);
+            foreach (var use in info.GetUsedRegisters())
+            {
+                switch (use.Access)
+                {
+                    case OpAccess.Read:
+                    case OpAccess.CondRead:
+                    case OpAccess.ReadWrite:
+                    case OpAccess.ReadCondWrite:
+                        result ??= new List<IVariable>();
+                        result.Add(_registers[use.Register]);
+                        break;
+                }
+            }
+
+            return result ?? Array.Empty<IVariable>();
         }
 
         /// <inheritdoc />
         public IEnumerable<IVariable> GetWrittenVariables(Instruction instruction)
         {
-            throw new NotImplementedException();
+            IList<IVariable> result = null;
+            
+            ref readonly var info = ref _infoFactory.GetInfo(instruction);
+            foreach (var use in info.GetUsedRegisters())
+            {
+                switch (use.Access)
+                {
+                    case OpAccess.Write:
+                    case OpAccess.CondWrite:
+                    case OpAccess.ReadWrite:
+                    case OpAccess.ReadCondWrite:
+                        result ??= new List<IVariable>();
+                        result.Add(_registers[use.Register]);
+                        break;
+                }
+            }
+
+            return result ?? Array.Empty<IVariable>();
         }
+        
     }
 }
