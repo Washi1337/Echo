@@ -4,7 +4,9 @@ using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction.Symbolic;
+using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
+using Echo.DataFlow.Values;
 
 namespace Echo.Platforms.AsmResolver
 {
@@ -13,6 +15,8 @@ namespace Echo.Platforms.AsmResolver
     /// </summary>
     public class CilStateTransitionResolver : StateTransitionResolverBase<CilInstruction>
     {
+        private readonly CilArchitecture _architecture;
+
         /// <summary>
         /// Creates a new instance of the <see cref="CilStateTransitionResolver"/> class.
         /// </summary>
@@ -20,6 +24,39 @@ namespace Echo.Platforms.AsmResolver
         public CilStateTransitionResolver(CilArchitecture architecture)
             : base(architecture)
         {
+            _architecture = architecture;
+        }
+
+        /// <inheritdoc />
+        public override SymbolicProgramState<CilInstruction> GetInitialState(long entrypointAddress)
+        {
+            var result = base.GetInitialState(entrypointAddress);
+            
+            foreach (var eh in _architecture.MethodBody.ExceptionHandlers)
+            {
+                var exceptionSource = default(ExternalDataSource<CilInstruction>);
+                if (eh.HandlerStart.Offset == entrypointAddress)
+                {
+                    exceptionSource = new ExternalDataSource<CilInstruction>(
+                        -(long) eh.HandlerStart.Offset,
+                        $"HandlerException_{eh.HandlerStart.Offset:X4}");
+                }
+                else if (eh.FilterStart != null && eh.FilterStart.Offset == entrypointAddress)
+                {
+                    exceptionSource = new ExternalDataSource<CilInstruction>(
+                        -(long) eh.FilterStart.Offset,
+                        $"FilterException_{eh.FilterStart.Offset:X4}");
+                }
+
+                if (exceptionSource is {})
+                {
+                    DataFlowGraph.Nodes.Add(exceptionSource);
+                    result.Stack.Push(new SymbolicValue<CilInstruction>(exceptionSource));
+                    break;
+                }
+            }
+
+            return result;
         }
 
         /// <inheritdoc />

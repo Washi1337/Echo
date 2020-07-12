@@ -78,8 +78,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
         protected override IInstructionTraversalResult<TInstruction> CollectInstructions(
             long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
-            var result = TraverseInstructions(entrypoint, knownBlockHeaders);
+            var blockHeaders = knownBlockHeaders as long[] ?? knownBlockHeaders.ToArray();
+            
+            var result = TraverseInstructions(entrypoint, blockHeaders);
+            result.BlockHeaders.UnionWith(blockHeaders);
             DetermineBlockHeaders(result);
+            
             return result;
         }
 
@@ -170,33 +174,16 @@ namespace Echo.ControlFlow.Construction.Symbolic
 
         private void DetermineBlockHeaders(InstructionTraversalResult<TInstruction> result)
         {
-            foreach (var instruction in result.GetAllInstructions())
+            foreach (var (instruction, successors) in result.GetAllInstructions())
             {
-                switch (instruction.Successors.Count)
+                if ((Architecture.GetFlowControl(instruction) & InstructionFlowControl.CanBranch) != 0)
                 {
-                    case 0:
-                        break;
+                    foreach (var successor in successors)
+                        result.BlockHeaders.Add(successor.DestinationAddress);
                     
-                    case 1:
-                        // Check if the only successor is right after the instruction or not. 
-                        // If it is not, then it means this is an unconditional branch instruction, introducing a new
-                        // new basic block.
-                        
-                        long offset = Architecture.GetOffset(instruction.Instruction);
-                        int size = Architecture.GetSize(instruction.Instruction);
-                        
-                        long destinationAddress = instruction.Successors.First().DestinationAddress;
-                        if (destinationAddress != offset + size)
-                            result.BlockHeaders.Add(destinationAddress);
-                        
-                        break;
-                        
-                    default:
-                        // Instruction is a branch: every successor indicates a new basic block. 
-                        foreach (var successor in instruction.Successors)
-                            result.BlockHeaders.Add(successor.DestinationAddress);
-                        break;
-                        
+                    long offset = Architecture.GetOffset(instruction);
+                    long size = Architecture.GetSize(instruction);
+                    result.BlockHeaders.Add(offset + size);
                 }
             }
         }

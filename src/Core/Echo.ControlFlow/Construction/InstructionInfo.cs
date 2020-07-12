@@ -40,5 +40,16 @@ namespace Echo.ControlFlow.Construction
         {
             get;
         }
+
+        /// <summary>
+        /// Deconstructs the successor info into a tuple.
+        /// </summary>
+        /// <param name="instruction">The instruction.</param>
+        /// <param name="successors">The successors associated to the instruction.</param>
+        public void Deconstruct(out TInstruction instruction, out ICollection<SuccessorInfo> successors)
+        {
+            instruction = Instruction;
+            successors = Successors;
+        }
     }
 }
