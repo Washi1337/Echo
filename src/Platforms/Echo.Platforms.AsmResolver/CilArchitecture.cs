@@ -12,7 +12,6 @@ namespace Echo.Platforms.AsmResolver
     /// </summary>
     public class CilArchitecture : IInstructionSetArchitecture<CilInstruction>
     {
-        private readonly CilMethodBody _parentBody;
         private readonly IList<CilVariable> _variables;
         private readonly IList<CilParameter> _parameters;
 
@@ -22,7 +21,7 @@ namespace Echo.Platforms.AsmResolver
         /// <param name="parentBody">The method body.</param>
         public CilArchitecture(CilMethodBody parentBody)
         {
-            _parentBody = parentBody ?? throw new ArgumentNullException(nameof(parentBody));
+            MethodBody = parentBody ?? throw new ArgumentNullException(nameof(parentBody));
             
             _variables = parentBody.LocalVariables
                 .Select(v => new CilVariable(v))
@@ -34,6 +33,14 @@ namespace Echo.Platforms.AsmResolver
 
             if (parentBody.Owner.Signature.HasThis)
                 _parameters.Insert(0, new CilParameter(parentBody.Owner.Parameters.ThisParameter));
+        }
+
+        /// <summary>
+        /// Gets the method body that was encapsulated.
+        /// </summary>
+        public CilMethodBody MethodBody
+        {
+            get;
         }
 
         /// <summary>
@@ -111,7 +118,7 @@ namespace Echo.Platforms.AsmResolver
         /// <inheritdoc />
         public int GetStackPopCount(CilInstruction instruction)
         {
-            return instruction.GetStackPopCount(_parentBody);
+            return instruction.GetStackPopCount(MethodBody);
         }
 
         /// <inheritdoc />
@@ -121,7 +128,7 @@ namespace Echo.Platforms.AsmResolver
             {
                 return new[]
                 {
-                    _variables[instruction.GetLocalVariable(_parentBody.LocalVariables).Index]
+                    _variables[instruction.GetLocalVariable(MethodBody.LocalVariables).Index]
                 };
             }
 
@@ -129,7 +136,7 @@ namespace Echo.Platforms.AsmResolver
             {
                 return new[]
                 {
-                    _parameters[instruction.GetParameter(_parentBody.Owner.Parameters).MethodSignatureIndex]
+                    _parameters[instruction.GetParameter(MethodBody.Owner.Parameters).MethodSignatureIndex]
                 };
             }
 
@@ -143,7 +150,7 @@ namespace Echo.Platforms.AsmResolver
             {
                 return new[]
                 {
-                    _variables[instruction.GetLocalVariable(_parentBody.LocalVariables).Index]
+                    _variables[instruction.GetLocalVariable(MethodBody.LocalVariables).Index]
                 };
             }
 
@@ -151,7 +158,7 @@ namespace Echo.Platforms.AsmResolver
             {
                 return new[]
                 {
-                    _parameters[instruction.GetParameter(_parentBody.Owner.Parameters).MethodSignatureIndex]
+                    _parameters[instruction.GetParameter(MethodBody.Owner.Parameters).MethodSignatureIndex]
                 };
             }
 
