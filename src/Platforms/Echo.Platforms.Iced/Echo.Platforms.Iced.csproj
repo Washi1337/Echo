@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <Title>Echo.Platforms.Iced</Title>
+        <Description>x86 back-end powered by Iced for the Echo program analysis toolsuite.</Description>
+        <Copyright>Copyright © Washi 2019-2020</Copyright>
+        <PackageProjectUrl>https://github.com/Washi1337/Echo</PackageProjectUrl>
+        <PackageLicense>https://github.com/Washi1337/Echo/LICENSE.md</PackageLicense>
+        <RepositoryUrl>https://github.com/Washi1337/Echo</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>program code analysis control-flow-graph data-flow-graph slicing emulation</PackageTags>
+        <LangVersion>8</LangVersion>
+        <Version>0.9.0-alpha.1</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\Echo.Platforms.Iced.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\Echo.Platforms.Iced.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Iced" Version="1.7.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Core\Echo.ControlFlow\Echo.ControlFlow.csproj" />
+      <ProjectReference Include="..\..\Core\Echo.Core\Echo.Core.csproj" />
+    </ItemGroup>
+
+</Project>
