@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 {
@@ -16,6 +17,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         {
             ResultingMethod = method ?? throw new ArgumentNullException(nameof(method));
             Exception = null;
+            ResultingMethodSignature = null;
+        }
+        
+        /// <summary>
+        /// Creates a new successful method devirtualization result. 
+        /// </summary>
+        /// <param name="methodSig">The resolved Method Signature.</param>
+        public MethodDevirtualizationResult(MethodSignature methodSig)
+        {
+            ResultingMethodSignature = methodSig ?? throw new ArgumentNullException(nameof(methodSig));
+            Exception = null;
+            ResultingMethod = null;
         }
 
         /// <summary>
@@ -26,12 +39,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         {
             ResultingMethod = null;
             Exception = exception ?? throw new ArgumentNullException(nameof(exception));
+            ResultingMethodSignature = null;
         }
         
         /// <summary>
         /// When successful, gets the resulting devirtualized method.
         /// </summary>
         public IMethodDescriptor ResultingMethod
+        {
+            get;
+        }
+        
+        /// <summary>
+        /// When successful, gets the resulting devirtualized method signature.
+        /// </summary>
+        public MethodSignature ResultingMethodSignature
         {
             get;
         }
