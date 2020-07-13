@@ -15,11 +15,12 @@ namespace Echo.DataFlow
         /// <param name="origin">The dependent node.</param>
         /// <param name="target">The dependency node.</param>
         /// <param name="type">The type of dependency.</param>
-        public DataFlowEdge(DataFlowNode<TContents> origin, DataFlowNode<TContents> target, DataDependencyType type)
+        public DataFlowEdge(DataFlowNode<TContents> origin, DataFlowNode<TContents> target, DataDependencyType type, object metadata)
         {
             Origin = origin;
             Target = target;
             Type = type;
+            Metadata = metadata;
         }
         
         /// <summary>
@@ -46,6 +47,11 @@ namespace Echo.DataFlow
         /// Gets the type of dependency that this edge encodes.
         /// </summary>
         public DataDependencyType Type
+        {
+            get;
+        }
+        
+        public object Metadata
         {
             get;
         }
