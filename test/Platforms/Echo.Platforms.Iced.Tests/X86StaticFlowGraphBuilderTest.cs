@@ -38,7 +38,7 @@ namespace Echo.Platforms.Iced.Tests
         [Fact]
         public void ConditionalBranchesShouldResultInBlocksWithConditionalEdges()
         {
-            var decoder = Decoder.Create(32, new ByteArrayCodeReader(new byte[]
+            var cfg = ConstructStaticFlowGraph(new byte[]
             {
                 0x55,                 // push ebp
                 0x89, 0xe5,           // mov ebp, esp
@@ -59,17 +59,8 @@ namespace Echo.Platforms.Iced.Tests
                 
                 0x5d,                 // pop ebp
                 0xc3                  // ret
-            }));
+            }, 0);
             
-            var architecture = new X86Architecture();
-            var instructionProvider = new X86DecoderInstructionProvider(architecture, decoder);
-            
-            var cfgBuilder = new StaticFlowGraphBuilder<Instruction>(
-                instructionProvider,
-                new X86StaticSuccessorResolver());
-
-            var cfg = cfgBuilder.ConstructFlowGraph(0);
-
             Assert.Equal(new long[]
             {
                 0x0, 0x7, 0xe, 0x11, 0x17,

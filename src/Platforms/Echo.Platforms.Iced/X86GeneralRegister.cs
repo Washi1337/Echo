@@ -4,15 +4,15 @@ using Iced.Intel;
 namespace Echo.Platforms.Iced
 {
     /// <summary>
-    /// Represents a variable represented by an x86 register. 
+    /// Represents a variable represented by an x86 general purpose register. 
     /// </summary>
-    public class X86RegisterVariable : IVariable
+    public class X86GeneralRegister : IVariable
     {
         /// <summary>
         /// Creates a new x86 register variable.
         /// </summary>
         /// <param name="register">The register.</param>
-        public X86RegisterVariable(Register register)
+        public X86GeneralRegister(Register register)
         {
             Register = register;
         }
