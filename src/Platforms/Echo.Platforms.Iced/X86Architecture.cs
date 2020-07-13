@@ -44,42 +44,7 @@ namespace Echo.Platforms.Iced
         public long GetOffset(Instruction instruction) => (long) instruction.IP;
 
         /// <inheritdoc />
-        public string GetMnemonic(Instruction instruction)
-        {
-            var output = new StringOutput();
-            _formatter.FormatMnemonic(instruction, output);
-            return output.ToString();
-        }
-
-        /// <inheritdoc />
-        public int GetOperandCount(Instruction instruction) => instruction.OpCode.OpCount;
-
-        /// <inheritdoc />
-        public object GetOperand(Instruction instruction, int index)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
         public int GetSize(Instruction instruction) => instruction.Length;
-
-        /// <inheritdoc />
-        public byte[] GetOpCodeBytes(Instruction instruction)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public byte[] GetOperandBytes(Instruction instruction)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public byte[] GetInstructionBytes(Instruction instruction)
-        {
-            throw new NotImplementedException();
-        }
 
         /// <inheritdoc />
         public InstructionFlowControl GetFlowControl(Instruction instruction)
