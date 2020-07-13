@@ -29,6 +29,11 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The array.</returns>
         IDotNetArrayValue AllocateArray(TypeSignature elementType, int length);
 
+        /// <summary>
+        /// Allocates an empty object on the virtual heap.
+        /// </summary>
+        /// <param name="type">The type of object to allocate.</param>
+        /// <returns>The allocated object.</returns>
         IDotNetObjectValue AllocateObject(TypeSignature type);
 
         /// <summary>

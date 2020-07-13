@@ -18,6 +18,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             get;
         }
 
+        /// <summary>
+        /// Loads an element of a particular element type from the array.
+        /// </summary>
+        /// <param name="index">The index of the element to read.</param>
+        /// <param name="marshaller">The marshaller to use for converting the raw value to a value the CLI operates on.</param>
+        /// <param name="typeLayout">The type layout to read.</param>
+        /// <returns>The element.</returns>
         ICliValue LoadElement(int index, TypeMemoryLayout typeLayout, ICliMarshaller marshaller);
 
         /// <summary>
@@ -108,6 +115,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <returns>The element.</returns>
         OValue LoadElementRef(int index, ICliMarshaller marshaller);
 
+        /// <summary>
+        /// Replaces an element of a particular element type in the array.
+        /// </summary>
+        /// <param name="index">The index of the element to read.</param>
+        /// <param name="value">The value to replace the element with.</param>
+        /// <param name="marshaller">The marshaller to use for converting the raw value to a value the CLI operates on.</param>
+        /// <param name="typeLayout">The type layout to write.</param>
         void StoreElement(int index, TypeMemoryLayout typeLayout, ICliValue value, ICliMarshaller marshaller);
         
         /// <summary>

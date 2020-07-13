@@ -35,8 +35,7 @@ namespace Echo.Platforms.Iced
             {
                 case FlowControl.UnconditionalBranch:
                     return GetUnconditionalBranchTransitions(instruction, nextState);
-                
-                    break;
+
                 case FlowControl.ConditionalBranch:
                     return GetConditionalBranchTransitions(instruction, nextState);
                 

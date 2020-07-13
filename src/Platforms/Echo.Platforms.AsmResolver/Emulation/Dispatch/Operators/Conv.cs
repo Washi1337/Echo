@@ -7,6 +7,9 @@ using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 {
+    /// <summary>
+    /// Provides a handler for instructions with any variant of the Conv operation codes.
+    /// </summary>
     public class Conv : FallThroughOpCodeHandler
     {
         /// <inheritdoc />

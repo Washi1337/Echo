@@ -20,8 +20,7 @@ namespace Echo.Platforms.Iced
             {
                 case FlowControl.UnconditionalBranch:
                     return GetUnconditionalBranchSuccessors(instruction);
-                
-                    break;
+
                 case FlowControl.ConditionalBranch:
                     return GetConditionalBranchSuccessors(instruction);
                 

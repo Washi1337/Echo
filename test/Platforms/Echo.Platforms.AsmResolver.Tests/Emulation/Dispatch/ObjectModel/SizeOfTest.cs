@@ -57,6 +57,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.Equal(value, ExecutionContext.ProgramState.Stack.Top);
         }
 
+        // Disable warnings related to unused members.
+#pragma warning disable 169
         private struct Test
         {
             int Dummy1;
@@ -65,5 +67,6 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             List<int> Dumm3;
         }
+#pragma warning restore 169
     }
 }

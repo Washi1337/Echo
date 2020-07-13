@@ -19,14 +19,15 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var module = ModuleDefinition.FromFile(typeof(CalliTest).Assembly.Location);
-            var type = module.TopLevelTypes.First(q => q.Name == nameof(CalliTest));
-            var method = type.Methods.First(q => q.Name == "Calli");
+            var type = (TypeDefinition) module.LookupMember(typeof(TestClass).MetadataToken);
+            var method = type.Methods.First(q => q.Name == nameof(TestClass.Calli));
 
             var sig = method.Signature;
             
             ExecutionContext.ProgramState.Stack.Push(new I4Value(1312));
             
-            var functionPointer = typeof(CalliTest).GetMethods().First(q => q.Name == "Calli").MethodHandle
+            var functionPointer = typeof(TestClass).GetMethods()
+                .First(q => q.Name == nameof(TestClass.Calli)).MethodHandle
                 .GetFunctionPointer();
             
             ExecutionContext.ProgramState.Stack.Push(new NativeIntegerValue(functionPointer.ToInt64(),environment.Is32Bit));
@@ -44,14 +45,15 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var module = ModuleDefinition.FromFile(typeof(CalliTest).Assembly.Location);
-            var type = module.TopLevelTypes.First(q => q.Name == nameof(CalliTest));
-            var method = type.Methods.First(q => q.Name == "Callivoid");
+            var type = (TypeDefinition) module.LookupMember(typeof(TestClass).MetadataToken);
+            var method = type.Methods.First(q => q.Name == nameof(TestClass.CalliVoid));
 
             var sig = method.Signature;
             
             ExecutionContext.ProgramState.Stack.Push(new I4Value(1312));
             
-            var functionPointer = typeof(CalliTest).GetMethods().First(q => q.Name == "Callivoid").MethodHandle
+            var functionPointer = typeof(TestClass).GetMethods()
+                .First(q => q.Name == nameof(TestClass.CalliVoid)).MethodHandle
                 .GetFunctionPointer();
             
             ExecutionContext.ProgramState.Stack.Push(new NativeIntegerValue(functionPointer.ToInt64(),environment.Is32Bit));
@@ -63,12 +65,16 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
         }
 
-        public static int Calli(int arg1)
+        private static class TestClass
         {
-            return arg1;
-        }
-        public static void Callivoid(int arg1)
-        {
+            public static int Calli(int arg1)
+            {
+                return arg1;
+            }
+
+            public static void CalliVoid(int arg1)
+            {
+            }
         }
     }
 }
