@@ -19,6 +19,16 @@ namespace Echo.DataFlow.Serialization.Dot
             get;
             set;
         } = new DotEntityStyle("black", "solid");
+
+        /// <summary>
+        /// Gets or sets a value indicating whether edges representing stack dependencies should be annotated
+        /// with the stack slot index. 
+        /// </summary>
+        public bool IncludeStackEdgeLabels
+        {
+            get;
+            set;
+        } = true;
         
         /// <summary>
         /// Gets or sets the edge style to use for edges representing variable dependencies.
@@ -28,6 +38,16 @@ namespace Echo.DataFlow.Serialization.Dot
             get;
             set;
         } = new DotEntityStyle("gray", "dashed");
+
+        /// <summary>
+        /// Gets or sets a value indicating whether edges representing variable dependencies should be annotated
+        /// with the variable that was referenced. 
+        /// </summary>
+        public bool IncludeVariableEdgeLabels
+        {
+            get;
+            set;
+        } = true;
         
         /// <inheritdoc />
         public IDictionary<string, string> GetEdgeAttributes(IEdge edge)
@@ -47,6 +67,19 @@ namespace Echo.DataFlow.Serialization.Dot
                     result["color"] = style.Color;
                 if (!string.IsNullOrEmpty(style.Style))
                     result["style"] = style.Style;
+
+                if (e.Metadata is {} metadata)
+                {
+                    bool include = e.Type switch
+                    {
+                        DataDependencyType.Stack => IncludeStackEdgeLabels,
+                        DataDependencyType.Variable => IncludeVariableEdgeLabels,
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+
+                    if (include)
+                        result["label"] = metadata.ToString();
+                }
 
                 return result;
             }

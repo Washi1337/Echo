@@ -99,10 +99,17 @@ namespace Echo.DataFlow
 
         IEnumerable<IEdge> INode.GetOutgoingEdges()
         {
-            foreach (var source in StackDependencies.SelectMany(dep => dep.DataSources))
-                yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Stack);
-            foreach (var source in VariableDependencies.Values.SelectMany(dep => dep.DataSources))
-                yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Variable);
+            for (int i = 0; i < StackDependencies.Count; i++)
+            {
+                foreach (var source in StackDependencies[i].DataSources)
+                    yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Stack, i);
+            }
+
+            foreach (var dependency in VariableDependencies)
+            {
+                foreach (var source in dependency.Value.DataSources)
+                    yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Variable, dependency.Key);
+            }
         }
 
         IEnumerable<INode> INode.GetPredecessors() => Dependants;
