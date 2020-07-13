@@ -28,5 +28,8 @@ namespace Echo.Platforms.AsmResolver
 
         /// <inheritdoc />
         public string Name => $"V_{Variable.Index}";
+        
+        /// <inheritdoc />
+        public override string ToString() => Name;
     }
 }

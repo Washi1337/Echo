@@ -28,5 +28,8 @@ namespace Echo.Platforms.AsmResolver
 
         /// <inheritdoc />
         public string Name => Parameter.Name;
+
+        /// <inheritdoc />
+        public override string ToString() => Name;
     }
 }

@@ -28,5 +28,7 @@ namespace Echo.Platforms.Iced
             get;
         }
         
+        /// <inheritdoc />
+        public override string ToString() => Name;
     }
 }
