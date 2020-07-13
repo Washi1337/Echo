@@ -146,8 +146,16 @@ namespace Echo.Concrete.Values.ReferenceType
         public void WriteFloat64(int offset, Float64Value value) => 
             BasePointer.WriteFloat64(CurrentOffset + offset, value);
 
+        /// <summary>
+        /// Moves the relative pointer a certain amount of bytes up in the address space.
+        /// </summary>
+        /// <param name="offset">The number of bytes to move up.</param>
         public void Add(int offset) => CurrentOffset += offset;
 
+        /// <summary>
+        /// Moves the relative pointer a certain amount of bytes down in the address space.
+        /// </summary>
+        /// <param name="offset">The number of bytes to move down.</param>
         public void Subtract(int offset) => CurrentOffset -= offset;
 
         /// <inheritdoc />

@@ -56,41 +56,8 @@ namespace Echo.Platforms.AsmResolver
             instruction.Offset;
 
         /// <inheritdoc />
-        public string GetMnemonic(CilInstruction instruction) =>
-            instruction.OpCode.Mnemonic;
-
-        /// <inheritdoc />
-        public int GetOperandCount(CilInstruction instruction) =>
-            instruction.Operand == null ? 0 : 1;
-
-        /// <inheritdoc />
-        public object GetOperand(CilInstruction instruction, int index) =>
-            instruction.Operand != null && index == 0 ? instruction.Operand : throw new IndexOutOfRangeException();
-
-        /// <inheritdoc />
         public int GetSize(CilInstruction instruction) =>
             instruction.Size;
-
-        /// <inheritdoc />
-        public byte[] GetOpCodeBytes(CilInstruction instruction)
-        {
-            var opCode = instruction.OpCode;
-            return opCode.Size == 2
-                ? new[] { opCode.Byte1, opCode.Byte2 }
-                : new[] { opCode.Byte1 };
-        }
-
-        /// <inheritdoc />
-        public byte[] GetOperandBytes(CilInstruction instruction)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public byte[] GetInstructionBytes(CilInstruction instruction)
-        {
-            throw new NotImplementedException();
-        }
 
         /// <inheritdoc />
         public InstructionFlowControl GetFlowControl(CilInstruction instruction)
