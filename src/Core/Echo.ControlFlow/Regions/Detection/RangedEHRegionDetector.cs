@@ -31,13 +31,13 @@ namespace Echo.ControlFlow.Regions.Detection
             DetermineRegionEntrypoints(cfg, sortedRanges, rangeToRegionMapping);
         }
 
-        private static Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> CreateEHRegions<TInstruction>(
+        private static Dictionary<IAddressRange, BasicControlFlowRegion<TInstruction>> CreateEHRegions<TInstruction>(
             ControlFlowGraph<TInstruction> cfg, 
             IReadOnlyList<ExceptionHandlerRange> sortedRanges)
         {
-            var rangeToRegion = new Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>>();
+            var rangeToRegion = new Dictionary<IAddressRange, BasicControlFlowRegion<TInstruction>>();
 
-            var ehRegions = new Dictionary<AddressRange, ExceptionHandlerRegion<TInstruction>>();
+            var ehRegions = new Dictionary<IAddressRange, ExceptionHandlerRegion<TInstruction>>();
             for (int i = 0; i < sortedRanges.Count; i++)
             {
                 var currentEHRange = sortedRanges[i];
@@ -80,17 +80,17 @@ namespace Echo.ControlFlow.Regions.Detection
         private static void InsertNodesInEHRegions<TInstruction>(
             ControlFlowGraph<TInstruction> cfg, 
             IReadOnlyList<ExceptionHandlerRange> sortedRanges,
-            Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> rangeToRegionMapping)
+            Dictionary<IAddressRange, BasicControlFlowRegion<TInstruction>> rangeToRegionMapping)
         {
             foreach (var node in cfg.Nodes)
             {
                 var parentRange = GetParentRange(sortedRanges, node);
-                if (parentRange.HasValue)
-                    rangeToRegionMapping[parentRange.Value].Nodes.Add(node);
+                if (!(parentRange is null))
+                    rangeToRegionMapping[parentRange].Nodes.Add(node);
             }
         }
 
-        private static AddressRange? GetParentRange<TInstruction>(
+        private static IAddressRange? GetParentRange<TInstruction>(
             IReadOnlyList<ExceptionHandlerRange> sortedRanges, 
             ControlFlowNode<TInstruction> node)
         {
@@ -111,7 +111,7 @@ namespace Echo.ControlFlow.Regions.Detection
         }
 
         private static void DetermineRegionEntrypoints<TInstruction>(ControlFlowGraph<TInstruction> cfg, List<ExceptionHandlerRange> sortedRanges,
-            Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> rangeToRegionMapping)
+            Dictionary<IAddressRange, BasicControlFlowRegion<TInstruction>> rangeToRegionMapping)
         {
             foreach (var range in sortedRanges)
             {

@@ -13,7 +13,7 @@ namespace Echo.ControlFlow.Regions.Detection
         /// </summary>
         /// <param name="protectedRange">The range indicating the code that is protected by the handler.</param>
         /// <param name="handlerRange">The range indicating the handler code.</param>
-        public ExceptionHandlerRange(AddressRange protectedRange, AddressRange handlerRange)
+        public ExceptionHandlerRange(IAddressRange protectedRange, IAddressRange handlerRange)
         {
             ProtectedRange = protectedRange;
             HandlerRange = handlerRange;
@@ -26,7 +26,7 @@ namespace Echo.ControlFlow.Regions.Detection
         /// <param name="protectedRange">The range indicating the code that is protected by the handler.</param>
         /// <param name="handlerRange">The range indicating the handler code.</param>
         /// <param name="userData">A user defined tag that is added to the exception handler.</param>
-        public ExceptionHandlerRange(AddressRange protectedRange, AddressRange handlerRange, object userData)
+        public ExceptionHandlerRange(IAddressRange protectedRange, IAddressRange handlerRange, object userData)
         {
             ProtectedRange = protectedRange;
             HandlerRange = handlerRange;
@@ -36,7 +36,7 @@ namespace Echo.ControlFlow.Regions.Detection
         /// <summary>
         /// Gets the address range indicating the start and end of the code that is protected by a handler.
         /// </summary>
-        public AddressRange ProtectedRange
+        public IAddressRange ProtectedRange
         {
             get;
         }
@@ -44,7 +44,7 @@ namespace Echo.ControlFlow.Regions.Detection
         /// <summary>
         /// Gets the address range indicating the start and end of the handler code.
         /// </summary>
-        public AddressRange HandlerRange
+        public IAddressRange HandlerRange
         {
             get;
         }

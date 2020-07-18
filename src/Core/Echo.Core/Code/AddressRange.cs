@@ -5,7 +5,7 @@ namespace Echo.Core.Code
     /// <summary>
     /// Represents an address range in memory.
     /// </summary>
-    public readonly struct AddressRange
+    public readonly struct AddressRange : IAddressRange
     {
         /// <summary>
         /// Determines whether two address ranges are considered equal.
@@ -37,47 +37,29 @@ namespace Echo.Core.Code
             End = end;
         }
         
-        /// <summary>
-        /// Gets the address of the first byte in the address range.
-        /// </summary>
+        /// <inheritdoc />
         public long Start
         {
             get;
         }
 
-        /// <summary>
-        /// Gets the address where this address range stops. This address is exclusive. 
-        /// </summary>
+        /// <inheritdoc />
         public long End
         {
             get;
         }
 
-        /// <summary>
-        /// Gets the total length of the address range.
-        /// </summary>
+        /// <inheritdoc />
         public long Length => End - Start;
 
-        /// <summary>
-        /// Determines whether the provided address falls within the address range.
-        /// </summary>
-        /// <param name="address">The address.</param>
-        /// <returns><c>true</c> if the address falls within the range, <c>false otherwise</c>.</returns>
+        /// <inheritdoc />
         public bool Contains(long address) => address >= Start && address < End;
 
-        /// <summary>
-        /// Determines whether the address range contains the provided sub range.
-        /// </summary>
-        /// <param name="range">The address range.</param>
-        /// <returns><c>true</c> if the sub range falls within the range, <c>false otherwise</c>.</returns>
-        public bool Contains(AddressRange range) => Contains(range.Start) && Contains(range.End);
+        /// <inheritdoc />
+        public bool Contains(IAddressRange range) => Contains(range.Start) && Contains(range.End);
 
-        /// <summary>
-        /// Determines whether the range is considered equal with the provided range.
-        /// </summary>
-        /// <param name="other">The other range.</param>
-        /// <returns><c>true</c> if the ranges are considered equal, <c>false</c> otherwise.</returns>
-        public bool Equals(in AddressRange other) => 
+        /// <inheritdoc />
+        public bool Equals(in IAddressRange other) => 
             Start == other.Start && End == other.End;
 
         /// <inheritdoc />
