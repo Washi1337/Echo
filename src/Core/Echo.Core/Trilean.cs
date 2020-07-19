@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Echo.Core
 {
@@ -21,6 +22,22 @@ namespace Echo.Core
         /// Represents the unknown value.
         /// </summary>
         public static readonly Trilean Unknown = new Trilean(TrileanValue.Unknown);
+        
+        // The following implements the following truth table:
+        //
+        //    | 0 | 1 | ?
+        // ---+---+---+---
+        //  0 | 0 | 1 | ?
+        //  --+---+---+---
+        //  1 | 1 | 1 | 1
+        //  --+---+---+---
+        //  ? | ? | 1 | ?
+        private static readonly Trilean[] OrTable =
+        {
+            TrileanValue.False, TrileanValue.True, TrileanValue.Unknown,
+            TrileanValue.True, TrileanValue.True, TrileanValue.True,
+            TrileanValue.Unknown, TrileanValue.True, TrileanValue.Unknown,
+        };
         
         /// <summary>
         /// Creates a new trilean.
@@ -170,7 +187,33 @@ namespace Echo.Core
 
         /// <inheritdoc />
         public override int GetHashCode() => (int) Value;
+
+        /// <summary>
+        /// Calculates the index within a binary operator lookup table.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <param name="column">The column.</param>
+        /// <returns>The index.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetLookupTableIndex(TrileanValue row, TrileanValue column) => (int) row * 3 + (int) column;
+
+        /// <summary>
+        /// Computes the inclusive or between two trilean values.
+        /// </summary>
+        /// <param name="a">The left hand side of the binary operator.</param>
+        /// <param name="b">The right hand side of the binary operator.</param>
+        /// <returns>Returns true if at least one of the values is true. If neither are true, returns unknown if at
+        /// least one is unknown, and false otherwise.</returns>
+        public static Trilean operator |(Trilean a, Trilean b) => a.Or(b);
         
+        /// <summary>
+        /// Computes the inclusive or between two trilean values.
+        /// </summary>
+        /// <param name="other">The other trilean value.</param>
+        /// <returns>Returns true if at least one of the values is true. If neither are true, returns unknown if at
+        /// least one is unknown, and false otherwise.</returns>
+        public Trilean Or(Trilean other) => OrTable[GetLookupTableIndex(Value, other.Value)];
+
         /// <inheritdoc />
         public override string ToString() => Value switch
         {
