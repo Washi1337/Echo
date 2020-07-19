@@ -51,5 +51,8 @@ namespace Echo.ControlFlow.Construction
             instruction = Instruction;
             successors = Successors;
         }
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Instruction} ({Successors.Count} successors)";
     }
 }
