@@ -39,7 +39,23 @@ namespace Echo.Core
         {
             Value = value;
         }
-        
+
+        /// <summary>
+        /// Creates a new trilean.
+        /// </summary>
+        /// <param name="value">
+        /// The nullable boolean value. If the value is <c>null</c>, <see cref="TrileanValue.Unknown"/> will be assumed.
+        /// </param>
+        public Trilean(bool? value)
+        {
+            if (!value.HasValue)
+                Value = TrileanValue.Unknown;
+            else if (value.Value)
+                Value = TrileanValue.True;
+            else
+                Value = TrileanValue.False;
+        }
+
         /// <summary>
         /// Gets the raw integer representation of the trilean value.
         /// </summary>
@@ -77,6 +93,18 @@ namespace Echo.Core
         public bool ToBooleanOrFalse() => Value == TrileanValue.True;
         
         /// <summary>
+        /// Converts the trilean to a nullable boolean, where null indicates the unknown state.
+        /// </summary>
+        /// <returns>The nullable boolean.</returns>
+        public bool? ToNullableBoolean() => Value switch
+        {
+            TrileanValue.Unknown => null,
+            TrileanValue.False => false,
+            TrileanValue.True => true,
+            _ => throw new ArgumentOutOfRangeException(nameof(Value))
+        };
+        
+        /// <summary>
         /// Creates a new trilean.
         /// </summary>
         /// <param name="value">The boolean value.</param>
@@ -87,6 +115,12 @@ namespace Echo.Core
         /// </summary>
         /// <param name="value">The trilean value.</param>
         public static implicit operator Trilean(TrileanValue value) => new Trilean(value);
+        
+        /// <summary>
+        /// Creates a new trilean.
+        /// </summary>
+        /// <param name="value">The trilean value.</param>
+        public static implicit operator Trilean(bool? value) => new Trilean(value);
 
         /// <summary>
         /// Determines whether the trilean is <c>true</c>.
