@@ -27,6 +27,22 @@ namespace Echo.Core
         //
         //    | 0 | 1 | ?
         // ---+---+---+---
+        //  0 | 0 | 0 | 0
+        //  --+---+---+---
+        //  1 | 0 | 1 | ?
+        //  --+---+---+---
+        //  ? | 0 | ? | ?
+        private static readonly Trilean[] AndTable =
+        {
+            TrileanValue.False, TrileanValue.False, TrileanValue.False,
+            TrileanValue.False, TrileanValue.True, TrileanValue.Unknown,
+            TrileanValue.False, TrileanValue.Unknown, TrileanValue.Unknown,
+        };
+        
+        // The following implements the following truth table:
+        //
+        //    | 0 | 1 | ?
+        // ---+---+---+---
         //  0 | 0 | 1 | ?
         //  --+---+---+---
         //  1 | 1 | 1 | 1
@@ -197,6 +213,23 @@ namespace Echo.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int GetLookupTableIndex(TrileanValue row, TrileanValue column) => (int) row * 3 + (int) column;
 
+        /// <summary>
+        /// Computes the and between two trilean values.
+        /// </summary>
+        /// <param name="a">The left hand side of the binary operator.</param>
+        /// <param name="b">The right hand side of the binary operator.</param>
+        /// <returns>Returns true if both values are true. If not, returns unknown if at
+        /// least one is true or unknown and the other is unknown, and false otherwise.</returns>
+        public static Trilean operator &(Trilean a, Trilean b) => a.And(b);
+        
+        /// <summary>
+        /// Computes the and between two trilean values.
+        /// </summary>
+        /// <param name="other">The other trilean value.</param>
+        /// <returns>Returns true if both values are true. If not, returns unknown if at
+        /// least one is true or unknown and the other is unknown, and false otherwise.</returns>
+        public Trilean And(Trilean other) => AndTable[GetLookupTableIndex(Value, other.Value)];
+        
         /// <summary>
         /// Computes the inclusive or between two trilean values.
         /// </summary>
