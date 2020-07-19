@@ -44,5 +44,25 @@ namespace Echo.Core.Tests
             Assert.Equal(z, x.Or(y));
             Assert.Equal(z, x | y);
         }
+        
+        [Theory]
+        [InlineData(False, False, False)]
+        [InlineData(False, True, True)]
+        [InlineData(False, Unknown, Unknown)]
+        [InlineData(True, False, True)]
+        [InlineData(True, True, False)]
+        [InlineData(True, Unknown, Unknown)]
+        [InlineData(Unknown, False, Unknown)]
+        [InlineData(Unknown, True, Unknown)]
+        [InlineData(Unknown, Unknown, Unknown)]
+        public void XorTest(TrileanValue a, TrileanValue b, TrileanValue expected)
+        {
+            Trilean x = a;
+            Trilean y = b;
+            Trilean z = expected;
+            
+            Assert.Equal(z, x.Xor(y));
+            Assert.Equal(z, x ^ y);
+        }
     }
 }

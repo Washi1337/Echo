@@ -55,6 +55,22 @@ namespace Echo.Core
             TrileanValue.Unknown, TrileanValue.True, TrileanValue.Unknown,
         };
         
+        // The following implements the following truth table:
+        //
+        //    | 0 | 1 | ?
+        // ---+---+---+---
+        //  0 | 0 | 1 | ?
+        //  --+---+---+---
+        //  1 | 1 | 0 | ?
+        //  --+---+---+---
+        //  ? | ? | ? | ?
+        private static readonly Trilean[] XorTable =
+        {
+            TrileanValue.False, TrileanValue.True, TrileanValue.Unknown,
+            TrileanValue.True, TrileanValue.False, TrileanValue.Unknown,
+            TrileanValue.Unknown, TrileanValue.Unknown, TrileanValue.Unknown,
+        };
+        
         /// <summary>
         /// Creates a new trilean.
         /// </summary>
@@ -246,6 +262,23 @@ namespace Echo.Core
         /// <returns>Returns true if at least one of the values is true. If neither are true, returns unknown if at
         /// least one is unknown, and false otherwise.</returns>
         public Trilean Or(Trilean other) => OrTable[GetLookupTableIndex(Value, other.Value)];
+        
+        /// <summary>
+        /// Computes the exclusive or between two trilean values.
+        /// </summary>
+        /// <param name="a">The left hand side of the binary operator.</param>
+        /// <param name="b">The right hand side of the binary operator.</param>
+        /// <returns>Returns true if the two trilean values are different. If at least one is unknown,
+        /// the result is unknown.</returns>
+        public static Trilean operator ^(Trilean a, Trilean b) => a.Xor(b);
+        
+        /// <summary>
+        /// Computes the exclusive or between two trilean values.
+        /// </summary>
+        /// <param name="other">The other trilean value.</param>
+        /// <returns>Returns true if the two trilean values are different. If at least one is unknown,
+        /// the result is unknown.</returns>
+        public Trilean Xor(Trilean other) => XorTable[GetLookupTableIndex(Value, other.Value)];
 
         /// <inheritdoc />
         public override string ToString() => Value switch
