@@ -221,6 +221,29 @@ namespace Echo.Core
         public override int GetHashCode() => (int) Value;
 
         /// <summary>
+        /// Inverts the trilean value.
+        /// </summary>
+        /// <param name="value">The value to invert.</param>
+        /// <returns>
+        /// Returns true if the value is false, and vice versa. If unknown, the return value is also unknown.
+        /// </returns>
+        public static Trilean operator !(Trilean value) => value.Not();
+        
+        /// <summary>
+        /// Inverts the trilean value.
+        /// </summary>
+        /// <returns>
+        /// Returns true if the value is false, and vice versa. If unknown, the return value is also unknown.
+        /// </returns>
+        public Trilean Not() => Value switch
+        {
+            TrileanValue.False => True,
+            TrileanValue.True => False,
+            TrileanValue.Unknown => Unknown,
+            _ => throw new ArgumentOutOfRangeException(nameof(Value))
+        };
+
+        /// <summary>
         /// Calculates the index within a binary operator lookup table.
         /// </summary>
         /// <param name="row">The row.</param>

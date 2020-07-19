@@ -6,6 +6,19 @@ namespace Echo.Core.Tests
     public class TrileanTest
     {
         [Theory]
+        [InlineData(False, True)]
+        [InlineData(True, False)]
+        [InlineData(Unknown, Unknown)]
+        public void NotTest(TrileanValue value, TrileanValue expected)
+        {
+            Trilean x = value;
+            Trilean y = expected;
+            
+            Assert.Equal(y, x.Not());
+            Assert.Equal(y, !x);
+        }
+        
+        [Theory]
         [InlineData(False, False, False)]
         [InlineData(False, True, False)]
         [InlineData(False, Unknown, False)]
