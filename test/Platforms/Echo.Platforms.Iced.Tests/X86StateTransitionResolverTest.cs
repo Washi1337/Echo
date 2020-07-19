@@ -22,9 +22,7 @@ namespace Echo.Platforms.Iced.Tests
         private (ControlFlowGraph<Instruction> Cfg, DataFlowGraph<Instruction> Dfg) ConstructSymbolicFlowGraph(
             byte[] rawCode, long entrypoint)
         {
-            var decoder = Decoder.Create(32, new ByteArrayCodeReader(rawCode));
-            
-            var instructionProvider = new X86DecoderInstructionProvider(_architecture, decoder);
+            var instructionProvider = new X86DecoderInstructionProvider(_architecture, rawCode, 32);
             var dfgBuilder = new X86StateTransitionResolver(_architecture);
             
             var cfgBuilder = new SymbolicFlowGraphBuilder<Instruction>(

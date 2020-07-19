@@ -11,10 +11,8 @@ namespace Echo.Platforms.Iced.Tests
     {
         private static ControlFlowGraph<Instruction> ConstructStaticFlowGraph(byte[] rawCode, long entrypoint)
         {
-            var decoder = Decoder.Create(32, new ByteArrayCodeReader(rawCode));
-            
             var architecture = new X86Architecture();
-            var instructionProvider = new X86DecoderInstructionProvider(architecture, decoder);
+            var instructionProvider = new X86DecoderInstructionProvider(architecture, rawCode, 32);
 
             var cfgBuilder = new StaticFlowGraphBuilder<Instruction>(
                 instructionProvider,
@@ -70,6 +68,24 @@ namespace Echo.Platforms.Iced.Tests
             Assert.Contains(cfg.Nodes[0x11], cfg.Nodes[0x7].ConditionalEdges.Select(e=>e.Target));
             Assert.Equal(cfg.Nodes[0x11], cfg.Nodes[0xE].FallThroughNeighbour);
             Assert.Contains(cfg.Nodes[0x7], cfg.Nodes[0x11].ConditionalEdges.Select(e=>e.Target));
+        }
+
+        [Fact]
+        public void DisconnectedBlocksShouldSkipOverNotExecutableData()
+        {
+            var cfg = ConstructStaticFlowGraph(new byte[]
+            {
+                /* 0: */ 0xEB, 0x01,  // jmp    0x3
+                /* 2: */ 0xFF,        // db     0xFF
+                /* 3: */ 0xC3         // ret
+            }, 0);
+            
+            Assert.Contains(cfg.Nodes, node => node.Offset == 0);
+            Assert.DoesNotContain(cfg.Nodes, node => node.Offset == 2);
+            Assert.Contains(cfg.Nodes, node => node.Offset == 3);
+            
+            Assert.Single(cfg.Nodes[0].Contents.Instructions);
+            Assert.Single(cfg.Nodes[3].Contents.Instructions);
         }
     }
 }
