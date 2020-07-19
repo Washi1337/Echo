@@ -47,6 +47,34 @@ namespace Echo.Core
         {
             get;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the value is known (either true or false).
+        /// </summary>
+        public bool IsKnown => Value != TrileanValue.Unknown;
+
+        /// <summary>
+        /// Gets a value indicating whether the value is unknown.
+        /// </summary>
+        public bool IsUnknown => Value == TrileanValue.Unknown;
+
+        /// <summary>
+        /// When the trilean value is known, obtains the boolean value.
+        /// </summary>
+        /// <returns>The boolean value.</returns>
+        public bool ToBoolean() => Value switch
+        {
+            TrileanValue.Unknown => throw new ArgumentException("Trilean value is unknown."),
+            TrileanValue.False => false,
+            TrileanValue.True => true,
+            _ => throw new ArgumentOutOfRangeException(nameof(Value))
+        };
+
+        /// <summary>
+        /// When the trilean value is known, obtains the boolean value, otherwise returns <c>false</c>.
+        /// </summary>
+        /// <returns>The boolean value.</returns>
+        public bool ToBooleanOrFalse() => Value == TrileanValue.True;
         
         /// <summary>
         /// Creates a new trilean.
@@ -60,6 +88,55 @@ namespace Echo.Core
         /// <param name="value">The trilean value.</param>
         public static implicit operator Trilean(TrileanValue value) => new Trilean(value);
 
+        /// <summary>
+        /// Determines whether the trilean is <c>true</c>.
+        /// </summary>
+        /// <param name="value">The trilean.</param>
+        /// <returns><c>true</c> if the <see cref="Value"/> property is <see cref="TrileanValue.True"/>, <c>false</c> otherwise.</returns>
+        public static bool operator true(Trilean value) => value.ToBooleanOrFalse();
+
+        /// <summary>
+        /// Determines whether the trilean is <c>false</c>.
+        /// </summary>
+        /// <param name="value">The trilean.</param>
+        /// <returns><c>false</c> if the <see cref="Value"/> property is <see cref="TrileanValue.False"/>, <c>false</c> otherwise.</returns>
+        public static bool operator false(Trilean value) => !value.ToBooleanOrFalse();
+
+        /// <summary>
+        /// Determines whether this trilean is exactly equal to the specified trilean.
+        /// </summary>
+        /// <param name="a">The left hand side of the comparison.</param>
+        /// <param name="b">The right hand side of the comparison.</param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="Value"/> property of both trileans are equal, <c>false</c> otherwise.
+        /// </returns>
+        public static bool operator ==(Trilean a, Trilean b) => a.Equals(b);
+
+        /// <summary>
+        /// Determines whether this trilean is not equal to the specified trilean.
+        /// </summary>
+        /// <param name="a">The left hand side of the comparison.</param>
+        /// <param name="b">The right hand side of the comparison.</param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="Value"/> property of both trileans are different, <c>false</c> otherwise.
+        /// </returns>
+        public static bool operator !=(Trilean a, Trilean b) => !a.Equals(b);
+
+        /// <summary>
+        /// Determines whether this trilean is exactly equal to the specified trilean.
+        /// </summary>
+        /// <param name="other">The other trilean.</param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="Value"/> property of both trileans are equal, <c>false</c> otherwise.
+        /// </returns>
+        public bool Equals(Trilean other) => Value == other.Value;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => obj is Trilean other && Equals(other);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => (int) Value;
+        
         /// <inheritdoc />
         public override string ToString() => Value switch
         {
