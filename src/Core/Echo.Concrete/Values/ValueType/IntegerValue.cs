@@ -186,16 +186,6 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         public virtual void And(IntegerValue other)
         {
-            // The following implements the following truth table:
-            //
-            //    | 0 | 1 | ?
-            // ---+---+---+---
-            //  0 | 0 | 0 | 0
-            //  --+---+---+---
-            //  1 | 0 | 1 | ?
-            //  --+---+---+---
-            //  ? | 0 | ? | ?
-            
             AssertSameBitSize(other);
 
             Span<byte> bits = stackalloc byte[Size];
@@ -207,16 +197,13 @@ namespace Echo.Concrete.Values.ValueType
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
-
                 Span<byte> otherBits = stackalloc byte[Size];
                 other.GetBits(otherBits);
-                
                 new BitField(bits).And(new BitField(otherBits));
             }
             else
             {
                 // Some bits are unknown, perform operation manually.
-                
                 var bitField = new BitField(bits);
                 var maskField = new BitField(mask);
 
@@ -236,16 +223,6 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         public virtual void Or(IntegerValue other)
         {
-            // The following implements the following truth table:
-            //
-            //    | 0 | 1 | ?
-            // ---+---+---+---
-            //  0 | 0 | 1 | ?
-            //  --+---+---+---
-            //  1 | 1 | 1 | 1
-            //  --+---+---+---
-            //  ? | ? | 1 | ?
-            
             AssertSameBitSize(other);
 
             Span<byte> bits = stackalloc byte[Size];
@@ -257,16 +234,13 @@ namespace Echo.Concrete.Values.ValueType
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
-
                 Span<byte> otherBits = stackalloc byte[Size];
                 other.GetBits(otherBits);
-                
                 new BitField(bits).Or(new BitField(otherBits));
             }
             else
             {
                 // Some bits are unknown, perform operation manually.
-                
                 var bitField = new BitField(bits);
                 var maskField = new BitField(mask);
                 
@@ -286,16 +260,6 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         public virtual void Xor(IntegerValue other)
         {
-            // The following implements the following truth table:
-            //
-            //    | 0 | 1 | ?
-            // ---+---+---+---
-            //  0 | 0 | 1 | ?
-            //  --+---+---+---
-            //  1 | 1 | 0 | ?
-            //  --+---+---+---
-            //  ? | ? | ? | ?
-            
             AssertSameBitSize(other);
 
             Span<byte> bits = stackalloc byte[Size];
@@ -307,16 +271,13 @@ namespace Echo.Concrete.Values.ValueType
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
-
                 Span<byte> otherBits = stackalloc byte[Size];
                 other.GetBits(otherBits);
-                
                 new BitField(bits).Xor(new BitField(otherBits));
             }
             else
             {
                 // Some bits are unknown, perform operation manually.
-                
                 var bitField = new BitField(bits);
                 var maskField = new BitField(mask);
 
@@ -414,9 +375,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match.</exception>
         public virtual void Add(IntegerValue other)
         {
-            // The following implements a ripple full adder, with unknown bits taken into account. 
-            // Essentially, this means that any unknown bit added to another bit results in an unknown sum and/or carry
-            // bit.
+            // The following implements a ripple full-adder.
             
             AssertSameBitSize(other);
 
@@ -430,30 +389,13 @@ namespace Echo.Concrete.Values.ValueType
             Trilean carry = false;
             for (int i = 0; i < sumBuffer.Length * 8; i++)
             {
-                Trilean a = GetBit(i);
-                Trilean b = other.GetBit(i);
-                
-                // Implement truth table.
-                (Trilean s, Trilean c) = (a.Value, b.Value, carry.Value) switch
-                {
-                    (False, False, False) => (Trilean.False, Trilean.False),
-                    (True, True, True) => (True, True),
-                    
-                    (True, False, False) => (True, False),
-                    (False, True, False) => (True, False),
-                    (False, False, True) => (True, False),
-                    
-                    (Unknown, False, False) => (Unknown, False),
-                    (False, Unknown, False) => (Unknown, False),
-                    (False, False, Unknown) => (Unknown, False),
-                    
-                    (False, True, True) => (False, True),
-                    (True, False, True) => (False, True),
-                    (True, True, False) => (False, True),
-                    
-                    _ => (null, null),
-                };
+                var a = GetBit(i);
+                var b = other.GetBit(i);
 
+                // Implement full-adder logic.
+                var s = a ^ b ^ carry;
+                var c = (carry & (a ^ b)) | (a & b); 
+                
                 sum[i] = s.ToBooleanOrFalse();
                 mask[i] = s.IsKnown;
                 carry = c;
@@ -481,6 +423,8 @@ namespace Echo.Concrete.Values.ValueType
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match.</exception>
         public virtual void Subtract(IntegerValue other)
         {
+            // The following implements a ripple full-subtractor.
+            
             AssertSameBitSize(other);
 
             Span<byte> differenceBuffer = stackalloc byte[Size];
@@ -493,35 +437,12 @@ namespace Echo.Concrete.Values.ValueType
             Trilean borrow = false;
             for (int i = 0; i < differenceBuffer.Length * 8; i++)
             {
-                Trilean a = GetBit(i);
-                Trilean b = other.GetBit(i);
+                var a = GetBit(i);
+                var b = other.GetBit(i);
                 
-                // Implement truth table.
-                (Trilean d, Trilean bOut) = (a.Value, b.Value, borrow.Value) switch
-                {
-                    (False, False, False) => (False, False),
-                    
-                    (True, True, True) => (True, True),
-                    (False, False, True) => (True, True),
-                    (False, True, False) => (True, True),
-                    
-                    (True, False, False) => (True, False),
-                    
-                    (False, True, True) => (False, True),
-                    
-                    (True, False, True) => (False, False),
-                    (True, True, False) => (False, False),
-                    
-                    (Unknown, True, True) => (Unknown, True),
-                    (False, True, Unknown) => (Unknown, True),
-                    
-                    (True, False, Unknown) => (Unknown, False),
-                    (True, Unknown, False) => (Unknown, False),
-                    (Unknown, False, False) => (Unknown, False),
-                    
-                    _ => (Unknown, Unknown),
-                    
-                };
+                // Implement full-subtractor logic.
+                var d = a ^ b ^ borrow;
+                var bOut = (!a & borrow) | (!a & b) | (b & borrow);
 
                 difference[i] = d.ToBooleanOrFalse();
                 mask[i] = d.IsKnown;
