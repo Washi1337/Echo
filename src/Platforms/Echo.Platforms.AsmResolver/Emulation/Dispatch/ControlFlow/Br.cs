@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
+using Echo.Core;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
 {
@@ -17,6 +18,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         };
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction) => true;
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction) => true;
     }
 }

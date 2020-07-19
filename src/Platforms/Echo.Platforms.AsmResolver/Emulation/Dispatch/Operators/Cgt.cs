@@ -11,7 +11,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
     /// Provides a handler for instructions with the <see cref="CilOpCodes.Cgt"/> or <see cref="CilOpCodes.Cgt_Un"/>
     /// operation code.
     /// </summary>
-    public class Cgt : BinaryNumericOperator
+    public class Cgt : ComparisonOperator
     {
         /// <inheritdoc />
         public override IReadOnlyCollection<CilCode> SupportedOpCodes => new[]
@@ -31,23 +31,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
             IntegerValue left, IntegerValue right)
         {
-            bool? result = left.IsGreaterThan(right, instruction.OpCode.Code == CilCode.Cgt);
+            var result = left.IsGreaterThan(right, instruction.OpCode.Code == CilCode.Cgt);
             return ConvertToI4AndReturnSuccess(context, result);
         }
 
         /// <inheritdoc />
         protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, OValue left, OValue right)
         {
-            bool? result = left.IsGreaterThan(right);
+            var result = left.IsGreaterThan(right);
             return ConvertToI4AndReturnSuccess(context, result);
         }
-
-        private static DispatchResult ConvertToI4AndReturnSuccess(ExecutionContext context, bool? result)
-        {
-            var i4Result = new I4Value(result.GetValueOrDefault() ? 1 : 0, 0xFFFFFFFEu | (result.HasValue ? 1u : 0u));
-            context.ProgramState.Stack.Push(i4Result);
-            return DispatchResult.Success();
-        }
-        
     }
 }

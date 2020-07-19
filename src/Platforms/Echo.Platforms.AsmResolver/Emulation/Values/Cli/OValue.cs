@@ -38,7 +38,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public NativeIntegerValue InterpretAsI(bool is32Bit)
         {
             var value = new NativeIntegerValue(0, is32Bit);
-            if (!IsZero.GetValueOrDefault())
+            if (!IsZero.ToBooleanOrFalse())
                 value.MarkFullyUnknown();
             return value;
         }
@@ -47,31 +47,31 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public NativeIntegerValue InterpretAsU(bool is32Bit)
         {
             var value = new NativeIntegerValue(0, is32Bit);
-            if (!IsZero.GetValueOrDefault())
+            if (!IsZero.ToBooleanOrFalse())
                 value.MarkFullyUnknown();
             return value;
         }
 
         /// <inheritdoc />
-        public I4Value InterpretAsI1() => new I4Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFFFF00);
+        public I4Value InterpretAsI1() => new I4Value(0, IsZero.ToBooleanOrFalse() ? 0xFFFFFFFF : 0xFFFFFF00);
 
         /// <inheritdoc />
-        public I4Value InterpretAsU1() => new I4Value(0, !IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFFFF00);
+        public I4Value InterpretAsU1() => new I4Value(0, !IsZero.ToBooleanOrFalse() ? 0xFFFFFFFF : 0xFFFFFF00);
 
         /// <inheritdoc />
-        public I4Value InterpretAsI2() => new I4Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFF0000);
+        public I4Value InterpretAsI2() => new I4Value(0, IsZero.ToBooleanOrFalse() ? 0xFFFFFFFF : 0xFFFF0000);
 
         /// <inheritdoc />
-        public I4Value InterpretAsU2() => new I4Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0xFFFF0000);
+        public I4Value InterpretAsU2() => new I4Value(0, IsZero.ToBooleanOrFalse() ? 0xFFFFFFFF : 0xFFFF0000);
 
         /// <inheritdoc />
-        public I4Value InterpretAsI4() => new I4Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0x00000000);
+        public I4Value InterpretAsI4() => new I4Value(0, IsZero.ToBooleanOrFalse() ? 0xFFFFFFFF : 0x00000000);
 
         /// <inheritdoc />
-        public I4Value InterpretAsU4() => new I4Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF : 0x00000000);
+        public I4Value InterpretAsU4() => new I4Value(0, IsZero.ToBooleanOrFalse() ? 0xFFFFFFFF : 0x00000000);
 
         /// <inheritdoc />
-        public I8Value InterpretAsI8() => new I8Value(0, IsZero.GetValueOrDefault() ? 0xFFFFFFFF_FFFFFFFF : 0);
+        public I8Value InterpretAsI8() => new I8Value(0, IsZero.ToBooleanOrFalse() ? 0xFFFFFFFF_FFFFFFFF : 0);
 
         /// <inheritdoc />
         public FValue InterpretAsR4() => new FValue(0); // TODO: return unknown float.

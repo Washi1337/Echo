@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
@@ -19,21 +20,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         };
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
             IntegerValue left, IntegerValue right)
         {
-            bool? equal = left.IsEqualTo(right);
-            bool? greaterThan = left.IsGreaterThan(right, IsSigned(instruction));
+            var equal = left.IsEqualTo(right);
+            var greaterThan = left.IsGreaterThan(right, IsSigned(instruction));
 
-            if (equal.GetValueOrDefault() || greaterThan.GetValueOrDefault())
-                return true;
-            if (!equal.HasValue || !greaterThan.HasValue)
-                return null;
-            return false;
+            if (equal.ToBooleanOrFalse() || greaterThan.ToBooleanOrFalse())
+                return Trilean.True;
+            if (!equal.IsKnown || !greaterThan.IsKnown)
+                return Trilean.Unknown;
+            return Trilean.False;
         }
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction, 
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction, 
             FValue left, FValue right)
         {
             // ReSharper disable once CompareOfFloatsByEqualityOperator
@@ -44,17 +45,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         }
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction, 
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction, 
             OValue left, OValue right)
         {
-            bool? equal = left.IsEqualTo(right);
-            bool? greaterThan = left.IsGreaterThan(right);
+            var equal = left.IsEqualTo(right);
+            var greaterThan = left.IsGreaterThan(right);
 
-            if (equal.GetValueOrDefault() || greaterThan.GetValueOrDefault())
-                return true;
-            if (!equal.HasValue || !greaterThan.HasValue)
-                return null;
-            return false;
+            if (equal.ToBooleanOrFalse() || greaterThan.ToBooleanOrFalse())
+                return Trilean.True;
+            if (!equal.IsKnown || !greaterThan.IsKnown)
+                return Trilean.Unknown;
+            return Trilean.False;
         }
 
         private static bool IsSigned(CilInstruction instruction)

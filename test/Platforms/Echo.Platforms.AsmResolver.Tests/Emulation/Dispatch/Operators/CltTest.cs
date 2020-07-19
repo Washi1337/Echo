@@ -1,4 +1,5 @@
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
@@ -92,7 +93,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Clt_Un));
             
             Assert.True(result.IsSuccess);
-            Assert.True(((I4Value) stack.Top).IsZero);
+            Assert.Equal(Trilean.True, ((I4Value) stack.Top).IsZero);
         }
 
         [Fact]
@@ -110,7 +111,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Clt_Un));
             
             Assert.True(result.IsSuccess);
-            Assert.True(((I4Value) stack.Top).IsNonZero);
+            Assert.Equal(Trilean.True, ((I4Value) stack.Top).IsNonZero);
         }
         
     }

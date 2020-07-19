@@ -1,7 +1,8 @@
 using System;
-using System.Collections;
 using System.Text;
+using Echo.Core;
 using Echo.Core.Values;
+using static Echo.Core.TrileanValue;
 
 namespace Echo.Concrete.Values.ValueType
 {
@@ -26,7 +27,7 @@ namespace Echo.Concrete.Values.ValueType
         public bool IsValueType => true;
 
         /// <inheritdoc />
-        public virtual bool? IsZero
+        public virtual Trilean IsZero
         {
             get
             {
@@ -38,12 +39,10 @@ namespace Echo.Concrete.Values.ValueType
                     for (var i = 0; i < Size; i++)
                     {
                         if (bits[i] != 0)
-                        {
-                            return false;
-                        }
+                            return Trilean.False;
                     }
 
-                    return true;
+                    return Trilean.True;
                 }
 
 
@@ -58,29 +57,27 @@ namespace Echo.Concrete.Values.ValueType
                 for (int i = 0; i < bits.Length * 8; i++)
                 {
                     if (bitField[i])
-                    {
-                        return false;
-                    }
+                        return Trilean.False;
                 }
 
-                return null;
+                return Trilean.Unknown;
             }
         }
 
         /// <inheritdoc />
-        public virtual bool? IsNonZero => !IsZero;
+        public virtual Trilean IsNonZero => !IsZero;
 
         /// <inheritdoc />
-        public bool? IsPositive => GetLastBit();
+        public Trilean IsPositive => GetLastBit();
 
         /// <inheritdoc />
-        public bool? IsNegative => !GetLastBit();
+        public Trilean IsNegative => !GetLastBit();
 
         /// <summary>
         /// Gets the most significant bit of the integer value.
         /// </summary>
         /// <returns></returns>
-        public virtual bool? GetLastBit() => GetBit(Size * 8 - 1);
+        public virtual Trilean GetLastBit() => GetBit(Size * 8 - 1);
 
         /// <summary>
         /// Reads a single bit value at the provided index.
@@ -88,7 +85,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="index">The index of the bit to read.</param>
         /// <returns>The read bit, or <c>null</c> if the bit value is unknown.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when an invalid index was provided.</exception>
-        public abstract bool? GetBit(int index);
+        public abstract Trilean GetBit(int index);
 
         /// <summary>
         /// Writes a single bit value at the provided index.
@@ -96,7 +93,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="index">The index of the bit to write.</param>
         /// <param name="value">The new value of the bit to write. <c>null</c> indicates an unknown bit value.</param>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when an invalid index was provided.</exception>
-        public abstract void SetBit(int index, bool? value);
+        public abstract void SetBit(int index, Trilean value);
 
         /// <inheritdoc />
         public abstract void GetBits(Span<byte> buffer);
@@ -154,19 +151,10 @@ namespace Echo.Concrete.Values.ValueType
         {
             var size = Size * 8;
             var sb = new StringBuilder(size);
-            for (int i = size - 1; i >= 0; i--)
-            {
-                var bit = GetBit(i);
-                if (bit.HasValue)
-                {
-                    sb.Append(bit.Value ? '1' : '0');
-                }
-                else
-                {
-                    sb.Append('?');
-                }
-            }
             
+            for (int i = size - 1; i >= 0; i--)
+                sb.Append(GetBit(i).ToString());
+
             return sb.ToString();
         }
 
@@ -234,18 +222,9 @@ namespace Echo.Concrete.Values.ValueType
 
                 for (int i = 0; i < mask.Length * 8; i++)
                 {
-                    bool? result = (GetBit(i), other.GetBit(i)) switch
-                    {
-                        (true, true) => true,
-                        (true, null) => null,
-                        (null, true) => null,
-                        (null, null) => null,
-                        
-                        _ => false,
-                    };
-
-                    bitField[i] = result.GetValueOrDefault();
-                    maskField[i] = result.HasValue;
+                    var result = GetBit(i) & other.GetBit(i);
+                    bitField[i] = result.ToBooleanOrFalse();
+                    maskField[i] = result.IsKnown;
                 }
             }
 
@@ -293,18 +272,9 @@ namespace Echo.Concrete.Values.ValueType
                 
                 for (int i = 0; i < mask.Length * 8; i++)
                 {
-                    bool? result = (GetBit(i), other.GetBit(i)) switch
-                    {
-                        (false, false) => false,
-                        (null, false) => null,
-                        (null, null) => null,
-                        (false, null) => null,
-                        
-                        _ => true,
-                    };
-
-                    bitField[i] = result.GetValueOrDefault();
-                    maskField[i] = result.HasValue;
+                    var result = GetBit(i) | other.GetBit(i);
+                    bitField[i] = result.ToBooleanOrFalse();
+                    maskField[i] = result.IsKnown;
                 }
             }
 
@@ -352,12 +322,9 @@ namespace Echo.Concrete.Values.ValueType
 
                 for (int i = 0; i < mask.Length * 8; i++)
                 {
-                    bool? a = GetBit(i);
-                    bool? b = other.GetBit(i);
-                    bool? result = a.HasValue && b.HasValue ? a.Value ^ b.Value : (bool?) null;
-                    
-                    bitField[i] = result.GetValueOrDefault();
-                    maskField[i] = result.HasValue;
+                    var result = GetBit(i) ^ other.GetBit(i);
+                    bitField[i] = result.ToBooleanOrFalse();
+                    maskField[i] = result.IsKnown;
                 }
             }
 
@@ -460,35 +427,35 @@ namespace Echo.Concrete.Values.ValueType
             var sum = new BitField(sumBuffer);
             var mask = new BitField(maskBuffer);
 
-            bool? carry = false;
+            Trilean carry = false;
             for (int i = 0; i < sumBuffer.Length * 8; i++)
             {
-                bool? a = GetBit(i);
-                bool? b = other.GetBit(i);
+                Trilean a = GetBit(i);
+                Trilean b = other.GetBit(i);
                 
                 // Implement truth table.
-                (bool? s, bool? c) = (a, b, carry) switch
+                (Trilean s, Trilean c) = (a.Value, b.Value, carry.Value) switch
                 {
-                    (false, false, false) => ((bool?) false, (bool?) false),
-                    (true, true, true) => (true, true),
+                    (False, False, False) => (Trilean.False, Trilean.False),
+                    (True, True, True) => (True, True),
                     
-                    (true, false, false) => (true, false),
-                    (false, true, false) => (true, false),
-                    (false, false, true) => (true, false),
+                    (True, False, False) => (True, False),
+                    (False, True, False) => (True, False),
+                    (False, False, True) => (True, False),
                     
-                    (null, false, false) => (null, false),
-                    (false, null, false) => (null, false),
-                    (false, false, null) => (null, false),
+                    (Unknown, False, False) => (Unknown, False),
+                    (False, Unknown, False) => (Unknown, False),
+                    (False, False, Unknown) => (Unknown, False),
                     
-                    (false, true, true) => (false, true),
-                    (true, false, true) => (false, true),
-                    (true, true, false) => (false, true),
+                    (False, True, True) => (False, True),
+                    (True, False, True) => (False, True),
+                    (True, True, False) => (False, True),
                     
                     _ => (null, null),
                 };
 
-                sum[i] = s.GetValueOrDefault();
-                mask[i] = s.HasValue;
+                sum[i] = s.ToBooleanOrFalse();
+                mask[i] = s.IsKnown;
                 carry = c;
             }
 
@@ -523,41 +490,41 @@ namespace Echo.Concrete.Values.ValueType
             var difference = new BitField(differenceBuffer);
             var mask = new BitField(maskBuffer);
 
-            bool? borrow = false;
+            Trilean borrow = false;
             for (int i = 0; i < differenceBuffer.Length * 8; i++)
             {
-                bool? a = GetBit(i);
-                bool? b = other.GetBit(i);
+                Trilean a = GetBit(i);
+                Trilean b = other.GetBit(i);
                 
                 // Implement truth table.
-                (bool? d, bool? bOut) = (a, b, borrow) switch
+                (Trilean d, Trilean bOut) = (a.Value, b.Value, borrow.Value) switch
                 {
-                    (false, false, false) => ((bool?) false, (bool?) false),
+                    (False, False, False) => (False, False),
                     
-                    (true, true, true) => (true, true),
-                    (false, false, true) => (true, true),
-                    (false, true, false) => (true, true),
+                    (True, True, True) => (True, True),
+                    (False, False, True) => (True, True),
+                    (False, True, False) => (True, True),
                     
-                    (true, false, false) => (true, false),
+                    (True, False, False) => (True, False),
                     
-                    (false, true, true) => (false, true),
+                    (False, True, True) => (False, True),
                     
-                    (true, false, true) => (false, false),
-                    (true, true, false) => (false, false),
+                    (True, False, True) => (False, False),
+                    (True, True, False) => (False, False),
                     
-                    (null, true, true) => (null, true),
-                    (false, true, null) => (null, true),
+                    (Unknown, True, True) => (Unknown, True),
+                    (False, True, Unknown) => (Unknown, True),
                     
-                    (true, false, null) => (null, false),
-                    (true, null, false) => (null, false),
-                    (null, false, false) => (null, false),
+                    (True, False, Unknown) => (Unknown, False),
+                    (True, Unknown, False) => (Unknown, False),
+                    (Unknown, False, False) => (Unknown, False),
                     
-                    _ => (null, null),
+                    _ => (Unknown, Unknown),
                     
                 };
 
-                difference[i] = d.GetValueOrDefault();
-                mask[i] = d.HasValue;
+                difference[i] = d.ToBooleanOrFalse();
+                mask[i] = d.IsKnown;
                 borrow = bOut;
             }
 
@@ -611,15 +578,15 @@ namespace Echo.Concrete.Values.ValueType
             int lastShiftByUnknown = 0;
             for (int i = 0; i < Size * 8; i++)
             {
-                bool? bit = other.GetBit(i);
+                Trilean bit = other.GetBit(i);
                 
-                if (!bit.HasValue)
+                if (!bit.IsKnown)
                 {
                     multipliedByUnknown.LeftShift(i - lastShiftByUnknown);
                     result.Add(multipliedByUnknown);
                     lastShiftByUnknown = i;
                 }
-                else if (bit.Value)
+                else if (bit.ToBoolean())
                 {
                     multipliedByOne.LeftShift(i - lastShiftByOne);
                     result.Add(multipliedByOne);
@@ -641,7 +608,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="other">The other integer.</param>
         /// <returns><c>true</c> if the integers are equal, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public virtual bool? IsEqualTo(IntegerValue other)
+        public virtual Trilean IsEqualTo(IntegerValue other)
         {
             if (!IsKnown || !other.IsKnown)
             {
@@ -655,10 +622,10 @@ namespace Echo.Concrete.Values.ValueType
                 // TODO: this could probably use performance improvements.
                 for (int i = 0; i < Size * 8; i++)
                 {
-                    bool? a = GetBit(i);
-                    bool? b = other.GetBit(i);
+                    Trilean a = GetBit(i);
+                    Trilean b = other.GetBit(i);
 
-                    if (a.HasValue && b.HasValue && a.Value != b.Value)
+                    if (a.IsKnown && b.IsKnown && a.Value != b.Value)
                         return false;
                 }
 
@@ -675,7 +642,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="signed">Indicates the integers should be interpreted as signed or unsigned integers.</param>
         /// <returns><c>true</c> if the current integer is greater than the provided integer, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public virtual bool? IsGreaterThan(IntegerValue other, bool signed)
+        public virtual Trilean IsGreaterThan(IntegerValue other, bool signed)
         {
             if (signed)
                 return null; // TODO: support signed comparisons.
@@ -695,23 +662,23 @@ namespace Echo.Concrete.Values.ValueType
 
             for (int i = Size * 8 - 1; i >= 0; i--)
             {
-                bool? a = GetBit(i);
-                bool? b = other.GetBit(i);
+                Trilean a = GetBit(i);
+                Trilean b = other.GetBit(i);
 
-                switch (a, b)
+                switch (a.Value, b.Value)
                 {
-                    case (false, true):
-                    case (false, null):
-                    case (null, true):
-                        return false;
+                    case (False, True):
+                    case (False, Unknown):
+                    case (Unknown, True):
+                        return False;
                     
-                    case (true, false):
-                        return true;
+                    case (True, False):
+                        return True;
                     
-                    case (true, null):
-                    case (null, false):
-                    case (null, null):
-                        return null;
+                    case (True, Unknown):
+                    case (Unknown, False):
+                    case (Unknown, Unknown):
+                        return Unknown;
                 }
             }
 
@@ -725,7 +692,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="signed">Indicates the integers should be interpreted as signed or unsigned integers.</param>
         /// <returns><c>true</c> if the current integer is less than the provided integer, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public virtual bool? IsLessThan(IntegerValue other, bool signed)
+        public virtual Trilean IsLessThan(IntegerValue other, bool signed)
         {
             if (signed)
                 return null; // TODO: support signed comparisons.
@@ -745,22 +712,22 @@ namespace Echo.Concrete.Values.ValueType
 
             for (int i = Size * 8 - 1; i >= 0; i--)
             {
-                bool? a = GetBit(i);
-                bool? b = other.GetBit(i);
+                Trilean a = GetBit(i);
+                Trilean b = other.GetBit(i);
 
-                switch (a, b)
+                switch (a.Value, b.Value)
                 {
-                    case (false, true):
-                        return true;
+                    case (False, True):
+                        return True;
                     
-                    case (true, false):
-                    case (true, null):
-                    case (null, false):
-                        return false;
+                    case (True, False):
+                    case (True, Unknown):
+                    case (Unknown, False):
+                        return False;
                     
-                    case (false, null):
-                    case (null, true):
-                        return null;
+                    case (False, Unknown):
+                    case (Unknown, True):
+                        return Unknown;
                 }
             }
 
@@ -822,19 +789,19 @@ namespace Echo.Concrete.Values.ValueType
             for (int i = 0; i < bitsToCopy; i++)
             {
                 var bit = GetBit(i);
-                newBits[i] = bit.GetValueOrDefault();
-                newMask[i] = bit.HasValue;
+                newBits[i] = bit.ToBooleanOrFalse();
+                newMask[i] = bit.IsKnown;
             }
 
             // Sign extend if necessary.
             if (signExtend)
             {
-                bool? sign = GetBit(bitsToCopy - 1);
+                Trilean sign = GetBit(bitsToCopy - 1);
 
                 for (int i = bitsToCopy; i < newBitLength; i++)
                 {
-                    newBits[i] = sign.GetValueOrDefault();
-                    newMask[i] = sign.HasValue;
+                    newBits[i] = sign.ToBooleanOrFalse();
+                    newMask[i] = sign.IsKnown;
                 }
             }
 

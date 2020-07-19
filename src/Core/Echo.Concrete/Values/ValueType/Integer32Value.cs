@@ -1,5 +1,6 @@
 using System;
 using System.Buffers.Binary;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -101,7 +102,7 @@ namespace Echo.Concrete.Values.ValueType
         public override int Size => sizeof(uint);
 
         /// <inheritdoc />
-        public override bool? IsZero
+        public override Trilean IsZero
         {
             get
             {
@@ -141,35 +142,28 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override bool? GetBit(int index)
+        public override Trilean GetBit(int index)
         {
-            Span<byte> bitsBuffer = stackalloc byte[Size];
-            GetBits(bitsBuffer);
-
-            Span<byte> maskBuffer = stackalloc byte[Size];
-            GetMask(maskBuffer);
-            
-            var bits = new BitField(bitsBuffer);
-            var mask = new BitField(maskBuffer);
-            
             if (index < 0 || index >= 32)
                 throw new ArgumentOutOfRangeException(nameof(index));
-
-            return mask[index] ? bits[index] : (bool?) null;
+            
+            return ((Mask >> index) & 1) == 1 
+                ? ((U32 >> index) & 1) == 1 
+                : Trilean.Unknown;
         }
 
         /// <inheritdoc />
-        public override void SetBit(int index, bool? value)
+        public override void SetBit(int index, Trilean value)
         {
             if (index < 0 || index >= 32)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
             uint mask = 1u << index;
             
-            if (value.HasValue)
+            if (value.IsKnown)
             {
                 Mask |= mask;
-                U32 = (U32 & ~mask) | ((value.Value ? 1u : 0u) << index);
+                U32 = (U32 & ~mask) | ((value.ToBooleanOrFalse() ? 1u : 0u) << index);
             }
             else
             {
@@ -258,32 +252,43 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override bool? IsEqualTo(IntegerValue other)
+        public override Trilean IsEqualTo(IntegerValue other)
         {
             if (other is Integer32Value int32)
             {
                 if (IsKnown && other.IsKnown)
                     return U32 == int32.U32;
-                return U32 == int32.U32 ? null : (bool?) false;
+                
+                return U32 == int32.U32 
+                    ? Trilean.Unknown
+                    : Trilean.False;
             }
 
             return base.IsEqualTo(other);
         }
 
         /// <inheritdoc />
-        public override bool? IsGreaterThan(IntegerValue other, bool signed)
+        public override Trilean IsGreaterThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer32Value int32)
-                return signed ? I32 > int32.I32 : U32 > int32.U32;
+            {
+                return signed
+                    ? I32 > int32.I32
+                    : U32 > int32.U32;
+            }
 
             return base.IsGreaterThan(other, signed);
         }
 
         /// <inheritdoc />
-        public override bool? IsLessThan(IntegerValue other, bool signed)
+        public override Trilean IsLessThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer32Value int32)
-                return signed ? I32 < int32.I32 : U32 < int32.U32;
+            {
+                return signed
+                    ? I32 < int32.I32
+                    : U32 < int32.U32;
+            }
             
             return base.IsLessThan(other, signed);
         }

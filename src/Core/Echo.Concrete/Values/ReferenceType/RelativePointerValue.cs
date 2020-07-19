@@ -1,5 +1,6 @@
 using System;
 using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ReferenceType
@@ -77,16 +78,16 @@ namespace Echo.Concrete.Values.ReferenceType
         public bool IsValueType => false;
 
         /// <inheritdoc />
-        public bool? IsZero => BasePointer is null;
+        public Trilean IsZero => BasePointer is null;
 
         /// <inheritdoc />
-        public bool? IsNonZero => !IsZero;
+        public Trilean IsNonZero => !IsZero;
 
         /// <inheritdoc />
-        public bool? IsPositive => true;
+        public Trilean IsPositive => true;
 
         /// <inheritdoc />
-        public bool? IsNegative => false;
+        public Trilean IsNegative => false;
 
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer) => 

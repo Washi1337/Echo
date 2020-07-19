@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -28,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
             switch (arguments[0])
             {
-                case { IsZero: true }:
+                case { IsZero: { Value: TrileanValue.True } }:
                     return new MethodDevirtualizationResult(new NullReferenceException());
                 
                 case OValue { ReferencedObject: IDotNetValue referencedObject }:

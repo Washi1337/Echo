@@ -4,6 +4,7 @@ using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -35,7 +36,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 case { IsKnown: false }:
                     throw new DispatchException("Could not infer object instance of field to set the value for.");
                 
-                case OValue { IsZero: true }:
+                case OValue { IsZero: { Value: TrileanValue.True } }:
                     return new DispatchResult(new NullReferenceException());
                 
                 case OValue { ReferencedObject: HleObjectValue compoundObject }:

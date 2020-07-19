@@ -2,6 +2,7 @@ using System;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -37,7 +38,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             ICliValue elementValue; 
             switch (arrayValue)
             {
-                case OValue { IsZero: true }:
+                case OValue { IsZero: { Value: TrileanValue.True } }:
                     // Pushed array object is null.
                     return new DispatchResult(new NullReferenceException());
                 

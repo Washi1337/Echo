@@ -1,16 +1,18 @@
 using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Xunit;
+using static Echo.Core.TrileanValue;
 
 namespace Echo.Concrete.Tests.Values.ValueType
 {
     public class IntegerNValueTest
     {
         [Theory]
-        [InlineData("00000000", true)]
-        [InlineData("00001010", false)]
-        [InlineData("0000?0?0", null)]
-        [InlineData("0100?0?0", false)]
-        public void IsZero(string input, bool? expected)
+        [InlineData("00000000", True)]
+        [InlineData("00001010", False)]
+        [InlineData("0000?0?0", Unknown)]
+        [InlineData("0100?0?0", False)]
+        public void IsZero(string input, TrileanValue expected)
         {
             var value = new IntegerNValue(input);
             
@@ -18,11 +20,11 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00000000", false)]
-        [InlineData("00001010", true)]
-        [InlineData("0000?0?0", null)]
-        [InlineData("0100?0?0", true)]
-        public void IsNonZero(string input, bool? expected)
+        [InlineData("00000000", False)]
+        [InlineData("00001010", True)]
+        [InlineData("0000?0?0", Unknown)]
+        [InlineData("0100?0?0", True)]
+        public void IsNonZero(string input, TrileanValue expected)
         {
             var value = new IntegerNValue(input);
             
@@ -275,11 +277,11 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("01010101", "01010101", true)]
-        [InlineData("01010101", "10101010", false)]
-        [InlineData("010?0101", "01010101", null)]
-        [InlineData("010?0111", "01010101", false)]
-        public void IsEqualTo(string a, string b, bool? expected)
+        [InlineData("01010101", "01010101", True)]
+        [InlineData("01010101", "10101010", False)]
+        [InlineData("010?0101", "01010101", Unknown)]
+        [InlineData("010?0111", "01010101", False)]
+        public void IsEqualTo(string a, string b, TrileanValue expected)
         {
             var value1 = new IntegerNValue(a);
             var value2 = new IntegerNValue(b);
@@ -288,15 +290,15 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00000000", "00000000", false, false)]
-        [InlineData("00000000", "00000001", false, true)]
-        [InlineData("00000001", "00010000", false, true)]
-        [InlineData("00000001", "00000000", false, false)]
-        [InlineData("0000000?", "00000000", false, false)]
-        [InlineData("0000001?", "000101??", false, true)]
-        [InlineData("000101??", "0000001?", false, false)]
-        [InlineData("0000000?", "000?0000", false, null)]
-        public void IsLessThan(string a, string b, bool signed, bool? expected)
+        [InlineData("00000000", "00000000", false, False)]
+        [InlineData("00000000", "00000001", false, True)]
+        [InlineData("00000001", "00010000", false, True)]
+        [InlineData("00000001", "00000000", false, False)]
+        [InlineData("0000000?", "00000000", false, False)]
+        [InlineData("0000001?", "000101??", false, True)]
+        [InlineData("000101??", "0000001?", false, False)]
+        [InlineData("0000000?", "000?0000", false, Unknown)]
+        public void IsLessThan(string a, string b, bool signed, TrileanValue expected)
         {
             var value1 = new IntegerNValue(a);
             var value2 = new IntegerNValue(b);
@@ -305,13 +307,13 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00000000", "00000000", false, false)]
-        [InlineData("00000001", "00000000", false, true)]
-        [InlineData("00000001", "00010000", false, false)]
-        [InlineData("00010000", "00000001", false, true)]
-        [InlineData("0001000?", "00001000", false, true)]
-        [InlineData("000101??", "0000001?", false, true)]
-        public void IsGreaterThan(string a, string b, bool signed, bool? expected)
+        [InlineData("00000000", "00000000", false, False)]
+        [InlineData("00000001", "00000000", false, True)]
+        [InlineData("00000001", "00010000", false, False)]
+        [InlineData("00010000", "00000001", false, True)]
+        [InlineData("0001000?", "00001000", false, True)]
+        [InlineData("000101??", "0000001?", false, True)]
+        public void IsGreaterThan(string a, string b, bool signed, TrileanValue expected)
         {
             var value1 = new IntegerNValue(a);
             var value2 = new IntegerNValue(b);

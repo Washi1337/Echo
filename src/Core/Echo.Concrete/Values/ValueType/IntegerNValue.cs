@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -127,22 +128,24 @@ namespace Echo.Concrete.Values.ValueType
         public override IValue Copy() => new IntegerNValue(Bits, Mask);
 
         /// <inheritdoc />
-        public override bool? GetBit(int index)
+        public override Trilean GetBit(int index)
         {
             var bits = new BitField(Bits);
             var mask = new BitField(Mask);
             
-            return mask[index] ? bits[index] : (bool?) null;
+            return mask[index]
+                ? bits[index] 
+                : Trilean.Unknown;
         }
 
         /// <inheritdoc />
-        public override void SetBit(int index, bool? value)
+        public override void SetBit(int index, Trilean value)
         {
             var bits = new BitField(Bits);
             var mask = new BitField(Mask);
             
-            mask[index] = value.HasValue;
-            bits[index] = value.GetValueOrDefault();
+            mask[index] = value.IsKnown;
+            bits[index] = value.ToBooleanOrFalse();
         }
 
         /// <inheritdoc />

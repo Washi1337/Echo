@@ -1,6 +1,7 @@
 using System;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete.Values.ReferenceType;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
@@ -51,16 +52,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool IsValueType => false;
 
         /// <inheritdoc />
-        public bool? IsZero => false;
+        public Trilean IsZero => false;
 
         /// <inheritdoc />
-        public bool? IsNonZero => true;
+        public Trilean IsNonZero => true;
 
         /// <inheritdoc />
-        public bool? IsPositive => true;
+        public Trilean IsPositive => true;
 
         /// <inheritdoc />
-        public bool? IsNegative => false;
+        public Trilean IsNegative => false;
 
         /// <inheritdoc />
         /// <inheritdoc />

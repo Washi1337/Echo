@@ -73,7 +73,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             if (value is Integer8Value int8)
             {
-                uint signMask = !signed || int8.GetBit(7).HasValue ? 0xFFFFFF00 : 0;
+                uint signMask = !signed || int8.GetBit(7).IsKnown ? 0xFFFFFF00 : 0;
                 return new I4Value(signed ? int8.I8 : (int) int8.U8, int8.Mask | signMask);
             }
 
@@ -95,7 +95,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             if (value is Integer16Value int16)
             {
-                uint signMask = !signed || int16.GetBit(15).HasValue ? 0xFFFF0000 : 0;
+                uint signMask = !signed || int16.GetBit(15).IsKnown ? 0xFFFF0000 : 0;
                 return new I4Value(signed ? int16.I16 : (int) int16.U16, int16.Mask | signMask);
             }
 

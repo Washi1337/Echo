@@ -2,6 +2,7 @@ using System;
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ReferenceType
@@ -51,16 +52,16 @@ namespace Echo.Concrete.Values.ReferenceType
         public bool IsValueType => false;
 
         /// <inheritdoc />
-        public bool? IsZero => false;
+        public Trilean IsZero => false;
 
         /// <inheritdoc />
-        public bool? IsNonZero => true;
+        public Trilean IsNonZero => true;
 
         /// <inheritdoc />
-        public bool? IsPositive => true;
+        public Trilean IsPositive => true;
 
         /// <inheritdoc />
-        public bool? IsNegative => false;
+        public Trilean IsNegative => false;
 
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer)
