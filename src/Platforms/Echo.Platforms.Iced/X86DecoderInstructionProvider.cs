@@ -19,7 +19,7 @@ namespace Echo.Platforms.Iced
         /// Creates a new wrapper around a raw stream containing x86 code.
         /// </summary>
         /// <param name="architecture">The x86 architecture.</param>
-        /// <param name="inputStream">The raw code stream.</param>
+        /// <param name="inputCode">The raw code stream.</param>
         /// <param name="bitness">The bitness of the x86 code. This value must be either 16, 32 or 64.</param>
         public X86DecoderInstructionProvider(
             IInstructionSetArchitecture<Instruction> architecture,
