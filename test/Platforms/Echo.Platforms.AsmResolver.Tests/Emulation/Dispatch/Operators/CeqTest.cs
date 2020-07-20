@@ -1,8 +1,9 @@
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
+using static Echo.Core.TrileanValue;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
 {
@@ -14,11 +15,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         }
 
         [Theory]
-        [InlineData("111000", "111000", true)]
-        [InlineData("111000", "000111", false)]
-        [InlineData("111000", "11000?", false)]
-        [InlineData("111000", "11100?", null)]
-        public void CompareI4sOnStack(string a, string b, bool? expected)
+        [InlineData("111000", "111000", True)]
+        [InlineData("111000", "000111", False)]
+        [InlineData("111000", "11000?", False)]
+        [InlineData("111000", "11100?", Unknown)]
+        public void CompareI4sOnStack(string a, string b, TrileanValue expected)
         {
             var stack = ExecutionContext.ProgramState.Stack;
             
@@ -32,11 +33,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         }
 
         [Theory]
-        [InlineData("111000", "111000", true)]
-        [InlineData("111000", "000111", false)]
-        [InlineData("111000", "11000?", false)]
-        [InlineData("111000", "11100?", null)]
-        public void CompareI8sOnStack(string a, string b, bool? expected)
+        [InlineData("111000", "111000", True)]
+        [InlineData("111000", "000111", False)]
+        [InlineData("111000", "11000?", False)]
+        [InlineData("111000", "11100?", Unknown)]
+        public void CompareI8sOnStack(string a, string b, TrileanValue expected)
         {
             var stack = ExecutionContext.ProgramState.Stack;
             

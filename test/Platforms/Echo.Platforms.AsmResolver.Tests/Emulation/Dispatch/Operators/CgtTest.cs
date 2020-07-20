@@ -4,6 +4,7 @@ using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
+using static Echo.Core.TrileanValue;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
 {
@@ -15,13 +16,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         }
 
         [Theory]
-        [InlineData(CilCode.Cgt, 0, 0, false)]
-        [InlineData(CilCode.Cgt_Un, 0, 0, false)]
-        [InlineData(CilCode.Cgt, 1, 0, true)]
-        [InlineData(CilCode.Cgt_Un, 1, 0, true)]
-        [InlineData(CilCode.Cgt, -1, 0, false)]
-        [InlineData(CilCode.Cgt_Un, -1, 0, true)]
-        public void I4Comparison(CilCode code, int a, int b, bool? expected)
+        [InlineData(CilCode.Cgt, 0, 0, False)]
+        [InlineData(CilCode.Cgt_Un, 0, 0, False)]
+        [InlineData(CilCode.Cgt, 1, 0, True)]
+        [InlineData(CilCode.Cgt_Un, 1, 0, True)]
+        [InlineData(CilCode.Cgt, -1, 0, False)]
+        [InlineData(CilCode.Cgt_Un, -1, 0, True)]
+        public void I4Comparison(CilCode code, int a, int b, TrileanValue expected)
         {
             var stack = ExecutionContext.ProgramState.Stack;
             
@@ -35,13 +36,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         }
 
         [Theory]
-        [InlineData(CilCode.Cgt, 0, 0, false)]
-        [InlineData(CilCode.Cgt_Un, 0, 0, false)]
-        [InlineData(CilCode.Cgt, 1, 0, true)]
-        [InlineData(CilCode.Cgt_Un, 1, 0, true)]
-        [InlineData(CilCode.Cgt, -1, 0, false)]
-        [InlineData(CilCode.Cgt_Un, -1, 0, true)]
-        public void I8Comparison(CilCode code, long a, long b, bool? expected)
+        [InlineData(CilCode.Cgt, 0, 0, False)]
+        [InlineData(CilCode.Cgt_Un, 0, 0, False)]
+        [InlineData(CilCode.Cgt, 1, 0, True)]
+        [InlineData(CilCode.Cgt_Un, 1, 0, True)]
+        [InlineData(CilCode.Cgt, -1, 0, False)]
+        [InlineData(CilCode.Cgt_Un, -1, 0, True)]
+        public void I8Comparison(CilCode code, long a, long b, TrileanValue expected)
         {
             var stack = ExecutionContext.ProgramState.Stack;
             
@@ -55,17 +56,17 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         }
 
         [Theory]
-        [InlineData(CilCode.Cgt, 0, 0, false)]
-        [InlineData(CilCode.Cgt_Un, 0, 0, false)]
-        [InlineData(CilCode.Cgt, 1, 0, true)]
-        [InlineData(CilCode.Cgt_Un, 1, 0, true)]
-        [InlineData(CilCode.Cgt, double.NaN, 0, false)]
-        [InlineData(CilCode.Cgt, 0, double.NaN, false)]
-        [InlineData(CilCode.Cgt, double.NaN, double.NaN, false)]
-        [InlineData(CilCode.Cgt_Un, double.NaN, 0, true)]
-        [InlineData(CilCode.Cgt_Un, 0, double.NaN, true)]
-        [InlineData(CilCode.Cgt_Un, double.NaN, double.NaN, true)]
-        public void FloatComparison(CilCode code, double a, double b, bool? expected)
+        [InlineData(CilCode.Cgt, 0, 0, False)]
+        [InlineData(CilCode.Cgt_Un, 0, 0, False)]
+        [InlineData(CilCode.Cgt, 1, 0, True)]
+        [InlineData(CilCode.Cgt_Un, 1, 0, True)]
+        [InlineData(CilCode.Cgt, double.NaN, 0, False)]
+        [InlineData(CilCode.Cgt, 0, double.NaN, False)]
+        [InlineData(CilCode.Cgt, double.NaN, double.NaN, False)]
+        [InlineData(CilCode.Cgt_Un, double.NaN, 0, True)]
+        [InlineData(CilCode.Cgt_Un, 0, double.NaN, True)]
+        [InlineData(CilCode.Cgt_Un, double.NaN, double.NaN, True)]
+        public void FloatComparison(CilCode code, double a, double b, TrileanValue expected)
         {
             var stack = ExecutionContext.ProgramState.Stack;
             
