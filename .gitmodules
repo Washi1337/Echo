@@ -2,3 +2,6 @@
 	path = deps/AsmResolver
 	url = https://github.com/Washi1337/AsmResolver
 	branch = v4
+[submodule "deps/JavaResolver"]
+	path = deps/JavaResolver
+	url = https://github.com/Washi1337/JavaResolver.git
