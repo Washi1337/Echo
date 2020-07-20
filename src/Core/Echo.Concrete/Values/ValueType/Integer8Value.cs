@@ -257,10 +257,10 @@ namespace Echo.Concrete.Values.ValueType
             {
                 if (IsKnown && other.IsKnown)
                     return U8 == int8.U8;
-                
+
                 return U8 == int8.U8
-                    ? null 
-                    : (bool?) false;
+                    ? Trilean.Unknown
+                    : Trilean.False;
             }
 
             return base.IsEqualTo(other);

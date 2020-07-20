@@ -120,22 +120,22 @@ namespace Echo.Concrete.Values.ValueType
 
             for (int i = 0; i < bitString.Length; i++)
             {
-                bool? bit = bitString[bitString.Length - i - 1] switch
+                Trilean bit = bitString[bitString.Length - i - 1] switch
                 {
-                    '0' => false,
-                    '1' => true,
-                    '?' => null,
+                    '0' => Trilean.False,
+                    '1' => Trilean.True,
+                    '?' => Trilean.Unknown,
                     _ => throw new FormatException()
                 };
 
                 if (i >= 8 * backingBits.Length)
                 {
-                    if (!bit.HasValue || bit.Value)
+                    if (bit.IsUnknown || bit)
                         throw new OverflowException();
                 }
-                else if (bit.HasValue)
+                else if (bit.IsKnown)
                 {
-                    bits[i] = bit.Value;
+                    bits[i] = bit.ToBooleanOrFalse();
                 }
                 else
                 {
@@ -347,9 +347,11 @@ namespace Echo.Concrete.Values.ValueType
             var bits = new BitField(bitsBuffer);
             var mask = new BitField(maskBuffer);
 
-            bool? sign = signExtend 
-                ? mask[8 * bitsBuffer.Length - 1] ? bits[8 * bitsBuffer.Length - 1] : (bool?) null 
-                : false;
+            var sign = signExtend 
+                ? mask[8 * bitsBuffer.Length - 1] 
+                    ? bits[8 * bitsBuffer.Length - 1] 
+                    : Trilean.Unknown 
+                : Trilean.False;
             
             count = Math.Min(Size * 8, count);
             
@@ -361,8 +363,8 @@ namespace Echo.Concrete.Values.ValueType
 
             for (int i = 0; i < count; i++)
             {
-                bits[8 * bitsBuffer.Length - 1 - i] = sign.GetValueOrDefault();
-                mask[8 * bitsBuffer.Length - 1 - i] = sign.HasValue;
+                bits[8 * bitsBuffer.Length - 1 - i] = sign.ToBooleanOrFalse();
+                mask[8 * bitsBuffer.Length - 1 - i] = sign.IsKnown;
             }
 
             SetBits(bitsBuffer, maskBuffer);
@@ -537,7 +539,7 @@ namespace Echo.Concrete.Values.ValueType
                 // Conclusion is therefore either false or unknown.
                 
                 if (Size != other.Size)
-                    return false;
+                    return Trilean.False;
 
                 // Check if we definitely know this is not equal to the other.
                 // TODO: this could probably use performance improvements.
@@ -547,10 +549,10 @@ namespace Echo.Concrete.Values.ValueType
                     Trilean b = other.GetBit(i);
 
                     if (a.IsKnown && b.IsKnown && a.Value != b.Value)
-                        return false;
+                        return Trilean.False;
                 }
 
-                return null;
+                return Trilean.Unknown;
             }
             
             return Equals(other);
@@ -567,21 +569,17 @@ namespace Echo.Concrete.Values.ValueType
         {
             if (signed)
             {
-                bool? thisSigned = GetLastBit();
-                bool? otherSigned = other.GetLastBit();
-                if (!thisSigned.HasValue || !otherSigned.HasValue)
-                    return false;
+                var thisSigned = GetLastBit();
+                var otherSigned = other.GetLastBit();
+                if (thisSigned.IsUnknown || otherSigned.IsUnknown)
+                    return Trilean.Unknown;
                             
                 // If the signs do not match, we know the result
-                if (thisSigned.Value ^ otherSigned.Value)
-                {
+                if (thisSigned ^ otherSigned)
                     return otherSigned;
-                }
-            
-                if (thisSigned.Value)
-                {
+
+                if (thisSigned)
                     return IsLessThan(other, false);
-                }
             }
 
             // The following implements the "truth" table:
@@ -607,19 +605,19 @@ namespace Echo.Concrete.Values.ValueType
                     case (False, True):
                     case (False, Unknown):
                     case (Unknown, True):
-                        return False;
+                        return Trilean.False;
                     
                     case (True, False):
-                        return True;
+                        return Trilean.True;
                     
                     case (True, Unknown):
                     case (Unknown, False):
                     case (Unknown, Unknown):
-                        return Unknown;
+                        return Trilean.Unknown;
                 }
             }
 
-            return false;
+            return Trilean.False;
         }
 
         /// <summary>
@@ -633,21 +631,17 @@ namespace Echo.Concrete.Values.ValueType
         {
             if (signed)
             {
-                bool? thisSigned = GetLastBit();
-                bool? otherSigned = other.GetLastBit();
-                if (!thisSigned.HasValue || !otherSigned.HasValue)
-                    return false;
+                var thisSigned = GetLastBit();
+                var otherSigned = other.GetLastBit();
+                if (thisSigned.IsUnknown || otherSigned.IsUnknown)
+                    return Trilean.Unknown;
                 
                 // If the signs do not match, we know the result
-                if (thisSigned.Value ^ otherSigned.Value)
-                {
+                if (thisSigned ^ otherSigned)
                     return thisSigned;
-                }
 
-                if (thisSigned.Value)
-                {
+                if (thisSigned)
                     return IsGreaterThan(other, false);
-                }
             }
 
             // The following implements the "truth" table:
@@ -671,20 +665,20 @@ namespace Echo.Concrete.Values.ValueType
                 switch (a.Value, b.Value)
                 {
                     case (False, True):
-                        return True;
+                        return Trilean.True;
                     
                     case (True, False):
                     case (True, Unknown):
                     case (Unknown, False):
-                        return False;
+                        return Trilean.False;
                     
                     case (False, Unknown):
                     case (Unknown, True):
-                        return Unknown;
+                        return Trilean.Unknown;
                 }
             }
 
-            return false;
+            return Trilean.False;
         }
 
         /// <summary>
