@@ -566,7 +566,23 @@ namespace Echo.Concrete.Values.ValueType
         public virtual Trilean IsGreaterThan(IntegerValue other, bool signed)
         {
             if (signed)
-                return null; // TODO: support signed comparisons.
+            {
+                bool? thisSigned = GetLastBit();
+                bool? otherSigned = other.GetLastBit();
+                if (!thisSigned.HasValue || !otherSigned.HasValue)
+                    return false;
+                            
+                // If the signs do not match, we know the result
+                if (thisSigned.Value ^ otherSigned.Value)
+                {
+                    return otherSigned;
+                }
+            
+                if (thisSigned.Value)
+                {
+                    return IsLessThan(other, false);
+                }
+            }
 
             // The following implements the "truth" table:
             // "-" indicates we do not know the answer yet.
@@ -616,7 +632,23 @@ namespace Echo.Concrete.Values.ValueType
         public virtual Trilean IsLessThan(IntegerValue other, bool signed)
         {
             if (signed)
-                return null; // TODO: support signed comparisons.
+            {
+                bool? thisSigned = GetLastBit();
+                bool? otherSigned = other.GetLastBit();
+                if (!thisSigned.HasValue || !otherSigned.HasValue)
+                    return false;
+                
+                // If the signs do not match, we know the result
+                if (thisSigned.Value ^ otherSigned.Value)
+                {
+                    return thisSigned;
+                }
+
+                if (thisSigned.Value)
+                {
+                    return IsGreaterThan(other, false);
+                }
+            }
 
             // The following implements the "truth" table:
             // "-" indicates we do not know the answer yet.
