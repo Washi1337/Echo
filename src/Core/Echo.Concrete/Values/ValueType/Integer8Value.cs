@@ -1,4 +1,5 @@
 using System;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -100,7 +101,7 @@ namespace Echo.Concrete.Values.ValueType
         public override int Size => sizeof(byte);
 
         /// <inheritdoc />
-        public override bool? IsZero
+        public override Trilean IsZero
         {
             get
             {
@@ -140,25 +141,28 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override bool? GetBit(int index)
+        public override Trilean GetBit(int index)
         {
             if (index < 0 || index >= 8)
                 throw new ArgumentOutOfRangeException(nameof(index));
-            return ((Mask >> index) & 1) == 1 ? ((U8 >> index) & 1) == 1 : (bool?) null;
+            
+            return ((Mask >> index) & 1) == 1 
+                ? ((U8 >> index) & 1) == 1 
+                : Trilean.Unknown;
         }
 
         /// <inheritdoc />
-        public override void SetBit(int index, bool? value)
+        public override void SetBit(int index, Trilean value)
         {
             if (index < 0 || index >= 8)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
             byte mask = (byte) (1 << index);
 
-            if (value.HasValue)
+            if (value.IsKnown)
             {
                 Mask |= mask;
-                U8 = (byte) ((U8 & ~mask) | ((value.Value ? 1 : 0) << index));
+                U8 = (byte) ((U8 & ~mask) | ((value.ToBooleanOrFalse() ? 1 : 0) << index));
             }
             else
             {
@@ -247,32 +251,43 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override bool? IsEqualTo(IntegerValue other)
+        public override Trilean IsEqualTo(IntegerValue other)
         {
             if (other is Integer8Value int8)
             {
                 if (IsKnown && other.IsKnown)
                     return U8 == int8.U8;
-                return U8 == int8.U8 ? null : (bool?) false;
+
+                return U8 == int8.U8
+                    ? Trilean.Unknown
+                    : Trilean.False;
             }
 
             return base.IsEqualTo(other);
         }
 
         /// <inheritdoc />
-        public override bool? IsGreaterThan(IntegerValue other, bool signed)
+        public override Trilean IsGreaterThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer8Value int8)
-                return signed ? I8 > int8.I8 : U8 > int8.U8;
+            {
+                return signed 
+                    ? I8 > int8.I8 
+                    : U8 > int8.U8;
+            }
 
             return base.IsGreaterThan(other, signed);
         }
 
         /// <inheritdoc />
-        public override bool? IsLessThan(IntegerValue other, bool signed)
+        public override Trilean IsLessThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer8Value int8)
-                return signed ? I8 < int8.I8 : U8 < int8.U8;
+            {
+                return signed 
+                    ? I8 < int8.I8
+                    : U8 < int8.U8;
+            }
 
             return base.IsLessThan(other, signed);
         }

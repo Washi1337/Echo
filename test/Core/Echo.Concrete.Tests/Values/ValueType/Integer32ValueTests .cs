@@ -1,5 +1,7 @@
 using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Xunit;
+using static Echo.Core.TrileanValue;
 
 namespace Echo.Concrete.Tests.Values.ValueType
 {
@@ -39,10 +41,10 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData(3, null)]
-        [InlineData(5, true)]
-        [InlineData(6, false)]
-        public void ReadBit(int index, bool? expected)
+        [InlineData(3, Unknown)]
+        [InlineData(5, True)]
+        [InlineData(6, False)]
+        public void ReadBit(int index, TrileanValue expected)
         {
             var value = new Integer32Value(
                 0b00000000_00100000,
@@ -51,10 +53,10 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData(31, null)]
-        [InlineData(31, true)]
-        [InlineData(31, false)]
-        public void SetBit(int index, bool? expected)
+        [InlineData(31, Unknown)]
+        [InlineData(31, True)]
+        [InlineData(31, False)]
+        public void SetBit(int index, TrileanValue expected)
         {
             var value = new Integer32Value(0);
             value.SetBit(index, expected);
@@ -62,26 +64,26 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00000000000000000000000000000000", true)]
-        [InlineData("00000000000000000000000000001010", false)]
-        [InlineData("00001010000000000000000000000000", false)]
-        [InlineData("0000000000000000000000000000?0?0", null)]
-        [InlineData("00?00?00000000000000000000000000", null)]
-        [InlineData("10?00?00000000000000000000000000", false)]
-        public void IsZero(string input, bool? expected)
+        [InlineData("00000000000000000000000000000000", True)]
+        [InlineData("00000000000000000000000000001010", False)]
+        [InlineData("00001010000000000000000000000000", False)]
+        [InlineData("0000000000000000000000000000?0?0", Unknown)]
+        [InlineData("00?00?00000000000000000000000000", Unknown)]
+        [InlineData("10?00?00000000000000000000000000", False)]
+        public void IsZero(string input, TrileanValue expected)
         {
             var value = new Integer32Value(input);
             Assert.Equal(expected, value.IsZero);
         }
 
         [Theory]
-        [InlineData("00000000000000000000000000000000", false)]
-        [InlineData("00000000000000000000000000001010", true)]
-        [InlineData("00001010000000000000000000000000", true)]
-        [InlineData("0000000000000000000000000000?0?0", null)]
-        [InlineData("00?00?00000000000000000000000000", null)]
-        [InlineData("10?00?00000000000000000000000000", true)]
-        public void IsNonZero(string input, bool? expected)
+        [InlineData("00000000000000000000000000000000", False)]
+        [InlineData("00000000000000000000000000001010", True)]
+        [InlineData("00001010000000000000000000000000", True)]
+        [InlineData("0000000000000000000000000000?0?0", Unknown)]
+        [InlineData("00?00?00000000000000000000000000", Unknown)]
+        [InlineData("10?00?00000000000000000000000000", True)]
+        public void IsNonZero(string input, TrileanValue expected)
         {
             var value = new Integer32Value(input);
             Assert.Equal(expected, value.IsNonZero);

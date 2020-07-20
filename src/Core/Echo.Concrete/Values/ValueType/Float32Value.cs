@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Globalization;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -48,16 +49,16 @@ namespace Echo.Concrete.Values.ValueType
         public bool IsValueType => true;
 
         /// <inheritdoc />
-        public bool? IsZero => F32 == 0;
+        public Trilean IsZero => F32 == 0;
 
         /// <inheritdoc />
-        public bool? IsNonZero => F32 != 0;
+        public Trilean IsNonZero => F32 != 0;
 
         /// <inheritdoc />
-        public bool? IsPositive => F32 > 0;
+        public Trilean IsPositive => F32 > 0;
 
         /// <inheritdoc />
-        public bool? IsNegative => F32 < 0;
+        public Trilean IsNegative => F32 < 0;
 
         /// <inheritdoc />
         public unsafe void GetBits(Span<byte> buffer)

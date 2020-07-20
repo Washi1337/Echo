@@ -1,3 +1,4 @@
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ReferenceType
@@ -66,16 +67,16 @@ namespace Echo.Concrete.Values.ReferenceType
         public bool IsValueType => false;
 
         /// <inheritdoc />
-        public bool? IsZero => IsKnown ? ReferencedObject is null : (bool?) null;
+        public Trilean IsZero => IsKnown ? ReferencedObject is null : Trilean.Unknown;
 
         /// <inheritdoc />
-        public bool? IsNonZero => !IsZero;
+        public Trilean IsNonZero => !IsZero;
 
         /// <inheritdoc />
-        public bool? IsPositive => !IsZero;
+        public Trilean IsPositive => !IsZero;
 
         /// <inheritdoc />
-        public bool? IsNegative => false;
+        public Trilean IsNegative => false;
 
         /// <inheritdoc />
         public virtual IValue Copy() => new ObjectReference(ReferencedObject, IsKnown, Is32Bit);
@@ -89,11 +90,11 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <param name="other">The other object.</param>
         /// <returns><c>true</c> if the object are equal, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public bool? IsEqualTo(ObjectReference other)
+        public Trilean IsEqualTo(ObjectReference other)
         {
             return IsKnown && IsKnown 
-                ? (bool?) ReferenceEquals(ReferencedObject, other.ReferencedObject) 
-                : null;
+                ? ReferenceEquals(ReferencedObject, other.ReferencedObject) 
+                : Trilean.Unknown;
         }
         
         /// <summary>
@@ -104,12 +105,12 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <remarks>
         /// This method is only really reliable when one of the values is the null value. 
         /// </remarks>
-        public bool? IsGreaterThan(ObjectReference other)
+        public Trilean IsGreaterThan(ObjectReference other)
         {
-            return IsZero switch
+            return IsZero.Value switch
             {
-                false when other is { IsZero: true } => true,
-                true when other is { IsZero: false } => false,
+                TrileanValue.False when other is { IsZero: { Value: TrileanValue.True} } => true,
+                TrileanValue.True when other is { IsZero: { Value: TrileanValue.False} } => false,
                 _ => null
             };
         }
@@ -122,12 +123,12 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <remarks>
         /// This method is only really reliable when one of the values is the null value. 
         /// </remarks>
-        public bool? IsLessThan(ObjectReference other)
+        public Trilean IsLessThan(ObjectReference other)
         {
-            return IsZero switch
+            return IsZero.Value switch
             {
-                false when other is { IsZero: true } => false,
-                true when other is { IsZero: false } => true,
+                TrileanValue.False when other is { IsZero: { Value: TrileanValue.True} } => false,
+                TrileanValue.True when other is { IsZero: { Value: TrileanValue.False} } => true,
                 _ => null
             };
         }

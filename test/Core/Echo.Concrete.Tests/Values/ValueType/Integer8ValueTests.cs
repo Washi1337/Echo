@@ -1,7 +1,9 @@
 using System;
 using System.Numerics;
 using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Xunit;
+using static Echo.Core.TrileanValue;
 
 namespace Echo.Concrete.Tests.Values.ValueType
 {
@@ -86,11 +88,11 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00000000", true)]
-        [InlineData("00001010", false)]
-        [InlineData("0000?0?0", null)]
-        [InlineData("0100?0?0", false)]
-        public void IsZero(string input, bool? expected)
+        [InlineData("00000000", True)]
+        [InlineData("00001010", False)]
+        [InlineData("0000?0?0", Unknown)]
+        [InlineData("0100?0?0", False)]
+        public void IsZero(string input, TrileanValue expected)
         {
             var value = new Integer8Value(input);
             
@@ -98,11 +100,11 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
-        [InlineData("00000000", false)]
-        [InlineData("00001010", true)]
-        [InlineData("0000?0?0", null)]
-        [InlineData("0100?0?0", true)]
-        public void IsNonZero(string input, bool? expected)
+        [InlineData("00000000", False)]
+        [InlineData("00001010", True)]
+        [InlineData("0000?0?0", Unknown)]
+        [InlineData("0100?0?0", True)]
+        public void IsNonZero(string input, TrileanValue expected)
         {
             var value = new Integer8Value(input);
             

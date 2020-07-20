@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
@@ -19,21 +20,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         };
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
             IntegerValue left, IntegerValue right)
         {
             return left.IsLessThan(right, IsSigned(instruction));
         }
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction, FValue left,
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction, FValue left,
             FValue right)
         {
             return left.IsLessThan(right, IsSigned(instruction));
         }
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction, OValue left,
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction, OValue left,
             OValue right)
         {
             return left.IsLessThan(right);

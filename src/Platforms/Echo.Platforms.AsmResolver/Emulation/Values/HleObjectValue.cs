@@ -5,6 +5,7 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Values;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
@@ -72,16 +73,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool IsValueType => true;
 
         /// <inheritdoc />
-        public bool? IsZero => false;
+        public Trilean IsZero => false;
 
         /// <inheritdoc />
-        public bool? IsNonZero => true;
+        public Trilean IsNonZero => true;
 
         /// <inheritdoc />
-        public bool? IsPositive => true;
+        public Trilean IsPositive => true;
 
         /// <inheritdoc />
-        public bool? IsNegative => false;
+        public Trilean IsNegative => false;
 
         /// <inheritdoc />
         public IValue Copy() => new HleObjectValue(Type, _fieldValues, _is32Bit);

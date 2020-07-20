@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
@@ -19,21 +20,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         };
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
             IntegerValue left, IntegerValue right)
         {
-            bool? equal = left.IsEqualTo(right);
-            bool? lessThan = left.IsLessThan(right, IsSigned(instruction));
+            var equal = left.IsEqualTo(right);
+            var lessThan = left.IsLessThan(right, IsSigned(instruction));
 
-            if (equal.GetValueOrDefault() || lessThan.GetValueOrDefault())
+            if (equal.ToBooleanOrFalse() || lessThan.ToBooleanOrFalse())
                 return true;
-            if (!equal.HasValue || !lessThan.HasValue)
+            if (!equal.IsKnown || !lessThan.IsKnown)
                 return null;
             return false;
         }
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction, 
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction, 
             FValue left, FValue right)
         {
             // ReSharper disable once CompareOfFloatsByEqualityOperator
@@ -44,15 +45,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         }
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction, 
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction, 
             OValue left, OValue right)
         {
-            bool? equal = left.IsEqualTo(right);
-            bool? lessThan = left.IsLessThan(right);
+            var equal = left.IsEqualTo(right);
+            var lessThan = left.IsLessThan(right);
 
-            if (equal.GetValueOrDefault() || lessThan.GetValueOrDefault())
+            if (equal.ToBooleanOrFalse() || lessThan.ToBooleanOrFalse())
                 return true;
-            if (!equal.HasValue || !lessThan.HasValue)
+            if (!equal.IsKnown || !lessThan.IsKnown)
                 return null;
             return false;
         }

@@ -1,8 +1,10 @@
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
+using static Echo.Core.TrileanValue;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
 {
@@ -14,13 +16,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         }
 
         [Theory]
-        [InlineData(CilCode.Clt, 0, 0, false)]
-        [InlineData(CilCode.Clt_Un, 0, 0, false)]
-        [InlineData(CilCode.Clt, 0, 1, true)]
-        [InlineData(CilCode.Clt_Un, 0, 1, true)]
-        [InlineData(CilCode.Clt, 0, -1, false)]
-        [InlineData(CilCode.Clt_Un, 0, -1, true)]
-        public void I4Comparison(CilCode code, int a, int b, bool? expected)
+        [InlineData(CilCode.Clt, 0, 0, False)]
+        [InlineData(CilCode.Clt_Un, 0, 0, False)]
+        [InlineData(CilCode.Clt, 0, 1, True)]
+        [InlineData(CilCode.Clt_Un, 0, 1, True)]
+        [InlineData(CilCode.Clt, 0, -1, False)]
+        [InlineData(CilCode.Clt_Un, 0, -1, True)]
+        public void I4Comparison(CilCode code, int a, int b, TrileanValue expected)
         {
             var stack = ExecutionContext.ProgramState.Stack;
             
@@ -34,13 +36,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         }
 
         [Theory]
-        [InlineData(CilCode.Clt, 0, 0, false)]
-        [InlineData(CilCode.Clt_Un, 0, 0, false)]
-        [InlineData(CilCode.Clt, 0, 1, true)]
-        [InlineData(CilCode.Clt_Un, 0, 1, true)]
-        [InlineData(CilCode.Clt, 0, -1, false)]
-        [InlineData(CilCode.Clt_Un, 0, -1, true)]
-        public void I8Comparison(CilCode code, long a, long b, bool? expected)
+        [InlineData(CilCode.Clt, 0, 0, False)]
+        [InlineData(CilCode.Clt_Un, 0, 0, False)]
+        [InlineData(CilCode.Clt, 0, 1, True)]
+        [InlineData(CilCode.Clt_Un, 0, 1, True)]
+        [InlineData(CilCode.Clt, 0, -1, False)]
+        [InlineData(CilCode.Clt_Un, 0, -1, True)]
+        public void I8Comparison(CilCode code, long a, long b, TrileanValue expected)
         {
             var stack = ExecutionContext.ProgramState.Stack;
             
@@ -54,17 +56,17 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
         }
 
         [Theory]
-        [InlineData(CilCode.Clt, 0, 0, false)]
-        [InlineData(CilCode.Clt_Un, 0, 0, false)]
-        [InlineData(CilCode.Clt, 0, 1, true)]
-        [InlineData(CilCode.Clt_Un, 0, 1, true)]
-        [InlineData(CilCode.Clt, double.NaN, 0, false)]
-        [InlineData(CilCode.Clt, 0, double.NaN, false)]
-        [InlineData(CilCode.Clt, double.NaN, double.NaN, false)]
-        [InlineData(CilCode.Clt_Un, double.NaN, 0, true)]
-        [InlineData(CilCode.Clt_Un, 0, double.NaN, true)]
-        [InlineData(CilCode.Clt_Un, double.NaN, double.NaN, true)]
-        public void FloatComparison(CilCode code, double a, double b, bool? expected)
+        [InlineData(CilCode.Clt, 0, 0, False)]
+        [InlineData(CilCode.Clt_Un, 0, 0, False)]
+        [InlineData(CilCode.Clt, 0, 1, True)]
+        [InlineData(CilCode.Clt_Un, 0, 1, True)]
+        [InlineData(CilCode.Clt, double.NaN, 0, False)]
+        [InlineData(CilCode.Clt, 0, double.NaN, False)]
+        [InlineData(CilCode.Clt, double.NaN, double.NaN, False)]
+        [InlineData(CilCode.Clt_Un, double.NaN, 0, True)]
+        [InlineData(CilCode.Clt_Un, 0, double.NaN, True)]
+        [InlineData(CilCode.Clt_Un, double.NaN, double.NaN, True)]
+        public void FloatComparison(CilCode code, double a, double b, TrileanValue expected)
         {
             var stack = ExecutionContext.ProgramState.Stack;
             
@@ -92,7 +94,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Clt_Un));
             
             Assert.True(result.IsSuccess);
-            Assert.True(((I4Value) stack.Top).IsZero);
+            Assert.Equal(Trilean.True, ((I4Value) stack.Top).IsZero);
         }
 
         [Fact]
@@ -110,7 +112,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Clt_Un));
             
             Assert.True(result.IsSuccess);
-            Assert.True(((I4Value) stack.Top).IsNonZero);
+            Assert.Equal(Trilean.True, ((I4Value) stack.Top).IsNonZero);
         }
         
     }

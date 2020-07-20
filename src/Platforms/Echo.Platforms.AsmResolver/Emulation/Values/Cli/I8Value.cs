@@ -49,7 +49,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// <inheritdoc />
         public I4Value InterpretAsI1()
         {
-            uint signMask = GetBit(7).HasValue ? 0xFFFFFF00 : 0;
+            uint signMask = GetBit(7).IsKnown ? 0xFFFFFF00 : 0;
             int newValue = (int) ((I64 & 0xFF) | ~((I64 & 0x80) - 1));
             return new I4Value(newValue, (uint) (Mask & 0xFF) | signMask);
         }
@@ -60,7 +60,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// <inheritdoc />
         public I4Value InterpretAsI2()
         {
-            uint signMask = GetBit(15).HasValue ? 0xFFFF0000 : 0;
+            uint signMask = GetBit(15).IsKnown ? 0xFFFF0000 : 0;
             int newValue = (int) ((I64 & 0xFFFF) | ~((I64 & 0x8000) - 1));
             return new I4Value(newValue, (uint) (Mask & 0xFFFF) | signMask);
         }
@@ -92,7 +92,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         }
 
         /// <inheritdoc />
-        public OValue InterpretAsRef(bool is32Bit) => new OValue(null, IsZero.GetValueOrDefault(), true);
+        public OValue InterpretAsRef(bool is32Bit) => new OValue(null, IsZero.ToBooleanOrFalse(), true);
 
         /// <inheritdoc />
         public NativeIntegerValue ConvertToI(bool is32Bit, bool unsigned, out bool overflowed)

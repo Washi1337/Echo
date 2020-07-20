@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
@@ -78,10 +79,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public override IValue Copy() => new NativeIntegerValue(_value, Size == sizeof(uint));
 
         /// <inheritdoc />
-        public override bool? GetBit(int index) => _value.GetBit(index);
+        public override Trilean GetBit(int index) => _value.GetBit(index);
 
         /// <inheritdoc />
-        public override void SetBit(int index, bool? value) => _value.SetBit(index, value);
+        public override void SetBit(int index, Trilean value) => _value.SetBit(index, value);
 
         /// <inheritdoc />
         public override void GetBits(Span<byte> buffer) => _value.GetBits(buffer);

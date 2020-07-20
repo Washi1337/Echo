@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Globalization;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -48,16 +49,16 @@ namespace Echo.Concrete.Values.ValueType
         public bool IsValueType => true;
 
         /// <inheritdoc />
-        public bool? IsZero => F64 == 0;
+        public Trilean IsZero => F64 == 0;
 
         /// <inheritdoc />
-        public bool? IsNonZero => F64 != 0;
+        public Trilean IsNonZero => F64 != 0;
 
         /// <inheritdoc />
-        public bool? IsPositive => F64 > 0;
+        public Trilean IsPositive => F64 > 0;
 
         /// <inheritdoc />
-        public bool? IsNegative => F64 < 0;
+        public Trilean IsNegative => F64 < 0;
         
         /// <inheritdoc />
         public virtual IValue Copy() => new Float64Value(F64);

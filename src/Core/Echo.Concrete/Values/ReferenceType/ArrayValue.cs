@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ReferenceType
@@ -69,13 +70,13 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <inheritdoc />
         public bool IsValueType => false;
         
-        bool? IConcreteValue.IsZero => false;
+        Trilean IConcreteValue.IsZero => false;
 
-        bool? IConcreteValue.IsNonZero => true;
+        Trilean IConcreteValue.IsNonZero => true;
 
-        bool? IConcreteValue.IsPositive => true;
+        Trilean IConcreteValue.IsPositive => true;
 
-        bool? IConcreteValue.IsNegative => false;
+        Trilean IConcreteValue.IsNegative => false;
 
         /// <inheritdoc />
         public IValue Copy() => new ArrayValue(_values);

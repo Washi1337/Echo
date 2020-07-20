@@ -1,6 +1,7 @@
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
@@ -11,7 +12,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
     public abstract class BinaryBranchHandler : BranchHandler
     {
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction)
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction)
         {
             var (left, right) = BinaryOperationHelper.PopBinaryOperationArguments(context);
 
@@ -31,9 +32,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         /// <param name="instruction">The instruction that is being executed.</param>
         /// <param name="left">The left operand of the comparison.</param>
         /// <param name="right">The right operand of the comparison.</param>
-        /// <returns><c>true</c> if the branch should be taken, <c>false</c> if not, and <c>null</c> if the conclusion
-        /// is unknown.</returns>
-        protected abstract bool? VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        /// <returns><c>true</c> if the branch should be taken, <c>false</c> if not, and <see cref="Trilean.Unknown"/>
+        /// if the conclusion is unknown.</returns>
+        protected abstract Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
             IntegerValue left, IntegerValue right);
         
         /// <summary>
@@ -43,9 +44,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         /// <param name="instruction">The instruction that is being executed.</param>
         /// <param name="left">The left operand of the comparison.</param>
         /// <param name="right">The right operand of the comparison.</param>
-        /// <returns><c>true</c> if the branch should be taken, <c>false</c> if not, and <c>null</c> if the conclusion
-        /// is unknown.</returns>
-        protected abstract bool? VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        /// <returns><c>true</c> if the branch should be taken, <c>false</c> if not, and <see cref="Trilean.Unknown"/>
+        /// if the conclusion is unknown.</returns>
+        protected abstract Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
             FValue left, FValue right);
         
         /// <summary>
@@ -55,9 +56,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         /// <param name="instruction">The instruction that is being executed.</param>
         /// <param name="left">The left operand of the comparison.</param>
         /// <param name="right">The right operand of the comparison.</param>
-        /// <returns><c>true</c> if the branch should be taken, <c>false</c> if not, and <c>null</c> if the conclusion
-        /// is unknown.</returns>
-        protected abstract bool? VerifyCondition(ExecutionContext context, CilInstruction instruction, 
+        /// <returns><c>true</c> if the branch should be taken, <c>false</c> if not, and <see cref="Trilean.Unknown"/>
+        /// if the conclusion is unknown.</returns>
+        protected abstract Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction, 
             OValue left, OValue right);
     }
 }

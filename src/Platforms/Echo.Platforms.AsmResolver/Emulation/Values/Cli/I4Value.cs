@@ -60,7 +60,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// <inheritdoc />
         public I4Value InterpretAsI1()
         {
-            uint signMask = GetBit(7).HasValue ? 0xFFFFFF00 : 0;
+            uint signMask = GetBit(7).IsKnown ? 0xFFFFFF00 : 0;
             int newValue = (I32 & 0xFF) | ~((I32 & 0x80) - 1);
             return new I4Value(newValue, (Mask & 0xFF) | signMask);
         }
@@ -71,7 +71,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// <inheritdoc />
         public I4Value InterpretAsI2()
         {
-            uint signMask = GetBit(15).HasValue ? 0xFFFF0000 : 0;
+            uint signMask = GetBit(15).IsKnown ? 0xFFFF0000 : 0;
             int newValue = (I32 & 0xFFFF) | ~((I32 & 0x8000) - 1);
             return new I4Value(newValue, (Mask & 0xFFFF) | signMask);
         }
@@ -103,7 +103,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         {
             if (!is32Bit)
                 throw new InvalidOperationException();
-            return new OValue(null, IsZero.GetValueOrDefault(), true);
+            return new OValue(null, IsZero.ToBooleanOrFalse(), true);
         }
 
         /// <inheritdoc />
@@ -178,7 +178,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public I8Value ConvertToI8(bool unsigned, out bool overflowed)
         {
             overflowed = false;
-            ulong signMask = !unsigned || GetLastBit().HasValue ? 0xFFFFFFFF00000000ul : 0ul;
+            ulong signMask = !unsigned || GetLastBit().IsKnown ? 0xFFFFFFFF00000000ul : 0ul;
             return new I8Value(unsigned ? (long) U32 : I32, Mask | signMask);
         }
 

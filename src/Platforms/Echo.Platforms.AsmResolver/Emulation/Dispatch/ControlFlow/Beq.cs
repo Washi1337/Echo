@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Values.ValueType;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
@@ -19,14 +20,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         };
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
             IntegerValue left, IntegerValue right)
         {
             return left.IsEqualTo(right);
         }
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
             FValue left, FValue right)
         {
             // ReSharper disable once CompareOfFloatsByEqualityOperator
@@ -34,12 +35,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         }
 
         /// <inheritdoc />
-        protected override bool? VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
             OValue left, OValue right)
         {
             return left.IsKnown && right.IsKnown
-                ? (bool?) ReferenceEquals(left.ReferencedObject, right.ReferencedObject)
-                : null;
+                ? ReferenceEquals(left.ReferencedObject, right.ReferencedObject)
+                : Trilean.Unknown;
         }
     }
 }

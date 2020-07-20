@@ -43,7 +43,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 
         private static DispatchResult ExecuteDefault(ExecutionContext context, IntegerValue value, IntegerValue left)
         {
-            if (value.IsNonZero.GetValueOrDefault())
+            if (value.IsNonZero.IsUnknown)
                 value.MarkFullyUnknown();
 
             context.ProgramState.Stack.Push(left);

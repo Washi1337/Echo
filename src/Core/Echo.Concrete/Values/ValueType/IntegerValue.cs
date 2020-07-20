@@ -1,7 +1,8 @@
 using System;
-using System.Collections;
 using System.Text;
+using Echo.Core;
 using Echo.Core.Values;
+using static Echo.Core.TrileanValue;
 
 namespace Echo.Concrete.Values.ValueType
 {
@@ -26,7 +27,7 @@ namespace Echo.Concrete.Values.ValueType
         public bool IsValueType => true;
 
         /// <inheritdoc />
-        public virtual bool? IsZero
+        public virtual Trilean IsZero
         {
             get
             {
@@ -38,12 +39,10 @@ namespace Echo.Concrete.Values.ValueType
                     for (var i = 0; i < Size; i++)
                     {
                         if (bits[i] != 0)
-                        {
-                            return false;
-                        }
+                            return Trilean.False;
                     }
 
-                    return true;
+                    return Trilean.True;
                 }
 
 
@@ -58,29 +57,27 @@ namespace Echo.Concrete.Values.ValueType
                 for (int i = 0; i < bits.Length * 8; i++)
                 {
                     if (bitField[i])
-                    {
-                        return false;
-                    }
+                        return Trilean.False;
                 }
 
-                return null;
+                return Trilean.Unknown;
             }
         }
 
         /// <inheritdoc />
-        public virtual bool? IsNonZero => !IsZero;
+        public virtual Trilean IsNonZero => !IsZero;
 
         /// <inheritdoc />
-        public bool? IsPositive => GetLastBit();
+        public Trilean IsPositive => GetLastBit();
 
         /// <inheritdoc />
-        public bool? IsNegative => !GetLastBit();
+        public Trilean IsNegative => !GetLastBit();
 
         /// <summary>
         /// Gets the most significant bit of the integer value.
         /// </summary>
         /// <returns></returns>
-        public virtual bool? GetLastBit() => GetBit(Size * 8 - 1);
+        public virtual Trilean GetLastBit() => GetBit(Size * 8 - 1);
 
         /// <summary>
         /// Reads a single bit value at the provided index.
@@ -88,7 +85,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="index">The index of the bit to read.</param>
         /// <returns>The read bit, or <c>null</c> if the bit value is unknown.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when an invalid index was provided.</exception>
-        public abstract bool? GetBit(int index);
+        public abstract Trilean GetBit(int index);
 
         /// <summary>
         /// Writes a single bit value at the provided index.
@@ -96,7 +93,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="index">The index of the bit to write.</param>
         /// <param name="value">The new value of the bit to write. <c>null</c> indicates an unknown bit value.</param>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when an invalid index was provided.</exception>
-        public abstract void SetBit(int index, bool? value);
+        public abstract void SetBit(int index, Trilean value);
 
         /// <inheritdoc />
         public abstract void GetBits(Span<byte> buffer);
@@ -123,22 +120,22 @@ namespace Echo.Concrete.Values.ValueType
 
             for (int i = 0; i < bitString.Length; i++)
             {
-                bool? bit = bitString[bitString.Length - i - 1] switch
+                Trilean bit = bitString[bitString.Length - i - 1] switch
                 {
-                    '0' => false,
-                    '1' => true,
-                    '?' => null,
+                    '0' => Trilean.False,
+                    '1' => Trilean.True,
+                    '?' => Trilean.Unknown,
                     _ => throw new FormatException()
                 };
 
                 if (i >= 8 * backingBits.Length)
                 {
-                    if (!bit.HasValue || bit.Value)
+                    if (bit.IsUnknown || bit)
                         throw new OverflowException();
                 }
-                else if (bit.HasValue)
+                else if (bit.IsKnown)
                 {
-                    bits[i] = bit.Value;
+                    bits[i] = bit.ToBooleanOrFalse();
                 }
                 else
                 {
@@ -154,19 +151,10 @@ namespace Echo.Concrete.Values.ValueType
         {
             var size = Size * 8;
             var sb = new StringBuilder(size);
-            for (int i = size - 1; i >= 0; i--)
-            {
-                var bit = GetBit(i);
-                if (bit.HasValue)
-                {
-                    sb.Append(bit.Value ? '1' : '0');
-                }
-                else
-                {
-                    sb.Append('?');
-                }
-            }
             
+            for (int i = size - 1; i >= 0; i--)
+                sb.Append(GetBit(i).ToString());
+
             return sb.ToString();
         }
 
@@ -198,16 +186,6 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         public virtual void And(IntegerValue other)
         {
-            // The following implements the following truth table:
-            //
-            //    | 0 | 1 | ?
-            // ---+---+---+---
-            //  0 | 0 | 0 | 0
-            //  --+---+---+---
-            //  1 | 0 | 1 | ?
-            //  --+---+---+---
-            //  ? | 0 | ? | ?
-            
             AssertSameBitSize(other);
 
             Span<byte> bits = stackalloc byte[Size];
@@ -219,33 +197,21 @@ namespace Echo.Concrete.Values.ValueType
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
-
                 Span<byte> otherBits = stackalloc byte[Size];
                 other.GetBits(otherBits);
-                
                 new BitField(bits).And(new BitField(otherBits));
             }
             else
             {
                 // Some bits are unknown, perform operation manually.
-                
                 var bitField = new BitField(bits);
                 var maskField = new BitField(mask);
 
                 for (int i = 0; i < mask.Length * 8; i++)
                 {
-                    bool? result = (GetBit(i), other.GetBit(i)) switch
-                    {
-                        (true, true) => true,
-                        (true, null) => null,
-                        (null, true) => null,
-                        (null, null) => null,
-                        
-                        _ => false,
-                    };
-
-                    bitField[i] = result.GetValueOrDefault();
-                    maskField[i] = result.HasValue;
+                    var result = GetBit(i) & other.GetBit(i);
+                    bitField[i] = result.ToBooleanOrFalse();
+                    maskField[i] = result.IsKnown;
                 }
             }
 
@@ -257,16 +223,6 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         public virtual void Or(IntegerValue other)
         {
-            // The following implements the following truth table:
-            //
-            //    | 0 | 1 | ?
-            // ---+---+---+---
-            //  0 | 0 | 1 | ?
-            //  --+---+---+---
-            //  1 | 1 | 1 | 1
-            //  --+---+---+---
-            //  ? | ? | 1 | ?
-            
             AssertSameBitSize(other);
 
             Span<byte> bits = stackalloc byte[Size];
@@ -278,33 +234,21 @@ namespace Echo.Concrete.Values.ValueType
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
-
                 Span<byte> otherBits = stackalloc byte[Size];
                 other.GetBits(otherBits);
-                
                 new BitField(bits).Or(new BitField(otherBits));
             }
             else
             {
                 // Some bits are unknown, perform operation manually.
-                
                 var bitField = new BitField(bits);
                 var maskField = new BitField(mask);
                 
                 for (int i = 0; i < mask.Length * 8; i++)
                 {
-                    bool? result = (GetBit(i), other.GetBit(i)) switch
-                    {
-                        (false, false) => false,
-                        (null, false) => null,
-                        (null, null) => null,
-                        (false, null) => null,
-                        
-                        _ => true,
-                    };
-
-                    bitField[i] = result.GetValueOrDefault();
-                    maskField[i] = result.HasValue;
+                    var result = GetBit(i) | other.GetBit(i);
+                    bitField[i] = result.ToBooleanOrFalse();
+                    maskField[i] = result.IsKnown;
                 }
             }
 
@@ -316,16 +260,6 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         public virtual void Xor(IntegerValue other)
         {
-            // The following implements the following truth table:
-            //
-            //    | 0 | 1 | ?
-            // ---+---+---+---
-            //  0 | 0 | 1 | ?
-            //  --+---+---+---
-            //  1 | 1 | 0 | ?
-            //  --+---+---+---
-            //  ? | ? | ? | ?
-            
             AssertSameBitSize(other);
 
             Span<byte> bits = stackalloc byte[Size];
@@ -337,27 +271,21 @@ namespace Echo.Concrete.Values.ValueType
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
-
                 Span<byte> otherBits = stackalloc byte[Size];
                 other.GetBits(otherBits);
-                
                 new BitField(bits).Xor(new BitField(otherBits));
             }
             else
             {
                 // Some bits are unknown, perform operation manually.
-                
                 var bitField = new BitField(bits);
                 var maskField = new BitField(mask);
 
                 for (int i = 0; i < mask.Length * 8; i++)
                 {
-                    bool? a = GetBit(i);
-                    bool? b = other.GetBit(i);
-                    bool? result = a.HasValue && b.HasValue ? a.Value ^ b.Value : (bool?) null;
-                    
-                    bitField[i] = result.GetValueOrDefault();
-                    maskField[i] = result.HasValue;
+                    var result = GetBit(i) ^ other.GetBit(i);
+                    bitField[i] = result.ToBooleanOrFalse();
+                    maskField[i] = result.IsKnown;
                 }
             }
 
@@ -419,9 +347,11 @@ namespace Echo.Concrete.Values.ValueType
             var bits = new BitField(bitsBuffer);
             var mask = new BitField(maskBuffer);
 
-            bool? sign = signExtend 
-                ? mask[8 * bitsBuffer.Length - 1] ? bits[8 * bitsBuffer.Length - 1] : (bool?) null 
-                : false;
+            var sign = signExtend 
+                ? mask[8 * bitsBuffer.Length - 1] 
+                    ? bits[8 * bitsBuffer.Length - 1] 
+                    : Trilean.Unknown 
+                : Trilean.False;
             
             count = Math.Min(Size * 8, count);
             
@@ -433,8 +363,8 @@ namespace Echo.Concrete.Values.ValueType
 
             for (int i = 0; i < count; i++)
             {
-                bits[8 * bitsBuffer.Length - 1 - i] = sign.GetValueOrDefault();
-                mask[8 * bitsBuffer.Length - 1 - i] = sign.HasValue;
+                bits[8 * bitsBuffer.Length - 1 - i] = sign.ToBooleanOrFalse();
+                mask[8 * bitsBuffer.Length - 1 - i] = sign.IsKnown;
             }
 
             SetBits(bitsBuffer, maskBuffer);
@@ -447,9 +377,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match.</exception>
         public virtual void Add(IntegerValue other)
         {
-            // The following implements a ripple full adder, with unknown bits taken into account. 
-            // Essentially, this means that any unknown bit added to another bit results in an unknown sum and/or carry
-            // bit.
+            // The following implements a ripple full-adder.
             
             AssertSameBitSize(other);
 
@@ -460,35 +388,18 @@ namespace Echo.Concrete.Values.ValueType
             var sum = new BitField(sumBuffer);
             var mask = new BitField(maskBuffer);
 
-            bool? carry = false;
+            Trilean carry = false;
             for (int i = 0; i < sumBuffer.Length * 8; i++)
             {
-                bool? a = GetBit(i);
-                bool? b = other.GetBit(i);
-                
-                // Implement truth table.
-                (bool? s, bool? c) = (a, b, carry) switch
-                {
-                    (false, false, false) => ((bool?) false, (bool?) false),
-                    (true, true, true) => (true, true),
-                    
-                    (true, false, false) => (true, false),
-                    (false, true, false) => (true, false),
-                    (false, false, true) => (true, false),
-                    
-                    (null, false, false) => (null, false),
-                    (false, null, false) => (null, false),
-                    (false, false, null) => (null, false),
-                    
-                    (false, true, true) => (false, true),
-                    (true, false, true) => (false, true),
-                    (true, true, false) => (false, true),
-                    
-                    _ => (null, null),
-                };
+                var a = GetBit(i);
+                var b = other.GetBit(i);
 
-                sum[i] = s.GetValueOrDefault();
-                mask[i] = s.HasValue;
+                // Implement full-adder logic.
+                var s = a ^ b ^ carry;
+                var c = (carry & (a ^ b)) | (a & b); 
+                
+                sum[i] = s.ToBooleanOrFalse();
+                mask[i] = s.IsKnown;
                 carry = c;
             }
 
@@ -514,6 +425,8 @@ namespace Echo.Concrete.Values.ValueType
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match.</exception>
         public virtual void Subtract(IntegerValue other)
         {
+            // The following implements a ripple full-subtractor.
+            
             AssertSameBitSize(other);
 
             Span<byte> differenceBuffer = stackalloc byte[Size];
@@ -523,41 +436,18 @@ namespace Echo.Concrete.Values.ValueType
             var difference = new BitField(differenceBuffer);
             var mask = new BitField(maskBuffer);
 
-            bool? borrow = false;
+            Trilean borrow = false;
             for (int i = 0; i < differenceBuffer.Length * 8; i++)
             {
-                bool? a = GetBit(i);
-                bool? b = other.GetBit(i);
+                var a = GetBit(i);
+                var b = other.GetBit(i);
                 
-                // Implement truth table.
-                (bool? d, bool? bOut) = (a, b, borrow) switch
-                {
-                    (false, false, false) => ((bool?) false, (bool?) false),
-                    
-                    (true, true, true) => (true, true),
-                    (false, false, true) => (true, true),
-                    (false, true, false) => (true, true),
-                    
-                    (true, false, false) => (true, false),
-                    
-                    (false, true, true) => (false, true),
-                    
-                    (true, false, true) => (false, false),
-                    (true, true, false) => (false, false),
-                    
-                    (null, true, true) => (null, true),
-                    (false, true, null) => (null, true),
-                    
-                    (true, false, null) => (null, false),
-                    (true, null, false) => (null, false),
-                    (null, false, false) => (null, false),
-                    
-                    _ => (null, null),
-                    
-                };
+                // Implement full-subtractor logic.
+                var d = a ^ b ^ borrow;
+                var bOut = (!a & borrow) | (!a & b) | (b & borrow);
 
-                difference[i] = d.GetValueOrDefault();
-                mask[i] = d.HasValue;
+                difference[i] = d.ToBooleanOrFalse();
+                mask[i] = d.IsKnown;
                 borrow = bOut;
             }
 
@@ -611,15 +501,15 @@ namespace Echo.Concrete.Values.ValueType
             int lastShiftByUnknown = 0;
             for (int i = 0; i < Size * 8; i++)
             {
-                bool? bit = other.GetBit(i);
+                Trilean bit = other.GetBit(i);
                 
-                if (!bit.HasValue)
+                if (!bit.IsKnown)
                 {
                     multipliedByUnknown.LeftShift(i - lastShiftByUnknown);
                     result.Add(multipliedByUnknown);
                     lastShiftByUnknown = i;
                 }
-                else if (bit.Value)
+                else if (bit.ToBoolean())
                 {
                     multipliedByOne.LeftShift(i - lastShiftByOne);
                     result.Add(multipliedByOne);
@@ -641,7 +531,7 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="other">The other integer.</param>
         /// <returns><c>true</c> if the integers are equal, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public virtual bool? IsEqualTo(IntegerValue other)
+        public virtual Trilean IsEqualTo(IntegerValue other)
         {
             if (!IsKnown || !other.IsKnown)
             {
@@ -649,20 +539,20 @@ namespace Echo.Concrete.Values.ValueType
                 // Conclusion is therefore either false or unknown.
                 
                 if (Size != other.Size)
-                    return false;
+                    return Trilean.False;
 
                 // Check if we definitely know this is not equal to the other.
                 // TODO: this could probably use performance improvements.
                 for (int i = 0; i < Size * 8; i++)
                 {
-                    bool? a = GetBit(i);
-                    bool? b = other.GetBit(i);
+                    Trilean a = GetBit(i);
+                    Trilean b = other.GetBit(i);
 
-                    if (a.HasValue && b.HasValue && a.Value != b.Value)
-                        return false;
+                    if (a.IsKnown && b.IsKnown && a.Value != b.Value)
+                        return Trilean.False;
                 }
 
-                return null;
+                return Trilean.Unknown;
             }
             
             return Equals(other);
@@ -675,25 +565,21 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="signed">Indicates the integers should be interpreted as signed or unsigned integers.</param>
         /// <returns><c>true</c> if the current integer is greater than the provided integer, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public virtual bool? IsGreaterThan(IntegerValue other, bool signed)
+        public virtual Trilean IsGreaterThan(IntegerValue other, bool signed)
         {
             if (signed)
             {
-                bool? thisSigned = GetLastBit();
-                bool? otherSigned = other.GetLastBit();
-                if (!thisSigned.HasValue || !otherSigned.HasValue)
-                    return false;
+                var thisSigned = GetLastBit();
+                var otherSigned = other.GetLastBit();
+                if (thisSigned.IsUnknown || otherSigned.IsUnknown)
+                    return Trilean.Unknown;
                             
                 // If the signs do not match, we know the result
-                if (thisSigned.Value ^ otherSigned.Value)
-                {
+                if (thisSigned ^ otherSigned)
                     return otherSigned;
-                }
-            
-                if (thisSigned.Value)
-                {
+
+                if (thisSigned)
                     return IsLessThan(other, false);
-                }
             }
 
             // The following implements the "truth" table:
@@ -711,27 +597,27 @@ namespace Echo.Concrete.Values.ValueType
 
             for (int i = Size * 8 - 1; i >= 0; i--)
             {
-                bool? a = GetBit(i);
-                bool? b = other.GetBit(i);
+                Trilean a = GetBit(i);
+                Trilean b = other.GetBit(i);
 
-                switch (a, b)
+                switch (a.Value, b.Value)
                 {
-                    case (false, true):
-                    case (false, null):
-                    case (null, true):
-                        return false;
+                    case (False, True):
+                    case (False, Unknown):
+                    case (Unknown, True):
+                        return Trilean.False;
                     
-                    case (true, false):
-                        return true;
+                    case (True, False):
+                        return Trilean.True;
                     
-                    case (true, null):
-                    case (null, false):
-                    case (null, null):
-                        return null;
+                    case (True, Unknown):
+                    case (Unknown, False):
+                    case (Unknown, Unknown):
+                        return Trilean.Unknown;
                 }
             }
 
-            return false;
+            return Trilean.False;
         }
 
         /// <summary>
@@ -741,25 +627,21 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="signed">Indicates the integers should be interpreted as signed or unsigned integers.</param>
         /// <returns><c>true</c> if the current integer is less than the provided integer, <c>false</c> if not, and
         /// <c>null</c> if the conclusion of the comparison is not certain.</returns>
-        public virtual bool? IsLessThan(IntegerValue other, bool signed)
+        public virtual Trilean IsLessThan(IntegerValue other, bool signed)
         {
             if (signed)
             {
-                bool? thisSigned = GetLastBit();
-                bool? otherSigned = other.GetLastBit();
-                if (!thisSigned.HasValue || !otherSigned.HasValue)
-                    return false;
+                var thisSigned = GetLastBit();
+                var otherSigned = other.GetLastBit();
+                if (thisSigned.IsUnknown || otherSigned.IsUnknown)
+                    return Trilean.Unknown;
                 
                 // If the signs do not match, we know the result
-                if (thisSigned.Value ^ otherSigned.Value)
-                {
+                if (thisSigned ^ otherSigned)
                     return thisSigned;
-                }
 
-                if (thisSigned.Value)
-                {
+                if (thisSigned)
                     return IsGreaterThan(other, false);
-                }
             }
 
             // The following implements the "truth" table:
@@ -777,26 +659,26 @@ namespace Echo.Concrete.Values.ValueType
 
             for (int i = Size * 8 - 1; i >= 0; i--)
             {
-                bool? a = GetBit(i);
-                bool? b = other.GetBit(i);
+                Trilean a = GetBit(i);
+                Trilean b = other.GetBit(i);
 
-                switch (a, b)
+                switch (a.Value, b.Value)
                 {
-                    case (false, true):
-                        return true;
+                    case (False, True):
+                        return Trilean.True;
                     
-                    case (true, false):
-                    case (true, null):
-                    case (null, false):
-                        return false;
+                    case (True, False):
+                    case (True, Unknown):
+                    case (Unknown, False):
+                        return Trilean.False;
                     
-                    case (false, null):
-                    case (null, true):
-                        return null;
+                    case (False, Unknown):
+                    case (Unknown, True):
+                        return Trilean.Unknown;
                 }
             }
 
-            return false;
+            return Trilean.False;
         }
 
         /// <summary>
@@ -854,19 +736,19 @@ namespace Echo.Concrete.Values.ValueType
             for (int i = 0; i < bitsToCopy; i++)
             {
                 var bit = GetBit(i);
-                newBits[i] = bit.GetValueOrDefault();
-                newMask[i] = bit.HasValue;
+                newBits[i] = bit.ToBooleanOrFalse();
+                newMask[i] = bit.IsKnown;
             }
 
             // Sign extend if necessary.
             if (signExtend)
             {
-                bool? sign = GetBit(bitsToCopy - 1);
+                Trilean sign = GetBit(bitsToCopy - 1);
 
                 for (int i = bitsToCopy; i < newBitLength; i++)
                 {
-                    newBits[i] = sign.GetValueOrDefault();
-                    newMask[i] = sign.HasValue;
+                    newBits[i] = sign.ToBooleanOrFalse();
+                    newMask[i] = sign.IsKnown;
                 }
             }
 
