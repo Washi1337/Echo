@@ -26,7 +26,7 @@ namespace Echo.DataFlow.Tests.Values
             var value2 = new SymbolicValue<DummyInstruction>(sources[1], sources[2]);
             
             Assert.True(value1.MergeWith(value2));
-            Assert.Equal(new HashSet<IDataFlowNode>(sources), value1.DataSources);
+            Assert.Equal(new HashSet<IDataFlowNode>(sources), value1);
         }
         
         [Fact]
@@ -42,7 +42,7 @@ namespace Echo.DataFlow.Tests.Values
             var value2 = new SymbolicValue<DummyInstruction>(sources[1], sources[0]);
             
             Assert.False(value1.MergeWith(value2));
-            Assert.Equal(new HashSet<IDataFlowNode>(sources), value1.DataSources);
+            Assert.Equal(new HashSet<IDataFlowNode>(sources), value1);
         }
     }
 }

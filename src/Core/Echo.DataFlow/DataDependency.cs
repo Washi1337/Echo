@@ -16,7 +16,6 @@ namespace Echo.DataFlow
         /// Creates a new data dependency with no data sources.
         /// </summary>
         public DataDependency()
-            : base()
         {
         }
 

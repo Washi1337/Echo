@@ -9,7 +9,7 @@ namespace Echo.DataFlow
     /// Provides a base for a data dependency,  which is a set of one or more data flow nodes where the symbolic value
     /// might pull data from.
     /// </summary>
-    /// <typeparam name="TContents"></typeparam>
+    /// <typeparam name="TContents">The type of contents to put in a data flow node.</typeparam>
     public abstract class DataDependencyBase<TContents> : IDataDependency, ISet<DataFlowNode<TContents>>
     {
         // -------------------------
@@ -18,10 +18,11 @@ namespace Echo.DataFlow
         //
         // To prevent allocations of big set objects, we delay initialization of it until we actually need to store
         // more than one data source. This is worth the extra steps in pattern matching, since there is going to be
-        // a lot of instances of this type, and for most architectures and functions written in these languages,
-        // instructions only have zero or one data source per data dependency.
+        // a lot of instances of this type. For most architectures and functions written in these languages,
+        // instructions only have zero or one data source per data dependency, and would therefore not need 
+        // special complex heap allocated objects to store zero or just one data source.
         //
-        // The following "list object" field can have three values:
+        // For this reason, the following "list object" field can have three possible values:
         //    - null:                             The dependency has no known data sources.
         //    - DataFlowNode<TContents>:          The dependency has a single data source.
         //    - HashSet<DataFlowNode<TContents>>: The dependency has multiple data sources.
@@ -31,7 +32,7 @@ namespace Echo.DataFlow
         /// <summary>
         /// Creates a new data dependency with no data sources.
         /// </summary>
-        public DataDependencyBase()
+        protected DataDependencyBase()
         {
             _listObject = null;
         }
@@ -39,7 +40,7 @@ namespace Echo.DataFlow
         /// <summary>
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
-        public DataDependencyBase(DataFlowNode<TContents> dataSource)
+        protected DataDependencyBase(DataFlowNode<TContents> dataSource)
         {
             _listObject = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
         }
@@ -48,7 +49,7 @@ namespace Echo.DataFlow
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
         /// <param name="dataSources">The data sources.</param>
-        public DataDependencyBase(params DataFlowNode<TContents>[] dataSources)
+        protected DataDependencyBase(params DataFlowNode<TContents>[] dataSources)
             : this(dataSources.AsEnumerable())
         {
         }
@@ -57,7 +58,7 @@ namespace Echo.DataFlow
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
         /// <param name="dataSources">The data sources.</param>
-        public DataDependencyBase(IEnumerable<DataFlowNode<TContents>> dataSources)
+        protected DataDependencyBase(IEnumerable<DataFlowNode<TContents>> dataSources)
         {
             _listObject = new HashSet<DataFlowNode<TContents>>(dataSources);
         }
@@ -72,7 +73,7 @@ namespace Echo.DataFlow
         public ISet<DataFlowNode<TContents>> DataSources => this;
 
         /// <inheritdoc />
-        public bool IsReadOnly => false;
+        bool ICollection<DataFlowNode<TContents>>.IsReadOnly => false;
 
         /// <inheritdoc />
         public int Count => _listObject switch
@@ -404,7 +405,7 @@ namespace Echo.DataFlow
 
                         break;
                     
-                    case HashSet<DataFlowNode<TContents>> nodes:
+                    default:
                         if (_setEnumerator.MoveNext())
                         {
                             Current = _setEnumerator.Current;
