@@ -63,8 +63,13 @@ Below an example snippet that obtains the dependency instructions of the ``add``
     var dependency2 = add.StackDependencies[1];
     
     // Get the instructions responsible for pushing the values 
-    var argument1 = dependency1.DataSources.First().Contents; // returns "push 1"
-    var argument2 = dependency2.DataSources.First().Contents; // returns "push 2"
+    var argument1 = dependency1.First().Contents; // returns "push 1"
+    var argument2 = dependency2.First().Contents; // returns "push 2"
+
+
+.. note::
+
+    The ``DataDependency<TContents>`` class also defines a property called ``DataSources``. In an attempt to reduce heap allocations, this extra collection is merged with the ``DataDependency<TContents>`` class, and the property was made obsolete. You can still use it, but it is redundent.
 
 
 To speed up the process, Echo defines an extension methods that obtains all of the dependency data flow nodes, and sorts them in such a way that they can be evaluated in order.
@@ -84,10 +89,13 @@ It is important to note that a single data dependency might have multiple data s
 
 For example, if we change the example slightly to the following control flow graph:
 
-.. image:: img/if.png
+.. image:: img/if.cfg.png
     :alt: An if statement.
 
-The value that is popped by the ``store v1`` instruction has two possible values, and therefore two different data sources. In Echo, this would be encoded as a single ``DataDependency<TContents>`` with two possible data sources ``push 1`` and ``push 2``. 
+The value that is popped by the ``store v1`` instruction has two possible values, and therefore two different data sources. In Echo, this would be encoded as a single ``DataDependency<TContents>`` with two possible data sources ``push 1`` and ``push 2``.  The resulting data flow graph would therefore look something like the picture below:
+
+.. image:: img/if.dfg.png
+    :alt: The associated data flow graph.
 
 Below an example on how to find the direct dependencies of the ``store v1`` node:
 
@@ -100,6 +108,6 @@ Below an example on how to find the direct dependencies of the ``store v1`` node
     var dependency = storeV1.StackDependencies[0];
 
     // Print out the possible data sources for this value:
-    foreach (DataFlowNode<T> sourceNode in dependency.DataSources)
+    foreach (DataFlowNode<T> sourceNode in dependency)
         Console.WriteLine(sourceNode.Contents);
 

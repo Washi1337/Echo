@@ -56,7 +56,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             var (cfg, dfg) = BuildFlowGraphs(instructions);
             
             Assert.Single(dfg.Nodes[1].StackDependencies);
-            Assert.Equal(dfg.Nodes[0], dfg.Nodes[1].StackDependencies[0].DataSources.First());
+            Assert.Equal(dfg.Nodes[0], dfg.Nodes[1].StackDependencies[0].First());
             Assert.Equal(new[]{dfg.Nodes[1]}, dfg.Nodes[0].GetDependants());
         }
         
@@ -78,7 +78,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             Assert.Equal(new[]
             {
                 dfg.Nodes[0], dfg.Nodes[1], dfg.Nodes[2],
-            }, dfg.Nodes[3].StackDependencies.Select(dep => dep.DataSources.First()));
+            }, dfg.Nodes[3].StackDependencies.Select(dep => dep.First()));
         }
         
         [Fact]
@@ -102,9 +102,9 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             var (cfg, dfg) = BuildFlowGraphs(instructions);
             
             Assert.Single(dfg.Nodes[3].StackDependencies);
-            Assert.Equal(dfg.Nodes[0], dfg.Nodes[3].StackDependencies[0].DataSources.First());
+            Assert.Equal(dfg.Nodes[0], dfg.Nodes[3].StackDependencies[0].First());
             Assert.Single(dfg.Nodes[5].StackDependencies);
-            Assert.Equal(dfg.Nodes[0], dfg.Nodes[5].StackDependencies[0].DataSources.First());
+            Assert.Equal(dfg.Nodes[0], dfg.Nodes[5].StackDependencies[0].First());
         }
 
         [Fact]
@@ -129,7 +129,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             Assert.Single(dfg.Nodes[5].StackDependencies);
             Assert.Equal(
                 new HashSet<IDataFlowNode> { dfg.Nodes[2], dfg.Nodes[4] },
-                new HashSet<IDataFlowNode>(dfg.Nodes[5].StackDependencies[0].DataSources));
+                new HashSet<IDataFlowNode>(dfg.Nodes[5].StackDependencies[0]));
         }
 
         [Fact]
@@ -154,7 +154,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
         
             Assert.Equal(
                 new HashSet<IDataFlowNode> { dfg.Nodes[2], dfg.Nodes[4] },
-                new HashSet<IDataFlowNode>(dfg.Nodes[6].StackDependencies[0].DataSources));
+                new HashSet<IDataFlowNode>(dfg.Nodes[6].StackDependencies[0]));
             Assert.Equal(new[]
             {
                 dfg.Nodes[6]
@@ -270,7 +270,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             cfgBuilder.ConstructFlowGraph(0);
             var dfg = dfgBuilder.DataFlowGraph;
 
-            Assert.Equal(new[] {argument}, dfg.Nodes[0].StackDependencies[0].DataSources);
+            Assert.Equal(new[] {argument}, dfg.Nodes[0].StackDependencies[0]);
         }
 
     }

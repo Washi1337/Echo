@@ -46,7 +46,7 @@ namespace Echo.DataFlow.Collections
         /// <summary>
         /// Gets the total number of edges that are stored in this dependency collection.
         /// </summary>
-        public int EdgeCount => _entries.Sum(e => e.Value.DataSources.Count);
+        public int EdgeCount => _entries.Sum(e => e.Value.Count);
 
         /// <inheritdoc />
         public bool IsReadOnly => false;
@@ -59,7 +59,7 @@ namespace Echo.DataFlow.Collections
             if (item.Dependant != null)
                 throw new ArgumentException("Variable dependency was already added to another node.");
             
-            if (item.DataSources.Any(n => n.ParentGraph != _owner.ParentGraph))
+            if (item.Any(n => n.ParentGraph != _owner.ParentGraph))
                 throw new ArgumentException("Dependency contains data sources from another graph.");
         }
         
