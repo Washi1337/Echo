@@ -145,7 +145,7 @@ namespace Echo.Platforms.Iced
                         result ??= new List<IVariable>();
                         
                         var register = _gpr[use.Register];
-                        if (result.Contains(register))
+                        if (!result.Contains(register))
                             result.Add(register);
                         
                         break;
@@ -163,7 +163,7 @@ namespace Echo.Platforms.Iced
                     {
                         result ??= new List<IVariable>();
                         var register = _flags[flag];
-                        if (result.Contains(register))
+                        if (!result.Contains(register))
                             result.Add(register);
                     }
                 }

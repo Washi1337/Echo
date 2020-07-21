@@ -79,11 +79,12 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public override string ToString()
+        public override string ToString() => DataSources.Count switch
         {
-            string dataSourcesString = IsKnown ? string.Join(" | ", DataSources) : "?";
-            return $"{dataSourcesString})";
-        }
+            0 => "?",
+            1 => DataSources.First().ToString(),
+            _ => $"({string.Join(" | ", DataSources)})"
+        };
 
         IEnumerable<IDataFlowNode> IDataDependency.GetDataSources() => DataSources;
 

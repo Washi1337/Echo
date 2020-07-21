@@ -1,3 +1,4 @@
+using System.Linq;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Symbolic;
@@ -69,7 +70,11 @@ namespace Echo.Platforms.Iced.Tests
                 /* 2: */ 0xC3  // ret
             }, 0);
 
-            Assert.Contains(dfg.Nodes[1].VariableDependencies.Keys, variable => variable.Name == "ESP");
+            var dependency = dfg.Nodes[1].VariableDependencies
+                .FirstOrDefault(v => v.Key.Name == "ESP")
+                .Value;
+            Assert.NotNull(dependency);
+            Assert.Contains(dfg.Nodes[0], dependency.DataSources);
         }
     }
 }
