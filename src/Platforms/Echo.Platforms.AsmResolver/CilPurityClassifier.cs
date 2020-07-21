@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Echo.Core;
@@ -13,6 +15,17 @@ namespace Echo.Platforms.AsmResolver
     /// </summary>
     public class CilPurityClassifier : IPurityClassifier<CilInstruction>
     {
+        private readonly SignatureComparer _comparer = new SignatureComparer();
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="CilPurityClassifier"/> class.
+        /// </summary>
+        public CilPurityClassifier()
+        {
+            KnownPureMethods = new HashSet<IMethodDescriptor>(_comparer);
+            KnownImpureMethods = new HashSet<IMethodDescriptor>(_comparer);
+        }
+        
         /// <summary>
         /// Gets or sets a value indicating whether writes to local variables should be considered pure or not.
         /// </summary>
@@ -96,6 +109,22 @@ namespace Echo.Platforms.AsmResolver
             set;
         } = true;
 
+        /// <summary>
+        /// Gets a mutable collection of known methods that should be considered pure.
+        /// </summary>
+        public ICollection<IMethodDescriptor> KnownPureMethods
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a mutable collection of known methods that should be considered impure and guaranteed have side-effects.
+        /// </summary>
+        public ICollection<IMethodDescriptor> KnownImpureMethods
+        {
+            get;
+        }
+            
         /// <inheritdoc />
         public Trilean IsPure(in CilInstruction instruction)
         {
@@ -219,6 +248,14 @@ namespace Echo.Platforms.AsmResolver
                 case CilCode.Callvirt:
                 case CilCode.Newobj:
                 case CilCode.Jmp:
+                    if (instruction.Operand is IMethodDescriptor method)
+                    {
+                        if (KnownPureMethods.Contains(method))
+                            return true;
+                        if (KnownImpureMethods.Contains(method))
+                            return false;
+                    }
+
                     return DefaultMethodCallPurity;
 
                 case CilCode.Ldftn:
