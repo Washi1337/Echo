@@ -40,6 +40,14 @@ namespace Echo.Platforms.Dnlib
 
         private CilBody MethodBody => Method.Body;
 
+        /// <summary>
+        /// Gets the default static successor resolution engine for this architecture.
+        /// </summary>
+        public CilStaticSuccessorResolver SuccessorResolver
+        {
+            get;
+        } = new CilStaticSuccessorResolver();
+
         /// <inheritdoc />
         public long GetOffset(Instruction instruction) => instruction.Offset;
 
@@ -52,19 +60,19 @@ namespace Echo.Platforms.Dnlib
             // see https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.flowcontrol?view=netcore-3.1
             switch (instruction.OpCode.FlowControl)
             {
+                case FlowControl.Break:
                 case FlowControl.Call:
                 case FlowControl.Meta: // used for prefixes and invalid instructions
                 case FlowControl.Next:
                     return InstructionFlowControl.Fallthrough;
                 case FlowControl.Branch:
-                case FlowControl.Break:
                 case FlowControl.Cond_Branch:
                 case FlowControl.Throw:
                     return InstructionFlowControl.CanBranch;
                 case FlowControl.Return:
                     return InstructionFlowControl.IsTerminator;
                 case FlowControl.Phi:
-                    throw new ArgumentException("There are no known instructions with Phi control flow");
+                    throw new NotSupportedException("There are no known instructions with Phi control flow");
                 default:
                     throw new ArgumentOutOfRangeException();
             }
