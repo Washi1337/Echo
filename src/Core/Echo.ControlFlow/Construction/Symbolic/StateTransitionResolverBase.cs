@@ -76,7 +76,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             {
                 var arguments = currentState.Stack.Pop(argumentsCount, true);
                 for (int i = 0; i < arguments.Count; i++)
-                    node.StackDependencies[i].UnionWith(arguments[i].DataSources);
+                    node.StackDependencies[i].UnionWith(arguments[i]);
             }
 
             for (int i = 0; i < Architecture.GetStackPushCount(instruction); i++)
@@ -89,7 +89,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             
             var readVariables = Architecture.GetReadVariables(instruction);
             foreach (var variable in readVariables)
-                node.VariableDependencies[variable].UnionWith(currentState.Variables[variable].DataSources);
+                node.VariableDependencies[variable].UnionWith(currentState.Variables[variable]);
 
             var writtenVariables = Architecture.GetWrittenVariables(instruction);
             foreach (var variable in writtenVariables)
