@@ -72,7 +72,7 @@ Limitations
 
 A big limitation of this approach, however, is that it cannot work on chunks of code that contain indirect jumps or calls. These might occur in for example chunks of x86 code such as the following:
 
-.. code-block::
+.. code-block:: csharp
 
     mov eax, address
     jmp eax

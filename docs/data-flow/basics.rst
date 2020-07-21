@@ -8,7 +8,7 @@ Data flow graphs are graphs that encode the dependencies between objects, instru
 
 Consider the following excerpt of a function written in a fictional stack-based language:
 
-.. code-block::
+.. code-block:: csharp
 
     push 1
     push 2

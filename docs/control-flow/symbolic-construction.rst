@@ -81,7 +81,7 @@ This approach allows for transition resolvers to look at the current program sta
 
 For example, an x86 back-end could resolve the branch target of the following jump instruction, by looking at the data dependencies and recognising that the value of ``eax`` will contain the value `0x12345678` at runtime.
 
-.. code-block::
+.. code-block:: csharp
 
     mov eax, 0x12345678
     jmp eax
