@@ -97,7 +97,11 @@ namespace Echo.Platforms.Iced
                     case OpAccess.ReadWrite:
                     case OpAccess.ReadCondWrite:
                         result ??= new List<IVariable>();
-                        result.Add(_gpr[use.Register]);
+                        
+                        var register = _gpr[use.Register];
+                        if (!result.Contains(register))
+                            result.Add(register);
+                        
                         break;
                 }
             }
@@ -112,7 +116,9 @@ namespace Echo.Platforms.Iced
                     if ((readFlags & flag) != 0)
                     {
                         result ??= new List<IVariable>();
-                        result.Add(_flags[flag]);
+                        var register = _flags[flag];
+                        if (!result.Contains(register))
+                            result.Add(register);
                     }
                 }
             }
@@ -137,7 +143,11 @@ namespace Echo.Platforms.Iced
                     case OpAccess.ReadWrite:
                     case OpAccess.ReadCondWrite:
                         result ??= new List<IVariable>();
-                        result.Add(_gpr[use.Register]);
+                        
+                        var register = _gpr[use.Register];
+                        if (!result.Contains(register))
+                            result.Add(register);
+                        
                         break;
                 }
             }
@@ -152,7 +162,9 @@ namespace Echo.Platforms.Iced
                     if ((modifiedFlags & flag) != 0)
                     {
                         result ??= new List<IVariable>();
-                        result.Add(_flags[flag]);
+                        var register = _flags[flag];
+                        if (!result.Contains(register))
+                            result.Add(register);
                     }
                 }
             }

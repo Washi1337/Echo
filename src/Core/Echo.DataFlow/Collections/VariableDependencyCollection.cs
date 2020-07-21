@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Echo.Core.Code;
 
@@ -10,6 +11,7 @@ namespace Echo.DataFlow.Collections
     /// Represents a collection of variables and their symbolic values that a node in a data flow graph depends on.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in each node.</typeparam>
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class VariableDependencyCollection<TContents> : IDictionary<IVariable, DataDependency<TContents>>
     {
         private readonly Dictionary<IVariable, DataDependency<TContents>> _entries =
