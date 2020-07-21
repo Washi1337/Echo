@@ -38,7 +38,7 @@ namespace Echo.Platforms.Dnlib
         /// </summary>
         public MethodDef Method { get; }
 
-        private CilBody MethodBody => Method.Body;
+        internal CilBody MethodBody => Method.Body;
 
         /// <summary>
         /// Gets the default static successor resolution engine for this architecture.
