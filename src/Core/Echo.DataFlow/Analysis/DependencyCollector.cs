@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Echo.Core.Graphing;
 using Echo.Core.Graphing.Analysis;
 using Echo.Core.Graphing.Analysis.Sorting;
 
@@ -39,13 +37,13 @@ namespace Echo.DataFlow.Analysis
                 // Prioritize stack dependencies over variable dependencies.
                 foreach (var dependency in node.StackDependencies)
                 {
-                    if (dependency.IsKnown)
+                    if (dependency.HasKnownDataSources)
                         result.Add(dependency.First());
                 }
                 
                 foreach (var entry in node.VariableDependencies)
                 {
-                    if (entry.Value.IsKnown)
+                    if (entry.Value.HasKnownDataSources)
                         result.Add(entry.Value.First());
                 }
 

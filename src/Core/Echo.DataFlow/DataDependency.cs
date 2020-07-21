@@ -6,7 +6,8 @@ using System.Linq;
 namespace Echo.DataFlow
 {
     /// <summary>
-    /// Represents a data dependency of a node in a data flow graph, with one or more data sources.
+    /// Represents a data dependency of a node in a data flow graph, which is a set of one or more data flow nodes where
+    /// the owner node might pull data from.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in a data flow node.</typeparam>
     public class DataDependency<TContents> : IDataDependency, ISet<DataFlowNode<TContents>>
@@ -64,6 +65,15 @@ namespace Echo.DataFlow
         }
 
         /// <summary>
+        /// Gets a collection of data sources this data dependency might pull data from.
+        /// </summary>
+        [Obsolete("The " + nameof(DataSources) + " property was inlined into the "
+                  + nameof(DataDependency<TContents>) + " class, which now implements the "
+                  + nameof(ISet<DataFlowNode<TContents>>) + " interface. Use the data dependency object "
+                  + "directly to iterate over all data sources.")]
+        public ISet<DataFlowNode<TContents>> DataSources => this;
+
+        /// <summary>
         /// Gets the node that owns the dependency.
         /// </summary>
         public DataFlowNode<TContents> Dependant
@@ -105,7 +115,7 @@ namespace Echo.DataFlow
         /// <summary>
         /// Gets a value indicating whether the data dependency has any known data sources. 
         /// </summary>
-        public bool IsKnown => Count > 0;
+        public bool HasKnownDataSources => Count > 0;
 
         IEnumerable<IDataFlowNode> IDataDependency.GetDataSources() => this;
         
@@ -179,7 +189,7 @@ namespace Echo.DataFlow
             switch (_listObject)
             {
                 case null:
-                    return true;
+                    return other.Any();
                 
                 case DataFlowNode<TContents> node:
                     bool containsElement = false;
@@ -353,13 +363,13 @@ namespace Echo.DataFlow
             if (item is null)
                 return false;
             
-             if (RemoveImpl(item))
-             {
-                 item.Dependants.Remove(Dependant);
-                 return true;
-             }
+            if (RemoveImpl(item))
+            {
+                item.Dependants.Remove(Dependant);
+                return true;
+            }
 
-             return false;
+            return false;
         }
 
         private bool RemoveImpl(DataFlowNode<TContents> item)
@@ -391,7 +401,7 @@ namespace Echo.DataFlow
         {
             null => "?",
             DataFlowNode<TContents> node => node.ToString(),
-            IEnumerable<TContents> collection => $"({string.Join(" | ", collection)})",
+            IEnumerable<DataFlowNode<TContents>> collection => $"({string.Join(" | ", collection)})",
             _ => ThrowInvalidStateException().ToString()
         };
 
