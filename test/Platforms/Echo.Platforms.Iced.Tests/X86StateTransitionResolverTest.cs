@@ -1,10 +1,7 @@
-using System.IO;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Symbolic;
-using Echo.Core.Graphing.Serialization.Dot;
 using Echo.DataFlow;
-using Echo.DataFlow.Serialization.Dot;
 using Iced.Intel;
 using Xunit;
 
@@ -62,5 +59,17 @@ namespace Echo.Platforms.Iced.Tests
             Assert.Contains(dfg.Nodes[0], dfg.Nodes[0x3].VariableDependencies[of].DataSources);
         }
 
+        [Fact]
+        public void PushEspShouldOnlyReturnEspOnceForReadAndWrittenVariables()
+        {
+            var (cfg, dfg) = ConstructSymbolicFlowGraph(new byte[]
+            {
+                /* 0: */ 0x54, // push esp
+                /* 1: */ 0x5C, // pop esp
+                /* 2: */ 0xC3  // ret
+            }, 0);
+
+            Assert.Contains(dfg.Nodes[1].VariableDependencies.Keys, variable => variable.Name == "ESP");
+        }
     }
 }
