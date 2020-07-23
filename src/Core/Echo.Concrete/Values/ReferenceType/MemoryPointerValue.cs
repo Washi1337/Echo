@@ -83,8 +83,8 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <inheritdoc />
         public void WriteBytes(int offset, ReadOnlySpan<byte> data)
         {
-            var slicedMemory = _memory.Span.Slice(offset);
-            var slicedBitMask = _knownBitMask.Span.Slice(offset);
+            var slicedMemory = _memory.Span.Slice(offset, data.Length);
+            var slicedBitMask = _knownBitMask.Span.Slice(offset, data.Length);
             
             data.CopyTo(slicedMemory);
             slicedBitMask.Fill(0xFF);
