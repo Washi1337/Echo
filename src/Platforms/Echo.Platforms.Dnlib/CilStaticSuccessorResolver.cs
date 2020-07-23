@@ -57,7 +57,9 @@ namespace Echo.Platforms.Dnlib
 
             SuccessorInfo Branch(bool conditional) =>
                 new SuccessorInfo(((Instruction) instruction.Operand).Offset,
-                    conditional ? ControlFlowEdgeType.Conditional : ControlFlowEdgeType.FallThrough);
+                    conditional
+                        ? ControlFlowEdgeType.Conditional
+                        : ControlFlowEdgeType.FallThrough);
 
             IEnumerable<SuccessorInfo> Switch() =>
                 ((Instruction[]) instruction.Operand).Select(i => new SuccessorInfo(i.Offset, ControlFlowEdgeType.Conditional));

@@ -105,7 +105,9 @@ namespace Echo.Platforms.Dnlib
                 ApplyDefaultBehaviour(nextState, instruction);
                 nextState.ProgramCounter = ((Instruction) instruction.Operand).Offset;
                 return new StateTransition<Instruction>(nextState,
-                    conditional ? ControlFlowEdgeType.Conditional : ControlFlowEdgeType.FallThrough);
+                    conditional
+                        ? ControlFlowEdgeType.Conditional
+                        : ControlFlowEdgeType.FallThrough);
             }
 
             IEnumerable<StateTransition<Instruction>> Switch() => ((Instruction[]) instruction.Operand).Select(i =>

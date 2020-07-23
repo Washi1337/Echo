@@ -27,8 +27,13 @@ namespace Echo.Platforms.Dnlib
             if (!method.HasBody || method.Body is null)
                 throw new ArgumentException("Method does not have a CIL method body.", nameof(method));
 
-            _variables = MethodBody.Variables.Select(v => new CilVariable(v)).ToArray();
-            _parameters = Method.Parameters.Select(p => new CilParameter(p)).ToArray();
+            _variables = MethodBody.Variables
+                .Select(v => new CilVariable(v))
+                .ToArray();
+
+            _parameters = Method.Parameters
+                .Select(p => new CilParameter(p))
+                .ToArray();
 
             Method = method;
         }
