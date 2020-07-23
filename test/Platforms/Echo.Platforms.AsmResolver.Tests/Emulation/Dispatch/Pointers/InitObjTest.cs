@@ -1,4 +1,3 @@
-using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Values.ValueType;
