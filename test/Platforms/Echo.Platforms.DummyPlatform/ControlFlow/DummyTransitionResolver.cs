@@ -29,66 +29,87 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
             return state;
         }
 
-        public override IEnumerable<StateTransition<DummyInstruction>> GetTransitions(SymbolicProgramState<DummyInstruction> currentState, DummyInstruction instruction)
+        public override int GetTransitionCount(in DummyInstruction instruction)
+        {
+            return instruction.OpCode switch
+            {
+                DummyOpCode.Op => 1,
+                DummyOpCode.Push => 1,
+                DummyOpCode.Pop => 1,
+                DummyOpCode.Jmp => 1,
+                DummyOpCode.JmpCond => 2,
+                DummyOpCode.Ret => 0,
+                DummyOpCode.Switch => ((ICollection<long>) instruction.Operands[0]).Count,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        public override int GetTransitions(
+            SymbolicProgramState<DummyInstruction> currentState,
+            in DummyInstruction instruction, 
+            Span<StateTransition<DummyInstruction>> successorBuffer)
         {
             var nextState = currentState.Copy();
             ApplyDefaultBehaviour(nextState, instruction);
 
             return instruction.OpCode switch
             {
-                DummyOpCode.Op => GetFallthroughTransitions(nextState),
-                DummyOpCode.Push => GetFallthroughTransitions(nextState),
-                DummyOpCode.Pop => GetFallthroughTransitions(nextState),
-                DummyOpCode.Jmp => GetJumpTransitions(nextState, instruction),
-                DummyOpCode.JmpCond => GetJumpCondTransitions(nextState, instruction),
-                DummyOpCode.Ret => Enumerable.Empty<StateTransition<DummyInstruction>>(),
-                DummyOpCode.Switch => GetSwitchTransitions(nextState, instruction),
+                DummyOpCode.Op => GetFallthroughTransitions(nextState, successorBuffer),
+                DummyOpCode.Push => GetFallthroughTransitions(nextState, successorBuffer),
+                DummyOpCode.Pop => GetFallthroughTransitions(nextState, successorBuffer),
+                DummyOpCode.Jmp => GetJumpTransitions(nextState, instruction, successorBuffer),
+                DummyOpCode.JmpCond => GetJumpCondTransitions(nextState, instruction, successorBuffer),
+                DummyOpCode.Ret => 0,
+                DummyOpCode.Switch => GetSwitchTransitions(nextState, instruction, successorBuffer),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
 
-        private static IEnumerable<StateTransition<DummyInstruction>> GetFallthroughTransitions(SymbolicProgramState<DummyInstruction> nextState)
+        private static int GetFallthroughTransitions(
+            SymbolicProgramState<DummyInstruction> nextState,
+            Span<StateTransition<DummyInstruction>> successorBuffer)
         {
-            return new[]
-            {
-                new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough),
-            };
+            successorBuffer[0] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough);
+            return 1;
         }
 
-        private IEnumerable<StateTransition<DummyInstruction>> GetJumpTransitions(SymbolicProgramState<DummyInstruction> nextState, DummyInstruction instruction)
+        private static int GetJumpTransitions(
+            SymbolicProgramState<DummyInstruction> nextState,
+            DummyInstruction instruction,
+            Span<StateTransition<DummyInstruction>> successorBuffer)
         {
             nextState.ProgramCounter = (long) instruction.Operands[0];
-            return new[]
-            {
-                new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough),
-            };
+            successorBuffer[0] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough);
+            return 1;
         }
 
-        private IEnumerable<StateTransition<DummyInstruction>> GetJumpCondTransitions(SymbolicProgramState<DummyInstruction> nextState, DummyInstruction instruction)
+        private static int GetJumpCondTransitions(
+            SymbolicProgramState<DummyInstruction> nextState,
+            DummyInstruction instruction, 
+            Span<StateTransition<DummyInstruction>> successorBuffer)
         {
             var branchState = nextState.Copy();
             branchState.ProgramCounter = (long) instruction.Operands[0];
-            return new[]
-            {
-                new StateTransition<DummyInstruction>(branchState, ControlFlowEdgeType.Conditional),
-                new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough),
-            };
+            successorBuffer[0] = new StateTransition<DummyInstruction>(branchState, ControlFlowEdgeType.Conditional);
+            successorBuffer[1] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough);
+            return 2;
         }
 
-        private IEnumerable<StateTransition<DummyInstruction>> GetSwitchTransitions(SymbolicProgramState<DummyInstruction> nextState, DummyInstruction instruction)
+        private static int GetSwitchTransitions(
+            SymbolicProgramState<DummyInstruction> nextState,
+            DummyInstruction instruction,
+            Span<StateTransition<DummyInstruction>> successorBuffer)
         {
-            var result = new List<StateTransition<DummyInstruction>>()
-            {
-                new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough),
-            };
-
-            foreach (long target in (IEnumerable<long>) instruction.Operands[0])
+            var targets = (IList<long>) instruction.Operands[0];
+            for (int i = 0; i < targets.Count; i++)
             {
                 var branchState = nextState.Copy();
-                branchState.ProgramCounter = target;
+                branchState.ProgramCounter = targets[i];
+                successorBuffer[i] =  new StateTransition<DummyInstruction>(branchState, ControlFlowEdgeType.Conditional);
             }
 
-            return result;
+            successorBuffer[targets.Count] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough);
+            return targets.Count;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Echo.DataFlow.Emulation;
 
 namespace Echo.ControlFlow.Construction.Symbolic
@@ -16,12 +17,18 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <returns>The object representing the initial state of the program.</returns>
         SymbolicProgramState<TInstruction> GetInitialState(long entrypointAddress);
 
+        int GetTransitionCount(in TInstruction instruction);
+        
         /// <summary>
         /// Resolves all possible program state transitions that the provided instruction can apply. 
         /// </summary>
         /// <param name="currentState">The current state of the program.</param>
         /// <param name="instruction">The instruction to evaluate.</param>
+        /// <param name="successorBuffer"></param>
         /// <returns>A collection of state transitions that the provided instruction might apply.</returns>
-        IEnumerable<StateTransition<TInstruction>> GetTransitions(SymbolicProgramState<TInstruction> currentState, TInstruction instruction);
+        int GetTransitions(
+            SymbolicProgramState<TInstruction> currentState, 
+            in TInstruction instruction, 
+            Span<StateTransition<TInstruction>> successorBuffer);
     }
 }

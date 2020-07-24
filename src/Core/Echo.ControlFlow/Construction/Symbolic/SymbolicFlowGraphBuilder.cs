@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.Core.Code;
@@ -165,10 +166,23 @@ namespace Echo.ControlFlow.Construction.Symbolic
             InstructionInfo<TInstruction> info,
             Stack<SymbolicProgramState<TInstruction>> agenda)
         {
-            foreach (var transition in TransitionResolver.GetTransitions(currentState, info.Instruction))
+            var arrayPool = ArrayPool<StateTransition<TInstruction>>.Shared;
+            int transitionCount = TransitionResolver.GetTransitionCount(info.Instruction);
+            var buffer = arrayPool.Rent(transitionCount);
+
+            try
             {
-                info.Successors.Add(new SuccessorInfo(transition.NextState.ProgramCounter, transition.EdgeType));
-                agenda.Push(transition.NextState);
+                var bufferSlice = new Span<StateTransition<TInstruction>>(buffer, 0, transitionCount);
+                TransitionResolver.GetTransitions(currentState, info.Instruction, bufferSlice);
+                foreach (var transition in bufferSlice)
+                {
+                    info.Successors.Add(new SuccessorInfo(transition.NextState.ProgramCounter, transition.EdgeType));
+                    agenda.Push(transition.NextState);
+                }
+            }
+            finally
+            {
+                arrayPool.Return(buffer);
             }
         }
 
