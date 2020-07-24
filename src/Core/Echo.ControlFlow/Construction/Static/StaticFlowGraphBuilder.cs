@@ -166,7 +166,12 @@ namespace Echo.ControlFlow.Construction.Static
             var successorsBufferSlice = new Span<SuccessorInfo>(successorsBuffer, 0, successorCount);
             int actualSuccessorCount = SuccessorResolver.GetSuccessors(instruction, successorsBufferSlice);
             if (actualSuccessorCount > successorCount)
-                throw new InvalidOperationException();
+            {
+                // Sanity check: This should only happen if the successor resolver contains a bug.
+                throw new ArgumentException(
+                    "The number of successors that was returned by the successor resolver is inconsistent "
+                    + "with the number of actual written successors.");
+            }
 
             return actualSuccessorCount;
         }

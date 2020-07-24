@@ -167,8 +167,13 @@ namespace Echo.ControlFlow.Construction.Symbolic
                 var transitionsBufferSlice = new Span<StateTransition<TInstruction>>(transitionsBuffer, 0, transitionCount);
                 int actualTransitionCount = TransitionResolver.GetTransitions(currentState, instruction, transitionsBufferSlice);
                 if (actualTransitionCount > transitionCount)
-                    throw new InvalidOperationException();
-                
+                {
+                    // Sanity check: This should only happen if the transition resolver contains a bug.
+                    throw new ArgumentException(
+                        "The number of transitions that was returned by the transition resolver is inconsistent "
+                        + "with the number of actual written transitions.");
+                }
+
                 for (int i = 0; i < actualTransitionCount; i++)
                 {
                     // Translate transition into successor info and register.
@@ -215,7 +220,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
                     var successorBufferSlice = new Span<SuccessorInfo>(successorBuffer, 0, successorCount);
                     int actualSuccessorCount = result.GetSuccessors(offset, successorBufferSlice);
                     if (actualSuccessorCount > successorCount)
-                        throw new InvalidOperationException();
+                    {
+                        // Sanity check: this should only happen if the InstructionTraversalResult has a bug.
+                        throw new ArgumentException(
+                            "The number of successors that was returned by the instruction traveral result is "
+                            + "inconsistent with the number of actual written successors.");
+                    }
                         
                     // Register all branch targets as block headers.
                     for (int i = 0; i < actualSuccessorCount; i++)
