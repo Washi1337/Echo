@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Echo.ControlFlow.Construction.Static
@@ -7,8 +8,10 @@ namespace Echo.ControlFlow.Construction.Static
     /// that is encoded within an instruction either explicitly or implicitly.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instruction to resolve the successors from.</typeparam>
-    public interface IStaticSuccessorResolver<in TInstruction>
+    public interface IStaticSuccessorResolver<TInstruction>
     {
+        int GetSuccessorsCount(in TInstruction instruction);
+        
         /// <summary>
         /// Gets a collection of references that represent the successors of the provided instruction.
         /// </summary>
@@ -38,6 +41,6 @@ namespace Echo.ControlFlow.Construction.Static
         ///
         /// This method extracts these successors from the provided instruction.
         /// </remarks>
-        ICollection<SuccessorInfo> GetSuccessors(TInstruction instruction);
+        int GetSuccessors(in TInstruction instruction, Span<SuccessorInfo> successorsBuffer);
     }
 }

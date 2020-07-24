@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.Core.Code;
@@ -70,61 +71,91 @@ namespace Echo.ControlFlow.Construction.Static
         /// <inheritdoc />
         protected override IInstructionTraversalResult<TInstruction> CollectInstructions(long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
-            var visited = new HashSet<long>();
-            
             var result = new InstructionTraversalResult<TInstruction>();
             result.BlockHeaders.Add(entrypoint);
             result.BlockHeaders.UnionWith(knownBlockHeaders);
+            
+            // Most instructions will have <= 2 successors.
+            // - Immediate fallthrough successor or unconditional branch target.
+            // - A single conditional branch target.
+            
+            // The only exception will be switch-like instructions.
+            // Therefore we start off by renting a buffer of at least two elements.
+            var arrayPool = ArrayPool<SuccessorInfo>.Shared;
+            var successorsBuffer = arrayPool.Rent(2);
 
-            // Start at the entrypoint and block headers.
-            var agenda = new Stack<long>();
-            foreach (var header in result.BlockHeaders)
-                agenda.Push(header);
-
-            while (agenda.Count > 0)
+            try
             {
-                // Get the current offset to process.
-                long currentOffset = agenda.Pop();
+                var visited = new HashSet<long>();
 
-                if (visited.Add(currentOffset))
+                // Start at the entrypoint and block headers.
+                var agenda = new Stack<long>();
+                foreach (var header in result.BlockHeaders)
+                    agenda.Push(header);
+
+                while (agenda.Count > 0)
                 {
-                    // Get the instruction at the provided offset and figure out successors.
-                    var instruction = Instructions.GetInstructionAtOffset(currentOffset);
-                    var currentSuccessors = SuccessorResolver.GetSuccessors(instruction);
-                    
-                    // Store collected data.
-                    result.Instructions.Add(currentOffset, new InstructionInfo<TInstruction>(instruction, currentSuccessors));
-                    
-                    // Figure out next offsets to process.
-                    bool nextInstructionIsSuccessor = false;
-                    foreach (long destinationAddress in currentSuccessors
-                        .Select(s => s.DestinationAddress)
-                        .Distinct())
+                    // Get the current offset to process.
+                    long currentOffset = agenda.Pop();
+
+                    if (visited.Add(currentOffset))
                     {
-                        if (destinationAddress == currentOffset + Architecture.GetSize(instruction))
+                        // Get the instruction at the provided offset, and figure out how many successors it has.
+                        var instruction = Instructions.GetInstructionAtOffset(currentOffset);
+                        int successorCount = SuccessorResolver.GetSuccessorsCount(instruction);
+
+                        // Verify that our buffer has enough elements.
+                        if (successorsBuffer.Length < successorCount)
                         {
-                            // Successor is just the next instruction.
-                            nextInstructionIsSuccessor = true;
-                        }
-                        else
-                        {
-                            // Successor is a jump to another address. This is a new basic block header! 
-                            result.BlockHeaders.Add(destinationAddress);
+                            arrayPool.Return(successorsBuffer);
+                            successorsBuffer = arrayPool.Rent(successorCount);
                         }
 
-                        agenda.Push(destinationAddress);
-                    }
+                        // Get successor information.
+                        var successorsBufferSlice = new Span<SuccessorInfo>(successorsBuffer, 0, successorCount);
+                        int actualSuccessorCount = SuccessorResolver.GetSuccessors(instruction, successorsBufferSlice);
+                        if (actualSuccessorCount > successorCount)
+                            throw new InvalidOperationException();
 
-                    // If we have multiple successors (e.g. as with an if-else construct), or the next instruction is
-                    // not a successor (e.g. with a return address), the next instruction is another block header. 
-                    if (!nextInstructionIsSuccessor
-                        || currentSuccessors.Count > 1
-                        || (Architecture.GetFlowControl(instruction) & InstructionFlowControl.CanBranch) != 0)
-                    {
-                        result.BlockHeaders.Add(currentOffset + Architecture.GetSize(instruction));
-                    }
+                        // Store collected data.
+                        // TODO: get rid of ToArray().
+                        result.Instructions.Add(currentOffset, new InstructionInfo<TInstruction>(instruction,
+                            successorsBufferSlice.ToArray()));
 
+                        // Figure out next offsets to process.
+                        bool nextInstructionIsSuccessor = false;
+                        for (int i = 0; i < actualSuccessorCount; i++)
+                        {
+                            long destinationAddress = successorsBuffer[i].DestinationAddress;
+                            if (destinationAddress == currentOffset + Architecture.GetSize(instruction))
+                            {
+                                // Successor is just the next instruction.
+                                nextInstructionIsSuccessor = true;
+                            }
+                            else
+                            {
+                                // Successor is a jump to another address. This is a new basic block header! 
+                                result.BlockHeaders.Add(destinationAddress);
+                            }
+
+                            agenda.Push(destinationAddress);
+                        }
+
+                        // If we have multiple successors (e.g. as with an if-else construct), or the next instruction is
+                        // not a successor (e.g. with a return address), the next instruction is another block header. 
+                        if (!nextInstructionIsSuccessor
+                            || actualSuccessorCount > 1
+                            || (Architecture.GetFlowControl(instruction) & InstructionFlowControl.CanBranch) != 0)
+                        {
+                            result.BlockHeaders.Add(currentOffset + Architecture.GetSize(instruction));
+                        }
+
+                    }
                 }
+            }
+            finally
+            {
+                arrayPool.Return(successorsBuffer);
             }
 
             return result;
