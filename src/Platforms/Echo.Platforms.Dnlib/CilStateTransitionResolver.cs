@@ -93,7 +93,7 @@ namespace Echo.Platforms.Dnlib
         /// <inheritdoc />
         public override int GetTransitions(SymbolicProgramState<Instruction> currentState,
             in Instruction instruction,
-            Span<StateTransition<Instruction>> successorBuffer)
+            Span<StateTransition<Instruction>> transitionBuffer)
         {
             // Multiplex based on flow control.
 
@@ -103,11 +103,11 @@ namespace Echo.Platforms.Dnlib
                 case FlowControl.Meta:
                 case FlowControl.Next:
                 case FlowControl.Break:
-                    successorBuffer[0] = Next(currentState, instruction);
+                    transitionBuffer[0] = Next(currentState, instruction);
                     return 1;
 
                 case FlowControl.Branch:
-                    successorBuffer[0] = Branch(false, currentState, instruction);
+                    transitionBuffer[0] = Branch(false, currentState, instruction);
                     return 1;
 
                 case FlowControl.Cond_Branch when instruction.OpCode.Code == Code.Switch:
@@ -117,15 +117,15 @@ namespace Echo.Platforms.Dnlib
                         var nextState = currentState.Copy();
                         ApplyDefaultBehaviour(nextState, instruction);
                         nextState.ProgramCounter = targets[i].Offset;
-                        successorBuffer[i] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.Conditional);
+                        transitionBuffer[i] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.Conditional);
                     }
 
-                    successorBuffer[targets.Length] = Next(currentState, instruction);
+                    transitionBuffer[targets.Length] = Next(currentState, instruction);
                     return targets.Length + 1;
 
                 case FlowControl.Cond_Branch:
-                    successorBuffer[0] = Branch(true, currentState, instruction);
-                    successorBuffer[1] = Next(currentState, instruction);
+                    transitionBuffer[0] = Branch(true, currentState, instruction);
+                    transitionBuffer[1] = Next(currentState, instruction);
                     return 2;
 
                 case FlowControl.Return:

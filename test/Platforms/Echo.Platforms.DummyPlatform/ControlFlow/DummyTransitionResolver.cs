@@ -48,20 +48,20 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
         public override int GetTransitions(
             SymbolicProgramState<DummyInstruction> currentState,
             in DummyInstruction instruction, 
-            Span<StateTransition<DummyInstruction>> successorBuffer)
+            Span<StateTransition<DummyInstruction>> transitionBuffer)
         {
             var nextState = currentState.Copy();
             ApplyDefaultBehaviour(nextState, instruction);
 
             return instruction.OpCode switch
             {
-                DummyOpCode.Op => GetFallthroughTransitions(nextState, successorBuffer),
-                DummyOpCode.Push => GetFallthroughTransitions(nextState, successorBuffer),
-                DummyOpCode.Pop => GetFallthroughTransitions(nextState, successorBuffer),
-                DummyOpCode.Jmp => GetJumpTransitions(nextState, instruction, successorBuffer),
-                DummyOpCode.JmpCond => GetJumpCondTransitions(nextState, instruction, successorBuffer),
+                DummyOpCode.Op => GetFallthroughTransitions(nextState, transitionBuffer),
+                DummyOpCode.Push => GetFallthroughTransitions(nextState, transitionBuffer),
+                DummyOpCode.Pop => GetFallthroughTransitions(nextState, transitionBuffer),
+                DummyOpCode.Jmp => GetJumpTransitions(nextState, instruction, transitionBuffer),
+                DummyOpCode.JmpCond => GetJumpCondTransitions(nextState, instruction, transitionBuffer),
                 DummyOpCode.Ret => 0,
-                DummyOpCode.Switch => GetSwitchTransitions(nextState, instruction, successorBuffer),
+                DummyOpCode.Switch => GetSwitchTransitions(nextState, instruction, transitionBuffer),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }

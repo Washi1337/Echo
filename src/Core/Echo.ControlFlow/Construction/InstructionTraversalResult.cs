@@ -16,6 +16,10 @@ namespace Echo.ControlFlow.Construction
         private readonly ISet<long> _fallThroughOffsets = new HashSet<long>();
         private readonly IDictionary<long, IList<SuccessorInfo>> _nonTrivialEdges = new Dictionary<long, IList<SuccessorInfo>>();
         
+        /// <summary>
+        /// Creates a new instance of the <see cref="InstructionTraversalResult{TInstruction}"/> class.
+        /// </summary>
+        /// <param name="architecture">The architecture.</param>
         public InstructionTraversalResult(IInstructionSetArchitecture<TInstruction> architecture)
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
@@ -50,6 +54,10 @@ namespace Echo.ControlFlow.Construction
             return _instructions.Values.OrderBy(i => Architecture.GetOffset(i));
         }
 
+        /// <summary>
+        /// Adds a single instruction to the traversal result.
+        /// </summary>
+        /// <param name="instruction">The instruction to add.</param>
         public void AddInstruction(in TInstruction instruction)
         {
             _instructions.Add(Architecture.GetOffset(instruction), instruction);
@@ -87,17 +95,28 @@ namespace Echo.ControlFlow.Construction
                 for (int i = 0; i < successors.Count; i++, count++)
                     successorsBuffer[count] = successors[i];
             } 
-            
+
             return count;
         }
 
-        public void ClearSuccessors(long offset)
+        /// <summary>
+        /// Clears all registered successors for the provided instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction.</param>
+        public void ClearSuccessors(in TInstruction instruction)
         {
+            long offset = Architecture.GetOffset(instruction);
+            
             _fallThroughOffsets.Remove(offset);
             if (_nonTrivialEdges.TryGetValue(offset, out var successors))
                 successors.Clear();
         }
         
+        /// <summary>
+        /// Registers a successor for the provided instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction.</param>
+        /// <param name="successorInfo">The successor information.</param>
         public void RegisterSuccessor(in TInstruction instruction, SuccessorInfo successorInfo)
         {
             long offset = Architecture.GetOffset(instruction);
@@ -117,10 +136,11 @@ namespace Echo.ControlFlow.Construction
                     successors = new List<SuccessorInfo>();
                     _nonTrivialEdges[offset] = successors;
                 }
-                        
-                // Add the non-fallthrough successor info.
+        
+                // Add the non-trivial successor info.
                 successors.Add(successorInfo);
             }
         }
+        
     }
 }

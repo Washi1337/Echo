@@ -68,8 +68,8 @@ namespace Echo.ControlFlow.Construction
 
         private void ConnectNodes(ControlFlowGraph<TInstruction> graph, IInstructionTraversalResult<TInstruction> traversalResult)
         {
-            var arrayPool = ArrayPool<SuccessorInfo>.Shared;
-            var successorsBuffer = arrayPool.Rent(2);
+            var successorsBufferPool = ArrayPool<SuccessorInfo>.Shared;
+            var successorsBuffer = successorsBufferPool.Rent(2);
 
             try
             {
@@ -79,13 +79,15 @@ namespace Echo.ControlFlow.Construction
                     var block = node.Contents;
                     long footerOffset = Architecture.GetOffset(block.Instructions[block.Instructions.Count - 1]);
 
+                    // Ensure the size of the successors buffer is big enough.
                     int successorCount = traversalResult.GetSuccessorCount(footerOffset);
                     if (successorsBuffer.Length < successorCount)
                     {
-                        arrayPool.Return(successorsBuffer);
-                        successorsBuffer = arrayPool.Rent(successorCount);
+                        successorsBufferPool.Return(successorsBuffer);
+                        successorsBuffer = successorsBufferPool.Rent(successorCount);
                     }
 
+                    // Read successors.
                     var successorsBufferSlice = new Span<SuccessorInfo>(successorsBuffer, 0, successorCount);
                     int actualCount = traversalResult.GetSuccessors(footerOffset, successorsBufferSlice);
                     if (actualCount > successorCount)
@@ -94,7 +96,7 @@ namespace Echo.ControlFlow.Construction
                     // Add edges accordingly.
                     for (int i = 0; i < actualCount; i++)
                     {
-                        var successor = successorsBufferSlice[i];
+                        var successor = successorsBuffer[i];
                         
                         var successorNode = graph.GetNodeByOffset(successor.DestinationAddress);
                         if (successorNode == null)
@@ -106,7 +108,7 @@ namespace Echo.ControlFlow.Construction
             }
             finally
             {
-                arrayPool.Return(successorsBuffer);
+                successorsBufferPool.Return(successorsBuffer);
             }
         }
         

@@ -93,23 +93,23 @@ namespace Echo.Platforms.AsmResolver
         /// <inheritdoc />
         public override int GetTransitions(SymbolicProgramState<CilInstruction> currentState,
             in CilInstruction instruction,
-            Span<StateTransition<CilInstruction>> successorBuffer)
+            Span<StateTransition<CilInstruction>> transitionBuffer)
         {
             // Multiplex based on flow control.
             
             switch (instruction.OpCode.FlowControl)
             {
                 case CilFlowControl.Branch:
-                    return GetUnconditionalBranchTransitions(currentState, instruction, successorBuffer);
+                    return GetUnconditionalBranchTransitions(currentState, instruction, transitionBuffer);
 
                 case CilFlowControl.ConditionalBranch:
-                    return GetConditionalBranchTransitions(currentState, instruction, successorBuffer);
+                    return GetConditionalBranchTransitions(currentState, instruction, transitionBuffer);
                 
                 case CilFlowControl.Call:
                 case CilFlowControl.Meta:
                 case CilFlowControl.Next:
                 case CilFlowControl.Break:
-                    return GetFallthroughTransitions(currentState, instruction, successorBuffer);
+                    return GetFallthroughTransitions(currentState, instruction, transitionBuffer);
                 
                 case CilFlowControl.Return:
                 case CilFlowControl.Throw:

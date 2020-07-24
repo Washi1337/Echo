@@ -30,8 +30,19 @@ namespace Echo.ControlFlow.Construction
         /// <returns>The instructions and their metadata.</returns>
         IEnumerable<TInstruction> GetAllInstructions();
 
+        /// <summary>
+        /// Obtains the number of successors of an instruction that were found during the traversal.
+        /// </summary>
+        /// <param name="offset">The offset of the instruction.</param>
+        /// <returns>The number of successors.</returns>
         int GetSuccessorCount(long offset);
 
+        /// <summary>
+        /// Obtains the registered successors of an instruction.
+        /// </summary>
+        /// <param name="offset">The offset.</param>
+        /// <param name="successorsBuffer">The buffer to write the successors into.</param>
+        /// <returns>The number of successors.</returns>
         int GetSuccessors(long offset, Span<SuccessorInfo> successorsBuffer);
     }
 }

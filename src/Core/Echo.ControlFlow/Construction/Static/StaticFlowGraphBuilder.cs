@@ -80,8 +80,8 @@ namespace Echo.ControlFlow.Construction.Static
             
             // The only exception will be switch-like instructions.
             // Therefore we start off by renting a buffer of at least two elements.
-            var arrayPool = ArrayPool<SuccessorInfo>.Shared;
-            var successorsBuffer = arrayPool.Rent(2);
+            var successorsBufferPool = ArrayPool<SuccessorInfo>.Shared;
+            var successorsBuffer = successorsBufferPool.Rent(2);
 
             try
             {
@@ -101,27 +101,14 @@ namespace Echo.ControlFlow.Construction.Static
                     {
                         // Get the instruction at the provided offset, and figure out how many successors it has.
                         var instruction = Instructions.GetInstructionAtOffset(currentOffset);
-                        int successorCount = SuccessorResolver.GetSuccessorsCount(instruction);
-
-                        // Verify that our buffer has enough elements.
-                        if (successorsBuffer.Length < successorCount)
-                        {
-                            arrayPool.Return(successorsBuffer);
-                            successorsBuffer = arrayPool.Rent(successorCount);
-                        }
-
-                        // Get successor information.
-                        var successorsBufferSlice = new Span<SuccessorInfo>(successorsBuffer, 0, successorCount);
-                        int actualSuccessorCount = SuccessorResolver.GetSuccessors(instruction, successorsBufferSlice);
-                        if (actualSuccessorCount > successorCount)
-                            throw new InvalidOperationException();
+                        int successorCount = GetSuccessors(successorsBufferPool, ref successorsBuffer, instruction);
 
                         // Store collected data.
                         result.AddInstruction(instruction);
 
                         // Figure out next offsets to process.
                         bool nextInstructionIsSuccessor = false;
-                        for (int i = 0; i < actualSuccessorCount; i++)
+                        for (int i = 0; i < successorCount; i++)
                         {
                             var successor = successorsBuffer[i];
                             long destinationAddress = successor.DestinationAddress;
@@ -144,7 +131,7 @@ namespace Echo.ControlFlow.Construction.Static
                         // If we have multiple successors (e.g. as with an if-else construct), or the next instruction is
                         // not a successor (e.g. with a return address), the next instruction is another block header. 
                         if (!nextInstructionIsSuccessor
-                            || actualSuccessorCount > 1
+                            || successorCount > 1
                             || (Architecture.GetFlowControl(instruction) & InstructionFlowControl.CanBranch) != 0)
                         {
                             result.BlockHeaders.Add(currentOffset + Architecture.GetSize(instruction));
@@ -155,10 +142,33 @@ namespace Echo.ControlFlow.Construction.Static
             }
             finally
             {
-                arrayPool.Return(successorsBuffer);
+                successorsBufferPool.Return(successorsBuffer);
             }
 
             return result;
+        }
+
+        private int GetSuccessors(
+            ArrayPool<SuccessorInfo> arrayPool, 
+            ref SuccessorInfo[] successorsBuffer, 
+            in TInstruction instruction)
+        {
+            int successorCount = SuccessorResolver.GetSuccessorsCount(instruction);
+
+            // Verify that our buffer has enough elements.
+            if (successorsBuffer.Length < successorCount)
+            {
+                arrayPool.Return(successorsBuffer);
+                successorsBuffer = arrayPool.Rent(successorCount);
+            }
+
+            // Get successor information.
+            var successorsBufferSlice = new Span<SuccessorInfo>(successorsBuffer, 0, successorCount);
+            int actualSuccessorCount = SuccessorResolver.GetSuccessors(instruction, successorsBufferSlice);
+            if (actualSuccessorCount > successorCount)
+                throw new InvalidOperationException();
+
+            return actualSuccessorCount;
         }
 
     }

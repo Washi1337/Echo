@@ -52,7 +52,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         public abstract int GetTransitions(
             SymbolicProgramState<TInstruction> currentState,
             in TInstruction instruction,
-            Span<StateTransition<TInstruction>> successorBuffer);
+            Span<StateTransition<TInstruction>> transitionBuffer);
 
         /// <summary>
         /// Applies the default fallthrough transition on a symbolic program state. 

@@ -7,6 +7,13 @@ namespace Echo.ControlFlow.Construction.Symbolic
     /// Provides members for resolving the next possible states of a program after the execution of an instruction.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instruction that is being executed.</typeparam>
+    /// <remarks>
+    /// <para>
+    /// This interface is meant for components within the Echo project that require information about the transitions
+    /// that an individual instruction might apply to a given program state. These are typically control flow graph
+    /// builders, such as the <see cref="SymbolicFlowGraphBuilder{TInstruction}"/> class.
+    /// </para>
+    /// </remarks>
     public interface IStateTransitionResolver<TInstruction>
     {
         /// <summary>
@@ -16,6 +23,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <returns>The object representing the initial state of the program.</returns>
         SymbolicProgramState<TInstruction> GetInitialState(long entrypointAddress);
 
+        /// <summary>
+        /// Gets the number of transitions the current program state might transition into.
+        /// </summary>
+        /// <param name="currentState">The current state of the program.</param>
+        /// <param name="instruction">The instruction to evaluate.</param>
+        /// <returns>The number of transitions that the provided instruction might apply.</returns>
         int GetTransitionCount(SymbolicProgramState<TInstruction> currentState, in TInstruction instruction);
         
         /// <summary>
@@ -23,11 +36,11 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// </summary>
         /// <param name="currentState">The current state of the program.</param>
         /// <param name="instruction">The instruction to evaluate.</param>
-        /// <param name="successorBuffer"></param>
-        /// <returns>A collection of state transitions that the provided instruction might apply.</returns>
+        /// <param name="transitionBuffer">The output buffer to write the transitions that the instruction might apply.</param>
+        /// <returns>The number of transitions that were written into <paramref name="transitionBuffer"/>.</returns>
         int GetTransitions(
             SymbolicProgramState<TInstruction> currentState, 
             in TInstruction instruction, 
-            Span<StateTransition<TInstruction>> successorBuffer);
+            Span<StateTransition<TInstruction>> transitionBuffer);
     }
 }

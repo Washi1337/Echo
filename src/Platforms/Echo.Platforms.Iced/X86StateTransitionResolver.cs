@@ -45,7 +45,7 @@ namespace Echo.Platforms.Iced
         /// <inheritdoc />
         public override int GetTransitions(SymbolicProgramState<Instruction> currentState,
             in Instruction instruction,
-            Span<StateTransition<Instruction>> successorBuffer)
+            Span<StateTransition<Instruction>> transitionBuffer)
         {
             var nextState = currentState.Copy();
             ApplyDefaultBehaviour(nextState, instruction);
@@ -53,10 +53,10 @@ namespace Echo.Platforms.Iced
             switch (instruction.FlowControl)
             {
                 case FlowControl.UnconditionalBranch:
-                    return GetUnconditionalBranchTransitions(instruction, nextState, successorBuffer);
+                    return GetUnconditionalBranchTransitions(instruction, nextState, transitionBuffer);
 
                 case FlowControl.ConditionalBranch:
-                    return GetConditionalBranchTransitions(instruction, nextState, successorBuffer);
+                    return GetConditionalBranchTransitions(instruction, nextState, transitionBuffer);
                 
                 case FlowControl.IndirectBranch: 
                     //TODO: Try inferring indirect branch from data flow graph.
@@ -65,7 +65,7 @@ namespace Echo.Platforms.Iced
                     return 0;
                 
                 default:
-                    return GetFallthroughTransitions(nextState, successorBuffer);
+                    return GetFallthroughTransitions(nextState, transitionBuffer);
             }
         }
         

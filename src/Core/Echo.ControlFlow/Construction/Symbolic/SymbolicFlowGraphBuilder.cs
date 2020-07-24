@@ -79,18 +79,23 @@ namespace Echo.ControlFlow.Construction.Symbolic
         protected override IInstructionTraversalResult<TInstruction> CollectInstructions(
             long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
-            var context = new Context(Architecture);
+            var context = new GraphBuilderContext(Architecture);
             var blockHeaders = knownBlockHeaders as long[] ?? knownBlockHeaders.ToArray();
             
+            // Perform traversal.
             TraverseInstructions(context, entrypoint, blockHeaders);
+            
+            // Register known block headers.
             context.Result.BlockHeaders.Add(entrypoint);
             context.Result.BlockHeaders.UnionWith(blockHeaders);
+            
+            // Infer remaining block headers.
             DetermineBlockHeaders(context);
             
             return context.Result;
         }
 
-        private void TraverseInstructions(Context context, long entrypoint, IEnumerable<long> knownBlockHeaders)
+        private void TraverseInstructions(in GraphBuilderContext context, long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
             var agenda = new Stack<SymbolicProgramState<TInstruction>>();
             foreach (var header in knownBlockHeaders)
@@ -110,7 +115,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
                     var instruction = Instructions.GetCurrentInstruction(currentState);
                     
                     if (context.Result.ContainsInstruction(currentState.ProgramCounter))
-                        context.Result.ClearSuccessors(currentState.ProgramCounter);
+                        context.Result.ClearSuccessors(instruction);
                     else
                         context.Result.AddInstruction(instruction);
 
@@ -120,7 +125,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         }
 
         private static bool ApplyStateChange(
-            Context context, 
+            GraphBuilderContext context, 
             ref SymbolicProgramState<TInstruction> currentState)
         {
             bool changed = false;
@@ -144,7 +149,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         }
 
         private void ResolveAndScheduleSuccessors(
-            Context context, 
+            GraphBuilderContext context, 
             SymbolicProgramState<TInstruction> currentState,
             in TInstruction instruction,
             Stack<SymbolicProgramState<TInstruction>> agenda)
@@ -181,7 +186,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             }
         }
 
-        private void DetermineBlockHeaders(Context context)
+        private void DetermineBlockHeaders(in GraphBuilderContext context)
         {
             var result = context.Result;
             var arrayPool = ArrayPool<SuccessorInfo>.Shared;
@@ -226,23 +231,24 @@ namespace Echo.ControlFlow.Construction.Symbolic
             }
         }
 
-        private sealed class Context
+        private readonly ref struct GraphBuilderContext
         {
-            public Context(IInstructionSetArchitecture<TInstruction> architecture)
+            public GraphBuilderContext(IInstructionSetArchitecture<TInstruction> architecture)
             {
                 Result = new InstructionTraversalResult<TInstruction>(architecture);
+                RecordedStates = new Dictionary<long, SymbolicProgramState<TInstruction>>();
             }
-            
+
             public IDictionary<long, SymbolicProgramState<TInstruction>> RecordedStates
             {
                 get;
-            } = new Dictionary<long, SymbolicProgramState<TInstruction>>();
+            }
 
             public InstructionTraversalResult<TInstruction> Result
             {
                 get;
             }
         }
-        
+
     }
 }
