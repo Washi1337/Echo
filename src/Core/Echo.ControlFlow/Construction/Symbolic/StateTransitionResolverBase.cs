@@ -45,7 +45,8 @@ namespace Echo.ControlFlow.Construction.Symbolic
             new SymbolicProgramState<TInstruction>(entrypointAddress);
 
         /// <inheritdoc />
-        public abstract int GetTransitionCount(in TInstruction instruction);
+        public abstract int GetTransitionCount(SymbolicProgramState<TInstruction> currentState,
+            in TInstruction instruction);
 
         /// <inheritdoc />
         public abstract int GetTransitions(

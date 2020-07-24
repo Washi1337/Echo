@@ -23,7 +23,8 @@ namespace Echo.Platforms.Iced
         }
 
         /// <inheritdoc />
-        public override int GetTransitionCount(in Instruction instruction)
+        public override int GetTransitionCount(SymbolicProgramState<Instruction> currentState,
+            in Instruction instruction)
         {   
             switch (instruction.FlowControl)
             {

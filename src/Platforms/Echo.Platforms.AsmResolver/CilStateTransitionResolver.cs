@@ -60,7 +60,8 @@ namespace Echo.Platforms.AsmResolver
         }
 
         /// <inheritdoc />
-        public override int GetTransitionCount(in CilInstruction instruction)
+        public override int GetTransitionCount(SymbolicProgramState<CilInstruction> currentState,
+            in CilInstruction instruction)
         {
             switch (instruction.OpCode.FlowControl)
             {

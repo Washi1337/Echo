@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction
 {
@@ -6,7 +8,7 @@ namespace Echo.ControlFlow.Construction
     /// Provides members for describing a traversal of a collection of instructions.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that were traversed.</typeparam>
-    public interface IInstructionTraversalResult<TInstruction>
+    public interface IInstructionTraversalResult<TInstruction> : IStaticInstructionProvider<TInstruction>
     {
         /// <summary>
         /// Determines whether an offset was marked as a block header during the traversal.
@@ -23,16 +25,13 @@ namespace Echo.ControlFlow.Construction
         bool ContainsInstruction(long offset);
 
         /// <summary>
-        /// Obtains the information about an instruction by its offset that was collected during the traversal.
-        /// </summary>
-        /// <param name="offset">The offset of the instruction.</param>
-        /// <returns>The collected instruction information.</returns>
-        InstructionInfo<TInstruction> GetInstruction(long offset);
-
-        /// <summary>
         /// Obtains all instruction records that were collected during the traversal. 
         /// </summary>
         /// <returns>The instructions and their metadata.</returns>
-        IEnumerable<InstructionInfo<TInstruction>> GetAllInstructions();
+        IEnumerable<TInstruction> GetAllInstructions();
+
+        int GetSuccessorCount(long offset);
+
+        int GetSuccessors(long offset, Span<SuccessorInfo> successorsBuffer);
     }
 }

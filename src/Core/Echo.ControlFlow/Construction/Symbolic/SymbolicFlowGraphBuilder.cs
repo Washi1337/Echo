@@ -79,22 +79,19 @@ namespace Echo.ControlFlow.Construction.Symbolic
         protected override IInstructionTraversalResult<TInstruction> CollectInstructions(
             long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
+            var context = new Context(Architecture);
             var blockHeaders = knownBlockHeaders as long[] ?? knownBlockHeaders.ToArray();
             
-            var result = TraverseInstructions(entrypoint, blockHeaders);
-            result.BlockHeaders.UnionWith(blockHeaders);
-            DetermineBlockHeaders(result);
+            TraverseInstructions(context, entrypoint, blockHeaders);
+            context.Result.BlockHeaders.Add(entrypoint);
+            context.Result.BlockHeaders.UnionWith(blockHeaders);
+            DetermineBlockHeaders(context);
             
-            return result;
+            return context.Result;
         }
 
-        private InstructionTraversalResult<TInstruction> TraverseInstructions(
-            long entrypoint, IEnumerable<long> knownBlockHeaders)
+        private void TraverseInstructions(Context context, long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
-            var result = new InstructionTraversalResult<TInstruction>();
-            
-            var recordedStates = new Dictionary<long, SymbolicProgramState<TInstruction>>();
-            
             var agenda = new Stack<SymbolicProgramState<TInstruction>>();
             foreach (var header in knownBlockHeaders)
                 agenda.Push(TransitionResolver.GetInitialState(header));
@@ -104,27 +101,30 @@ namespace Echo.ControlFlow.Construction.Symbolic
             {
                 // Merge the current state with the recorded states.
                 var currentState = agenda.Pop();
-                bool recordedStatesChanged = ApplyStateChange(recordedStates, ref currentState);
+                bool recordedStatesChanged = ApplyStateChange(context, ref currentState);
                 
                 // If anything changed, we must invalidate the known successors of the current
                 // instruction and (re)visit all its successors.
                 if (recordedStatesChanged)
                 {
                     var instruction = Instructions.GetCurrentInstruction(currentState);
-                    var instructionInfo = InvalidateKnownSuccessors(result, currentState, instruction);
-                    ResolveAndScheduleSuccessors(currentState, instructionInfo, agenda);
+                    
+                    if (context.Result.ContainsInstruction(currentState.ProgramCounter))
+                        context.Result.ClearSuccessors(currentState.ProgramCounter);
+                    else
+                        context.Result.AddInstruction(instruction);
+
+                    ResolveAndScheduleSuccessors(context, currentState, instruction, agenda);
                 }
             }
-
-            return result;
         }
 
         private static bool ApplyStateChange(
-            IDictionary<long, SymbolicProgramState<TInstruction>> recordedStates, 
+            Context context, 
             ref SymbolicProgramState<TInstruction> currentState)
         {
             bool changed = false;
-            if (recordedStates.TryGetValue(currentState.ProgramCounter, out var recordedState))
+            if (context.RecordedStates.TryGetValue(currentState.ProgramCounter, out var recordedState))
             {
                 // We are revisiting this address, merge program states.
                 if (recordedState.MergeWith(currentState))
@@ -136,69 +136,111 @@ namespace Echo.ControlFlow.Construction.Symbolic
             else
             {
                 // This is a new unvisited address.
-                recordedStates.Add(currentState.ProgramCounter, currentState);
+                context.RecordedStates.Add(currentState.ProgramCounter, currentState);
                 changed = true;
             }
 
             return changed;
         }
 
-        private static InstructionInfo<TInstruction> InvalidateKnownSuccessors(
-            InstructionTraversalResult<TInstruction> result, 
-            SymbolicProgramState<TInstruction> currentState,
-            TInstruction instruction)
-        {
-            if (result.Instructions.TryGetValue(currentState.ProgramCounter, out var info))
-            {
-                info.Successors.Clear();
-            }
-            else
-            {
-                info = new InstructionInfo<TInstruction>(instruction, new List<SuccessorInfo>());
-                result.Instructions.Add(currentState.ProgramCounter, info);
-            }
-
-            return info;
-        }
-
         private void ResolveAndScheduleSuccessors(
-            SymbolicProgramState<TInstruction> currentState, 
-            InstructionInfo<TInstruction> info,
+            Context context, 
+            SymbolicProgramState<TInstruction> currentState,
+            in TInstruction instruction,
             Stack<SymbolicProgramState<TInstruction>> agenda)
         {
+            var result = context.Result;
+            
+            // Get a buffer to write to.
             var arrayPool = ArrayPool<StateTransition<TInstruction>>.Shared;
-            int transitionCount = TransitionResolver.GetTransitionCount(info.Instruction);
-            var buffer = arrayPool.Rent(transitionCount);
+            int transitionCount = TransitionResolver.GetTransitionCount(currentState, instruction);
+            var transitionsBuffer = arrayPool.Rent(transitionCount);
 
             try
             {
-                var bufferSlice = new Span<StateTransition<TInstruction>>(buffer, 0, transitionCount);
-                TransitionResolver.GetTransitions(currentState, info.Instruction, bufferSlice);
-                foreach (var transition in bufferSlice)
+                // Read transitions.
+                var transitionsBufferSlice = new Span<StateTransition<TInstruction>>(transitionsBuffer, 0, transitionCount);
+                int actualTransitionCount = TransitionResolver.GetTransitions(currentState, instruction, transitionsBufferSlice);
+                if (actualTransitionCount > transitionCount)
+                    throw new InvalidOperationException();
+                
+                for (int i = 0; i < actualTransitionCount; i++)
                 {
-                    info.Successors.Add(new SuccessorInfo(transition.NextState.ProgramCounter, transition.EdgeType));
+                    // Translate transition into successor info and register.
+                    var transition = transitionsBufferSlice[i];
+                    var successor = new SuccessorInfo(transition.NextState.ProgramCounter, transition.EdgeType);
+                    result.RegisterSuccessor(instruction, successor);
+                    
+                    // Schedule transition for further processing.
                     agenda.Push(transition.NextState);
                 }
             }
             finally
             {
-                arrayPool.Return(buffer);
+                arrayPool.Return(transitionsBuffer);
             }
         }
 
-        private void DetermineBlockHeaders(InstructionTraversalResult<TInstruction> result)
+        private void DetermineBlockHeaders(Context context)
         {
-            foreach (var (instruction, successors) in result.GetAllInstructions())
+            var result = context.Result;
+            var arrayPool = ArrayPool<SuccessorInfo>.Shared;
+            var successorBuffer = arrayPool.Rent(2);
+
+            try
             {
-                if ((Architecture.GetFlowControl(instruction) & InstructionFlowControl.CanBranch) != 0)
+                foreach (var instruction in result.GetAllInstructions())
                 {
-                    foreach (var successor in successors)
-                        result.BlockHeaders.Add(successor.DestinationAddress);
+                    // Block headers are introduced by branches only.
+                    if ((Architecture.GetFlowControl(instruction) & InstructionFlowControl.CanBranch) == 0)
+                        continue;
                     
                     long offset = Architecture.GetOffset(instruction);
                     long size = Architecture.GetSize(instruction);
+
+                    // Make sure the successor buffer is big enough.
+                    int successorCount = result.GetSuccessorCount(offset);
+                    if (successorBuffer.Length < successorCount)
+                    {
+                        arrayPool.Return(successorBuffer);
+                        successorBuffer = arrayPool.Rent(successorCount);
+                    }
+
+                    // Get successors.
+                    var successorBufferSlice = new Span<SuccessorInfo>(successorBuffer, 0, successorCount);
+                    int actualSuccessorCount = result.GetSuccessors(offset, successorBufferSlice);
+                    if (actualSuccessorCount > successorCount)
+                        throw new InvalidOperationException();
+                        
+                    // Register all branch targets as block headers.
+                    for (int i = 0; i < actualSuccessorCount; i++)
+                        result.BlockHeaders.Add(successorBufferSlice[i].DestinationAddress);
+
+                    // Mark end of current block.
                     result.BlockHeaders.Add(offset + size);
                 }
+            }
+            finally
+            {
+                arrayPool.Return(successorBuffer);
+            }
+        }
+
+        private sealed class Context
+        {
+            public Context(IInstructionSetArchitecture<TInstruction> architecture)
+            {
+                Result = new InstructionTraversalResult<TInstruction>(architecture);
+            }
+            
+            public IDictionary<long, SymbolicProgramState<TInstruction>> RecordedStates
+            {
+                get;
+            } = new Dictionary<long, SymbolicProgramState<TInstruction>>();
+
+            public InstructionTraversalResult<TInstruction> Result
+            {
+                get;
             }
         }
         

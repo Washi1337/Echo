@@ -29,7 +29,8 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
             return state;
         }
 
-        public override int GetTransitionCount(in DummyInstruction instruction)
+        public override int GetTransitionCount(SymbolicProgramState<DummyInstruction> currentState,
+            in DummyInstruction instruction)
         {
             return instruction.OpCode switch
             {

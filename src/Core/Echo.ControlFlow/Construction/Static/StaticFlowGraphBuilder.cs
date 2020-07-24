@@ -1,7 +1,6 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Linq;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction.Static
@@ -71,7 +70,7 @@ namespace Echo.ControlFlow.Construction.Static
         /// <inheritdoc />
         protected override IInstructionTraversalResult<TInstruction> CollectInstructions(long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
-            var result = new InstructionTraversalResult<TInstruction>();
+            var result = new InstructionTraversalResult<TInstruction>(Architecture);
             result.BlockHeaders.Add(entrypoint);
             result.BlockHeaders.UnionWith(knownBlockHeaders);
             
@@ -118,15 +117,15 @@ namespace Echo.ControlFlow.Construction.Static
                             throw new InvalidOperationException();
 
                         // Store collected data.
-                        // TODO: get rid of ToArray().
-                        result.Instructions.Add(currentOffset, new InstructionInfo<TInstruction>(instruction,
-                            successorsBufferSlice.ToArray()));
+                        result.AddInstruction(instruction);
 
                         // Figure out next offsets to process.
                         bool nextInstructionIsSuccessor = false;
                         for (int i = 0; i < actualSuccessorCount; i++)
                         {
-                            long destinationAddress = successorsBuffer[i].DestinationAddress;
+                            var successor = successorsBuffer[i];
+                            long destinationAddress = successor.DestinationAddress;
+                            
                             if (destinationAddress == currentOffset + Architecture.GetSize(instruction))
                             {
                                 // Successor is just the next instruction.
@@ -137,7 +136,8 @@ namespace Echo.ControlFlow.Construction.Static
                                 // Successor is a jump to another address. This is a new basic block header! 
                                 result.BlockHeaders.Add(destinationAddress);
                             }
-
+                            
+                            result.RegisterSuccessor(instruction, successor);
                             agenda.Push(destinationAddress);
                         }
 

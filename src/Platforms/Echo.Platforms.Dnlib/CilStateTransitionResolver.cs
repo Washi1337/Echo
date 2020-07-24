@@ -59,7 +59,8 @@ namespace Echo.Platforms.Dnlib
         }
 
         /// <inheritdoc />
-        public override int GetTransitionCount(in Instruction instruction)
+        public override int GetTransitionCount(SymbolicProgramState<Instruction> currentState,
+            in Instruction instruction)
         {
             switch (instruction.OpCode.FlowControl)
             {
