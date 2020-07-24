@@ -41,13 +41,13 @@ namespace Echo.Platforms.Iced
         public X86FlagsRegister GetFlag(RflagsBits flag) => _flags[flag];
         
         /// <inheritdoc />
-        public long GetOffset(Instruction instruction) => (long) instruction.IP;
+        public long GetOffset(in Instruction instruction) => (long) instruction.IP;
 
         /// <inheritdoc />
-        public int GetSize(Instruction instruction) => instruction.Length;
+        public int GetSize(in Instruction instruction) => instruction.Length;
 
         /// <inheritdoc />
-        public InstructionFlowControl GetFlowControl(Instruction instruction)
+        public InstructionFlowControl GetFlowControl(in Instruction instruction)
         {
             switch (instruction.FlowControl)
             {
@@ -67,21 +67,21 @@ namespace Echo.Platforms.Iced
         }
 
         /// <inheritdoc />
-        public int GetStackPushCount(Instruction instruction)
+        public int GetStackPushCount(in Instruction instruction)
         {
             // TODO:
             return 0;
         }
 
         /// <inheritdoc />
-        public int GetStackPopCount(Instruction instruction)
+        public int GetStackPopCount(in Instruction instruction)
         {
             // TODO:
             return 0;
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetReadVariables(Instruction instruction)
+        public IEnumerable<IVariable> GetReadVariables(in Instruction instruction)
         {
             IList<IVariable> result = null;
             
@@ -127,7 +127,7 @@ namespace Echo.Platforms.Iced
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetWrittenVariables(Instruction instruction)
+        public IEnumerable<IVariable> GetWrittenVariables(in Instruction instruction)
         {
             IList<IVariable> result = null;
             

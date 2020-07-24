@@ -54,13 +54,13 @@ namespace Echo.Platforms.Dnlib
         } = new CilStaticSuccessorResolver();
 
         /// <inheritdoc />
-        public long GetOffset(Instruction instruction) => instruction.Offset;
+        public long GetOffset(in Instruction instruction) => instruction.Offset;
 
         /// <inheritdoc />
-        public int GetSize(Instruction instruction) => instruction.GetSize();
+        public int GetSize(in Instruction instruction) => instruction.GetSize();
 
         /// <inheritdoc />
-        public InstructionFlowControl GetFlowControl(Instruction instruction)
+        public InstructionFlowControl GetFlowControl(in Instruction instruction)
         {
             // see https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.flowcontrol?view=netcore-3.1
             switch (instruction.OpCode.FlowControl)
@@ -84,21 +84,21 @@ namespace Echo.Platforms.Dnlib
         }
 
         /// <inheritdoc />
-        public int GetStackPushCount(Instruction instruction)
+        public int GetStackPushCount(in Instruction instruction)
         {
             instruction.CalculateStackUsage(out int pushes, out _);
             return pushes;
         }
 
         /// <inheritdoc />
-        public int GetStackPopCount(Instruction instruction)
+        public int GetStackPopCount(in Instruction instruction)
         {
             instruction.CalculateStackUsage(out _, out int pops);
             return pops;
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetReadVariables(Instruction instruction)
+        public IEnumerable<IVariable> GetReadVariables(in Instruction instruction)
         {
             if (instruction.IsLdloc())
             {
@@ -120,7 +120,7 @@ namespace Echo.Platforms.Dnlib
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetWrittenVariables(Instruction instruction)
+        public IEnumerable<IVariable> GetWrittenVariables(in Instruction instruction)
         {
             if (instruction.IsStloc())
             {

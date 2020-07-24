@@ -52,15 +52,13 @@ namespace Echo.Platforms.AsmResolver
         } = new CilStaticSuccessorResolver();
 
         /// <inheritdoc />
-        public long GetOffset(CilInstruction instruction) =>
-            instruction.Offset;
+        public long GetOffset(in CilInstruction instruction) => instruction.Offset;
 
         /// <inheritdoc />
-        public int GetSize(CilInstruction instruction) =>
-            instruction.Size;
+        public int GetSize(in CilInstruction instruction) => instruction.Size;
 
         /// <inheritdoc />
-        public InstructionFlowControl GetFlowControl(CilInstruction instruction)
+        public InstructionFlowControl GetFlowControl(in CilInstruction instruction)
         {
             var result = InstructionFlowControl.Fallthrough;
             
@@ -77,19 +75,19 @@ namespace Echo.Platforms.AsmResolver
         }
 
         /// <inheritdoc />
-        public int GetStackPushCount(CilInstruction instruction)
+        public int GetStackPushCount(in CilInstruction instruction)
         {
             return instruction.GetStackPushCount();
         }
 
         /// <inheritdoc />
-        public int GetStackPopCount(CilInstruction instruction)
+        public int GetStackPopCount(in CilInstruction instruction)
         {
             return instruction.GetStackPopCount(MethodBody);
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetReadVariables(CilInstruction instruction)
+        public IEnumerable<IVariable> GetReadVariables(in CilInstruction instruction)
         {
             if (instruction.IsLdloc())
             {
@@ -111,7 +109,7 @@ namespace Echo.Platforms.AsmResolver
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetWrittenVariables(CilInstruction instruction)
+        public IEnumerable<IVariable> GetWrittenVariables(in CilInstruction instruction)
         {   
             if (instruction.IsStloc())
             {
