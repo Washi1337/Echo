@@ -34,7 +34,7 @@ namespace Echo.Platforms.Dnlib
                     return 1;
 
                 case FlowControl.Cond_Branch when instruction.OpCode.Code == Code.Switch:
-                    return ((ICollection<Instruction>) instruction.Operand).Count;
+                    return ((ICollection<Instruction>) instruction.Operand).Count + 1;
 
                 case FlowControl.Cond_Branch:
                     return 2;

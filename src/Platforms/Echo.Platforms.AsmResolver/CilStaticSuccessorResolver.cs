@@ -33,7 +33,7 @@ namespace Echo.Platforms.AsmResolver
                     return 1;
                 
                 case CilFlowControl.ConditionalBranch when instruction.OpCode.Code == CilCode.Switch:
-                    return ((ICollection<ICilLabel>) instruction.Operand).Count;
+                    return ((ICollection<ICilLabel>) instruction.Operand).Count + 1;
                 
                 case CilFlowControl.ConditionalBranch:
                     return 2;
