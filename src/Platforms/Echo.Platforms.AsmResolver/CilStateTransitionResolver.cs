@@ -113,7 +113,7 @@ namespace Echo.Platforms.AsmResolver
                 
                 case CilFlowControl.Return:
                 case CilFlowControl.Throw:
-                    return 0;
+                    return ProcessTerminatingTransition(currentState, instruction);
 
                 case CilFlowControl.Phi:
                     throw new NotSupportedException();
@@ -121,6 +121,16 @@ namespace Echo.Platforms.AsmResolver
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private int ProcessTerminatingTransition(SymbolicProgramState<CilInstruction> currentState, in CilInstruction instruction)
+        {
+            // Note: we still perform the transition, to record the final dependencies that a throw or a ret might have. 
+            
+            var nextState = currentState.Copy();
+            ApplyDefaultBehaviour(nextState, instruction);
+
+            return 0;
         }
 
         private int GetFallthroughTransitions(

@@ -130,6 +130,7 @@ namespace Echo.Platforms.Dnlib
 
                 case FlowControl.Return:
                 case FlowControl.Throw:
+                    ApplyDefaultBehaviour(currentState.Copy(), instruction);
                     return 0;
 
                 case FlowControl.Phi:
