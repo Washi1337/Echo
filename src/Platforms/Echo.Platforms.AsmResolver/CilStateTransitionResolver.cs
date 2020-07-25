@@ -183,16 +183,17 @@ namespace Echo.Platforms.AsmResolver
                         var nextBranchState = baseNextState.Copy();
                         nextBranchState.ProgramCounter = multipleTargets[i].Offset;
                         
-                        successorBuffer[i] = new StateTransition<CilInstruction>(
+                        successorBuffer[i + 1] = new StateTransition<CilInstruction>(
                             nextBranchState, 
                             ControlFlowEdgeType.Conditional);
                     }
-
+                    
                     return multipleTargets.Count + 1;
                 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+            
         }
     }
 }
