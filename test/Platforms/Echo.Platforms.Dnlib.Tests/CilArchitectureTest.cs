@@ -1,7 +1,6 @@
-﻿using System;
-using System.Linq;
-using dnlib.DotNet.Emit;
+﻿using dnlib.DotNet.Emit;
 using Xunit;
+using IVariable = Echo.Core.Code.IVariable;
 
 namespace Echo.Platforms.Dnlib.Tests
 {
@@ -18,9 +17,11 @@ namespace Echo.Platforms.Dnlib.Tests
 
             var param = method.Parameters[index];
             var testInstruction = Instruction.Create(OpCodes.Ldarg, param);
-            var actualParam = arch.GetReadVariables(testInstruction).Single();
 
-            Assert.Equal(parameterName, actualParam.Name);
+            var readVariables = new IVariable[1];
+            arch.GetReadVariables(testInstruction, readVariables);
+
+            Assert.Equal(parameterName, readVariables[0].Name);
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Core.Code;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests
@@ -18,8 +19,10 @@ namespace Echo.Platforms.AsmResolver.Tests
             
             var architecture = new CilArchitecture(method.CilMethodBody);
 
-            Assert.Equal(new[] { method.Parameters[0] }, architecture
-                .GetReadVariables(new CilInstruction(CilOpCodes.Ldarg_0))
+            var readVariables = new IVariable[1];
+            architecture.GetReadVariables(new CilInstruction(CilOpCodes.Ldarg_0), readVariables);
+
+            Assert.Equal(new[] {method.Parameters[0]}, readVariables
                 .Cast<CilParameter>()
                 .Select(p => p.Parameter));
         }
@@ -34,13 +37,15 @@ namespace Echo.Platforms.AsmResolver.Tests
             
             var architecture = new CilArchitecture(method.CilMethodBody);
 
-            Assert.Equal(new[] { method.Parameters.ThisParameter }, architecture
-                .GetReadVariables(new CilInstruction(CilOpCodes.Ldarg_0))
+            var readVariables = new IVariable[1];
+            architecture.GetReadVariables(new CilInstruction(CilOpCodes.Ldarg_0), readVariables);
+            
+            Assert.Equal(new[] { method.Parameters.ThisParameter }, readVariables
                 .Cast<CilParameter>()
                 .Select(p => p.Parameter));
 
-            Assert.Equal(new[] { method.Parameters[0] }, architecture
-                .GetReadVariables(new CilInstruction(CilOpCodes.Ldarg_1))
+            architecture.GetReadVariables(new CilInstruction(CilOpCodes.Ldarg_1), readVariables);
+            Assert.Equal(new[] { method.Parameters[0] }, readVariables
                 .Cast<CilParameter>()
                 .Select(p => p.Parameter));
         }

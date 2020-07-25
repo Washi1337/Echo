@@ -45,17 +45,33 @@ namespace Echo.Core.Code
         int GetStackPopCount(in TInstruction instruction);
 
         /// <summary>
+        /// Gets the number of variables that the provided instruction reads from.
+        /// </summary>
+        /// <param name="instruction">The instruction to get the number of read variables from.</param>
+        /// <returns>The number of variables.</returns>
+        int GetReadVariablesCount(in TInstruction instruction);
+
+        /// <summary>
         /// Gets a collection of variables that an instruction reads from.
         /// </summary>
         /// <param name="instruction">The instruction to get the variables from.</param>
-        /// <returns>The variables this instruction reads from.</returns>
-        IEnumerable<IVariable> GetReadVariables(in TInstruction instruction);
+        /// <param name="variablesBuffer">The output buffer to write the read variables into.</param>
+        /// <returns>The number of variables that were written into <paramref name="variablesBuffer"/>.</returns>
+        int GetReadVariables(in TInstruction instruction, Span<IVariable> variablesBuffer);
 
+        /// <summary>
+        /// Gets the number of variables that the provided instruction writes to.
+        /// </summary>
+        /// <param name="instruction">The instruction to get the number of written variables from.</param>
+        /// <returns>The number of variables.</returns>
+        int GetWrittenVariablesCount(in TInstruction instruction);
+        
         /// <summary>
         /// Gets a collection of variables that an instruction writes to.
         /// </summary>
         /// <param name="instruction">The instruction to get the variables from.</param>
-        /// <returns>The variables this instruction writes to.</returns>
-        IEnumerable<IVariable> GetWrittenVariables(in TInstruction instruction);
+        /// <param name="variablesBuffer">The output buffer to write the written variables into.</param>
+        /// <returns>The number of variables that were written into <paramref name="variablesBuffer"/>.</returns>
+        int GetWrittenVariables(in TInstruction instruction, Span<IVariable> variablesBuffer);
     }
 }

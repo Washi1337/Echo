@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.Core.Code;
 using Echo.Platforms.DummyPlatform.ControlFlow;
@@ -20,28 +19,15 @@ namespace Echo.Platforms.DummyPlatform.Code
             get;
         } = new DummyStaticSuccessorResolver();
         
-        public long GetOffset(in DummyInstruction instruction) =>
-            instruction.Offset;
+        public long GetOffset(in DummyInstruction instruction) => instruction.Offset;
 
-        public string GetMnemonic(in DummyInstruction instruction) => 
-            instruction.Mnemonic;
+        public string GetMnemonic(in DummyInstruction instruction) => instruction.Mnemonic;
 
-        public int GetOperandCount(in DummyInstruction instruction) => 
-            instruction.Operands.Count;
+        public int GetOperandCount(in DummyInstruction instruction) => instruction.Operands.Count;
 
-        public object GetOperand(in DummyInstruction instruction, int index) => 
-            instruction.Operands[index];
+        public object GetOperand(in DummyInstruction instruction, int index) => instruction.Operands[index];
 
         public int GetSize(in DummyInstruction instruction) => 1;
-
-        public byte[] GetOpCodeBytes(in DummyInstruction instruction) =>
-            throw new System.NotImplementedException();
-
-        public byte[] GetOperandBytes(in DummyInstruction instruction) =>
-            throw new System.NotImplementedException();
-
-        public byte[] GetInstructionBytes(in DummyInstruction instruction) =>
-            throw new System.NotImplementedException();
 
         public InstructionFlowControl GetFlowControl(in DummyInstruction instruction) =>
             instruction.OpCode switch
@@ -53,11 +39,17 @@ namespace Echo.Platforms.DummyPlatform.Code
                 _ => InstructionFlowControl.Fallthrough
             };
 
-        public int GetStackPushCount(in DummyInstruction instruction) => 
-            instruction.PushCount;
+        public int GetStackPushCount(in DummyInstruction instruction) => instruction.PushCount;
 
-        public int GetStackPopCount(in DummyInstruction instruction) =>
-            instruction.PopCount;
+        public int GetStackPopCount(in DummyInstruction instruction) => instruction.PopCount;
+
+        public int GetReadVariablesCount(in DummyInstruction instruction) => 0;
+
+        public int GetReadVariables(in DummyInstruction instruction, Span<IVariable> variablesBuffer) => 0;
+
+        public int GetWrittenVariablesCount(in DummyInstruction instruction) => 0;
+
+        public int GetWrittenVariables(in DummyInstruction instruction, Span<IVariable> variablesBuffer) => 0;
 
         public IEnumerable<IVariable> GetReadVariables(in DummyInstruction instruction) =>
             Enumerable.Empty<IVariable>();

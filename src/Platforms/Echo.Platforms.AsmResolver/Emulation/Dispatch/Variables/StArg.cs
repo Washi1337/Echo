@@ -4,6 +4,7 @@ using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
+using Echo.Core.Code;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
@@ -23,18 +24,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
         public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
-            var variable = environment.Architecture
-                .GetWrittenVariables(instruction)
-                .First();
             
-            switch (variable)
+            var variables = new IVariable[1];
+            if (environment.Architecture.GetReadVariables(instruction, variables) != 1)
+            {
+                throw new DispatchException(
+                    $"Architecture returned an incorrect number of variables being written by instruction {instruction}.");
+            }
+            
+            switch (variables[0])
             {
                 case CilParameter parameter:
                     var value = environment.CliMarshaller.ToCtsValue(
                         (ICliValue) context.ProgramState.Stack.Pop(),
                         parameter.Parameter.ParameterType);
 
-                    context.ProgramState.Variables[variable] = value;
+                    context.ProgramState.Variables[variables[0]] = value;
                     return base.Execute(context, instruction);
                 
                 default:

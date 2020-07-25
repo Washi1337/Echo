@@ -98,47 +98,51 @@ namespace Echo.Platforms.Dnlib
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetReadVariables(in Instruction instruction)
+        public int GetReadVariablesCount(in Instruction instruction) => 
+            instruction.IsLdloc() || instruction.IsLdarg() 
+                ? 1
+                : 0;
+        
+        /// <inheritdoc />
+        public int GetReadVariables(in Instruction instruction, Span<IVariable> variablesBuffer)
         {
             if (instruction.IsLdloc())
             {
-                return new[]
-                {
-                    _variables[instruction.GetLocal(MethodBody.Variables).Index]
-                };
+                variablesBuffer[0] = _variables[instruction.GetLocal(MethodBody.Variables).Index];
+                return 1;
             }
 
             if (instruction.IsLdarg())
             {
-                return new[]
-                {
-                    _parameters[instruction.GetParameter(Method.Parameters).Index]
-                };
+                variablesBuffer[0] = _parameters[instruction.GetParameter(Method.Parameters).Index];
+                return 1;
             }
 
-            return Enumerable.Empty<IVariable>();
+            return 0;
         }
+        
+        /// <inheritdoc />
+        public int GetWrittenVariablesCount(in Instruction instruction) => 
+            instruction.IsStloc() || instruction.IsStarg() 
+                ? 1
+                : 0;
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetWrittenVariables(in Instruction instruction)
+        public int GetWrittenVariables(in Instruction instruction, Span<IVariable> variablesBuffer)
         {
             if (instruction.IsStloc())
             {
-                return new[]
-                {
-                    _variables[instruction.GetLocal(MethodBody.Variables).Index]
-                };
+                variablesBuffer[0] = _variables[instruction.GetLocal(MethodBody.Variables).Index];
+                return 1;
             }
 
             if (instruction.IsStarg())
             {
-                return new[]
-                {
-                    _parameters[instruction.GetParameter(Method.Parameters).Index]
-                };
+                variablesBuffer[0] = _parameters[instruction.GetParameter(Method.Parameters).Index];
+                return 1;
             }
 
-            return Enumerable.Empty<IVariable>();
+            return 0;
         }
     }
 }

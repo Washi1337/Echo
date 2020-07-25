@@ -60,74 +60,81 @@ namespace Echo.Platforms.AsmResolver
         /// <inheritdoc />
         public InstructionFlowControl GetFlowControl(in CilInstruction instruction)
         {
-            var result = InstructionFlowControl.Fallthrough;
-            
-            result |= instruction.OpCode.FlowControl switch
+            switch (instruction.OpCode.FlowControl)
             {
-                CilFlowControl.Branch => InstructionFlowControl.CanBranch,
-                CilFlowControl.ConditionalBranch => InstructionFlowControl.CanBranch,
-                CilFlowControl.Return => InstructionFlowControl.IsTerminator,
-                CilFlowControl.Throw => InstructionFlowControl.IsTerminator,
-                _ => InstructionFlowControl.Fallthrough
-            };
+                case CilFlowControl.Branch:
+                case CilFlowControl.ConditionalBranch:
+                    return InstructionFlowControl.CanBranch | InstructionFlowControl.Fallthrough;
 
-            return result;
+                case CilFlowControl.Return:
+                case CilFlowControl.Throw:
+                    return InstructionFlowControl.IsTerminator;
+
+                case CilFlowControl.Break:
+                case CilFlowControl.Call:
+                case CilFlowControl.Meta:
+                case CilFlowControl.Next:
+                case CilFlowControl.Phi:
+                    return InstructionFlowControl.Fallthrough;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         /// <inheritdoc />
-        public int GetStackPushCount(in CilInstruction instruction)
-        {
-            return instruction.GetStackPushCount();
-        }
+        public int GetStackPushCount(in CilInstruction instruction) => instruction.GetStackPushCount();
 
         /// <inheritdoc />
-        public int GetStackPopCount(in CilInstruction instruction)
-        {
-            return instruction.GetStackPopCount(MethodBody);
-        }
+        public int GetStackPopCount(in CilInstruction instruction) => instruction.GetStackPopCount(MethodBody);
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetReadVariables(in CilInstruction instruction)
+        public int GetReadVariablesCount(in CilInstruction instruction) => 
+            instruction.IsLdloc() || instruction.IsLdarg() 
+                ? 1
+                : 0;
+
+        /// <inheritdoc />
+        public int GetReadVariables(in CilInstruction instruction, Span<IVariable> variablesBuffer)
         {
             if (instruction.IsLdloc())
             {
-                return new[]
-                {
-                    _variables[instruction.GetLocalVariable(MethodBody.LocalVariables).Index]
-                };
+                variablesBuffer[0] = _variables[instruction.GetLocalVariable(MethodBody.LocalVariables).Index];
+                return 1;
             }
 
             if (instruction.IsLdarg())
             {
-                return new[]
-                {
-                    _parameters[instruction.GetParameter(MethodBody.Owner.Parameters).MethodSignatureIndex]
-                };
+                variablesBuffer[0] = _parameters[instruction.GetParameter(MethodBody.Owner.Parameters).MethodSignatureIndex];
+                return 1;
             }
 
-            return Enumerable.Empty<IVariable>();
+            return 0;
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetWrittenVariables(in CilInstruction instruction)
+        public int GetWrittenVariablesCount(in CilInstruction instruction) => 
+            instruction.IsStloc() || instruction.IsStarg() 
+                ? 1
+                : 0;
+        
+        /// <inheritdoc />
+        public int GetWrittenVariables(in CilInstruction instruction, Span<IVariable> variablesBuffer)
         {   
             if (instruction.IsStloc())
             {
-                return new[]
-                {
-                    _variables[instruction.GetLocalVariable(MethodBody.LocalVariables).Index]
-                };
+                variablesBuffer[0] = _variables[instruction.GetLocalVariable(MethodBody.LocalVariables).Index];
+                return 1;
             }
 
             if (instruction.IsStarg())
             {
-                return new[]
-                {
-                    _parameters[instruction.GetParameter(MethodBody.Owner.Parameters).MethodSignatureIndex]
-                };
+                variablesBuffer[0] = _parameters[instruction.GetParameter(MethodBody.Owner.Parameters).MethodSignatureIndex];
+                return 1;
             }
 
-            return Enumerable.Empty<IVariable>();
+            return 0;
         }
+        
     }
 }
