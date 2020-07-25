@@ -17,8 +17,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
     {
         private readonly ModuleDefinition _module;
         
-        public LdFldTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public LdFldTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
             _module = ModuleDefinition.FromFile(typeof(LdFldTest).Assembly.Location);
         }

@@ -10,8 +10,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
 {
     public class StElemTest : DispatcherTestBase
     {
-        public StElemTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public StElemTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

@@ -10,8 +10,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 {
     public class CalliTest : DispatcherTestBase
     {
-        public CalliTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public CalliTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
         [Fact]

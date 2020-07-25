@@ -9,8 +9,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
 {
     public class XorTest : DispatcherTestBase
     {
-        public XorTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public XorTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

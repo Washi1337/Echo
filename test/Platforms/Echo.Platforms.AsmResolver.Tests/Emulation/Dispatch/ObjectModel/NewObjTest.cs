@@ -9,8 +9,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 {
     public class NewObjTest : DispatcherTestBase
     {
-        public NewObjTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public NewObjTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
         

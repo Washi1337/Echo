@@ -11,8 +11,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 {
     public class LdindTest : DispatcherTestBase
     {
-        public LdindTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public LdindTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 
