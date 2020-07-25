@@ -150,10 +150,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
             {
                 node = new DataFlowNode<TInstruction>(offset, instruction);
                 
+                // Register (unknown) stack dependencies.
                 int stackArgumentCount = Architecture.GetStackPopCount(instruction);
                 for (int i = 0; i < stackArgumentCount; i++)
                     node.StackDependencies.Add(new DataDependency<TInstruction>());
                 
+                // Get read variables.
                 int variableReadCount = Architecture.GetReadVariablesCount(instruction);
                 if (_variablesBuffer.Length < variableReadCount)
                     _variablesBuffer = new IVariable[variableReadCount];
@@ -162,6 +164,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
                 if (actualCount > variableReadCount)
                     throw new ArgumentException("GetWrittenVariables returned a number of variables that is inconsistent.");
 
+                // Register (unknown) variable dependencies.
                 for (int i = 0; i < actualCount; i++)
                 {
                     var variable = _variablesBuffer[i];
