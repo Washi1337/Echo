@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
+using Echo.Core.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
 {
@@ -22,15 +21,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
         public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
-            var variable = environment.Architecture
-                .GetReadVariables(instruction)
-                .First();
 
-            switch (variable)
+            var variables = new IVariable[1];
+            if (environment.Architecture.GetReadVariables(instruction, variables) != 1)
+            {
+                throw new DispatchException(
+                    $"Architecture returned an incorrect number of variables being read from instruction {instruction}.");
+            }
+
+            switch (variables[0])
             {
                 case CilParameter parameter:
                     var value = environment.CliMarshaller.ToCliValue(
-                        context.ProgramState.Variables[variable],
+                        context.ProgramState.Variables[variables[0]],
                         parameter.Parameter.ParameterType);
                     
                     context.ProgramState.Stack.Push(value);

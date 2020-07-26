@@ -7,8 +7,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Miscellaneous
 {
     public class DupTest : DispatcherTestBase
     {
-        public DupTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public DupTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

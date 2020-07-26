@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using dnlib.DotNet.Emit;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction.Symbolic;
@@ -59,31 +57,28 @@ namespace Echo.Platforms.Dnlib
         }
 
         /// <inheritdoc />
-        public override IEnumerable<StateTransition<Instruction>> GetTransitions(SymbolicProgramState<Instruction> currentState, Instruction instruction)
+        public override int GetTransitionCount(SymbolicProgramState<Instruction> currentState,
+            in Instruction instruction)
         {
-            // Multiplex based on flow control.
-
             switch (instruction.OpCode.FlowControl)
             {
-
                 case FlowControl.Call:
                 case FlowControl.Meta:
                 case FlowControl.Next:
                 case FlowControl.Break:
-                    return new[] {Next()};
-
                 case FlowControl.Branch:
-                    return new[] {Branch(false)};
-
+                    return 1;
+                
                 case FlowControl.Cond_Branch when instruction.OpCode.Code == Code.Switch:
-                    return Switch().Append(Next());
-
+                    var targets = (Instruction[]) instruction.Operand;
+                    return targets.Length + 1;
+                
                 case FlowControl.Cond_Branch:
-                    return new[] {Branch(true), Next()};
-
+                    return 2;
+                
                 case FlowControl.Return:
                 case FlowControl.Throw:
-                    return Array.Empty<StateTransition<Instruction>>();
+                    return 0;
 
                 case FlowControl.Phi:
                     throw new NotSupportedException("There are no known instructions with Phi control flow");
@@ -91,32 +86,77 @@ namespace Echo.Platforms.Dnlib
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
 
-            StateTransition<Instruction> Next()
+        /// <inheritdoc />
+        public override int GetTransitions(SymbolicProgramState<Instruction> currentState,
+            in Instruction instruction,
+            Span<StateTransition<Instruction>> transitionBuffer)
+        {
+            // Multiplex based on flow control.
+
+            switch (instruction.OpCode.FlowControl)
             {
-                var nextState = currentState.Copy();
-                ApplyDefaultBehaviour(nextState, instruction);
-                return new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough);
+                case FlowControl.Call:
+                case FlowControl.Meta:
+                case FlowControl.Next:
+                case FlowControl.Break:
+                    transitionBuffer[0] = Next(currentState, instruction);
+                    return 1;
+
+                case FlowControl.Branch:
+                    transitionBuffer[0] = Branch(false, currentState, instruction);
+                    return 1;
+
+                case FlowControl.Cond_Branch when instruction.OpCode.Code == Code.Switch:
+                    var targets = (Instruction[]) instruction.Operand;
+                    for (int i = 0; i < targets.Length; i++)
+                    {
+                        var nextState = currentState.Copy();
+                        ApplyDefaultBehaviour(nextState, instruction);
+                        nextState.ProgramCounter = targets[i].Offset;
+                        transitionBuffer[i] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.Conditional);
+                    }
+
+                    transitionBuffer[targets.Length] = Next(currentState, instruction);
+                    return targets.Length + 1;
+
+                case FlowControl.Cond_Branch:
+                    transitionBuffer[0] = Branch(true, currentState, instruction);
+                    transitionBuffer[1] = Next(currentState, instruction);
+                    return 2;
+
+                case FlowControl.Return:
+                case FlowControl.Throw:
+                    ApplyDefaultBehaviour(currentState.Copy(), instruction);
+                    return 0;
+
+                case FlowControl.Phi:
+                    throw new NotSupportedException("There are no known instructions with Phi control flow");
+
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
+        }
 
-            StateTransition<Instruction> Branch(bool conditional)
-            {
-                var nextState = currentState.Copy();
-                ApplyDefaultBehaviour(nextState, instruction);
-                nextState.ProgramCounter = ((Instruction) instruction.Operand).Offset;
-                return new StateTransition<Instruction>(nextState,
-                    conditional
-                        ? ControlFlowEdgeType.Conditional
-                        : ControlFlowEdgeType.FallThrough);
-            }
+        private StateTransition<Instruction> Next(SymbolicProgramState<Instruction> currentState, Instruction instruction)
+        {
+            var nextState = currentState.Copy();
+            ApplyDefaultBehaviour(nextState, instruction);
+            return new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough);
+        }
 
-            IEnumerable<StateTransition<Instruction>> Switch() => ((Instruction[]) instruction.Operand).Select(i =>
-            {
-                var nextState = currentState.Copy();
-                ApplyDefaultBehaviour(nextState, instruction);
-                nextState.ProgramCounter = i.Offset;
-                return new StateTransition<Instruction>(nextState, ControlFlowEdgeType.Conditional);
-            });
+        private StateTransition<Instruction> Branch(
+            bool conditional, 
+            SymbolicProgramState<Instruction> currentState, 
+            Instruction instruction)
+        {
+            var nextState = currentState.Copy();
+            ApplyDefaultBehaviour(nextState, instruction);
+            nextState.ProgramCounter = ((Instruction) instruction.Operand).Offset;
+            return new StateTransition<Instruction>(nextState, conditional
+                ? ControlFlowEdgeType.Conditional
+                : ControlFlowEdgeType.FallThrough);
         }
     }
 }

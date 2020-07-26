@@ -24,4 +24,8 @@
       <DocumentationFile>bin\Release\Echo.Core.xml</DocumentationFile>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="System.Memory" Version="4.5.4" />
+    </ItemGroup>
+
 </Project>

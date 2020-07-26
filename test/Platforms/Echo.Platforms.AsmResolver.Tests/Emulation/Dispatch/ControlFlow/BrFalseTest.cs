@@ -7,8 +7,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
 {
     public class BrFalseTest : DispatcherTestBase
     {
-        public BrFalseTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public BrFalseTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

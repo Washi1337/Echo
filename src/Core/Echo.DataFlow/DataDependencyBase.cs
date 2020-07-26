@@ -66,7 +66,7 @@ namespace Echo.DataFlow
         /// <summary>
         /// Gets a collection of data sources this data dependency might pull data from.
         /// </summary>
-        [Obsolete("The " + nameof(DataSources) + " property was inlined into the "
+        [Obsolete("This property was inlined into the "
                   + nameof(DataDependencyBase<TContents>) + " class, which now implements the "
                   + nameof(ISet<DataFlowNode<TContents>>) + " interface. Use the data dependency object "
                   + "directly to iterate over all data sources.")]

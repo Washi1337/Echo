@@ -8,8 +8,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Constants
 {
     public class LdstrTest : DispatcherTestBase
     {
-        public LdstrTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public LdstrTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

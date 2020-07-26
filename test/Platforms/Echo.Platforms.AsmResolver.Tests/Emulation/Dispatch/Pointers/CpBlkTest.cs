@@ -10,8 +10,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 {
     public class CpBlkTest : DispatcherTestBase
     {
-        public CpBlkTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public CpBlkTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

@@ -12,8 +12,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 {
     public class StsFldTest : DispatcherTestBase
     {
-        public StsFldTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public StsFldTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
         

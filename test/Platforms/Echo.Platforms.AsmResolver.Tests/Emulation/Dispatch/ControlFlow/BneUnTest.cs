@@ -8,8 +8,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
 {
     public class BneUnTest : DispatcherTestBase
     {
-        public BneUnTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public BneUnTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

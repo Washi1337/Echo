@@ -9,8 +9,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Miscellaneous
 {
     public class CkFinite : DispatcherTestBase
     {
-        public CkFinite(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public CkFinite(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using dnlib.DotNet.Emit;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
@@ -22,7 +21,7 @@ namespace Echo.Platforms.Dnlib
         } = new CilStaticSuccessorResolver();
 
         /// <inheritdoc />
-        public ICollection<SuccessorInfo> GetSuccessors(Instruction instruction)
+        public int GetSuccessorsCount(in Instruction instruction)
         {
             switch (instruction.OpCode.FlowControl)
             {
@@ -30,20 +29,18 @@ namespace Echo.Platforms.Dnlib
                 case FlowControl.Call:
                 case FlowControl.Meta:
                 case FlowControl.Next:
-                    return new[] {Next()};
-
                 case FlowControl.Branch:
-                    return new[] {Branch(false)};
+                    return 1;
 
                 case FlowControl.Cond_Branch when instruction.OpCode.Code == Code.Switch:
-                    return Switch().Append(Next()).ToArray();
+                    return ((ICollection<Instruction>) instruction.Operand).Count + 1;
 
                 case FlowControl.Cond_Branch:
-                    return new[] {Branch(true), Next()};
+                    return 2;
 
                 case FlowControl.Return:
                 case FlowControl.Throw:
-                    return Array.Empty<SuccessorInfo>();
+                    return 0;
 
                 case FlowControl.Phi:
                     throw new NotSupportedException("There are no known instructions with Phi control flow");
@@ -51,18 +48,56 @@ namespace Echo.Platforms.Dnlib
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            SuccessorInfo Next() =>
-                new SuccessorInfo(instruction.Offset + instruction.GetSize(), ControlFlowEdgeType.FallThrough);
-
-            SuccessorInfo Branch(bool conditional) =>
-                new SuccessorInfo(((Instruction) instruction.Operand).Offset,
-                    conditional
-                        ? ControlFlowEdgeType.Conditional
-                        : ControlFlowEdgeType.FallThrough);
-
-            IEnumerable<SuccessorInfo> Switch() =>
-                ((Instruction[]) instruction.Operand).Select(i => new SuccessorInfo(i.Offset, ControlFlowEdgeType.Conditional));
         }
+
+        /// <inheritdoc />
+        public int GetSuccessors(in Instruction instruction, Span<SuccessorInfo> successorsBuffer)
+        {
+            switch (instruction.OpCode.FlowControl)
+            {
+                case FlowControl.Break:
+                case FlowControl.Call:
+                case FlowControl.Meta:
+                case FlowControl.Next:
+                    successorsBuffer[0] = Next(instruction);
+                    return 1;
+
+                case FlowControl.Branch:
+                    successorsBuffer[0] = Branch(false, instruction);
+                    return 1;
+
+                case FlowControl.Cond_Branch when instruction.OpCode.Code == Code.Switch:
+                    var multipleTargets = (Instruction[]) instruction.Operand;
+                    for (int i = 0; i < multipleTargets.Length; i++)
+                        successorsBuffer[i] = new SuccessorInfo(multipleTargets[i].Offset, ControlFlowEdgeType.Conditional);
+                    successorsBuffer[multipleTargets.Length] = Next(instruction);
+                    return multipleTargets.Length + 1;
+
+                case FlowControl.Cond_Branch:
+                    successorsBuffer[0] = Branch(true, instruction);
+                    successorsBuffer[1] = Next(instruction);
+                    return 2;
+
+                case FlowControl.Return:
+                case FlowControl.Throw:
+                    return 0;
+
+                case FlowControl.Phi:
+                    throw new NotSupportedException("There are no known instructions with Phi control flow");
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static SuccessorInfo Next(Instruction instruction)
+        {
+            return new SuccessorInfo(instruction.Offset + instruction.GetSize(), ControlFlowEdgeType.FallThrough);
+        }
+
+        private static SuccessorInfo Branch(bool conditional, Instruction instruction) =>
+            new SuccessorInfo(((Instruction) instruction.Operand).Offset, conditional
+                ? ControlFlowEdgeType.Conditional
+                : ControlFlowEdgeType.FallThrough);
     }
 }

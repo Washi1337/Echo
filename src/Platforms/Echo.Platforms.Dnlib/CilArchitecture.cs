@@ -54,13 +54,13 @@ namespace Echo.Platforms.Dnlib
         } = new CilStaticSuccessorResolver();
 
         /// <inheritdoc />
-        public long GetOffset(Instruction instruction) => instruction.Offset;
+        public long GetOffset(in Instruction instruction) => instruction.Offset;
 
         /// <inheritdoc />
-        public int GetSize(Instruction instruction) => instruction.GetSize();
+        public int GetSize(in Instruction instruction) => instruction.GetSize();
 
         /// <inheritdoc />
-        public InstructionFlowControl GetFlowControl(Instruction instruction)
+        public InstructionFlowControl GetFlowControl(in Instruction instruction)
         {
             // see https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.flowcontrol?view=netcore-3.1
             switch (instruction.OpCode.FlowControl)
@@ -84,61 +84,66 @@ namespace Echo.Platforms.Dnlib
         }
 
         /// <inheritdoc />
-        public int GetStackPushCount(Instruction instruction)
+        public int GetStackPushCount(in Instruction instruction)
         {
             instruction.CalculateStackUsage(out int pushes, out _);
             return pushes;
         }
 
         /// <inheritdoc />
-        public int GetStackPopCount(Instruction instruction)
+        public int GetStackPopCount(in Instruction instruction)
         {
-            instruction.CalculateStackUsage(out _, out int pops);
+            bool isVoid = Method.ReturnType.ElementType == ElementType.Void;
+            instruction.CalculateStackUsage(!isVoid, out _, out int pops);
             return pops;
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetReadVariables(Instruction instruction)
+        public int GetReadVariablesCount(in Instruction instruction) => 
+            instruction.IsLdloc() || instruction.IsLdarg() 
+                ? 1
+                : 0;
+        
+        /// <inheritdoc />
+        public int GetReadVariables(in Instruction instruction, Span<IVariable> variablesBuffer)
         {
             if (instruction.IsLdloc())
             {
-                return new[]
-                {
-                    _variables[instruction.GetLocal(MethodBody.Variables).Index]
-                };
+                variablesBuffer[0] = _variables[instruction.GetLocal(MethodBody.Variables).Index];
+                return 1;
             }
 
             if (instruction.IsLdarg())
             {
-                return new[]
-                {
-                    _parameters[instruction.GetParameter(Method.Parameters).Index]
-                };
+                variablesBuffer[0] = _parameters[instruction.GetParameter(Method.Parameters).Index];
+                return 1;
             }
 
-            return Enumerable.Empty<IVariable>();
+            return 0;
         }
+        
+        /// <inheritdoc />
+        public int GetWrittenVariablesCount(in Instruction instruction) => 
+            instruction.IsStloc() || instruction.IsStarg() 
+                ? 1
+                : 0;
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetWrittenVariables(Instruction instruction)
+        public int GetWrittenVariables(in Instruction instruction, Span<IVariable> variablesBuffer)
         {
             if (instruction.IsStloc())
             {
-                return new[]
-                {
-                    _variables[instruction.GetLocal(MethodBody.Variables).Index]
-                };
+                variablesBuffer[0] = _variables[instruction.GetLocal(MethodBody.Variables).Index];
+                return 1;
             }
 
             if (instruction.IsStarg())
             {
-                return new[]
-                {
-                    _parameters[instruction.GetParameter(Method.Parameters).Index]
-                };
+                variablesBuffer[0] = _parameters[instruction.GetParameter(Method.Parameters).Index];
+                return 1;
             }
 
-            return Enumerable.Empty<IVariable>();
+            return 0;
         }
     }
 }

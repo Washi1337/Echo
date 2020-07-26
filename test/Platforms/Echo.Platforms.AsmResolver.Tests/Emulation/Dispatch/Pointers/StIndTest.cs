@@ -10,8 +10,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 {
     public class StIndTest : DispatcherTestBase
     {
-        public StIndTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public StIndTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

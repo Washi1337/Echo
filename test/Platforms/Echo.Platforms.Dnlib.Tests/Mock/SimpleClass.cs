@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Echo.Platforms.AsmResolver.Tests.Mock
+namespace Echo.Platforms.Dnlib.Tests.Mock
 {
     public class SimpleClass
     {

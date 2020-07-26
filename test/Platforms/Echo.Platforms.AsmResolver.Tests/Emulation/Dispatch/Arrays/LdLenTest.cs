@@ -10,8 +10,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
 {
     public class LdLenTest : DispatcherTestBase
     {
-        public LdLenTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public LdLenTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

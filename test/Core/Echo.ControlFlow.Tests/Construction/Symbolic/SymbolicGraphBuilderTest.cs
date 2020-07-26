@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Symbolic;
+using Echo.ControlFlow.Serialization.Dot;
 using Echo.Core.Emulation;
+using Echo.Core.Graphing.Serialization.Dot;
 using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
 using Echo.DataFlow.Values;

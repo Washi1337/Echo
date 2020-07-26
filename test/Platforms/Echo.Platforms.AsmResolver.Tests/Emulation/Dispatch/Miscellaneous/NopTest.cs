@@ -6,8 +6,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Miscellaneous
 {
     public class NopTest : DispatcherTestBase
     {
-        public NopTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public NopTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

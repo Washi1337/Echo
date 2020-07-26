@@ -8,8 +8,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Miscellaneous
 {
     public class PopTest : DispatcherTestBase
     {
-        public PopTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public PopTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

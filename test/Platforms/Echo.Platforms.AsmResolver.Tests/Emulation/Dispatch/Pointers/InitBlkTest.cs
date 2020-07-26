@@ -10,8 +10,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 {
     public class InitBlkTest : DispatcherTestBase
     {
-        public InitBlkTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public InitBlkTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

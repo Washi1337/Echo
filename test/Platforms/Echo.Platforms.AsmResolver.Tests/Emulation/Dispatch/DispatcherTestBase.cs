@@ -14,15 +14,15 @@ using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
 {
-    public class DispatcherTestBase : IClassFixture<MockModuleProvider>
+    public class DispatcherTestBase : IClassFixture<MockModuleFixture>
     {
-        public DispatcherTestBase(MockModuleProvider moduleProvider)
+        public DispatcherTestBase(MockModuleFixture moduleFixture)
         {
             const bool is32Bit = false;
             
             Dispatcher = new DefaultCilDispatcher();
 
-            var dummyModule = moduleProvider.GetModule();
+            var dummyModule = moduleFixture.GetModule();
             var dummyMethod = new MethodDefinition(
                 "MockMethod",
                 MethodAttributes.Static,

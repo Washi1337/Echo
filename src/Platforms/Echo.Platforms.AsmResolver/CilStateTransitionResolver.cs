@@ -60,27 +60,27 @@ namespace Echo.Platforms.AsmResolver
         }
 
         /// <inheritdoc />
-        public override IEnumerable<StateTransition<CilInstruction>> GetTransitions(SymbolicProgramState<CilInstruction> currentState, CilInstruction instruction)
+        public override int GetTransitionCount(SymbolicProgramState<CilInstruction> currentState,
+            in CilInstruction instruction)
         {
-            // Multiplex based on flow control.
-            
             switch (instruction.OpCode.FlowControl)
             {
-                case CilFlowControl.Branch:
-                    return GetUnconditionalBranchTransitions(currentState, instruction);
-
-                case CilFlowControl.ConditionalBranch:
-                    return GetConditionalBranchTransitions(currentState, instruction);
-                
                 case CilFlowControl.Call:
                 case CilFlowControl.Meta:
                 case CilFlowControl.Next:
                 case CilFlowControl.Break:
-                    return GetFallthroughTransitions(currentState, instruction);
+                case CilFlowControl.Branch:
+                    return 1;
+
+                case CilFlowControl.ConditionalBranch when instruction.OpCode.Code == CilCode.Switch:
+                    return ((ICollection<ICilLabel>) instruction.Operand).Count + 1;
+                
+                case CilFlowControl.ConditionalBranch:
+                    return 2;
                 
                 case CilFlowControl.Return:
                 case CilFlowControl.Throw:
-                    return Enumerable.Empty<StateTransition<CilInstruction>>();
+                    return 0;
 
                 case CilFlowControl.Phi:
                     throw new NotSupportedException();
@@ -90,23 +90,67 @@ namespace Echo.Platforms.AsmResolver
             }
         }
 
-        private IEnumerable<StateTransition<CilInstruction>> GetFallthroughTransitions(
-            SymbolicProgramState<CilInstruction> currentState, CilInstruction instruction)
+        /// <inheritdoc />
+        public override int GetTransitions(SymbolicProgramState<CilInstruction> currentState,
+            in CilInstruction instruction,
+            Span<StateTransition<CilInstruction>> transitionBuffer)
+        {
+            // Multiplex based on flow control.
+            
+            switch (instruction.OpCode.FlowControl)
+            {
+                case CilFlowControl.Branch:
+                    return GetUnconditionalBranchTransitions(currentState, instruction, transitionBuffer);
+
+                case CilFlowControl.ConditionalBranch:
+                    return GetConditionalBranchTransitions(currentState, instruction, transitionBuffer);
+                
+                case CilFlowControl.Call:
+                case CilFlowControl.Meta:
+                case CilFlowControl.Next:
+                case CilFlowControl.Break:
+                    return GetFallthroughTransitions(currentState, instruction, transitionBuffer);
+                
+                case CilFlowControl.Return:
+                case CilFlowControl.Throw:
+                    return ProcessTerminatingTransition(currentState, instruction);
+
+                case CilFlowControl.Phi:
+                    throw new NotSupportedException();
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private int ProcessTerminatingTransition(SymbolicProgramState<CilInstruction> currentState, in CilInstruction instruction)
+        {
+            // Note: we still perform the transition, to record the final dependencies that a throw or a ret might have. 
+            
+            var nextState = currentState.Copy();
+            ApplyDefaultBehaviour(nextState, instruction);
+
+            return 0;
+        }
+
+        private int GetFallthroughTransitions(
+            SymbolicProgramState<CilInstruction> currentState,
+            CilInstruction instruction,
+            Span<StateTransition<CilInstruction>> successorBuffer)
         {
             // Fallthrough instructions just transform the state normally.
             
             var nextState = currentState.Copy();
             ApplyDefaultBehaviour(nextState, instruction);
 
-            var transition = new StateTransition<CilInstruction>(nextState, ControlFlowEdgeType.FallThrough);
-            return new[]
-            {
-                transition
-            };
+            successorBuffer[0] = new StateTransition<CilInstruction>(nextState, ControlFlowEdgeType.FallThrough);
+            return 1;
         }
 
-        private IEnumerable<StateTransition<CilInstruction>> GetUnconditionalBranchTransitions(
-            SymbolicProgramState<CilInstruction> currentState, CilInstruction instruction)
+        private int GetUnconditionalBranchTransitions(
+            SymbolicProgramState<CilInstruction> currentState, 
+            CilInstruction instruction,
+            Span<StateTransition<CilInstruction>> successorBuffer)
         {           
             // Unconditional branches are similar to normal fallthrough, except they change the program counter.
             
@@ -115,26 +159,22 @@ namespace Echo.Platforms.AsmResolver
             
             nextState.ProgramCounter = ((ICilLabel) instruction.Operand).Offset;
 
-            var transition = new StateTransition<CilInstruction>(nextState, ControlFlowEdgeType.FallThrough);
-            return new[]
-            {
-                transition
-            };
+            successorBuffer[0] = new StateTransition<CilInstruction>(nextState, ControlFlowEdgeType.FallThrough);
+            return 1;
         }
 
-        private IEnumerable<StateTransition<CilInstruction>> GetConditionalBranchTransitions(
-            SymbolicProgramState<CilInstruction> currentState, CilInstruction instruction)
+        private int GetConditionalBranchTransitions(
+            SymbolicProgramState<CilInstruction> currentState,
+            CilInstruction instruction,
+            Span<StateTransition<CilInstruction>> successorBuffer)
         {
             // Conditional branches result in multiple possible transitions that could happen.
             
             var baseNextState = currentState.Copy();
             ApplyDefaultBehaviour(baseNextState, instruction);
 
-            var result = new List<StateTransition<CilInstruction>>
-            {
-                // Define the transition if the branch was not taken. (this is a normal fall through transition).
-                new StateTransition<CilInstruction>(baseNextState, ControlFlowEdgeType.FallThrough)
-            };
+            // Define the transition if the branch was not taken. (this is a normal fall through transition).
+            successorBuffer[0] = new StateTransition<CilInstruction>(baseNextState, ControlFlowEdgeType.FallThrough);
 
             // CIL conditional branches can have a single target or multiple targets. Fork the next state, and change
             // the program counters to their branch targets.
@@ -144,21 +184,26 @@ namespace Echo.Platforms.AsmResolver
                 case ICilLabel singleTarget:
                     var branchState = baseNextState.Copy();
                     branchState.ProgramCounter = singleTarget.Offset;
-                    result.Add(new StateTransition<CilInstruction>(branchState, ControlFlowEdgeType.Conditional));
-                    break;
+                    successorBuffer[1] = new StateTransition<CilInstruction>(branchState, ControlFlowEdgeType.Conditional);
+                    return 2;
                             
-                case IEnumerable<ICilLabel> multipleTargets:
-                    foreach (var target in multipleTargets)
+                case IList<ICilLabel> multipleTargets:
+                    for (int i = 0; i < multipleTargets.Count; i++)
                     {
                         var nextBranchState = baseNextState.Copy();
-                        nextBranchState.ProgramCounter = target.Offset;
-                        result.Add(new StateTransition<CilInstruction>(nextBranchState, ControlFlowEdgeType.Conditional));
+                        nextBranchState.ProgramCounter = multipleTargets[i].Offset;
+                        
+                        successorBuffer[i + 1] = new StateTransition<CilInstruction>(
+                            nextBranchState, 
+                            ControlFlowEdgeType.Conditional);
                     }
-
-                    break;
+                    
+                    return multipleTargets.Count + 1;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-
-            return result;
+            
         }
     }
 }
