@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using dnlib.DotNet.Emit;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction.Symbolic;

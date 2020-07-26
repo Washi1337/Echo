@@ -1,11 +1,7 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
-using Echo.ControlFlow.Serialization.Dot;
-using Echo.Core.Graphing.Serialization.Dot;
-using Echo.DataFlow.Serialization.Dot;
 using Echo.Platforms.Dnlib.Tests.Mock;
 using Xunit;
 
