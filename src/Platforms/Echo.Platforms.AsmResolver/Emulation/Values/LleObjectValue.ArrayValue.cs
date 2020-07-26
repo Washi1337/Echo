@@ -51,7 +51,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                     : Type.Module.CorLibTypeFactory.Byte;
 
                 var elementTypeLayout = _memoryAllocator.GetTypeMemoryLayout(elementType);
-                return _contents.Length / (int) elementTypeLayout.Size;
+                return Contents.Length / (int) elementTypeLayout.Size;
             }
         }
 
@@ -61,13 +61,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 throw new IndexOutOfRangeException();
         }
 
-        private bool OffsetIsInRange(int index, int elementSize) => index * elementSize < _contents.Length;
+        private bool OffsetIsInRange(int index, int elementSize) => index * elementSize < Contents.Length;
 
         /// <inheritdoc />
         public ICliValue LoadElement(int index, TypeMemoryLayout typeLayout, ICliMarshaller marshaller)
         {
             AssertIndexValidity(index);
-            var elementValue = ReadStruct(index * (int) typeLayout.Size, typeLayout);
+            var elementValue = this.ReadStruct(index * (int) typeLayout.Size, _memoryAllocator, typeLayout);
             return marshaller.ToCliValue(elementValue, typeLayout.Type.ToTypeSignature());
         }
 
@@ -77,16 +77,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             AssertIndexValidity(index);
             
             IntegerValue rawValue;
-            if (_contents.Is32Bit)
+            if (Contents.Is32Bit)
             {
                 rawValue = OffsetIsInRange(index, sizeof(uint))
-                    ? _contents.ReadInteger32(index * sizeof(uint))
+                    ? Contents.ReadInteger32(index * sizeof(uint))
                     : new Integer32Value(0);
             }
             else
             {
                 rawValue = OffsetIsInRange(index, sizeof(ulong))
-                    ? _contents.ReadInteger64(index * sizeof(ulong))
+                    ? Contents.ReadInteger64(index * sizeof(ulong))
                     : new Integer64Value(0);
             }
 
@@ -99,7 +99,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             AssertIndexValidity(index);
 
             var rawValue = OffsetIsInRange(index, sizeof(sbyte))
-                ? _contents.ReadInteger8(index * sizeof(sbyte))
+                ? Contents.ReadInteger8(index * sizeof(sbyte))
                 : new Integer8Value(0);
             
             return (I4Value) marshaller.ToCliValue(rawValue, CorLibTypeFactory.SByte);
@@ -111,7 +111,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             AssertIndexValidity(index);
 
             var rawValue = OffsetIsInRange(index, sizeof(short))
-                ? _contents.ReadInteger16(index * sizeof(short))
+                ? Contents.ReadInteger16(index * sizeof(short))
                 : new Integer16Value(0);
             
             return (I4Value) marshaller.ToCliValue(rawValue, CorLibTypeFactory.Int16);
@@ -123,7 +123,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             AssertIndexValidity(index);
 
             var rawValue = OffsetIsInRange(index, sizeof(int))
-                ? _contents.ReadInteger32(index * sizeof(int))
+                ? Contents.ReadInteger32(index * sizeof(int))
                 : new Integer32Value(0);
             
             return (I4Value) marshaller.ToCliValue(rawValue, CorLibTypeFactory.Int32);
@@ -135,7 +135,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             AssertIndexValidity(index);
             
             var rawValue = OffsetIsInRange(index, sizeof(long))
-                ? _contents.ReadInteger64(index * sizeof(long))
+                ? Contents.ReadInteger64(index * sizeof(long))
                 : new Integer64Value(0);
             
             return (I8Value) marshaller.ToCliValue(rawValue, CorLibTypeFactory.Int64);
@@ -147,7 +147,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             AssertIndexValidity(index);
             
             var rawValue = OffsetIsInRange(index, sizeof(byte))
-                ? _contents.ReadInteger8(index * sizeof(byte))
+                ? Contents.ReadInteger8(index * sizeof(byte))
                 : new Integer8Value(0);
             
             return (I4Value) marshaller.ToCliValue(rawValue, CorLibTypeFactory.Byte);
@@ -159,7 +159,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             AssertIndexValidity(index);
             
             var rawValue = OffsetIsInRange(index, sizeof(ushort))
-                ? _contents.ReadInteger16(index * sizeof(ushort))
+                ? Contents.ReadInteger16(index * sizeof(ushort))
                 : new Integer16Value(0);
             
             return (I4Value) marshaller.ToCliValue(rawValue, CorLibTypeFactory.UInt16);
@@ -171,7 +171,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             AssertIndexValidity(index);
             
             var rawValue = OffsetIsInRange(index, sizeof(uint))
-                ? _contents.ReadInteger32(index * sizeof(uint))
+                ? Contents.ReadInteger32(index * sizeof(uint))
                 : new Integer32Value(0);
             
             return (I4Value) marshaller.ToCliValue(rawValue, CorLibTypeFactory.UInt32);
@@ -183,7 +183,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             AssertIndexValidity(index);
             
             var rawValue = OffsetIsInRange(index, sizeof(float))
-                ? _contents.ReadFloat32(index * sizeof(float))
+                ? Contents.ReadFloat32(index * sizeof(float))
                 : new Float32Value(0);
             
             return (FValue) marshaller.ToCliValue(rawValue, CorLibTypeFactory.Single);
@@ -195,7 +195,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             AssertIndexValidity(index);
             
             var rawValue = OffsetIsInRange(index, sizeof(double))
-                ? _contents.ReadFloat64(index * sizeof(double))
+                ? Contents.ReadFloat64(index * sizeof(double))
                 : new Float64Value(0);
             
             return (FValue) marshaller.ToCliValue(rawValue, CorLibTypeFactory.Double);
@@ -213,7 +213,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
             var elementValue = marshaller.ToCtsValue(value, typeLayout.Type.ToTypeSignature());
-            WriteStruct(index * (int)typeLayout.Size, typeLayout, elementValue);
+            this.WriteStruct(index * (int)typeLayout.Size, _memoryAllocator, typeLayout, elementValue);
         }
 
         /// <inheritdoc />
@@ -222,10 +222,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             AssertIndexValidity(index);
             
             var ctsValue = marshaller.ToCtsValue(value, CorLibTypeFactory.IntPtr);
-            if (_contents.Is32Bit)
-                _contents.WriteInteger32(index * sizeof(uint), (Integer32Value) ctsValue);
+            if (Contents.Is32Bit)
+                Contents.WriteInteger32(index * sizeof(uint), (Integer32Value) ctsValue);
             else
-                _contents.WriteInteger64(index * sizeof(uint), (Integer64Value) ctsValue);
+                Contents.WriteInteger64(index * sizeof(uint), (Integer64Value) ctsValue);
         }
 
         /// <inheritdoc />
@@ -233,7 +233,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            _contents.WriteInteger8(index * sizeof(sbyte),
+            Contents.WriteInteger8(index * sizeof(sbyte),
                 (Integer8Value) marshaller.ToCtsValue(value, CorLibTypeFactory.SByte));
         }
 
@@ -242,7 +242,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            _contents.WriteInteger16(index * sizeof(short),
+            Contents.WriteInteger16(index * sizeof(short),
                 (Integer16Value) marshaller.ToCtsValue(value, CorLibTypeFactory.Int16));
         }
 
@@ -251,7 +251,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            _contents.WriteInteger32(index * sizeof(int),
+            Contents.WriteInteger32(index * sizeof(int),
                 (Integer32Value) marshaller.ToCtsValue(value, CorLibTypeFactory.Int32));
         }
 
@@ -260,7 +260,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            _contents.WriteInteger64(index * sizeof(long),
+            Contents.WriteInteger64(index * sizeof(long),
                 (Integer64Value) marshaller.ToCtsValue(value, CorLibTypeFactory.Int64));
         }
 
@@ -269,7 +269,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            _contents.WriteInteger8(index * sizeof(byte),
+            Contents.WriteInteger8(index * sizeof(byte),
                 (Integer8Value) marshaller.ToCtsValue(value, CorLibTypeFactory.Byte));
         }
 
@@ -278,7 +278,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            _contents.WriteInteger16(index * sizeof(ushort),
+            Contents.WriteInteger16(index * sizeof(ushort),
                 (Integer16Value) marshaller.ToCtsValue(value, CorLibTypeFactory.UInt16));
         }
 
@@ -287,7 +287,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            _contents.WriteInteger32(index * sizeof(uint),
+            Contents.WriteInteger32(index * sizeof(uint),
                 (Integer32Value) marshaller.ToCtsValue(value, CorLibTypeFactory.UInt32));
         }
 
@@ -296,7 +296,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            _contents.WriteFloat32(index * sizeof(float),
+            Contents.WriteFloat32(index * sizeof(float),
                 (Float32Value) marshaller.ToCtsValue(value, CorLibTypeFactory.Single));
         }
 
@@ -305,7 +305,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            _contents.WriteFloat64(index * sizeof(double),
+            Contents.WriteFloat64(index * sizeof(double),
                 (Float64Value) marshaller.ToCtsValue(value, CorLibTypeFactory.Double));
         }
 
@@ -314,10 +314,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
 
-            if (_contents.Is32Bit)
-                _contents.WriteInteger32(index * sizeof(uint), new Integer32Value(0, 0));
+            if (Contents.Is32Bit)
+                Contents.WriteInteger32(index * sizeof(uint), new Integer32Value(0, 0));
             else
-                _contents.WriteInteger64(index * sizeof(uint), new Integer64Value(0, 0));
+                Contents.WriteInteger64(index * sizeof(uint), new Integer64Value(0, 0));
         }
 
     }

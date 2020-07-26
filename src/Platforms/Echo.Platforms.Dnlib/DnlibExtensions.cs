@@ -13,7 +13,7 @@ using Echo.DataFlow;
 namespace Echo.Platforms.Dnlib
 {
     /// <summary>
-    /// Provides extension methods to AsmResolver models.
+    /// Provides extension methods to dnlib models.
     /// </summary>
     public static class DnlibExtensions
     {
