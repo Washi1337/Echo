@@ -1,0 +1,56 @@
+using System;
+using System.Collections.Generic;
+using AsmResolver.DotNet;
+using AsmResolver.PE.DotNet.Cil;
+using Echo.Concrete.Emulation;
+using Echo.Concrete.Emulation.Dispatch;
+using Echo.Platforms.AsmResolver.Emulation.Values;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
+
+namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
+{
+    /// <summary>
+    /// Provides a handler for instructions with a variation of the <see cref="CilOpCodes.Ldobj"/> operation code.
+    /// </summary>
+    public class LdObj : FallThroughOpCodeHandler
+    {
+        /// <inheritdoc />
+        public override IReadOnlyCollection<CilCode> SupportedOpCodes => new[]
+        {
+            CilCode.Ldobj
+        };
+
+        /// <inheritdoc />
+        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        {
+            var environment = context.GetService<ICilRuntimeEnvironment>();
+            var stack = context.ProgramState.Stack;
+
+            // Pop address to dereference.
+            var addressValue = stack.Pop();
+            if (!(addressValue is PointerValue pointerValue))
+                return DispatchResult.InvalidProgram();
+
+            // Determine type layout.
+            var type = ((ITypeDefOrRef) instruction.Operand).ToTypeSignature();
+            var memoryLayout = environment.MemoryAllocator.GetTypeMemoryLayout(type);
+
+            // Dereference.
+            Span<byte> contents = stackalloc byte[(int) memoryLayout.Size];
+            Span<byte> knownBitmask = stackalloc byte[(int) memoryLayout.Size];
+            if (pointerValue.IsKnown)
+                pointerValue.ReadBytes(0, contents, knownBitmask);
+
+            // Create structure.
+            var structureValue = environment.MemoryAllocator.AllocateObject(type);
+            if (structureValue is IDotNetPointer structurePointerValue)
+                structurePointerValue.WriteBytes(0, contents, knownBitmask);
+            
+            // Push
+            stack.Push(environment.CliMarshaller.ToCliValue(structureValue, type));
+            
+            return DispatchResult.Success();
+        }
+        
+    }
+}
