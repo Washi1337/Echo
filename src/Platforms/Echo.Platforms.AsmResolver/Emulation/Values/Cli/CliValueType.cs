@@ -39,6 +39,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// <summary>
         /// Indicates the value is an unmanaged pointer type *.
         /// </summary>
-        ManagedPointer
+        ManagedPointer,
+        
+        /// <summary>
+        /// Indicates the value is a custom structure.
+        /// </summary>
+        Structure,
     }
 }

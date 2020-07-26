@@ -54,10 +54,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 ElementType.I => IntToI(value as IntegerValue),
                 ElementType.U => IntToI(value as IntegerValue),
                 ElementType.Ptr => PtrToPointerValue(value as IPointerValue),
+                ElementType.ValueType => ObjectToStruct(value as LleObjectValue),
                 _ => ObjectToO(value)
             };
         }
-        
+
         /// <summary>
         /// Converts the provided (partially) known 8 bit integer value to an I4 value. 
         /// </summary>
@@ -168,6 +169,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             return new FValue(value.F64);
         }
 
+        protected virtual ICliValue ObjectToStruct(LleObjectValue value)
+        {
+            return new StructValue(Environment.MemoryAllocator, value.Type, value.Contents);
+        }
+
         /// <summary>
         /// Converts the provided object value to a type O object reference.
         /// </summary>
@@ -276,9 +282,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                     var ptrValue = (PointerValue) value;
                     return new RelativePointerValue(ptrValue.BasePointer, ptrValue.CurrentOffset);
                 }
-                
+
+                case ElementType.ValueType:
+                {
+                    var structValue = (StructValue) value;
+                    return new LleObjectValue(Environment.MemoryAllocator, structValue.Type, structValue.Contents);
+                }
+
                 default:
+                {
                     throw new NotSupportedException();
+                }
             }
         }
         

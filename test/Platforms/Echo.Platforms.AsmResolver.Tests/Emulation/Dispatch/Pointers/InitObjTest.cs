@@ -9,7 +9,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 {
     public class InitObjTest : DispatcherTestBase
     {
-        public InitObjTest(MockModuleProvider moduleProvider)
+        public InitObjTest(MockModuleFixture moduleProvider)
             : base(moduleProvider)
         {
         }

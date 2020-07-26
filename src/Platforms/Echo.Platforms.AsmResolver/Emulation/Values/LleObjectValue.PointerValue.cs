@@ -9,36 +9,36 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     public partial class LleObjectValue : IDotNetPointer
     {
         /// <inheritdoc />
-        public void ReadBytes(int offset, Span<byte> memoryBuffer) => _contents.ReadBytes(offset, memoryBuffer);
+        public void ReadBytes(int offset, Span<byte> memoryBuffer) => Contents.ReadBytes(offset, memoryBuffer);
 
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer, Span<byte> knownBitmaskBuffer) => 
-            _contents.ReadBytes(offset, memoryBuffer, knownBitmaskBuffer);
+            Contents.ReadBytes(offset, memoryBuffer, knownBitmaskBuffer);
 
         /// <inheritdoc />
-        public void WriteBytes(int offset, ReadOnlySpan<byte> data) => _contents.WriteBytes(offset, data);
+        public void WriteBytes(int offset, ReadOnlySpan<byte> data) => Contents.WriteBytes(offset, data);
 
         /// <inheritdoc />
         public void WriteBytes(int offset, ReadOnlySpan<byte> data, ReadOnlySpan<byte> knownBitMask) => 
-            _contents.WriteBytes(offset, data, knownBitMask);
+            Contents.WriteBytes(offset, data, knownBitMask);
 
         /// <inheritdoc />
-        public Integer8Value ReadInteger8(int offset) => _contents.ReadInteger8(offset);
+        public Integer8Value ReadInteger8(int offset) => Contents.ReadInteger8(offset);
 
         /// <inheritdoc />
-        public Integer16Value ReadInteger16(int offset) => _contents.ReadInteger16(offset);
+        public Integer16Value ReadInteger16(int offset) => Contents.ReadInteger16(offset);
 
         /// <inheritdoc />
-        public Integer32Value ReadInteger32(int offset) => _contents.ReadInteger32(offset);
+        public Integer32Value ReadInteger32(int offset) => Contents.ReadInteger32(offset);
 
         /// <inheritdoc />
-        public Integer64Value ReadInteger64(int offset) => _contents.ReadInteger64(offset);
+        public Integer64Value ReadInteger64(int offset) => Contents.ReadInteger64(offset);
 
         /// <inheritdoc />
-        public Float32Value ReadFloat32(int offset) => _contents.ReadFloat32(offset);
+        public Float32Value ReadFloat32(int offset) => Contents.ReadFloat32(offset);
 
         /// <inheritdoc />
-        public Float64Value ReadFloat64(int offset) => _contents.ReadFloat64(offset);
+        public Float64Value ReadFloat64(int offset) => Contents.ReadFloat64(offset);
 
         /// <inheritdoc />
         public IConcreteValue ReadStruct(int offset, TypeMemoryLayout typeLayout)
@@ -69,7 +69,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             Span<byte> contents = stackalloc byte[(int) typeLayout.Size];
             Span<byte> bitmask = stackalloc byte[(int) typeLayout.Size];
-            _contents.ReadBytes(offset, contents, bitmask);
+            Contents.ReadBytes(offset, contents, bitmask);
             
             var structValue = _memoryAllocator.AllocateMemory((int) typeLayout.Size, false);
             structValue.WriteBytes(0, contents, bitmask);
@@ -77,22 +77,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public void WriteInteger8(int offset, Integer8Value value) => _contents.WriteInteger8(offset, value);
+        public void WriteInteger8(int offset, Integer8Value value) => Contents.WriteInteger8(offset, value);
 
         /// <inheritdoc />
-        public void WriteInteger16(int offset, Integer16Value value) => _contents.WriteInteger16(offset, value);
+        public void WriteInteger16(int offset, Integer16Value value) => Contents.WriteInteger16(offset, value);
 
         /// <inheritdoc />
-        public void WriteInteger32(int offset, Integer32Value value) => _contents.WriteInteger32(offset, value);
+        public void WriteInteger32(int offset, Integer32Value value) => Contents.WriteInteger32(offset, value);
 
         /// <inheritdoc />
-        public void WriteInteger64(int offset, Integer64Value value) => _contents.WriteInteger64(offset, value);
+        public void WriteInteger64(int offset, Integer64Value value) => Contents.WriteInteger64(offset, value);
 
         /// <inheritdoc />
-        public void WriteFloat32(int offset, Float32Value value) => _contents.WriteFloat32(offset, value);
+        public void WriteFloat32(int offset, Float32Value value) => Contents.WriteFloat32(offset, value);
 
         /// <inheritdoc />
-        public void WriteFloat64(int offset, Float64Value value) => _contents.WriteFloat64(offset, value);
+        public void WriteFloat64(int offset, Float64Value value) => Contents.WriteFloat64(offset, value);
 
         /// <inheritdoc />
         public void WriteStruct(int offset, TypeMemoryLayout typeLayout, IConcreteValue value)

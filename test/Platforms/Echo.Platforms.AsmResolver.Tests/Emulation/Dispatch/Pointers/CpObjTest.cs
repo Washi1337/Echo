@@ -11,7 +11,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 {
     public class CpObjTest : DispatcherTestBase
     {
-        public CpObjTest(MockModuleProvider moduleProvider)
+        public CpObjTest(MockModuleFixture moduleProvider)
             : base(moduleProvider)
         {
         }

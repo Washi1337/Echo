@@ -14,25 +14,28 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         private readonly IMemoryAllocator _memoryAllocator;
 
         /// <summary>
-        /// The pointer to the raw data of the object.
-        /// </summary>
-        private readonly MemoryPointerValue _contents;
-
-        /// <summary>
         /// Creates a new low level emulated object. 
         /// </summary>
         /// <param name="memoryAllocator">The object responsible for memory management in the virtual machine.</param>
         /// <param name="valueType">The type of the object.</param>
-        /// <param name="contents">The raw contents of the array.</param>
+        /// <param name="contents">The raw contents of the object.</param>
         public LleObjectValue(IMemoryAllocator memoryAllocator, TypeSignature valueType, MemoryPointerValue contents)
         {
             Type = valueType;
             _memoryAllocator = memoryAllocator ?? throw new ArgumentNullException(nameof(memoryAllocator));
-            _contents = contents ?? throw new ArgumentNullException(nameof(contents));
+            Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
         /// <inheritdoc />
         public TypeSignature Type
+        {
+            get;
+        }
+
+        /// <summary>
+        /// The pointer to the raw data of the object.
+        /// </summary>
+        public MemoryPointerValue Contents
         {
             get;
         }
@@ -43,10 +46,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public bool IsKnown => true;
         
         /// <inheritdoc />
-        public bool Is32Bit => _contents.Is32Bit;
+        public bool Is32Bit => Contents.Is32Bit;
         
         /// <inheritdoc />
-        public int Size => _contents.Size;
+        public int Size => Contents.Size;
 
         /// <inheritdoc />
         public bool IsValueType => false;
@@ -65,10 +68,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
         /// <inheritdoc />
         /// <inheritdoc />
-        public IValue Copy() => new LleObjectValue(_memoryAllocator, Type, _contents);
+        public IValue Copy() => new LleObjectValue(_memoryAllocator, Type, Contents);
         
         /// <inheritdoc />
-        public override string ToString() => $"{Type.FullName} ({_contents.Length.ToString()} bytes)";
+        public override string ToString() => $"{Type.FullName} ({Contents.Length.ToString()} bytes)";
 
         
     }
