@@ -93,7 +93,8 @@ namespace Echo.Platforms.Dnlib
         /// <inheritdoc />
         public int GetStackPopCount(in Instruction instruction)
         {
-            instruction.CalculateStackUsage(out _, out int pops);
+            bool isVoid = Method.ReturnType.ElementType == ElementType.Void;
+            instruction.CalculateStackUsage(!isVoid, out _, out int pops);
             return pops;
         }
 
