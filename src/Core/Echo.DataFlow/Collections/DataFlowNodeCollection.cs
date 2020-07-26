@@ -133,15 +133,15 @@ namespace Echo.DataFlow.Collections
                 foreach (var dependent in item.GetDependants().ToArray())
                 {
                     foreach (var dependency in dependent.StackDependencies)
-                        dependency.DataSources.Remove(item);
+                        dependency.Remove(item);
                     foreach (var dependency in dependent.VariableDependencies)
-                        dependency.Value.DataSources.Remove(item);
+                        dependency.Value.Remove(item);
                 }
                 
                 foreach (var dependency in item.StackDependencies)
-                    dependency.DataSources.Clear();
+                    dependency.Clear();
                 foreach (var entry in item.VariableDependencies)
-                    entry.Value.DataSources.Clear();
+                    entry.Value.Clear();
                 
                 // Remove node.
                 _nodes.Remove(offset);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Echo.Core.Code;
 
@@ -10,6 +11,7 @@ namespace Echo.DataFlow.Collections
     /// Represents a collection of variables and their symbolic values that a node in a data flow graph depends on.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in each node.</typeparam>
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class VariableDependencyCollection<TContents> : IDictionary<IVariable, DataDependency<TContents>>
     {
         private readonly Dictionary<IVariable, DataDependency<TContents>> _entries =
@@ -44,7 +46,7 @@ namespace Echo.DataFlow.Collections
         /// <summary>
         /// Gets the total number of edges that are stored in this dependency collection.
         /// </summary>
-        public int EdgeCount => _entries.Sum(e => e.Value.DataSources.Count);
+        public int EdgeCount => _entries.Sum(e => e.Value.Count);
 
         /// <inheritdoc />
         public bool IsReadOnly => false;
@@ -57,7 +59,7 @@ namespace Echo.DataFlow.Collections
             if (item.Dependant != null)
                 throw new ArgumentException("Variable dependency was already added to another node.");
             
-            if (item.DataSources.Any(n => n.ParentGraph != _owner.ParentGraph))
+            if (item.Any(n => n.ParentGraph != _owner.ParentGraph))
                 throw new ArgumentException("Dependency contains data sources from another graph.");
         }
         

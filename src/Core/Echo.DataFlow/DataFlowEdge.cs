@@ -15,11 +15,13 @@ namespace Echo.DataFlow
         /// <param name="origin">The dependent node.</param>
         /// <param name="target">The dependency node.</param>
         /// <param name="type">The type of dependency.</param>
-        public DataFlowEdge(DataFlowNode<TContents> origin, DataFlowNode<TContents> target, DataDependencyType type)
+        /// <param name="metadata">The metadata associated to the edge.</param>
+        public DataFlowEdge(DataFlowNode<TContents> origin, DataFlowNode<TContents> target, DataDependencyType type, object metadata)
         {
             Origin = origin;
             Target = target;
             Type = type;
+            Metadata = metadata;
         }
         
         /// <summary>
@@ -46,6 +48,15 @@ namespace Echo.DataFlow
         /// Gets the type of dependency that this edge encodes.
         /// </summary>
         public DataDependencyType Type
+        {
+            get;
+        }
+        
+        /// <summary>
+        /// Gets the metadata associated to the edge. For stack dependency edges, this contains the index of the
+        /// stack slot that was referenced. For variable dependency edges, this contains the referenced variable. 
+        /// </summary>
+        public object Metadata
         {
             get;
         }

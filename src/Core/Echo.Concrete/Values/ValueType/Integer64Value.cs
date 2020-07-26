@@ -1,5 +1,6 @@
 using System;
-using System.Collections;
+using System.Buffers.Binary;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -101,7 +102,7 @@ namespace Echo.Concrete.Values.ValueType
         public override int Size => sizeof(ulong);
 
         /// <inheritdoc />
-        public override bool? IsZero
+        public override Trilean IsZero
         {
             get
             {
@@ -141,48 +142,50 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override BitArray GetBits() => new BitArray(BitConverter.GetBytes(U64));
+        public override void GetBits(Span<byte> buffer) => BinaryPrimitives.WriteUInt64LittleEndian(buffer, U64);
 
         /// <inheritdoc />
-        public override bool? GetBit(int index)
+        public override Trilean GetBit(int index)
         {
             if (index < 0 || index >= 64)
                 throw new ArgumentOutOfRangeException(nameof(index));
-            return ((Mask >> index) & 1) == 1 ? ((U64 >> index) & 1) == 1 : (bool?) null;
+            
+            return ((Mask >> index) & 1) == 1 
+                ? ((U64 >> index) & 1) == 1 
+                : Trilean.Unknown;
         }
 
         /// <inheritdoc />
-        public override void SetBit(int index, bool? value)
+        public override void SetBit(int index, Trilean value)
         {
             if (index < 0 || index >= 64)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
             ulong mask = 1ul << index;
 
-            if (value.HasValue)
+            if (value.IsKnown)
             {
                 Mask |= mask;
-                U64 = (U64 & ~mask) | ((value.Value ? 1ul : 0ul) << index);
+                U64 = (U64 & ~mask) | ((value.ToBooleanOrFalse() ? 1ul : 0ul) << index);
             }
             else
             {
+                U64 = U64 & ~mask;
                 Mask &= ~mask;
             }
         }
 
         /// <inheritdoc />
-        public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
+        public override void GetMask(Span<byte> buffer) => BinaryPrimitives.WriteUInt64LittleEndian(buffer, Mask);
 
         /// <inheritdoc />
-        public override void SetBits(BitArray bits, BitArray mask)
+        public override void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            if (bits.Count != 64 || mask.Count != 64)
+            if (bits.Length != 8 || mask.Length != 8)
                 throw new ArgumentException("Number of bits is not 64.");
-            var buffer = new byte[8];
-            bits.CopyTo(buffer, 0);
-            U64 = BitConverter.ToUInt64(buffer, 0);
-            mask.CopyTo(buffer, 0);
-            Mask = BitConverter.ToUInt64(buffer, 0);
+
+            U64 = BinaryPrimitives.ReadUInt64LittleEndian(bits);
+            Mask = BinaryPrimitives.ReadUInt64LittleEndian(mask);
         }
 
         /// <inheritdoc />
@@ -249,29 +252,51 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override bool? IsEqualTo(IntegerValue other)
+        public override Trilean IsEqualTo(IntegerValue other)
         {
-            return IsKnown && other.IsKnown && other is Integer64Value int64
-                ? U64 == int64.U64
-                : (bool?) null;
+            if (other is Integer64Value int64)
+            {
+                if (IsKnown && other.IsKnown)
+                    return U64 == int64.U64;
+                
+                return U64 == int64.U64 
+                    ? Trilean.Unknown 
+                    : Trilean.False;
+            }
+
+            return base.IsEqualTo(other);
         }
 
         /// <inheritdoc />
-        public override bool? IsGreaterThan(IntegerValue other)
+        public override Trilean IsGreaterThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer64Value int64)
-                return U64 > int64.U64;
+            {
+                return signed
+                    ? I64 > int64.I64
+                    : U64 > int64.U64;
+            }
 
-            return base.IsGreaterThan(other);
+            return base.IsGreaterThan(other, signed);
         }
 
         /// <inheritdoc />
-        public override bool? IsLessThan(IntegerValue other)
+        public override Trilean IsLessThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer64Value int64)
-                return U64 < int64.U64;
+            {
+                return signed
+                    ? I64 < int64.I64
+                    : U64 < int64.U64;
+            }
 
-            return base.IsLessThan(other);
+            return base.IsLessThan(other, signed);
+        }
+
+        /// <inheritdoc />
+        public override void MarkFullyUnknown()
+        {
+            Mask = 0;
         }
     }
 }

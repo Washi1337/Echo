@@ -1,5 +1,6 @@
 using System;
-using System.Collections;
+using System.Buffers.Binary;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -101,7 +102,7 @@ namespace Echo.Concrete.Values.ValueType
         public override int Size => sizeof(ushort);
 
         /// <inheritdoc />
-        public override bool? IsZero
+        public override Trilean IsZero
         {
             get
             {
@@ -141,48 +142,50 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override bool? GetBit(int index)
+        public override Trilean GetBit(int index)
         {
             if (index < 0 || index >= 16)
                 throw new ArgumentOutOfRangeException(nameof(index));
-            return ((Mask >> index) & 1) == 1 ? ((U16 >> index) & 1) == 1 : (bool?) null;
+            
+            return ((Mask >> index) & 1) == 1
+                ? ((U16 >> index) & 1) == 1 
+                : Trilean.Unknown;
         }
 
         /// <inheritdoc />
-        public override void SetBit(int index, bool? value)
+        public override void SetBit(int index, Trilean value)
         {
             if (index < 0 || index >= 16)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
             ushort mask = (ushort) (1 << index);
 
-            if (value.HasValue)
+            if (value.IsKnown)
             {
                 Mask |= mask;
-                U16 = (ushort) ((U16 & ~mask) | ((value.Value ? 1 : 0) << index));
+                U16 = (ushort) ((U16 & ~mask) | ((value.ToBooleanOrFalse() ? 1 : 0) << index));
             }
             else
             {
+                U16 = (ushort) (U16 & ~mask);
                 Mask &= (ushort) ~mask;
             }
         }
 
         /// <inheritdoc />
-        public override BitArray GetBits() => new BitArray(BitConverter.GetBytes(U16));
+        public override void GetBits(Span<byte> buffer) => BinaryPrimitives.WriteUInt16LittleEndian(buffer, U16);
 
         /// <inheritdoc />
-        public override BitArray GetMask() => new BitArray(BitConverter.GetBytes(Mask));
+        public override void GetMask(Span<byte> buffer) => BinaryPrimitives.WriteUInt16LittleEndian(buffer, Mask);
 
         /// <inheritdoc />
-        public override void SetBits(BitArray bits, BitArray mask)
+        public override void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            if (bits.Count != 16 || mask.Count != 16)
+            if (bits.Length != 2 || mask.Length != 2)
                 throw new ArgumentException("Number of bits is not 16.");
-            var buffer = new byte[2];
-            bits.CopyTo(buffer, 0);
-            U16 = BitConverter.ToUInt16(buffer, 0);
-            mask.CopyTo(buffer, 0);
-            Mask = BitConverter.ToUInt16(buffer, 0);
+            
+            U16 = BinaryPrimitives.ReadUInt16LittleEndian(bits);
+            Mask = BinaryPrimitives.ReadUInt16LittleEndian(mask);
         }
 
         /// <inheritdoc />
@@ -249,29 +252,51 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override bool? IsEqualTo(IntegerValue other)
+        public override Trilean IsEqualTo(IntegerValue other)
         {
-            return IsKnown && other.IsKnown && other is Integer16Value int16
-                ? U16 == int16.U16
-                : (bool?) null;
+            if (other is Integer16Value int16)
+            {
+                if (IsKnown && other.IsKnown)
+                    return U16 == int16.U16;
+                
+                return U16 == int16.U16 
+                    ? Trilean.Unknown 
+                    : Trilean.False;
+            }
+
+            return base.IsEqualTo(other);
         }
 
         /// <inheritdoc />
-        public override bool? IsGreaterThan(IntegerValue other)
+        public override Trilean IsGreaterThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer16Value int16)
-                return U16 > int16.U16;
+            {
+                return signed
+                    ? I16 > int16.I16
+                    : U16 > int16.U16;
+            }
 
-            return base.IsGreaterThan(other);
+            return base.IsGreaterThan(other, signed);
         }
 
         /// <inheritdoc />
-        public override bool? IsLessThan(IntegerValue other)
+        public override Trilean IsLessThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer16Value int16)
-                return U16 < int16.U16;
+            {
+                return signed 
+                    ? I16 < int16.I16
+                    : U16 < int16.U16;
+            }
 
-            return base.IsLessThan(other);
+            return base.IsLessThan(other, signed);
+        }
+
+        /// <inheritdoc />
+        public override void MarkFullyUnknown()
+        {
+            Mask = 0;
         }
     }
 }

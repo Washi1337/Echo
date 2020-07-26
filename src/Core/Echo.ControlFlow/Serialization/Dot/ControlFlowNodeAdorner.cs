@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using Echo.Core.Graphing;
 using Echo.Core.Graphing.Serialization.Dot;
 
@@ -18,17 +19,62 @@ namespace Echo.ControlFlow.Serialization.Dot
             get;
             set;
         } = "box3d";
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the adorner should add block headers to every node.
+        /// </summary>
+        public bool IncludeBlockHeaders
+        {
+            get;
+            set;
+        } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the adorner should add the block instructions to every node.
+        /// </summary>
+        public bool IncludeInstructions
+        {
+            get;
+            set;
+        } = true;
+        
+        /// <summary>
+        /// Gets or sets a value indicating the format of block headers. This is a format string with one
+        /// parameter containing the value of <see cref="ControlFlowNode{TInstruction}.Offset"/>.
+        /// </summary>
+        public string BlockHeaderFormat
+        {
+            get;
+            set;
+        } = "Block_{0:X8}:";
         
         /// <inheritdoc />
         public IDictionary<string, string> GetNodeAttributes(INode node)
         {
             if (node is ControlFlowNode<TInstruction> cfgNode)
             {
-                string code = string.Join("\\l", cfgNode.Contents.Instructions) +"\\l";
+                var contentsBuilder = new StringBuilder();
+
+                if (IncludeBlockHeaders)
+                {
+                    contentsBuilder.AppendFormat(BlockHeaderFormat, cfgNode.Offset);
+                    contentsBuilder.Append("\\l");
+                }
+
+                if (IncludeInstructions)
+                {
+                    for (int i = 0; i < cfgNode.Contents.Instructions.Count; i++)
+                    {
+                        var instruction = cfgNode.Contents.Instructions[i];
+                        contentsBuilder.Append(instruction);
+                        contentsBuilder.Append("\\l");
+                    }
+                }
+
                 var result = new Dictionary<string, string>
                 {
                     ["shape"] = NodeShape, 
-                    ["label"] = code
+                    ["label"] = contentsBuilder.ToString()
                 };
                 return result;
             }

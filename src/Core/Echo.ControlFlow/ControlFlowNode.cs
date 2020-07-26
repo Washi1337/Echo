@@ -474,7 +474,28 @@ namespace Echo.ControlFlow
         /// </returns>
         public ExceptionHandlerRegion<TInstruction> GetParentExceptionHandler() =>
             ParentRegion?.GetParentExceptionHandler();
+
+        /// <summary>
+        /// Traverses the region tree upwards and collects all regions this node is situated in. 
+        /// </summary>
+        /// <returns>The regions this node is situated in, starting with the inner-most regions.</returns>
+        public IEnumerable<IControlFlowRegion<TInstruction>> GetSituatedRegions()
+        {
+            var parentRegion = ParentRegion;
+            while (parentRegion is {})
+            {
+                yield return parentRegion;
+                parentRegion = parentRegion.ParentRegion;
+            }
+        }
         
+        /// <summary>
+        /// Gets a value indicating whether the node is in the provided region.
+        /// </summary>
+        /// <param name="region">The region.</param>
+        /// <returns><c>true</c> if the node is within the region, <c>false</c> otherwise.</returns>
+        public bool IsInRegion(IControlFlowRegion<TInstruction> region) => GetSituatedRegions().Contains(region);
+
         /// <inheritdoc />
         public override string ToString() => Offset.ToString("X8");
 

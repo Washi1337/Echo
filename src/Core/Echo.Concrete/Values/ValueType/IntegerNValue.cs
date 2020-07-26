@@ -1,5 +1,7 @@
 using System;
+using System.Buffers;
 using System.Collections;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -9,24 +11,36 @@ namespace Echo.Concrete.Values.ValueType
     /// </summary>
     public class IntegerNValue : IntegerValue
     {
+        private readonly byte[] _bits;
+
+        private readonly byte[] _mask;
+        
         /// <summary>
         /// Creates a new zero integer.
         /// </summary>
         /// <param name="byteCount">The number of bytes to use for encoding this integer.</param>
         public IntegerNValue(int byteCount)
         {
-            Bits = new BitArray(byteCount*8);
-            Mask = new BitArray(byteCount * 8, true);
+            _bits = ArrayPool<byte>.Shared.Rent(byteCount);
+            _mask = ArrayPool<byte>.Shared.Rent(byteCount);
+            _mask.AsSpan().Fill(0xFF);
+
+            Size = byteCount;
         }
         
         /// <summary>
         /// Creates a fully known new integer from a bit array.
         /// </summary>
         /// <param name="bits">The raw bits of the integer.</param>
-        public IntegerNValue(BitArray bits)
+        public IntegerNValue(Span<byte> bits)
         {
-            Bits = (BitArray) bits.Clone();
-            Mask = new BitArray(bits.Count, true);
+            _bits = ArrayPool<byte>.Shared.Rent(bits.Length);
+            bits.CopyTo(_bits);
+
+            _mask = ArrayPool<byte>.Shared.Rent(bits.Length);
+            _mask.AsSpan().Fill(0xFF);
+
+            Size = bits.Length;
         }
 
         /// <summary>
@@ -34,14 +48,19 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         /// <param name="bits">The raw bits of the integer.</param>
         /// <param name="knownMask">The known bit mask.</param>
-        public IntegerNValue(BitArray bits, BitArray knownMask)
+        public IntegerNValue(Span<byte> bits, Span<byte> knownMask)
         {
-            if (bits.Count != knownMask.Count)
+            if (bits.Length != knownMask.Length)
                 throw new ArgumentException("Known bit mask does not have the same bit-length as the raw value.");
-            
-            Bits = (BitArray) bits.Clone();
-            Mask = (BitArray) knownMask.Clone();
-        }
+
+            _bits = ArrayPool<byte>.Shared.Rent(bits.Length);
+            bits.CopyTo(_bits);
+
+            _mask = ArrayPool<byte>.Shared.Rent(knownMask.Length);
+            knownMask.CopyTo(_mask);
+
+            Size = bits.Length;
+        }    
         
         /// <summary>
         /// Parses a (partially) known bit string into an integer.
@@ -49,64 +68,109 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="bitString">The bit string to parse.</param>
         public IntegerNValue(string bitString)
         {
-            Bits = new BitArray(bitString.Length);
-            Mask = new BitArray(bitString.Length, true);
+            _bits = ArrayPool<byte>.Shared.Rent(bitString.Length / 8);
+            _mask = ArrayPool<byte>.Shared.Rent(bitString.Length / 8);
+
+            Size = bitString.Length / 8;
             SetBits(bitString);
         }
 
-        /// <inheritdoc />
-        public override bool IsKnown => BitArrayComparer.Instance.Equals(Mask, new BitArray(Size * 8, true));
-
-        /// <inheritdoc />
-        public override int Size => Bits.Count / 8;
-        
         /// <summary>
-        /// Gets the raw bits of this integer. 
+        /// Returns the rented array to <see cref="ArrayPool{T}"/>
         /// </summary>
-        public BitArray Bits
+        ~IntegerNValue()
         {
-            get;
-            private set;
+            if (_bits is {})
+            {
+                ArrayPool<byte>.Shared.Return(_bits, true);
+            }
+
+            if (_mask is {})
+            {
+                ArrayPool<byte>.Shared.Return(_mask, true);
+            }
         }
 
-        /// <summary>
-        /// Gets the known bit mask of this integer. 
-        /// </summary>
-        public BitArray Mask
+        /// <inheritdoc />
+        public override bool IsKnown
+        {
+            get
+            {
+                for (var i = 0; i < Size; i++)
+                {
+                    if (_mask[i] != 0xFF)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+
+        /// <inheritdoc />
+        public override int Size
         {
             get;
-            private set;
+        }
+
+        private Span<byte> Bits
+        {
+            get => _bits.AsSpan(0, Size);
+        }
+
+        private Span<byte> Mask
+        {
+            get => _mask.AsSpan(0, Size);
         }
 
         /// <inheritdoc />
         public override IValue Copy() => new IntegerNValue(Bits, Mask);
 
         /// <inheritdoc />
-        public override bool? GetBit(int index) => !Mask[index] ? (bool?) null : Bits[index];
-
-        /// <inheritdoc />
-        public override void SetBit(int index, bool? value)
+        public override Trilean GetBit(int index)
         {
-            Mask[index] = value.HasValue;
-            Bits[index] = !value.HasValue || value.Value;
+            var bits = new BitField(Bits);
+            var mask = new BitField(Mask);
+            
+            return mask[index]
+                ? bits[index] 
+                : Trilean.Unknown;
         }
 
         /// <inheritdoc />
-        public override BitArray GetBits() => (BitArray) Bits.Clone();
-
-        /// <inheritdoc />
-        public override BitArray GetMask() => (BitArray) Mask.Clone();
-
-        /// <inheritdoc />
-        public override void SetBits(BitArray bits, BitArray mask)
+        public override void SetBit(int index, Trilean value)
         {
-            if (bits.Count != Bits.Count)
+            var bits = new BitField(Bits);
+            var mask = new BitField(Mask);
+            
+            mask[index] = value.IsKnown;
+            bits[index] = value.ToBooleanOrFalse();
+        }
+
+        /// <inheritdoc />
+        public override void GetBits(Span<byte> buffer) => Bits.CopyTo(buffer);
+
+        /// <inheritdoc />
+        public override void GetMask(Span<byte> buffer) => Mask.CopyTo(buffer);
+
+        /// <inheritdoc />
+        public override void SetBits(Span<byte> bits, Span<byte> mask)
+        {
+            if (bits.Length != Size)
                 throw new ArgumentException("New bit value does not have the same bit-length as the original value.");
-            if (bits.Count != mask.Count)
+            if (mask.Length != Size)
                 throw new ArgumentException("Known bit mask does not have the same bit-length as the raw value.");
             
-            Bits = (BitArray) bits.Clone();
-            Mask = (BitArray) mask.Clone();
+            bits.CopyTo(_bits);
+            mask.CopyTo(_mask);
+        }      
+        
+        /// <inheritdoc />
+        public override void MarkFullyUnknown()
+        {
+            Mask.Fill(0);
         }
+
     }
 }

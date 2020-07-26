@@ -1,14 +1,14 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using Echo.DataFlow.Collections;
 
 namespace Echo.DataFlow
 {
     /// <summary>
-    /// Represents a data dependency of a node in a data flow graph, with one or more data sources.
+    /// Represents a data dependency of a node in a data flow graph, which is a set of one or more data flow nodes where
+    /// the owner node might pull data from.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in a data flow node.</typeparam>
-    public class DataDependency<TContents> : IDataDependency
+    public class DataDependency<TContents> : DataDependencyBase<TContents>
     {
         private DataFlowNode<TContents> _dependant;
 
@@ -16,16 +16,23 @@ namespace Echo.DataFlow
         /// Creates a new data dependency with no data sources.
         /// </summary>
         public DataDependency()
-            : this (Enumerable.Empty<DataFlowNode<TContents>>())
         {
         }
 
         /// <summary>
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
+        public DataDependency(DataFlowNode<TContents> dataSource)
+            : base(dataSource)
+        {
+        }
+        
+        /// <summary>
+        /// Creates a new data dependency with the provided data sources.
+        /// </summary>
         /// <param name="dataSources">The data sources.</param>
         public DataDependency(params DataFlowNode<TContents>[] dataSources)
-            : this(dataSources.AsEnumerable())
+            : base(dataSources)
         {
         }
         
@@ -34,8 +41,8 @@ namespace Echo.DataFlow
         /// </summary>
         /// <param name="dataSources">The data sources.</param>
         public DataDependency(IEnumerable<DataFlowNode<TContents>> dataSources)
+            : base(dataSources)
         {
-            DataSources = new DataSourceCollection<TContents>(this, dataSources);
         }
 
         /// <summary>
@@ -50,7 +57,7 @@ namespace Echo.DataFlow
                 {
                     if (_dependant != null)
                     {
-                        foreach (var source in DataSources)
+                        foreach (var source in this)
                             source.Dependants.Remove(_dependant);
                     }
 
@@ -58,34 +65,44 @@ namespace Echo.DataFlow
                     
                     if (_dependant != null)
                     {
-                        foreach (var source in DataSources)
+                        foreach (var source in this)
                             source.Dependants.Add(_dependant);
                     }
                 }
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the data dependency has any known data sources. 
-        /// </summary>
-        public bool IsKnown => DataSources.Count > 0;
-
-        /// <summary>
-        /// Gets a collection of data sources this data dependency might pull data from.
-        /// </summary>
-        public DataSourceCollection<TContents> DataSources
+        /// <inheritdoc />
+        public override bool Add(DataFlowNode<TContents> item)
         {
-            get;
+            if (item is null)
+                throw new ArgumentNullException(nameof(item));
+            if (Dependant != null && item.ParentGraph != Dependant.ParentGraph)
+                throw new ArgumentException("Data source is not added to the same graph.");
+
+            if (base.Add(item))
+            {
+                item.Dependants.Add(Dependant);
+                return true;
+            }
+
+            return false;
         }
 
         /// <inheritdoc />
-        public override string ToString()
+        public override bool Remove(DataFlowNode<TContents> item)
         {
-            string dataSourcesString = IsKnown ? string.Join(" | ", DataSources) : "?";
-            return $"{dataSourcesString})";
+            if (item is null)
+                return false;
+            
+            if (base.Remove(item))
+            {
+                item.Dependants.Remove(Dependant);
+                return true;
+            }
+
+            return false;
         }
-
-        IEnumerable<IDataFlowNode> IDataDependency.GetDataSources() => DataSources;
-
+        
     }
 }

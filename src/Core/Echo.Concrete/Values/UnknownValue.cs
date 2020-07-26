@@ -1,3 +1,4 @@
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values
@@ -17,18 +18,21 @@ namespace Echo.Concrete.Values
         bool IConcreteValue.IsValueType => false;
 
         /// <inheritdoc />
-        bool? IConcreteValue.IsZero => null;
+        Trilean IConcreteValue.IsZero => Trilean.Unknown;
 
         /// <inheritdoc />
-        bool? IConcreteValue.IsNonZero => null;
+        Trilean IConcreteValue.IsNonZero => Trilean.Unknown;
 
         /// <inheritdoc />
-        bool? IConcreteValue.IsPositive => null;
+        Trilean IConcreteValue.IsPositive => Trilean.Unknown;
 
         /// <inheritdoc />
-        bool? IConcreteValue.IsNegative => null;
+        Trilean IConcreteValue.IsNegative => Trilean.Unknown;
         
         /// <inheritdoc />
         public IValue Copy() => new UnknownValue();
+
+        /// <inheritdoc />
+        public override string ToString() => "?";
     }
 }

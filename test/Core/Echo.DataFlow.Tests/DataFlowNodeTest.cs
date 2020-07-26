@@ -123,7 +123,7 @@ namespace Echo.DataFlow.Tests
             var n2 = dfg2.Nodes.Add(2, 0);
 
             n1.StackDependencies.Add(new DataDependency<int>());
-            Assert.Throws<ArgumentException>(() => n1.StackDependencies[0].DataSources.Add(n2));
+            Assert.Throws<ArgumentException>(() => n1.StackDependencies[0].Add(n2));
         }
 
         [Fact]
@@ -135,12 +135,12 @@ namespace Echo.DataFlow.Tests
             
             n1.StackDependencies.Add(new DataDependency<int>(n2));
             
-            Assert.Single(n1.StackDependencies[0].DataSources);
+            Assert.Single(n1.StackDependencies[0]);
             Assert.Single(n2.GetDependants());
             
             dfg.Nodes.Remove(n2);
             
-            Assert.Empty(n1.StackDependencies[0].DataSources);
+            Assert.Empty(n1.StackDependencies[0]);
             Assert.Empty(n2.GetDependants());
         }
 
@@ -153,12 +153,12 @@ namespace Echo.DataFlow.Tests
             
             n1.StackDependencies.Add(new DataDependency<int>(n2));
             
-            Assert.Single(n1.StackDependencies[0].DataSources);
+            Assert.Single(n1.StackDependencies[0]);
             Assert.Single(n2.GetDependants());
             
             dfg.Nodes.Remove(n1);
             
-            Assert.Empty(n1.StackDependencies[0].DataSources);
+            Assert.Empty(n1.StackDependencies[0]);
             Assert.Empty(n2.GetDependants());
         }
 
@@ -173,12 +173,12 @@ namespace Echo.DataFlow.Tests
 
             n1.VariableDependencies[variable] = new DataDependency<int>(n2);
             
-            Assert.Single(n1.VariableDependencies[variable].DataSources);
+            Assert.Single(n1.VariableDependencies[variable]);
             Assert.Single(n2.GetDependants());
             
             dfg.Nodes.Remove(n2);
             
-            Assert.Empty(n1.VariableDependencies[variable].DataSources);
+            Assert.Empty(n1.VariableDependencies[variable]);
             Assert.Empty(n2.GetDependants());
         }
         
@@ -208,10 +208,10 @@ namespace Echo.DataFlow.Tests
             switch (edgeType)
             {
                 case DataDependencyType.Stack:
-                    n1.StackDependencies[0].DataSources.Add(n2);
+                    n1.StackDependencies[0].Add(n2);
                     break;
                 case DataDependencyType.Variable:
-                    n1.VariableDependencies[variable].DataSources.Add(n2);
+                    n1.VariableDependencies[variable].Add(n2);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(edgeType), edgeType, null);
@@ -222,8 +222,8 @@ namespace Echo.DataFlow.Tests
             else
                 n2.Disconnect();
 
-            Assert.Empty(n1.StackDependencies[0].DataSources);
-            Assert.Empty(n1.VariableDependencies[variable].DataSources);
+            Assert.Empty(n1.StackDependencies[0]);
+            Assert.Empty(n1.VariableDependencies[variable]);
             Assert.Empty(n2.GetDependants());
         }
 

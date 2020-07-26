@@ -12,9 +12,8 @@ namespace Echo.Platforms.AsmResolver
     /// </summary>
     public class CilArchitecture : IInstructionSetArchitecture<CilInstruction>
     {
-        private readonly CilMethodBody _parentBody;
-        private readonly CilVariable[] _variables;
-        private readonly CilParameter[] _parameters;
+        private readonly IList<CilVariable> _variables;
+        private readonly IList<CilParameter> _parameters;
 
         /// <summary>
         /// Creates a new CIL architecture description based on a CIL method body.
@@ -22,7 +21,7 @@ namespace Echo.Platforms.AsmResolver
         /// <param name="parentBody">The method body.</param>
         public CilArchitecture(CilMethodBody parentBody)
         {
-            _parentBody = parentBody ?? throw new ArgumentNullException(nameof(parentBody));
+            MethodBody = parentBody ?? throw new ArgumentNullException(nameof(parentBody));
             
             _variables = parentBody.LocalVariables
                 .Select(v => new CilVariable(v))
@@ -30,7 +29,18 @@ namespace Echo.Platforms.AsmResolver
             
             _parameters = parentBody.Owner.Parameters
                 .Select(p => new CilParameter(p))
-                .ToArray();
+                .ToList();
+
+            if (parentBody.Owner.Signature.HasThis)
+                _parameters.Insert(0, new CilParameter(parentBody.Owner.Parameters.ThisParameter));
+        }
+
+        /// <summary>
+        /// Gets the method body that was encapsulated.
+        /// </summary>
+        public CilMethodBody MethodBody
+        {
+            get;
         }
 
         /// <summary>
@@ -42,116 +52,89 @@ namespace Echo.Platforms.AsmResolver
         } = new CilStaticSuccessorResolver();
 
         /// <inheritdoc />
-        public long GetOffset(CilInstruction instruction) =>
-            instruction.Offset;
+        public long GetOffset(in CilInstruction instruction) => instruction.Offset;
 
         /// <inheritdoc />
-        public string GetMnemonic(CilInstruction instruction) =>
-            instruction.OpCode.Mnemonic;
+        public int GetSize(in CilInstruction instruction) => instruction.Size;
 
         /// <inheritdoc />
-        public int GetOperandCount(CilInstruction instruction) =>
-            instruction.Operand == null ? 0 : 1;
-
-        /// <inheritdoc />
-        public object GetOperand(CilInstruction instruction, int index) =>
-            instruction.Operand != null && index == 0 ? instruction.Operand : throw new IndexOutOfRangeException();
-
-        /// <inheritdoc />
-        public int GetSize(CilInstruction instruction) =>
-            instruction.Size;
-
-        /// <inheritdoc />
-        public byte[] GetOpCodeBytes(CilInstruction instruction)
+        public InstructionFlowControl GetFlowControl(in CilInstruction instruction)
         {
-            var opCode = instruction.OpCode;
-            return opCode.Size == 2
-                ? new[] { opCode.Byte1, opCode.Byte2 }
-                : new[] { opCode.Byte1 };
-        }
-
-        /// <inheritdoc />
-        public byte[] GetOperandBytes(CilInstruction instruction)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public byte[] GetInstructionBytes(CilInstruction instruction)
-        {
-            throw new NotImplementedException();
-        }
-
-        public InstructionFlowControl GetFlowControl(CilInstruction instruction)
-        {
-            var result = InstructionFlowControl.Fallthrough;
-            
-            result |= instruction.OpCode.FlowControl switch
+            switch (instruction.OpCode.FlowControl)
             {
-                CilFlowControl.Branch => InstructionFlowControl.CanBranch,
-                CilFlowControl.ConditionalBranch => InstructionFlowControl.CanBranch,
-                CilFlowControl.Return => InstructionFlowControl.IsTerminator,
-                CilFlowControl.Throw => InstructionFlowControl.IsTerminator,
-                _ => InstructionFlowControl.Fallthrough
-            };
+                case CilFlowControl.Branch:
+                case CilFlowControl.ConditionalBranch:
+                    return InstructionFlowControl.CanBranch | InstructionFlowControl.Fallthrough;
 
-            return result;
+                case CilFlowControl.Return:
+                case CilFlowControl.Throw:
+                    return InstructionFlowControl.IsTerminator;
+
+                case CilFlowControl.Break:
+                case CilFlowControl.Call:
+                case CilFlowControl.Meta:
+                case CilFlowControl.Next:
+                case CilFlowControl.Phi:
+                    return InstructionFlowControl.Fallthrough;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         /// <inheritdoc />
-        public int GetStackPushCount(CilInstruction instruction)
-        {
-            return instruction.GetStackPushCount();
-        }
+        public int GetStackPushCount(in CilInstruction instruction) => instruction.GetStackPushCount();
 
         /// <inheritdoc />
-        public int GetStackPopCount(CilInstruction instruction)
-        {
-            return instruction.GetStackPopCount(_parentBody);
-        }
+        public int GetStackPopCount(in CilInstruction instruction) => instruction.GetStackPopCount(MethodBody);
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetReadVariables(CilInstruction instruction)
+        public int GetReadVariablesCount(in CilInstruction instruction) => 
+            instruction.IsLdloc() || instruction.IsLdarg() 
+                ? 1
+                : 0;
+
+        /// <inheritdoc />
+        public int GetReadVariables(in CilInstruction instruction, Span<IVariable> variablesBuffer)
         {
             if (instruction.IsLdloc())
             {
-                return new[]
-                {
-                    _variables[instruction.GetLocalVariable(_parentBody.LocalVariables).Index]
-                };
+                variablesBuffer[0] = _variables[instruction.GetLocalVariable(MethodBody.LocalVariables).Index];
+                return 1;
             }
 
             if (instruction.IsLdarg())
             {
-                return new[]
-                {
-                    _parameters[instruction.GetParameter(_parentBody.Owner.Parameters).Index]
-                };
+                variablesBuffer[0] = _parameters[instruction.GetParameter(MethodBody.Owner.Parameters).MethodSignatureIndex];
+                return 1;
             }
 
-            return Enumerable.Empty<IVariable>();
+            return 0;
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetWrittenVariables(CilInstruction instruction)
+        public int GetWrittenVariablesCount(in CilInstruction instruction) => 
+            instruction.IsStloc() || instruction.IsStarg() 
+                ? 1
+                : 0;
+        
+        /// <inheritdoc />
+        public int GetWrittenVariables(in CilInstruction instruction, Span<IVariable> variablesBuffer)
         {   
             if (instruction.IsStloc())
             {
-                return new[]
-                {
-                    _variables[instruction.GetLocalVariable(_parentBody.LocalVariables).Index]
-                };
+                variablesBuffer[0] = _variables[instruction.GetLocalVariable(MethodBody.LocalVariables).Index];
+                return 1;
             }
 
             if (instruction.IsStarg())
             {
-                return new[]
-                {
-                    _parameters[instruction.GetParameter(_parentBody.Owner.Parameters).Index]
-                };
+                variablesBuffer[0] = _parameters[instruction.GetParameter(MethodBody.Owner.Parameters).MethodSignatureIndex];
+                return 1;
             }
 
-            return Enumerable.Empty<IVariable>();
+            return 0;
         }
+        
     }
 }

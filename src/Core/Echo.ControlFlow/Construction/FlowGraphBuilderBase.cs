@@ -1,7 +1,6 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
-using System.Linq;
-using Echo.ControlFlow.Regions.Detection;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction
@@ -44,10 +43,10 @@ namespace Echo.ControlFlow.Construction
         private void CreateNodes(ControlFlowGraph<TInstruction> graph, IInstructionTraversalResult<TInstruction> traversalResult)
         {
             ControlFlowNode<TInstruction> currentNode = null;
-            foreach (var info in traversalResult.GetAllInstructions())
+            foreach (var instruction in traversalResult.GetAllInstructions())
             {
                 // Check if we reached a new block header.
-                long offset = Architecture.GetOffset(info.Instruction);
+                long offset = Architecture.GetOffset(instruction);
                 if (currentNode == null || traversalResult.IsBlockHeader(offset))
                 {
                     // We arrived at a new basic block header. Create a new node for it. 
@@ -56,12 +55,12 @@ namespace Echo.ControlFlow.Construction
                 }
 
                 // Add the current instruction to the current block that we're populating.
-                currentNode.Contents.Instructions.Add(info.Instruction);
+                currentNode.Contents.Instructions.Add(instruction);
 
                 // Edge case: Blocks might not come straight after each other. If we see that the next instruction
                 // does not exist, or the previous algorithm has decided the next instruction is a block header, 
                 // we can create a new block in the next iteration.
-                long nextOffset = offset + Architecture.GetSize(info.Instruction);
+                long nextOffset = offset + Architecture.GetSize(instruction);
                 if (!traversalResult.ContainsInstruction(nextOffset) || traversalResult.IsBlockHeader(nextOffset))
                     currentNode = null;
             }
@@ -69,25 +68,47 @@ namespace Echo.ControlFlow.Construction
 
         private void ConnectNodes(ControlFlowGraph<TInstruction> graph, IInstructionTraversalResult<TInstruction> traversalResult)
         {
-            foreach (var node in graph.Nodes)
-            {
-                // Get the successors of the last instruction in the current block.
-                var block = node.Contents;
-                long footerOffset = Architecture.GetOffset(block.Instructions[block.Instructions.Count - 1]);
-                var successors = traversalResult.GetInstruction(footerOffset).Successors;
+            var successorsBufferPool = ArrayPool<SuccessorInfo>.Shared;
+            var successorsBuffer = successorsBufferPool.Rent(2);
 
-                // Add edges accordingly.
-                foreach (var successor in successors)
+            try
+            {
+                foreach (var node in graph.Nodes)
                 {
-                    var successorNode = graph.GetNodeByOffset(successor.DestinationAddress);
-                    if (successorNode == null)
+                    // Get the successors of the last instruction in the current block.
+                    var block = node.Contents;
+                    long footerOffset = Architecture.GetOffset(block.Instructions[block.Instructions.Count - 1]);
+
+                    // Ensure the size of the successors buffer is big enough.
+                    int successorCount = traversalResult.GetSuccessorCount(footerOffset);
+                    if (successorsBuffer.Length < successorCount)
                     {
-                        throw new ArgumentException(
-                            $"Instruction at address {footerOffset:X8} refers to a non-existing node.");
+                        successorsBufferPool.Return(successorsBuffer);
+                        successorsBuffer = successorsBufferPool.Rent(successorCount);
                     }
 
-                    node.ConnectWith(successorNode, successor.EdgeType);
+                    // Read successors.
+                    var successorsBufferSlice = new Span<SuccessorInfo>(successorsBuffer, 0, successorCount);
+                    int actualCount = traversalResult.GetSuccessors(footerOffset, successorsBufferSlice);
+                    if (actualCount > successorCount)
+                        throw new InvalidOperationException();
+
+                    // Add edges accordingly.
+                    for (int i = 0; i < actualCount; i++)
+                    {
+                        var successor = successorsBuffer[i];
+                        
+                        var successorNode = graph.GetNodeByOffset(successor.DestinationAddress);
+                        if (successorNode == null)
+                            throw new ArgumentException($"Instruction at address {footerOffset:X8} refers to a non-existing node.");
+
+                        node.ConnectWith(successorNode, successor.EdgeType);
+                    }
                 }
+            }
+            finally
+            {
+                successorsBufferPool.Return(successorsBuffer);
             }
         }
         

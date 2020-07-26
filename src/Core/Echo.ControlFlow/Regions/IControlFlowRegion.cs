@@ -29,6 +29,12 @@ namespace Echo.ControlFlow.Regions
         }
         
         /// <summary>
+        /// Obtains the first node that is executed in the region (if available).
+        /// </summary>
+        /// <returns>The node, or <c>null</c> if no entrypoint was specified..</returns>
+        ControlFlowNode<TInstruction> GetEntrypoint();
+        
+        /// <summary>
         /// Gets a collection of all nested regions defined in this region.
         /// </summary>
         /// <returns>The sub regions.</returns>

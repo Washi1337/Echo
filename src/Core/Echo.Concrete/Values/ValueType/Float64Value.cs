@@ -1,4 +1,7 @@
+using System;
+using System.Buffers.Binary;
 using System.Globalization;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -6,7 +9,7 @@ namespace Echo.Concrete.Values.ValueType
     /// <summary>
     /// Represents a fully known concrete 64 bit floating point numerical value.
     /// </summary>
-    public class Float64Value : IConcreteValue
+    public class Float64Value : IValueTypeValue
     {
         /// <summary>
         /// Wraps a 64 bit floating point number into an instance of <see cref="Float64Value"/>.
@@ -24,13 +27,13 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="value">The raw 64 bit value.</param>
         public Float64Value(double value)
         {
-            R8 = value;
+            F64 = value;
         }
 
         /// <summary>
         /// Gets or sets the raw floating point value.
         /// </summary>
-        public double R8
+        public double F64
         {
             get;
             set;
@@ -46,21 +49,62 @@ namespace Echo.Concrete.Values.ValueType
         public bool IsValueType => true;
 
         /// <inheritdoc />
-        public bool? IsZero => R8 == 0;
+        public Trilean IsZero => F64 == 0;
 
         /// <inheritdoc />
-        public bool? IsNonZero => R8 != 0;
+        public Trilean IsNonZero => F64 != 0;
 
         /// <inheritdoc />
-        public bool? IsPositive => R8 > 0;
+        public Trilean IsPositive => F64 > 0;
 
         /// <inheritdoc />
-        public bool? IsNegative => R8 < 0;
+        public Trilean IsNegative => F64 < 0;
         
         /// <inheritdoc />
-        public IValue Copy() => new Float64Value(R8);
+        public virtual IValue Copy() => new Float64Value(F64);
+        
+        /// <inheritdoc />
+        public unsafe void GetBits(Span<byte> buffer)
+        {
+            // HACK: .NET standard 2.0 does not provide a method to write floating point numbers to a span.
+            
+            double value = F64;
+            ulong rawBits = *(ulong*) &value;
+            BinaryPrimitives.WriteUInt64LittleEndian(buffer, rawBits);
+        }
 
         /// <inheritdoc />
-        public override string ToString() => R8.ToString(CultureInfo.InvariantCulture);
+        public void GetMask(Span<byte> buffer)
+        {
+            // TODO: support unknown bits in float.
+            buffer.Fill(0);
+        }
+
+        /// <inheritdoc />
+        public unsafe void SetBits(Span<byte> bits, Span<byte> mask)
+        {
+            // HACK: .NET standard 2.0 does not provide a method to read floating point numbers from a span.
+            // TODO: support unknown bits in float.
+            
+            ulong rawBits = BinaryPrimitives.ReadUInt64LittleEndian(bits);
+            F64 = *(double*) &rawBits;
+        }
+
+        /// <inheritdoc />
+        public override string ToString() => F64.ToString(CultureInfo.InvariantCulture);
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            
+            return obj is Float64Value value && F64.Equals(value.F64);;
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode() => F64.GetHashCode();
     }
 }

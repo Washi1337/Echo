@@ -99,19 +99,26 @@ namespace Echo.DataFlow
 
         IEnumerable<IEdge> INode.GetOutgoingEdges()
         {
-            foreach (var source in StackDependencies.SelectMany(dep => dep.DataSources))
-                yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Stack);
-            foreach (var source in VariableDependencies.Values.SelectMany(dep => dep.DataSources))
-                yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Variable);
+            for (int i = 0; i < StackDependencies.Count; i++)
+            {
+                foreach (var source in StackDependencies[i])
+                    yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Stack, i);
+            }
+
+            foreach (var dependency in VariableDependencies)
+            {
+                foreach (var source in dependency.Value)
+                    yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Variable, dependency.Key);
+            }
         }
 
         IEnumerable<INode> INode.GetPredecessors() => Dependants;
 
-        IEnumerable<INode> INode.GetSuccessors() => StackDependencies.SelectMany(v => v.DataSources);
+        IEnumerable<INode> INode.GetSuccessors() => StackDependencies.SelectMany(v => v);
 
         bool INode.HasPredecessor(INode node) => Dependants.Contains(node);
 
-        bool INode.HasSuccessor(INode node) => StackDependencies.Any(dep => dep.DataSources.Contains(node));
+        bool INode.HasSuccessor(INode node) => StackDependencies.Any(dep => dep.Contains(node));
 
         IEnumerable<IDataDependency> IDataFlowNode.GetStackDependencies() => StackDependencies;
 
@@ -127,16 +134,16 @@ namespace Echo.DataFlow
         public void Disconnect()
         {
             foreach (var dependency in StackDependencies)
-                dependency.DataSources.Clear();
+                dependency.Clear();
             foreach (var entry in VariableDependencies)
-                entry.Value.DataSources.Clear();
+                entry.Value.Clear();
 
             foreach (var dependant in Dependants.ToArray())
             {
                 foreach (var dependency in dependant.StackDependencies)
-                    dependency.DataSources.Remove(this);
+                    dependency.Remove(this);
                 foreach (var entry in dependant.VariableDependencies)
-                    entry.Value.DataSources.Remove(this);
+                    entry.Value.Remove(this);
             }
         }
 

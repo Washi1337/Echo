@@ -110,7 +110,7 @@ namespace Echo.Concrete.Tests.Values.ReferenceType
 
             var value = new Float32Value(0.12345678f);
             ptrValue.WriteFloat32(0, value);
-            Assert.Equal(value.R4, ptrValue.ReadFloat32(0).R4);
+            Assert.Equal(value.F32, ptrValue.ReadFloat32(0).F32);
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace Echo.Concrete.Tests.Values.ReferenceType
 
             var value = new Float64Value(0.12345678d);
             ptrValue.WriteFloat64(0, value);
-            Assert.Equal(value.R8, ptrValue.ReadFloat64(0).R8);
+            Assert.Equal(value.F64, ptrValue.ReadFloat64(0).F64);
         }
     }
 }

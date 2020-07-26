@@ -1,3 +1,4 @@
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values
@@ -18,10 +19,7 @@ namespace Echo.Concrete.Values
         /// <summary>
         /// Determines whether the value is null or consists of only zeroes.
         /// </summary>
-        /// <remarks>
-        /// If this value is <c>null</c>, it is unknown whether this value is null or contains only zeroes.
-        /// </remarks>
-        bool? IsZero
+        Trilean IsZero
         {
             get;
         }
@@ -29,11 +27,7 @@ namespace Echo.Concrete.Values
         /// <summary>
         /// Determines whether the value is not null or contains at least a single one in its bit string.
         /// </summary>
-        /// <remarks>
-        /// If this value is <c>null</c>, it is unknown whether this value is not null or contains at least a single
-        /// one in its bit string.
-        /// </remarks>
-        bool? IsNonZero
+        Trilean IsNonZero
         {
             get;
         }
@@ -41,10 +35,7 @@ namespace Echo.Concrete.Values
         /// <summary>
         /// Determines whether the value contains a positive value.
         /// </summary>
-        /// <remarks>
-        /// If this value is <c>null</c>, it is unknown whether this value is positive or not.
-        /// </remarks>
-        bool? IsPositive
+        Trilean IsPositive
         {
             get;
         }
@@ -52,10 +43,7 @@ namespace Echo.Concrete.Values
         /// <summary>
         /// Determines whether the value contains a negative value.
         /// </summary>
-        /// <remarks>
-        /// If this value is <c>null</c>, it is unknown whether this value is negative or not.
-        /// </remarks>
-        bool? IsNegative
+        Trilean IsNegative
         {
             get;
         }

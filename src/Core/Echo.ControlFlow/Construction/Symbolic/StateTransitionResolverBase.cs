@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using Echo.Core.Code;
 using Echo.DataFlow;
@@ -14,6 +15,8 @@ namespace Echo.ControlFlow.Construction.Symbolic
     /// <typeparam name="TInstruction">The type of instructions to evaluate.</typeparam>
     public abstract class StateTransitionResolverBase<TInstruction> : IStateTransitionResolver<TInstruction>
     {
+        private IVariable[] _variablesBuffer = new IVariable[1];
+        
         /// <summary>
         /// Initializes the base implementation of the state state transition resolver.
         /// </summary>
@@ -45,8 +48,14 @@ namespace Echo.ControlFlow.Construction.Symbolic
             new SymbolicProgramState<TInstruction>(entrypointAddress);
 
         /// <inheritdoc />
-        public abstract IEnumerable<StateTransition<TInstruction>> GetTransitions(SymbolicProgramState<TInstruction> currentState,
-            TInstruction instruction);
+        public abstract int GetTransitionCount(SymbolicProgramState<TInstruction> currentState,
+            in TInstruction instruction);
+
+        /// <inheritdoc />
+        public abstract int GetTransitions(
+            SymbolicProgramState<TInstruction> currentState,
+            in TInstruction instruction,
+            Span<StateTransition<TInstruction>> transitionBuffer);
 
         /// <summary>
         /// Applies the default fallthrough transition on a symbolic program state. 
@@ -76,7 +85,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             {
                 var arguments = currentState.Stack.Pop(argumentsCount, true);
                 for (int i = 0; i < arguments.Count; i++)
-                    node.StackDependencies[i].DataSources.UnionWith(arguments[i].DataSources);
+                    node.StackDependencies[i].UnionWith(arguments[i]);
             }
 
             for (int i = 0; i < Architecture.GetStackPushCount(instruction); i++)
@@ -86,14 +95,40 @@ namespace Echo.ControlFlow.Construction.Symbolic
         private void ApplyVariableTransition(DataFlowNode<TInstruction> node, SymbolicProgramState<TInstruction> currentState)
         {
             var instruction = node.Contents;
-            
-            var readVariables = Architecture.GetReadVariables(instruction);
-            foreach (var variable in readVariables)
-                node.VariableDependencies[variable].DataSources.UnionWith(currentState.Variables[variable].DataSources);
 
-            var writtenVariables = Architecture.GetWrittenVariables(instruction);
-            foreach (var variable in writtenVariables)
+            // Ensure buffer is large enough.
+            int readCount = Architecture.GetReadVariablesCount(instruction);
+            int writtenCount = Architecture.GetWrittenVariablesCount(instruction);
+            
+            int bufferSize = Math.Max(readCount, writtenCount);
+            if (_variablesBuffer.Length < bufferSize)
+                _variablesBuffer = new IVariable[bufferSize];
+            
+            // Get read variables.
+            var variablesBufferSlice = new Span<IVariable>(_variablesBuffer, 0, readCount);
+            int actualCount = Architecture.GetReadVariables(instruction, variablesBufferSlice);
+            if (actualCount > variablesBufferSlice.Length)
+                throw new ArgumentException("GetReadVariables returned a number of variables that is inconsistent.");
+
+            // Register variable dependencies.
+            for (int i = 0; i < actualCount; i++)
+            {
+                var variable = _variablesBuffer[i];
+                node.VariableDependencies[variable].UnionWith(currentState.Variables[variable]);
+            }
+            
+            // Get written variables.
+            variablesBufferSlice = new Span<IVariable>(_variablesBuffer, 0, writtenCount);
+            actualCount = Architecture.GetWrittenVariables(instruction, variablesBufferSlice);
+            if (actualCount > bufferSize)
+                throw new ArgumentException("GetWrittenVariables returned a number of variables that is inconsistent.");
+
+            // Apply variable changes in program state.
+            for (int i = 0; i < actualCount; i++)
+            {
+                var variable = _variablesBuffer[i];
                 currentState.Variables[variable] = new SymbolicValue<TInstruction>(node);
+            }
         }
 
         /// <summary>
@@ -115,14 +150,28 @@ namespace Echo.ControlFlow.Construction.Symbolic
             {
                 node = new DataFlowNode<TInstruction>(offset, instruction);
                 
+                // Register (unknown) stack dependencies.
                 int stackArgumentCount = Architecture.GetStackPopCount(instruction);
                 for (int i = 0; i < stackArgumentCount; i++)
                     node.StackDependencies.Add(new DataDependency<TInstruction>());
                 
-                var readVariables = Architecture.GetReadVariables(instruction);
-                foreach (var variable in readVariables)
-                    node.VariableDependencies.Add(variable, new DataDependency<TInstruction>());
+                // Get read variables.
+                int variableReadCount = Architecture.GetReadVariablesCount(instruction);
+                if (_variablesBuffer.Length < variableReadCount)
+                    _variablesBuffer = new IVariable[variableReadCount];
                 
+                int actualCount = Architecture.GetReadVariables(instruction, _variablesBuffer);
+                if (actualCount > variableReadCount)
+                    throw new ArgumentException("GetWrittenVariables returned a number of variables that is inconsistent.");
+
+                // Register (unknown) variable dependencies.
+                for (int i = 0; i < actualCount; i++)
+                {
+                    var variable = _variablesBuffer[i];
+                    if (!node.VariableDependencies.ContainsKey(variable))
+                        node.VariableDependencies[variable] = new DataDependency<TInstruction>();
+                }
+
                 DataFlowGraph.Nodes.Add(node);
             }
 

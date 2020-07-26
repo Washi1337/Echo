@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,10 +24,9 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            string newLine = Environment.NewLine;
-            return "{" + newLine + string.Join(newLine, Blocks) + newLine + "}";
-        }
+        public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitScopeBlock(this);
+
+        /// <inheritdoc />
+        public override string ToString() => BlockFormatter<TInstruction>.Format(this);
     }
 }

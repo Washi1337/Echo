@@ -84,15 +84,14 @@ namespace Echo.ControlFlow.Blocks
         public TInstruction Footer => !IsEmpty ? Instructions[Instructions.Count - 1] : default;
         
         /// <inheritdoc />
-        public override string ToString()
-        {
-            string newLine = Environment.NewLine;
-            return "{" + newLine + string.Join(newLine, Instructions) + newLine + "}";
-        }
+        public override string ToString() => BlockFormatter<TInstruction>.Format(this);
 
         IEnumerable<BasicBlock<TInstruction>> IBlock<TInstruction>.GetAllBlocks()
         {
             return new[] {this};
         }
+
+        /// <inheritdoc />
+        public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitBasicBlock(this);
     }
 }

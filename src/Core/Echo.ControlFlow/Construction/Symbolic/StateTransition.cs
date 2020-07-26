@@ -1,4 +1,5 @@
-﻿using Echo.DataFlow.Emulation;
+﻿using System;
+using Echo.DataFlow.Emulation;
 
 namespace Echo.ControlFlow.Construction.Symbolic
 {
@@ -15,7 +16,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <param name="edgeType">The type of edge that was taken.</param>
         public StateTransition(SymbolicProgramState<TInstruction> nextState, ControlFlowEdgeType edgeType)
         {
-            NextState = nextState;
+            NextState = nextState ?? throw new ArgumentNullException(nameof(nextState));
             EdgeType = edgeType;
         }
         
@@ -36,7 +37,8 @@ namespace Echo.ControlFlow.Construction.Symbolic
         }
 
         /// <inheritdoc />
-        public override string ToString() => 
-            $"{NextState.ProgramCounter:X8} ({EdgeType})";
+        public override string ToString() => NextState is null
+            ? "<<unknown>>"
+            : $"{NextState.ProgramCounter:X8} ({EdgeType})";
     }
 }

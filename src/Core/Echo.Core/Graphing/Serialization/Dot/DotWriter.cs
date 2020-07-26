@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,13 +25,13 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <param name="writer">The writer responsible for writing the output.</param>
         public DotWriter(TextWriter writer)
         {
-            Writer = writer ?? throw new ArgumentNullException(nameof(writer));
+            Writer = new IndentedTextWriter(writer ?? throw new ArgumentNullException(nameof(writer)));
         }
 
         /// <summary>
         /// Gets the writer that is used to write textual data to the output stream.
         /// </summary>
-        protected TextWriter Writer
+        protected IndentedTextWriter Writer
         {
             get;
         }
@@ -97,6 +98,7 @@ namespace Echo.Core.Graphing.Serialization.Dot
         public void Write(IGraph graph)
         {
             WriteHeader("digraph", null);
+            Writer.Indent++;
             
             var freeNodes = new HashSet<INode>(graph.GetNodes());
             
@@ -118,6 +120,7 @@ namespace Echo.Core.Graphing.Serialization.Dot
             foreach (var edge in graph.GetEdges())
                 WriteEdge(edge);
 
+            Writer.Indent--;
             WriteFooter();
         }
 
@@ -126,20 +129,23 @@ namespace Echo.Core.Graphing.Serialization.Dot
             if (SubGraphAdorner is null)
             {
                 WriteHeader("subgraph", null);
+                Writer.Indent++;
             }
             else
             {
                 WriteHeader("subgraph", SubGraphAdorner.GetSubGraphName(subGraph));
+                Writer.Indent++;
                 
                 var attributes = SubGraphAdorner.GetSubGraphAttributes(subGraph);
                 if (attributes.Count > 0)
                 {
-                    string delimeter = (IncludeSemicolons ? ";" : string.Empty) + Environment.NewLine;
-                    WriteAttributes(attributes, delimeter);
+                    string delimeter = (IncludeSemicolons ? ";" : string.Empty);
+                    WriteAttributes(attributes, delimeter, true);
+                    Writer.WriteLine(delimeter);
                     Writer.WriteLine();
                 }
             }
-            
+
             foreach (var nested in subGraph.GetSubGraphs())
                 WriteSubGraph(nested, scope);
 
@@ -149,7 +155,10 @@ namespace Echo.Core.Graphing.Serialization.Dot
                     WriteNode(node);
             }
 
+            Writer.Indent--;
             WriteFooter();
+
+            Writer.WriteLine();
         }
 
         /// <summary>
@@ -216,12 +225,12 @@ namespace Echo.Core.Graphing.Serialization.Dot
             if (array.Length > 0)
             {
                 Writer.Write(" [");
-                WriteAttributes(array, ", ");
+                WriteAttributes(array, ", ", false);
                 Writer.Write(']');
             }
         }
 
-        private void WriteAttributes(IEnumerable<KeyValuePair<string, string>> attributes, string delimeter)
+        private void WriteAttributes(IEnumerable<KeyValuePair<string, string>> attributes, string delimeter, bool newLines)
         {
             var array = attributes as KeyValuePair<string, string>[] ?? attributes.ToArray();
             for (int i = 0; i < array.Length; i++)
@@ -231,7 +240,11 @@ namespace Echo.Core.Graphing.Serialization.Dot
                 WriteIdentifier(array[i].Value);
 
                 if (i < array.Length - 1)
+                {
                     Writer.Write(delimeter);
+                    if (newLines)
+                        Writer.WriteLine();
+                }
             }
         }
 

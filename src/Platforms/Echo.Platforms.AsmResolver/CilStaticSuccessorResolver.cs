@@ -12,12 +12,16 @@ namespace Echo.Platforms.AsmResolver
     /// </summary>
     public class CilStaticSuccessorResolver : IStaticSuccessorResolver<CilInstruction>
     {
+        /// <summary>
+        /// Gets a reusable singleton instance of the static successor resolver for the CIL architecture.
+        /// </summary>
         public static CilStaticSuccessorResolver Instance
         {
             get;
         } = new CilStaticSuccessorResolver();
-        
-        public ICollection<SuccessorInfo> GetSuccessors(CilInstruction instruction)
+
+        /// <inheritdoc />
+        public int GetSuccessorsCount(in CilInstruction instruction)
         {
             switch (instruction.OpCode.FlowControl)
             {
@@ -25,60 +29,92 @@ namespace Echo.Platforms.AsmResolver
                 case CilFlowControl.Call:
                 case CilFlowControl.Meta:
                 case CilFlowControl.Next:
-                    return GetFallThroughTransitions(instruction);
-                
                 case CilFlowControl.Branch:
-                    return GetUnconditionalBranchTransitions(instruction);
+                    return 1;
+                
+                case CilFlowControl.ConditionalBranch when instruction.OpCode.Code == CilCode.Switch:
+                    return ((ICollection<ICilLabel>) instruction.Operand).Count + 1;
                 
                 case CilFlowControl.ConditionalBranch:
-                    return GetConditionalBranchTransitions(instruction);
-                
+                    return 2;
+
                 case CilFlowControl.Phi:
                     throw new NotSupportedException();
                 
                 case CilFlowControl.Return:
                 case CilFlowControl.Throw:
-                    return Array.Empty<SuccessorInfo>();
+                    return 0;
                 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        private static ICollection<SuccessorInfo> GetFallThroughTransitions(CilInstruction instruction)
+        /// <inheritdoc />
+        public int GetSuccessors(in CilInstruction instruction, Span<SuccessorInfo> successorsBuffer)
         {
-            return new[]
+            // Multiplex based on flow control.
+            
+            switch (instruction.OpCode.FlowControl)
             {
-                CreateFallThroughTransition(instruction)
-            };
+                case CilFlowControl.Break:
+                case CilFlowControl.Call:
+                case CilFlowControl.Meta:
+                case CilFlowControl.Next:
+                    return GetFallThroughTransitions(instruction, successorsBuffer);
+                
+                case CilFlowControl.Branch:
+                    return GetUnconditionalBranchTransitions(instruction, successorsBuffer);
+                
+                case CilFlowControl.ConditionalBranch:
+                    return GetConditionalBranchTransitions(instruction, successorsBuffer);
+                
+                case CilFlowControl.Phi:
+                    throw new NotSupportedException();
+                
+                case CilFlowControl.Return:
+                case CilFlowControl.Throw:
+                    return 0;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
-        private static ICollection<SuccessorInfo> GetUnconditionalBranchTransitions(CilInstruction instruction)
+        private static int GetFallThroughTransitions(CilInstruction instruction, Span<SuccessorInfo> successorsBuffer)
         {
+            // Fallthrough instructions always move to the next instruction.
+            successorsBuffer[0] = CreateFallThroughTransition(instruction);
+            return 1;
+        }
+
+        private static int GetUnconditionalBranchTransitions(CilInstruction instruction, Span<SuccessorInfo> successorsBuffer)
+        {
+            // Unconditional branches always move to the instruction referenced in the operand.
             var label = (ICilLabel) instruction.Operand;
-            return new[]
-            {
-                new SuccessorInfo(label.Offset, ControlFlowEdgeType.FallThrough)
-            };
+            successorsBuffer[0] = new SuccessorInfo(label.Offset, ControlFlowEdgeType.FallThrough);
+            return 1;
         }
 
-        private static ICollection<SuccessorInfo> GetConditionalBranchTransitions(CilInstruction instruction)
+        private static int GetConditionalBranchTransitions(CilInstruction instruction, Span<SuccessorInfo> successorsBuffer)
         {
-            var result = new List<SuccessorInfo>(1);
+            // Conditional branches can reference one or more instructions in the operand.
             switch (instruction.Operand)
             {
                 case ICilLabel singleTarget:
-                    result.Add(CreateConditionalTransition(singleTarget));
-                    break;
+                    successorsBuffer[0] = CreateConditionalTransition(singleTarget);
+                    successorsBuffer[1] = CreateFallThroughTransition(instruction);
+                    return 2;
 
-                case IEnumerable<ICilLabel> multipleTargets:
-                    foreach (var target in multipleTargets)
-                        result.Add(CreateConditionalTransition(target));
-                    break;
+                case IList<ICilLabel> multipleTargets:
+                    for (int i = 0; i < multipleTargets.Count; i++)
+                        successorsBuffer[i] = CreateConditionalTransition(multipleTargets[i]);
+                    successorsBuffer[multipleTargets.Count] = CreateFallThroughTransition(instruction);
+                    return multipleTargets.Count + 1;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-
-            result.Add(CreateFallThroughTransition(instruction));
-            return result;
         }
 
         private static SuccessorInfo CreateFallThroughTransition(CilInstruction instruction)

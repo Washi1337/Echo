@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using Echo.Core;
 using Echo.Core.Values;
 
 namespace Echo.Concrete.Values.ValueType
@@ -101,7 +101,7 @@ namespace Echo.Concrete.Values.ValueType
         public override int Size => sizeof(byte);
 
         /// <inheritdoc />
-        public override bool? IsZero
+        public override Trilean IsZero
         {
             get
             {
@@ -141,54 +141,50 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override bool? GetBit(int index)
+        public override Trilean GetBit(int index)
         {
             if (index < 0 || index >= 8)
                 throw new ArgumentOutOfRangeException(nameof(index));
-            return ((Mask >> index) & 1) == 1 ? ((U8 >> index) & 1) == 1 : (bool?) null;
+            
+            return ((Mask >> index) & 1) == 1 
+                ? ((U8 >> index) & 1) == 1 
+                : Trilean.Unknown;
         }
 
         /// <inheritdoc />
-        public override void SetBit(int index, bool? value)
+        public override void SetBit(int index, Trilean value)
         {
             if (index < 0 || index >= 8)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
             byte mask = (byte) (1 << index);
 
-            if (value.HasValue)
+            if (value.IsKnown)
             {
                 Mask |= mask;
-                U8 = (byte) ((U8 & ~mask) | ((value.Value ? 1 : 0) << index));
+                U8 = (byte) ((U8 & ~mask) | ((value.ToBooleanOrFalse() ? 1 : 0) << index));
             }
             else
             {
+                U8 = (byte) (U8 & ~mask);
                 Mask &= (byte) ~mask;
             }
         }
 
         /// <inheritdoc />
-        public override BitArray GetBits() => new BitArray(new[]
-        {
-            U8
-        });
+        public override void GetBits(Span<byte> buffer) => buffer[0] = U8;
 
         /// <inheritdoc />
-        public override BitArray GetMask() => new BitArray(new[]
-        {
-            Mask
-        });
+        public override void GetMask(Span<byte> buffer) => buffer[0] = Mask;
 
         /// <inheritdoc />
-        public override void SetBits(BitArray bits, BitArray mask)
+        public override void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            if (bits.Count != 8 || mask.Count != 8)
+            if (bits.Length != 1 || mask.Length != 1)
                 throw new ArgumentException("Number of bits is not 8.");
-            var buffer = new byte[1];
-            bits.CopyTo(buffer, 0);
-            U8 = buffer[0];
-            mask.CopyTo(buffer, 0);
-            Mask = buffer[0];
+            
+            U8 = bits[0];
+            Mask = mask[0];
         }
 
         /// <inheritdoc />
@@ -255,29 +251,51 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public override bool? IsEqualTo(IntegerValue other)
+        public override Trilean IsEqualTo(IntegerValue other)
         {
-            return IsKnown && other.IsKnown && other is Integer8Value int8
-                ? U8 == int8.U8
-                : (bool?) null;
+            if (other is Integer8Value int8)
+            {
+                if (IsKnown && other.IsKnown)
+                    return U8 == int8.U8;
+
+                return U8 == int8.U8
+                    ? Trilean.Unknown
+                    : Trilean.False;
+            }
+
+            return base.IsEqualTo(other);
         }
 
         /// <inheritdoc />
-        public override bool? IsGreaterThan(IntegerValue other)
+        public override Trilean IsGreaterThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer8Value int8)
-                return U8 > int8.U8;
+            {
+                return signed 
+                    ? I8 > int8.I8 
+                    : U8 > int8.U8;
+            }
 
-            return base.IsGreaterThan(other);
+            return base.IsGreaterThan(other, signed);
         }
 
         /// <inheritdoc />
-        public override bool? IsLessThan(IntegerValue other)
+        public override Trilean IsLessThan(IntegerValue other, bool signed)
         {
             if (IsKnown && other.IsKnown && other is Integer8Value int8)
-                return U8 < int8.U8;
+            {
+                return signed 
+                    ? I8 < int8.I8
+                    : U8 < int8.U8;
+            }
 
-            return base.IsLessThan(other);
+            return base.IsLessThan(other, signed);
+        }
+        
+        /// <inheritdoc />
+        public override void MarkFullyUnknown()
+        {
+            Mask = 0;
         }
     }
 }

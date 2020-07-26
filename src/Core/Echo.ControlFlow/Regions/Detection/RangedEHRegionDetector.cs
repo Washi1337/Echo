@@ -25,8 +25,10 @@ namespace Echo.ControlFlow.Regions.Detection
             var sortedRanges = ranges.ToList();
             sortedRanges.Sort();
 
+            // Build up region tree.
             var rangeToRegionMapping = CreateEHRegions(cfg, sortedRanges);
             InsertNodesInEHRegions(cfg, sortedRanges, rangeToRegionMapping);
+            DetermineRegionEntrypoints(cfg, sortedRanges, rangeToRegionMapping);
         }
 
         private static Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> CreateEHRegions<TInstruction>(
@@ -107,5 +109,19 @@ namespace Echo.ControlFlow.Regions.Detection
 
             return null;
         }
+
+        private static void DetermineRegionEntrypoints<TInstruction>(ControlFlowGraph<TInstruction> cfg, List<ExceptionHandlerRange> sortedRanges,
+            Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> rangeToRegionMapping)
+        {
+            foreach (var range in sortedRanges)
+            {
+                var protectedRegion = rangeToRegionMapping[range.ProtectedRange];
+                protectedRegion.Entrypoint ??= cfg.GetNodeByOffset(range.ProtectedRange.Start);
+
+                var handlerRegion = rangeToRegionMapping[range.HandlerRange];
+                handlerRegion.Entrypoint ??= cfg.GetNodeByOffset(range.HandlerRange.Start);
+            }
+        }
+        
     }
 }
