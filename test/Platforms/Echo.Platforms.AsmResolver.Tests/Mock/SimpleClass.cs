@@ -1,5 +1,7 @@
 // ReSharper disable UnassignedField.Global
 
+using System;
+
 namespace Echo.Platforms.AsmResolver.Tests.Mock
 {
     public class SimpleClass
@@ -17,6 +19,27 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
 
         public virtual void VirtualInstanceMethod()
         {
+        }
+
+        public static void HelloWorld()
+        {
+            Console.WriteLine("Hello, world!");
+        }
+
+        public static string If(int argument)
+        {
+            return argument >= 18 ? "Adult" : "Child";
+        }
+
+        public static string Switch(int argument)
+        {
+            return argument switch
+            {
+                0 => "Red",
+                1 => "Orange",
+                2 => "Green",
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction.Symbolic;
 using Echo.Core.Code;
@@ -24,9 +23,29 @@ namespace Echo.Platforms.Iced
         }
 
         /// <inheritdoc />
-        public override IEnumerable<StateTransition<Instruction>> GetTransitions(
-            SymbolicProgramState<Instruction> currentState, 
-            Instruction instruction)
+        public override int GetTransitionCount(SymbolicProgramState<Instruction> currentState,
+            in Instruction instruction)
+        {   
+            switch (instruction.FlowControl)
+            {
+                case FlowControl.ConditionalBranch:
+                    return 2;
+                
+                case FlowControl.IndirectBranch: 
+                //TODO: Try inferring indirect branch from data flow graph.
+                    
+                case FlowControl.Return:
+                    return 0;
+                
+                default:
+                    return 1;
+            }
+        }
+
+        /// <inheritdoc />
+        public override int GetTransitions(SymbolicProgramState<Instruction> currentState,
+            in Instruction instruction,
+            Span<StateTransition<Instruction>> transitionBuffer)
         {
             var nextState = currentState.Copy();
             ApplyDefaultBehaviour(nextState, instruction);
@@ -34,54 +53,51 @@ namespace Echo.Platforms.Iced
             switch (instruction.FlowControl)
             {
                 case FlowControl.UnconditionalBranch:
-                    return GetUnconditionalBranchTransitions(instruction, nextState);
+                    return GetUnconditionalBranchTransitions(instruction, nextState, transitionBuffer);
 
                 case FlowControl.ConditionalBranch:
-                    return GetConditionalBranchTransitions(instruction, nextState);
+                    return GetConditionalBranchTransitions(instruction, nextState, transitionBuffer);
                 
                 case FlowControl.IndirectBranch: 
                     //TODO: Try inferring indirect branch from data flow graph.
                     
                 case FlowControl.Return:
-                    return Array.Empty<StateTransition<Instruction>>();
+                    return 0;
                 
                 default:
-                    return GetFallthroughTransitions(nextState);
+                    return GetFallthroughTransitions(nextState, transitionBuffer);
             }
         }
         
-        private static ICollection<StateTransition<Instruction>> GetUnconditionalBranchTransitions(
-            Instruction instruction, 
-            SymbolicProgramState<Instruction> nextState)
+        private static int GetUnconditionalBranchTransitions(
+            Instruction instruction,
+            SymbolicProgramState<Instruction> nextState, 
+            Span<StateTransition<Instruction>> successorBuffer)
         {
             nextState.ProgramCounter = (long) instruction.NearBranchTarget;
-            return new[]
-            {
-                new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough),
-            };
+            successorBuffer[0] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough);
+            return 1;
         }
 
-        private static ICollection<StateTransition<Instruction>> GetConditionalBranchTransitions(
-            Instruction instruction, 
-            SymbolicProgramState<Instruction> nextState)
+        private static int GetConditionalBranchTransitions(
+            Instruction instruction,
+            SymbolicProgramState<Instruction> nextState,
+            Span<StateTransition<Instruction>> successorBuffer)
         {
             var branchState = nextState.Copy();
             branchState.ProgramCounter = (long) instruction.NearBranchTarget;
 
-            return new[]
-            {
-                new StateTransition<Instruction>(branchState, ControlFlowEdgeType.Conditional),
-                new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough)
-            };
+            successorBuffer[0] = new StateTransition<Instruction>(branchState, ControlFlowEdgeType.Conditional);
+            successorBuffer[1] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough);
+            return 2;
         }
 
-        private static ICollection<StateTransition<Instruction>> GetFallthroughTransitions(
-            SymbolicProgramState<Instruction> nextState)
+        private static int GetFallthroughTransitions(
+            SymbolicProgramState<Instruction> nextState, 
+            Span<StateTransition<Instruction>> successorBuffer)
         {
-            return new[]
-            {
-                new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough),
-            };
+            successorBuffer[0] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough);
+            return 1;
         }
 
     }

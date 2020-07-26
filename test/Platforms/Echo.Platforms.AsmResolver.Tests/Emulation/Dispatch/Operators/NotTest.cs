@@ -8,8 +8,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
 {
     public class NotTest : DispatcherTestBase
     {
-        public NotTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public NotTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

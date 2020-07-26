@@ -8,8 +8,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
 {
     public class BeqTest : DispatcherTestBase
     {
-        public BeqTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public BeqTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

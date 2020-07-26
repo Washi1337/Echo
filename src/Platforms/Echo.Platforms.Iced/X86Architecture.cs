@@ -41,13 +41,13 @@ namespace Echo.Platforms.Iced
         public X86FlagsRegister GetFlag(RflagsBits flag) => _flags[flag];
         
         /// <inheritdoc />
-        public long GetOffset(Instruction instruction) => (long) instruction.IP;
+        public long GetOffset(in Instruction instruction) => (long) instruction.IP;
 
         /// <inheritdoc />
-        public int GetSize(Instruction instruction) => instruction.Length;
+        public int GetSize(in Instruction instruction) => instruction.Length;
 
         /// <inheritdoc />
-        public InstructionFlowControl GetFlowControl(Instruction instruction)
+        public InstructionFlowControl GetFlowControl(in Instruction instruction)
         {
             switch (instruction.FlowControl)
             {
@@ -67,23 +67,23 @@ namespace Echo.Platforms.Iced
         }
 
         /// <inheritdoc />
-        public int GetStackPushCount(Instruction instruction)
+        public int GetStackPushCount(in Instruction instruction)
         {
             // TODO:
             return 0;
         }
 
         /// <inheritdoc />
-        public int GetStackPopCount(Instruction instruction)
+        public int GetStackPopCount(in Instruction instruction)
         {
             // TODO:
             return 0;
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetReadVariables(Instruction instruction)
+        public int GetReadVariablesCount(in Instruction instruction)
         {
-            IList<IVariable> result = null;
+            int count = 0;
             
             ref readonly var info = ref _infoFactory.GetInfo(instruction);
             
@@ -96,12 +96,44 @@ namespace Echo.Platforms.Iced
                     case OpAccess.CondRead:
                     case OpAccess.ReadWrite:
                     case OpAccess.ReadCondWrite:
-                        result ??= new List<IVariable>();
-                        
-                        var register = _gpr[use.Register];
-                        if (!result.Contains(register))
-                            result.Add(register);
-                        
+                        count++;
+                        break;
+                }
+            }
+
+            // Check for any flag register reads.
+            var readFlags = info.RflagsRead;
+            if (readFlags != RflagsBits.None)
+            {
+                for (int i = 1; i <= (int) RflagsBits.AC; i <<= 1)
+                {
+                    var flag = (RflagsBits) i;
+                    if ((readFlags & flag) != 0)
+                        count++;
+                }
+            }
+
+            return count;
+        }
+
+        /// <inheritdoc />
+        public int GetReadVariables(in Instruction instruction, Span<IVariable> variablesBuffer)
+        {
+            int count = 0;
+            
+            ref readonly var info = ref _infoFactory.GetInfo(instruction);
+            
+            // Check for any general purpose register reads.
+            foreach (var use in info.GetUsedRegisters())
+            {
+                switch (use.Access)
+                {
+                    case OpAccess.Read:
+                    case OpAccess.CondRead:
+                    case OpAccess.ReadWrite:
+                    case OpAccess.ReadCondWrite:
+                        variablesBuffer[count] = _gpr[use.Register];
+                        count++;
                         break;
                 }
             }
@@ -115,21 +147,19 @@ namespace Echo.Platforms.Iced
                     var flag = (RflagsBits) i;
                     if ((readFlags & flag) != 0)
                     {
-                        result ??= new List<IVariable>();
-                        var register = _flags[flag];
-                        if (!result.Contains(register))
-                            result.Add(register);
+                        variablesBuffer[count] = _flags[flag];
+                        count++;
                     }
                 }
             }
 
-            return result ?? Array.Empty<IVariable>();
+            return count;
         }
 
         /// <inheritdoc />
-        public IEnumerable<IVariable> GetWrittenVariables(Instruction instruction)
+        public int GetWrittenVariablesCount(in Instruction instruction)
         {
-            IList<IVariable> result = null;
+            int count = 0;
             
             ref readonly var info = ref _infoFactory.GetInfo(instruction);
             
@@ -142,12 +172,44 @@ namespace Echo.Platforms.Iced
                     case OpAccess.CondWrite:
                     case OpAccess.ReadWrite:
                     case OpAccess.ReadCondWrite:
-                        result ??= new List<IVariable>();
-                        
-                        var register = _gpr[use.Register];
-                        if (!result.Contains(register))
-                            result.Add(register);
-                        
+                        count++;
+                        break;
+                }
+            }
+
+            // Check for any flag register writes.
+            var modifiedFlags = info.RflagsModified;
+            if (modifiedFlags != RflagsBits.None)
+            {
+                for (int i = 1; i <= (int) RflagsBits.AC; i <<= 1)
+                {
+                    var flag = (RflagsBits) i;
+                    if ((modifiedFlags & flag) != 0)
+                        count++;
+                }
+            }
+
+            return count;
+        }
+
+        /// <inheritdoc />
+        public int GetWrittenVariables(in Instruction instruction, Span<IVariable> variablesBuffer)
+        {
+            int count = 0;
+            
+            ref readonly var info = ref _infoFactory.GetInfo(instruction);
+            
+            // Check for any general purpose register writes.
+            foreach (var use in info.GetUsedRegisters())
+            {
+                switch (use.Access)
+                {
+                    case OpAccess.Write:
+                    case OpAccess.CondWrite:
+                    case OpAccess.ReadWrite:
+                    case OpAccess.ReadCondWrite:
+                        variablesBuffer[count] = _gpr[use.Register];
+                        count++;
                         break;
                 }
             }
@@ -161,15 +223,13 @@ namespace Echo.Platforms.Iced
                     var flag = (RflagsBits) i;
                     if ((modifiedFlags & flag) != 0)
                     {
-                        result ??= new List<IVariable>();
-                        var register = _flags[flag];
-                        if (!result.Contains(register))
-                            result.Add(register);
+                        variablesBuffer[count] = _flags[flag];
+                        count++;
                     }
                 }
             }
 
-            return result ?? Array.Empty<IVariable>();
+            return count;
         }
         
     }

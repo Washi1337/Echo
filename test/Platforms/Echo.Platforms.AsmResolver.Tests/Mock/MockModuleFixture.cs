@@ -3,7 +3,7 @@ using AsmResolver.DotNet;
 
 namespace Echo.Platforms.AsmResolver.Tests.Mock
 {
-    public class MockModuleProvider
+    public class MockModuleFixture
     {
         private readonly ConcurrentDictionary<AssemblyReference, ModuleDefinition> _modules =
             new ConcurrentDictionary<AssemblyReference, ModuleDefinition>();

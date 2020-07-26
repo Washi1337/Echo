@@ -10,8 +10,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
 {
     public class CgtTest : DispatcherTestBase
     {
-        public CgtTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public CgtTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

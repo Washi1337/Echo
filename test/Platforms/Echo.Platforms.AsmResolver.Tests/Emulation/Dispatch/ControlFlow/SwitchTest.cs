@@ -7,8 +7,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
 {
     public class SwitchTest : DispatcherTestBase
     {
-        public SwitchTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public SwitchTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

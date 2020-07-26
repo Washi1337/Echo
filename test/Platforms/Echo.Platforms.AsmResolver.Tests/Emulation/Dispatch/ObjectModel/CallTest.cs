@@ -14,8 +14,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
     {
         private readonly TypeDefinition _type;
         
-        public CallTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public CallTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
             var module = ModuleDefinition.FromFile(typeof(CallTest).Assembly.Location);
             _type = (TypeDefinition) module.LookupMember(typeof(CallTest).MetadataToken);

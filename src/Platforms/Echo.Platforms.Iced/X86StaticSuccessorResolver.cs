@@ -14,48 +14,71 @@ namespace Echo.Platforms.Iced
     public class X86StaticSuccessorResolver : IStaticSuccessorResolver<Instruction>
     {
         /// <inheritdoc />
-        public ICollection<SuccessorInfo> GetSuccessors(Instruction instruction)
+        public int GetSuccessorsCount(in Instruction instruction)
+        {
+            switch (instruction.FlowControl)
+            {
+                case FlowControl.ConditionalBranch:
+                    return 2;
+                
+                case FlowControl.IndirectBranch: 
+                case FlowControl.Return:
+                    return 0;
+                
+                default:
+                    return 1;
+            }
+        }
+
+        /// <inheritdoc />
+        public int GetSuccessors(in Instruction instruction, Span<SuccessorInfo> successorsBuffer)
         {
             switch (instruction.FlowControl)
             {
                 case FlowControl.UnconditionalBranch:
-                    return GetUnconditionalBranchSuccessors(instruction);
+                    return GetUnconditionalBranchSuccessors(instruction, successorsBuffer);
 
                 case FlowControl.ConditionalBranch:
-                    return GetConditionalBranchSuccessors(instruction);
+                    return GetConditionalBranchSuccessors(instruction, successorsBuffer);
                 
                 case FlowControl.IndirectBranch: 
                 case FlowControl.Return:
-                    return Array.Empty<SuccessorInfo>();
+                    return 0;
                 
                 default:
-                    return GetFallthroughSuccessors(instruction);
+                    return GetFallthroughSuccessors(instruction, successorsBuffer);
             }
         }
 
-        private static ICollection<SuccessorInfo> GetUnconditionalBranchSuccessors(Instruction instruction)
+        private static int GetUnconditionalBranchSuccessors(Instruction instruction, Span<SuccessorInfo> successorsBuffer)
         {
-            return new[]
-            {
-                new SuccessorInfo((long) instruction.NearBranchTarget, ControlFlowEdgeType.FallThrough),
-            };
+            successorsBuffer[0] = new SuccessorInfo(
+                (long) instruction.NearBranchTarget, 
+                ControlFlowEdgeType.FallThrough);
+            
+            return 1;
         }
 
-        private static ICollection<SuccessorInfo> GetConditionalBranchSuccessors(Instruction instruction)
+        private static int GetConditionalBranchSuccessors(Instruction instruction, Span<SuccessorInfo> successorsBuffer)
         {
-            return new[]
-            {
-                new SuccessorInfo((long) instruction.NearBranchTarget, ControlFlowEdgeType.Conditional),
-                new SuccessorInfo((long) instruction.IP + instruction.Length, ControlFlowEdgeType.FallThrough)
-            };
+            successorsBuffer[0] = new SuccessorInfo(
+                (long) instruction.NearBranchTarget, 
+                ControlFlowEdgeType.Conditional);
+            
+            successorsBuffer[1] =new SuccessorInfo(
+                (long) instruction.IP + instruction.Length, 
+                ControlFlowEdgeType.FallThrough);
+            
+            return 2;
         }
 
-        private static ICollection<SuccessorInfo> GetFallthroughSuccessors(Instruction instruction)
+        private static int GetFallthroughSuccessors(Instruction instruction, Span<SuccessorInfo> successorsBuffer)
         {
-            return new[]
-            {
-                new SuccessorInfo((long) instruction.IP + instruction.Length, ControlFlowEdgeType.FallThrough)
-            };
+            successorsBuffer[0] = new SuccessorInfo(
+                (long) instruction.IP + instruction.Length,
+                ControlFlowEdgeType.FallThrough);
+            
+            return 1;
         }
         
     }

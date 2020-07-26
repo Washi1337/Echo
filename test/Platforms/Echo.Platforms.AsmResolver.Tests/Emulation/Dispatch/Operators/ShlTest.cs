@@ -9,8 +9,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
 {
     public class ShlTest : DispatcherTestBase
     {
-        public ShlTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public ShlTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

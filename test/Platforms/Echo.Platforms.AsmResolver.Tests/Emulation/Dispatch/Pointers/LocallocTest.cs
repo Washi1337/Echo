@@ -7,8 +7,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 {
     public class LocallocTest : DispatcherTestBase
     {
-        public LocallocTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public LocallocTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

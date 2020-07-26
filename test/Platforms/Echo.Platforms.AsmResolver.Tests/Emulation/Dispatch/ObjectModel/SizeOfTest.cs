@@ -11,8 +11,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 {
     public class SizeOfTest : DispatcherTestBase
     {
-        public SizeOfTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider) { }
+        public SizeOfTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture) { }
 
         [Fact]
         public void DispatchInt32()

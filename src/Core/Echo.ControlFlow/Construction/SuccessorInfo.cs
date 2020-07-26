@@ -15,7 +15,7 @@ namespace Echo.ControlFlow.Construction
             DestinationAddress = destinationAddress;
             EdgeType = edgeType;
         }
-            
+
         /// <summary>
         /// Gets the address of the successor instruction.
         /// </summary>

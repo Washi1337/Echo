@@ -10,8 +10,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
 {
     public class NewArrTest : DispatcherTestBase
     {
-        public NewArrTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public NewArrTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using Echo.ControlFlow.Construction.Static;
+using Echo.ControlFlow.Serialization.Dot;
+using Echo.Core.Graphing.Serialization.Dot;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 

@@ -8,8 +8,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
 {
     public class ConvTest : DispatcherTestBase
     {
-        public ConvTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public ConvTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 

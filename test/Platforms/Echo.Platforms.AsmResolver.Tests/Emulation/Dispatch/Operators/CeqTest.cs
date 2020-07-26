@@ -9,8 +9,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
 {
     public class CeqTest : DispatcherTestBase
     {
-        public CeqTest(MockModuleProvider moduleProvider)
-            : base(moduleProvider)
+        public CeqTest(MockModuleFixture moduleFixture)
+            : base(moduleFixture)
         {
         }
 
