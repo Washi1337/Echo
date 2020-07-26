@@ -67,7 +67,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public ICliValue LoadElement(int index, TypeMemoryLayout typeLayout, ICliMarshaller marshaller)
         {
             AssertIndexValidity(index);
-            var elementValue = ReadStruct(index * (int) typeLayout.Size, typeLayout);
+            var elementValue = this.ReadStruct(index * (int) typeLayout.Size, _memoryAllocator, typeLayout);
             return marshaller.ToCliValue(elementValue, typeLayout.Type.ToTypeSignature());
         }
 
@@ -213,7 +213,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
             var elementValue = marshaller.ToCtsValue(value, typeLayout.Type.ToTypeSignature());
-            WriteStruct(index * (int)typeLayout.Size, typeLayout, elementValue);
+            this.WriteStruct(index * (int)typeLayout.Size, _memoryAllocator, typeLayout, elementValue);
         }
 
         /// <inheritdoc />

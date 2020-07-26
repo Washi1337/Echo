@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete.Values.ReferenceType;
+using Echo.Concrete.Values.ValueType;
 using Echo.Core;
 using Echo.Core.Values;
 
@@ -9,7 +11,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// <summary>
     /// Represents a low level implementation of an object.
     /// </summary>
-    public partial class LleObjectValue 
+    public partial class LleObjectValue : IValueTypeValue
     {
         private readonly IMemoryAllocator _memoryAllocator;
 
@@ -52,7 +54,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public int Size => Contents.Size;
 
         /// <inheritdoc />
-        public bool IsValueType => Type.IsValueType;
+        public bool IsValueType => true;
 
         /// <inheritdoc />
         public Trilean IsZero => false;
@@ -73,6 +75,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <inheritdoc />
         public override string ToString() => $"{Type.FullName} ({Contents.Length.ToString()} bytes)";
 
-        
+        /// <inheritdoc />
+        public void GetBits(Span<byte> buffer) => Contents.ReadBytes(0, buffer);
+
+        /// <inheritdoc />
+        public void GetMask(Span<byte> buffer)
+        {
+            Span<byte> data = stackalloc byte[buffer.Length];
+            Contents.ReadBytes(0, data, buffer);
+        }
+
+        /// <inheritdoc />
+        public void SetBits(Span<byte> bits, Span<byte> mask) => Contents.WriteBytes(0, bits, mask);
     }
 }

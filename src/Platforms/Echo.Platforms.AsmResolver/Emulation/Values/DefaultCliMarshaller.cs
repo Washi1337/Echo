@@ -169,6 +169,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             return new FValue(value.F64);
         }
 
+        /// <summary>
+        /// Converts the provided value-typed object into a struct value. 
+        /// </summary>
+        /// <param name="value">The value to marshal.</param>
+        /// <returns>The marshalled value.</returns>
         protected virtual ICliValue ObjectToStruct(LleObjectValue value)
         {
             return new StructValue(Environment.MemoryAllocator, value.Type, value.Contents);

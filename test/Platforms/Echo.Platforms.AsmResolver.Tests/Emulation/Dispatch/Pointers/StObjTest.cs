@@ -1,22 +1,22 @@
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation;
+using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 {
-    public class LdObjTest : DispatcherTestBase, IClassFixture<CurrentModuleFixture>
+    public class StObjTest : DispatcherTestBase, IClassFixture<CurrentModuleFixture>
     {
         private readonly TypeDefinition _structType;
         private readonly FieldDefinition _x;
         private readonly FieldDefinition _y;
-
-        public LdObjTest(MockModuleFixture moduleFixture, CurrentModuleFixture currentModuleFixture)
+        
+        public StObjTest(MockModuleFixture moduleFixture, CurrentModuleFixture currentModuleFixture)
             : base(moduleFixture)
         {
             var module = currentModuleFixture.Module;
@@ -27,28 +27,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
         }
 
         [Fact]
-        public void LoadObjectFromUnknownPointerShouldResultInUnknownObjectContents()
-        {
-            var stack = ExecutionContext.ProgramState.Stack;
-
-            // Push unknown pointer.
-            stack.Push(new PointerValue(false));
-
-            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldobj, _structType));
-            
-            // Check if top of stack is a structure.
-            Assert.True(result.IsSuccess);
-            Assert.IsAssignableFrom<StructValue>(stack.Top);
-            Assert.True(stack.Top.IsValueType);
-            
-            // Check structure contents.
-            var instance = (StructValue) stack.Top;
-            Assert.False(instance.GetFieldValue(_x).IsKnown);
-            Assert.False(instance.GetFieldValue(_y).IsKnown);
-        }
-        
-        [Fact]
-        public void LoadObjectFromKnownPointerShouldResultInSameContents()
+        public void StoreObjectToPointerShouldSetContents()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var originalInstance = environment.MemoryAllocator.AllocateObject(_structType.ToTypeSignature());
@@ -57,17 +36,19 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             
             var stack = ExecutionContext.ProgramState.Stack;
 
-            stack.Push(new PointerValue((IPointerValue) originalInstance));
-
-            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldobj, _structType));
+            var destinationAddress = environment.MemoryAllocator.AllocateMemory(100, true);
             
-            // Push unknown pointer.
+            // Push unknown pointer and object to write.
+            stack.Push(new PointerValue(destinationAddress));
+            stack.Push(environment.CliMarshaller.ToCliValue(originalInstance, _structType.ToTypeSignature()));
+
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Stobj, _structType));
+
             Assert.True(result.IsSuccess);
-            Assert.IsAssignableFrom<StructValue>(stack.Top);
-            Assert.True(stack.Top.IsValueType);
             
             // Check structure contents.
-            var instance = (StructValue) stack.Top;
+            var instance = (IDotNetObjectValue) destinationAddress.ReadStruct(0, environment.MemoryAllocator,
+                environment.MemoryAllocator.GetTypeMemoryLayout(_structType));
             Assert.NotSame(originalInstance, instance);
             Assert.Equal(originalInstance.GetFieldValue(_x), instance.GetFieldValue(_x));
             Assert.Equal(originalInstance.GetFieldValue(_y), instance.GetFieldValue(_y));
