@@ -8,15 +8,25 @@ namespace Echo.Ast
     /// <summary>
     /// Provides a base contract for all Ast nodes
     /// </summary>
-    public abstract class AstNodeBase : INode
+    public abstract class AstNodeBase<TInstruction> : INode
     {
         /// <summary>
         /// Assigns the unique ID to the node
         /// </summary>
         /// <param name="id">The unique identifier</param>
-        protected AstNodeBase(long id)
+        /// <param name="content">Instruction to represent in the AST node</param>
+        protected AstNodeBase(long id, TInstruction content)
         {
             Id = id;
+            Content = content;
+        }
+
+        /// <summary>
+        /// Gets the <typeparamref name="TInstruction"/> represented by this AST node
+        /// </summary>
+        public TInstruction Content
+        {
+            get;
         }
 
         /// <inheritdoc />
@@ -32,10 +42,10 @@ namespace Echo.Ast
         public int OutDegree => GetOutgoingEdges().Count();
 
         /// <summary>
-        /// Gets the children of the current <see cref="AstNodeBase"/>
+        /// Gets the children of the current <see cref="AstNodeBase{TInstruction}"/>
         /// </summary>
         /// <returns>The children</returns>
-        public abstract IEnumerable<AstNodeBase> GetChildren();
+        public abstract IEnumerable<AstNodeBase<TInstruction>> GetChildren();
 
         /// <inheritdoc />
         public IEnumerable<IEdge> GetIncomingEdges() => throw new NotSupportedException();
