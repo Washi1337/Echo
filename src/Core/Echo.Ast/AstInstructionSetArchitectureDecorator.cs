@@ -1,5 +1,6 @@
 using System;
 using Echo.Core.Code;
+using Echo.Core.Graphing.Analysis.Traversal;
 
 namespace Echo.Ast
 {
@@ -21,30 +22,38 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public long GetOffset(in AstNodeBase<TInstruction> instruction) => _isa.GetOffset(instruction.Content);
+        public long GetOffset(in AstNodeBase<TInstruction> instruction) => instruction.Id;
 
         /// <inheritdoc />
-        public int GetSize(in AstNodeBase<TInstruction> instruction) => _isa.GetSize(instruction.Content);
+        public int GetSize(in AstNodeBase<TInstruction> instruction) => 1;
 
         /// <inheritdoc />
-        public InstructionFlowControl GetFlowControl(in AstNodeBase<TInstruction> instruction) =>
-            _isa.GetFlowControl(instruction.Content);
+        public InstructionFlowControl GetFlowControl(in AstNodeBase<TInstruction> instruction) => 0;
+        
+        /// <inheritdoc />
+        public int GetStackPushCount(in AstNodeBase<TInstruction> instruction) => 0;
 
         /// <inheritdoc />
-        public int GetStackPushCount(in AstNodeBase<TInstruction> instruction) =>
-            _isa.GetStackPushCount(instruction.Content);
+        public int GetStackPopCount(in AstNodeBase<TInstruction> instruction) => 0;
 
         /// <inheritdoc />
-        public int GetStackPopCount(in AstNodeBase<TInstruction> instruction) =>
-            _isa.GetStackPopCount(instruction.Content);
+        public int GetReadVariablesCount(in AstNodeBase<TInstruction> instruction)
+        {
+            var visitor = new VariableExpressionVisitor<TInstruction>();
+            instruction.Accept(visitor);
+
+            return visitor.Count;
+        }
 
         /// <inheritdoc />
-        public int GetReadVariablesCount(in AstNodeBase<TInstruction> instruction) =>
-            _isa.GetReadVariablesCount(instruction.Content);
-
-        /// <inheritdoc />
-        public int GetReadVariables(in AstNodeBase<TInstruction> instruction, Span<IVariable> variablesBuffer) =>
-            _isa.GetReadVariables(instruction.Content, variablesBuffer);
+        public int GetReadVariables(in AstNodeBase<TInstruction> instruction, Span<IVariable> variablesBuffer)
+        {
+            var visitor = new VariableExpressionVisitor<TInstruction>();
+            instruction.Accept(visitor);
+            
+            visitor.Variables.CopyTo(variablesBuffer);
+            return visitor.Count;
+        }
 
         /// <inheritdoc />
         public int GetWrittenVariablesCount(in AstNodeBase<TInstruction> instruction) =>
