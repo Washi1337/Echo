@@ -14,19 +14,9 @@ namespace Echo.Ast
         /// Assigns the unique ID to the node
         /// </summary>
         /// <param name="id">The unique identifier</param>
-        /// <param name="content">Instruction to represent in the AST node</param>
-        protected AstNodeBase(long id, TInstruction content)
+        protected AstNodeBase(long id)
         {
             Id = id;
-            Content = content;
-        }
-
-        /// <summary>
-        /// Gets the <typeparamref name="TInstruction"/> represented by this AST node
-        /// </summary>
-        public TInstruction Content
-        {
-            get;
         }
 
         /// <inheritdoc />
@@ -47,15 +37,14 @@ namespace Echo.Ast
         /// <returns>The children</returns>
         public abstract IEnumerable<AstNodeBase<TInstruction>> GetChildren();
 
+        internal virtual void Accept(VariableExpressionVisitor<TInstruction> visitor) { }
+
         /// <inheritdoc />
         public IEnumerable<IEdge> GetIncomingEdges() => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public IEnumerable<IEdge> GetOutgoingEdges()
-        {
-            IEnumerable<Edge> edges = GetChildren().Select(child => new Edge(this, child));
-            return edges.Cast<IEdge>();
-        }
+        public IEnumerable<IEdge> GetOutgoingEdges() => 
+            GetChildren().Select(child => (IEdge) new Edge(this, child));
 
         /// <inheritdoc />
         public IEnumerable<INode> GetPredecessors() => throw new NotSupportedException();
