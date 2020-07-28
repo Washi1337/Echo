@@ -1,0 +1,44 @@
+﻿using System.Collections.Generic;
+
+namespace Echo.Ast
+{
+    /// <summary>
+    /// Represents an instruction in the AST
+    /// </summary>
+    public sealed class AstInstructionExpression<TInstruction> : AstExpressionBase<TInstruction>
+    {
+        /// <summary>
+        /// Creates a new instruction expression node
+        /// </summary>
+        /// <param name="id">The unique ID to give to the node</param>
+        /// <param name="content">The instruction</param>
+        /// <param name="parameters">The parameters to this instruction</param>
+        public AstInstructionExpression(long id, TInstruction content, ICollection<AstExpressionBase<TInstruction>> parameters)
+            : base(id)
+        {
+            Content = content;
+            Parameters = parameters;
+        }
+
+        /// <summary>
+        /// The instruction that the AST node represents
+        /// </summary>
+        public TInstruction Content
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the parameters for the expression
+        /// </summary>
+        public ICollection<AstExpressionBase<TInstruction>> Parameters
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<AstNodeBase<TInstruction>> GetChildren() => Parameters;
+
+        internal override void Accept(VariableExpressionVisitor<TInstruction> visitor) => visitor.Visit(this);
+    }
+}
