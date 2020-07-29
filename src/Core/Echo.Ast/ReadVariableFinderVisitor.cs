@@ -12,16 +12,17 @@ namespace Echo.Ast
 
         internal IVariable[] Variables => _variables.ToArray();
 
-        public void Visit(AstAssignmentStatement<TInstruction> assignmentStatement, object state)
-        {
-            foreach (AstNodeBase<TInstruction> child in assignmentStatement.GetChildren())
-                child.Accept(this, state);
-        }
+        public void Visit(AstAssignmentStatement<TInstruction> assignmentStatement, object state) =>
+            assignmentStatement.Expression.Accept(this, state);
 
         public void Visit(AstExpressionStatement<TInstruction> expressionStatement, object state) =>
             expressionStatement.Expression.Accept(this, state);
 
-        public void Visit(AstInstructionExpression<TInstruction> instructionExpression, object state) { }
+        public void Visit(AstInstructionExpression<TInstruction> instructionExpression, object state)
+        {
+            foreach (AstExpressionBase<TInstruction> parameter in instructionExpression.Parameters)
+                parameter.Accept(this, state);
+        }
 
         public void Visit(AstVariableExpression<TInstruction> variableExpression, object state) =>
             _variables.Add(variableExpression.Variable);
