@@ -45,5 +45,13 @@ namespace Echo.Ast
             foreach (var variable in Variables)
                 yield return new AstVariableExpression<TInstruction>(0, variable);
         }
+
+        /// <inheritdoc />
+        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
+            visitor.Visit(this, state);
+
+        /// <inheritdoc />
+        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
+            visitor.Visit(this, state);
     }
 }
