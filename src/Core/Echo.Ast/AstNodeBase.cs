@@ -37,7 +37,15 @@ namespace Echo.Ast
         /// <returns>The children</returns>
         public abstract IEnumerable<AstNodeBase<TInstruction>> GetChildren();
 
-        internal virtual void Accept(VariableExpressionVisitor<TInstruction> visitor) { }
+        /// <summary>
+        /// Implements the visitor pattern
+        /// </summary>
+        public abstract void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state);
+
+        /// <summary>
+        /// Implements the visitor pattern
+        /// </summary>
+        public abstract TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state);
 
         /// <inheritdoc />
         public IEnumerable<IEdge> GetIncomingEdges() => throw new NotSupportedException();
