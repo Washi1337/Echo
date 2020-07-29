@@ -8,7 +8,8 @@ namespace Echo.Ast
     /// Provides a decorator around <typeparamref name="TInstruction"/> for the AST
     /// </summary>
     /// <typeparam name="TInstruction">The instruction</typeparam>
-    public class AstInstructionSetArchitectureDecorator<TInstruction> : IInstructionSetArchitecture<AstNodeBase<TInstruction>>
+    public class AstInstructionSetArchitectureDecorator<TInstruction>
+        : IInstructionSetArchitecture<AstStatementBase<TInstruction>>
     {
         private readonly IInstructionSetArchitecture<TInstruction> _isa;
 
@@ -22,22 +23,22 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public long GetOffset(in AstNodeBase<TInstruction> instruction) => instruction.Id;
+        public long GetOffset(in AstStatementBase<TInstruction> instruction) => instruction.Id;
 
         /// <inheritdoc />
-        public int GetSize(in AstNodeBase<TInstruction> instruction) => 1;
+        public int GetSize(in AstStatementBase<TInstruction> instruction) => 1;
 
         /// <inheritdoc />
-        public InstructionFlowControl GetFlowControl(in AstNodeBase<TInstruction> instruction) => 0;
+        public InstructionFlowControl GetFlowControl(in AstStatementBase<TInstruction> instruction) => 0;
         
         /// <inheritdoc />
-        public int GetStackPushCount(in AstNodeBase<TInstruction> instruction) => 0;
+        public int GetStackPushCount(in AstStatementBase<TInstruction> instruction) => 0;
 
         /// <inheritdoc />
-        public int GetStackPopCount(in AstNodeBase<TInstruction> instruction) => 0;
+        public int GetStackPopCount(in AstStatementBase<TInstruction> instruction) => 0;
 
         /// <inheritdoc />
-        public int GetReadVariablesCount(in AstNodeBase<TInstruction> instruction)
+        public int GetReadVariablesCount(in AstStatementBase<TInstruction> instruction)
         {
             var visitor = new ReadVariableFinderVisitor<TInstruction>();
             instruction.Accept(visitor, null);
@@ -46,7 +47,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public int GetReadVariables(in AstNodeBase<TInstruction> instruction, Span<IVariable> variablesBuffer)
+        public int GetReadVariables(in AstStatementBase<TInstruction> instruction, Span<IVariable> variablesBuffer)
         {
             var visitor = new ReadVariableFinderVisitor<TInstruction>();
             instruction.Accept(visitor, null);
@@ -56,7 +57,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public int GetWrittenVariablesCount(in AstNodeBase<TInstruction> instruction)
+        public int GetWrittenVariablesCount(in AstStatementBase<TInstruction> instruction)
         {
             var visitor = new WrittenVariableFinderVisitor<TInstruction>();
             instruction.Accept(visitor, null);
@@ -65,7 +66,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public int GetWrittenVariables(in AstNodeBase<TInstruction> instruction, Span<IVariable> variablesBuffer)
+        public int GetWrittenVariables(in AstStatementBase<TInstruction> instruction, Span<IVariable> variablesBuffer)
         {
             var visitor = new WrittenVariableFinderVisitor<TInstruction>();
             instruction.Accept(visitor, null);
