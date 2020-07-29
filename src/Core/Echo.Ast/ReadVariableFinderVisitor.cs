@@ -4,7 +4,7 @@ using Echo.Core.Code;
 
 namespace Echo.Ast
 {
-    internal sealed class UniqueVariableFinderVisitor<TInstruction> : IAstNodeVisitor<TInstruction, object>
+    internal sealed class ReadVariableFinderVisitor<TInstruction> : IAstNodeVisitor<TInstruction, object>
     {
         private readonly HashSet<IVariable> _variables = new HashSet<IVariable>();
 
