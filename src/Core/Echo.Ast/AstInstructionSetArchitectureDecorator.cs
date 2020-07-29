@@ -39,8 +39,8 @@ namespace Echo.Ast
         /// <inheritdoc />
         public int GetReadVariablesCount(in AstNodeBase<TInstruction> instruction)
         {
-            var visitor = new VariableExpressionVisitor<TInstruction>();
-            instruction.Accept(visitor);
+            var visitor = new UniqueVariableFinderVisitor<TInstruction>();
+            instruction.Accept(visitor, null);
 
             return visitor.Count;
         }
@@ -48,8 +48,8 @@ namespace Echo.Ast
         /// <inheritdoc />
         public int GetReadVariables(in AstNodeBase<TInstruction> instruction, Span<IVariable> variablesBuffer)
         {
-            var visitor = new VariableExpressionVisitor<TInstruction>();
-            instruction.Accept(visitor);
+            var visitor = new UniqueVariableFinderVisitor<TInstruction>();
+            instruction.Accept(visitor, null);
             
             visitor.Variables.CopyTo(variablesBuffer);
             return visitor.Count;
@@ -57,10 +57,10 @@ namespace Echo.Ast
 
         /// <inheritdoc />
         public int GetWrittenVariablesCount(in AstNodeBase<TInstruction> instruction) =>
-            _isa.GetWrittenVariablesCount(instruction.Content);
+            throw new NotImplementedException();
 
         /// <inheritdoc />
         public int GetWrittenVariables(in AstNodeBase<TInstruction> instruction, Span<IVariable> variablesBuffer) =>
-            _isa.GetWrittenVariables(instruction.Content, variablesBuffer);
+            throw new NotImplementedException();
     }
 }
