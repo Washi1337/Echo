@@ -5,7 +5,7 @@ namespace Echo.Ast
     /// <summary>
     /// Represents and expression statement in the AST
     /// </summary>
-    public sealed class AstExpressionStatement<TInstruction> : AstStatement<TInstruction>
+    public sealed class AstExpressionStatement<TInstruction> : AstStatementBase<TInstruction>
     {
         /// <summary>
         /// Creates a new expression statement

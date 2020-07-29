@@ -6,7 +6,7 @@ namespace Echo.Ast
     /// <summary>
     /// Represents an assignment in the AST
     /// </summary>
-    public sealed class AstAssignmentStatement<TInstruction> : AstStatement<TInstruction>
+    public sealed class AstAssignmentStatement<TInstruction> : AstStatementBase<TInstruction>
     {
         /// <summary>
         /// Creates a new assignment statement
