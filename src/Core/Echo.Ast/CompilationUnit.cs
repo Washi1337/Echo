@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Echo.ControlFlow;
 using Echo.Core.Code;
 
