@@ -34,7 +34,8 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// <returns>The children, represented by the dominator tree nodes.</returns>
         public IEnumerable<DominatorTreeNode> GetDirectChildren()
         {
-            return Children.Where(c => c.Parent.HasPredecessor(OriginalNode)).Cast<DominatorTreeNode>();
+            return Children.Where(c => c.Parent.HasPredecessor(OriginalNode))
+                .Cast<DominatorTreeNode>();
         }
 
         /// <summary>
@@ -44,7 +45,8 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// <returns>The children, represented by the dominator tree nodes.</returns>
         public IEnumerable<DominatorTreeNode> GetIndirectChildren()
         {
-            return Children.Where(c => !c.Parent.HasPredecessor(OriginalNode)).Cast<DominatorTreeNode>();
+            return Children.Where(c => !c.Parent.HasPredecessor(OriginalNode))
+                .Cast<DominatorTreeNode>();
         }
 
         /// <summary>
@@ -65,7 +67,7 @@ namespace Echo.ControlFlow.Analysis.Domination
                 yield return current;
 
                 foreach (var child in current.Children)
-                    stack.Push(child as DominatorTreeNode);
+                    stack.Push((DominatorTreeNode) child);
             }
         }
     }
