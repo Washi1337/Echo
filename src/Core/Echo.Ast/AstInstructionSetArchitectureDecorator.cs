@@ -29,6 +29,7 @@ namespace Echo.Ast
         public int GetSize(in AstStatementBase<TInstruction> instruction) => 1;
 
         /// <inheritdoc />
+        // TODO: Return proper flow
         public InstructionFlowControl GetFlowControl(in AstStatementBase<TInstruction> instruction) => 0;
         
         /// <inheritdoc />
