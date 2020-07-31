@@ -56,19 +56,11 @@ namespace Echo.Ast
             AstInstructionExpression<TInstruction> instructionExpression, TState state) { }
 
         /// <summary>
-        /// Begin visiting a given <see cref="AstVariableExpression{TInstruction}"/>
+        /// Visiting a given <see cref="AstVariableExpression{TInstruction}"/>
         /// </summary>
-        /// <param name="variableExpression">The <see cref="AstVariableExpression{TInstruction}"/> that is being entered</param>
+        /// <param name="variableExpression">The <see cref="AstVariableExpression{TInstruction}"/> that is will be visited</param>
         /// <param name="state">The state</param>
-        protected virtual void EnterVariableExpression(
-            AstVariableExpression<TInstruction> variableExpression, TState state) { }
-        
-        /// <summary>
-        /// Finish visiting a given <see cref="AstVariableExpression{TInstruction}"/>
-        /// </summary>
-        /// <param name="variableExpression">The <see cref="AstVariableExpression{TInstruction}"/> that is being finished</param>
-        /// <param name="state">The state</param>
-        protected virtual void ExitVariableExpression(
+        protected virtual void VisitVariableExpression(
             AstVariableExpression<TInstruction> variableExpression, TState state) { }
 
         /// <inheritdoc />
@@ -105,8 +97,7 @@ namespace Echo.Ast
         /// <inheritdoc />
         void IAstNodeVisitor<TInstruction, TState>.Visit(AstVariableExpression<TInstruction> variableExpression, TState state)
         {
-            EnterVariableExpression(variableExpression, state);
-            ExitVariableExpression(variableExpression, state);
+            VisitVariableExpression(variableExpression, state);
         }
     }
 }
