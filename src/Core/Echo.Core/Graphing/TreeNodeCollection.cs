@@ -11,6 +11,10 @@ namespace Echo.Core.Graphing
     {
         private readonly TNode _owner;
 
+        /// <summary>
+        /// Creates a new tree node collection with the specified <paramref name="owner"/>
+        /// </summary>
+        /// <param name="owner">The owner whose children this collection represents</param>
         public TreeNodeCollection(TNode owner)
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
