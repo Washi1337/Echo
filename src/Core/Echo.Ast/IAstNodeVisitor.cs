@@ -16,6 +16,11 @@ namespace Echo.Ast
         /// Visits a given <see cref="AstExpressionStatement{TInstruction}"/>
         /// </summary>
         void Visit(AstExpressionStatement<TInstruction> expressionStatement, TState state);
+
+        /// <summary>
+        /// Visits a given <see cref="AstPhiStatement{TInstruction}"/>
+        /// </summary>
+        void Visit(AstPhiStatement<TInstruction> phiStatement, TState state);
         
         /// <summary>
         /// Visits a given <see cref="AstInstructionExpression{TInstruction}"/>
@@ -45,6 +50,11 @@ namespace Echo.Ast
         /// Visits a given <see cref="AstExpressionStatement{TInstruction}"/>
         /// </summary>
         TOut Visit(AstExpressionStatement<TInstruction> expressionStatement, TState state);
+
+        /// <summary>
+        /// Visits a given <see cref="AstPhiStatement{TInstruction}"/>
+        /// </summary>
+        TOut Visit(AstPhiStatement<TInstruction> phiStatement, TState state);
         
         /// <summary>
         /// Visits a given <see cref="AstInstructionExpression{TInstruction}"/>

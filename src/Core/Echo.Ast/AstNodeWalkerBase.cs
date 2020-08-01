@@ -1,11 +1,11 @@
 namespace Echo.Ast
 {
     /// <summary>
-    /// Provides a base contract for listeners
+    /// Provides a base contract for Ast walkers
     /// </summary>
     /// <typeparam name="TInstruction">The type of the instruction</typeparam>
     /// <typeparam name="TState">The type of the state to pass</typeparam>
-    public abstract class AstNodeListenerBase<TInstruction, TState> : IAstNodeVisitor<TInstruction, TState>
+    public abstract class AstNodeWalkerBase<TInstruction, TState> : IAstNodeVisitor<TInstruction, TState>
     {
         /// <summary>
         /// Begin visiting a given <see cref="AstAssignmentStatement{TInstruction}"/>
@@ -30,7 +30,7 @@ namespace Echo.Ast
         /// <param name="state">The state</param>
         protected virtual void EnterExpressionStatement(
             AstExpressionStatement<TInstruction> expressionStatement, TState state) { }
-
+        
         /// <summary>
         /// Finish visiting a given <see cref="AstExpressionStatement{TInstruction}"/>
         /// </summary>
@@ -38,6 +38,22 @@ namespace Echo.Ast
         /// <param name="state">The state</param>
         protected virtual void ExitExpressionStatement(
             AstExpressionStatement<TInstruction> expressionStatement, TState state) { }
+
+        /// <summary>
+        /// Begin visiting a given <see cref="AstPhiStatement{TInstruction}"/>
+        /// </summary>
+        /// <param name="phiStatement">The <see cref="AstPhiStatement{TInstruction}"/> that is being entered</param>
+        /// <param name="state">The state</param>
+        protected virtual void EnterPhiStatement(
+            AstPhiStatement<TInstruction> phiStatement, TState state) { }
+
+        /// <summary>
+        /// Finish visiting a given <see cref="AstPhiStatement{TInstruction}"/>
+        /// </summary>
+        /// <param name="phiStatement">The <see cref="AstPhiStatement{TInstruction}"/> that is being finished</param>
+        /// <param name="state">The state</param>
+        protected virtual void ExitPhiStatement(
+            AstPhiStatement<TInstruction> phiStatement, TState state) { }
 
         /// <summary>
         /// Begin visiting a given <see cref="AstInstructionExpression{TInstruction}"/>
@@ -81,6 +97,17 @@ namespace Echo.Ast
             expressionStatement.Expression.Accept(this, state);
 
             ExitExpressionStatement(expressionStatement, state);
+        }
+
+        /// <inheritdoc />
+        void IAstNodeVisitor<TInstruction, TState>.Visit(AstPhiStatement<TInstruction> phiStatement, TState state)
+        {
+            EnterPhiStatement(phiStatement, state);
+            
+            foreach (AstVariableExpression<TInstruction> source in phiStatement.Sources)
+                source.Accept(this, state);
+            
+            ExitPhiStatement(phiStatement, state);
         }
 
         /// <inheritdoc />

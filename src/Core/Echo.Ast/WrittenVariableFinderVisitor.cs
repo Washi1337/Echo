@@ -19,6 +19,9 @@ namespace Echo.Ast
         }
 
         public void Visit(AstExpressionStatement<TInstruction> expressionStatement, object state) { }
+        
+        public void Visit(AstPhiStatement<TInstruction> phiStatement, object state) =>
+            _variables.Add(phiStatement.Target);
 
         public void Visit(AstInstructionExpression<TInstruction> instructionExpression, object state) { }
 

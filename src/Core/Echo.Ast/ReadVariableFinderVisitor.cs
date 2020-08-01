@@ -18,6 +18,12 @@ namespace Echo.Ast
         public void Visit(AstExpressionStatement<TInstruction> expressionStatement, object state) =>
             expressionStatement.Expression.Accept(this, state);
 
+        public void Visit(AstPhiStatement<TInstruction> phiStatement, object state)
+        {
+            foreach (AstVariableExpression<TInstruction> source in phiStatement.Sources)
+                source.Accept(this, state);
+        }
+
         public void Visit(AstInstructionExpression<TInstruction> instructionExpression, object state)
         {
             foreach (AstExpressionBase<TInstruction> parameter in instructionExpression.Parameters)
