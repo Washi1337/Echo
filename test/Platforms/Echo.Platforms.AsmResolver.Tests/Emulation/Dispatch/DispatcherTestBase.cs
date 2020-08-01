@@ -28,15 +28,17 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(dummyModule.CorLibTypeFactory.Void));
             dummyMethod.CilMethodBody = new CilMethodBody(dummyMethod);
-                
+
             var environment = new MockCilRuntimeEnvironment
             {
                 Is32Bit = is32Bit,
                 Architecture = new CilArchitecture(dummyMethod.CilMethodBody),
                 Module = dummyModule,
-                MemoryAllocator = new DefaultMemoryAllocator(dummyModule, is32Bit),
-                MethodInvoker = new HookedMethodInvoker(new ReturnUnknownMethodInvoker(new UnknownValueFactory(is32Bit)))
+                MemoryAllocator = new DefaultMemoryAllocator(dummyModule, is32Bit)
             };
+            
+            var methodInvoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(environment));
+            environment.MethodInvoker = new HookedMethodInvoker(methodInvoker);
 
             var container = new ServiceContainer();
             container.AddService(typeof(ICilRuntimeEnvironment), environment);

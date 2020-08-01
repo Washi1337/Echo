@@ -3,7 +3,7 @@
     /// <summary>
     /// Provides a basic implementation of an edge in a graph.
     /// </summary>
-    public readonly struct Edge : IEdge
+    public sealed class Edge : IEdge
     {
         /// <summary>
         /// Creates a new edge in a graph.

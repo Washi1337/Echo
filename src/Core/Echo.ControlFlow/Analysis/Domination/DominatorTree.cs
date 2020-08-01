@@ -191,7 +191,7 @@ namespace Echo.ControlFlow.Analysis.Domination
             {
                 if (current.OriginalNode == dominator)
                     return true;
-                current = current.Parent;
+                current = (DominatorTreeNode) current.Parent;
             }
 
             return false;
@@ -229,10 +229,10 @@ namespace Echo.ControlFlow.Analysis.Domination
                     foreach (var p in predecessors)
                     {
                         var runner = p;
-                        while (runner != _nodes[node].Parent.OriginalNode)
+                        while (runner != ((DominatorTreeNode) _nodes[node].Parent).OriginalNode)
                         {
                             frontier[runner].Add(node);
-                            runner = _nodes[runner].Parent.OriginalNode;
+                            runner = ((DominatorTreeNode) _nodes[runner].Parent).OriginalNode;
                         }
                     }
                 }

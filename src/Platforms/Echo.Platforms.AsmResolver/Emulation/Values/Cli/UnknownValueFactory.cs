@@ -9,21 +9,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
     /// </summary>
     public class UnknownValueFactory : IUnknownValueFactory
     {
+        private readonly ICilRuntimeEnvironment _environment;
+
         /// <summary>
         /// Creates a new instance of the <see cref="UnknownValueFactory"/> class.
         /// </summary>
-        /// <param name="is32Bit">Indicates pointers created by this factory should be 32 or 64 bits wide.</param>
-        public UnknownValueFactory(bool is32Bit)
+        public UnknownValueFactory(ICilRuntimeEnvironment environment)
         {
-            Is32Bit = is32Bit;
-        }
-        
-        /// <summary>
-        /// Gets a value indicating whether the factory uses 32 or 64 bits when constructing unknown pointers.
-        /// </summary>
-        public bool Is32Bit
-        {
-            get;
+            _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
 
         /// <inheritdoc />
@@ -67,28 +60,30 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
                     
                     case ElementType.I:
                     case ElementType.U:
-                        return new NativeIntegerValue(0, 0, Is32Bit);
+                        return new NativeIntegerValue(0, 0, _environment.Is32Bit);
 
                     case ElementType.Object:
                     case ElementType.String:
                     case ElementType.Array:
                     case ElementType.SzArray:
                     case ElementType.GenericInst:
-                        return new OValue(null, false, Is32Bit);
+                        return new OValue(null, false, _environment.Is32Bit);
 
                     case ElementType.Class:
                         // NOTE: This has an issue where fields defined in super classes of type will not be included.
-                        return new OValue(new HleObjectValue(type, Is32Bit), true, Is32Bit);
+                        return new OValue(new HleObjectValue(type, _environment.Is32Bit), true, _environment.Is32Bit);
 
                     case ElementType.MVar:
                     case ElementType.Var:
                         // TODO: resolve type argument (maybe add a generic context parameter to this factory method?)
-                        return new OValue(null, false, Is32Bit);
+                        return new OValue(null, false, _environment.Is32Bit);
 
                     case ElementType.ByRef:
                     case ElementType.ValueType:
                     case ElementType.TypedByRef:
-                        throw new NotImplementedException();
+                        return _environment.CliMarshaller.ToCliValue(
+                            _environment.MemoryAllocator.AllocateObject(type),
+                            type);
 
                     case ElementType.CModReqD:
                     case ElementType.CModOpt:
@@ -102,7 +97,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
                         // At this point we know it is at least an object reference, as value types have been captured by
                         // other cases. Return an unknown object reference.
 
-                        return new OValue(null, false, Is32Bit);
+                        return new OValue(null, false, _environment.Is32Bit);
                 }
             }
         }

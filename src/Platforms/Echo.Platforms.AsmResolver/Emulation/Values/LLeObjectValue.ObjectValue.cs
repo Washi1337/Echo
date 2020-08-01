@@ -45,7 +45,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             var typeMemoryLayout = _memoryAllocator.GetTypeMemoryLayout(field.DeclaringType);
             var fieldMemoryLayout = typeMemoryLayout[field.Resolve()];
-            return ReadStruct((int) fieldMemoryLayout.Offset, fieldMemoryLayout.ContentsLayout);
+            return this.ReadStruct((int) fieldMemoryLayout.Offset, _memoryAllocator, fieldMemoryLayout.ContentsLayout);
         }
 
         /// <inheritdoc />
@@ -53,7 +53,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             var typeMemoryLayout = _memoryAllocator.GetTypeMemoryLayout(field.DeclaringType);
             var fieldMemoryLayout = typeMemoryLayout[field.Resolve()];
-            WriteStruct((int) fieldMemoryLayout.Offset, fieldMemoryLayout.ContentsLayout, value);
+            this.WriteStruct((int) fieldMemoryLayout.Offset, _memoryAllocator, fieldMemoryLayout.ContentsLayout, value);
         }
 
     }
