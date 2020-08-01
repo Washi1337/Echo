@@ -1,18 +1,21 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
-using Echo.Core.Graphing;
 
-namespace Echo.ControlFlow.Analysis.Domination
+namespace Echo.Core.Graphing
 {
     /// <summary>
-    /// Represents a collection of dominator tree node children that are dominated by a single graph node.
+    /// Represents a collection of tree node children
     /// </summary>
-    public class DominatorTreeNodeCollection<TNode> : Collection<DominatorTreeNode>
-        where TNode : INode
+    /// <typeparam name="TNode">The node to create a collection of</typeparam>
+    public class TreeNodeCollection<TNode> : Collection<TNode> where TNode : TreeNodeBase
     {
-        private readonly DominatorTreeNode _owner;
+        private readonly TNode _owner;
 
-        internal DominatorTreeNodeCollection(DominatorTreeNode owner)
+        /// <summary>
+        /// Creates a new tree node collection with the specified <paramref name="owner"/>
+        /// </summary>
+        /// <param name="owner">The owner whose children this collection represents</param>
+        public TreeNodeCollection(TNode owner)
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
@@ -22,14 +25,14 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// </summary>
         /// <param name="node">The node to verify.</param>
         /// <exception cref="ArgumentException">Occurs if the node is already added to another node.</exception>
-        protected static void AssertNoParent(DominatorTreeNode node)
+        protected static void AssertNoParent(TNode node)
         {
             if (node.Parent != null)
                 throw new ArgumentException("Cannot add a node that is already a child of another node.");
         }
 
         /// <inheritdoc />
-        protected override void SetItem(int index, DominatorTreeNode item)
+        protected override void SetItem(int index, TNode item)
         {
             AssertNoParent(item);
             var old = Items[index];
@@ -54,7 +57,7 @@ namespace Echo.ControlFlow.Analysis.Domination
         }
 
         /// <inheritdoc />
-        protected override void InsertItem(int index, DominatorTreeNode item)
+        protected override void InsertItem(int index, TNode item)
         {
             AssertNoParent(item);
             item.Parent = _owner;
