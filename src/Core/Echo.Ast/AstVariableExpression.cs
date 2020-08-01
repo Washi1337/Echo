@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Echo.Core.Code;
+﻿using Echo.Core.Code;
 
 namespace Echo.Ast
 {
@@ -25,12 +24,6 @@ namespace Echo.Ast
         public IVariable Variable
         {
             get;
-        }
-
-        /// <inheritdoc />
-        public override IEnumerable<AstNodeBase<TInstruction>> GetChildren()
-        {
-            yield break;
         }
 
         /// <inheritdoc />

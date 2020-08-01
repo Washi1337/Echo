@@ -1,6 +1,5 @@
 using System;
 using Echo.Core.Code;
-using Echo.Core.Graphing.Analysis.Traversal;
 
 namespace Echo.Ast
 {

@@ -18,6 +18,9 @@ namespace Echo.Ast
         {
             Content = content;
             Parameters = parameters;
+            
+            foreach (AstExpressionBase<TInstruction> parameter in parameters)
+                Children.Add(parameter);
         }
 
         /// <summary>
@@ -35,9 +38,6 @@ namespace Echo.Ast
         {
             get;
         }
-
-        /// <inheritdoc />
-        public override IEnumerable<AstNodeBase<TInstruction>> GetChildren() => Parameters;
 
         /// <inheritdoc />
         public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Echo.Ast
 {
     /// <summary>
@@ -16,6 +14,7 @@ namespace Echo.Ast
             : base(id)
         {
             Expression = expression;
+            Children.Add(expression);
         }
 
         /// <summary>
@@ -24,12 +23,6 @@ namespace Echo.Ast
         public AstExpressionBase<TInstruction> Expression
         {
             get;
-        }
-
-        /// <inheritdoc />
-        public override IEnumerable<AstNodeBase<TInstruction>> GetChildren()
-        {
-            yield return Expression;
         }
 
         /// <inheritdoc />

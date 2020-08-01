@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Echo.Core.Code;
+﻿using Echo.Core.Code;
 
 namespace Echo.Ast
 {
@@ -19,6 +18,7 @@ namespace Echo.Ast
         {
             Expression = expression;
             Variables = variables;
+            Children.Add(expression);
         }
 
         /// <summary>
@@ -35,15 +35,6 @@ namespace Echo.Ast
         public IVariable[] Variables
         {
             get;
-        }
-
-        /// <inheritdoc />
-        public override IEnumerable<AstNodeBase<TInstruction>> GetChildren()
-        {
-            yield return Expression;
-
-            foreach (var variable in Variables)
-                yield return new AstVariableExpression<TInstruction>(0, variable);
         }
 
         /// <inheritdoc />
