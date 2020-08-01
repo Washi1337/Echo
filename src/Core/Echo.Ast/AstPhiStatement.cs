@@ -20,7 +20,7 @@ namespace Echo.Ast
             Sources = sources;
             Target = target;
             
-            foreach (AstVariableExpression<TInstruction> source in sources)
+            foreach (var source in sources)
                 Children.Add(source);
         }
 

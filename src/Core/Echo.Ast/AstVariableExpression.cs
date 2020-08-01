@@ -3,7 +3,7 @@
 namespace Echo.Ast
 {
     /// <summary>
-    /// Represents a variable in the AST
+    /// Represents a variable expression in the AST
     /// </summary>
     public sealed class AstVariableExpression<TInstruction> : AstExpressionBase<TInstruction>
     {

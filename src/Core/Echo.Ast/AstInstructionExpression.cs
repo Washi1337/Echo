@@ -19,7 +19,7 @@ namespace Echo.Ast
             Content = content;
             Parameters = parameters;
             
-            foreach (AstExpressionBase<TInstruction> parameter in parameters)
+            foreach (var parameter in parameters)
                 Children.Add(parameter);
         }
 

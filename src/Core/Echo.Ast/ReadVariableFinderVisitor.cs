@@ -20,13 +20,13 @@ namespace Echo.Ast
 
         public void Visit(AstPhiStatement<TInstruction> phiStatement, object state)
         {
-            foreach (AstVariableExpression<TInstruction> source in phiStatement.Sources)
+            foreach (var source in phiStatement.Sources)
                 source.Accept(this, state);
         }
 
         public void Visit(AstInstructionExpression<TInstruction> instructionExpression, object state)
         {
-            foreach (AstExpressionBase<TInstruction> parameter in instructionExpression.Parameters)
+            foreach (var parameter in instructionExpression.Parameters)
                 parameter.Accept(this, state);
         }
 

@@ -104,7 +104,7 @@ namespace Echo.Ast
         {
             EnterPhiStatement(phiStatement, state);
             
-            foreach (AstVariableExpression<TInstruction> source in phiStatement.Sources)
+            foreach (var source in phiStatement.Sources)
                 source.Accept(this, state);
             
             ExitPhiStatement(phiStatement, state);
@@ -115,7 +115,7 @@ namespace Echo.Ast
         {
             EnterInstructionExpression(instructionExpression, state);
 
-            foreach (AstExpressionBase<TInstruction> parameter in instructionExpression.Parameters)
+            foreach (var parameter in instructionExpression.Parameters)
                 parameter.Accept(this, state);
             
             ExitInstructionExpression(instructionExpression, state);
