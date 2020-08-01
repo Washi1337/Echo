@@ -3,28 +3,41 @@ using Echo.Core.Code;
 
 namespace Echo.Ast
 {
+    /// <summary>
+    /// Represents a Phi statement in the Ast
+    /// </summary>
     public sealed class AstPhiStatement<TInstruction> : AstStatementBase<TInstruction>
     {
-        public AstPhiStatement(long id, IEnumerable<AstVariableExpression<TInstruction>> sources, IVariable target) : base(id)
+        /// <summary>
+        /// Creates a new Phi statement
+        /// </summary>
+        /// <param name="id">The unique ID to assign to the node</param>
+        /// <param name="sources">The possible sources for the assignment</param>
+        /// <param name="target">The target variable that will be assigned to</param>
+        public AstPhiStatement(long id, ICollection<AstVariableExpression<TInstruction>> sources, IVariable target)
+            : base(id)
         {
             Sources = sources;
             Target = target;
+            
+            foreach (AstVariableExpression<TInstruction> source in sources)
+                Children.Add(source);
         }
 
-        public AstVariableExpression<TInstruction> Sources
+        /// <summary>
+        /// The possible sources for that could be assigned to <see cref="Target"/>
+        /// </summary>
+        public ICollection<AstVariableExpression<TInstruction>> Sources
         {
             get;
         }
 
+        /// <summary>
+        /// The variable that will be assigned to
+        /// </summary>
         public IVariable Target
         {
             get;
-        }
-
-        /// <inheritdoc />
-        public override IEnumerable<AstNodeBase<TInstruction>> GetChildren()
-        {
-            throw new System.NotImplementedException();
         }
 
         /// <inheritdoc />
