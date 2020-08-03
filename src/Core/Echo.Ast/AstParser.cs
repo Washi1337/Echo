@@ -7,7 +7,6 @@ using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Blocks;
 using Echo.Core.Code;
 using Echo.DataFlow;
-using Echo.DataFlow.Analysis;
 
 namespace Echo.Ast
 {
@@ -41,7 +40,8 @@ namespace Echo.Ast
             var root = new CompilationUnit<TInstruction>(_architecture);
             var blockBuilder = new BlockBuilder<TInstruction>();
             var rootScope = blockBuilder.ConstructBlocks(_controlFlowGraph);
-            var walker = new BlockWalker<TInstruction>(new BlockTransformer(root, _controlFlowGraph, _dataFlowGraph));
+            var transformer = new BlockTransformer(root, _controlFlowGraph, _dataFlowGraph);
+            var walker = new BlockWalker<TInstruction>(transformer);
 
             rootScope.AcceptVisitor(walker);
             
@@ -53,8 +53,11 @@ namespace Echo.Ast
             private readonly CompilationUnit<TInstruction> _compilationUnit;
             private readonly ControlFlowGraph<TInstruction> _controlFlowGraph;
             private readonly DataFlowGraph<TInstruction> _dataFlowGraph;
-            private readonly Dictionary<TInstruction, AstVariable> _stackSlots;
-            private readonly Stack<IControlFlowRegion<AstNodeBase<TInstruction>>> _regions;
+            private readonly Dictionary<DataDependency<TInstruction>, AstVariable> _stackSlots;
+            private readonly Dictionary<ControlFlowNode<TInstruction>, ControlFlowNode<AstStatementBase<TInstruction>>> _mapping;
+            private readonly Stack<IControlFlowRegion<AstStatementBase<TInstruction>>> _regions;
+            private long _id = -1;
+            private long _variableCount = 0;
             
             internal BlockTransformer(
                 CompilationUnit<TInstruction> compilationUnit,
@@ -64,48 +67,116 @@ namespace Echo.Ast
                 _compilationUnit = compilationUnit;
                 _controlFlowGraph = controlFlowGraph;
                 _dataFlowGraph = dataFlowGraph;
-                _stackSlots = new Dictionary<TInstruction, AstVariable>();
-                _regions = new Stack<IControlFlowRegion<AstNodeBase<TInstruction>>>();
+                _stackSlots = new Dictionary<DataDependency<TInstruction>, AstVariable>();
+                _mapping = new Dictionary<ControlFlowNode<TInstruction>, ControlFlowNode<AstStatementBase<TInstruction>>>();
+                _regions = new Stack<IControlFlowRegion<AstStatementBase<TInstruction>>>();
             }
 
             private IInstructionSetArchitecture<TInstruction> Architecture => _controlFlowGraph.Architecture;
 
             public void VisitBasicBlock(BasicBlock<TInstruction> block)
             {
-                // TODO: Phi statements should always be at the top of a block
+                int phiCount = 0;
+                var astBlock = new BasicBlock<AstStatementBase<TInstruction>>();
+                long firstoffset = Architecture.GetOffset(block.Instructions[0]);
+                
                 foreach (var instruction in block.Instructions)
                 {
                     long offset = Architecture.GetOffset(instruction);
                     var dataFlowNode = _dataFlowGraph.Nodes[offset];
-                    
-                    // Nothing depends on this instruction, so we can just make a statement and add it to the block
-                    if (!dataFlowNode.GetDependants().Any())
-                    {
-                        //
-                    }
-                    
                     var stackDependencies = dataFlowNode.StackDependencies;
-                    var instructionExpression = new AstInstructionExpression<TInstruction>(offset, instruction, null);
+                    var variableDependencies = dataFlowNode.VariableDependencies;
+                    var targetVariables = new IVariable[stackDependencies.Count + variableDependencies.Count];
+
+                    for (int i = 0; i < stackDependencies.Count; i++)
+                    {
+                        var sources = stackDependencies[i];
+                        if (sources.Count == 1)
+                        {
+                            var variable = _stackSlots[sources];
+                            targetVariables[i] = variable;
+                        }
+                        else
+                        {
+                            var phiSlot = new AstVariable($"stack_slot_{_variableCount++}");
+                            var phi = new AstPhiStatement<TInstruction>(_id--,
+                                sources.Select(s =>
+                                        // ReSharper disable once CoVariantArrayConversion
+                                        new AstVariableExpression<TInstruction>(_id--, _stackSlots[sources.]))
+                                    .ToArray(), phiSlot);
+
+                            astBlock.Instructions.Insert(phiCount++, phi);
+                            targetVariables[i] = phiSlot;
+                        }
+                    }
+
+                    int index = stackDependencies.Count;
+                    foreach (var dep in variableDependencies)
+                    {
+                        targetVariables[index] = dep.Key;
+                        index++;
+                    }
+
+                    var instructionExpression = new AstInstructionExpression<TInstruction>(offset, instruction,
+                        targetVariables.Select(t => new AstVariableExpression<TInstruction>(_id--, t)).ToArray());
+
+                    var writtenVariables = new IVariable[Architecture.GetWrittenVariablesCount(instruction)];
+                    Architecture.GetWrittenVariables(instruction, writtenVariables.AsSpan());
+                    
+                    if (!dataFlowNode.GetDependants().Any())
+                        astBlock.Instructions.Add(new AstExpressionStatement<TInstruction>(offset, instructionExpression));
+                    else
+                    {
+                        int stackPushCount = Architecture.GetStackPushCount(instruction);
+                        var slots = Enumerable.Range(0, stackPushCount)
+                            .Select(_ => new AstVariable($"stack_slot_{_variableCount++}"))
+                            .ToArray();
+
+                        var combined = new IVariable[slots.Length + writtenVariables.Length];
+                        slots.CopyTo(combined, 0);
+                        writtenVariables.CopyTo(combined, Math.Max(0, slots.Length - 1));
+                        _stackSlots[] = slots;
+                        astBlock.Instructions.Add(
+                            new AstAssignmentStatement<TInstruction>(offset, instructionExpression, combined));
+                    }
                 }
+
+                var newNode = new ControlFlowNode<AstStatementBase<TInstruction>>(firstoffset, astBlock);
+                _mapping[_controlFlowGraph.Nodes[firstoffset]] = newNode;
+                _compilationUnit.Nodes.Add(newNode);
             }
 
             public void EnterScopeBlock(ScopeBlock<TInstruction> block)
             {
-                _regions.Push(TransformRegion(_controlFlowGraph.Nodes[block.GetAllBlocks().First().Offset].ParentRegion));
+                long first = block.Blocks[0].GetAllBlocks().First().Offset;
+                var region = _controlFlowGraph.Nodes[first].ParentRegion;
+                _regions.Push(TransformRegion(region));
             }
 
             public void ExitScopeBlock(ScopeBlock<TInstruction> block)
             {
-                _regions.Pop();
+                var region = _regions.Pop();
+                if (region is CompilationUnit<TInstruction>)
+                {
+                    foreach (var edge in _controlFlowGraph.GetEdges())
+                    {
+                        _mapping[edge.Origin].ConnectWith(_mapping[edge.Target], edge.Type);
+                    }
+
+                    return;
+                }
+                
+                _compilationUnit.Regions.Add((ControlFlowRegion<AstStatementBase<TInstruction>>) region);
             }
 
-            private static IControlFlowRegion<AstNodeBase<TInstruction>> TransformRegion(
+            private IControlFlowRegion<AstStatementBase<TInstruction>> TransformRegion(
                 IControlFlowRegion<TInstruction> region)
             {
                 return region switch
                 {
-                    BasicControlFlowRegion<TInstruction> _ => new BasicControlFlowRegion<AstNodeBase<TInstruction>>(),
-                    ExceptionHandlerRegion<TInstruction> _ => new ExceptionHandlerRegion<AstNodeBase<TInstruction>>(),
+                    ControlFlowGraph<TInstruction> _ => _compilationUnit,
+                    BasicControlFlowRegion<TInstruction> _ => new BasicControlFlowRegion<AstStatementBase<TInstruction>>(),
+                    ExceptionHandlerRegion<TInstruction> _ => new ExceptionHandlerRegion<AstStatementBase<TInstruction>>(),
                     _ => throw new NotSupportedException()
                 };
             }
