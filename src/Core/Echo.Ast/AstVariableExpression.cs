@@ -25,7 +25,7 @@ namespace Echo.Ast
         {
             get;
         }
-
+        
         /// <inheritdoc />
         public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
             visitor.Visit(this, state);
