@@ -32,5 +32,8 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Expression}";
     }
 }

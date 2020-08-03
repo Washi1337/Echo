@@ -51,5 +51,8 @@ namespace Echo.Ast
         {
             throw new System.NotImplementedException();
         }
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Target} = φ({string.Join(", ", Sources)})";
     }
 }
