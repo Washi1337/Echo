@@ -34,16 +34,16 @@ namespace Echo.Platforms.AsmResolver
             
             foreach (var eh in _architecture.MethodBody.ExceptionHandlers)
             {
-                var exceptionSource = default(ExternalDataSource<CilInstruction>);
+                var exceptionSource = default(ExternalDataSourceNode<CilInstruction>);
                 if (eh.HandlerStart.Offset == entrypointAddress)
                 {
-                    exceptionSource = new ExternalDataSource<CilInstruction>(
+                    exceptionSource = new ExternalDataSourceNode<CilInstruction>(
                         -(long) eh.HandlerStart.Offset,
                         $"HandlerException_{eh.HandlerStart.Offset:X4}");
                 }
                 else if (eh.FilterStart != null && eh.FilterStart.Offset == entrypointAddress)
                 {
-                    exceptionSource = new ExternalDataSource<CilInstruction>(
+                    exceptionSource = new ExternalDataSourceNode<CilInstruction>(
                         -(long) eh.FilterStart.Offset,
                         $"FilterException_{eh.FilterStart.Offset:X4}");
                 }
@@ -51,7 +51,7 @@ namespace Echo.Platforms.AsmResolver
                 if (exceptionSource is {})
                 {
                     DataFlowGraph.Nodes.Add(exceptionSource);
-                    result.Stack.Push(new SymbolicValue<CilInstruction>(exceptionSource));
+                    result.Stack.Push(new SymbolicValue<CilInstruction>(new DataSource<CilInstruction>(exceptionSource)));
                     break;
                 }
             }

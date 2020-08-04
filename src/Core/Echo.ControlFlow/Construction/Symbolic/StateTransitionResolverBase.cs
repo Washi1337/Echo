@@ -89,7 +89,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             }
 
             for (int i = 0; i < Architecture.GetStackPushCount(instruction); i++)
-                currentState.Stack.Push(new SymbolicValue<TInstruction>(node));
+                currentState.Stack.Push(new SymbolicValue<TInstruction>(new DataSource<TInstruction>(node, i)));
         }
 
         private void ApplyVariableTransition(DataFlowNode<TInstruction> node, SymbolicProgramState<TInstruction> currentState)
@@ -127,7 +127,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             for (int i = 0; i < actualCount; i++)
             {
                 var variable = _variablesBuffer[i];
-                currentState.Variables[variable] = new SymbolicValue<TInstruction>(node);
+                currentState.Variables[variable] = new SymbolicValue<TInstruction>(new DataSource<TInstruction>(node));
             }
         }
 
