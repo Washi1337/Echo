@@ -23,12 +23,12 @@ namespace Echo.DataFlow.Tests.Values
             };
             
             var value1 = new SymbolicValue<DummyInstruction>(sources[0]);
-            var value2 = new SymbolicValue<DummyInstruction>(sources[1], sources[2]);
+            var value2 = new SymbolicValue<DummyInstruction>(new[] {sources[1], sources[2]});
             
             Assert.True(value1.MergeWith(value2));
-            Assert.Equal(new HashSet<IDataFlowNode>(sources), value1);
+            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources), value1.GetNodes());
         }
-        
+
         [Fact]
         public void MergeNoChange()
         {
@@ -37,12 +37,12 @@ namespace Echo.DataFlow.Tests.Values
                 CreateDummyNode(0),
                 CreateDummyNode(1)
             };
-            
-            var value1 = new SymbolicValue<DummyInstruction>(sources[0], sources[1]);
-            var value2 = new SymbolicValue<DummyInstruction>(sources[1], sources[0]);
-            
+
+            var value1 = new SymbolicValue<DummyInstruction>(new[] {sources[0], sources[1]});
+            var value2 = new SymbolicValue<DummyInstruction>(new[] {sources[1], sources[0]});
+
             Assert.False(value1.MergeWith(value2));
-            Assert.Equal(new HashSet<IDataFlowNode>(sources), value1);
+            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources), value1.GetNodes());
         }
     }
 }

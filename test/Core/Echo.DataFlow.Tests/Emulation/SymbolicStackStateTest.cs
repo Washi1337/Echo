@@ -31,7 +31,7 @@ namespace Echo.DataFlow.Tests.Emulation
             stack2.Push(value2);
             
             Assert.True(stack1.MergeWith(stack2));
-            Assert.Equal(new HashSet<IDataFlowNode>(sources), stack1.Top);
+            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources), stack1.Top.GetNodes());
         }
         
         [Fact]
@@ -79,7 +79,7 @@ namespace Echo.DataFlow.Tests.Emulation
             int index = sources.Length - 1;
             foreach (var slot in stack1.GetAllStackSlots())
             {
-                Assert.Equal(new HashSet<IDataFlowNode>(sources[index]), slot);
+                Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources[index]), slot.GetNodes());
                 index--;
             }
         }

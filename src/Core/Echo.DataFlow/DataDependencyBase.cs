@@ -10,7 +10,7 @@ namespace Echo.DataFlow
     /// might pull data from.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in a data flow node.</typeparam>
-    public abstract class DataDependencyBase<TContents> : IDataDependency, ISet<DataFlowNode<TContents>>
+    public abstract class DataDependencyBase<TContents> : ISet<DataSource<TContents>>
     {
         // -------------------------
         // Implementation rationale:
@@ -24,8 +24,8 @@ namespace Echo.DataFlow
         //
         // For this reason, the following "list object" field can have three possible values:
         //    - null:                             The dependency has no known data sources.
-        //    - DataFlowNode<TContents>:          The dependency has a single data source.
-        //    - HashSet<DataFlowNode<TContents>>: The dependency has multiple data sources.
+        //    - DataSource<TContents>:            The dependency has a single data source.
+        //    - HashSet<DataSource<TContents>>:   The dependency has multiple data sources.
         
         private object _listObject;
 
@@ -40,7 +40,7 @@ namespace Echo.DataFlow
         /// <summary>
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
-        protected DataDependencyBase(DataFlowNode<TContents> dataSource)
+        protected DataDependencyBase(DataSource<TContents> dataSource)
         {
             _listObject = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
         }
@@ -49,7 +49,7 @@ namespace Echo.DataFlow
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
         /// <param name="dataSources">The data sources.</param>
-        protected DataDependencyBase(params DataFlowNode<TContents>[] dataSources)
+        protected DataDependencyBase(params DataSource<TContents>[] dataSources)
             : this(dataSources.AsEnumerable())
         {
         }
@@ -58,29 +58,20 @@ namespace Echo.DataFlow
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
         /// <param name="dataSources">The data sources.</param>
-        protected DataDependencyBase(IEnumerable<DataFlowNode<TContents>> dataSources)
+        protected DataDependencyBase(IEnumerable<DataSource<TContents>> dataSources)
         {
-            _listObject = new HashSet<DataFlowNode<TContents>>(dataSources);
+            _listObject = new HashSet<DataSource<TContents>>(dataSources);
         }
 
-        /// <summary>
-        /// Gets a collection of data sources this data dependency might pull data from.
-        /// </summary>
-        [Obsolete("This property was inlined into the "
-                  + nameof(DataDependencyBase<TContents>) + " class, which now implements the "
-                  + nameof(ISet<DataFlowNode<TContents>>) + " interface. Use the data dependency object "
-                  + "directly to iterate over all data sources.")]
-        public ISet<DataFlowNode<TContents>> DataSources => this;
-
         /// <inheritdoc />
-        bool ICollection<DataFlowNode<TContents>>.IsReadOnly => false;
+        bool ICollection<DataSource<TContents>>.IsReadOnly => false;
 
         /// <inheritdoc />
         public int Count => _listObject switch
         {
             null => 0,
-            DataFlowNode<TContents> _ => 1,
-            ICollection<DataFlowNode<TContents>> collection => collection.Count,
+            DataSource<TContents> _ => 1,
+            ICollection<DataSource<TContents>> collection => collection.Count,
             _ => throw new InvalidOperationException("Data dependency is in an invalid state.")
         };
 
@@ -89,15 +80,13 @@ namespace Echo.DataFlow
         /// </summary>
         public bool HasKnownDataSources => Count > 0;
 
-        IEnumerable<IDataFlowNode> IDataDependency.GetDataSources() => this;
-
         private static bool ThrowInvalidStateException()
         {
             throw new InvalidOperationException("Data dependency is in an invalid state.");
         }
 
         /// <inheritdoc />
-        public virtual bool Add(DataFlowNode<TContents> item)
+        public virtual bool Add(DataSource<TContents> item)
         {
             switch (_listObject)
             {
@@ -105,15 +94,15 @@ namespace Echo.DataFlow
                     _listObject = item;
                     return true;
 
-                case DataFlowNode<TContents> node:
-                    _listObject = new HashSet<DataFlowNode<TContents>>
+                case DataSource<TContents> node:
+                    _listObject = new HashSet<DataSource<TContents>>
                     {
                         node,
                         item
                     };
                     return node != item;
 
-                case ISet<DataFlowNode<TContents>> nodes:
+                case ISet<DataSource<TContents>> nodes:
                     return nodes.Add(item);
 
                 default:
@@ -122,16 +111,16 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public void ExceptWith(IEnumerable<DataFlowNode<TContents>> other)
+        public void ExceptWith(IEnumerable<DataSource<TContents>> other)
         {
             foreach (var node in other)
                 Remove(node);
         }
 
         /// <inheritdoc />
-        public void IntersectWith(IEnumerable<DataFlowNode<TContents>> other)
+        public void IntersectWith(IEnumerable<DataSource<TContents>> other)
         {
-            var set = new HashSet<DataFlowNode<TContents>>(other);
+            var set = new HashSet<DataSource<TContents>>(other);
             foreach (var item in this)
             {
                 if (!set.Contains(item))
@@ -140,14 +129,14 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public bool IsProperSubsetOf(IEnumerable<DataFlowNode<TContents>> other)
+        public bool IsProperSubsetOf(IEnumerable<DataSource<TContents>> other)
         {
             switch (_listObject)
             {
                 case null:
                     return other.Any();
                 
-                case DataFlowNode<TContents> node:
+                case DataSource<TContents> node:
                     bool containsElement = false;
                     foreach (var item in other)
                     {
@@ -159,7 +148,7 @@ namespace Echo.DataFlow
 
                     return false;
                     
-                case ISet<DataFlowNode<TContents>> nodes:
+                case ISet<DataSource<TContents>> nodes:
                     return nodes.IsProperSubsetOf(other);
                 
                 default:
@@ -168,38 +157,38 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public bool IsProperSupersetOf(IEnumerable<DataFlowNode<TContents>> other) => _listObject switch
+        public bool IsProperSupersetOf(IEnumerable<DataSource<TContents>> other) => _listObject switch
         {
             null => false,
-            DataFlowNode<TContents> _ => !other.Any(),
-            ISet<DataFlowNode<TContents>> nodes => nodes.IsProperSupersetOf(other),
+            DataSource<TContents> _ => !other.Any(),
+            ISet<DataSource<TContents>> nodes => nodes.IsProperSupersetOf(other),
             _ => ThrowInvalidStateException(),
         };
 
         /// <inheritdoc />
-        public bool IsSubsetOf(IEnumerable<DataFlowNode<TContents>> other) => _listObject switch
+        public bool IsSubsetOf(IEnumerable<DataSource<TContents>> other) => _listObject switch
         {
             null => true,
-            DataFlowNode<TContents> node => other.Contains(node),
-            ISet<DataFlowNode<TContents>> nodes => nodes.IsSubsetOf(other),
+            DataSource<TContents> node => other.Contains(node),
+            ISet<DataSource<TContents>> nodes => nodes.IsSubsetOf(other),
             _ =>  ThrowInvalidStateException(),
         };
 
         /// <inheritdoc />
-        public bool IsSupersetOf(IEnumerable<DataFlowNode<TContents>> other)
+        public bool IsSupersetOf(IEnumerable<DataSource<TContents>> other)
         {
             switch (_listObject)
             {
                 case null:
                     return !other.Any();
 
-                case DataFlowNode<TContents> node:
+                case DataSource<TContents> node:
                 {
                     using var enumerator = other.GetEnumerator();
                     return !enumerator.MoveNext() || enumerator.Current == node && !enumerator.MoveNext();
                 }
 
-                case ISet<DataFlowNode<TContents>> nodes:
+                case ISet<DataSource<TContents>> nodes:
                     return nodes.IsSupersetOf(other);
 
                 default:
@@ -208,29 +197,29 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public bool Overlaps(IEnumerable<DataFlowNode<TContents>> other) => _listObject switch
+        public bool Overlaps(IEnumerable<DataSource<TContents>> other) => _listObject switch
         {
             null => false,
-            DataFlowNode<TContents> node => other.Contains(node),
-            ISet<DataFlowNode<TContents>> nodes => nodes.Overlaps(other),
+            DataSource<TContents> node => other.Contains(node),
+            ISet<DataSource<TContents>> nodes => nodes.Overlaps(other),
             _ => ThrowInvalidStateException(),
         };
 
         /// <inheritdoc />
-        public bool SetEquals(IEnumerable<DataFlowNode<TContents>> other)
+        public bool SetEquals(IEnumerable<DataSource<TContents>> other)
         {
             switch (_listObject)
             {
                 case null:
                     return !other.Any();
                 
-                case DataFlowNode<TContents> node:
+                case DataSource<TContents> node:
                 {
                     using var enumerator = other.GetEnumerator();
                     return enumerator.MoveNext() && node == enumerator.Current && !enumerator.MoveNext();
                 }
 
-                case ISet<DataFlowNode<TContents>> nodes:
+                case ISet<DataSource<TContents>> nodes:
                     return nodes.SetEquals(other);
 
                 default:
@@ -239,7 +228,7 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public void SymmetricExceptWith(IEnumerable<DataFlowNode<TContents>> other)
+        public void SymmetricExceptWith(IEnumerable<DataSource<TContents>> other)
         {
             foreach (var item in other)
             {
@@ -249,13 +238,18 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public void UnionWith(IEnumerable<DataFlowNode<TContents>> other)
+        public void UnionWith(IEnumerable<DataSource<TContents>> other)
         {
             foreach (var node in other)
                 Add(node);
         }
 
-        void ICollection<DataFlowNode<TContents>>.Add(DataFlowNode<TContents> item) => Add(item);
+        void ICollection<DataSource<TContents>>.Add(DataSource<TContents> item)
+        {
+            if (item is null)
+                throw new ArgumentNullException(nameof(item));
+            Add(item);
+        }
 
         /// <inheritdoc />
         public void Clear()
@@ -265,11 +259,11 @@ namespace Echo.DataFlow
                 case null:
                     break;
                 
-                case DataFlowNode<TContents> node:
+                case DataSource<TContents> node:
                     Remove(node);
                     break;
                 
-                case ICollection<DataFlowNode<TContents>> nodes:
+                case ICollection<DataSource<TContents>> nodes:
                     foreach (var node in nodes.ToArray())
                         Remove(node);
                     break;
@@ -283,27 +277,27 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public bool Contains(DataFlowNode<TContents> item) => _listObject switch
+        public bool Contains(DataSource<TContents> item) => _listObject switch
         {
             null => false,
-            DataFlowNode<TContents> node => item == node,
-            ICollection<DataFlowNode<TContents>> nodes => nodes.Contains(item),
+            DataSource<TContents> node => item == node,
+            ICollection<DataSource<TContents>> nodes => nodes.Contains(item),
             _ => ThrowInvalidStateException()
         };
 
         /// <inheritdoc />
-        public void CopyTo(DataFlowNode<TContents>[] array, int arrayIndex)
+        public void CopyTo(DataSource<TContents>[] array, int arrayIndex)
         {
             switch (_listObject)
             {
                 case null:
                     break;
                 
-                case DataFlowNode<TContents> node:
+                case DataSource<TContents> node:
                     array[arrayIndex] = node;
                     break;
                 
-                case ICollection<DataFlowNode<TContents>> nodes:
+                case ICollection<DataSource<TContents>> nodes:
                     nodes.CopyTo(array, arrayIndex);
                     break;
                 
@@ -313,15 +307,31 @@ namespace Echo.DataFlow
             }
         }
 
+        public bool Remove(DataFlowNode<TContents> node)
+        {
+            var sourcesToRemove = new List<DataSource<TContents>>();
+           
+            foreach (var source in this)
+            {
+                if (source.Node == node)
+                    sourcesToRemove.Add(source);
+            }
+
+            foreach (var source in sourcesToRemove)
+                Remove(source);
+
+            return sourcesToRemove.Count > 0;
+        }
+        
         /// <inheritdoc />
-        public virtual bool Remove(DataFlowNode<TContents> item) 
+        public virtual bool Remove(DataSource<TContents> item) 
         {
             switch (_listObject)
             {
                 case null:
                     return false;
 
-                case DataFlowNode<TContents> node:
+                case DataSource<TContents> node:
                     if (node == item)
                     {
                         _listObject = null;
@@ -330,7 +340,7 @@ namespace Echo.DataFlow
 
                     return false;
 
-                case ICollection<DataFlowNode<TContents>> nodes:
+                case ICollection<DataSource<TContents>> nodes:
                     return nodes.Remove(item);
 
                 default:
@@ -338,12 +348,16 @@ namespace Echo.DataFlow
             }
         }
 
+        public IEnumerable<DataFlowNode<TContents>> GetNodes() => this
+            .Select(source => source.Node)
+            .Distinct();
+        
         /// <inheritdoc />
         public override string ToString() => _listObject switch
         {
             null => "?",
-            DataFlowNode<TContents> node => node.ToString(),
-            IEnumerable<DataFlowNode<TContents>> collection => $"({string.Join(" | ", collection)})",
+            DataSource<TContents> node => node.ToString(),
+            IEnumerable<DataSource<TContents>> collection => $"({string.Join(" | ", collection)})",
             _ => ThrowInvalidStateException().ToString()
         };
 
@@ -353,16 +367,16 @@ namespace Echo.DataFlow
         /// <returns>The enumerator.</returns>
         public Enumerator GetEnumerator() => new Enumerator(this);
 
-        IEnumerator<DataFlowNode<TContents>> IEnumerable<DataFlowNode<TContents>>.GetEnumerator() => GetEnumerator();
+        IEnumerator<DataSource<TContents>> IEnumerable<DataSource<TContents>>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         /// Provides a mechanism for enumerating all data sources within a single data dependency. 
         /// </summary>
-        public struct Enumerator : IEnumerator<DataFlowNode<TContents>>
+        public struct Enumerator : IEnumerator<DataSource<TContents>>
         {
             private readonly DataDependencyBase<TContents> _collection;
-            private HashSet<DataFlowNode<TContents>>.Enumerator _setEnumerator;
+            private HashSet<DataSource<TContents>>.Enumerator _setEnumerator;
 
             /// <summary>
             /// Creates a new instance of the <see cref="Enumerator"/> structure.
@@ -371,13 +385,13 @@ namespace Echo.DataFlow
             public Enumerator(DataDependencyBase<TContents> collection)
             {
                 _collection = collection ?? throw new ArgumentNullException(nameof(collection));
-                if (collection._listObject is HashSet<DataFlowNode<TContents>> nodes)
+                if (collection._listObject is HashSet<DataSource<TContents>> nodes)
                     _setEnumerator = nodes.GetEnumerator();
                 Current = null;
             }
 
             /// <inheritdoc />
-            public DataFlowNode<TContents> Current
+            public DataSource<TContents> Current
             {
                 get;
                 private set;
@@ -396,10 +410,10 @@ namespace Echo.DataFlow
                     case null:
                         return false;
                     
-                    case DataFlowNode<TContents> node:
+                    case DataSource<TContents> source:
                         if (Current is null)
                         {
-                            Current = node;
+                            Current = source;
                             return true;
                         }
 

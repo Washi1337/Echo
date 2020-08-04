@@ -12,7 +12,7 @@ namespace Echo.DataFlow
     /// Represents a single node in a data flow graph.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to store in the node.</typeparam>
-    public class DataFlowNode<TContents> : IDataFlowNode
+    public class DataFlowNode<TContents> : INode
     {
         /// <summary>
         /// Creates a new data flow graph node.
@@ -102,30 +102,27 @@ namespace Echo.DataFlow
             for (int i = 0; i < StackDependencies.Count; i++)
             {
                 foreach (var source in StackDependencies[i])
-                    yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Stack, i);
+                    yield return new DataFlowEdge<TContents>(this, source.Node, DataDependencyType.Stack, i);
             }
 
             foreach (var dependency in VariableDependencies)
             {
                 foreach (var source in dependency.Value)
-                    yield return new DataFlowEdge<TContents>(this, source, DataDependencyType.Variable, dependency.Key);
+                    yield return new DataFlowEdge<TContents>(this, source.Node, DataDependencyType.Variable, dependency.Key);
             }
         }
 
         IEnumerable<INode> INode.GetPredecessors() => Dependants;
 
-        IEnumerable<INode> INode.GetSuccessors() => StackDependencies.SelectMany(v => v);
+        IEnumerable<INode> INode.GetSuccessors() => StackDependencies
+            .SelectMany(
+                dep => dep,
+                (dep, source) => source.Node);
 
         bool INode.HasPredecessor(INode node) => Dependants.Contains(node);
 
-        bool INode.HasSuccessor(INode node) => StackDependencies.Any(dep => dep.Contains(node));
-
-        IEnumerable<IDataDependency> IDataFlowNode.GetStackDependencies() => StackDependencies;
-
-        IEnumerable<KeyValuePair<IVariable, IDataDependency>> IDataFlowNode.GetVariableDependencies()
-        {
-            throw new NotImplementedException();
-        }
+        bool INode.HasSuccessor(INode node) => StackDependencies.Any(
+            dep => dep.Any(source => source.Node == node));
 
         /// <summary>
         /// Removes all incident edges (both incoming and outgoing edges) from the node, effectively isolating the node
@@ -142,6 +139,7 @@ namespace Echo.DataFlow
             {
                 foreach (var dependency in dependant.StackDependencies)
                     dependency.Remove(this);
+
                 foreach (var entry in dependant.VariableDependencies)
                     entry.Value.Remove(this);
             }

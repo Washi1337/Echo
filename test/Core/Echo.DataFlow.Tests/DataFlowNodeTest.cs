@@ -73,10 +73,10 @@ namespace Echo.DataFlow.Tests
             var dependency2 = new DataDependency<int>(n0);
             n2.StackDependencies.Add(dependency2);
 
-            Assert.Equal(new HashSet<IDataFlowNode>
+            Assert.Equal(new HashSet<DataFlowNode<int>>
             {
                 n1, n2
-            }, new HashSet<IDataFlowNode>(n0.GetDependants()));
+            }, new HashSet<DataFlowNode<int>>(n0.GetDependants()));
         }
 
         [Fact]
@@ -94,10 +94,10 @@ namespace Echo.DataFlow.Tests
 
             n1.StackDependencies.Remove(dependency1);
 
-            Assert.Equal(new HashSet<IDataFlowNode>
+            Assert.Equal(new HashSet<DataFlowNode<int>>
             {
                 n2
-            }, new HashSet<IDataFlowNode>(n0.GetDependants()));
+            }, new HashSet<DataFlowNode<int>>(n0.GetDependants()));
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace Echo.DataFlow.Tests
             var n2 = dfg2.Nodes.Add(2, 0);
 
             n1.StackDependencies.Add(new DataDependency<int>());
-            Assert.Throws<ArgumentException>(() => n1.StackDependencies[0].Add(n2));
+            Assert.Throws<ArgumentException>(() => n1.StackDependencies[0].Add(new DataSource<int>(n2)));
         }
 
         [Fact]
@@ -208,10 +208,10 @@ namespace Echo.DataFlow.Tests
             switch (edgeType)
             {
                 case DataDependencyType.Stack:
-                    n1.StackDependencies[0].Add(n2);
+                    n1.StackDependencies[0].Add(new DataSource<int>(n2));
                     break;
                 case DataDependencyType.Variable:
-                    n1.VariableDependencies[variable].Add(n2);
+                    n1.VariableDependencies[variable].Add(new DataSource<int>(n2));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(edgeType), edgeType, null);
@@ -252,7 +252,7 @@ namespace Echo.DataFlow.Tests
             var n3 = graph.Nodes.Add(3, 3);
             
             Assert.Equal(0, n1.OutDegree);
-            n1.StackDependencies.Add(new DataDependency<int>(n2, n3));
+            n1.StackDependencies.Add(new DataDependency<int>(new[] {n2, n3}));
             Assert.Equal(2, n1.OutDegree);
         }
 
@@ -282,7 +282,7 @@ namespace Echo.DataFlow.Tests
             var n3 = graph.Nodes.Add(3, 3);
             
             Assert.Equal(0, n1.OutDegree);
-            n1.VariableDependencies.Add(variable, new DataDependency<int>(n2, n3));
+            n1.VariableDependencies.Add(variable, new DataDependency<int>(new[]{n2, n3}));
             Assert.Equal(2, n1.OutDegree);
         }
     }

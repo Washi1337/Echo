@@ -51,7 +51,7 @@ namespace Echo.Platforms.AsmResolver
                 if (exceptionSource is {})
                 {
                     DataFlowGraph.Nodes.Add(exceptionSource);
-                    result.Stack.Push(new SymbolicValue<CilInstruction>(exceptionSource));
+                    result.Stack.Push(new SymbolicValue<CilInstruction>(new DataSource<CilInstruction>(exceptionSource)));
                     break;
                 }
             }

@@ -42,7 +42,7 @@ namespace Echo.Platforms.Iced.Tests
 
             var eax = _architecture.GetRegister(Register.EAX);
             Assert.True(dfg.Nodes[0x5].VariableDependencies.ContainsKey(eax));
-            Assert.Contains(dfg.Nodes[0], dfg.Nodes[0x5].VariableDependencies[eax]);
+            Assert.Contains(dfg.Nodes[0], dfg.Nodes[0x5].VariableDependencies[eax].GetNodes());
         }
 
         [Fact]
@@ -57,7 +57,7 @@ namespace Echo.Platforms.Iced.Tests
 
             var of = _architecture.GetFlag(RflagsBits.OF);
             Assert.True(dfg.Nodes[0x3].VariableDependencies.ContainsKey(of));
-            Assert.Contains(dfg.Nodes[0], dfg.Nodes[0x3].VariableDependencies[of]);
+            Assert.Contains(dfg.Nodes[0], dfg.Nodes[0x3].VariableDependencies[of].GetNodes());
         }
 
         [Fact]
@@ -74,7 +74,7 @@ namespace Echo.Platforms.Iced.Tests
                 .FirstOrDefault(v => v.Key.Name == "ESP")
                 .Value;
             Assert.NotNull(dependency);
-            Assert.Contains(dfg.Nodes[0], dependency);
+            Assert.Contains(dfg.Nodes[0], dependency.GetNodes());
         }
     }
 }
