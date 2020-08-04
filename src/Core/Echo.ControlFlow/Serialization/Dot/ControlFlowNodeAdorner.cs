@@ -12,6 +12,20 @@ namespace Echo.ControlFlow.Serialization.Dot
     public class ControlFlowNodeAdorner<TInstruction> : IDotNodeAdorner
     {
         /// <summary>
+        /// Creates a new <see cref="ControlFlowNodeAdorner{TInstruction}"/> with the default formatter.
+        /// </summary>
+        public ControlFlowNodeAdorner()
+            : this(DefaultInstructionFormatter<TInstruction>.Instance) { }
+
+        /// <summary>
+        /// Creates a new <see cref="ControlFlowNodeAdorner{TInstruction}"/> with
+        /// the specified <see cref="IInstructionFormatter{TInstruction}"/>.
+        /// </summary>
+        /// <param name="formatter">The <see cref="IInstructionFormatter{TInstruction}"/> to format instructions with.</param>
+        public ControlFlowNodeAdorner(IInstructionFormatter<TInstruction> formatter) =>
+            InstructionFormatter = formatter;
+        
+        /// <summary>
         /// Gets or sets the shape of the node.
         /// </summary>
         public string NodeShape
@@ -47,6 +61,15 @@ namespace Echo.ControlFlow.Serialization.Dot
             get;
             set;
         } = "Block_{0:X8}:";
+
+        /// <summary>
+        /// Gets or sets the formatter that will be used to format the instructions.
+        /// </summary>
+        public IInstructionFormatter<TInstruction> InstructionFormatter
+        {
+            get;
+            set;
+        }
         
         /// <inheritdoc />
         public IDictionary<string, string> GetNodeAttributes(INode node)
@@ -66,7 +89,7 @@ namespace Echo.ControlFlow.Serialization.Dot
                     for (int i = 0; i < cfgNode.Contents.Instructions.Count; i++)
                     {
                         var instruction = cfgNode.Contents.Instructions[i];
-                        contentsBuilder.Append(instruction);
+                        contentsBuilder.Append(InstructionFormatter.Format(instruction));
                         contentsBuilder.Append("\\l");
                     }
                 }
