@@ -42,16 +42,12 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state)
-        {
-            throw new System.NotImplementedException();
-        }
+        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
+            visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state)
-        {
-            throw new System.NotImplementedException();
-        }
+        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
+            visitor.Visit(this, state);
 
         /// <inheritdoc />
         public override string ToString() => $"{Target} = φ({string.Join(", ", Sources)})";
