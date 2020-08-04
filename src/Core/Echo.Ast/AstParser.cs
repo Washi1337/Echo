@@ -53,11 +53,14 @@ namespace Echo.Ast
             private readonly CompilationUnit<TInstruction> _compilationUnit;
             private readonly ControlFlowGraph<TInstruction> _controlFlowGraph;
             private readonly DataFlowGraph<TInstruction> _dataFlowGraph;
-            private readonly Dictionary<DataDependency<TInstruction>, AstVariable> _stackSlots;
+            private readonly Dictionary<TInstruction, AstVariable[]> _stackSlots;
             private readonly Dictionary<ControlFlowNode<TInstruction>, ControlFlowNode<AstStatementBase<TInstruction>>> _mapping;
+            private readonly Dictionary<ControlFlowRegion<TInstruction>, ControlFlowRegion<AstStatementBase<TInstruction>>> _oldToNew;
+            private readonly Dictionary<ControlFlowRegion<AstStatementBase<TInstruction>>, ControlFlowRegion<TInstruction>> _newToOld;
             private readonly Stack<IControlFlowRegion<AstStatementBase<TInstruction>>> _regions;
             private long _id = -1;
-            private long _variableCount = 0;
+            private long _variableCount;
+            private long _phiSlotCount;
             
             internal BlockTransformer(
                 CompilationUnit<TInstruction> compilationUnit,
@@ -67,8 +70,10 @@ namespace Echo.Ast
                 _compilationUnit = compilationUnit;
                 _controlFlowGraph = controlFlowGraph;
                 _dataFlowGraph = dataFlowGraph;
-                _stackSlots = new Dictionary<DataDependency<TInstruction>, AstVariable>();
+                _stackSlots = new Dictionary<TInstruction, AstVariable[]>();
                 _mapping = new Dictionary<ControlFlowNode<TInstruction>, ControlFlowNode<AstStatementBase<TInstruction>>>();
+                _oldToNew = new Dictionary<ControlFlowRegion<TInstruction>, ControlFlowRegion<AstStatementBase<TInstruction>>>();
+                _newToOld = new Dictionary<ControlFlowRegion<AstStatementBase<TInstruction>>, ControlFlowRegion<TInstruction>>();
                 _regions = new Stack<IControlFlowRegion<AstStatementBase<TInstruction>>>();
             }
 
@@ -78,7 +83,6 @@ namespace Echo.Ast
             {
                 int phiCount = 0;
                 var astBlock = new BasicBlock<AstStatementBase<TInstruction>>();
-                long firstoffset = Architecture.GetOffset(block.Instructions[0]);
                 
                 foreach (var instruction in block.Instructions)
                 {
@@ -93,17 +97,19 @@ namespace Echo.Ast
                         var sources = stackDependencies[i];
                         if (sources.Count == 1)
                         {
-                            var variable = _stackSlots[sources];
-                            targetVariables[i] = variable;
+                            var dep = sources.First(); 
+                            var variable = _stackSlots[dep.Node.Contents];
+                            targetVariables[i] = variable[dep.SlotIndex];
                         }
                         else
                         {
-                            var phiSlot = new AstVariable($"stack_slot_{_variableCount++}");
-                            var phi = new AstPhiStatement<TInstruction>(_id--,
+                            var phiSlot = new AstVariable($"phi_{_phiSlotCount++}");
+                            var phi = new AstPhiStatement<TInstruction>(
+                                _id--,
                                 sources.Select(s =>
-                                        // ReSharper disable once CoVariantArrayConversion
-                                        new AstVariableExpression<TInstruction>(_id--, _stackSlots[sources.]))
-                                    .ToArray(), phiSlot);
+                                    new AstVariableExpression<TInstruction>(_id--,
+                                        _stackSlots[s.Node.Contents][s.SlotIndex])
+                                ).ToArray(), phiSlot);
 
                             astBlock.Instructions.Insert(phiCount++, phi);
                             targetVariables[i] = phiSlot;
@@ -123,26 +129,29 @@ namespace Echo.Ast
                     var writtenVariables = new IVariable[Architecture.GetWrittenVariablesCount(instruction)];
                     Architecture.GetWrittenVariables(instruction, writtenVariables.AsSpan());
                     
-                    if (!dataFlowNode.GetDependants().Any())
+                    if (!dataFlowNode.GetDependants().Any() && writtenVariables.Length == 0)
                         astBlock.Instructions.Add(new AstExpressionStatement<TInstruction>(offset, instructionExpression));
                     else
                     {
                         int stackPushCount = Architecture.GetStackPushCount(instruction);
-                        var slots = Enumerable.Range(0, stackPushCount)
-                            .Select(_ => new AstVariable($"stack_slot_{_variableCount++}"))
-                            .ToArray();
+                        var slots = stackPushCount == 0
+                            ? Array.Empty<AstVariable>()
+                            : Enumerable.Range(0, stackPushCount)
+                                .Select(_ => new AstVariable($"stack_slot_{_variableCount++}"))
+                                .ToArray();
 
                         var combined = new IVariable[slots.Length + writtenVariables.Length];
                         slots.CopyTo(combined, 0);
                         writtenVariables.CopyTo(combined, Math.Max(0, slots.Length - 1));
-                        _stackSlots[] = slots;
+                        _stackSlots[instruction] = slots;
                         astBlock.Instructions.Add(
                             new AstAssignmentStatement<TInstruction>(offset, instructionExpression, combined));
                     }
                 }
 
-                var newNode = new ControlFlowNode<AstStatementBase<TInstruction>>(firstoffset, astBlock);
-                _mapping[_controlFlowGraph.Nodes[firstoffset]] = newNode;
+                long firstOffset = Architecture.GetOffset(block.Instructions[0]);
+                var newNode = new ControlFlowNode<AstStatementBase<TInstruction>>(firstOffset, astBlock);
+                _mapping[_controlFlowGraph.Nodes[firstOffset]] = newNode;
                 _compilationUnit.Nodes.Add(newNode);
             }
 
@@ -159,24 +168,58 @@ namespace Echo.Ast
                 if (region is CompilationUnit<TInstruction>)
                 {
                     foreach (var edge in _controlFlowGraph.GetEdges())
-                    {
                         _mapping[edge.Origin].ConnectWith(_mapping[edge.Target], edge.Type);
-                    }
 
+                    foreach (var subregion in _compilationUnit.Regions)
+                        CopyRegion(_newToOld[subregion], subregion);
                     return;
                 }
-                
+
+                void CopyRegion(ControlFlowRegion<TInstruction> old,
+                    ControlFlowRegion<AstStatementBase<TInstruction>> @new)
+                {
+                    if (old is ExceptionHandlerRegion<TInstruction> oldExceptionHandlerRegion)
+                    {
+                        foreach (var protectedNode in oldExceptionHandlerRegion.ProtectedRegion.Nodes)
+                            ((ExceptionHandlerRegion<AstStatementBase<TInstruction>>) @new).ProtectedRegion.Nodes.Add(_mapping[protectedNode]);
+                        foreach (var handlerRegion in oldExceptionHandlerRegion.HandlerRegions)
+                            CopyRegion(handlerRegion, _oldToNew[handlerRegion]);
+                    }
+
+                    if (old is BasicControlFlowRegion<TInstruction> basicControlFlowRegion)
+                    {
+                        foreach (var node in basicControlFlowRegion.Nodes)
+                            ((BasicControlFlowRegion<AstStatementBase<TInstruction>>) @new).Nodes.Add(_mapping[node]);
+                        foreach (var subregion in basicControlFlowRegion.Regions)
+                            CopyRegion(subregion, _oldToNew[subregion]);
+                    }
+                }
+
                 _compilationUnit.Regions.Add((ControlFlowRegion<AstStatementBase<TInstruction>>) region);
             }
 
             private IControlFlowRegion<AstStatementBase<TInstruction>> TransformRegion(
                 IControlFlowRegion<TInstruction> region)
             {
+                IControlFlowRegion<AstStatementBase<TInstruction>> AddToMapping(ControlFlowRegion<TInstruction> old)
+                {
+                    ControlFlowRegion<AstStatementBase<TInstruction>> @new = old switch
+                    {
+                        BasicControlFlowRegion<TInstruction> _ => new BasicControlFlowRegion<AstStatementBase<TInstruction>>(),
+                        ExceptionHandlerRegion<TInstruction> _ => new ExceptionHandlerRegion<AstStatementBase<TInstruction>>(),
+                        _ => throw new NotSupportedException()
+                    };
+
+                    _oldToNew[old] = @new;
+                    _newToOld[@new] = old;
+                    return @new;
+                }
+                
                 return region switch
                 {
                     ControlFlowGraph<TInstruction> _ => _compilationUnit,
-                    BasicControlFlowRegion<TInstruction> _ => new BasicControlFlowRegion<AstStatementBase<TInstruction>>(),
-                    ExceptionHandlerRegion<TInstruction> _ => new ExceptionHandlerRegion<AstStatementBase<TInstruction>>(),
+                    BasicControlFlowRegion<TInstruction> basicControlFlowRegion => AddToMapping(basicControlFlowRegion),
+                    ExceptionHandlerRegion<TInstruction> exceptionHandlerRegion => AddToMapping(exceptionHandlerRegion),
                     _ => throw new NotSupportedException()
                 };
             }
