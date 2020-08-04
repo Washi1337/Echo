@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Echo.ControlFlow.Serialization.Dot;
 
 namespace Echo.Ast
 {
@@ -49,5 +50,8 @@ namespace Echo.Ast
 
         /// <inheritdoc />
         public override string ToString() => $"{Content}({string.Join(", ", Parameters)})";
+
+        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
+            $"{instructionFormatter.Format(Content)}({string.Join(", ", Parameters)})";
     }
 }

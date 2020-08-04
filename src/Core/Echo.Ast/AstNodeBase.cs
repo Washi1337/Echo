@@ -1,3 +1,4 @@
+using Echo.ControlFlow.Serialization.Dot;
 using Echo.Core.Graphing;
 
 namespace Echo.Ast
@@ -23,5 +24,7 @@ namespace Echo.Ast
         /// Implements the visitor pattern
         /// </summary>
         public abstract TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state);
+
+        internal abstract string Format(IInstructionFormatter<TInstruction> instructionFormatter);
     }
 }

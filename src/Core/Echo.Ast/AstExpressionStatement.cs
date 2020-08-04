@@ -1,3 +1,5 @@
+using Echo.ControlFlow.Serialization.Dot;
+
 namespace Echo.Ast
 {
     /// <summary>
@@ -35,5 +37,8 @@ namespace Echo.Ast
 
         /// <inheritdoc />
         public override string ToString() => $"{Expression}";
+
+        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
+            $"{Expression.Format(instructionFormatter)}";
     }
 }

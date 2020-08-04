@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Echo.ControlFlow.Serialization.Dot;
 using Echo.Core.Code;
 
 namespace Echo.Ast
@@ -54,5 +55,7 @@ namespace Echo.Ast
 
         /// <inheritdoc />
         public override string ToString() => $"{Target} = φ({string.Join(", ", Sources)})";
+
+        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) => ToString();
     }
 }

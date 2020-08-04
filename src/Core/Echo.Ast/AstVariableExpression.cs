@@ -1,4 +1,5 @@
-﻿using Echo.Core.Code;
+﻿using Echo.ControlFlow.Serialization.Dot;
+using Echo.Core.Code;
 
 namespace Echo.Ast
 {
@@ -36,5 +37,7 @@ namespace Echo.Ast
 
         /// <inheritdoc />
         public override string ToString() => $"{Variable}";
+
+        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) => ToString();
     }
 }

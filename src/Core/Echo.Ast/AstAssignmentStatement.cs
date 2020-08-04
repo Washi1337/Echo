@@ -1,4 +1,6 @@
-﻿using Echo.Core.Code;
+﻿using System.Linq;
+using Echo.ControlFlow.Serialization.Dot;
+using Echo.Core.Code;
 
 namespace Echo.Ast
 {
@@ -46,6 +48,9 @@ namespace Echo.Ast
             visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override string ToString() => $"{string.Join(", ", (object[]) Variables)} = {Expression}";
+        public override string ToString() => $"{string.Join(", ", Variables.Select(v => v.ToString()))} = {Expression}";
+        
+        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
+           $"{string.Join(", ", Variables.Select(v => v.ToString()))} = {Expression.Format(instructionFormatter)}"; 
     }
 }
