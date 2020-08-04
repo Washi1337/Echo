@@ -2,9 +2,6 @@
 {
     internal sealed class DefaultInstructionFormatter<TInstruction> : IInstructionFormatter<TInstruction>
     {
-        public string Format(in TInstruction instruction)
-        {
-            return instruction.ToString();
-        }
+        public string Format(in TInstruction instruction) => instruction.ToString();
     }
 }
