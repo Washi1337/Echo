@@ -24,7 +24,7 @@ namespace Echo.DataFlow.Serialization.Dot
         {
             switch (node)
             {
-                case ExternalDataSource<TContents> externalDataSource:
+                case ExternalDataSourceNode<TContents> externalDataSource:
                     return new Dictionary<string, string>
                     {
                         ["shape"] = NodeShape,

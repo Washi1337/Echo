@@ -307,6 +307,11 @@ namespace Echo.DataFlow
             }
         }
 
+        /// <summary>
+        /// Removes all data sources that are related to the specified node.
+        /// </summary>
+        /// <param name="node">The node to remove all data sources from.</param>
+        /// <returns><c>true</c> if any data source was removed, <c>false</c> otherwise.</returns>
         public bool Remove(DataFlowNode<TContents> node)
         {
             var sourcesToRemove = new List<DataSource<TContents>>();
@@ -348,6 +353,9 @@ namespace Echo.DataFlow
             }
         }
 
+        /// <summary>
+        /// Gets a collection of nodes that were referenced by all data sources in this data dependency.
+        /// </summary>
         public IEnumerable<DataFlowNode<TContents>> GetNodes() => this
             .Select(source => source.Node)
             .Distinct();

@@ -31,16 +31,16 @@ namespace Echo.Platforms.Dnlib
             
             foreach (var eh in _architecture.MethodBody.ExceptionHandlers)
             {
-                var exceptionSource = default(ExternalDataSource<Instruction>);
+                var exceptionSource = default(ExternalDataSourceNode<Instruction>);
                 if (eh.HandlerStart.Offset == entrypointAddress)
                 {
-                    exceptionSource = new ExternalDataSource<Instruction>(
+                    exceptionSource = new ExternalDataSourceNode<Instruction>(
                         -(long) eh.HandlerStart.Offset,
                         $"HandlerException_{eh.HandlerStart.Offset:X4}");
                 }
                 else if (eh.FilterStart != null && eh.FilterStart.Offset == entrypointAddress)
                 {
-                    exceptionSource = new ExternalDataSource<Instruction>(
+                    exceptionSource = new ExternalDataSourceNode<Instruction>(
                         -(long) eh.FilterStart.Offset,
                         $"FilterException_{eh.FilterStart.Offset:X4}");
                 }

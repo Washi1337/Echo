@@ -261,7 +261,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             };
 
             var dfgBuilder = new DummyTransitionResolver();
-            var argument = new ExternalDataSource<DummyInstruction>(-1, "Argument 1");
+            var argument = new ExternalDataSourceNode<DummyInstruction>(-1, "Argument 1");
             dfgBuilder.DataFlowGraph.Nodes.Add(argument);
             dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>();
             dfgBuilder.InitialState.Stack.Push(new SymbolicValue<DummyInstruction>(argument));
