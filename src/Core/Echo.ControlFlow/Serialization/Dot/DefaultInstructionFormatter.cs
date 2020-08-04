@@ -1,12 +1,12 @@
 ﻿namespace Echo.ControlFlow.Serialization.Dot
 {
-    internal sealed class DefaultInstructionFormatter<TInstruction> : IInstructionFormatter<TInstruction>
+    /// <summary>
+    /// Provides a default implementation for <see cref="IInstructionFormatter{TInstruction}"/>.
+    /// </summary>
+    /// <typeparam name="TInstruction">The type of the instruction to create a formatter of.</typeparam>
+    public sealed class DefaultInstructionFormatter<TInstruction> : IInstructionFormatter<TInstruction>
     {
-        internal static readonly DefaultInstructionFormatter<TInstruction> Instance
-            = new DefaultInstructionFormatter<TInstruction>();
-        
-        private DefaultInstructionFormatter() { }
-        
+        /// <inheritdoc />
         public string Format(in TInstruction instruction) => instruction.ToString();
     }
 }

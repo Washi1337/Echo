@@ -15,7 +15,7 @@ namespace Echo.ControlFlow.Serialization.Dot
         /// Creates a new <see cref="ControlFlowNodeAdorner{TInstruction}"/> with the default formatter.
         /// </summary>
         public ControlFlowNodeAdorner()
-            : this(DefaultInstructionFormatter<TInstruction>.Instance) { }
+            : this(new DefaultInstructionFormatter<TInstruction>()) { }
 
         /// <summary>
         /// Creates a new <see cref="ControlFlowNodeAdorner{TInstruction}"/> with
