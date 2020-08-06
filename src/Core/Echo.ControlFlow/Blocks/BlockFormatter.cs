@@ -82,5 +82,49 @@ namespace Echo.ControlFlow.Blocks
             _builder.Append('}');
             _builder.AppendLine();
         }
+
+        /// <inheritdoc />
+        public void EnterExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block)
+        {
+            AppendIndentationString();
+            _builder.Append('{');
+            _builder.AppendLine();
+            
+            _indentationLevel++;
+        }
+
+        /// <inheritdoc />
+        public void ExitExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block)
+        {
+            _indentationLevel--;
+            
+            AppendIndentationString();
+            _builder.Append('}');
+            _builder.AppendLine();
+        }
+
+        /// <inheritdoc />
+        public void EnterProtectedBlock(ExceptionHandlerBlock<TInstruction> block)
+        {
+            AppendIndentationString();
+            _builder.AppendLine("try:");
+        }
+
+        /// <inheritdoc />
+        public void ExitProtectedBlock(ExceptionHandlerBlock<TInstruction> block)
+        {
+        }
+
+        /// <inheritdoc />
+        public void EnterHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex)
+        {
+            AppendIndentationString();
+            _builder.AppendLine("handler:");
+        }
+
+        /// <inheritdoc />
+        public void ExitHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex)
+        {
+        }
     }
 }
