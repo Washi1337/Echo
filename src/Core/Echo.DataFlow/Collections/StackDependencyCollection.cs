@@ -39,7 +39,7 @@ namespace Echo.DataFlow.Collections
             if (item.Dependant != null)
                 throw new ArgumentException("Stack dependency was already added to another node.");
             
-            if (item.Any(n => n.ParentGraph != _owner.ParentGraph))
+            if (item.Any(n => n.Node.ParentGraph != _owner.ParentGraph))
                 throw new ArgumentException("Dependency contains data sources from another graph.");
         }
 

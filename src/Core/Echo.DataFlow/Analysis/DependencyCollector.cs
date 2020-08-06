@@ -38,13 +38,13 @@ namespace Echo.DataFlow.Analysis
                 foreach (var dependency in node.StackDependencies)
                 {
                     if (dependency.HasKnownDataSources)
-                        result.Add(dependency.First());
+                        result.Add(dependency.First().Node);
                 }
                 
                 foreach (var entry in node.VariableDependencies)
                 {
                     if (entry.Value.HasKnownDataSources)
-                        result.Add(entry.Value.First());
+                        result.Add(entry.Value.First().Node);
                 }
 
                 return result;

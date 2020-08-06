@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Echo.DataFlow
 {
@@ -22,7 +23,15 @@ namespace Echo.DataFlow
         /// <summary>
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
-        public DataDependency(DataFlowNode<TContents> dataSource)
+        public DataDependency(DataFlowNode<TContents> sourceNode)
+            : base(new DataSource<TContents>(sourceNode))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new data dependency with the provided data sources.
+        /// </summary>
+        public DataDependency(DataSource<TContents> dataSource)
             : base(dataSource)
         {
         }
@@ -30,9 +39,9 @@ namespace Echo.DataFlow
         /// <summary>
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
-        /// <param name="dataSources">The data sources.</param>
-        public DataDependency(params DataFlowNode<TContents>[] dataSources)
-            : base(dataSources)
+        /// <param name="sourceNodes">The data sources.</param>
+        public DataDependency(IEnumerable<DataFlowNode<TContents>> sourceNodes)
+            : base(sourceNodes.Select(source => new DataSource<TContents>(source)))
         {
         }
         
@@ -40,11 +49,11 @@ namespace Echo.DataFlow
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
         /// <param name="dataSources">The data sources.</param>
-        public DataDependency(IEnumerable<DataFlowNode<TContents>> dataSources)
+        public DataDependency(IEnumerable<DataSource<TContents>> dataSources)
             : base(dataSources)
         {
         }
-
+        
         /// <summary>
         /// Gets the node that owns the dependency.
         /// </summary>
@@ -58,7 +67,7 @@ namespace Echo.DataFlow
                     if (_dependant != null)
                     {
                         foreach (var source in this)
-                            source.Dependants.Remove(_dependant);
+                            source.Node.Dependants.Remove(_dependant);
                     }
 
                     _dependant = value;
@@ -66,23 +75,23 @@ namespace Echo.DataFlow
                     if (_dependant != null)
                     {
                         foreach (var source in this)
-                            source.Dependants.Add(_dependant);
+                            source.Node.Dependants.Add(_dependant);
                     }
                 }
             }
         }
 
         /// <inheritdoc />
-        public override bool Add(DataFlowNode<TContents> item)
+        public override bool Add(DataSource<TContents> item)
         {
             if (item is null)
                 throw new ArgumentNullException(nameof(item));
-            if (Dependant != null && item.ParentGraph != Dependant.ParentGraph)
+            if (Dependant != null && item.Node.ParentGraph != Dependant.ParentGraph)
                 throw new ArgumentException("Data source is not added to the same graph.");
 
             if (base.Add(item))
             {
-                item.Dependants.Add(Dependant);
+                item.Node.Dependants.Add(Dependant);
                 return true;
             }
 
@@ -90,14 +99,14 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public override bool Remove(DataFlowNode<TContents> item)
+        public override bool Remove(DataSource<TContents> item)
         {
             if (item is null)
                 return false;
             
             if (base.Remove(item))
             {
-                item.Dependants.Remove(Dependant);
+                item.Node.Dependants.Remove(Dependant);
                 return true;
             }
 

@@ -59,7 +59,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             var (cfg, dfg) = BuildFlowGraphs(instructions);
             
             Assert.Single(dfg.Nodes[1].StackDependencies);
-            Assert.Equal(dfg.Nodes[0], dfg.Nodes[1].StackDependencies[0].First());
+            Assert.Equal(dfg.Nodes[0], dfg.Nodes[1].StackDependencies[0].First().Node);
             Assert.Equal(new[]{dfg.Nodes[1]}, dfg.Nodes[0].GetDependants());
         }
         
@@ -81,7 +81,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             Assert.Equal(new[]
             {
                 dfg.Nodes[0], dfg.Nodes[1], dfg.Nodes[2],
-            }, dfg.Nodes[3].StackDependencies.Select(dep => dep.First()));
+            }, dfg.Nodes[3].StackDependencies.Select(dep => dep.First().Node));
         }
         
         [Fact]
@@ -105,9 +105,9 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             var (cfg, dfg) = BuildFlowGraphs(instructions);
             
             Assert.Single(dfg.Nodes[3].StackDependencies);
-            Assert.Equal(dfg.Nodes[0], dfg.Nodes[3].StackDependencies[0].First());
+            Assert.Equal(dfg.Nodes[0], dfg.Nodes[3].StackDependencies[0].First().Node);
             Assert.Single(dfg.Nodes[5].StackDependencies);
-            Assert.Equal(dfg.Nodes[0], dfg.Nodes[5].StackDependencies[0].First());
+            Assert.Equal(dfg.Nodes[0], dfg.Nodes[5].StackDependencies[0].First().Node);
         }
 
         [Fact]
@@ -131,8 +131,8 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
         
             Assert.Single(dfg.Nodes[5].StackDependencies);
             Assert.Equal(
-                new HashSet<IDataFlowNode> { dfg.Nodes[2], dfg.Nodes[4] },
-                new HashSet<IDataFlowNode>(dfg.Nodes[5].StackDependencies[0]));
+                new HashSet<DataFlowNode<DummyInstruction>> {dfg.Nodes[2], dfg.Nodes[4]},
+                new HashSet<DataFlowNode<DummyInstruction>>(dfg.Nodes[5].StackDependencies[0].Select(s => s.Node)));
         }
 
         [Fact]
@@ -154,10 +154,10 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             };
 
             var (cfg, dfg) = BuildFlowGraphs(instructions);
-        
+
             Assert.Equal(
-                new HashSet<IDataFlowNode> { dfg.Nodes[2], dfg.Nodes[4] },
-                new HashSet<IDataFlowNode>(dfg.Nodes[6].StackDependencies[0]));
+                new HashSet<DataFlowNode<DummyInstruction>> {dfg.Nodes[2], dfg.Nodes[4]},
+                new HashSet<DataFlowNode<DummyInstruction>>(dfg.Nodes[6].StackDependencies[0].Select(s => s.Node)));
             Assert.Equal(new[]
             {
                 dfg.Nodes[6]
@@ -261,7 +261,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             };
 
             var dfgBuilder = new DummyTransitionResolver();
-            var argument = new ExternalDataSource<DummyInstruction>(-1, "Argument 1");
+            var argument = new ExternalDataSourceNode<DummyInstruction>(-1, "Argument 1");
             dfgBuilder.DataFlowGraph.Nodes.Add(argument);
             dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>();
             dfgBuilder.InitialState.Stack.Push(new SymbolicValue<DummyInstruction>(argument));
@@ -273,8 +273,24 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             cfgBuilder.ConstructFlowGraph(0);
             var dfg = dfgBuilder.DataFlowGraph;
 
-            Assert.Equal(new[] {argument}, dfg.Nodes[0].StackDependencies[0]);
+            Assert.Equal(new[] {argument}, dfg.Nodes[0].StackDependencies[0].GetNodes());
         }
 
+        [Fact]
+        public void PushingMultipleStackSlots()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Push(0, 2),
+                DummyInstruction.Pop(1, 1),
+                DummyInstruction.Pop(2, 1),
+                DummyInstruction.Ret(3),
+            };
+            
+            var (cfg, dfg) = BuildFlowGraphs(instructions);
+            
+            Assert.Equal(1, dfg.Nodes[1].StackDependencies[0].First().SlotIndex);
+            Assert.Equal(0, dfg.Nodes[2].StackDependencies[0].First().SlotIndex);
+        }
     }
 }
