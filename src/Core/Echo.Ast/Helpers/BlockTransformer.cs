@@ -15,8 +15,12 @@ namespace Echo.Ast.Helpers
         private readonly ControlFlowGraph<TInstruction> _controlFlowGraph;
         private readonly DataFlowGraph<TInstruction> _dataFlowGraph;
         private readonly Dictionary<TInstruction, AstVariable[]> _stackSlots = new Dictionary<TInstruction, AstVariable[]>();
-        private readonly Dictionary<ControlFlowRegion<TInstruction>, ControlFlowRegion<AstStatementBase<TInstruction>>>
-            _regionMapping = new Dictionary<ControlFlowRegion<TInstruction>, ControlFlowRegion<AstStatementBase<TInstruction>>>();
+        private readonly Stack<IControlFlowRegion<AstStatementBase<TInstruction>>>
+            _regions = new Stack<IControlFlowRegion<AstStatementBase<TInstruction>>>();
+        private readonly Dictionary<ControlFlowNode<TInstruction>, ControlFlowNode<AstStatementBase<TInstruction>>>
+            _mapping = new Dictionary<ControlFlowNode<TInstruction>, ControlFlowNode<AstStatementBase<TInstruction>>>();
+        private readonly Dictionary<IControlFlowRegion<TInstruction>, IControlFlowRegion<AstStatementBase<TInstruction>>>
+            _regionsMapping = new Dictionary<IControlFlowRegion<TInstruction>, IControlFlowRegion<AstStatementBase<TInstruction>>>();
 
         private long _id = -1;
         private long _varCount;
@@ -30,7 +34,10 @@ namespace Echo.Ast.Helpers
             _compilationUnit = compilationUnit;
             _controlFlowGraph = controlFlowGraph;
             _dataFlowGraph = dataFlowGraph;
+            _regionsMapping[_controlFlowGraph] = _compilationUnit;
         }
+
+        private IInstructionSetArchitecture<TInstruction> Architecture => _controlFlowGraph.Architecture;
 
         public void VisitBasicBlock(BasicBlock<TInstruction> block)
         {
@@ -42,8 +49,7 @@ namespace Echo.Ast.Helpers
 
             foreach (var instruction in block.Instructions)
             {
-                var architecture = _controlFlowGraph.Architecture;
-                long offset = architecture.GetOffset(instruction);
+                long offset = Architecture.GetOffset(instruction);
                 var dataFlowNode = _dataFlowGraph.Nodes[offset];
                 var stackDependencies = dataFlowNode.StackDependencies;
                 var variableDependencies = dataFlowNode.VariableDependencies;
@@ -89,9 +95,9 @@ namespace Echo.Ast.Helpers
                 );
 
                 var writtenVariables = CreateVariablesBuffer(
-                    architecture.GetWrittenVariablesCount(instruction));
+                    Architecture.GetWrittenVariablesCount(instruction));
                 if (writtenVariables.Length > 0)
-                    architecture.GetWrittenVariables(instruction, writtenVariables.AsSpan());
+                    Architecture.GetWrittenVariables(instruction, writtenVariables.AsSpan());
 
                 if (!dataFlowNode.GetDependants().Any() && writtenVariables.Length == 0)
                 {
@@ -99,7 +105,7 @@ namespace Echo.Ast.Helpers
                 }
                 else
                 {
-                    int stackPushCount = architecture.GetStackPushCount(instruction);
+                    int stackPushCount = Architecture.GetStackPushCount(instruction);
                     var slots = stackPushCount == 0
                         ? Array.Empty<AstVariable>()
                         : CreateVariablesBuffer(stackPushCount)
@@ -116,47 +122,82 @@ namespace Echo.Ast.Helpers
                 }
             }
 
-            _compilationUnit.Nodes.Add(new ControlFlowNode<AstStatementBase<TInstruction>>(mock.Offset, mock));
+            var original = _controlFlowGraph.Nodes[block.Offset];
+            var node = new ControlFlowNode<AstStatementBase<TInstruction>>(mock.Offset, mock);
+            _mapping[original] = node;
         }
 
         public void EnterScopeBlock(ScopeBlock<TInstruction> block)
         {
-            throw new NotImplementedException();
+            long offset = block.GetAllBlocks().First().Offset;
+            var node = _controlFlowGraph.Nodes[offset];
+            var region = node.ParentRegion;
+            IControlFlowRegion<AstStatementBase<TInstruction>> transformed = region switch
+            {
+                ControlFlowGraph<TInstruction> _ => _compilationUnit,
+                BasicControlFlowRegion<TInstruction> _ => new BasicControlFlowRegion<AstStatementBase<TInstruction>>(),
+                _ => throw new NotSupportedException()
+            };
+            
+            _regionsMapping[region] = transformed;
+            _regions.Push(transformed);
         }
 
         public void ExitScopeBlock(ScopeBlock<TInstruction> block)
         {
-            throw new NotImplementedException();
+            _regions.Pop();
+            if (_regions.Count != 0)
+                return;
+            
+            foreach (var edge in _controlFlowGraph.GetEdges())
+                _mapping[edge.Origin].ConnectWith(_mapping[edge.Target], edge.Type);
+            
+            CloneRegions(_controlFlowGraph, _compilationUnit);
         }
 
-        public void EnterExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block)
-        {
-            throw new NotImplementedException();
-        }
+        public void EnterExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block) { }
 
-        public void ExitExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block)
-        {
-            throw new NotImplementedException();
-        }
+        public void ExitExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block) { }
 
-        public void EnterProtectedBlock(ExceptionHandlerBlock<TInstruction> block)
-        {
-            throw new NotImplementedException();
-        }
+        public void EnterProtectedBlock(ExceptionHandlerBlock<TInstruction> block) { }
 
-        public void ExitProtectedBlock(ExceptionHandlerBlock<TInstruction> block)
-        {
-            throw new NotImplementedException();
-        }
+        public void ExitProtectedBlock(ExceptionHandlerBlock<TInstruction> block) { }
 
-        public void EnterHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex)
-        {
-            throw new NotImplementedException();
-        }
+        public void EnterHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex) { }
 
-        public void ExitHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex)
+        public void ExitHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex) { }
+
+        private void CloneRegions(
+            IControlFlowRegion<TInstruction> old, IControlFlowRegion<AstStatementBase<TInstruction>> @new)
         {
-            throw new NotImplementedException();
+            IControlFlowRegion<AstStatementBase<TInstruction>> GetClone(IControlFlowRegion<TInstruction> oldReg)
+            {
+                if (_regionsMapping.TryGetValue(oldReg, out var value))
+                    return value;
+                
+                var newRegion = new ExceptionHandlerRegion<AstStatementBase<TInstruction>>();
+                _regionsMapping[oldReg] = newRegion;
+
+                return newRegion;
+            }
+            
+            if (old is ControlFlowGraph<TInstruction> cfg)
+            {
+                foreach (var region in cfg.Regions)
+                    CloneRegions(region, GetClone(region));
+            }
+            else if (old is BasicControlFlowRegion<TInstruction> basic)
+            {
+                foreach (var node in basic.Nodes)
+                    ((BasicControlFlowRegion<AstStatementBase<TInstruction>>) @new).Nodes.Add(_mapping[node]);
+            }
+            else
+            {
+                var eh = (ExceptionHandlerRegion<TInstruction>) old;
+                CloneRegions(eh.ProtectedRegion, GetClone(eh.ProtectedRegion));
+                foreach (var handler in eh.HandlerRegions)
+                    CloneRegions(handler, GetClone(handler));
+            }
         }
     }
 }
