@@ -2,7 +2,7 @@
 using System.Linq;
 using Echo.Core.Code;
 
-namespace Echo.Ast
+namespace Echo.Ast.Helpers
 {
     internal sealed class ReadVariableFinderVisitor<TInstruction> : IAstNodeVisitor<TInstruction, object>
     {
