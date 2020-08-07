@@ -178,18 +178,18 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var instructions = new[]
             {
                 DummyInstruction.Op(0, 0, 0),
-                
+
                 // try start
                 DummyInstruction.Op(1, 0, 0),
                 DummyInstruction.Jmp(2, 5),
-                
+
                 // handler start
                 DummyInstruction.Op(3, 0, 0),
                 DummyInstruction.Jmp(4, 5),
-                
+
                 DummyInstruction.Ret(5),
             };
-            
+
             var ranges = new[]
             {
                 new ExceptionHandlerRange(new AddressRange(1, 3), new AddressRange(3, 5)),
@@ -198,11 +198,53 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
             var blockBuilder = new BlockBuilder<DummyInstruction>();
             var rootScope = blockBuilder.ConstructBlocks(cfg);
-            
+
             var order = rootScope.GetAllBlocks().ToArray();
+
+            Assert.Equal(3, rootScope.Blocks.Count);
+            Assert.IsAssignableFrom<ExceptionHandlerBlock<DummyInstruction>>(rootScope.Blocks[1]);
             Assert.Equal(
                 new long[] {0, 1, 3, 5}, 
                 order.Select(b => b.Offset));
+        }
+
+        [Fact]
+        public void EHWithMultipleHandlersByRangesShouldGroupTogether()
+        {
+            var ranges = new[]
+            {
+                new ExceptionHandlerRange(new AddressRange(1, 3), new AddressRange(3, 5)),
+                new ExceptionHandlerRange(new AddressRange(1, 3), new AddressRange(5, 7)),
+            };
+            
+            var instructions = new[]
+            {
+                DummyInstruction.Op(0, 0, 0),
+                
+                // try start 1 & 2
+                DummyInstruction.Op(1, 0, 0),
+                DummyInstruction.Jmp(2, 7),
+                
+                // handler start 2
+                DummyInstruction.Op(3, 0, 0),
+                DummyInstruction.Jmp(4, 7),
+                
+                // handler start 1
+                DummyInstruction.Op(5, 0, 0),
+                DummyInstruction.Jmp(6, 7),
+                
+                DummyInstruction.Ret(7),
+            };
+
+            var cfg = ConstructGraphWithEHRegions(instructions, ranges);
+            var blockBuilder = new BlockBuilder<DummyInstruction>();
+            var rootScope = blockBuilder.ConstructBlocks(cfg);
+            
+            var order = rootScope.GetAllBlocks().ToArray();
+
+            Assert.Equal(3, rootScope.Blocks.Count);
+            Assert.IsAssignableFrom<ExceptionHandlerBlock<DummyInstruction>>(rootScope.Blocks[1]);
+            Assert.Equal(2, ((ExceptionHandlerBlock<DummyInstruction>) rootScope.Blocks[1]).HandlerBlocks.Count);
         }
     }
 }
