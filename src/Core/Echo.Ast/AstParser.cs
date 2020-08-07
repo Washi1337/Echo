@@ -19,7 +19,7 @@ namespace Echo.Ast
         private readonly DataFlowGraph<TInstruction> _dataFlowGraph;
         private readonly IInstructionSetArchitecture<AstStatementBase<TInstruction>> _architecture;
 
-        private readonly Dictionary<TInstruction, AstVariable[]> _stackSlots = new Dictionary<TInstruction, AstVariable[]>();
+        private readonly Dictionary<long, AstVariable[]> _stackSlots = new Dictionary<long, AstVariable[]>();
         private readonly Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<AstStatementBase<TInstruction>>>
             _regionsMapping = new Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<AstStatementBase<TInstruction>>>();
 
@@ -148,15 +148,22 @@ namespace Echo.Ast
                     if (sources.Count == 1)
                     {
                         var source = sources.First();
-                        var slot = _stackSlots[source.Node.Contents][source.SlotIndex];
-                        targetVariables[i] = slot;
+                        if (source.Node.IsExternal)
+                        {
+                            targetVariables[i] = new AstVariable(((ExternalDataSourceNode<TInstruction>) source.Node).Name);
+                        }
+                        else
+                        {
+                            var slot = _stackSlots[source.Node.Id][source.SlotIndex];
+                            targetVariables[i] = slot;
+                        }
                     }
                     else
                     {
                         var phiVar = new AstVariable($"phi_{_phiVarCount++}");
                         
                         var slots = sources
-                            .Select(s => _stackSlots[s.Node.Contents][s.SlotIndex]);
+                            .Select(s => _stackSlots[s.Node.Id][s.SlotIndex]);
                         var variables = slots
                             .Select(s => new AstVariableExpression<TInstruction>(_id--, s));
                         
@@ -202,7 +209,7 @@ namespace Echo.Ast
                     slots.CopyTo(combined, 0);
                     writtenVariables.CopyTo(combined, Math.Max(0, slots.Length - 1));
 
-                    _stackSlots[instruction] = slots;
+                    _stackSlots[offset] = slots;
                     result.Instructions.Add(
                         new AstAssignmentStatement<TInstruction>(_id--, instructionExpression, combined));
                 }
