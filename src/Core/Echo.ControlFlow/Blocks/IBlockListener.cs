@@ -21,6 +21,45 @@ namespace Echo.ControlFlow.Blocks
         /// <summary>
         /// Exits a scope block.
         /// </summary>
+        /// <param name="block">The block.</param>
         void ExitScopeBlock(ScopeBlock<TInstruction> block);
+
+        /// <summary>
+        /// Enters an exception handler block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        void EnterExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block);
+        
+        /// <summary>
+        /// Exits an exception handler block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        void ExitExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block);
+        
+        /// <summary>
+        /// Enters the protected region of an exception handler block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        void EnterProtectedBlock(ExceptionHandlerBlock<TInstruction> block);
+        
+        /// <summary>
+        /// Exits the protected region of an exception handler block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        void ExitProtectedBlock(ExceptionHandlerBlock<TInstruction> block);
+
+        /// <summary>
+        /// Enters a handler region of an exception handler block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        /// <param name="handlerIndex">The index of the handler that was entered.</param>
+        void EnterHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex);
+        
+        /// <summary>
+        /// Exits a handler region of an exception handler block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        /// <param name="handlerIndex">The index of the handler that was exit.</param>
+        void ExitHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex);
     }
 }

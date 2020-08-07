@@ -44,14 +44,14 @@ namespace Echo.ControlFlow.Serialization.Blocks
             // Add the nodes in the order of the sorting.
             foreach (var node in sorting)
             {
-                var current = scopeStack.Peek();
-                if (node.ParentRegion != current.Region)
+                var currentScope = scopeStack.Peek();
+                if (node.ParentRegion != currentScope.Region)
                 {
                     UpdateScopeStack(node, scopeStack);
-                    current = scopeStack.Peek();
+                    currentScope = scopeStack.Peek();
                 }
 
-                current.Block.Blocks.Add(node.Contents);
+                currentScope.AddBlock(node.Contents);
             }
 
             return rootScope;
@@ -83,12 +83,47 @@ namespace Echo.ControlFlow.Serialization.Blocks
             {
                 // Create new scope block.
                 var enteredRegion = activeRegions[scopeStack.Count];
-                var enteredBlock = new ScopeBlock<TInstruction>();
 
                 // Add new cope block to the current scope.
                 var currentScope = scopeStack.Peek();
-                currentScope.Block.Blocks.Add(enteredBlock);
-                scopeStack.Push(new ScopeInfo(enteredRegion, enteredBlock));
+
+                if (enteredRegion is ExceptionHandlerRegion<TInstruction> ehRegion)
+                {
+                    // We entered an exception handler region.
+                    var ehBlock = new ExceptionHandlerBlock<TInstruction>();
+                    currentScope.AddBlock(ehBlock);
+                    scopeStack.Push(new ScopeInfo(ehRegion, ehBlock));
+                }
+                else if (enteredRegion.ParentRegion is ExceptionHandlerRegion<TInstruction> parentEhRegion)
+                {
+                    // We entered one of the exception handler sub regions. Figure out which one it is.
+                    var enteredBlock = default(ScopeBlock<TInstruction>);
+
+                    if (!(currentScope.Block is ExceptionHandlerBlock<TInstruction> ehBlock))
+                        throw new InvalidOperationException("The parent scope is not an exception handler scope.");
+
+                    if (parentEhRegion.ProtectedRegion == enteredRegion)
+                    {
+                        // We entered the protected region.
+                        enteredBlock = ehBlock.ProtectedBlock;
+                    }
+                    else
+                    {
+                        // We entered a handler region.
+                        enteredBlock = new ScopeBlock<TInstruction>();
+                        ehBlock.HandlerBlocks.Add(enteredBlock);
+                    }
+
+                    // Push the entered scope.
+                    scopeStack.Push(new ScopeInfo(parentEhRegion.ProtectedRegion, enteredBlock));
+                }
+                else
+                {
+                    // Fall back method: just enter a new scope block.
+                    var scopeBlock = new ScopeBlock<TInstruction>();
+                    currentScope.AddBlock(scopeBlock);
+                    scopeStack.Push(new ScopeInfo(enteredRegion, scopeBlock));
+                }
             }
         }
 
@@ -145,7 +180,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
 
         private readonly struct ScopeInfo
         {
-            public ScopeInfo(IControlFlowRegion<TInstruction> region, ScopeBlock<TInstruction> block)
+            public ScopeInfo(IControlFlowRegion<TInstruction> region, IBlock<TInstruction> block)
             {
                 Region = region;
                 Block = block;
@@ -156,9 +191,17 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 get;
             }
 
-            public ScopeBlock<TInstruction> Block
+            public IBlock<TInstruction> Block
             {
                 get;
+            }
+
+            public void AddBlock(IBlock<TInstruction> basicBlock)
+            {
+                if (Block is ScopeBlock<TInstruction> scopeBlock)
+                    scopeBlock.Blocks.Add(basicBlock);
+                else
+                    throw new InvalidOperationException("Current scope is not a container of basic blocks.");
             }
 
             public override string ToString()

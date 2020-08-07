@@ -17,5 +17,11 @@ namespace Echo.ControlFlow.Blocks
         /// </summary>
         /// <param name="block">The block.</param>
         void VisitScopeBlock(ScopeBlock<TInstruction> block);
+
+        /// <summary>
+        /// Visits an exception handler block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        void VisitExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block);
     }
 }

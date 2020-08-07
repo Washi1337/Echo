@@ -36,5 +36,26 @@ namespace Echo.ControlFlow.Blocks
                 innerBlock.AcceptVisitor(this);
             _listener.ExitScopeBlock(block);
         }
+
+        /// <inheritdoc />
+        public void VisitExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block)
+        {
+            _listener.EnterExceptionHandlerBlock(block);
+
+            _listener.EnterProtectedBlock(block);
+            block.ProtectedBlock.AcceptVisitor(this);
+            _listener.ExitProtectedBlock(block);
+
+            for (int i = 0; i < block.HandlerBlocks.Count; i++)
+            {
+                var handlerBlock = block.HandlerBlocks[i];
+                
+                _listener.EnterHandlerBlock(block, i);
+                handlerBlock.AcceptVisitor(this);
+                _listener.ExitHandlerBlock(block, i);
+            }
+
+            _listener.ExitExceptionHandlerBlock(block);
+        }
     }
 }
