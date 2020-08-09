@@ -68,5 +68,19 @@ namespace Echo.Ast.Patterns
 
         /// <inheritdoc />
         public override string ToString() => $"[{string.Join(" | ", Options)}]";
+
+        /// <inheritdoc />
+        public override OrPattern<T> OrElse(Pattern<T> alternative)
+        {
+            var options = new List<Pattern<T>>(Options);
+
+            if (alternative is OrPattern<T> alternativeOr)
+                options.AddRange(alternativeOr.Options);
+            else
+                options.Add(alternative);
+
+            return new OrPattern<T>(options);
+        }
+
     }
 }

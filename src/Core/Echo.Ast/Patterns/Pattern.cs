@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace Echo.Ast.Patterns
 {
+    /// <summary>
+    /// Provides factory methods for constructing patterns.
+    /// </summary>
     public static class Pattern
     {
         /// <summary>
@@ -35,23 +38,8 @@ namespace Echo.Ast.Patterns
         /// already an <see cref="OrPattern{T}"/>, the options of that particular pattern will be used instead of the
         /// <see cref="OrPattern{T}"/> itself. 
         /// </remarks>
-        public static OrPattern<T> operator |(Pattern<T> a, Pattern<T> b)
-        {
-            var options = new List<Pattern<T>>();
-            
-            if (a is OrPattern<T> orA)
-                options.AddRange(orA.Options);
-            else
-                options.Add(a);
-            
-            if (b is OrPattern<T> orB)
-                options.AddRange(orB.Options);
-            else
-                options.Add(b);
-            
-            return new OrPattern<T>(options);
-        } 
-        
+        public static OrPattern<T> operator |(Pattern<T> a, Pattern<T> b) => a.OrElse(b);
+
         /// <summary>
         /// Gets or sets the capture group this pattern was assigned to.
         /// </summary>
@@ -98,10 +86,36 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="captureGroup">The capture group to add the object to.</param>
         /// <returns>The pattern.</returns>
-        public Pattern<T> Capture(CaptureGroup captureGroup)
+        public Pattern<T> CaptureAs(CaptureGroup captureGroup)
         {
             CaptureGroup = captureGroup;
             return this;
         }
+
+        /// <summary>
+        /// Constructs a pattern that matches on either the current pattern, or the specified pattern.
+        /// </summary>
+        /// <param name="alternative">The alternative pattern.</param>
+        /// <returns>The resulting pattern.</returns>
+        /// <remarks>
+        /// This method flattens all options into a single <see cref="OrPattern{T}"/>.  When a specified pattern is
+        /// already an <see cref="OrPattern{T}"/>, the options of that particular pattern will be used instead of the
+        /// <see cref="OrPattern{T}"/> itself. 
+        /// </remarks>
+        public virtual OrPattern<T> OrElse(Pattern<T> alternative)
+        {
+            var options = new List<Pattern<T>>
+            {
+                this
+            };
+
+            if (alternative is OrPattern<T> alternativeOr)
+                options.AddRange(alternativeOr.Options);
+            else
+                options.Add(alternative);
+
+            return new OrPattern<T>(options);
+        }
+
     }
 }

@@ -54,6 +54,6 @@ namespace Echo.Ast.Tests.Patterns
 
             Assert.Equal(new[] {pattern1, pattern2, pattern3}, combined.Options);
         }
-        
+
     }
 }
