@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Echo.Ast.Pattern;
+using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
 namespace Echo.Ast.Tests.Pattern
@@ -127,6 +128,27 @@ namespace Echo.Ast.Tests.Pattern
 
             Assert.False(result.IsSuccess);
         }
-        
+
+        [Fact]
+        public void SameInstructionWithComplexMatchingArgumentsShouldNotMatch()
+        {
+            var pattern = ExpressionPattern<int>
+                .Instruction(1234)
+                .WithArguments(
+                    ExpressionPattern<int>.Instruction(1234) | ExpressionPattern<int>.Instruction(5678),
+                    ExpressionPattern<int>.Any());
+
+            var arguments = new List<AstExpressionBase<int>>(2)
+            {
+                new AstInstructionExpression<int>(0, 5678, ImmutableArray<AstExpressionBase<int>>.Empty),
+                new AstInstructionExpression<int>(1, 1, ImmutableArray<AstExpressionBase<int>>.Empty),
+            };
+
+            var input = new AstInstructionExpression<int>(2, 1234, arguments);
+            
+            var result = pattern.Match(input);
+
+            Assert.True(result.IsSuccess);
+        }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Echo.Ast.Pattern
 {
@@ -157,5 +158,32 @@ namespace Echo.Ast.Pattern
             return this;
         }
 
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            
+            builder.Append(Content);
+            
+            builder.Append('(');
+            if (AnyArguments)
+            {
+                builder.Append('*');
+            }
+            else
+            {
+                for (int i = 0; i < Arguments.Count; i++)
+                {
+                    builder.Append(Arguments[i]);
+                    if (i < Arguments.Count - 1)
+                        builder.Append(", ");
+                }
+            }
+
+            builder.Append(')');
+            
+            return builder.ToString();
+        }
+        
     }
 }

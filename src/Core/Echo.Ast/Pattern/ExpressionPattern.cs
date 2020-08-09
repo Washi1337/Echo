@@ -34,5 +34,15 @@ namespace Echo.Ast.Pattern
         {
             return new InstructionExpressionPattern<TInstruction>(instruction);
         }
+
+        /// <summary>
+        /// Creates a new pattern that matches any type of variable expression. 
+        /// </summary>
+        /// <returns>The pattern.</returns>
+        public static VariableExpressionPattern<TInstruction> Variable()
+        {
+            return new VariableExpressionPattern<TInstruction>();
+        }
+        
     }
 }

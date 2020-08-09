@@ -67,6 +67,6 @@ namespace Echo.Ast.Pattern
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"({string.Join(" | ", Options)})";
+        public override string ToString() => $"[{string.Join(" | ", Options)}]";
     }
 }
