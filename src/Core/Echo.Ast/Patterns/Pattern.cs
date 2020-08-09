@@ -82,7 +82,7 @@ namespace Echo.Ast.Patterns
         protected abstract void MatchChildren(T input, MatchResult result);
 
         /// <summary>
-        /// When the pattern matches successfully, puts the the matched object in the provided capture group.
+        /// When the pattern matches successfully, puts the matched object in the provided capture group.
         /// </summary>
         /// <param name="captureGroup">The capture group to add the object to.</param>
         /// <returns>The pattern.</returns>

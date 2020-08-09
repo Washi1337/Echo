@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using Echo.Core.Code;
+
 namespace Echo.Ast.Patterns
 {
     /// <summary>
@@ -12,26 +15,41 @@ namespace Echo.Ast.Patterns
         public static AnyPattern<AstStatementBase<TInstruction>> Any<TInstruction>()
         {
             return new AnyPattern<AstStatementBase<TInstruction>>();
-        } 
-        
+        }
+
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="AstAssignmentStatement{TInstruction}"/>.
         /// </summary>
+        /// <param name="variable">The pattern describing the variable that is assigned a value.</param>
         /// <param name="expression">The pattern for the expression on the right hand side of the equals sign.</param>
-        public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>(ExpressionPattern<TInstruction> expression)
+        public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>(
+            Pattern<IVariable> variable,
+            Pattern<AstExpressionBase<TInstruction>> expression)
         {
-            return new AssignmentStatementPattern<TInstruction>(expression);
+            return new AssignmentStatementPattern<TInstruction>(variable, expression);
         }
-        
+
+        /// <summary>
+        /// Creates a new pattern that matches on instances of <see cref="AstAssignmentStatement{TInstruction}"/>.
+        /// </summary>
+        /// <param name="variables">The patterns describing the variables that is assigned a value.</param>
+        /// <param name="expression">The pattern for the expression on the right hand side of the equals sign.</param>
+        public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>(
+            IEnumerable<Pattern<IVariable>> variables,
+            Pattern<AstExpressionBase<TInstruction>> expression)
+        {
+            return new AssignmentStatementPattern<TInstruction>(variables, expression);
+        }
+
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="AstExpressionStatement{TInstruction}"/>.
         /// </summary>
         /// <param name="expression">The pattern for the embedded expression.</param>
-        public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>(ExpressionPattern<TInstruction> expression)
+        public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>(Pattern<AstExpressionBase<TInstruction>> expression)
         {
             return new ExpressionStatementPattern<TInstruction>(expression);
         }
-        
+
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="AstExpressionStatement{TInstruction}"/> that
         /// contain instances of <see cref="AstInstructionExpression{TInstruction}"/>.
@@ -42,7 +60,7 @@ namespace Echo.Ast.Patterns
         {
             return new ExpressionStatementPattern<TInstruction>(ExpressionPattern.InstructionLiteral(instruction));
         }
-        
+
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="AstExpressionStatement{TInstruction}"/> that
         /// contain instances of <see cref="AstInstructionExpression{TInstruction}"/>.
