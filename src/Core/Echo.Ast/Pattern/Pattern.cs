@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Echo.Ast.Pattern
 {
     /// <summary>
@@ -18,6 +20,34 @@ namespace Echo.Ast.Pattern
         /// <param name="o">The instance to match with.</param>
         /// <returns></returns>
         public static LiteralPattern<T> Literal(T o) => new LiteralPattern<T>(o);
+        
+        /// <summary>
+        /// Combines two patterns together into a single <see cref="OrPattern{T}"/>.
+        /// </summary>
+        /// <param name="a">The first pattern.</param>
+        /// <param name="b">The second pattern.</param>
+        /// <returns>The resulting pattern.</returns>
+        /// <remarks>
+        /// This method flattens all options into a single <see cref="OrPattern{T}"/>.  When a specified pattern is
+        /// already an <see cref="OrPattern{T}"/>, the options of that particular pattern will be used instead of the
+        /// <see cref="OrPattern{T}"/> itself. 
+        /// </remarks>
+        public static OrPattern<T> operator |(Pattern<T> a, Pattern<T> b)
+        {
+            var options = new List<Pattern<T>>();
+            
+            if (a is OrPattern<T> orA)
+                options.AddRange(orA.Options);
+            else
+                options.Add(a);
+            
+            if (b is OrPattern<T> orB)
+                options.AddRange(orB.Options);
+            else
+                options.Add(b);
+            
+            return new OrPattern<T>(options);
+        } 
         
         /// <summary>
         /// Gets or sets the capture group this pattern was assigned to.

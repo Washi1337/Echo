@@ -58,8 +58,12 @@ namespace Echo.Ast.Pattern
                         foreach (var o in entry.Value)
                             result.AddCapturedObject(entry.Key, o);
                     }
+
+                    return;
                 }
             }
+
+            result.IsSuccess = false;
         }
 
         /// <inheritdoc />
