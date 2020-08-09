@@ -1,3 +1,5 @@
+using Echo.Core.Code;
+
 namespace Echo.Ast.Patterns
 {
     /// <summary>
@@ -41,6 +43,26 @@ namespace Echo.Ast.Patterns
         public static VariableExpressionPattern<TInstruction> Variable<TInstruction>()
         {
             return new VariableExpressionPattern<TInstruction>();
+        }
+
+        /// <summary>
+        /// Creates a new pattern that matches any type of variable expression. 
+        /// </summary>
+        /// <param name="variable">The pattern describing the referenced variable.</param>
+        /// <returns>The pattern.</returns>
+        public static VariableExpressionPattern<TInstruction> Variable<TInstruction>(IVariable variable)
+        {
+            return new VariableExpressionPattern<TInstruction>(Pattern.Literal(variable));
+        }
+
+        /// <summary>
+        /// Creates a new pattern that matches any type of variable expression. 
+        /// </summary>
+        /// <param name="variable">The pattern describing the referenced variable.</param>
+        /// <returns>The pattern.</returns>
+        public static VariableExpressionPattern<TInstruction> Variable<TInstruction>(Pattern<IVariable> variable)
+        {
+            return new VariableExpressionPattern<TInstruction>(variable);
         }
     }
     
