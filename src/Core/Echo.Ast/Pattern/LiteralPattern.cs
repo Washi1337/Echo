@@ -7,14 +7,14 @@ namespace Echo.Ast.Pattern
     public class LiteralPattern<T> : Pattern<T>
     {
         /// <summary>
-        /// 
+        /// Creates a new literal pattern.
         /// </summary>
-        /// <param name="o"></param>
+        /// <param name="o">The object to match with.</param>
         public LiteralPattern(T o)
         {
             Value = o;
         }
-        
+
         /// <summary>
         /// Gets or sets the object that the input should match.
         /// </summary>
@@ -33,5 +33,12 @@ namespace Echo.Ast.Pattern
 
         /// <inheritdoc />
         public override string ToString() => Value?.ToString() ?? "null";
+
+        /// <summary>
+        /// Converts the provided literal to a pattern.
+        /// </summary>
+        /// <param name="value">The value to match.</param>
+        /// <returns>The resulting pattern.</returns>
+        public static implicit operator LiteralPattern<T>(T value) => new LiteralPattern<T>(value);
     }
 }

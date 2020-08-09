@@ -15,7 +15,7 @@ namespace Echo.Ast.Pattern
         public static AnyPattern<T> Any() => new AnyPattern<T>();
         
         /// <summary>
-        /// Creates a new pattern that matches the input with an exact object instance of the specified type.
+        /// Creates a new pattern that value-matches the input with an object instance of the specified type.
         /// </summary>
         /// <param name="o">The instance to match with.</param>
         /// <returns></returns>
