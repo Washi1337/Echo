@@ -39,7 +39,7 @@ namespace Echo.Ast
     /// <typeparam name="TInstruction">The type of the instruction the AST models</typeparam>
     /// <typeparam name="TState">The state to pass between visitors</typeparam>
     /// <typeparam name="TOut">The return type of the Visit methods</typeparam>
-    public interface IAstNodeVisitor<TInstruction, in TState, out TOut>
+    public interface INodeVisitor<TInstruction, in TState, out TOut>
     {
         /// <summary>
         /// Visits a given <see cref="AssignmentStatement{TInstruction}"/>

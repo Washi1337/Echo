@@ -23,7 +23,7 @@ namespace Echo.Ast
         /// <summary>
         /// Implements the visitor pattern
         /// </summary>
-        public abstract TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state);
+        public abstract TOut Accept<TState, TOut>(INodeVisitor<TInstruction, TState, TOut> visitor, TState state);
 
         internal abstract string Format(IInstructionFormatter<TInstruction> instructionFormatter);
     }
