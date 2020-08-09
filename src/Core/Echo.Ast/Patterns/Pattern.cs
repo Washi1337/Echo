@@ -1,26 +1,29 @@
 using System.Collections.Generic;
 
-namespace Echo.Ast.Pattern
+namespace Echo.Ast.Patterns
 {
-    /// <summary>
-    /// Represents an object pattern.
-    /// </summary>
-    /// <typeparam name="T">The type of objects to match.</typeparam>
-    public abstract class Pattern<T>
+    public static class Pattern
     {
         /// <summary>
         /// Creates a new pattern that matches any object instance of the specified type.
         /// </summary>
         /// <returns>The pattern.</returns>
-        public static AnyPattern<T> Any() => new AnyPattern<T>();
+        public static AnyPattern<T> Any<T>() => new AnyPattern<T>();
         
         /// <summary>
         /// Creates a new pattern that value-matches the input with an object instance of the specified type.
         /// </summary>
         /// <param name="o">The instance to match with.</param>
         /// <returns></returns>
-        public static LiteralPattern<T> Literal(T o) => new LiteralPattern<T>(o);
-        
+        public static LiteralPattern<T> Literal<T>(T o) => new LiteralPattern<T>(o);
+    }
+    
+    /// <summary>
+    /// Represents an object pattern.
+    /// </summary>
+    /// <typeparam name="T">The type of objects to match.</typeparam>
+    public abstract class Pattern<T>
+    {
         /// <summary>
         /// Combines two patterns together into a single <see cref="OrPattern{T}"/>.
         /// </summary>

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Echo.Ast.Pattern
+namespace Echo.Ast.Patterns
 {
     /// <summary>
     /// Describes an object pattern that matches the input to a number of pattern options.

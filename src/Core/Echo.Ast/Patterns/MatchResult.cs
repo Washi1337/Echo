@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Echo.Ast.Pattern
+namespace Echo.Ast.Patterns
 {
     /// <summary>
     /// Describes an object pattern matching result.

@@ -1,14 +1,14 @@
-using Echo.Ast.Pattern;
+using Echo.Ast.Patterns;
 using Xunit;
 
-namespace Echo.Ast.Tests.Pattern
+namespace Echo.Ast.Tests.Patterns
 {
     public class OrPatternTest
     {
         [Fact]
         public void FirstOfTwoOptionsMatchShouldResultInMatch()
         {
-            var pattern = Pattern<int>.Literal(1) | Pattern<int>.Literal(2);
+            var pattern = Pattern.Literal<int>(1) | Pattern.Literal<int>(2);
             var result = pattern.Match(1);
             Assert.True(result.IsSuccess);
         }
@@ -16,7 +16,7 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void SecondOfTwoOptionsMatchShouldResultInMatch()
         {
-            var pattern = Pattern<int>.Literal(1) | Pattern<int>.Literal(2);
+            var pattern = Pattern.Literal<int>(1) | Pattern.Literal<int>(2);
             var result = pattern.Match(2);
             Assert.True(result.IsSuccess);
         }
@@ -24,7 +24,7 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void NeitherOfTwoOptionsMatchShouldResultInNoMatch()
         {
-            var pattern = Pattern<int>.Literal(1) | Pattern<int>.Literal(2);
+            var pattern = Pattern.Literal<int>(1) | Pattern.Literal<int>(2);
             var result = pattern.Match(3);
             Assert.False(result.IsSuccess);
         }
@@ -32,9 +32,9 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void LeftHandSideOrPatternShouldBeFlattened()
         {
-            var pattern1 = Pattern<int>.Literal(1);
-            var pattern2 = Pattern<int>.Literal(2);
-            var pattern3 = Pattern<int>.Literal(3);
+            var pattern1 = Pattern.Literal<int>(1);
+            var pattern2 = Pattern.Literal<int>(2);
+            var pattern3 = Pattern.Literal<int>(3);
 
             var combined = pattern1 | pattern2;
             combined = combined | pattern3;
@@ -45,9 +45,9 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void RightHandSideOrPatternShouldBeFlattened()
         {
-            var pattern1 = Pattern<int>.Literal(1);
-            var pattern2 = Pattern<int>.Literal(2);
-            var pattern3 = Pattern<int>.Literal(3);
+            var pattern1 = Pattern.Literal<int>(1);
+            var pattern2 = Pattern.Literal<int>(2);
+            var pattern3 = Pattern.Literal<int>(3);
 
             var combined = pattern2 | pattern3;
             combined = pattern1 | combined;

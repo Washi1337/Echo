@@ -1,14 +1,14 @@
-using Echo.Ast.Pattern;
+using Echo.Ast.Patterns;
 using Xunit;
 
-namespace Echo.Ast.Tests.Pattern
+namespace Echo.Ast.Tests.Patterns
 {
     public class LiteralPatternTest
     {
         [Fact]
         public void SameValueShouldMatch()
         {
-            var pattern = Pattern<int>.Literal(123);
+            var pattern = Pattern.Literal(123);
             var result = pattern.Match(123);
             Assert.True(result.IsSuccess);
         }
@@ -16,7 +16,7 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void DifferentValueShouldNotMatch()
         {
-            var pattern = Pattern<int>.Literal(123);
+            var pattern = Pattern.Literal(123);
             var result = pattern.Match(456);
             Assert.False(result.IsSuccess);
         }

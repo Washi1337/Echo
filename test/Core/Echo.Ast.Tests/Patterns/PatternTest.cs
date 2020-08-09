@@ -1,7 +1,7 @@
-using Echo.Ast.Pattern;
+using Echo.Ast.Patterns;
 using Xunit;
 
-namespace Echo.Ast.Tests.Pattern
+namespace Echo.Ast.Tests.Patterns
 {
     public class PatternTest
     {
@@ -10,7 +10,7 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void NonCapturedAnyPatternShouldMatchAndExtractValue()
         {
-            var pattern = Pattern<object>.Any();
+            var pattern = Pattern.Any<object>();
             
             var myObject = new object();
             var result = pattern.Match(myObject);
@@ -22,7 +22,7 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void CapturedAnyPatternShouldMatchAndExtractValue()
         {
-            var pattern = Pattern<object>.Any()
+            var pattern = Pattern.Any<object>()
                 .Capture(_captureGroup);
             
             var myObject = new object();

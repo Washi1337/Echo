@@ -1,16 +1,15 @@
-namespace Echo.Ast.Pattern
+namespace Echo.Ast.Patterns
 {
     /// <summary>
-    /// Describes a pattern for an expression in an abstract syntax tree.
+    /// Provides factory methods for constructing expression patterns.
     /// </summary>
-    /// <typeparam name="TInstruction">The type of instructions stored in the abstract syntax tree.</typeparam>
-    public abstract class ExpressionPattern<TInstruction> : Pattern<AstExpressionBase<TInstruction>>
+    public static class ExpressionPattern
     {
         /// <summary>
         /// Creates a new pattern that matches any type of expressions. 
         /// </summary>
         /// <returns>The pattern.</returns>
-        public new static AnyPattern<AstExpressionBase<TInstruction>> Any()
+        public new static AnyPattern<AstExpressionBase<TInstruction>> Any<TInstruction>()
         {
             return new AnyPattern<AstExpressionBase<TInstruction>>();
         } 
@@ -20,9 +19,9 @@ namespace Echo.Ast.Pattern
         /// </summary>
         /// <param name="instruction">The instruction to match on.</param>
         /// <returns>The pattern.</returns>
-        public static InstructionExpressionPattern<TInstruction> Instruction(TInstruction instruction)
+        public static InstructionExpressionPattern<TInstruction> InstructionLiteral<TInstruction>(TInstruction instruction)
         {
-            return new InstructionExpressionPattern<TInstruction>(Pattern<TInstruction>.Literal(instruction));
+            return new InstructionExpressionPattern<TInstruction>(Pattern.Literal(instruction));
         }
         
         /// <summary>
@@ -30,7 +29,7 @@ namespace Echo.Ast.Pattern
         /// </summary>
         /// <param name="instruction">The instruction pattern to match on.</param>
         /// <returns>The pattern.</returns>
-        public static InstructionExpressionPattern<TInstruction> Instruction(Pattern<TInstruction> instruction)
+        public static InstructionExpressionPattern<TInstruction> Instruction<TInstruction>(Pattern<TInstruction> instruction)
         {
             return new InstructionExpressionPattern<TInstruction>(instruction);
         }
@@ -39,10 +38,17 @@ namespace Echo.Ast.Pattern
         /// Creates a new pattern that matches any type of variable expression. 
         /// </summary>
         /// <returns>The pattern.</returns>
-        public static VariableExpressionPattern<TInstruction> Variable()
+        public static VariableExpressionPattern<TInstruction> Variable<TInstruction>()
         {
             return new VariableExpressionPattern<TInstruction>();
         }
-        
+    }
+    
+    /// <summary>
+    /// Describes a pattern for an expression in an abstract syntax tree.
+    /// </summary>
+    /// <typeparam name="TInstruction">The type of instructions stored in the abstract syntax tree.</typeparam>
+    public abstract class ExpressionPattern<TInstruction> : Pattern<AstExpressionBase<TInstruction>>
+    {
     }
 }

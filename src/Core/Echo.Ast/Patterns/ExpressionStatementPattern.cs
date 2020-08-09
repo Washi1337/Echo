@@ -1,18 +1,18 @@
 using System;
 
-namespace Echo.Ast.Pattern
+namespace Echo.Ast.Patterns
 {
     /// <summary>
-    /// Describes an statement pattern that matches on an instance of a <see cref="AstAssignmentStatement{TInstruction}"/>. 
+    /// Describes an statement pattern that matches on an instance of a <see cref="AstExpressionStatement{TInstruction}"/>. 
     /// </summary>
     /// <typeparam name="TInstruction">The type of instruction that is stored in the expression.</typeparam>
-    public class AssignmentStatementPattern<TInstruction> : Pattern<TInstruction>
+    public class ExpressionStatementPattern<TInstruction> : StatementPattern<TInstruction>
     {
         /// <summary>
-        /// Creates a new assignment statement pattern.
+        /// Creates a new expression statement pattern.
         /// </summary>
-        /// <param name="expression">The pattern of the expression placed on the right hand side of the equals sign.</param>
-        public AssignmentStatementPattern(Pattern<AstExpressionBase<TInstruction>> expression)
+        /// <param name="expression">The pattern for the embedded expression.</param>
+        public ExpressionStatementPattern(Pattern<AstExpressionBase<TInstruction>> expression)
         {
             Expression = expression ?? throw new ArgumentNullException(nameof(expression));
         }
@@ -27,9 +27,9 @@ namespace Echo.Ast.Pattern
         }
 
         /// <inheritdoc />
-        protected override void MatchChildren(TInstruction input, MatchResult result)
+        protected override void MatchChildren(AstStatementBase<TInstruction> input, MatchResult result)
         {
-            if (!(input is AstAssignmentStatement<TInstruction> statement))
+            if (!(input is AstExpressionStatement<TInstruction> statement))
             {
                 result.IsSuccess = false;
                 return;
@@ -39,6 +39,6 @@ namespace Echo.Ast.Pattern
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"var = {Expression}";
+        public override string ToString() => Expression.ToString();
     }
 }

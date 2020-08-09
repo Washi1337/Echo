@@ -1,6 +1,6 @@
 using System;
 
-namespace Echo.Ast.Pattern
+namespace Echo.Ast.Patterns
 {
     /// <summary>
     /// Defines a capture group in a pattern.

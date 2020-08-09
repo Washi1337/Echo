@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Echo.Ast.Pattern
+namespace Echo.Ast.Patterns
 {
     /// <summary>
     /// Describes an expression pattern that matches on an instance of a <see cref="AstInstructionExpression{TInstruction}"/>. 

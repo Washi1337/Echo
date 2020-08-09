@@ -1,4 +1,4 @@
-namespace Echo.Ast.Pattern
+namespace Echo.Ast.Patterns
 {
     /// <summary>
     /// Describes a pattern that matches the input with a specific object. 

@@ -1,17 +1,18 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Echo.Ast.Pattern;
+using Echo.Ast.Patterns;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
-namespace Echo.Ast.Tests.Pattern
+namespace Echo.Ast.Tests.Patterns
 {
     public class InstructionExpressionPatternTest
     {
         [Fact]
         public void SameInstructionWithZeroArgumentsShouldMatch()
         {
-            var pattern = ExpressionPattern<int>.Instruction(1234);
+            var pattern = ExpressionPattern.InstructionLiteral(1234);
             var input = new AstInstructionExpression<int>(0, 1234, ImmutableArray<AstExpressionBase<int>>.Empty);
             var result = pattern.Match(input);
             
@@ -21,7 +22,7 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void DifferentInstructionWithZeroArgumentsShouldNotMatch()
         {
-            var pattern = ExpressionPattern<int>.Instruction(1234);
+            var pattern = ExpressionPattern.InstructionLiteral(1234);
             var input = new AstInstructionExpression<int>(0, 5678, ImmutableArray<AstExpressionBase<int>>.Empty);
             var result = pattern.Match(input);
             
@@ -35,8 +36,8 @@ namespace Echo.Ast.Tests.Pattern
         [InlineData(true, 3)]
         public void InstructionWithAnyArgumentsShouldMatchIfInstructionIsEqual(bool sameInstruction, int argumentCount)
         {
-            var pattern = ExpressionPattern<int>
-                .Instruction(1234)
+            var pattern = ExpressionPattern
+                .InstructionLiteral(1234)
                 .WithAnyArguments();
 
             var arguments = new List<AstExpressionBase<int>>(argumentCount);
@@ -53,9 +54,9 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void SameInstructionWithMatchingArgumentsShouldMatch()
         {
-            var pattern = ExpressionPattern<int>
-                .Instruction(1234)
-                .WithArguments(ExpressionPattern<int>.Any(), ExpressionPattern<int>.Any());
+            var pattern = ExpressionPattern
+                .InstructionLiteral(1234)
+                .WithArguments(ExpressionPattern.Any<int>(), ExpressionPattern.Any<int>());
 
             var arguments = new List<AstExpressionBase<int>>(2)
             {
@@ -73,9 +74,9 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void DifferentInstructionWithMatchingArgumentsShouldNotMatch()
         {
-            var pattern = ExpressionPattern<int>
-                .Instruction(1234)
-                .WithArguments(ExpressionPattern<int>.Any(), ExpressionPattern<int>.Any());
+            var pattern = ExpressionPattern
+                .InstructionLiteral(1234)
+                .WithArguments(ExpressionPattern.Any<int>(), ExpressionPattern.Any<int>());
 
             var arguments = new List<AstExpressionBase<int>>(2)
             {
@@ -93,9 +94,9 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void SameInstructionWithNonMatchingArgumentsShouldNotMatch()
         {
-            var pattern = ExpressionPattern<int>
-                .Instruction(1234)
-                .WithArguments(ExpressionPattern<int>.Instruction(5678), ExpressionPattern<int>.Any());
+            var pattern = ExpressionPattern
+                .InstructionLiteral(1234)
+                .WithArguments(ExpressionPattern.InstructionLiteral(5678), ExpressionPattern.Any<int>());
 
             var arguments = new List<AstExpressionBase<int>>(2)
             {
@@ -113,9 +114,9 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void SameInstructionWithDifferentArgumentCountShouldNotMatch()
         {
-            var pattern = ExpressionPattern<int>
-                .Instruction(1234)
-                .WithArguments(ExpressionPattern<int>.Any(), ExpressionPattern<int>.Any());
+            var pattern = ExpressionPattern
+                .InstructionLiteral(1234)
+                .WithArguments(ExpressionPattern.Any<int>(), ExpressionPattern.Any<int>());
 
             var arguments = new List<AstExpressionBase<int>>(2)
             {
@@ -132,11 +133,11 @@ namespace Echo.Ast.Tests.Pattern
         [Fact]
         public void SameInstructionWithComplexMatchingArgumentsShouldNotMatch()
         {
-            var pattern = ExpressionPattern<int>
-                .Instruction(1234)
+            var pattern = ExpressionPattern
+                .InstructionLiteral(1234)
                 .WithArguments(
-                    ExpressionPattern<int>.Instruction(1234) | ExpressionPattern<int>.Instruction(5678),
-                    ExpressionPattern<int>.Any());
+                    ExpressionPattern.InstructionLiteral(1234) | ExpressionPattern.InstructionLiteral(5678),
+                    ExpressionPattern.Any<int>());
 
             var arguments = new List<AstExpressionBase<int>>(2)
             {
@@ -149,6 +150,38 @@ namespace Echo.Ast.Tests.Pattern
             var result = pattern.Match(input);
 
             Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public void Test()
+        {
+            var statement = new AstExpressionStatement<DummyInstruction>(
+                0, new AstInstructionExpression<DummyInstruction>(1,
+                    DummyInstruction.Ret(1), new List<AstExpressionBase<DummyInstruction>>
+                    {
+                        new AstInstructionExpression<DummyInstruction>(2, DummyInstruction.Push(0, 1),
+                            ArraySegment<AstExpressionBase<DummyInstruction>>.Empty)
+                    }));
+            
+            // Define capture group.
+            var returnValueGroup = new CaptureGroup("returnValue");
+            
+            // Define ret(?) 
+            var pattern = StatementPattern.Expression(
+                ExpressionPattern
+                    .Instruction(new DummyInstructionPattern(DummyOpCode.Ret))
+                    .WithArguments(
+                        ExpressionPattern.Any<DummyInstruction>().Capture(returnValueGroup)
+                    )
+            );
+
+            // Match.
+            var result = pattern.Match(statement);
+            
+            // Extract return expression node.
+            var returnValueExpression = (AstExpressionBase<DummyInstruction>) result.Captures[returnValueGroup][0];
+            
+            
         }
     }
 }
