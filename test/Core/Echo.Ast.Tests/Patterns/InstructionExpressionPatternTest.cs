@@ -13,7 +13,7 @@ namespace Echo.Ast.Tests.Patterns
         public void SameInstructionWithZeroArgumentsShouldMatch()
         {
             var pattern = ExpressionPattern.InstructionLiteral(1234);
-            var input = new AstInstructionExpression<int>(0, 1234, ImmutableArray<AstExpressionBase<int>>.Empty);
+            var input = new InstructionExpression<int>(0, 1234, ImmutableArray<ExpressionBase<int>>.Empty);
             var result = pattern.Match(input);
             
             Assert.True(result.IsSuccess);
@@ -23,7 +23,7 @@ namespace Echo.Ast.Tests.Patterns
         public void DifferentInstructionWithZeroArgumentsShouldNotMatch()
         {
             var pattern = ExpressionPattern.InstructionLiteral(1234);
-            var input = new AstInstructionExpression<int>(0, 5678, ImmutableArray<AstExpressionBase<int>>.Empty);
+            var input = new InstructionExpression<int>(0, 5678, ImmutableArray<ExpressionBase<int>>.Empty);
             var result = pattern.Match(input);
             
             Assert.False(result.IsSuccess);
@@ -40,11 +40,11 @@ namespace Echo.Ast.Tests.Patterns
                 .InstructionLiteral(1234)
                 .WithAnyArguments();
 
-            var arguments = new List<AstExpressionBase<int>>(argumentCount);
+            var arguments = new List<ExpressionBase<int>>(argumentCount);
             for (int i = 0; i < argumentCount; i++)
-                arguments.Add(new AstInstructionExpression<int>(i, 0, ImmutableArray<AstExpressionBase<int>>.Empty));
+                arguments.Add(new InstructionExpression<int>(i, 0, ImmutableArray<ExpressionBase<int>>.Empty));
 
-            var input = new AstInstructionExpression<int>(argumentCount, sameInstruction ? 1234 : 5678, arguments);
+            var input = new InstructionExpression<int>(argumentCount, sameInstruction ? 1234 : 5678, arguments);
             
             var result = pattern.Match(input);
 
@@ -58,13 +58,13 @@ namespace Echo.Ast.Tests.Patterns
                 .InstructionLiteral(1234)
                 .WithArguments(ExpressionPattern.Any<int>(), ExpressionPattern.Any<int>());
 
-            var arguments = new List<AstExpressionBase<int>>(2)
+            var arguments = new List<ExpressionBase<int>>(2)
             {
-                new AstInstructionExpression<int>(0, 0, ImmutableArray<AstExpressionBase<int>>.Empty),
-                new AstInstructionExpression<int>(1, 1, ImmutableArray<AstExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(0, 0, ImmutableArray<ExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(1, 1, ImmutableArray<ExpressionBase<int>>.Empty),
             };
 
-            var input = new AstInstructionExpression<int>(2, 1234, arguments);
+            var input = new InstructionExpression<int>(2, 1234, arguments);
             
             var result = pattern.Match(input);
 
@@ -78,13 +78,13 @@ namespace Echo.Ast.Tests.Patterns
                 .InstructionLiteral(1234)
                 .WithArguments(ExpressionPattern.Any<int>(), ExpressionPattern.Any<int>());
 
-            var arguments = new List<AstExpressionBase<int>>(2)
+            var arguments = new List<ExpressionBase<int>>(2)
             {
-                new AstInstructionExpression<int>(0, 0, ImmutableArray<AstExpressionBase<int>>.Empty),
-                new AstInstructionExpression<int>(1, 1, ImmutableArray<AstExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(0, 0, ImmutableArray<ExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(1, 1, ImmutableArray<ExpressionBase<int>>.Empty),
             };
 
-            var input = new AstInstructionExpression<int>(2, 5678, arguments);
+            var input = new InstructionExpression<int>(2, 5678, arguments);
             
             var result = pattern.Match(input);
 
@@ -98,13 +98,13 @@ namespace Echo.Ast.Tests.Patterns
                 .InstructionLiteral(1234)
                 .WithArguments(ExpressionPattern.InstructionLiteral(5678), ExpressionPattern.Any<int>());
 
-            var arguments = new List<AstExpressionBase<int>>(2)
+            var arguments = new List<ExpressionBase<int>>(2)
             {
-                new AstInstructionExpression<int>(0, 0, ImmutableArray<AstExpressionBase<int>>.Empty),
-                new AstInstructionExpression<int>(1, 1, ImmutableArray<AstExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(0, 0, ImmutableArray<ExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(1, 1, ImmutableArray<ExpressionBase<int>>.Empty),
             };
 
-            var input = new AstInstructionExpression<int>(2, 1234, arguments);
+            var input = new InstructionExpression<int>(2, 1234, arguments);
             
             var result = pattern.Match(input);
 
@@ -118,12 +118,12 @@ namespace Echo.Ast.Tests.Patterns
                 .InstructionLiteral(1234)
                 .WithArguments(ExpressionPattern.Any<int>(), ExpressionPattern.Any<int>());
 
-            var arguments = new List<AstExpressionBase<int>>(2)
+            var arguments = new List<ExpressionBase<int>>(2)
             {
-                new AstInstructionExpression<int>(0, 0, ImmutableArray<AstExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(0, 0, ImmutableArray<ExpressionBase<int>>.Empty),
             };
 
-            var input = new AstInstructionExpression<int>(2, 1234, arguments);
+            var input = new InstructionExpression<int>(2, 1234, arguments);
             
             var result = pattern.Match(input);
 
@@ -139,13 +139,13 @@ namespace Echo.Ast.Tests.Patterns
                     ExpressionPattern.InstructionLiteral(1234) | ExpressionPattern.InstructionLiteral(5678),
                     ExpressionPattern.Any<int>());
 
-            var arguments = new List<AstExpressionBase<int>>(2)
+            var arguments = new List<ExpressionBase<int>>(2)
             {
-                new AstInstructionExpression<int>(0, 5678, ImmutableArray<AstExpressionBase<int>>.Empty),
-                new AstInstructionExpression<int>(1, 1, ImmutableArray<AstExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(0, 5678, ImmutableArray<ExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(1, 1, ImmutableArray<ExpressionBase<int>>.Empty),
             };
 
-            var input = new AstInstructionExpression<int>(2, 1234, arguments);
+            var input = new InstructionExpression<int>(2, 1234, arguments);
             
             var result = pattern.Match(input);
 
@@ -155,13 +155,13 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void TestComplexCapture()
         {
-            var valueExpression = new AstInstructionExpression<DummyInstruction>(2, 
+            var valueExpression = new InstructionExpression<DummyInstruction>(2, 
                 DummyInstruction.Push(0, 1),
-                ArraySegment<AstExpressionBase<DummyInstruction>>.Empty);
+                ArraySegment<ExpressionBase<DummyInstruction>>.Empty);
 
-            var statement = new AstExpressionStatement<DummyInstruction>(0,
-                new AstInstructionExpression<DummyInstruction>(1,
-                    DummyInstruction.Ret(1), new List<AstExpressionBase<DummyInstruction>>
+            var statement = new ExpressionStatement<DummyInstruction>(0,
+                new InstructionExpression<DummyInstruction>(1,
+                    DummyInstruction.Ret(1), new List<ExpressionBase<DummyInstruction>>
                     {
                         valueExpression
                     }));

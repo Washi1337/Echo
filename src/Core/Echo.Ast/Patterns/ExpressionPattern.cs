@@ -11,13 +11,13 @@ namespace Echo.Ast.Patterns
         /// Creates a new pattern that matches any type of expressions. 
         /// </summary>
         /// <returns>The pattern.</returns>
-        public static AnyPattern<AstExpressionBase<TInstruction>> Any<TInstruction>()
+        public static AnyPattern<ExpressionBase<TInstruction>> Any<TInstruction>()
         {
-            return new AnyPattern<AstExpressionBase<TInstruction>>();
+            return new AnyPattern<ExpressionBase<TInstruction>>();
         } 
         
         /// <summary>
-        /// Creates a new pattern that matches on instances of <see cref="AstInstructionExpression{TInstruction}"/>. 
+        /// Creates a new pattern that matches on instances of <see cref="InstructionExpression{TInstruction}"/>. 
         /// </summary>
         /// <param name="instruction">The instruction to match on.</param>
         /// <returns>The pattern.</returns>
@@ -27,7 +27,7 @@ namespace Echo.Ast.Patterns
         }
         
         /// <summary>
-        /// Creates a new pattern that matches on instances of <see cref="AstInstructionExpression{TInstruction}"/>. 
+        /// Creates a new pattern that matches on instances of <see cref="InstructionExpression{TInstruction}"/>. 
         /// </summary>
         /// <param name="instruction">The instruction pattern to match on.</param>
         /// <returns>The pattern.</returns>
@@ -70,7 +70,7 @@ namespace Echo.Ast.Patterns
     /// Describes a pattern for an expression in an abstract syntax tree.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions stored in the abstract syntax tree.</typeparam>
-    public abstract class ExpressionPattern<TInstruction> : Pattern<AstExpressionBase<TInstruction>>
+    public abstract class ExpressionPattern<TInstruction> : Pattern<ExpressionBase<TInstruction>>
     {
     }
 }

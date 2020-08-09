@@ -4,7 +4,7 @@ using Echo.Core.Code;
 namespace Echo.Ast.Patterns
 {
     /// <summary>
-    /// Describes a pattern that matches on <see cref="AstVariableExpression{TInstruction}"/>.
+    /// Describes a pattern that matches on <see cref="VariableExpression{TInstruction}"/>.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instruction that is stored in the expression.</typeparam>
     public class VariableExpressionPattern<TInstruction> : ExpressionPattern<TInstruction>
@@ -36,9 +36,9 @@ namespace Echo.Ast.Patterns
         }
         
         /// <inheritdoc />
-        protected override void MatchChildren(AstExpressionBase<TInstruction> input, MatchResult result)
+        protected override void MatchChildren(ExpressionBase<TInstruction> input, MatchResult result)
         {
-            if (!(input is AstVariableExpression<TInstruction> expression))
+            if (!(input is VariableExpression<TInstruction> expression))
             {
                 result.IsSuccess = false;
                 return;
