@@ -10,5 +10,8 @@ namespace Echo.Ast.Pattern
         protected override void MatchChildren(T input, MatchResult result)
         {
         }
+
+        /// <inheritdoc />
+        public override string ToString() => "?";
     }
 }

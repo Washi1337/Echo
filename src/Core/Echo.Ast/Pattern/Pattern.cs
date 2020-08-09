@@ -9,8 +9,15 @@ namespace Echo.Ast.Pattern
         /// <summary>
         /// Creates a new pattern that matches any object instance of the specified type.
         /// </summary>
-        /// <returns>The type of objects.</returns>
+        /// <returns>The pattern.</returns>
         public static AnyPattern<T> Any() => new AnyPattern<T>();
+        
+        /// <summary>
+        /// Creates a new pattern that matches the input with an exact object instance of the specified type.
+        /// </summary>
+        /// <param name="o">The instance to match with.</param>
+        /// <returns></returns>
+        public static LiteralPattern<T> Literal(T o) => new LiteralPattern<T>(o);
         
         /// <summary>
         /// Gets or sets the capture group this pattern was assigned to.
