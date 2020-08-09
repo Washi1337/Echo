@@ -148,9 +148,7 @@ namespace Echo.Ast
                     {
                         var source = sources.First();
                         if (source.Node.IsExternal)
-                        {
                             targetVariables[i] = new AstVariable(((ExternalDataSourceNode<TInstruction>) source.Node).Name);
-                        }
                         else
                         {
                             var slot = _stackSlots[source.Node.Id][source.SlotIndex];
