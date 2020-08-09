@@ -30,10 +30,6 @@ namespace Echo.Ast.Pattern
         {
             var result = new MatchResult();
             Match(input, result);
-
-            if (result.IsSuccess && CaptureGroup != null)
-                result.AddCapturedObject(CaptureGroup, input);
-
             return result;
         }
 
@@ -42,7 +38,20 @@ namespace Echo.Ast.Pattern
         /// </summary>
         /// <param name="input">The input object.</param>
         /// <param name="result">The buffer to store the extracted objects in.</param>
-        protected abstract void Match(T input, MatchResult result);
+        public void Match(T input, MatchResult result)
+        {
+            MatchChildren(input, result);
+
+            if (result.IsSuccess && CaptureGroup != null)
+                result.AddCapturedObject(CaptureGroup, input);
+        }
+
+        /// <summary>
+        /// Attempts to match and extract any captured groups from the given input's children.
+        /// </summary>
+        /// <param name="input">The input object.</param>
+        /// <param name="result">The buffer to store the extracted objects in.</param>
+        protected abstract void MatchChildren(T input, MatchResult result);
 
         /// <summary>
         /// When the pattern matches successfully, puts the the matched object in the provided capture group.

@@ -7,7 +7,7 @@ namespace Echo.Ast.Pattern
     public class AnyPattern<T> : Pattern<T>
     {
         /// <inheritdoc />
-        protected override void Match(T input, MatchResult result)
+        protected override void MatchChildren(T input, MatchResult result)
         {
         }
     }
