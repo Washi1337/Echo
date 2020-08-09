@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Echo.ControlFlow.Serialization.Dot;
 using Echo.Core.Code;
+using Echo.Core.Graphing;
 
 namespace Echo.Ast
 {
@@ -20,9 +21,6 @@ namespace Echo.Ast
         {
             Sources = sources;
             Target = target;
-            
-            foreach (var source in sources)
-                Children.Add(source);
         }
 
         /// <summary>
@@ -48,6 +46,9 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override TOut Accept<TState, TOut>(INodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
+
+        /// <inheritdoc />
+        public override IEnumerable<TreeNodeBase> GetChildren() => Sources;
 
         /// <inheritdoc />
         public override string ToString() => $"{Target} = φ({string.Join(", ", Sources)})";

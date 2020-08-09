@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Serialization.Dot;
+using Echo.Core.Graphing;
 
 namespace Echo.Ast
 {
@@ -19,7 +20,7 @@ namespace Echo.Ast
             : base(id)
         {
             Content = content;
-            Arguments = new ArgumentCollection<TInstruction>(this, arguments);
+            Arguments = arguments.ToList();
         }
 
         /// <summary>
@@ -31,9 +32,9 @@ namespace Echo.Ast
         }
 
         /// <summary>
-        /// Gets the parameters for the expression
+        /// The arguments to this <see cref="InstructionExpression{TInstruction}"/>
         /// </summary>
-        public ArgumentCollection<TInstruction> Arguments
+        public IList<ExpressionBase<TInstruction>> Arguments
         {
             get;
         }
@@ -47,9 +48,12 @@ namespace Echo.Ast
             visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override string ToString() => $"{Content}({string.Join(", ", Arguments)})";
+        public override IEnumerable<TreeNodeBase> GetChildren() => Arguments;
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Content}({string.Join(", ", GetChildren())})";
 
         internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
-            $"{instructionFormatter.Format(Content)}({string.Join(", ", Arguments)})";
+            $"{instructionFormatter.Format(Content)}({string.Join(", ", GetChildren())})";
     }
 }

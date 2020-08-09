@@ -115,8 +115,8 @@ namespace Echo.Ast
         {
             EnterInstructionExpression(instructionExpression, state);
 
-            foreach (var parameter in instructionExpression.Arguments)
-                parameter.Accept(this, state);
+            foreach (var parameter in instructionExpression.GetChildren())
+                ((ExpressionBase<TInstruction>) parameter).Accept(this, state);
             
             ExitInstructionExpression(instructionExpression, state);
         }

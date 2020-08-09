@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Echo.ControlFlow.Serialization.Dot;
+using Echo.Core.Graphing;
 
 namespace Echo.Ast
 {
@@ -13,11 +15,7 @@ namespace Echo.Ast
         /// <param name="id">The unique ID to assign to the node</param>
         /// <param name="expression">The expression</param>
         public ExpressionStatement(long id, ExpressionBase<TInstruction> expression)
-            : base(id)
-        {
-            Expression = expression;
-            Children.Add(expression);
-        }
+            : base(id) => Expression = expression;
 
         /// <summary>
         /// The expression that this <see cref="ExpressionStatement{TInstruction}"/> holds
@@ -34,6 +32,12 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override TOut Accept<TState, TOut>(INodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
+
+        /// <inheritdoc />
+        public override IEnumerable<TreeNodeBase> GetChildren()
+        {
+            yield return Expression;
+        }
 
         /// <inheritdoc />
         public override string ToString() => $"{Expression}";

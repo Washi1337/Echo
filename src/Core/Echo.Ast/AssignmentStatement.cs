@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Echo.ControlFlow.Serialization.Dot;
 using Echo.Core.Code;
+using Echo.Core.Graphing;
 
 namespace Echo.Ast
 {
@@ -20,7 +22,6 @@ namespace Echo.Ast
         {
             Expression = expression;
             Variables = variables;
-            Children.Add(expression);
         }
 
         /// <summary>
@@ -46,6 +47,12 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override TOut Accept<TState, TOut>(INodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
+
+        /// <inheritdoc />
+        public override IEnumerable<TreeNodeBase> GetChildren()
+        {
+            yield return Expression;
+        }
 
         /// <inheritdoc />
         public override string ToString() => $"{string.Join(", ", Variables.Select(v => v.ToString()))} = {Expression}";
