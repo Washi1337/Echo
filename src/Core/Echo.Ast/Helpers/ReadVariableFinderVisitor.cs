@@ -26,8 +26,8 @@ namespace Echo.Ast.Helpers
 
         public void Visit(InstructionExpression<TInstruction> instructionExpression, object state)
         {
-            foreach (var parameter in instructionExpression.Arguments)
-                parameter.Accept(this, state);
+            foreach (var parameter in instructionExpression.GetChildren())
+                ((ExpressionBase<TInstruction>) parameter).Accept(this, state);
         }
 
         public void Visit(VariableExpression<TInstruction> variableExpression, object state) =>
