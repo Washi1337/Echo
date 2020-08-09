@@ -36,7 +36,7 @@ namespace Echo.Ast.Pattern
         /// </summary>
         /// <param name="content">The pattern describing the instruction that is stored in the expression.</param>
         /// <param name="arguments">The list of patterns that describe the arguments of the input expression should match with.</param>
-        public InstructionExpressionPattern(Pattern<TInstruction> content, params ExpressionPattern<TInstruction>[] arguments)
+        public InstructionExpressionPattern(Pattern<TInstruction> content, params Pattern<AstExpressionBase<TInstruction>>[] arguments)
         {
             Content = content;
             AnyArguments = false;
@@ -49,7 +49,7 @@ namespace Echo.Ast.Pattern
         /// </summary>
         /// <param name="content">The pattern describing the instruction that is stored in the expression.</param>
         /// <param name="arguments">The list of patterns that describe the arguments of the input expression should match with.</param>
-        public InstructionExpressionPattern(Pattern<TInstruction> content, IEnumerable<ExpressionPattern<TInstruction>> arguments)
+        public InstructionExpressionPattern(Pattern<TInstruction> content, IEnumerable<Pattern<AstExpressionBase<TInstruction>>> arguments)
         {
             Content = content;
             AnyArguments = false;
@@ -82,10 +82,10 @@ namespace Echo.Ast.Pattern
         /// <remarks>
         /// When <see cref="AnyArguments"/> is set to <c>true</c>, this property is ignored.
         /// </remarks>
-        public IList<ExpressionPattern<TInstruction>> Arguments
+        public IList<Pattern<AstExpressionBase<TInstruction>>> Arguments
         {
             get;
-        } = new List<ExpressionPattern<TInstruction>>();
+        } = new List<Pattern<AstExpressionBase<TInstruction>>>();
         
         /// <inheritdoc />
         protected override void MatchChildren(AstExpressionBase<TInstruction> input, MatchResult result)
@@ -116,6 +116,45 @@ namespace Echo.Ast.Pattern
                 for (int i = 0; i < Arguments.Count && result.IsSuccess; i++)
                     Arguments[i].Match(arguments[i], result);
             }
+        }
+
+        /// <summary>
+        /// Sets the argument patterns to the provided expression patterns.
+        /// </summary>
+        /// <param name="arguments">The patterns that describe the arguments of the expression.</param>
+        /// <returns>The pattern.</returns>
+        public InstructionExpressionPattern<TInstruction> WithArguments(
+            params Pattern<AstExpressionBase<TInstruction>>[] arguments)
+        {
+            Arguments.Clear();
+            foreach (var argument in arguments)
+                Arguments.Add(argument);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the argument patterns to the provided expression patterns.
+        /// </summary>
+        /// <param name="arguments">The patterns that describe the arguments of the expression.</param>
+        /// <returns>The pattern.</returns>
+        public InstructionExpressionPattern<TInstruction> WithArguments(
+            IEnumerable<Pattern<AstExpressionBase<TInstruction>>> arguments)
+        {
+            Arguments.Clear();
+            foreach (var argument in arguments)
+                Arguments.Add(argument);
+            return this;
+        }
+
+        /// <summary>
+        /// Indicate any number of arguments is allowed. 
+        /// </summary>
+        /// <returns>The pattern.</returns>
+        public InstructionExpressionPattern<TInstruction> WithAnyArguments()
+        {
+            Arguments.Clear();
+            AnyArguments = true;
+            return this;
         }
 
     }
