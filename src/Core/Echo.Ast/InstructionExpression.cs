@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Echo.ControlFlow.Serialization.Dot;
 
 namespace Echo.Ast
@@ -6,22 +7,19 @@ namespace Echo.Ast
     /// <summary>
     /// Represents an instruction in the AST
     /// </summary>
-    public sealed class AstInstructionExpression<TInstruction> : AstExpressionBase<TInstruction>
+    public sealed class InstructionExpression<TInstruction> : ExpressionBase<TInstruction>
     {
         /// <summary>
         /// Creates a new instruction expression node
         /// </summary>
         /// <param name="id">The unique ID to give to the node</param>
         /// <param name="content">The instruction</param>
-        /// <param name="parameters">The parameters to this instruction</param>
-        public AstInstructionExpression(long id, TInstruction content, ICollection<AstExpressionBase<TInstruction>> parameters)
+        /// <param name="arguments">The parameters to this instruction</param>
+        public InstructionExpression(long id, TInstruction content, IEnumerable<ExpressionBase<TInstruction>> arguments)
             : base(id)
         {
             Content = content;
-            Parameters = parameters;
-            
-            foreach (var parameter in parameters)
-                Children.Add(parameter);
+            Arguments = new ArgumentCollection<TInstruction>(this, arguments);
         }
 
         /// <summary>
@@ -35,23 +33,23 @@ namespace Echo.Ast
         /// <summary>
         /// Gets the parameters for the expression
         /// </summary>
-        public ICollection<AstExpressionBase<TInstruction>> Parameters
+        public ArgumentCollection<TInstruction> Arguments
         {
             get;
         }
 
         /// <inheritdoc />
-        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
+        public override void Accept<TState>(INodeVisitor<TInstruction, TState> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
+        public override TOut Accept<TState, TOut>(INodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override string ToString() => $"{Content}({string.Join(", ", Parameters)})";
+        public override string ToString() => $"{Content}({string.Join(", ", Arguments)})";
 
         internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
-            $"{instructionFormatter.Format(Content)}({string.Join(", ", Parameters)})";
+            $"{instructionFormatter.Format(Content)}({string.Join(", ", Arguments)})";
     }
 }

@@ -7,7 +7,7 @@ namespace Echo.Ast
     /// <summary>
     /// Represents an assignment in the AST
     /// </summary>
-    public sealed class AstAssignmentStatement<TInstruction> : AstStatementBase<TInstruction>
+    public sealed class AssignmentStatement<TInstruction> : StatementBase<TInstruction>
     {
         /// <summary>
         /// Creates a new assignment statement
@@ -15,7 +15,7 @@ namespace Echo.Ast
         /// <param name="id">The unique ID to assign to the node</param>
         /// <param name="expression">The expression</param>
         /// <param name="variables">The variables</param>
-        public AstAssignmentStatement(long id, AstExpressionBase<TInstruction> expression, IVariable[] variables)
+        public AssignmentStatement(long id, ExpressionBase<TInstruction> expression, IVariable[] variables)
             : base(id)
         {
             Expression = expression;
@@ -26,7 +26,7 @@ namespace Echo.Ast
         /// <summary>
         /// The expression to assign to <see cref="Variables"/>
         /// </summary>
-        public AstExpressionBase<TInstruction> Expression
+        public ExpressionBase<TInstruction> Expression
         {
             get;
         }
@@ -40,11 +40,11 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
+        public override void Accept<TState>(INodeVisitor<TInstruction, TState> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
+        public override TOut Accept<TState, TOut>(INodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />
