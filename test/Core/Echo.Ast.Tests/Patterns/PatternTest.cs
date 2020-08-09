@@ -23,7 +23,7 @@ namespace Echo.Ast.Tests.Patterns
         public void CapturedAnyPatternShouldMatchAndExtractValue()
         {
             var pattern = Pattern.Any<object>()
-                .Capture(_captureGroup);
+                .CaptureAs(_captureGroup);
             
             var myObject = new object();
             var result = pattern.Match(myObject);

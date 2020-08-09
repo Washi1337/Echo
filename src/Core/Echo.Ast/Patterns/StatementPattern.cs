@@ -9,7 +9,7 @@ namespace Echo.Ast.Patterns
         /// Creates a new pattern that matches any type of statement. 
         /// </summary>
         /// <returns>The pattern.</returns>
-        public new static AnyPattern<AstStatementBase<TInstruction>> Any<TInstruction>()
+        public static AnyPattern<AstStatementBase<TInstruction>> Any<TInstruction>()
         {
             return new AnyPattern<AstStatementBase<TInstruction>>();
         } 

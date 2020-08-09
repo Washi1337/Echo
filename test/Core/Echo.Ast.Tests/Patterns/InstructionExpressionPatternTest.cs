@@ -153,25 +153,28 @@ namespace Echo.Ast.Tests.Patterns
         }
 
         [Fact]
-        public void Test()
+        public void TestComplexCapture()
         {
-            var statement = new AstExpressionStatement<DummyInstruction>(
-                0, new AstInstructionExpression<DummyInstruction>(1,
+            var valueExpression = new AstInstructionExpression<DummyInstruction>(2, 
+                DummyInstruction.Push(0, 1),
+                ArraySegment<AstExpressionBase<DummyInstruction>>.Empty);
+
+            var statement = new AstExpressionStatement<DummyInstruction>(0,
+                new AstInstructionExpression<DummyInstruction>(1,
                     DummyInstruction.Ret(1), new List<AstExpressionBase<DummyInstruction>>
                     {
-                        new AstInstructionExpression<DummyInstruction>(2, DummyInstruction.Push(0, 1),
-                            ArraySegment<AstExpressionBase<DummyInstruction>>.Empty)
+                        valueExpression
                     }));
             
             // Define capture group.
             var returnValueGroup = new CaptureGroup("returnValue");
             
-            // Define ret(?) 
+            // Create ret(?) pattern. 
             var pattern = StatementPattern.Expression(
                 ExpressionPattern
                     .Instruction(new DummyInstructionPattern(DummyOpCode.Ret))
                     .WithArguments(
-                        ExpressionPattern.Any<DummyInstruction>().Capture(returnValueGroup)
+                        ExpressionPattern.Any<DummyInstruction>().CaptureAs(returnValueGroup)
                     )
             );
 
@@ -179,9 +182,9 @@ namespace Echo.Ast.Tests.Patterns
             var result = pattern.Match(statement);
             
             // Extract return expression node.
-            var returnValueExpression = (AstExpressionBase<DummyInstruction>) result.Captures[returnValueGroup][0];
+            var capturedObject = result.Captures[returnValueGroup][0];
             
-            
+            Assert.Same(valueExpression, capturedObject);
         }
     }
 }
