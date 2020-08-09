@@ -109,7 +109,6 @@ namespace Echo.Ast
                         newEhRegion.HandlerRegions.Add(TransformRegion(subRegion));
 
                     return newEhRegion;
-                    break;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(region));
@@ -140,7 +139,7 @@ namespace Echo.Ast
                 var variableDependencies = dataFlowNode.VariableDependencies;
                 var targetVariables = CreateVariablesBuffer(
                     stackDependencies.Count + variableDependencies.Count);
-
+                
                 for (int i = 0; i < stackDependencies.Count; i++)
                 {
                     var sources = stackDependencies[i];
