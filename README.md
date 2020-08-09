@@ -17,6 +17,10 @@ Main Features
 - Unified generic API.
     - Serialize any kind of graph to the dot file format.
     - Adding a new platform for flow analysis requires minimal effort
+- Supported platforms:
+    - AsmResolver (CIL)
+    - dnlib (CIL)
+    - Iced (x86 32-bit and 64-bit)
 
 Compiling
 ---------
