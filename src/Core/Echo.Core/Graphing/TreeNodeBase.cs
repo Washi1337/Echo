@@ -15,7 +15,6 @@ namespace Echo.Core.Graphing
         protected TreeNodeBase(long id)
         {
             Id = id;
-            Children = new TreeNodeCollection<TreeNodeBase>(this);
         }
         
         /// <summary>
@@ -25,14 +24,6 @@ namespace Echo.Core.Graphing
         {
             get;
             internal set;
-        }
-
-        /// <summary>
-        /// The children of this <see cref="TreeNodeBase"/>
-        /// </summary>
-        public IList<TreeNodeBase> Children
-        {
-            get;
         }
 
         /// <inheritdoc />
@@ -45,7 +36,13 @@ namespace Echo.Core.Graphing
         public int InDegree => Parent is null ? 0 : 1;
 
         /// <inheritdoc />
-        public int OutDegree => Children.Count;
+        public int OutDegree => GetChildren().Count();
+
+        /// <summary>
+        /// Gets the children of the current <see cref="TreeNodeBase"/>
+        /// </summary>
+        /// <returns>The children of the current <see cref="TreeNodeBase"/></returns>
+        public abstract IEnumerable<TreeNodeBase> GetChildren();
 
         /// <inheritdoc />
         public IEnumerable<IEdge> GetIncomingEdges()
@@ -55,7 +52,7 @@ namespace Echo.Core.Graphing
 
         /// <inheritdoc />
         public IEnumerable<IEdge> GetOutgoingEdges() =>
-            Children.Select(child => (IEdge) new Edge(this, child));
+            GetChildren().Select(child => (IEdge) new Edge(this, child));
 
         /// <inheritdoc />
         public IEnumerable<INode> GetPredecessors()
@@ -64,12 +61,12 @@ namespace Echo.Core.Graphing
         }
 
         /// <inheritdoc />
-        public IEnumerable<INode> GetSuccessors() => Children;
+        public IEnumerable<INode> GetSuccessors() => GetChildren();
 
         /// <inheritdoc />
         public bool HasPredecessor(INode node) => node == Parent;
 
         /// <inheritdoc />
-        public bool HasSuccessor(INode node) => Children.Contains(node);
+        public bool HasSuccessor(INode node) => GetChildren().Contains(node);
     }
 }

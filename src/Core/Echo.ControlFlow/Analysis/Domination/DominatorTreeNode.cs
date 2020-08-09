@@ -17,6 +17,7 @@ namespace Echo.ControlFlow.Analysis.Domination
             : base(node.Id)
         {
             OriginalNode = node;
+            Children = new TreeNodeCollection<DominatorTreeNode>(this);
         }
 
         /// <summary>
@@ -26,6 +27,17 @@ namespace Echo.ControlFlow.Analysis.Domination
         {
             get;
         }
+
+        /// <summary>
+        /// Gets the children of the current <see cref="DominatorTreeNode"/>
+        /// </summary>
+        public TreeNodeCollection<DominatorTreeNode> Children
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<TreeNodeBase> GetChildren() => Children;
 
         /// <summary>
         /// Gets a collection of children representing all nodes that were dominated by the original node, as well as an
