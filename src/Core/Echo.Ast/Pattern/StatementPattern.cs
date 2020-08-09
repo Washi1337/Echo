@@ -7,6 +7,15 @@ namespace Echo.Ast.Pattern
     public abstract class StatementPattern<TInstruction> : Pattern<AstStatementBase<TInstruction>>
     {
         /// <summary>
+        /// Creates a new pattern that matches any type of statement. 
+        /// </summary>
+        /// <returns>The pattern.</returns>
+        public new static AnyPattern<AstStatementBase<TInstruction>> Any()
+        {
+            return new AnyPattern<AstStatementBase<TInstruction>>();
+        } 
+        
+        /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="AstAssignmentStatement{TInstruction}"/>.
         /// </summary>
         /// <param name="expression">The pattern for the expression on the right hand side of the equals sign.</param>
