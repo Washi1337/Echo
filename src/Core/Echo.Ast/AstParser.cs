@@ -18,6 +18,8 @@ namespace Echo.Ast
         private readonly ControlFlowGraph<TInstruction> _controlFlowGraph;
         private readonly DataFlowGraph<TInstruction> _dataFlowGraph;
         private readonly IInstructionSetArchitecture<StatementBase<TInstruction>> _astArchitecture;
+        private readonly Dictionary<IVariable, int> _variableVersions = new Dictionary<IVariable, int>();
+        private readonly Dictionary<(IVariable, int), AstVariable> _versionedAstVariables = new Dictionary<(IVariable, int), AstVariable>();
         private readonly Dictionary<long, AstVariable[]> _stackSlots = new Dictionary<long, AstVariable[]>();
         private readonly Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<StatementBase<TInstruction>>>
             _regionsMapping = new Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<StatementBase<TInstruction>>>();
@@ -125,8 +127,8 @@ namespace Echo.Ast
 
         private BasicBlock<StatementBase<TInstruction>> TransformBlock(BasicBlock<TInstruction> block)
         {
-            static IVariable[] CreateVariablesBuffer(int count) =>
-                count == 0 ? Array.Empty<IVariable>() : new IVariable[count];
+            static AstVariable[] CreateVariablesBuffer(int count) =>
+                count == 0 ? Array.Empty<AstVariable>() : new AstVariable[count];
             
             int phiCount = 0;
             var result = new BasicBlock<StatementBase<TInstruction>>(block.Offset);
@@ -147,7 +149,10 @@ namespace Echo.Ast
                     {
                         var source = sources.First();
                         if (source.Node.IsExternal)
-                            targetVariables[i] = new AstVariable(((ExternalDataSourceNode<TInstruction>) source.Node).Name);
+                        {
+                            targetVariables[i] =
+                                new AstVariable(((ExternalDataSourceNode<TInstruction>) source.Node).Name);
+                        }
                         else
                         {
                             var slot = _stackSlots[source.Node.Id][source.SlotIndex];
@@ -172,9 +177,19 @@ namespace Echo.Ast
                 }
 
                 int index = stackDependencies.Count;
-                foreach (var variable in variableDependencies)
-                    targetVariables[index++] = variable.Key;
-                
+                foreach (var variableDependency in variableDependencies)
+                {
+                    var variable = variableDependency.Key;
+                    if (!_variableVersions.TryGetValue(variable, out int version))
+                        _variableVersions.Add(variable, 0);
+                        
+                    var key = (variable, version);
+                    if (!_versionedAstVariables.ContainsKey(key))
+                        _versionedAstVariables.Add(key, new AstVariable($"{variable.Name}_v{version}"));
+
+                    targetVariables[index++] = _versionedAstVariables[key];
+                }
+
                 var instructionExpression = new InstructionExpression<TInstruction>(
                     offset,
                     instruction,
@@ -183,10 +198,23 @@ namespace Echo.Ast
                         .ToArray()
                 );
 
-                var writtenVariables = CreateVariablesBuffer(
-                    Architecture.GetWrittenVariablesCount(instruction));
+                int writtenVariablesCount = Architecture.GetWrittenVariablesCount(instruction);
+                var writtenVariables = writtenVariablesCount == 0
+                    ? Array.Empty<IVariable>()
+                    : new IVariable[writtenVariablesCount];
+                
                 if (writtenVariables.Length > 0)
                     Architecture.GetWrittenVariables(instruction, writtenVariables.AsSpan());
+
+                foreach (var writtenVariable in writtenVariables)
+                {
+                    if (_variableVersions.ContainsKey(writtenVariable))
+                        _variableVersions[writtenVariable]++;
+                    else _variableVersions.Add(writtenVariable, 0);
+                    
+                    _versionedAstVariables[(writtenVariable, _variableVersions[writtenVariable])] =
+                        new AstVariable($"{writtenVariable.Name}_v{_variableVersions[writtenVariable]}");
+                }
 
                 if (!dataFlowNode.GetDependants().Any() && writtenVariables.Length == 0)
                 {
@@ -203,7 +231,12 @@ namespace Echo.Ast
 
                     var combined = CreateVariablesBuffer(writtenVariables.Length + slots.Length);
                     slots.CopyTo(combined, 0);
-                    writtenVariables.CopyTo(combined, Math.Max(0, slots.Length - 1));
+                    int index2 = stackPushCount;
+                    foreach (var writtenVariable in writtenVariables)
+                    {
+                        combined[index2++] =
+                            _versionedAstVariables[(writtenVariable, _variableVersions[writtenVariable])];
+                    }
 
                     _stackSlots[offset] = slots;
                     result.Instructions.Add(
