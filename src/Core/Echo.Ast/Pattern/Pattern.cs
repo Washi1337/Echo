@@ -7,6 +7,12 @@ namespace Echo.Ast.Pattern
     public abstract class Pattern<T>
     {
         /// <summary>
+        /// Creates a new pattern that matches any object instance of the specified type.
+        /// </summary>
+        /// <returns>The type of objects.</returns>
+        public static AnyPattern<T> Any() => new AnyPattern<T>();
+        
+        /// <summary>
         /// Gets or sets the capture group this pattern was assigned to.
         /// </summary>
         public CaptureGroup CaptureGroup
@@ -38,5 +44,15 @@ namespace Echo.Ast.Pattern
         /// <param name="result">The buffer to store the extracted objects in.</param>
         protected abstract void Match(T input, MatchResult result);
 
+        /// <summary>
+        /// When the pattern matches successfully, puts the the matched object in the provided capture group.
+        /// </summary>
+        /// <param name="captureGroup">The capture group to add the object to.</param>
+        /// <returns>The pattern.</returns>
+        public Pattern<T> Capture(CaptureGroup captureGroup)
+        {
+            CaptureGroup = captureGroup;
+            return this;
+        }
     }
 }

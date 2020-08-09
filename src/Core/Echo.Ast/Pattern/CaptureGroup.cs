@@ -23,5 +23,8 @@ namespace Echo.Ast.Pattern
         {
             get;
         }
+
+        /// <inheritdoc />
+        public override string ToString() => Name;
     }
 }

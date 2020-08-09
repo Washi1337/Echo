@@ -14,7 +14,7 @@ namespace Echo.Ast.Pattern
         {
             get;
             set;
-        }
+        } = true;
 
         /// <summary>
         /// Provides a collection of objects extracted from the input object.
@@ -24,6 +24,11 @@ namespace Echo.Ast.Pattern
             get;
         } = new Dictionary<CaptureGroup, IList<object>>();
 
+        /// <summary>
+        /// Adds an extracted object to a capture group.
+        /// </summary>
+        /// <param name="captureGroup">The capture group to add it to.</param>
+        /// <param name="value">The extracted object to add.</param>
         public void AddCapturedObject(CaptureGroup captureGroup, object value)
         {
             if (!Captures.TryGetValue(captureGroup, out var objects))
