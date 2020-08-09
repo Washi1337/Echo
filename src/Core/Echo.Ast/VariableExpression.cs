@@ -6,14 +6,14 @@ namespace Echo.Ast
     /// <summary>
     /// Represents a variable expression in the AST
     /// </summary>
-    public sealed class AstVariableExpression<TInstruction> : AstExpressionBase<TInstruction>
+    public sealed class VariableExpression<TInstruction> : ExpressionBase<TInstruction>
     {
         /// <summary>
         /// Creates a new variable expression
         /// </summary>
         /// <param name="id">The unique ID to give to the node</param>
         /// <param name="variable">The variable</param>
-        public AstVariableExpression(long id, IVariable variable)
+        public VariableExpression(long id, IVariable variable)
             : base(id)
         {
             Variable = variable;
@@ -28,7 +28,7 @@ namespace Echo.Ast
         }
         
         /// <inheritdoc />
-        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
+        public override void Accept<TState>(INodeVisitor<TInstruction, TState> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />

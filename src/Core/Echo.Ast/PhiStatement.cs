@@ -7,7 +7,7 @@ namespace Echo.Ast
     /// <summary>
     /// Represents a Phi statement in the Ast
     /// </summary>
-    public sealed class AstPhiStatement<TInstruction> : AstStatementBase<TInstruction>
+    public sealed class PhiStatement<TInstruction> : StatementBase<TInstruction>
     {
         /// <summary>
         /// Creates a new Phi statement
@@ -15,7 +15,7 @@ namespace Echo.Ast
         /// <param name="id">The unique ID to assign to the node</param>
         /// <param name="sources">The possible sources for the assignment</param>
         /// <param name="target">The target variable that will be assigned to</param>
-        public AstPhiStatement(long id, ICollection<AstVariableExpression<TInstruction>> sources, IVariable target)
+        public PhiStatement(long id, ICollection<VariableExpression<TInstruction>> sources, IVariable target)
             : base(id)
         {
             Sources = sources;
@@ -28,7 +28,7 @@ namespace Echo.Ast
         /// <summary>
         /// The possible sources for that could be assigned to <see cref="Target"/>
         /// </summary>
-        public ICollection<AstVariableExpression<TInstruction>> Sources
+        public ICollection<VariableExpression<TInstruction>> Sources
         {
             get;
         }
@@ -42,7 +42,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
+        public override void Accept<TState>(INodeVisitor<TInstruction, TState> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />

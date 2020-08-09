@@ -4,7 +4,7 @@ using Echo.Core.Code;
 
 namespace Echo.Ast.Helpers
 {
-    internal sealed class WrittenVariableFinderVisitor<TInstruction> : IAstNodeVisitor<TInstruction, object>
+    internal sealed class WrittenVariableFinderVisitor<TInstruction> : INodeVisitor<TInstruction, object>
     {
         private readonly HashSet<IVariable> _variables = new HashSet<IVariable>();
 
@@ -12,19 +12,19 @@ namespace Echo.Ast.Helpers
 
         internal IVariable[] Variables => _variables.ToArray();
         
-        public void Visit(AstAssignmentStatement<TInstruction> assignmentStatement, object state)
+        public void Visit(AssignmentStatement<TInstruction> assignmentStatement, object state)
         {
             foreach (var target in assignmentStatement.Variables)
                 _variables.Add(target);
         }
 
-        public void Visit(AstExpressionStatement<TInstruction> expressionStatement, object state) { }
+        public void Visit(ExpressionStatement<TInstruction> expressionStatement, object state) { }
         
-        public void Visit(AstPhiStatement<TInstruction> phiStatement, object state) =>
+        public void Visit(PhiStatement<TInstruction> phiStatement, object state) =>
             _variables.Add(phiStatement.Target);
 
-        public void Visit(AstInstructionExpression<TInstruction> instructionExpression, object state) { }
+        public void Visit(InstructionExpression<TInstruction> instructionExpression, object state) { }
 
-        public void Visit(AstVariableExpression<TInstruction> variableExpression, object state) { }
+        public void Visit(VariableExpression<TInstruction> variableExpression, object state) { }
     }
 }

@@ -5,21 +5,21 @@ namespace Echo.Ast
     /// <summary>
     /// Formats the Ast so it looks nicer in <see cref="ControlFlowNodeAdorner{TInstruction}"/>
     /// </summary>
-    public class AstStatementFormatter<TInstruction> : IInstructionFormatter<AstStatementBase<TInstruction>>
+    public class StatementFormatter<TInstruction> : IInstructionFormatter<StatementBase<TInstruction>>
     {
         private readonly IInstructionFormatter<TInstruction> _instructionFormatter;
         
         /// <summary>
-        /// Creates a new instance of <see cref="AstStatementFormatter{TInstruction}"/> with the specified
+        /// Creates a new instance of <see cref="StatementFormatter{TInstruction}"/> with the specified
         /// <see cref="IInstructionFormatter{TInstruction}"/>
         /// </summary>
         /// <param name="instructionFormatter">The <see cref="IInstructionFormatter{TInstruction}"/> used to
-        /// format <see cref="AstInstructionExpression{TInstruction}"/>s with</param>
-        public AstStatementFormatter(IInstructionFormatter<TInstruction> instructionFormatter) =>
+        /// format <see cref="InstructionExpression{TInstruction}"/>s with</param>
+        public StatementFormatter(IInstructionFormatter<TInstruction> instructionFormatter) =>
             _instructionFormatter = instructionFormatter;
 
         /// <inheritdoc />
-        public string Format(in AstStatementBase<TInstruction> instruction) =>
+        public string Format(in StatementBase<TInstruction> instruction) =>
             instruction.Format(_instructionFormatter);
     }
 }
