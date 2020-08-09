@@ -5,7 +5,7 @@ using System.Text;
 namespace Echo.Ast.Pattern
 {
     /// <summary>
-    /// Describes an expression pattern that matches on an instance of a <see cref="InstructionExpressionPattern{TInstruction}"/>. 
+    /// Describes an expression pattern that matches on an instance of a <see cref="AstInstructionExpression{TInstruction}"/>. 
     /// </summary>
     /// <typeparam name="TInstruction">The type of instruction that is stored in the expression.</typeparam>
     public class InstructionExpressionPattern<TInstruction> : ExpressionPattern<TInstruction>
