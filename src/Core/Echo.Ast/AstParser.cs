@@ -198,7 +198,7 @@ namespace Echo.Ast
                     var slots = stackPushCount == 0
                         ? Array.Empty<AstVariable>()
                         : CreateVariablesBuffer(stackPushCount)
-                            .Select(v => new AstVariable($"stack_slot{_varCount++}"))
+                            .Select(v => new AstVariable($"stack_slot_{_varCount++}"))
                             .ToArray();
 
                     var combined = CreateVariablesBuffer(writtenVariables.Length + slots.Length);
