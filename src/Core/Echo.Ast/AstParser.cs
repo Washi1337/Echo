@@ -45,10 +45,10 @@ namespace Echo.Ast
         /// <summary>
         /// Parses the given <see cref="ControlFlowGraph{TInstruction}"/>
         /// </summary>
-        /// <returns>A <see cref="CompilationUnit{TInstruction}"/> representing the Ast</returns>
-        public CompilationUnit<TInstruction> Parse()
+        /// <returns>A <see cref="ControlFlowGraph{TInstruction}"/> representing the Ast</returns>
+        public ControlFlowGraph<StatementBase<TInstruction>> Parse()
         {
-            var newGraph = new CompilationUnit<TInstruction>(_astArchitecture);
+            var newGraph = new ControlFlowGraph<StatementBase<TInstruction>>(_astArchitecture);
             var blockBuilder = new BlockBuilder<TInstruction>();
             var rootScope = blockBuilder.ConstructBlocks(_controlFlowGraph);
 
@@ -63,7 +63,6 @@ namespace Echo.Ast
             foreach (var originalBlock in rootScope.GetAllBlocks())
             {
                 var originalNode = _controlFlowGraph.Nodes[originalBlock.Offset];
-                
                 var transformedBlock = TransformBlock(originalBlock);
                 var newNode = new ControlFlowNode<StatementBase<TInstruction>>(originalBlock.Offset, transformedBlock);
                 newGraph.Nodes.Add(newNode);
@@ -81,6 +80,9 @@ namespace Echo.Ast
                 newOrigin.ConnectWith(newTarget, originalEdge.Type);
             }
             
+            // Fix entry point.
+            newGraph.Entrypoint = newGraph.Nodes[_controlFlowGraph.Entrypoint.Offset];
+
             return newGraph;
         }
 
