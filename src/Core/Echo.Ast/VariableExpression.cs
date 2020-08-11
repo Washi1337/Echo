@@ -44,7 +44,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"{Variable}";
+        public override string ToString() => $"{Variable.Name}";
 
         internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) => ToString();
     }

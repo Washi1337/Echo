@@ -55,9 +55,9 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"{string.Join(", ", Variables.Select(v => v.ToString()))} = {Expression}";
+        public override string ToString() => $"{string.Join(", ", Variables.Select(v => v.Name))} = {Expression}";
         
         internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
-           $"{string.Join(", ", Variables.Select(v => v.ToString()))} = {Expression.Format(instructionFormatter)}"; 
+           $"{string.Join(", ", Variables.Select(v => v.Name))} = {Expression.Format(instructionFormatter)}"; 
     }
 }

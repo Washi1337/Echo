@@ -127,8 +127,8 @@ namespace Echo.Ast
 
         private BasicBlock<StatementBase<TInstruction>> TransformBlock(BasicBlock<TInstruction> block)
         {
-            static AstVariable[] CreateVariablesBuffer(int count) =>
-                count == 0 ? Array.Empty<AstVariable>() : new AstVariable[count];
+            static IVariable[] CreateVariablesBuffer(int count) =>
+                count == 0 ? Array.Empty<IVariable>() : new IVariable[count];
             
             int phiCount = 0;
             var result = new BasicBlock<StatementBase<TInstruction>>(block.Offset);
@@ -180,14 +180,7 @@ namespace Echo.Ast
                 foreach (var variableDependency in variableDependencies)
                 {
                     var variable = variableDependency.Key;
-                    if (!_variableVersions.TryGetValue(variable, out int version))
-                        _variableVersions.Add(variable, 0);
-                        
-                    var key = (variable, version);
-                    if (!_versionedAstVariables.ContainsKey(key))
-                        _versionedAstVariables.Add(key, new AstVariable($"{variable.Name}_v{version}"));
-
-                    targetVariables[index++] = _versionedAstVariables[key];
+                    targetVariables[index++] = new TemporaryVariable(variable);
                 }
 
                 var instructionExpression = new InstructionExpression<TInstruction>(
@@ -199,9 +192,7 @@ namespace Echo.Ast
                 );
 
                 int writtenVariablesCount = Architecture.GetWrittenVariablesCount(instruction);
-                var writtenVariables = writtenVariablesCount == 0
-                    ? Array.Empty<IVariable>()
-                    : new IVariable[writtenVariablesCount];
+                var writtenVariables = CreateVariablesBuffer(writtenVariablesCount);
                 
                 if (writtenVariables.Length > 0)
                     Architecture.GetWrittenVariables(instruction, writtenVariables.AsSpan());

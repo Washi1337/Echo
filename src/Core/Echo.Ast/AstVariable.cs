@@ -21,8 +21,5 @@ namespace Echo.Ast
         {
             get;
         }
-
-        /// <inheritdoc />
-        public override string ToString() => Name;
     }
 }
