@@ -12,6 +12,7 @@ namespace Echo.Ast
         : IInstructionSetArchitecture<StatementBase<TInstruction>>
     {
         private readonly IInstructionSetArchitecture<TInstruction> _isa;
+        private readonly InstructionFlowControlDeterminerVisitor<TInstruction> _flowControlDeterminer;
 
         /// <summary>
         /// Create a new decorator around the <paramref name="isa"/>
@@ -20,6 +21,7 @@ namespace Echo.Ast
         public AstInstructionSetArchitectureDecorator(IInstructionSetArchitecture<TInstruction> isa)
         {
             _isa = isa;
+            _flowControlDeterminer = new InstructionFlowControlDeterminerVisitor<TInstruction>(isa);
         }
 
         /// <inheritdoc />
@@ -29,8 +31,8 @@ namespace Echo.Ast
         public int GetSize(in StatementBase<TInstruction> instruction) => 1;
 
         /// <inheritdoc />
-        // TODO: Return proper flow
-        public InstructionFlowControl GetFlowControl(in StatementBase<TInstruction> instruction) => 0;
+        public InstructionFlowControl GetFlowControl(in StatementBase<TInstruction> instruction) =>
+            instruction.Accept(_flowControlDeterminer, null);
         
         /// <inheritdoc />
         public int GetStackPushCount(in StatementBase<TInstruction> instruction) => 0;
