@@ -71,6 +71,27 @@ namespace Echo.Ast.Patterns
         {
             return new ExpressionStatementPattern<TInstruction>(ExpressionPattern.Instruction(instruction));
         }
+
+        /// <summary>
+        /// Creates a new pattern that matches on instances of <see cref="PhiStatementPattern{TInstruction}"/> with
+        /// any target and any number of source variables.
+        /// </summary>
+        /// <returns>The pattern.</returns>
+        public static PhiStatementPattern<TInstruction> Phi<TInstruction>()
+        {
+            return new PhiStatementPattern<TInstruction>();
+        }
+
+        /// <summary>
+        /// Creates a new pattern that matches on instances of <see cref="PhiStatementPattern{TInstruction}"/> with
+        /// any number of source variables.
+        /// </summary>
+        /// <param name="target">The target pattern to match on.</param>
+        /// <returns>The pattern.</returns>
+        public static PhiStatementPattern<TInstruction> Phi<TInstruction>(Pattern<IVariable> target)
+        {
+            return new PhiStatementPattern<TInstruction>(target);
+        }
     }
     
     /// <summary>
