@@ -13,7 +13,8 @@ namespace Echo.Ast
         /// <param name="assignmentStatement">The <see cref="AssignmentStatement{TInstruction}"/> that is being entered</param>
         /// <param name="state">The state</param>
         protected virtual void EnterAssignmentStatement(
-            AssignmentStatement<TInstruction> assignmentStatement, TState state) { }
+            AssignmentStatement<TInstruction> assignmentStatement, TState state) =>
+                VisitChildren(assignmentStatement, state);
 
         /// <summary>
         /// Finish visiting a given <see cref="AssignmentStatement{TInstruction}"/>
@@ -29,7 +30,8 @@ namespace Echo.Ast
         /// <param name="expressionStatement">The <see cref="ExpressionStatement{TInstruction}"/> that is being entered</param>
         /// <param name="state">The state</param>
         protected virtual void EnterExpressionStatement(
-            ExpressionStatement<TInstruction> expressionStatement, TState state) { }
+            ExpressionStatement<TInstruction> expressionStatement, TState state) =>
+                VisitChildren(expressionStatement, state);
         
         /// <summary>
         /// Finish visiting a given <see cref="ExpressionStatement{TInstruction}"/>
@@ -45,7 +47,7 @@ namespace Echo.Ast
         /// <param name="phiStatement">The <see cref="PhiStatement{TInstruction}"/> that is being entered</param>
         /// <param name="state">The state</param>
         protected virtual void EnterPhiStatement(
-            PhiStatement<TInstruction> phiStatement, TState state) { }
+            PhiStatement<TInstruction> phiStatement, TState state) => VisitChildren(phiStatement, state);
 
         /// <summary>
         /// Finish visiting a given <see cref="PhiStatement{TInstruction}"/>
@@ -61,7 +63,8 @@ namespace Echo.Ast
         /// <param name="instructionExpression">The <see cref="InstructionExpression{TInstruction}"/> that is being entered</param>
         /// <param name="state">The state</param>
         protected virtual void EnterInstructionExpression(
-            InstructionExpression<TInstruction> instructionExpression, TState state) { }
+            InstructionExpression<TInstruction> instructionExpression, TState state) =>
+                VisitChildren(instructionExpression, state);
 
         /// <summary>
         /// Finish visiting a given <see cref="InstructionExpression{TInstruction}"/>
@@ -78,6 +81,12 @@ namespace Echo.Ast
         /// <param name="state">The state</param>
         protected virtual void VisitVariableExpression(
             VariableExpression<TInstruction> variableExpression, TState state) { }
+
+        private void VisitChildren(NodeBase<TInstruction> node, TState state)
+        {
+            foreach (var child in node.GetChildren())
+                ((NodeBase<TInstruction>) child).Accept(this, state);
+        }
 
         /// <inheritdoc />
         void INodeVisitor<TInstruction, TState>.Visit(AssignmentStatement<TInstruction> assignmentStatement, TState state)
