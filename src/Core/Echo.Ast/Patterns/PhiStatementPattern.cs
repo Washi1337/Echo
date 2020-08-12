@@ -132,9 +132,12 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="sources">The patterns that describe the sources of the phi node.</param>
         /// <returns>The current pattern.</returns>
-        public PhiStatementPattern<TInstruction> WithSources(IEnumerable<Pattern<VariableExpression<TInstruction>>> sources)
-        {
-            return WithSources(sources.ToArray());
-        }
+        public PhiStatementPattern<TInstruction> WithSources(IEnumerable<Pattern<VariableExpression<TInstruction>>> sources) => 
+            WithSources(sources.ToArray());
+
+        /// <inheritdoc />
+        public override string ToString() => AnySources
+            ? $"{Target} = φ(*)"
+            : $"{Target} = φ({string.Join(", ", Sources)})";
     }
 }
