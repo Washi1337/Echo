@@ -88,6 +88,53 @@ namespace Echo.Ast.Patterns
                     Sources[i].Match(sources[i], result);
             }
         }
-        
+
+        /// <summary>
+        /// Sets the target variable patterns to the provided expression patterns.
+        /// </summary>
+        /// <param name="target">The pattern describing the target of the phi node.</param>
+        /// <returns>The current pattern.</returns>
+        public PhiStatementPattern<TInstruction> WithTarget(Pattern<IVariable> target)
+        {
+            Target = target;
+            return this;
+        }
+
+        /// <summary>
+        /// Indicate any number of sources is allowed. 
+        /// </summary>
+        /// <returns>The current pattern.</returns>
+        public PhiStatementPattern<TInstruction> WithAnySources()
+        {
+            Sources.Clear();
+            AnySources = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the source patterns to the provided expression patterns.
+        /// </summary>
+        /// <param name="sources">The patterns that describe the sources of the phi node.</param>
+        /// <returns>The current pattern.</returns>
+        public PhiStatementPattern<TInstruction> WithSources(params Pattern<VariableExpression<TInstruction>>[] sources)
+        {
+            return WithSources(sources.ToArray());
+        }
+
+        /// <summary>
+        /// Sets the source patterns to the provided expression patterns.
+        /// </summary>
+        /// <param name="sources">The patterns that describe the sources of the phi node.</param>
+        /// <returns>The current pattern.</returns>
+        public PhiStatementPattern<TInstruction> WithSources(IEnumerable<Pattern<VariableExpression<TInstruction>>> sources)
+        {
+            AnySources = false;
+
+            Sources.Clear();
+            foreach (var source in sources)
+                Sources.Add(source);
+
+            return this;
+        }
     }
 }
