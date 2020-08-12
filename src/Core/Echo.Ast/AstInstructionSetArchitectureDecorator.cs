@@ -43,7 +43,7 @@ namespace Echo.Ast
         /// <inheritdoc />
         public int GetReadVariablesCount(in StatementBase<TInstruction> instruction)
         {
-            var visitor = new ReadVariableFinderVisitor<TInstruction>();
+            var visitor = new ReadVariableFinderWalker<TInstruction>();
             instruction.Accept(visitor, null);
 
             return visitor.Count;
@@ -52,7 +52,7 @@ namespace Echo.Ast
         /// <inheritdoc />
         public int GetReadVariables(in StatementBase<TInstruction> instruction, Span<IVariable> variablesBuffer)
         {
-            var visitor = new ReadVariableFinderVisitor<TInstruction>();
+            var visitor = new ReadVariableFinderWalker<TInstruction>();
             instruction.Accept(visitor, null);
             
             visitor.Variables.CopyTo(variablesBuffer);
@@ -62,7 +62,7 @@ namespace Echo.Ast
         /// <inheritdoc />
         public int GetWrittenVariablesCount(in StatementBase<TInstruction> instruction)
         {
-            var visitor = new WrittenVariableFinderVisitor<TInstruction>();
+            var visitor = new WrittenVariableFinderWalker<TInstruction>();
             instruction.Accept(visitor, null);
 
             return visitor.Count;
@@ -71,7 +71,7 @@ namespace Echo.Ast
         /// <inheritdoc />
         public int GetWrittenVariables(in StatementBase<TInstruction> instruction, Span<IVariable> variablesBuffer)
         {
-            var visitor = new WrittenVariableFinderVisitor<TInstruction>();
+            var visitor = new WrittenVariableFinderWalker<TInstruction>();
             instruction.Accept(visitor, null);
             
             visitor.Variables.CopyTo(variablesBuffer);
