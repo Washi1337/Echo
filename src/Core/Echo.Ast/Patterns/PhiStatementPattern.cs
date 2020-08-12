@@ -118,7 +118,13 @@ namespace Echo.Ast.Patterns
         /// <returns>The current pattern.</returns>
         public PhiStatementPattern<TInstruction> WithSources(params Pattern<VariableExpression<TInstruction>>[] sources)
         {
-            return WithSources(sources.ToArray());
+            AnySources = false;
+
+            Sources.Clear();
+            foreach (var source in sources)
+                Sources.Add(source);
+
+            return this;
         }
 
         /// <summary>
@@ -128,13 +134,7 @@ namespace Echo.Ast.Patterns
         /// <returns>The current pattern.</returns>
         public PhiStatementPattern<TInstruction> WithSources(IEnumerable<Pattern<VariableExpression<TInstruction>>> sources)
         {
-            AnySources = false;
-
-            Sources.Clear();
-            foreach (var source in sources)
-                Sources.Add(source);
-
-            return this;
+            return WithSources(sources.ToArray());
         }
     }
 }
