@@ -11,6 +11,15 @@ namespace Echo.Ast.Patterns
     public class AssignmentStatementPattern<TInstruction> : StatementPattern<TInstruction>
     {
         /// <summary>
+        /// Creates a new assignment statement pattern that matches on any variable and any value expression.
+        /// </summary>
+        public AssignmentStatementPattern()
+        {
+            Variables.Add(Pattern.Any<IVariable>());
+            Expression = Pattern.Any<ExpressionBase<TInstruction>>();
+        }
+        
+        /// <summary>
         /// Creates a new assignment statement pattern.
         /// </summary>
         /// <param name="variable">The pattern describing the variable that is assigned a value.</param>
@@ -68,6 +77,32 @@ namespace Echo.Ast.Patterns
             }
 
             Expression.Match(statement.Expression, result);
+        }
+
+        /// <summary>
+        /// Sets the patterns describing the variables that are assigned a new value.
+        /// </summary>
+        /// <param name="variables">The patterns describing the variables.</param>
+        /// <returns>The current pattern.</returns>
+        public AssignmentStatementPattern<TInstruction> WithVariables(params Pattern<IVariable>[] variables)
+        {
+            Variables.Clear();
+            
+            foreach (var variable in variables)
+                Variables.Add(variable);
+            
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the pattern describing the expression on the right hand side of the equals sign.
+        /// </summary>
+        /// <param name="expression">The pattern describing expression.</param>
+        /// <returns>The current pattern.</returns>
+        public AssignmentStatementPattern<TInstruction> WithExpression(Pattern<ExpressionBase<TInstruction>> expression)
+        {
+            Expression = expression;
+            return this;
         }
 
         /// <inheritdoc />
