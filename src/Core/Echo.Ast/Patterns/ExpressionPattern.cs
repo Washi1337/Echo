@@ -42,14 +42,6 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="variable">The pattern describing the referenced variable.</param>
         /// <returns>The pattern.</returns>
-        public static VariableExpressionPattern<TInstruction> Variable<TInstruction>(IVariable variable) => 
-            new VariableExpressionPattern<TInstruction>(Pattern.Literal(variable));
-
-        /// <summary>
-        /// Creates a new pattern that matches any type of variable expression. 
-        /// </summary>
-        /// <param name="variable">The pattern describing the referenced variable.</param>
-        /// <returns>The pattern.</returns>
         public static VariableExpressionPattern<TInstruction> Variable<TInstruction>(Pattern<IVariable> variable) => 
             new VariableExpressionPattern<TInstruction>(variable);
     }

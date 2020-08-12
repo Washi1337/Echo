@@ -28,6 +28,13 @@ namespace Echo.Ast.Patterns
     public abstract class Pattern<T>
     {
         /// <summary>
+        /// Converts the provided literal to a pattern.
+        /// </summary>
+        /// <param name="value">The value to match.</param>
+        /// <returns>The resulting pattern.</returns>
+        public static implicit operator Pattern<T>(T value) => new LiteralPattern<T>(value);
+        
+        /// <summary>
         /// Combines two patterns together into a single <see cref="OrPattern{T}"/>.
         /// </summary>
         /// <param name="a">The first pattern.</param>

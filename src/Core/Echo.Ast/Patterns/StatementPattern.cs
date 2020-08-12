@@ -20,6 +20,16 @@ namespace Echo.Ast.Patterns
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="AssignmentStatement{TInstruction}"/>.
         /// </summary>
+        public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>()
+        {
+            return new AssignmentStatementPattern<TInstruction>(
+                Pattern.Any<IVariable>(),
+                Pattern.Any<ExpressionBase<TInstruction>>());
+        }
+        
+        /// <summary>
+        /// Creates a new pattern that matches on instances of <see cref="AssignmentStatement{TInstruction}"/>.
+        /// </summary>
         /// <param name="variable">The pattern describing the variable that is assigned a value.</param>
         /// <param name="expression">The pattern for the expression on the right hand side of the equals sign.</param>
         public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>(

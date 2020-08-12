@@ -33,12 +33,5 @@ namespace Echo.Ast.Patterns
 
         /// <inheritdoc />
         public override string ToString() => Value?.ToString() ?? "null";
-
-        /// <summary>
-        /// Converts the provided literal to a pattern.
-        /// </summary>
-        /// <param name="value">The value to match.</param>
-        /// <returns>The resulting pattern.</returns>
-        public static implicit operator LiteralPattern<T>(T value) => new LiteralPattern<T>(value);
     }
 }
