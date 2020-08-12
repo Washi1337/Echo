@@ -9,6 +9,14 @@ namespace Echo.Ast.Patterns
     public class ExpressionStatementPattern<TInstruction> : StatementPattern<TInstruction>
     {
         /// <summary>
+        /// Creates a new expression statement pattern matching on any embedded expression.
+        /// </summary>
+        public ExpressionStatementPattern()
+        {
+            Expression = Pattern.Any<ExpressionBase<TInstruction>>();
+        }
+        
+        /// <summary>
         /// Creates a new expression statement pattern.
         /// </summary>
         /// <param name="expression">The pattern for the embedded expression.</param>
@@ -38,6 +46,17 @@ namespace Echo.Ast.Patterns
             Expression.Match(statement.Expression, result);
         }
 
+        /// <summary>
+        /// Sets the pattern describing the expression embedded into the input.
+        /// </summary>
+        /// <param name="expression">The expression pattern.</param>
+        /// <returns>The current pattern.</returns>
+        public ExpressionStatementPattern<TInstruction> WithExpression(Pattern<ExpressionBase<TInstruction>> expression)
+        {
+            Expression = expression;
+            return this;
+        }
+        
         /// <inheritdoc />
         public override string ToString() => Expression.ToString();
     }

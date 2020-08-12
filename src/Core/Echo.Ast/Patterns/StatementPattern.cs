@@ -52,6 +52,15 @@ namespace Echo.Ast.Patterns
         }
 
         /// <summary>
+        /// Creates a new pattern that matches on instances of <see cref="ExpressionStatement{TInstruction}"/> with
+        /// any kind of embedded expression.
+        /// </summary>
+        public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>()
+        {
+            return new ExpressionStatementPattern<TInstruction>();
+        }
+        
+        /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="ExpressionStatement{TInstruction}"/>.
         /// </summary>
         /// <param name="expression">The pattern for the embedded expression.</param>
