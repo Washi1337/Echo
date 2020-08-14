@@ -136,7 +136,6 @@ namespace Echo.Ast
             static IVariable[] CreateVariablesBuffer(int count) =>
                 count == 0 ? Array.Empty<IVariable>() : new IVariable[count];
             
-            int phiCount = 0;
             var result = new BasicBlock<StatementBase<TInstruction>>(block.Offset);
 
             foreach (var instruction in block.Instructions)
@@ -154,30 +153,24 @@ namespace Echo.Ast
                     if (sources.Count == 1)
                     {
                         var source = sources.First();
-                        if (source.Node.IsExternal)
-                        {
-                            targetVariables[i] =
-                                new AstVariable(((ExternalDataSourceNode<TInstruction>) source.Node).Name);
-                        }
-                        else
-                        {
-                            var slot = _stackSlots[source.Node.Id][source.SlotIndex];
-                            targetVariables[i] = slot;
-                        }
+                        targetVariables[i] = source.Node is ExternalDataSourceNode<TInstruction> external
+                            ? VariableFactory.CreateVariable(external.Name)
+                            : _stackSlots[source.Node.Id][source.SlotIndex];
                     }
                     else
                     {
                         var phiVar = CreatePhiSlot();
+                        var slots = sources.Select(s =>
+                        {
+                            // ReSharper disable once ConvertToLambdaExpression
+                            return s.Node is ExternalDataSourceNode<TInstruction> external
+                                ? VariableFactory.CreateVariable(external.Name)
+                                : _stackSlots[s.Node.Id][s.SlotIndex];
+                        });
+                        var variables = slots.Select(s => new VariableExpression<TInstruction>(_id--, s));
+                        var phiStatement = new PhiStatement<TInstruction>(_id--, variables.ToArray(), phiVar);
                         
-                        var slots = sources
-                            .Select(s => _stackSlots[s.Node.Id][s.SlotIndex]);
-                        var variables = slots
-                            .Select(s => new VariableExpression<TInstruction>(_id--, s));
-                        
-                        var phiStatement = new PhiStatement<TInstruction>(
-                            _id--, variables.ToArray(), phiVar);
-                        
-                        result.Instructions.Insert(phiCount++, phiStatement);
+                        result.Instructions.Add(phiStatement);
                         targetVariables[i] = phiVar;
                     }
                 }
