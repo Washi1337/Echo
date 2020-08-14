@@ -133,9 +133,7 @@ namespace Echo.Ast
 
         private BasicBlock<StatementBase<TInstruction>> TransformBlock(BasicBlock<TInstruction> block)
         {
-            static IVariable[] CreateVariablesBuffer(int count) =>
-                count == 0 ? Array.Empty<IVariable>() : new IVariable[count];
-            
+            int phiStatementCount = 0;
             var result = new BasicBlock<StatementBase<TInstruction>>(block.Offset);
 
             foreach (var instruction in block.Instructions)
@@ -144,7 +142,7 @@ namespace Echo.Ast
                 var dataFlowNode = _dataFlowGraph.Nodes[offset];
                 var stackDependencies = dataFlowNode.StackDependencies;
                 var variableDependencies = dataFlowNode.VariableDependencies;
-                var targetVariables = CreateVariablesBuffer(
+                var targetVariables = VariableFactory.CreateVariableBuffer(
                     stackDependencies.Count + variableDependencies.Count);
                 
                 for (int i = 0; i < stackDependencies.Count; i++)
@@ -162,15 +160,15 @@ namespace Echo.Ast
                         var phiVar = CreatePhiSlot();
                         var slots = sources.Select(s =>
                         {
-                            // ReSharper disable once ConvertToLambdaExpression
-                            return s.Node is ExternalDataSourceNode<TInstruction> external
+                            var variable = s.Node is ExternalDataSourceNode<TInstruction> external
                                 ? VariableFactory.CreateVariable(external.Name)
                                 : _stackSlots[s.Node.Id][s.SlotIndex];
+                            
+                            return new VariableExpression<TInstruction>(_id--, variable);
                         });
-                        var variables = slots.Select(s => new VariableExpression<TInstruction>(_id--, s));
-                        var phiStatement = new PhiStatement<TInstruction>(_id--, variables.ToArray(), phiVar);
+                        var phiStatement = new PhiStatement<TInstruction>(_id--, slots.ToArray(), phiVar);
                         
-                        result.Instructions.Add(phiStatement);
+                        result.Instructions.Insert(phiStatementCount++, phiStatement);
                         targetVariables[i] = phiVar;
                     }
                 }
@@ -225,9 +223,11 @@ namespace Echo.Ast
                         else
                         {
                             phiSlot = CreatePhiSlot();
-                            var phi = new PhiStatement<TInstruction>(_id--,
-                                sources.Select(s => new VariableExpression<TInstruction>(_id--, s)).ToArray(), phiSlot);
-                            result.Instructions.Add(phi);
+                            var phiStatement = new PhiStatement<TInstruction>(
+                                _id--,
+                                sources.Select(s => new VariableExpression<TInstruction>(_id--, s)).ToArray(),
+                                phiSlot);
+                            result.Instructions.Insert(phiStatementCount++, phiStatement);
                             _phiSlots[sources] = phiSlot;
                             targetVariables[index++] = phiSlot;
                         }
@@ -243,7 +243,7 @@ namespace Echo.Ast
                 );
 
                 int writtenVariablesCount = Architecture.GetWrittenVariablesCount(instruction);
-                var writtenVariables = CreateVariablesBuffer(writtenVariablesCount);
+                var writtenVariables = VariableFactory.CreateVariableBuffer(writtenVariablesCount);
                 
                 if (writtenVariables.Length > 0)
                     Architecture.GetWrittenVariables(instruction, writtenVariables.AsSpan());
@@ -291,7 +291,7 @@ namespace Echo.Ast
                             .Select(_ => CreateStackSlot())
                             .ToArray();
 
-                    var combined = CreateVariablesBuffer(writtenVariables.Length + slots.Length);
+                    var combined = VariableFactory.CreateVariableBuffer(writtenVariables.Length + slots.Length);
                     slots.CopyTo(combined, 0);
                     foreach (var writtenVariable in writtenVariables)
                     {
