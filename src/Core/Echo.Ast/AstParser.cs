@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Echo.Ast.Factories;
 using Echo.Ast.Helpers;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Blocks;
@@ -166,7 +167,7 @@ namespace Echo.Ast
                     }
                     else
                     {
-                        var phiVar = new AstVariable($"phi_{_phiVarCount++}");
+                        var phiVar = CreatePhiSlot();
                         
                         var slots = sources
                             .Select(s => _stackSlots[s.Node.Id][s.SlotIndex]);
@@ -192,7 +193,7 @@ namespace Echo.Ast
                             _variableVersions.Add(variable, 0);
                         
                         if (!_versionedAstVariables.ContainsKey((variable, _variableVersions[variable])))
-                            _versionedAstVariables.Add((variable, _variableVersions[variable]), new AstVariable($"{variable.Name}_v{_variableVersions[variable]}"));
+                            _versionedAstVariables.Add((variable, _variableVersions[variable]), CreateVersionedVariable(variable));
 
                         targetVariables[index++] = _versionedAstVariables[(variable, _variableVersions[variable])];
                     }
@@ -264,9 +265,9 @@ namespace Echo.Ast
                         
                         dict = new Dictionary<IVariable, int>();
                         _instructionToVersionedVariable[offset] = dict;
-                        
+
                         _versionedAstVariables[(writtenVariable, _variableVersions[writtenVariable])] =
-                            new AstVariable($"{writtenVariable.Name}_v{_variableVersions[writtenVariable]}");
+                            CreateVersionedVariable(writtenVariable);
                         dict.Add(writtenVariable, _variableVersions[writtenVariable]);
                     }
                     else
@@ -280,7 +281,7 @@ namespace Echo.Ast
                         }
 
                         _versionedAstVariables[(writtenVariable, dict[writtenVariable])] =
-                            new AstVariable($"{writtenVariable.Name}_v{dict[writtenVariable]}");
+                            CreateVersionedVariable(writtenVariable);
                     }
                 }
 
@@ -293,8 +294,8 @@ namespace Echo.Ast
                     int stackPushCount = Architecture.GetStackPushCount(instruction);
                     var slots = stackPushCount == 0
                         ? Array.Empty<AstVariable>()
-                        : CreateVariablesBuffer(stackPushCount)
-                            .Select(v => new AstVariable($"stack_slot_{_varCount++}"))
+                        : Enumerable.Range(0, stackPushCount)
+                            .Select(_ => CreateStackSlot())
                             .ToArray();
 
                     var combined = CreateVariablesBuffer(writtenVariables.Length + slots.Length);
@@ -303,7 +304,7 @@ namespace Echo.Ast
                     foreach (var writtenVariable in writtenVariables)
                     {
                         if (!_versionedAstVariables.ContainsKey((writtenVariable, _variableVersions[writtenVariable])))
-                            _versionedAstVariables.Add((writtenVariable, _variableVersions[writtenVariable]), new AstVariable($"{writtenVariable.Name}_v{_variableVersions[writtenVariable]}"));
+                            _versionedAstVariables.Add((writtenVariable, _variableVersions[writtenVariable]), CreateVersionedVariable(writtenVariable));
                         
                         combined[index2++] =
                             _versionedAstVariables[(writtenVariable, _variableVersions[writtenVariable])];
@@ -317,5 +318,12 @@ namespace Echo.Ast
 
             return result;
         }
+        
+        private AstVariable CreateStackSlot() => VariableFactory.CreateVariable($"stack_slot_{_varCount++}");
+
+        private AstVariable CreatePhiSlot() => VariableFactory.CreateVariable($"phi_{_phiVarCount++}");
+
+        private AstVariable CreateVersionedVariable(IVariable original) =>
+            VariableFactory.CreateVariable(original.Name, _variableVersions[original]);
     }
 }
