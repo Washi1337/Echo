@@ -17,16 +17,7 @@ namespace Echo.Ast
     /// </summary>
     public sealed class AstParser<TInstruction>
     {
-        private readonly ControlFlowGraph<TInstruction> _controlFlowGraph;
-        private readonly DataFlowGraph<TInstruction> _dataFlowGraph;
-        private readonly IInstructionSetArchitecture<StatementBase<TInstruction>> _astArchitecture;
-        private readonly Dictionary<IVariable, int> _variableVersions = new Dictionary<IVariable, int>();
-        private readonly Dictionary<(IVariable, int), AstVariable> _versionedAstVariables = new Dictionary<(IVariable, int), AstVariable>();
-        private readonly Dictionary<long, Dictionary<IVariable, int>> _instructionToVersionedVariable = new Dictionary<long, Dictionary<IVariable, int>>();
-        private readonly Dictionary<AstVariableCollection, AstVariable> _phiSlots = new Dictionary<AstVariableCollection, AstVariable>();
-        private readonly Dictionary<long, AstVariable[]> _stackSlots = new Dictionary<long, AstVariable[]>();
-        private readonly Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<StatementBase<TInstruction>>>
-            _regionsMapping = new Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<StatementBase<TInstruction>>>();
+        private readonly AstParserContext<TInstruction> _context;
 
         private long _id = -1;
         private long _varCount;
@@ -39,12 +30,14 @@ namespace Echo.Ast
         /// <param name="dataFlowGraph">The <see cref="DataFlowGraph{TContents}"/> to parse</param>
         public AstParser(ControlFlowGraph<TInstruction> controlFlowGraph, DataFlowGraph<TInstruction> dataFlowGraph)
         {
-            _controlFlowGraph = controlFlowGraph;
-            _dataFlowGraph = dataFlowGraph;
-            _astArchitecture = new AstInstructionSetArchitectureDecorator<TInstruction>(_controlFlowGraph.Architecture);
+            var isa = new AstInstructionSetArchitectureDecorator<TInstruction>(controlFlowGraph.Architecture);
+            _context = new AstParserContext<TInstruction>(controlFlowGraph, dataFlowGraph, isa);
         }
 
-        private IInstructionSetArchitecture<TInstruction> Architecture => _controlFlowGraph.Architecture; 
+        private IInstructionSetArchitecture<TInstruction> Architecture => _context.Architecture;
+        private IInstructionSetArchitecture<StatementBase<TInstruction>> AstArchitecture => _context.AstArchitecture;
+        private ControlFlowGraph<TInstruction> ControlFlowGraph => _context.ControlFlowGraph;
+        private DataFlowGraph<TInstruction> DataFlowGraph => _context.DataFlowGraph;
         
         /// <summary>
         /// Parses the given <see cref="ControlFlowGraph{TInstruction}"/>
@@ -52,12 +45,12 @@ namespace Echo.Ast
         /// <returns>A <see cref="ControlFlowGraph{TInstruction}"/> representing the Ast</returns>
         public ControlFlowGraph<StatementBase<TInstruction>> Parse()
         {
-            var newGraph = new ControlFlowGraph<StatementBase<TInstruction>>(_astArchitecture);
+            var newGraph = new ControlFlowGraph<StatementBase<TInstruction>>(AstArchitecture);
             var blockBuilder = new BlockBuilder<TInstruction>();
-            var rootScope = blockBuilder.ConstructBlocks(_controlFlowGraph);
+            var rootScope = blockBuilder.ConstructBlocks(ControlFlowGraph);
 
             // Transform and add regions.
-            foreach (var originalRegion in _controlFlowGraph.Regions)
+            foreach (var originalRegion in ControlFlowGraph.Regions)
             {
                 var newRegion = TransformRegion(originalRegion);
                 newGraph.Regions.Add(newRegion);
@@ -66,18 +59,18 @@ namespace Echo.Ast
             // Transform and add nodes.
             foreach (var originalBlock in rootScope.GetAllBlocks())
             {
-                var originalNode = _controlFlowGraph.Nodes[originalBlock.Offset];
+                var originalNode = ControlFlowGraph.Nodes[originalBlock.Offset];
                 var transformedBlock = TransformBlock(originalBlock);
                 var newNode = new ControlFlowNode<StatementBase<TInstruction>>(originalBlock.Offset, transformedBlock);
                 newGraph.Nodes.Add(newNode);
                 
                 // Move node to newly created region.
                 if (originalNode.ParentRegion is BasicControlFlowRegion<TInstruction> basicRegion)
-                    newNode.MoveToRegion(_regionsMapping[basicRegion]);
+                    newNode.MoveToRegion(_context.RegionsMapping[basicRegion]);
             }
 
             // Clone edges.
-            foreach (var originalEdge in _controlFlowGraph.GetEdges())
+            foreach (var originalEdge in ControlFlowGraph.GetEdges())
             {
                 var newOrigin = newGraph.Nodes[originalEdge.Origin.Offset];
                 var newTarget = newGraph.Nodes[originalEdge.Target.Offset];
@@ -85,7 +78,7 @@ namespace Echo.Ast
             }
             
             // Fix entry point.
-            newGraph.Entrypoint = newGraph.Nodes[_controlFlowGraph.Entrypoint.Offset];
+            newGraph.Entrypoint = newGraph.Nodes[_context.ControlFlowGraph.Entrypoint.Offset];
 
             return newGraph;
         }
@@ -100,7 +93,7 @@ namespace Echo.Ast
                     TransformSubRegions(basicRegion, newBasicRegion);
 
                     // Register basic region pair.
-                    _regionsMapping[basicRegion] = newBasicRegion;
+                    _context.RegionsMapping[basicRegion] = newBasicRegion;
 
                     return newBasicRegion;
 
@@ -110,7 +103,7 @@ namespace Echo.Ast
                     // ProtectedRegion is read-only, so instead we just transform all sub regions and add it to the
                     // existing protected region.
                     TransformSubRegions(ehRegion.ProtectedRegion, newEhRegion.ProtectedRegion);
-                    _regionsMapping[ehRegion.ProtectedRegion] = newEhRegion.ProtectedRegion;
+                    _context.RegionsMapping[ehRegion.ProtectedRegion] = newEhRegion.ProtectedRegion;
 
                     // Add handler regions.
                     foreach (var subRegion in ehRegion.HandlerRegions)
@@ -139,7 +132,7 @@ namespace Echo.Ast
             foreach (var instruction in block.Instructions)
             {
                 long offset = Architecture.GetOffset(instruction);
-                var dataFlowNode = _dataFlowGraph.Nodes[offset];
+                var dataFlowNode = DataFlowGraph.Nodes[offset];
                 var stackDependencies = dataFlowNode.StackDependencies;
                 var variableDependencies = dataFlowNode.VariableDependencies;
                 var targetVariables = VariableFactory.CreateVariableBuffer(
@@ -190,31 +183,8 @@ namespace Echo.Ast
                     }
                     else
                     {
-                        var sources = new AstVariableCollection();
-                        foreach (var source in dependency)
-                        {
-                            var node = source.Node;
-                            long nodeOffset = Architecture.GetOffset(node.Contents);
-                            if (_instructionToVersionedVariable.TryGetValue(nodeOffset, out var pair2))
-                            {
-                                sources.Add(_versionedAstVariables[(variable, pair2[variable])]);
-                            }
-                            else
-                            {
-                                if (!_variableVersions.ContainsKey(variable))
-                                    _variableVersions.Add(variable, 0);
-                                else _variableVersions[variable]++;
-
-                                var slot = CreateVersionedVariable(variable);
-                                _instructionToVersionedVariable.Add(nodeOffset, new Dictionary<IVariable, int>
-                                {
-                                    [variable] = _variableVersions[variable]
-                                });
-
-                                _versionedAstVariables[(variable, _variableVersions[variable])] = slot;
-                                sources.Add(slot);
-                            }
-                        }
+                        var sources = AstVariableCollectionFactory<TInstruction>.CollectDependencies(
+                            _context, variable, dependency);
 
                         if (_phiSlots.TryGetValue(sources, out var phiSlot))
                         {
