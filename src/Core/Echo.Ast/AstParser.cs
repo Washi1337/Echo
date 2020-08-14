@@ -21,7 +21,7 @@ namespace Echo.Ast
         private readonly IInstructionSetArchitecture<StatementBase<TInstruction>> _astArchitecture;
         private readonly Dictionary<IVariable, int> _variableVersions = new Dictionary<IVariable, int>();
         private readonly Dictionary<(IVariable, int), AstVariable> _versionedAstVariables = new Dictionary<(IVariable, int), AstVariable>();
-        private readonly Dictionary<long, (AstVariable, int)> _instructionToVersionedVariable = new Dictionary<long, (AstVariable, int)>();
+        private readonly Dictionary<long, Dictionary<IVariable, int>> _instructionToVersionedVariable = new Dictionary<long, Dictionary<IVariable, int>>();
         private readonly Dictionary<AstVariableCollection, AstVariable> _phiSlots = new Dictionary<AstVariableCollection, AstVariable>();
         private readonly Dictionary<long, AstVariable[]> _stackSlots = new Dictionary<long, AstVariable[]>();
         private readonly Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<StatementBase<TInstruction>>>
@@ -186,9 +186,15 @@ namespace Echo.Ast
                 {
                     var variable = pair.Key;
                     var dependency = pair.Value;
-                    if (dependency.Count == 1)
+                    if (dependency.Count <= 1)
                     {
-                        targetVariables[index++] = variable;
+                        if (!_variableVersions.ContainsKey(variable))
+                            _variableVersions.Add(variable, 0);
+                        
+                        if (!_versionedAstVariables.ContainsKey((variable, _variableVersions[variable])))
+                            _versionedAstVariables.Add((variable, _variableVersions[variable]), new AstVariable($"{variable.Name}_v{_variableVersions[variable]}"));
+
+                        targetVariables[index++] = _versionedAstVariables[(variable, _variableVersions[variable])];
                     }
                     else
                     {
@@ -199,16 +205,20 @@ namespace Echo.Ast
                             long nodeOffset = Architecture.GetOffset(node.Contents);
                             if (_instructionToVersionedVariable.TryGetValue(nodeOffset, out var pair2))
                             {
-                                sources.Add(pair2.Item1);
+                                sources.Add(_versionedAstVariables[(variable, pair2[variable])]);
                             }
                             else
                             {
-                                if (_variableVersions.ContainsKey(variable))
-                                    _variableVersions[variable]++;
-                                else _variableVersions.Add(variable, 0);
+                                if (!_variableVersions.ContainsKey(variable))
+                                    _variableVersions.Add(variable, 0);
+                                else _variableVersions[variable]++;
                                 
                                 var slot = new AstVariable($"{variable.Name}_v{_variableVersions[variable]}");
-                                _instructionToVersionedVariable[nodeOffset] = (slot, _variableVersions[variable]);
+                                _instructionToVersionedVariable.Add(nodeOffset, new Dictionary<IVariable, int>
+                                {
+                                    [variable] = _variableVersions[variable]
+                                });
+
                                 _versionedAstVariables[(variable, _variableVersions[variable])] = slot;
                                 sources.Add(slot);
                             }
@@ -246,20 +256,31 @@ namespace Echo.Ast
 
                 foreach (var writtenVariable in writtenVariables)
                 {
-                    if (!_instructionToVersionedVariable.TryGetValue(offset, out var pair))
+                    if (!_instructionToVersionedVariable.TryGetValue(offset, out var dict))
                     {
-                        if (_variableVersions.ContainsKey(writtenVariable))
-                            _variableVersions[writtenVariable]++;
-                        else _variableVersions.Add(writtenVariable, 0);
+                        if (!_variableVersions.ContainsKey(writtenVariable))
+                            _variableVersions.Add(writtenVariable, 0);
+                        else _variableVersions[writtenVariable]++;
+                        
+                        dict = new Dictionary<IVariable, int>();
+                        _instructionToVersionedVariable[offset] = dict;
                         
                         _versionedAstVariables[(writtenVariable, _variableVersions[writtenVariable])] =
                             new AstVariable($"{writtenVariable.Name}_v{_variableVersions[writtenVariable]}");
-                        _instructionToVersionedVariable[offset] =
-                            (_versionedAstVariables[(writtenVariable, _variableVersions[writtenVariable])], _variableVersions[writtenVariable]);
+                        dict.Add(writtenVariable, _variableVersions[writtenVariable]);
                     }
                     else
                     {
-                        _versionedAstVariables[pair] = new AstVariable($"{pair.Item1.Name}_v{pair.Item2}");
+                        if (!dict.ContainsKey(writtenVariable))
+                        {
+                            if (!_variableVersions.ContainsKey(writtenVariable))
+                                _variableVersions.Add(writtenVariable, 0);
+                            
+                            dict.Add(writtenVariable, _variableVersions[writtenVariable]++);
+                        }
+
+                        _versionedAstVariables[(writtenVariable, dict[writtenVariable])] =
+                            new AstVariable($"{writtenVariable.Name}_v{dict[writtenVariable]}");
                     }
                 }
 
@@ -281,6 +302,9 @@ namespace Echo.Ast
                     int index2 = stackPushCount;
                     foreach (var writtenVariable in writtenVariables)
                     {
+                        if (!_versionedAstVariables.ContainsKey((writtenVariable, _variableVersions[writtenVariable])))
+                            _versionedAstVariables.Add((writtenVariable, _variableVersions[writtenVariable]), new AstVariable($"{writtenVariable.Name}_v{_variableVersions[writtenVariable]}"));
+                        
                         combined[index2++] =
                             _versionedAstVariables[(writtenVariable, _variableVersions[writtenVariable])];
                     }
