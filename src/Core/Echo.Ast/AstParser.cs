@@ -129,6 +129,12 @@ namespace Echo.Ast
             int phiStatementCount = 0;
             var result = new BasicBlock<StatementBase<TInstruction>>(block.Offset);
 
+            var stackSlots = _context.StackSlots;
+            var phiSlots = _context.PhiSlots;
+            var variableVersions = _context.VariableVersions;
+            var versionedAstVariables = _context.VersionedAstVariables;
+            var instructionVersionStates = _context.InstructionVersionStates;
+
             foreach (var instruction in block.Instructions)
             {
                 long offset = Architecture.GetOffset(instruction);
@@ -146,7 +152,7 @@ namespace Echo.Ast
                         var source = sources.First();
                         targetVariables[i] = source.Node is ExternalDataSourceNode<TInstruction> external
                             ? VariableFactory.CreateVariable(external.Name)
-                            : _stackSlots[source.Node.Id][source.SlotIndex];
+                            : stackSlots[source.Node.Id][source.SlotIndex];
                     }
                     else
                     {
@@ -155,7 +161,7 @@ namespace Echo.Ast
                         {
                             var variable = s.Node is ExternalDataSourceNode<TInstruction> external
                                 ? VariableFactory.CreateVariable(external.Name)
-                                : _stackSlots[s.Node.Id][s.SlotIndex];
+                                : stackSlots[s.Node.Id][s.SlotIndex];
                             
                             return new VariableExpression<TInstruction>(_id--, variable);
                         });
@@ -173,20 +179,20 @@ namespace Echo.Ast
                     var dependency = pair.Value;
                     if (dependency.Count <= 1)
                     {
-                        if (!_variableVersions.ContainsKey(variable))
-                            _variableVersions.Add(variable, 0);
+                        int version = _context.GetOrCreateVersion(variable);
+                        var key = (variable, version);
                         
-                        if (!_versionedAstVariables.ContainsKey((variable, _variableVersions[variable])))
-                            _versionedAstVariables.Add((variable, _variableVersions[variable]), CreateVersionedVariable(variable));
+                        if (!versionedAstVariables.ContainsKey(key))
+                            versionedAstVariables.Add(key, CreateVersionedVariable(variable));
 
-                        targetVariables[index++] = _versionedAstVariables[(variable, _variableVersions[variable])];
+                        targetVariables[index++] = versionedAstVariables[key];
                     }
                     else
                     {
                         var sources = AstVariableCollectionFactory<TInstruction>.CollectDependencies(
                             _context, variable, dependency);
 
-                        if (_phiSlots.TryGetValue(sources, out var phiSlot))
+                        if (phiSlots.TryGetValue(sources, out var phiSlot))
                         {
                             targetVariables[index++] = phiSlot;
                         }
@@ -198,7 +204,7 @@ namespace Echo.Ast
                                 sources.Select(s => new VariableExpression<TInstruction>(_id--, s)).ToArray(),
                                 phiSlot);
                             result.Instructions.Insert(phiStatementCount++, phiStatement);
-                            _phiSlots[sources] = phiSlot;
+                            phiSlots[sources] = phiSlot;
                             targetVariables[index++] = phiSlot;
                         }
                     }
@@ -220,31 +226,23 @@ namespace Echo.Ast
 
                 foreach (var writtenVariable in writtenVariables)
                 {
-                    if (!_instructionToVersionedVariable.TryGetValue(offset, out var dict))
+                    if (!instructionVersionStates.TryGetValue(offset, out var dict))
                     {
-                        if (!_variableVersions.ContainsKey(writtenVariable))
-                            _variableVersions.Add(writtenVariable, 0);
-                        else _variableVersions[writtenVariable]++;
+                        int version = _context.IncrementVersion(writtenVariable);
                         
                         dict = new Dictionary<IVariable, int>();
-                        _instructionToVersionedVariable[offset] = dict;
+                        instructionVersionStates[offset] = dict;
 
-                        _versionedAstVariables[(writtenVariable, _variableVersions[writtenVariable])] =
-                            CreateVersionedVariable(writtenVariable);
-                        dict.Add(writtenVariable, _variableVersions[writtenVariable]);
+                        versionedAstVariables[(writtenVariable, version)] = CreateVersionedVariable(writtenVariable);
+                        dict.Add(writtenVariable, version);
                     }
                     else
                     {
                         if (!dict.ContainsKey(writtenVariable))
-                        {
-                            if (!_variableVersions.ContainsKey(writtenVariable))
-                                _variableVersions.Add(writtenVariable, 0);
-                            
-                            dict.Add(writtenVariable, _variableVersions[writtenVariable]++);
-                        }
+                            dict.Add(writtenVariable, _context.IncrementVersionPost(writtenVariable));
 
-                        _versionedAstVariables[(writtenVariable, dict[writtenVariable])] =
-                            CreateVersionedVariable(writtenVariable);
+                        var versionedVariable = CreateVersionedVariable(writtenVariable);
+                        versionedAstVariables[(writtenVariable, dict[writtenVariable])] = versionedVariable;
                     }
                 }
 
@@ -265,15 +263,15 @@ namespace Echo.Ast
                     slots.CopyTo(combined, 0);
                     foreach (var writtenVariable in writtenVariables)
                     {
-                        int version = _variableVersions[writtenVariable];
+                        int version = variableVersions[writtenVariable];
                         var key = (writtenVariable, version);
-                        if (!_versionedAstVariables.ContainsKey(key))
-                            _versionedAstVariables.Add(key, CreateVersionedVariable(writtenVariable));
+                        if (!versionedAstVariables.ContainsKey(key))
+                            versionedAstVariables.Add(key, CreateVersionedVariable(writtenVariable));
                         
-                        combined[stackPushCount++] = _versionedAstVariables[key];
+                        combined[stackPushCount++] = versionedAstVariables[key];
                     }
 
-                    _stackSlots[offset] = slots;
+                    stackSlots[offset] = slots;
                     result.Instructions.Add(
                         new AssignmentStatement<TInstruction>(_id--, instructionExpression, combined));
                 }
@@ -287,6 +285,6 @@ namespace Echo.Ast
         private AstVariable CreatePhiSlot() => VariableFactory.CreateVariable($"phi_{_phiVarCount++}");
 
         private AstVariable CreateVersionedVariable(IVariable original) =>
-            VariableFactory.CreateVariable(original.Name, _variableVersions[original]);
+            VariableFactory.CreateVariable(original.Name, _context.VariableVersions[original]);
     }
 }

@@ -19,10 +19,6 @@ namespace Echo.Ast.Helpers
         internal readonly Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<StatementBase<TInstruction>>>
             RegionsMapping = new Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<StatementBase<TInstruction>>>();
 
-        internal long Id = -1;
-        internal long VarCount;
-        internal long PhiVarCount;
-
         internal AstParserContext(
             ControlFlowGraph<TInstruction> controlFlowGraph,
             DataFlowGraph<TInstruction> dataFlowGraph,
@@ -47,6 +43,11 @@ namespace Echo.Ast.Helpers
         {
             GetOrCreateVersion(variable);
             return ++VariableVersions[variable];
+        }
+
+        internal int IncrementVersionPost(IVariable variable)
+        {
+            return IncrementVersion(variable) - 1;
         }
     }
 }
