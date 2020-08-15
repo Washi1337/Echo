@@ -18,7 +18,8 @@ namespace Echo.Ast.Patterns
         }
 
         /// <summary>
-        /// Creates a new pattern that matches on instances of <see cref="AssignmentStatement{TInstruction}"/>.
+        /// Creates a new pattern that matches on instances of <see cref="AssignmentStatement{TInstruction}"/> with
+        /// a single variable on the left hand side of the equals sign.
         /// </summary>
         public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>()
         {

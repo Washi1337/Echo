@@ -112,6 +112,22 @@ namespace Echo.Ast.Patterns
         }
 
         /// <summary>
+        /// Indicates the pattern should match on instances with the provided number of sources.
+        /// </summary>
+        /// <param name="numberOfSources">The number of sources the phi node should have.</param>
+        /// <returns>The current pattern.</returns>
+        public PhiStatementPattern<TInstruction> WithSources(int numberOfSources)
+        {
+            AnySources = false;
+
+            Sources.Clear();
+            for (int i = 0; i < numberOfSources; i++)
+                Sources.Add(Pattern.Any<VariableExpression<TInstruction>>());
+
+            return this;
+        }
+
+        /// <summary>
         /// Sets the source patterns to the provided expression patterns.
         /// </summary>
         /// <param name="sources">The patterns that describe the sources of the phi node.</param>
@@ -134,6 +150,18 @@ namespace Echo.Ast.Patterns
         /// <returns>The current pattern.</returns>
         public PhiStatementPattern<TInstruction> WithSources(IEnumerable<Pattern<VariableExpression<TInstruction>>> sources) => 
             WithSources(sources.ToArray());
+
+        /// <summary>
+        /// Indicates all sources should be captured in a certain group.
+        /// </summary>
+        /// <param name="captureGroup">The group.</param>
+        /// <returns>The current pattern.</returns>
+        public PhiStatementPattern<TInstruction> CaptureSources(CaptureGroup captureGroup)
+        {
+            foreach (var source in Sources)
+                source.CaptureAs(captureGroup);
+            return this;
+        }
 
         /// <inheritdoc />
         public override string ToString() => AnySources

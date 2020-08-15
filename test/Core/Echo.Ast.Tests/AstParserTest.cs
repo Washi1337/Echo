@@ -56,14 +56,18 @@ namespace Echo.Ast.Tests
 
             var finalPattern = new SequencePattern<StatementBase<DummyInstruction>>(
                 // stack_slot = push 1()
-                StatementPattern.Assignment(
-                    Pattern.Any<IVariable>().CaptureAs(variableCapture),
-                    ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push))),
+                StatementPattern
+                    .Assignment<DummyInstruction>()
+                    .WithExpression(ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push)))
+                    .CaptureVariables(variableCapture),
 
                 // pop(stack_slot)
-                StatementPattern.Expression(ExpressionPattern
-                    .Instruction(new DummyInstructionPattern(DummyOpCode.Pop))
-                    .WithArguments(ExpressionPattern.Variable<DummyInstruction>().CaptureVariable(variableCapture))),
+                StatementPattern.Expression(
+                    ExpressionPattern
+                        .Instruction(new DummyInstructionPattern(DummyOpCode.Pop))
+                        .WithArguments(ExpressionPattern
+                            .Variable<DummyInstruction>()
+                            .CaptureVariable(variableCapture))),
 
                 // ret()
                 StatementPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Ret))
@@ -73,6 +77,58 @@ namespace Echo.Ast.Tests
 
             Assert.True(result.IsSuccess);
             Assert.Single(result.Captures[variableCapture].Distinct());
+        }
+
+        [Fact]
+        public void JoiningControlFlowPathsWithPositiveStackDeltaShouldResultInPhiNode()
+        {
+            var cfg = ConstructAst(new[]
+            {
+                DummyInstruction.Push(0, 1),
+                DummyInstruction.JmpCond(1,4),
+
+                DummyInstruction.Push(2, 1),
+                DummyInstruction.Jmp(3, 5),
+
+                DummyInstruction.Push(4, 1),
+
+                DummyInstruction.Pop(5, 1),
+                DummyInstruction.Ret(6)
+            });
+            
+            var phiSourcesCapture = new CaptureGroup("sources");
+            var variablesCapture = new CaptureGroup("variables");
+
+            // stack_slot = push 1()
+            var assignPattern = StatementPattern
+                .Assignment<DummyInstruction>()
+                .CaptureVariables(variablesCapture);
+            
+            // variable = phi(stack_slot_1,stack_slot_2) 
+            var phiPattern = StatementPattern
+                .Phi<DummyInstruction>()
+                .WithSources(2)
+                .CaptureSources(phiSourcesCapture);
+
+            var push1Result = assignPattern.Match(cfg.Nodes[2].Contents.Header);
+            var push2Result = assignPattern.Match(cfg.Nodes[4].Contents.Header);
+            var phiResult = phiPattern.Match(cfg.Nodes[5].Contents.Header);
+            
+            Assert.True(push1Result.IsSuccess, "Node 2 was expected to start with an assignment statement.");
+            Assert.True(push2Result.IsSuccess, "Node 4 was expected to start with an assignment statement.");
+            Assert.True(phiResult.IsSuccess, "Node 5 was expected to start with a phi statement.");
+
+            var sources = phiResult.Captures[phiSourcesCapture]
+                .Cast<VariableExpression<DummyInstruction>>()
+                .Select(s => s.Variable);
+
+            var allVariables = new[]
+            {
+                (IVariable) push1Result.Captures[variablesCapture][0],
+                (IVariable) push2Result.Captures[variablesCapture][0]
+            };
+
+            Assert.Equal(allVariables.ToHashSet(), sources.ToHashSet());
         }
     }
 }
