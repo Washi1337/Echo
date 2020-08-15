@@ -73,17 +73,6 @@ namespace Echo.Ast.Patterns
         /// Creates a new pattern that matches on instances of <see cref="ExpressionStatement{TInstruction}"/> that
         /// contain instances of <see cref="InstructionExpression{TInstruction}"/>.
         /// </summary>
-        /// <param name="instruction">The instruction to match on.</param>
-        /// <returns>The pattern.</returns>
-        public static ExpressionStatementPattern<TInstruction> Instruction<TInstruction>(TInstruction instruction)
-        {
-            return new ExpressionStatementPattern<TInstruction>(ExpressionPattern.InstructionLiteral(instruction));
-        }
-
-        /// <summary>
-        /// Creates a new pattern that matches on instances of <see cref="ExpressionStatement{TInstruction}"/> that
-        /// contain instances of <see cref="InstructionExpression{TInstruction}"/>.
-        /// </summary>
         /// <param name="instruction">The instruction pattern to match on.</param>
         /// <returns>The pattern.</returns>
         public static ExpressionStatementPattern<TInstruction> Instruction<TInstruction>(Pattern<TInstruction> instruction)
