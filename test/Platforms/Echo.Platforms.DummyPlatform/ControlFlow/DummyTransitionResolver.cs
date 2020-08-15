@@ -49,7 +49,7 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
                     return 0;
                 
                 case DummyOpCode.Switch:
-                    return ((ICollection<long>) instruction.Operands[0]).Count;
+                    return ((ICollection<long>) instruction.Operands[0]).Count + 1;
                 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -134,7 +134,7 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
             }
 
             successorBuffer[targets.Count] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough);
-            return targets.Count;
+            return targets.Count + 1;
         }
     }
 }

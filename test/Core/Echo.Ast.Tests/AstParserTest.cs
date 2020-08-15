@@ -407,5 +407,51 @@ namespace Echo.Ast.Tests
 
             Assert.Equal(allVariables.ToHashSet(), sources.ToHashSet());
         }
+
+        [Fact]
+        public void SwitchWithAssignmentsToSameVariableShouldResultInPhiNodeWithTheSameNumberOfSources()
+        {
+            var variable = new DummyVariable("temp");
+            
+            var cfg = ConstructAst(new[]
+            {
+                // switch(some_value)
+                DummyInstruction.Push(0, 1),
+                DummyInstruction.Switch(1, 5, 8, 11),
+
+                // default:
+                DummyInstruction.Push(2, 1),
+                DummyInstruction.Set(3, variable),
+                DummyInstruction.Jmp(4, 13),
+
+                // case 0:
+                DummyInstruction.Push(5, 1),
+                DummyInstruction.Set(6, variable),
+                DummyInstruction.Jmp(7, 13),
+                
+                // case 1:
+                DummyInstruction.Push(8, 1),
+                DummyInstruction.Set(9, variable),
+                DummyInstruction.Jmp(10, 13),
+
+                // case 2:
+                DummyInstruction.Push(11, 1),
+                DummyInstruction.Set(12, variable),
+
+                // end:
+                DummyInstruction.Get(13, variable),
+                DummyInstruction.Pop(14, 1),
+                DummyInstruction.Ret(15)
+            });
+            
+            // variable = phi(?, ?) 
+            var phiPattern = StatementPattern
+                .Phi<DummyInstruction>()
+                .WithSources(4);
+
+            Assert.True(phiPattern.Matches(cfg.Nodes[13].Contents.Header),
+                "Node 13 was expected to start with a phi node with 4 sources.");
+        }
+        
     }
 }
