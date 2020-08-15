@@ -328,5 +328,84 @@ namespace Echo.Ast.Tests
             Assert.All(cfg.Nodes[4].Contents.Instructions, s => Assert.False(phiPattern.Matches(s)));
             Assert.All(cfg.Nodes[9].Contents.Instructions, s => Assert.False(phiPattern.Matches(s)));
         }
+
+        [Fact]
+        public void JoiningPathsWithMultipleAssignmentsShouldOnlyUseLatestVersion()
+        {
+            var variable = new DummyVariable("temp");
+            
+            var cfg = ConstructAst(new[]
+            {
+                // if (cond) goto else:
+                DummyInstruction.Push(0, 1),
+                DummyInstruction.JmpCond(1, 7),
+
+                // temp = some_value (not used).
+                DummyInstruction.Push(2, 1),
+                DummyInstruction.Set(3, variable),
+                // temp = some_value (render previous value useless)
+                DummyInstruction.Push(4, 1),
+                DummyInstruction.Set(5, variable),
+                
+                // goto end
+                DummyInstruction.Jmp(6, 9),
+
+                // else:
+                // temp = some_value
+                DummyInstruction.Push(7, 1),
+                DummyInstruction.Set(8, variable),
+
+                // end:
+                // pop(temp)
+                DummyInstruction.Get(9, variable),
+                DummyInstruction.Pop(10, 1),
+                
+                // return
+                DummyInstruction.Ret(11)
+            });
+
+            var phiSourcesCapture = new CaptureGroup("sources");
+            var variablesCapture = new CaptureGroup("variables");
+            
+            // variable = phi(?, ?) 
+            var phiPattern = StatementPattern
+                .Phi<DummyInstruction>()
+                .WithSources(2)
+                .CaptureSources(phiSourcesCapture);
+            
+            // temp_vx = set(?)
+            var assignPattern = StatementPattern
+                .Assignment<DummyInstruction>()
+                .WithExpression(ExpressionPattern
+                    .Instruction(new DummyInstructionPattern(DummyOpCode.Set))
+                    .WithArguments(1))
+                .CaptureVariables(variablesCapture);
+
+            var assignment1Results = assignPattern
+                .FindAllMatches(cfg.Nodes[7].Contents.Instructions)
+                .ToArray();
+            
+            var assignment2Results = assignPattern
+                .FindAllMatches(cfg.Nodes[2].Contents.Instructions)
+                .ToArray();
+
+            var phiResult = phiPattern.Match(cfg.Nodes[9].Contents.Header);
+            
+            Assert.True(assignment1Results.Length == 1, "Node 7 was expected to have one assignment to 'temp'.");
+            Assert.True(assignment2Results.Length == 2, "Node 2 was expected to have two assignments to 'temp'.");
+            Assert.True(phiResult.IsSuccess, "Node 9 was expected to start with a phi node with two sources.");
+
+            var sources = phiResult.Captures[phiSourcesCapture]
+                .Cast<VariableExpression<DummyInstruction>>()
+                .Select(s => s.Variable);
+
+            var allVariables = new[]
+            {
+                (IVariable) assignment1Results[0].Captures[variablesCapture][0],
+                (IVariable) assignment2Results[1].Captures[variablesCapture][0]
+            };
+
+            Assert.Equal(allVariables.ToHashSet(), sources.ToHashSet());
+        }
     }
 }
