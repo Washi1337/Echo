@@ -150,21 +150,13 @@ namespace Echo.Ast
                     if (sources.Count == 1)
                     {
                         var source = sources.First();
-                        targetVariables[i] = source.Node is ExternalDataSourceNode<TInstruction> external
-                            ? VariableFactory.CreateVariable(external.Name)
-                            : stackSlots[source.Node.Id][source.SlotIndex];
+                        targetVariables[i] = GetOrCreateStackSlot(source);
                     }
                     else
                     {
                         var phiVar = CreatePhiSlot();
-                        var slots = sources.Select(s =>
-                        {
-                            var variable = s.Node is ExternalDataSourceNode<TInstruction> external
-                                ? VariableFactory.CreateVariable(external.Name)
-                                : stackSlots[s.Node.Id][s.SlotIndex];
-                            
-                            return new VariableExpression<TInstruction>(_id--, variable);
-                        });
+                        var slots = sources.Select(s => 
+                            new VariableExpression<TInstruction>(_id--, GetOrCreateStackSlot(s)));
                         var phiStatement = new PhiStatement<TInstruction>(_id--, slots.ToArray(), phiVar);
                         
                         result.Instructions.Insert(phiStatementCount++, phiStatement);
@@ -281,6 +273,11 @@ namespace Echo.Ast
         }
         
         private AstVariable CreateStackSlot() => VariableFactory.CreateVariable($"stack_slot_{_varCount++}");
+
+        private IVariable GetOrCreateStackSlot(DataSource<TInstruction> source) =>
+            source.Node is ExternalDataSourceNode<TInstruction> external
+                ? VariableFactory.CreateVariable(external.Name)
+                : _context.StackSlots[source.Node.Id][source.SlotIndex];
 
         private AstVariable CreatePhiSlot() => VariableFactory.CreateVariable($"phi_{_phiVarCount++}");
 
