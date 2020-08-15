@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using Echo.Core.Code;
 
 namespace Echo.Platforms.DummyPlatform.Code
 {
@@ -23,7 +21,7 @@ namespace Echo.Platforms.DummyPlatform.Code
 
         public static DummyInstruction Get(long offset, DummyVariable variable)
         {
-            return new DummyInstruction(offset, DummyOpCode.Set, 0, 1, variable);
+            return new DummyInstruction(offset, DummyOpCode.Get, 0, 1, variable);
         }
 
         public static DummyInstruction Set(long offset, DummyVariable variable)
@@ -87,9 +85,6 @@ namespace Echo.Platforms.DummyPlatform.Code
             get;
         }
 
-        public override string ToString()
-        {
-            return $"Label_{Offset:X4}: {Mnemonic}({string.Join(", ", Operands)})";
-        }
+        public override string ToString() => $"Label_{Offset:X4}: {Mnemonic} {string.Join(", ", Operands)}";
     }
 }
