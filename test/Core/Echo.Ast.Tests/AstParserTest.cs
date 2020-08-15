@@ -54,7 +54,7 @@ namespace Echo.Ast.Tests
 
             var variableCapture = new CaptureGroup("variable");
 
-            var finalPattern = new SequencePattern<StatementBase<DummyInstruction>>(
+            var pattern = new SequencePattern<StatementBase<DummyInstruction>>(
                 // stack_slot = push 1()
                 StatementPattern
                     .Assignment<DummyInstruction>()
@@ -62,21 +62,117 @@ namespace Echo.Ast.Tests
                     .CaptureVariables(variableCapture),
 
                 // pop(stack_slot)
-                StatementPattern.Expression(
-                    ExpressionPattern
-                        .Instruction(new DummyInstructionPattern(DummyOpCode.Pop))
-                        .WithArguments(ExpressionPattern
-                            .Variable<DummyInstruction>()
-                            .CaptureVariable(variableCapture))),
+                StatementPattern.Expression(ExpressionPattern
+                    .Instruction(new DummyInstructionPattern(DummyOpCode.Pop))
+                    .WithArguments(ExpressionPattern
+                        .Variable<DummyInstruction>()
+                        .CaptureVariable(variableCapture))),
 
                 // ret()
                 StatementPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Ret))
             );
 
-            var result = finalPattern.Match(cfg.Nodes[0].Contents.Instructions);
+            var result = pattern.Match(cfg.Nodes[0].Contents.Instructions);
 
             Assert.True(result.IsSuccess);
             Assert.Single(result.Captures[variableCapture].Distinct());
+        }
+
+        [Fact]
+        public void PushingTwoValuesOnStackShouldResultInTwoVariablesAssigned()
+        {
+            var cfg = ConstructAst(new[]
+            {
+                DummyInstruction.Push(0, 2),
+                DummyInstruction.Pop(1, 2), 
+                DummyInstruction.Ret(2)
+            });
+            
+            var variableCapture = new CaptureGroup("variable");
+            var argumentsCapture = new CaptureGroup("argument");
+
+            var pattern = new SequencePattern<StatementBase<DummyInstruction>>(
+                // stack_slot_1, stack_slot_2 = push 2()
+                StatementPattern
+                    .Assignment<DummyInstruction>()
+                    .WithVariables(2)
+                    .CaptureVariables(variableCapture),
+
+                // pop(stack_slot_1, stack_slot_2)
+                StatementPattern.Expression(ExpressionPattern
+                    .Instruction<DummyInstruction>()
+                    .WithArguments(2)
+                    .CaptureArguments(argumentsCapture)),
+
+                // ret()
+                StatementPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Ret))
+            );
+
+            var result = pattern.Match(cfg.Nodes[0].Contents.Instructions);
+            Assert.True(result.IsSuccess);
+
+            var variables = result.Captures[variableCapture]
+                .Cast<IVariable>()
+                .ToArray();
+
+            var arguments = result.Captures[argumentsCapture]
+                .Cast<VariableExpression<DummyInstruction>>()
+                .Select(e => e.Variable)
+                .ToArray();
+
+            Assert.Equal(variables, arguments);
+        }
+
+        [Fact]
+        public void PushingTwoValuesOnStackWithDifferentConsumers()
+        {
+            var cfg = ConstructAst(new[]
+            {
+                DummyInstruction.Push(0, 2),
+                DummyInstruction.Pop(1, 1), 
+                DummyInstruction.Pop(2, 1), 
+                DummyInstruction.Ret(3)
+            });
+            
+            var variableCapture = new CaptureGroup("variable");
+            var argumentsCapture1 = new CaptureGroup("argument1");
+            var argumentsCapture2 = new CaptureGroup("argument2");
+
+            var pattern = new SequencePattern<StatementBase<DummyInstruction>>(
+                // stack_slot_1, stack_slot_2 = push 2()
+                StatementPattern
+                    .Assignment<DummyInstruction>()
+                    .WithVariables(2)
+                    .CaptureVariables(variableCapture),
+
+                // pop(stack_slot_2)
+                StatementPattern.Expression(ExpressionPattern
+                    .Instruction<DummyInstruction>()
+                    .WithArguments(1)
+                    .CaptureArguments(argumentsCapture1)),
+
+                // pop(stack_slot_1)
+                StatementPattern.Expression(ExpressionPattern
+                    .Instruction<DummyInstruction>()
+                    .WithArguments(1)
+                    .CaptureArguments(argumentsCapture2)),
+
+                // ret()
+                StatementPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Ret))
+            );
+
+            var result = pattern.Match(cfg.Nodes[0].Contents.Instructions);
+            Assert.True(result.IsSuccess);
+
+            var variables = result.Captures[variableCapture]
+                .Cast<IVariable>()
+                .ToArray();
+
+            var argument1 = (VariableExpression<DummyInstruction>) result.Captures[argumentsCapture1][0];
+            var argument2 = (VariableExpression<DummyInstruction>) result.Captures[argumentsCapture2][0];
+            
+            Assert.Equal(variables[1], argument1.Variable);
+            Assert.Equal(variables[0], argument2.Variable);
         }
 
         [Fact]
