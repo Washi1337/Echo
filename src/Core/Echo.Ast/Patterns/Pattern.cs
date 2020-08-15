@@ -102,6 +102,18 @@ namespace Echo.Ast.Patterns
         protected abstract void MatchChildren(T input, MatchResult result);
 
         /// <summary>
+        /// Determines whether a certain object matches the pattern.
+        /// </summary>
+        /// <param name="input">The input object.</param>
+        /// <returns><c>true</c> if the input object matches the pattern, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// This method is a shortcut for calling <see cref="Match(T)"/> and verifying whether <see cref="MatchResult.IsSuccess"/>
+        /// is set to <c>true</c>. Do not use this in combination with <see cref="Match(T)"/> on the same input and
+        /// pattern.
+        /// </remarks>
+        public bool Matches(T input) => Match(input).IsSuccess;
+
+        /// <summary>
         /// Attempts to find a match in a sequence of inputs.
         /// </summary>
         /// <param name="inputSequence">The sequence of inputs.</param>

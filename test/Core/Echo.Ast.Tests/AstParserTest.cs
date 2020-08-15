@@ -290,5 +290,46 @@ namespace Echo.Ast.Tests
 
             Assert.Equal(allVariables.ToHashSet(), sources.ToHashSet());
         }
+
+        [Fact]
+        public void LoopCounterShouldResultInOnlyOnePhiNode()
+        {  
+            var counterVariable = new DummyVariable("i");
+
+            var cfg = ConstructAst(new[]
+            {
+                // i = initial();
+                DummyInstruction.Push(0, 1),
+                DummyInstruction.Set(1, counterVariable),
+
+                // loop:
+                // if (cond(i)) goto end;
+                DummyInstruction.Get(2, counterVariable),
+                DummyInstruction.JmpCond(3, 9),
+
+                // Loop body.
+                DummyInstruction.Op(4, 0, 0),
+
+                // i = next(i);
+                // goto loop
+                DummyInstruction.Get(5, counterVariable),
+                DummyInstruction.Op(6, 1, 1),
+                DummyInstruction.Set(7, counterVariable),
+                DummyInstruction.Jmp(8, 2),
+
+                // end:
+                DummyInstruction.Ret(9)
+            });
+            
+            // variable = phi(?, ?) 
+            var phiPattern = StatementPattern
+                .Phi<DummyInstruction>()
+                .WithSources(2);
+
+            Assert.True(phiPattern.Matches(cfg.Nodes[2].Contents.Header));
+            Assert.All(cfg.Nodes[0].Contents.Instructions, s => Assert.False(phiPattern.Matches(s)));
+            Assert.All(cfg.Nodes[4].Contents.Instructions, s => Assert.False(phiPattern.Matches(s)));
+            Assert.All(cfg.Nodes[9].Contents.Instructions, s => Assert.False(phiPattern.Matches(s)));
+        }
     }
 }
