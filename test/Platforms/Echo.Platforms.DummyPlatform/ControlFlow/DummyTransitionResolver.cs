@@ -32,17 +32,28 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
         public override int GetTransitionCount(SymbolicProgramState<DummyInstruction> currentState,
             in DummyInstruction instruction)
         {
-            return instruction.OpCode switch
+            switch (instruction.OpCode)
             {
-                DummyOpCode.Op => 1,
-                DummyOpCode.Push => 1,
-                DummyOpCode.Pop => 1,
-                DummyOpCode.Jmp => 1,
-                DummyOpCode.JmpCond => 2,
-                DummyOpCode.Ret => 0,
-                DummyOpCode.Switch => ((ICollection<long>) instruction.Operands[0]).Count,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                case DummyOpCode.Op:
+                case DummyOpCode.Push:
+                case DummyOpCode.Pop:
+                case DummyOpCode.Get:
+                case DummyOpCode.Set:
+                case DummyOpCode.Jmp:
+                    return 1;
+                
+                case DummyOpCode.JmpCond:
+                    return 2;
+                
+                case DummyOpCode.Ret:
+                    return 0;
+                
+                case DummyOpCode.Switch:
+                    return ((ICollection<long>) instruction.Operands[0]).Count;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         public override int GetTransitions(
@@ -53,17 +64,30 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
             var nextState = currentState.Copy();
             ApplyDefaultBehaviour(nextState, instruction);
 
-            return instruction.OpCode switch
+            switch (instruction.OpCode)
             {
-                DummyOpCode.Op => GetFallthroughTransitions(nextState, transitionBuffer),
-                DummyOpCode.Push => GetFallthroughTransitions(nextState, transitionBuffer),
-                DummyOpCode.Pop => GetFallthroughTransitions(nextState, transitionBuffer),
-                DummyOpCode.Jmp => GetJumpTransitions(nextState, instruction, transitionBuffer),
-                DummyOpCode.JmpCond => GetJumpCondTransitions(nextState, instruction, transitionBuffer),
-                DummyOpCode.Ret => 0,
-                DummyOpCode.Switch => GetSwitchTransitions(nextState, instruction, transitionBuffer),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                case DummyOpCode.Op:
+                case DummyOpCode.Push:
+                case DummyOpCode.Pop:
+                case DummyOpCode.Get:
+                case DummyOpCode.Set:
+                    return GetFallthroughTransitions(nextState, transitionBuffer);
+                
+                case DummyOpCode.Jmp:
+                    return GetJumpTransitions(nextState, instruction, transitionBuffer);
+                
+                case DummyOpCode.JmpCond:
+                    return GetJumpCondTransitions(nextState, instruction, transitionBuffer);
+                
+                case DummyOpCode.Ret:
+                    return 0;
+                
+                case DummyOpCode.Switch:
+                    return GetSwitchTransitions(nextState, instruction, transitionBuffer);
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private static int GetFallthroughTransitions(

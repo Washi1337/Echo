@@ -21,12 +21,6 @@ namespace Echo.Platforms.DummyPlatform.Code
         
         public long GetOffset(in DummyInstruction instruction) => instruction.Offset;
 
-        public string GetMnemonic(in DummyInstruction instruction) => instruction.Mnemonic;
-
-        public int GetOperandCount(in DummyInstruction instruction) => instruction.Operands.Count;
-
-        public object GetOperand(in DummyInstruction instruction, int index) => instruction.Operands[index];
-
         public int GetSize(in DummyInstruction instruction) => 1;
 
         public InstructionFlowControl GetFlowControl(in DummyInstruction instruction) =>
@@ -43,18 +37,40 @@ namespace Echo.Platforms.DummyPlatform.Code
 
         public int GetStackPopCount(in DummyInstruction instruction) => instruction.PopCount;
 
-        public int GetReadVariablesCount(in DummyInstruction instruction) => 0;
+        public int GetReadVariablesCount(in DummyInstruction instruction)
+        {
+            return instruction.OpCode == DummyOpCode.Get 
+                ? 1
+                : 0;
+        }
 
-        public int GetReadVariables(in DummyInstruction instruction, Span<IVariable> variablesBuffer) => 0;
+        public int GetReadVariables(in DummyInstruction instruction, Span<IVariable> variablesBuffer)
+        {
+            if (instruction.OpCode == DummyOpCode.Get)
+            {
+                variablesBuffer[0] = (IVariable) instruction.Operands[0];
+                return 1;
+            }
 
-        public int GetWrittenVariablesCount(in DummyInstruction instruction) => 0;
+            return 0;
+        }
 
-        public int GetWrittenVariables(in DummyInstruction instruction, Span<IVariable> variablesBuffer) => 0;
+        public int GetWrittenVariablesCount(in DummyInstruction instruction)
+        {
+            return instruction.OpCode == DummyOpCode.Set 
+                ? 1
+                : 0;
+        }
 
-        public IEnumerable<IVariable> GetReadVariables(in DummyInstruction instruction) =>
-            Enumerable.Empty<IVariable>();
+        public int GetWrittenVariables(in DummyInstruction instruction, Span<IVariable> variablesBuffer)
+        {
+            if (instruction.OpCode == DummyOpCode.Set)
+            {
+                variablesBuffer[0] = (IVariable) instruction.Operands[0];
+                return 1;
+            }
 
-        public IEnumerable<IVariable> GetWrittenVariables(in DummyInstruction instruction) =>
-            Enumerable.Empty<IVariable>();
+            return 0;
+        }
     }
 }
