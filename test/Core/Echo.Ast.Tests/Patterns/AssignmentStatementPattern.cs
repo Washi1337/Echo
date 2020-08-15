@@ -19,8 +19,7 @@ namespace Echo.Ast.Tests.Patterns
             
             var pattern = StatementPattern.Assignment<int>();
 
-            var result = pattern.Match(statement);
-            Assert.True(result.IsSuccess);
+            Assert.True(pattern.Matches(statement));
         }
 
         [Fact]

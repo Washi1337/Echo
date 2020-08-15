@@ -9,24 +9,21 @@ namespace Echo.Ast.Tests.Patterns
         public void FirstOfTwoOptionsMatchShouldResultInMatch()
         {
             var pattern = Pattern.Literal(1) | Pattern.Literal(2);
-            var result = pattern.Match(1);
-            Assert.True(result.IsSuccess);
+            Assert.True(pattern.Matches(1));
         }
         
         [Fact]
         public void SecondOfTwoOptionsMatchShouldResultInMatch()
         {
             var pattern = Pattern.Literal(1) | Pattern.Literal(2);
-            var result = pattern.Match(2);
-            Assert.True(result.IsSuccess);
+            Assert.True(pattern.Matches(2));
         }
         
         [Fact]
         public void NeitherOfTwoOptionsMatchShouldResultInNoMatch()
         {
             var pattern = Pattern.Literal(1) | Pattern.Literal(2);
-            var result = pattern.Match(3);
-            Assert.False(result.IsSuccess);
+            Assert.False(pattern.Matches(3));
         }
 
         [Fact]

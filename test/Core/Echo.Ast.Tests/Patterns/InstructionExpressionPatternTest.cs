@@ -14,9 +14,8 @@ namespace Echo.Ast.Tests.Patterns
         {
             var pattern = ExpressionPattern.InstructionLiteral(1234);
             var input = new InstructionExpression<int>(0, 1234, ImmutableArray<ExpressionBase<int>>.Empty);
-            var result = pattern.Match(input);
-            
-            Assert.True(result.IsSuccess);
+
+            Assert.True(pattern.Matches(input));
         }
         
         [Fact]
@@ -24,9 +23,8 @@ namespace Echo.Ast.Tests.Patterns
         {
             var pattern = ExpressionPattern.InstructionLiteral(1234);
             var input = new InstructionExpression<int>(0, 5678, ImmutableArray<ExpressionBase<int>>.Empty);
-            var result = pattern.Match(input);
-            
-            Assert.False(result.IsSuccess);
+
+            Assert.False(pattern.Matches(input));
         }
         
         [Theory]
@@ -65,10 +63,8 @@ namespace Echo.Ast.Tests.Patterns
             };
 
             var input = new InstructionExpression<int>(2, 1234, arguments);
-            
-            var result = pattern.Match(input);
 
-            Assert.True(result.IsSuccess);
+            Assert.True(pattern.Matches(input));
         }
         
         [Fact]
@@ -85,10 +81,8 @@ namespace Echo.Ast.Tests.Patterns
             };
 
             var input = new InstructionExpression<int>(2, 5678, arguments);
-            
-            var result = pattern.Match(input);
 
-            Assert.False(result.IsSuccess);
+            Assert.False(pattern.Matches(input));
         }
         
         [Fact]
@@ -105,10 +99,8 @@ namespace Echo.Ast.Tests.Patterns
             };
 
             var input = new InstructionExpression<int>(2, 1234, arguments);
-            
-            var result = pattern.Match(input);
 
-            Assert.False(result.IsSuccess);
+            Assert.False(pattern.Matches(input));
         }
         
         [Fact]
@@ -124,10 +116,8 @@ namespace Echo.Ast.Tests.Patterns
             };
 
             var input = new InstructionExpression<int>(2, 1234, arguments);
-            
-            var result = pattern.Match(input);
 
-            Assert.False(result.IsSuccess);
+            Assert.False(pattern.Matches(input));
         }
 
         [Fact]
@@ -146,10 +136,8 @@ namespace Echo.Ast.Tests.Patterns
             };
 
             var input = new InstructionExpression<int>(2, 1234, arguments);
-            
-            var result = pattern.Match(input);
 
-            Assert.True(result.IsSuccess);
+            Assert.True(pattern.Matches(input));
         }
 
     }
