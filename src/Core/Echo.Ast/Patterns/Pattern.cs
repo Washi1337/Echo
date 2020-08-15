@@ -102,6 +102,47 @@ namespace Echo.Ast.Patterns
         protected abstract void MatchChildren(T input, MatchResult result);
 
         /// <summary>
+        /// Attempts to find a match in a sequence of inputs.
+        /// </summary>
+        /// <param name="inputSequence">The sequence of inputs.</param>
+        /// <returns>The match result of the input matching the pattern.</returns>
+        public MatchResult FindFirstMatch(IEnumerable<T> inputSequence)
+        {
+            var result = new MatchResult();
+
+            foreach (var input in inputSequence)
+            {
+                result.Captures.Clear();
+                result.IsSuccess = true;
+
+                Match(input, result);
+
+                if (result.IsSuccess)
+                    return result;
+            }
+            
+            result.Captures.Clear();
+            result.IsSuccess = false;
+            return result;
+        }
+
+        /// <summary>
+        /// Attempts to find all matches in a sequence of inputs.
+        /// </summary>
+        /// <param name="inputSequence">The sequence of inputs.</param>
+        /// <returns>The match result of the input matching the pattern.</returns>
+        public IEnumerable<MatchResult> FindAllMatches(IEnumerable<T> inputSequence)
+        {
+            foreach (var input in inputSequence)
+            {
+                var result = Match(input);
+
+                if (result.IsSuccess)
+                    yield return result;
+            }
+        }
+
+        /// <summary>
         /// When the pattern matches successfully, puts the matched object in the provided capture group.
         /// </summary>
         /// <param name="captureGroup">The capture group to add the object to.</param>
