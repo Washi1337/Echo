@@ -48,6 +48,19 @@ namespace Echo.Ast.Patterns
         public static OrPattern<T> operator |(Pattern<T> a, Pattern<T> b) => a.OrElse(b);
 
         /// <summary>
+        /// Concatenates two patterns together into a single <see cref="SequencePattern{T}"/>.
+        /// </summary>
+        /// <param name="a">The first pattern.</param>
+        /// <param name="b">The second pattern.</param>
+        /// <returns>The resulting pattern.</returns>
+        /// <remarks>
+        /// This method flattens all options into a single <see cref="SequencePattern{T}"/>.  When a specified pattern is
+        /// already an <see cref="SequencePattern{T}"/>, the elements of that particular pattern will be used instead
+        /// of the <see cref="SequencePattern{T}"/> itself. 
+        /// </remarks>
+        public static SequencePattern<T> operator +(Pattern<T> a, Pattern<T> b) => a.FollowedBy(b);
+
+        /// <summary>
         /// Gets or sets the capture group this pattern was assigned to.
         /// </summary>
         public CaptureGroup CaptureGroup
@@ -124,5 +137,13 @@ namespace Echo.Ast.Patterns
             return new OrPattern<T>(options);
         }
 
+        /// <summary>
+        /// Constructs a pattern that accepts a sequence of objects, starting with the current pattern followed by
+        /// the provided pattern. 
+        /// </summary>
+        /// <param name="pattern">The pattern describing the next element..</param>
+        /// <returns>The resulting pattern.</returns>
+        public virtual SequencePattern<T> FollowedBy(Pattern<T> pattern) => 
+            new SequencePattern<T>(this, pattern);
     }
 }
