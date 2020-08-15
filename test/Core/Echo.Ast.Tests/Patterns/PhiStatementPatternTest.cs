@@ -20,8 +20,7 @@ namespace Echo.Ast.Tests.Patterns
 
             var pattern = StatementPattern.Phi<int>();
 
-            var result = pattern.Match(statement);
-            Assert.True(result.IsSuccess);
+            Assert.True(pattern.Matches(statement));
         }
         
         [Fact]
@@ -62,13 +61,11 @@ namespace Echo.Ast.Tests.Patterns
                     Pattern.Any<VariableExpression<int>>(),
                     Pattern.Any<VariableExpression<int>>());
 
-            var result = pattern.Match(statement);
-            Assert.True(result.IsSuccess);
+            Assert.True(pattern.Matches(statement));
 
             statement.Sources.Add(new VariableExpression<int>(4, new AstVariable("v4")));
-            
-            result = pattern.Match(statement);
-            Assert.False(result.IsSuccess);
+
+            Assert.False(pattern.Matches(statement));
         }
         
         

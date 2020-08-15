@@ -5,6 +5,8 @@ namespace Echo.Platforms.DummyPlatform.Code
         Op,
         Push,
         Pop,
+        Get,
+        Set,
         Jmp,
         JmpCond,
         Ret,

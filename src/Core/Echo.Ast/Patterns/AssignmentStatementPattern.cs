@@ -80,6 +80,21 @@ namespace Echo.Ast.Patterns
         }
 
         /// <summary>
+        /// Indicates the pattern should match on instances with the provided number of variables on the left hand side.
+        /// </summary>
+        /// <param name="variablesCount">The number of variables the assignment statement should have.</param>
+        /// <returns>The current pattern.</returns>
+        public AssignmentStatementPattern<TInstruction> WithVariables(int variablesCount)
+        {
+            Variables.Clear();
+
+            for (int i = 0; i < variablesCount; i++)
+                Variables.Add(Pattern.Any<IVariable>());
+            
+            return this;
+        }
+
+        /// <summary>
         /// Sets the patterns describing the variables that are assigned a new value.
         /// </summary>
         /// <param name="variables">The patterns describing the variables.</param>
@@ -102,6 +117,19 @@ namespace Echo.Ast.Patterns
         public AssignmentStatementPattern<TInstruction> WithExpression(Pattern<ExpressionBase<TInstruction>> expression)
         {
             Expression = expression;
+            return this;
+        }
+
+        /// <summary>
+        /// Indicates all variables should be captured in a certain group.
+        /// </summary>
+        /// <param name="captureGroup">The group.</param>
+        /// <returns>The current pattern.</returns>
+        public AssignmentStatementPattern<TInstruction> CaptureVariables(CaptureGroup captureGroup)
+        {
+            foreach (var variable in Variables)
+                variable.CaptureAs(captureGroup);
+
             return this;
         }
 

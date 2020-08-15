@@ -48,6 +48,19 @@ namespace Echo.Ast.Patterns
         public static OrPattern<T> operator |(Pattern<T> a, Pattern<T> b) => a.OrElse(b);
 
         /// <summary>
+        /// Concatenates two patterns together into a single <see cref="SequencePattern{T}"/>.
+        /// </summary>
+        /// <param name="a">The first pattern.</param>
+        /// <param name="b">The second pattern.</param>
+        /// <returns>The resulting pattern.</returns>
+        /// <remarks>
+        /// This method flattens all options into a single <see cref="SequencePattern{T}"/>.  When a specified pattern is
+        /// already an <see cref="SequencePattern{T}"/>, the elements of that particular pattern will be used instead
+        /// of the <see cref="SequencePattern{T}"/> itself. 
+        /// </remarks>
+        public static SequencePattern<T> operator +(Pattern<T> a, Pattern<T> b) => a.FollowedBy(b);
+
+        /// <summary>
         /// Gets or sets the capture group this pattern was assigned to.
         /// </summary>
         public CaptureGroup CaptureGroup
@@ -89,6 +102,59 @@ namespace Echo.Ast.Patterns
         protected abstract void MatchChildren(T input, MatchResult result);
 
         /// <summary>
+        /// Determines whether a certain object matches the pattern.
+        /// </summary>
+        /// <param name="input">The input object.</param>
+        /// <returns><c>true</c> if the input object matches the pattern, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// This method is a shortcut for calling <see cref="Match(T)"/> and verifying whether <see cref="MatchResult.IsSuccess"/>
+        /// is set to <c>true</c>. Do not use this in combination with <see cref="Match(T)"/> on the same input and
+        /// pattern.
+        /// </remarks>
+        public bool Matches(T input) => Match(input).IsSuccess;
+
+        /// <summary>
+        /// Attempts to find a match in a sequence of inputs.
+        /// </summary>
+        /// <param name="inputSequence">The sequence of inputs.</param>
+        /// <returns>The match result of the input matching the pattern.</returns>
+        public MatchResult FindFirstMatch(IEnumerable<T> inputSequence)
+        {
+            var result = new MatchResult();
+
+            foreach (var input in inputSequence)
+            {
+                result.Captures.Clear();
+                result.IsSuccess = true;
+
+                Match(input, result);
+
+                if (result.IsSuccess)
+                    return result;
+            }
+            
+            result.Captures.Clear();
+            result.IsSuccess = false;
+            return result;
+        }
+
+        /// <summary>
+        /// Attempts to find all matches in a sequence of inputs.
+        /// </summary>
+        /// <param name="inputSequence">The sequence of inputs.</param>
+        /// <returns>The match result of the input matching the pattern.</returns>
+        public IEnumerable<MatchResult> FindAllMatches(IEnumerable<T> inputSequence)
+        {
+            foreach (var input in inputSequence)
+            {
+                var result = Match(input);
+
+                if (result.IsSuccess)
+                    yield return result;
+            }
+        }
+
+        /// <summary>
         /// When the pattern matches successfully, puts the matched object in the provided capture group.
         /// </summary>
         /// <param name="captureGroup">The capture group to add the object to.</param>
@@ -124,5 +190,13 @@ namespace Echo.Ast.Patterns
             return new OrPattern<T>(options);
         }
 
+        /// <summary>
+        /// Constructs a pattern that accepts a sequence of objects, starting with the current pattern followed by
+        /// the provided pattern. 
+        /// </summary>
+        /// <param name="pattern">The pattern describing the next element..</param>
+        /// <returns>The resulting pattern.</returns>
+        public virtual SequencePattern<T> FollowedBy(Pattern<T> pattern) => 
+            new SequencePattern<T>(this, pattern);
     }
 }

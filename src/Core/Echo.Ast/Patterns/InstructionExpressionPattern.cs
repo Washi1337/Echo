@@ -120,6 +120,21 @@ namespace Echo.Ast.Patterns
         }
 
         /// <summary>
+        /// Indicates the pattern should match on instances with the provided number of arguments.
+        /// </summary>
+        /// <param name="argumentCount">The number of arguments the expression should have.</param>
+        /// <returns>The current pattern.</returns>
+        public InstructionExpressionPattern<TInstruction> WithArguments(int argumentCount)
+        {
+            Arguments.Clear();
+
+            for (int i = 0; i < argumentCount; i++)
+                Arguments.Add(ExpressionPattern.Any<TInstruction>());
+            
+            return this;
+        }
+
+        /// <summary>
         /// Sets the argument patterns to the provided expression patterns.
         /// </summary>
         /// <param name="arguments">The patterns that describe the arguments of the expression.</param>
@@ -155,6 +170,19 @@ namespace Echo.Ast.Patterns
         {
             Arguments.Clear();
             AnyArguments = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Indicates all arguments should be captured in a certain group.
+        /// </summary>
+        /// <param name="captureGroup">The group.</param>
+        /// <returns>The current pattern.</returns>
+        public InstructionExpressionPattern<TInstruction> CaptureArguments(CaptureGroup captureGroup)
+        {
+            foreach (var argument in Arguments)
+                argument.CaptureAs(captureGroup);
+            
             return this;
         }
 

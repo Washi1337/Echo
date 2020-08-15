@@ -18,7 +18,8 @@ namespace Echo.Ast.Patterns
         }
 
         /// <summary>
-        /// Creates a new pattern that matches on instances of <see cref="AssignmentStatement{TInstruction}"/>.
+        /// Creates a new pattern that matches on instances of <see cref="AssignmentStatement{TInstruction}"/> with
+        /// a single variable on the left hand side of the equals sign.
         /// </summary>
         public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>()
         {
@@ -67,17 +68,6 @@ namespace Echo.Ast.Patterns
         public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>(Pattern<ExpressionBase<TInstruction>> expression)
         {
             return new ExpressionStatementPattern<TInstruction>(expression);
-        }
-
-        /// <summary>
-        /// Creates a new pattern that matches on instances of <see cref="ExpressionStatement{TInstruction}"/> that
-        /// contain instances of <see cref="InstructionExpression{TInstruction}"/>.
-        /// </summary>
-        /// <param name="instruction">The instruction to match on.</param>
-        /// <returns>The pattern.</returns>
-        public static ExpressionStatementPattern<TInstruction> Instruction<TInstruction>(TInstruction instruction)
-        {
-            return new ExpressionStatementPattern<TInstruction>(ExpressionPattern.InstructionLiteral(instruction));
         }
 
         /// <summary>

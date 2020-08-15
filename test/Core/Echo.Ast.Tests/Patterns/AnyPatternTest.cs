@@ -9,8 +9,7 @@ namespace Echo.Ast.Tests.Patterns
         public void AnyPatternShouldMatchAnyObject()
         {
             var pattern = Pattern.Any<object>();
-            var result = pattern.Match(new object());
-            Assert.True(result.IsSuccess);
+            Assert.True(pattern.Matches(new object()));
         }
     }
 }

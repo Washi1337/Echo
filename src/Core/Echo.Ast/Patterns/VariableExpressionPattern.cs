@@ -49,6 +49,16 @@ namespace Echo.Ast.Patterns
 
         /// <inheritdoc />
         public override string ToString() => Variable.ToString();
-        
+
+        /// <summary>
+        /// Captures the embedded variable.
+        /// </summary>
+        /// <param name="captureGroup">The capture group to add the extracted variable to.</param>
+        /// <returns>The current pattern.</returns>
+        public Pattern<ExpressionBase<TInstruction>> CaptureVariable(CaptureGroup captureGroup)
+        {
+            Variable.CaptureAs(captureGroup);
+            return this;
+        }
     }
 }
