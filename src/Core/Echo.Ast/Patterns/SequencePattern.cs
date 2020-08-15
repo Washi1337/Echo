@@ -6,7 +6,7 @@ namespace Echo.Ast.Patterns
     /// Describes a pattern for sequences of objects.
     /// </summary>
     /// <typeparam name="T">The type of objects to match.</typeparam>
-    public class SequencePattern<T> 
+    public class SequencePattern<T> : Pattern<IList<T>>
     {
         /// <summary>
         /// Creates a new sequence pattern.
@@ -33,30 +33,9 @@ namespace Echo.Ast.Patterns
         {
             get;
         }
-        
-        /// <summary>
-        /// Attempts to match and extract any captured groups from the given input.
-        /// </summary>
-        /// <param name="input">The input list.</param>
-        /// <returns>The extracted objects.</returns>
-        public MatchResult Match(IList<T> input)
-        {
-            var result = new MatchResult();
-            Match(input, result);
-            return result;
-        }
 
-        /// <summary>
-        /// Attempts to match and extract any captured groups from the given input.
-        /// </summary>
-        /// <param name="input">The input list.</param>
-        /// <param name="result">The buffer to store the extracted objects in.</param>
-        public void Match(IList<T> input, MatchResult result)
-        {
-            MatchChildren(input, result);
-        }
-        
-        private void MatchChildren(IList<T> input, MatchResult result)
+        /// <inheritdoc />
+        protected override void MatchChildren(IList<T> input, MatchResult result)
         {
             if (input.Count != Elements.Count)
             {
