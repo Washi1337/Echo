@@ -35,6 +35,7 @@ Table of Contents:
    control-flow/symbolic-construction
    control-flow/exception-handlers
    control-flow/dominators
+   control-flow/blocks
 
 
 
