@@ -33,8 +33,10 @@ Table of Contents:
    control-flow/basics
    control-flow/static-construction
    control-flow/symbolic-construction
+   control-flow/regions
    control-flow/exception-handlers
    control-flow/dominators
+   control-flow/blocks
 
 
 
