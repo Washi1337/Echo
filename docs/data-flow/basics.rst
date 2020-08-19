@@ -65,7 +65,7 @@ Below an example snippet that obtains the dependency instructions of the ``add``
     
     // Get the instructions responsible for pushing the values 
     DataFlowNode<T> argument1Source = dependency1.First().Node; // returns the node representing "push 1"
-    DataFlowNode<T> argument1Source argument2 = dependency2.First().Node; // returns the node representing "push 2"
+    DataFlowNode<T> argument2Source = dependency2.First().Node; // returns the node representing "push 2"
 
 
 To speed up the process, Echo defines an extension methods that obtains all of the dependency data flow nodes, and sorts them in such a way that they can be evaluated in order.

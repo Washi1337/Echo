@@ -1,5 +1,5 @@
 Control Flow Regions
---------------------
+====================
 
 Control flow graphs can be partitioned into one or more regions. This is used to encode certain relationships between nodes, such as modelling lexical scopes and exception handlers.
 
