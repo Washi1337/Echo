@@ -16,7 +16,7 @@ namespace Echo.Ast.Patterns
         public AssignmentStatementPattern()
         {
             Variables.Add(Pattern.Any<IVariable>());
-            Expression = Pattern.Any<ExpressionBase<TInstruction>>();
+            Expression = Pattern.Any<Expression<TInstruction>>();
         }
         
         /// <summary>
@@ -24,7 +24,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="variable">The pattern describing the variable that is assigned a value.</param>
         /// <param name="expression">The pattern of the expression placed on the right hand side of the equals sign.</param>
-        public AssignmentStatementPattern(Pattern<IVariable> variable, Pattern<ExpressionBase<TInstruction>> expression)
+        public AssignmentStatementPattern(Pattern<IVariable> variable, Pattern<Expression<TInstruction>> expression)
         {
             Variables.Add(variable);
             Expression = expression ?? throw new ArgumentNullException(nameof(expression));
@@ -35,7 +35,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="variables">The patterns describing the variables that is assigned a value.</param>
         /// <param name="expression">The pattern of the expression placed on the right hand side of the equals sign.</param>
-        public AssignmentStatementPattern(IEnumerable<Pattern<IVariable>> variables, Pattern<ExpressionBase<TInstruction>> expression)
+        public AssignmentStatementPattern(IEnumerable<Pattern<IVariable>> variables, Pattern<Expression<TInstruction>> expression)
         {
             foreach (var variable in variables)
                 Variables.Add(variable);
@@ -53,14 +53,14 @@ namespace Echo.Ast.Patterns
         /// <summary>
         /// Gets or sets the pattern describing the expression embedded into the input.
         /// </summary>
-        public Pattern<ExpressionBase<TInstruction>> Expression
+        public Pattern<Expression<TInstruction>> Expression
         {
             get;
             set;
         }
 
         /// <inheritdoc />
-        protected override void MatchChildren(StatementBase<TInstruction> input, MatchResult result)
+        protected override void MatchChildren(Statement<TInstruction> input, MatchResult result)
         {
             if (!(input is AssignmentStatement<TInstruction> statement)
                 || statement.Variables.Length != Variables.Count)
@@ -114,7 +114,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="expression">The pattern describing expression.</param>
         /// <returns>The current pattern.</returns>
-        public AssignmentStatementPattern<TInstruction> WithExpression(Pattern<ExpressionBase<TInstruction>> expression)
+        public AssignmentStatementPattern<TInstruction> WithExpression(Pattern<Expression<TInstruction>> expression)
         {
             Expression = expression;
             return this;

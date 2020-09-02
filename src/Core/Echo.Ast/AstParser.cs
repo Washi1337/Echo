@@ -30,12 +30,12 @@ namespace Echo.Ast
         /// <param name="dataFlowGraph">The <see cref="DataFlowGraph{TContents}"/> to parse</param>
         public AstParser(ControlFlowGraph<TInstruction> controlFlowGraph, DataFlowGraph<TInstruction> dataFlowGraph)
         {
-            var isa = new AstInstructionSetArchitectureDecorator<TInstruction>(controlFlowGraph.Architecture);
+            var isa = new AstArchitecture<TInstruction>(controlFlowGraph.Architecture);
             _context = new AstParserContext<TInstruction>(controlFlowGraph, dataFlowGraph, isa);
         }
 
         private IInstructionSetArchitecture<TInstruction> Architecture => _context.Architecture;
-        private IInstructionSetArchitecture<StatementBase<TInstruction>> AstArchitecture => _context.AstArchitecture;
+        private IInstructionSetArchitecture<Statement<TInstruction>> AstArchitecture => _context.AstArchitecture;
         private ControlFlowGraph<TInstruction> ControlFlowGraph => _context.ControlFlowGraph;
         private DataFlowGraph<TInstruction> DataFlowGraph => _context.DataFlowGraph;
         
@@ -43,9 +43,9 @@ namespace Echo.Ast
         /// Parses the given <see cref="ControlFlowGraph{TInstruction}"/>
         /// </summary>
         /// <returns>A <see cref="ControlFlowGraph{TInstruction}"/> representing the Ast</returns>
-        public ControlFlowGraph<StatementBase<TInstruction>> Parse()
+        public ControlFlowGraph<Statement<TInstruction>> Parse()
         {
-            var newGraph = new ControlFlowGraph<StatementBase<TInstruction>>(AstArchitecture);
+            var newGraph = new ControlFlowGraph<Statement<TInstruction>>(AstArchitecture);
             var blockBuilder = new BlockBuilder<TInstruction>();
             var rootScope = blockBuilder.ConstructBlocks(ControlFlowGraph);
 
@@ -61,7 +61,7 @@ namespace Echo.Ast
             {
                 var originalNode = ControlFlowGraph.Nodes[originalBlock.Offset];
                 var transformedBlock = TransformBlock(originalBlock);
-                var newNode = new ControlFlowNode<StatementBase<TInstruction>>(originalBlock.Offset, transformedBlock);
+                var newNode = new ControlFlowNode<Statement<TInstruction>>(originalBlock.Offset, transformedBlock);
                 newGraph.Nodes.Add(newNode);
                 
                 // Move node to newly created region.
@@ -83,13 +83,13 @@ namespace Echo.Ast
             return newGraph;
         }
 
-        private ControlFlowRegion<StatementBase<TInstruction>> TransformRegion(IControlFlowRegion<TInstruction> region)
+        private ControlFlowRegion<Statement<TInstruction>> TransformRegion(IControlFlowRegion<TInstruction> region)
         {
             switch (region)
             {
                 case BasicControlFlowRegion<TInstruction> basicRegion:
                     // Create new basic region.
-                    var newBasicRegion = new BasicControlFlowRegion<StatementBase<TInstruction>>();
+                    var newBasicRegion = new BasicControlFlowRegion<Statement<TInstruction>>();
                     TransformSubRegions(basicRegion, newBasicRegion);
 
                     // Register basic region pair.
@@ -98,7 +98,7 @@ namespace Echo.Ast
                     return newBasicRegion;
 
                 case ExceptionHandlerRegion<TInstruction> ehRegion:
-                    var newEhRegion = new ExceptionHandlerRegion<StatementBase<TInstruction>>();
+                    var newEhRegion = new ExceptionHandlerRegion<Statement<TInstruction>>();
 
                     // ProtectedRegion is read-only, so instead we just transform all sub regions and add it to the
                     // existing protected region.
@@ -117,17 +117,17 @@ namespace Echo.Ast
 
             void TransformSubRegions(
                 BasicControlFlowRegion<TInstruction> originalRegion, 
-                BasicControlFlowRegion<StatementBase<TInstruction>> newRegion)
+                BasicControlFlowRegion<Statement<TInstruction>> newRegion)
             {
                 foreach (var subRegion in originalRegion.Regions)
                     newRegion.Regions.Add(TransformRegion(subRegion));
             }
         }
 
-        private BasicBlock<StatementBase<TInstruction>> TransformBlock(BasicBlock<TInstruction> block)
+        private BasicBlock<Statement<TInstruction>> TransformBlock(BasicBlock<TInstruction> block)
         {
             int phiStatementCount = 0;
-            var result = new BasicBlock<StatementBase<TInstruction>>(block.Offset);
+            var result = new BasicBlock<Statement<TInstruction>>(block.Offset);
 
             var stackSlots = _context.StackSlots;
             var phiSlots = _context.PhiSlots;

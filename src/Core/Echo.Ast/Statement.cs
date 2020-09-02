@@ -3,10 +3,10 @@
     /// <summary>
     /// Provides a base contract for statements in the AST
     /// </summary>
-    public abstract class StatementBase<TInstruction> : NodeBase<TInstruction>
+    public abstract class Statement<TInstruction> : AstNodeBase<TInstruction>
     {
         /// <inheritdoc />
-        protected StatementBase(long id)
+        protected Statement(long id)
             : base(id) { }
     }
 }

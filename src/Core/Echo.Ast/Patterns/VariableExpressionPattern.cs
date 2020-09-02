@@ -36,7 +36,7 @@ namespace Echo.Ast.Patterns
         }
         
         /// <inheritdoc />
-        protected override void MatchChildren(ExpressionBase<TInstruction> input, MatchResult result)
+        protected override void MatchChildren(Expression<TInstruction> input, MatchResult result)
         {
             if (!(input is VariableExpression<TInstruction> expression))
             {
@@ -55,7 +55,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="captureGroup">The capture group to add the extracted variable to.</param>
         /// <returns>The current pattern.</returns>
-        public Pattern<ExpressionBase<TInstruction>> CaptureVariable(CaptureGroup captureGroup)
+        public Pattern<Expression<TInstruction>> CaptureVariable(CaptureGroup captureGroup)
         {
             Variable.CaptureAs(captureGroup);
             return this;

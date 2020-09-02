@@ -10,19 +10,19 @@ namespace Echo.Ast.Helpers
     {
         internal readonly ControlFlowGraph<TInstruction> ControlFlowGraph;
         internal readonly DataFlowGraph<TInstruction> DataFlowGraph;
-        internal readonly IInstructionSetArchitecture<StatementBase<TInstruction>> AstArchitecture;
+        internal readonly IInstructionSetArchitecture<Statement<TInstruction>> AstArchitecture;
         internal readonly Dictionary<IVariable, int> VariableVersions = new Dictionary<IVariable, int>();
         internal readonly Dictionary<(IVariable, int), AstVariable> VersionedAstVariables = new Dictionary<(IVariable, int), AstVariable>();
         internal readonly Dictionary<long, Dictionary<IVariable, int>> InstructionVersionStates = new Dictionary<long, Dictionary<IVariable, int>>();
         internal readonly Dictionary<AstVariableCollection, AstVariable> PhiSlots = new Dictionary<AstVariableCollection, AstVariable>();
         internal readonly Dictionary<long, AstVariable[]> StackSlots = new Dictionary<long, AstVariable[]>();
-        internal readonly Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<StatementBase<TInstruction>>>
-            RegionsMapping = new Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<StatementBase<TInstruction>>>();
+        internal readonly Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<Statement<TInstruction>>>
+            RegionsMapping = new Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<Statement<TInstruction>>>();
 
         internal AstParserContext(
             ControlFlowGraph<TInstruction> controlFlowGraph,
             DataFlowGraph<TInstruction> dataFlowGraph,
-            IInstructionSetArchitecture<StatementBase<TInstruction>> astArchitecture)
+            IInstructionSetArchitecture<Statement<TInstruction>> astArchitecture)
         {
             ControlFlowGraph = controlFlowGraph;
             DataFlowGraph = dataFlowGraph;

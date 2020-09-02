@@ -4,7 +4,7 @@ using Echo.Core.Code;
 
 namespace Echo.Ast.Helpers
 {
-    internal sealed class ReadVariableFinderWalker<TInstruction> : NodeWalkerBase<TInstruction, object>
+    internal sealed class ReadVariableFinderWalker<TInstruction> : AstNodeWalkerBase<TInstruction, object>
     {
         private readonly HashSet<IVariable> _variables = new HashSet<IVariable>();
 

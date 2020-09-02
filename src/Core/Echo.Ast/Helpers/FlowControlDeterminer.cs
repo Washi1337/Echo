@@ -2,12 +2,12 @@
 
 namespace Echo.Ast.Helpers
 {
-    internal sealed class InstructionFlowControlDeterminerVisitor<TInstruction>
-        : INodeVisitor<TInstruction, object, InstructionFlowControl>
+    internal sealed class FlowControlDeterminer<TInstruction>
+        : IAstNodeVisitor<TInstruction, object, InstructionFlowControl>
     {
         private readonly IInstructionSetArchitecture<TInstruction> _isa;
         
-        internal InstructionFlowControlDeterminerVisitor(IInstructionSetArchitecture<TInstruction> isa) =>
+        internal FlowControlDeterminer(IInstructionSetArchitecture<TInstruction> isa) =>
             _isa = isa;
 
         public InstructionFlowControl Visit(AssignmentStatement<TInstruction> assignmentStatement, object state) =>

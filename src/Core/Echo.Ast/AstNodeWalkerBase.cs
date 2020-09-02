@@ -5,7 +5,7 @@ namespace Echo.Ast
     /// </summary>
     /// <typeparam name="TInstruction">The type of the instruction</typeparam>
     /// <typeparam name="TState">The type of the state to pass</typeparam>
-    public abstract class NodeWalkerBase<TInstruction, TState> : INodeVisitor<TInstruction, TState>
+    public abstract class AstNodeWalkerBase<TInstruction, TState> : IAstNodeVisitor<TInstruction, TState>
     {
         /// <summary>
         /// Begin visiting a given <see cref="AssignmentStatement{TInstruction}"/>
@@ -82,14 +82,14 @@ namespace Echo.Ast
         protected virtual void VisitVariableExpression(
             VariableExpression<TInstruction> variableExpression, TState state) { }
 
-        private void VisitChildren(NodeBase<TInstruction> node, TState state)
+        private void VisitChildren(AstNodeBase<TInstruction> node, TState state)
         {
             foreach (var child in node.GetChildren())
-                ((NodeBase<TInstruction>) child).Accept(this, state);
+                ((AstNodeBase<TInstruction>) child).Accept(this, state);
         }
 
         /// <inheritdoc />
-        void INodeVisitor<TInstruction, TState>.Visit(AssignmentStatement<TInstruction> assignmentStatement, TState state)
+        void IAstNodeVisitor<TInstruction, TState>.Visit(AssignmentStatement<TInstruction> assignmentStatement, TState state)
         {
             EnterAssignmentStatement(assignmentStatement, state);
 
@@ -99,7 +99,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        void INodeVisitor<TInstruction, TState>.Visit(ExpressionStatement<TInstruction> expressionStatement, TState state)
+        void IAstNodeVisitor<TInstruction, TState>.Visit(ExpressionStatement<TInstruction> expressionStatement, TState state)
         {
             EnterExpressionStatement(expressionStatement, state);
 
@@ -109,7 +109,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        void INodeVisitor<TInstruction, TState>.Visit(PhiStatement<TInstruction> phiStatement, TState state)
+        void IAstNodeVisitor<TInstruction, TState>.Visit(PhiStatement<TInstruction> phiStatement, TState state)
         {
             EnterPhiStatement(phiStatement, state);
             
@@ -120,18 +120,18 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        void INodeVisitor<TInstruction, TState>.Visit(InstructionExpression<TInstruction> instructionExpression, TState state)
+        void IAstNodeVisitor<TInstruction, TState>.Visit(InstructionExpression<TInstruction> instructionExpression, TState state)
         {
             EnterInstructionExpression(instructionExpression, state);
 
             foreach (var parameter in instructionExpression.GetChildren())
-                ((ExpressionBase<TInstruction>) parameter).Accept(this, state);
+                ((Expression<TInstruction>) parameter).Accept(this, state);
             
             ExitInstructionExpression(instructionExpression, state);
         }
 
         /// <inheritdoc />
-        void INodeVisitor<TInstruction, TState>.Visit(VariableExpression<TInstruction> variableExpression, TState state)
+        void IAstNodeVisitor<TInstruction, TState>.Visit(VariableExpression<TInstruction> variableExpression, TState state)
         {
             VisitVariableExpression(variableExpression, state);
         }

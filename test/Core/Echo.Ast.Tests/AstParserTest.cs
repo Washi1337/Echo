@@ -14,7 +14,7 @@ namespace Echo.Ast.Tests
 {
     public class AstParserTest
     {
-        private ControlFlowGraph<StatementBase<DummyInstruction>> ConstructAst(
+        private ControlFlowGraph<Statement<DummyInstruction>> ConstructAst(
             IEnumerable<DummyInstruction> instructions)
         {
             var architecture = DummyArchitecture.Instance;
@@ -54,7 +54,7 @@ namespace Echo.Ast.Tests
 
             var variableCapture = new CaptureGroup("variable");
 
-            var pattern = new SequencePattern<StatementBase<DummyInstruction>>(
+            var pattern = new SequencePattern<Statement<DummyInstruction>>(
                 // stack_slot = push 1()
                 StatementPattern
                     .Assignment<DummyInstruction>()
@@ -91,7 +91,7 @@ namespace Echo.Ast.Tests
             var variableCapture = new CaptureGroup("variable");
             var argumentsCapture = new CaptureGroup("argument");
 
-            var pattern = new SequencePattern<StatementBase<DummyInstruction>>(
+            var pattern = new SequencePattern<Statement<DummyInstruction>>(
                 // stack_slot_1, stack_slot_2 = push 2()
                 StatementPattern
                     .Assignment<DummyInstruction>()
@@ -138,7 +138,7 @@ namespace Echo.Ast.Tests
             var argumentsCapture1 = new CaptureGroup("argument1");
             var argumentsCapture2 = new CaptureGroup("argument2");
 
-            var pattern = new SequencePattern<StatementBase<DummyInstruction>>(
+            var pattern = new SequencePattern<Statement<DummyInstruction>>(
                 // stack_slot_1, stack_slot_2 = push 2()
                 StatementPattern
                     .Assignment<DummyInstruction>()

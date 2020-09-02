@@ -11,7 +11,7 @@ namespace Echo.Ast.Tests.Patterns
         public void AnyVariableAndAnyExpression()
         {
             var statement = new AssignmentStatement<int>(0,
-                new InstructionExpression<int>(1, 1, ArraySegment<ExpressionBase<int>>.Empty), 
+                new InstructionExpression<int>(1, 1, ArraySegment<Expression<int>>.Empty), 
                 new IVariable[]
                 {
                     new AstVariable("var1"),
@@ -28,7 +28,7 @@ namespace Echo.Ast.Tests.Patterns
             var group = new CaptureGroup("group");
             
             var statement = new AssignmentStatement<int>(0,
-                new InstructionExpression<int>(1, 1, ArraySegment<ExpressionBase<int>>.Empty), 
+                new InstructionExpression<int>(1, 1, ArraySegment<Expression<int>>.Empty), 
                 new IVariable[]
                 {
                     new AstVariable("var1"),
@@ -36,7 +36,7 @@ namespace Echo.Ast.Tests.Patterns
 
             var pattern = StatementPattern
                 .Assignment<int>()
-                .WithExpression(Pattern.Any<ExpressionBase<int>>().CaptureAs(group));
+                .WithExpression(Pattern.Any<Expression<int>>().CaptureAs(group));
 
             var result = pattern.Match(statement);
             Assert.True(result.IsSuccess);
@@ -50,7 +50,7 @@ namespace Echo.Ast.Tests.Patterns
             var group = new CaptureGroup("group");
             
             var statement = new AssignmentStatement<int>(0,
-                new InstructionExpression<int>(1, 1, ArraySegment<ExpressionBase<int>>.Empty), 
+                new InstructionExpression<int>(1, 1, ArraySegment<Expression<int>>.Empty), 
                 new IVariable[]
                 {
                     new AstVariable("var1"),

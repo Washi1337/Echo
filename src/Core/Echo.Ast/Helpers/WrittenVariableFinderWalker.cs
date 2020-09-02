@@ -4,7 +4,7 @@ using Echo.Core.Code;
 
 namespace Echo.Ast.Helpers
 {
-    internal sealed class WrittenVariableFinderWalker<TInstruction> : NodeWalkerBase<TInstruction, object>
+    internal sealed class WrittenVariableFinderWalker<TInstruction> : AstNodeWalkerBase<TInstruction, object>
     {
         private readonly HashSet<IVariable> _variables = new HashSet<IVariable>();
 
@@ -19,9 +19,7 @@ namespace Echo.Ast.Helpers
                 _variables.Add(target);
         }
 
-        protected override void ExitPhiStatement(PhiStatement<TInstruction> phiStatement, object state)
-        {
+        protected override void ExitPhiStatement(PhiStatement<TInstruction> phiStatement, object state) =>
             _variables.Add(phiStatement.Target);
-        }
     }
 }

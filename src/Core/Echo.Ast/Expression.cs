@@ -3,10 +3,10 @@
     /// <summary>
     /// Provides a base contract for expressions in the AST
     /// </summary>
-    public abstract class ExpressionBase<TInstruction> : NodeBase<TInstruction>
+    public abstract class Expression<TInstruction> : AstNodeBase<TInstruction>
     {
         /// <inheritdoc />
-        protected ExpressionBase(long id)
+        protected Expression(long id)
             : base(id) { }
     }
 }

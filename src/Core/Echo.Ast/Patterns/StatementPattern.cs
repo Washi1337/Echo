@@ -12,9 +12,9 @@ namespace Echo.Ast.Patterns
         /// Creates a new pattern that matches any type of statement. 
         /// </summary>
         /// <returns>The pattern.</returns>
-        public static AnyPattern<StatementBase<TInstruction>> Any<TInstruction>()
+        public static AnyPattern<Statement<TInstruction>> Any<TInstruction>()
         {
-            return new AnyPattern<StatementBase<TInstruction>>();
+            return new AnyPattern<Statement<TInstruction>>();
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Echo.Ast.Patterns
         {
             return new AssignmentStatementPattern<TInstruction>(
                 Pattern.Any<IVariable>(),
-                Pattern.Any<ExpressionBase<TInstruction>>());
+                Pattern.Any<Expression<TInstruction>>());
         }
         
         /// <summary>
@@ -35,7 +35,7 @@ namespace Echo.Ast.Patterns
         /// <param name="expression">The pattern for the expression on the right hand side of the equals sign.</param>
         public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>(
             Pattern<IVariable> variable,
-            Pattern<ExpressionBase<TInstruction>> expression)
+            Pattern<Expression<TInstruction>> expression)
         {
             return new AssignmentStatementPattern<TInstruction>(variable, expression);
         }
@@ -47,7 +47,7 @@ namespace Echo.Ast.Patterns
         /// <param name="expression">The pattern for the expression on the right hand side of the equals sign.</param>
         public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>(
             IEnumerable<Pattern<IVariable>> variables,
-            Pattern<ExpressionBase<TInstruction>> expression)
+            Pattern<Expression<TInstruction>> expression)
         {
             return new AssignmentStatementPattern<TInstruction>(variables, expression);
         }
@@ -65,7 +65,7 @@ namespace Echo.Ast.Patterns
         /// Creates a new pattern that matches on instances of <see cref="ExpressionStatement{TInstruction}"/>.
         /// </summary>
         /// <param name="expression">The pattern for the embedded expression.</param>
-        public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>(Pattern<ExpressionBase<TInstruction>> expression)
+        public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>(Pattern<Expression<TInstruction>> expression)
         {
             return new ExpressionStatementPattern<TInstruction>(expression);
         }
@@ -107,7 +107,7 @@ namespace Echo.Ast.Patterns
     /// Describes a pattern for a statement in an abstract syntax tree.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions stored in the abstract syntax tree.</typeparam>
-    public abstract class StatementPattern<TInstruction> : Pattern<StatementBase<TInstruction>>
+    public abstract class StatementPattern<TInstruction> : Pattern<Statement<TInstruction>>
     {
     }
 }

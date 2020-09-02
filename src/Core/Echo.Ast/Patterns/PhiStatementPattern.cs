@@ -59,7 +59,7 @@ namespace Echo.Ast.Patterns
         } = new List<Pattern<VariableExpression<TInstruction>>>();
 
         /// <inheritdoc />
-        protected override void MatchChildren(StatementBase<TInstruction> input, MatchResult result)
+        protected override void MatchChildren(Statement<TInstruction> input, MatchResult result)
         {
             // Test whether the expression is an instruction expression.
             if (!(input is PhiStatement<TInstruction> statement))

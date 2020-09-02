@@ -37,7 +37,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="content">The pattern describing the instruction that is stored in the expression.</param>
         /// <param name="arguments">The list of patterns that describe the arguments of the input expression should match with.</param>
-        public InstructionExpressionPattern(Pattern<TInstruction> content, params Pattern<ExpressionBase<TInstruction>>[] arguments)
+        public InstructionExpressionPattern(Pattern<TInstruction> content, params Pattern<Expression<TInstruction>>[] arguments)
         {
             Content = content;
             AnyArguments = false;
@@ -50,7 +50,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="content">The pattern describing the instruction that is stored in the expression.</param>
         /// <param name="arguments">The list of patterns that describe the arguments of the input expression should match with.</param>
-        public InstructionExpressionPattern(Pattern<TInstruction> content, IEnumerable<Pattern<ExpressionBase<TInstruction>>> arguments)
+        public InstructionExpressionPattern(Pattern<TInstruction> content, IEnumerable<Pattern<Expression<TInstruction>>> arguments)
         {
             Content = content;
             AnyArguments = false;
@@ -83,13 +83,13 @@ namespace Echo.Ast.Patterns
         /// <remarks>
         /// When <see cref="AnyArguments"/> is set to <c>true</c>, this property is ignored.
         /// </remarks>
-        public IList<Pattern<ExpressionBase<TInstruction>>> Arguments
+        public IList<Pattern<Expression<TInstruction>>> Arguments
         {
             get;
-        } = new List<Pattern<ExpressionBase<TInstruction>>>();
+        } = new List<Pattern<Expression<TInstruction>>>();
         
         /// <inheritdoc />
-        protected override void MatchChildren(ExpressionBase<TInstruction> input, MatchResult result)
+        protected override void MatchChildren(Expression<TInstruction> input, MatchResult result)
         {
             // Test whether the expression is an instruction expression.
             if (!(input is InstructionExpression<TInstruction> expression))
@@ -140,7 +140,7 @@ namespace Echo.Ast.Patterns
         /// <param name="arguments">The patterns that describe the arguments of the expression.</param>
         /// <returns>The pattern.</returns>
         public InstructionExpressionPattern<TInstruction> WithArguments(
-            params Pattern<ExpressionBase<TInstruction>>[] arguments)
+            params Pattern<Expression<TInstruction>>[] arguments)
         {
             Arguments.Clear();
             foreach (var argument in arguments)
@@ -154,7 +154,7 @@ namespace Echo.Ast.Patterns
         /// <param name="arguments">The patterns that describe the arguments of the expression.</param>
         /// <returns>The pattern.</returns>
         public InstructionExpressionPattern<TInstruction> WithArguments(
-            IEnumerable<Pattern<ExpressionBase<TInstruction>>> arguments)
+            IEnumerable<Pattern<Expression<TInstruction>>> arguments)
         {
             Arguments.Clear();
             foreach (var argument in arguments)

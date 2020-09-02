@@ -13,11 +13,11 @@ namespace Echo.Ast.Tests.Patterns
         {
             var valueExpression = new InstructionExpression<DummyInstruction>(2, 
                 DummyInstruction.Push(0, 1),
-                ArraySegment<ExpressionBase<DummyInstruction>>.Empty);
+                ArraySegment<Expression<DummyInstruction>>.Empty);
 
             var statement = new ExpressionStatement<DummyInstruction>(0,
                 new InstructionExpression<DummyInstruction>(1,
-                    DummyInstruction.Ret(1), new List<ExpressionBase<DummyInstruction>>
+                    DummyInstruction.Ret(1), new List<Expression<DummyInstruction>>
                     {
                         valueExpression
                     }));

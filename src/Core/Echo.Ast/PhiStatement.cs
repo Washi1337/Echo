@@ -8,7 +8,7 @@ namespace Echo.Ast
     /// <summary>
     /// Represents a Phi statement in the Ast
     /// </summary>
-    public sealed class PhiStatement<TInstruction> : StatementBase<TInstruction>
+    public sealed class PhiStatement<TInstruction> : Statement<TInstruction>
     {
         /// <summary>
         /// Creates a new Phi statement
@@ -40,11 +40,11 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public override void Accept<TState>(INodeVisitor<TInstruction, TState> visitor, TState state) =>
+        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override TOut Accept<TState, TOut>(INodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
+        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />

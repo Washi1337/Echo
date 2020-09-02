@@ -13,14 +13,14 @@ namespace Echo.Ast.Patterns
         /// </summary>
         public ExpressionStatementPattern()
         {
-            Expression = Pattern.Any<ExpressionBase<TInstruction>>();
+            Expression = Pattern.Any<Expression<TInstruction>>();
         }
         
         /// <summary>
         /// Creates a new expression statement pattern.
         /// </summary>
         /// <param name="expression">The pattern for the embedded expression.</param>
-        public ExpressionStatementPattern(Pattern<ExpressionBase<TInstruction>> expression)
+        public ExpressionStatementPattern(Pattern<Expression<TInstruction>> expression)
         {
             Expression = expression ?? throw new ArgumentNullException(nameof(expression));
         }
@@ -28,14 +28,14 @@ namespace Echo.Ast.Patterns
         /// <summary>
         /// Gets or sets the pattern describing the expression embedded into the input.
         /// </summary>
-        public Pattern<ExpressionBase<TInstruction>> Expression
+        public Pattern<Expression<TInstruction>> Expression
         {
             get;
             set;
         }
 
         /// <inheritdoc />
-        protected override void MatchChildren(StatementBase<TInstruction> input, MatchResult result)
+        protected override void MatchChildren(Statement<TInstruction> input, MatchResult result)
         {
             if (!(input is ExpressionStatement<TInstruction> statement))
             {
@@ -51,7 +51,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="expression">The expression pattern.</param>
         /// <returns>The current pattern.</returns>
-        public ExpressionStatementPattern<TInstruction> WithExpression(Pattern<ExpressionBase<TInstruction>> expression)
+        public ExpressionStatementPattern<TInstruction> WithExpression(Pattern<Expression<TInstruction>> expression)
         {
             Expression = expression;
             return this;

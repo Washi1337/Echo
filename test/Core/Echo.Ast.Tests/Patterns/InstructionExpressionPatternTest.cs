@@ -13,7 +13,7 @@ namespace Echo.Ast.Tests.Patterns
         public void SameInstructionWithZeroArgumentsShouldMatch()
         {
             var pattern = ExpressionPattern.InstructionLiteral(1234);
-            var input = new InstructionExpression<int>(0, 1234, ImmutableArray<ExpressionBase<int>>.Empty);
+            var input = new InstructionExpression<int>(0, 1234, ImmutableArray<Expression<int>>.Empty);
 
             Assert.True(pattern.Matches(input));
         }
@@ -22,7 +22,7 @@ namespace Echo.Ast.Tests.Patterns
         public void DifferentInstructionWithZeroArgumentsShouldNotMatch()
         {
             var pattern = ExpressionPattern.InstructionLiteral(1234);
-            var input = new InstructionExpression<int>(0, 5678, ImmutableArray<ExpressionBase<int>>.Empty);
+            var input = new InstructionExpression<int>(0, 5678, ImmutableArray<Expression<int>>.Empty);
 
             Assert.False(pattern.Matches(input));
         }
@@ -38,9 +38,9 @@ namespace Echo.Ast.Tests.Patterns
                 .InstructionLiteral(1234)
                 .WithAnyArguments();
 
-            var arguments = new List<ExpressionBase<int>>(argumentCount);
+            var arguments = new List<Expression<int>>(argumentCount);
             for (int i = 0; i < argumentCount; i++)
-                arguments.Add(new InstructionExpression<int>(i, 0, ImmutableArray<ExpressionBase<int>>.Empty));
+                arguments.Add(new InstructionExpression<int>(i, 0, ImmutableArray<Expression<int>>.Empty));
 
             var input = new InstructionExpression<int>(argumentCount, sameInstruction ? 1234 : 5678, arguments);
             
@@ -56,10 +56,10 @@ namespace Echo.Ast.Tests.Patterns
                 .InstructionLiteral(1234)
                 .WithArguments(ExpressionPattern.Any<int>(), ExpressionPattern.Any<int>());
 
-            var arguments = new List<ExpressionBase<int>>(2)
+            var arguments = new List<Expression<int>>(2)
             {
-                new InstructionExpression<int>(0, 0, ImmutableArray<ExpressionBase<int>>.Empty),
-                new InstructionExpression<int>(1, 1, ImmutableArray<ExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(0, 0, ImmutableArray<Expression<int>>.Empty),
+                new InstructionExpression<int>(1, 1, ImmutableArray<Expression<int>>.Empty),
             };
 
             var input = new InstructionExpression<int>(2, 1234, arguments);
@@ -74,10 +74,10 @@ namespace Echo.Ast.Tests.Patterns
                 .InstructionLiteral(1234)
                 .WithArguments(ExpressionPattern.Any<int>(), ExpressionPattern.Any<int>());
 
-            var arguments = new List<ExpressionBase<int>>(2)
+            var arguments = new List<Expression<int>>(2)
             {
-                new InstructionExpression<int>(0, 0, ImmutableArray<ExpressionBase<int>>.Empty),
-                new InstructionExpression<int>(1, 1, ImmutableArray<ExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(0, 0, ImmutableArray<Expression<int>>.Empty),
+                new InstructionExpression<int>(1, 1, ImmutableArray<Expression<int>>.Empty),
             };
 
             var input = new InstructionExpression<int>(2, 5678, arguments);
@@ -92,10 +92,10 @@ namespace Echo.Ast.Tests.Patterns
                 .InstructionLiteral(1234)
                 .WithArguments(ExpressionPattern.InstructionLiteral(5678), ExpressionPattern.Any<int>());
 
-            var arguments = new List<ExpressionBase<int>>(2)
+            var arguments = new List<Expression<int>>(2)
             {
-                new InstructionExpression<int>(0, 0, ImmutableArray<ExpressionBase<int>>.Empty),
-                new InstructionExpression<int>(1, 1, ImmutableArray<ExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(0, 0, ImmutableArray<Expression<int>>.Empty),
+                new InstructionExpression<int>(1, 1, ImmutableArray<Expression<int>>.Empty),
             };
 
             var input = new InstructionExpression<int>(2, 1234, arguments);
@@ -110,9 +110,9 @@ namespace Echo.Ast.Tests.Patterns
                 .InstructionLiteral(1234)
                 .WithArguments(ExpressionPattern.Any<int>(), ExpressionPattern.Any<int>());
 
-            var arguments = new List<ExpressionBase<int>>(2)
+            var arguments = new List<Expression<int>>(2)
             {
-                new InstructionExpression<int>(0, 0, ImmutableArray<ExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(0, 0, ImmutableArray<Expression<int>>.Empty),
             };
 
             var input = new InstructionExpression<int>(2, 1234, arguments);
@@ -129,10 +129,10 @@ namespace Echo.Ast.Tests.Patterns
                     ExpressionPattern.InstructionLiteral(1234) | ExpressionPattern.InstructionLiteral(5678),
                     ExpressionPattern.Any<int>());
 
-            var arguments = new List<ExpressionBase<int>>(2)
+            var arguments = new List<Expression<int>>(2)
             {
-                new InstructionExpression<int>(0, 5678, ImmutableArray<ExpressionBase<int>>.Empty),
-                new InstructionExpression<int>(1, 1, ImmutableArray<ExpressionBase<int>>.Empty),
+                new InstructionExpression<int>(0, 5678, ImmutableArray<Expression<int>>.Empty),
+                new InstructionExpression<int>(1, 1, ImmutableArray<Expression<int>>.Empty),
             };
 
             var input = new InstructionExpression<int>(2, 1234, arguments);

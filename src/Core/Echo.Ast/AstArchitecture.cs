@@ -8,40 +8,36 @@ namespace Echo.Ast
     /// Provides a decorator around <typeparamref name="TInstruction"/> for the AST
     /// </summary>
     /// <typeparam name="TInstruction">The instruction</typeparam>
-    public class AstInstructionSetArchitectureDecorator<TInstruction>
-        : IInstructionSetArchitecture<StatementBase<TInstruction>>
+    public class AstArchitecture<TInstruction>
+        : IInstructionSetArchitecture<Statement<TInstruction>>
     {
-        private readonly IInstructionSetArchitecture<TInstruction> _isa;
-        private readonly InstructionFlowControlDeterminerVisitor<TInstruction> _flowControlDeterminer;
+        private readonly FlowControlDeterminer<TInstruction> _flowControlDeterminer;
 
         /// <summary>
         /// Create a new decorator around the <paramref name="isa"/>
         /// </summary>
         /// <param name="isa">The <see cref="IInstructionSetArchitecture{TInstruction}"/> to decorate</param>
-        public AstInstructionSetArchitectureDecorator(IInstructionSetArchitecture<TInstruction> isa)
-        {
-            _isa = isa;
-            _flowControlDeterminer = new InstructionFlowControlDeterminerVisitor<TInstruction>(isa);
-        }
+        public AstArchitecture(IInstructionSetArchitecture<TInstruction> isa) =>
+            _flowControlDeterminer = new FlowControlDeterminer<TInstruction>(isa);
 
         /// <inheritdoc />
-        public long GetOffset(in StatementBase<TInstruction> instruction) => instruction.Id;
+        public long GetOffset(in Statement<TInstruction> instruction) => instruction.Id;
 
         /// <inheritdoc />
-        public int GetSize(in StatementBase<TInstruction> instruction) => 1;
+        public int GetSize(in Statement<TInstruction> instruction) => 1;
 
         /// <inheritdoc />
-        public InstructionFlowControl GetFlowControl(in StatementBase<TInstruction> instruction) =>
+        public InstructionFlowControl GetFlowControl(in Statement<TInstruction> instruction) =>
             instruction.Accept(_flowControlDeterminer, null);
         
         /// <inheritdoc />
-        public int GetStackPushCount(in StatementBase<TInstruction> instruction) => 0;
+        public int GetStackPushCount(in Statement<TInstruction> instruction) => 0;
 
         /// <inheritdoc />
-        public int GetStackPopCount(in StatementBase<TInstruction> instruction) => 0;
+        public int GetStackPopCount(in Statement<TInstruction> instruction) => 0;
 
         /// <inheritdoc />
-        public int GetReadVariablesCount(in StatementBase<TInstruction> instruction)
+        public int GetReadVariablesCount(in Statement<TInstruction> instruction)
         {
             var visitor = new ReadVariableFinderWalker<TInstruction>();
             instruction.Accept(visitor, null);
@@ -50,7 +46,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public int GetReadVariables(in StatementBase<TInstruction> instruction, Span<IVariable> variablesBuffer)
+        public int GetReadVariables(in Statement<TInstruction> instruction, Span<IVariable> variablesBuffer)
         {
             var visitor = new ReadVariableFinderWalker<TInstruction>();
             instruction.Accept(visitor, null);
@@ -60,7 +56,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public int GetWrittenVariablesCount(in StatementBase<TInstruction> instruction)
+        public int GetWrittenVariablesCount(in Statement<TInstruction> instruction)
         {
             var visitor = new WrittenVariableFinderWalker<TInstruction>();
             instruction.Accept(visitor, null);
@@ -69,7 +65,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public int GetWrittenVariables(in StatementBase<TInstruction> instruction, Span<IVariable> variablesBuffer)
+        public int GetWrittenVariables(in Statement<TInstruction> instruction, Span<IVariable> variablesBuffer)
         {
             var visitor = new WrittenVariableFinderWalker<TInstruction>();
             instruction.Accept(visitor, null);

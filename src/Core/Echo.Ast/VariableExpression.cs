@@ -8,7 +8,7 @@ namespace Echo.Ast
     /// <summary>
     /// Represents a variable expression in the AST
     /// </summary>
-    public sealed class VariableExpression<TInstruction> : ExpressionBase<TInstruction>
+    public sealed class VariableExpression<TInstruction> : Expression<TInstruction>
     {
         /// <summary>
         /// Creates a new variable expression
@@ -30,11 +30,11 @@ namespace Echo.Ast
         }
         
         /// <inheritdoc />
-        public override void Accept<TState>(INodeVisitor<TInstruction, TState> visitor, TState state) =>
+        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override TOut Accept<TState, TOut>(INodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
+        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />

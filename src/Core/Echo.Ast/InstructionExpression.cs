@@ -8,7 +8,7 @@ namespace Echo.Ast
     /// <summary>
     /// Represents an instruction in the AST
     /// </summary>
-    public sealed class InstructionExpression<TInstruction> : ExpressionBase<TInstruction>
+    public sealed class InstructionExpression<TInstruction> : Expression<TInstruction>
     {
         /// <summary>
         /// Creates a new instruction expression node
@@ -16,7 +16,7 @@ namespace Echo.Ast
         /// <param name="id">The unique ID to give to the node</param>
         /// <param name="content">The instruction</param>
         /// <param name="arguments">The parameters to this instruction</param>
-        public InstructionExpression(long id, TInstruction content, IEnumerable<ExpressionBase<TInstruction>> arguments)
+        public InstructionExpression(long id, TInstruction content, IEnumerable<Expression<TInstruction>> arguments)
             : base(id)
         {
             Content = content;
@@ -34,17 +34,17 @@ namespace Echo.Ast
         /// <summary>
         /// The arguments to this <see cref="InstructionExpression{TInstruction}"/>
         /// </summary>
-        public IList<ExpressionBase<TInstruction>> Arguments
+        public IList<Expression<TInstruction>> Arguments
         {
             get;
         }
 
         /// <inheritdoc />
-        public override void Accept<TState>(INodeVisitor<TInstruction, TState> visitor, TState state) =>
+        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override TOut Accept<TState, TOut>(INodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
+        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
 
         /// <inheritdoc />

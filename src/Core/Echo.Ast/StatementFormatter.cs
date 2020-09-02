@@ -5,7 +5,7 @@ namespace Echo.Ast
     /// <summary>
     /// Formats the Ast so it looks nicer in <see cref="ControlFlowNodeAdorner{TInstruction}"/>
     /// </summary>
-    public class StatementFormatter<TInstruction> : IInstructionFormatter<StatementBase<TInstruction>>
+    public class StatementFormatter<TInstruction> : IInstructionFormatter<Statement<TInstruction>>
     {
         private readonly IInstructionFormatter<TInstruction> _instructionFormatter;
         
@@ -19,7 +19,7 @@ namespace Echo.Ast
             _instructionFormatter = instructionFormatter;
 
         /// <inheritdoc />
-        public string Format(in StatementBase<TInstruction> instruction) =>
+        public string Format(in Statement<TInstruction> instruction) =>
             instruction.Format(_instructionFormatter);
     }
 }
