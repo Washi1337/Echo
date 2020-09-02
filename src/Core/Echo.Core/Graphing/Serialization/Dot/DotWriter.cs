@@ -215,12 +215,15 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <param name="edge">The edge to append.</param>
         protected virtual void WriteEdge(IEdge edge)
         {
-            WriteIdentifier(NodeIdentifier.GetIdentifier(edge.Origin).ToString());
+            long sourceId = NodeIdentifier.GetIdentifier(edge.Origin);
+            long targetId = NodeIdentifier.GetIdentifier(edge.Target);
+            
+            WriteIdentifier(sourceId.ToString());
             Writer.Write(" -> ");
-            WriteIdentifier(NodeIdentifier.GetIdentifier(edge.Target).ToString());
+            WriteIdentifier(targetId.ToString());
             
             if (EdgeAdorner != null)
-                WriteEntityAttributes(EdgeAdorner.GetEdgeAttributes(edge));
+                WriteEntityAttributes(EdgeAdorner.GetEdgeAttributes(edge, sourceId, targetId));
             
             WriteSemicolon();
             Writer.WriteLine();
