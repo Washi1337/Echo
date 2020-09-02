@@ -242,9 +242,6 @@ namespace Echo.ControlFlow.Analysis.Domination
         }
 
         /// <inheritdoc />
-        INode ISubGraph.GetNodeById(long id) => _nodes.Values.FirstOrDefault(n => n.Id == id);
-
-        /// <inheritdoc />
         IEnumerable<INode> ISubGraph.GetNodes() => _nodes.Values;
 
         /// <inheritdoc />

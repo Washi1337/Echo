@@ -190,7 +190,7 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <param name="node">The node to append.</param>
         protected virtual void WriteNode(INode node)
         {
-            WriteIdentifier(node.Id.ToString());
+            throw new NotImplementedException();
             
             if (NodeAdorner != null)
                 WriteEntityAttributes(NodeAdorner.GetNodeAttributes(node));
@@ -205,15 +205,16 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <param name="edge">The edge to append.</param>
         protected virtual void WriteEdge(IEdge edge)
         {
-            WriteIdentifier(edge.Origin.Id.ToString());
-            Writer.Write(" -> ");
-            WriteIdentifier(edge.Target.Id.ToString());
-
-            if (EdgeAdorner != null)
-                WriteEntityAttributes(EdgeAdorner.GetEdgeAttributes(edge));
-
-            WriteSemicolon();
-            Writer.WriteLine();
+            throw new NotImplementedException();
+            // WriteIdentifier(edge.Origin.Id.ToString());
+            // Writer.Write(" -> ");
+            // WriteIdentifier(edge.Target.Id.ToString());
+            //
+            // if (EdgeAdorner != null)
+            //     WriteEntityAttributes(EdgeAdorner.GetEdgeAttributes(edge));
+            //
+            // WriteSemicolon();
+            // Writer.WriteLine();
         }
 
         private void WriteEntityAttributes(IEnumerable<KeyValuePair<string, string>> attributes)

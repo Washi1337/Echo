@@ -103,9 +103,6 @@ namespace Echo.ControlFlow
         }
 
         /// <inheritdoc />
-        long INode.Id => Offset;
-
-        /// <inheritdoc />
         public int InDegree => IncomingEdges.Count;
 
         /// <inheritdoc />

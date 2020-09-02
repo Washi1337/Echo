@@ -14,7 +14,6 @@ namespace Echo.ControlFlow.Analysis.Domination
     public class DominatorTreeNode : TreeNodeBase
     {
         internal DominatorTreeNode(INode node)
-            : base(node.Id)
         {
             OriginalNode = node;
         }

@@ -40,9 +40,6 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        INode ISubGraph.GetNodeById(long id) => Nodes[id];
-
-        /// <inheritdoc />
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
         
         /// <inheritdoc />

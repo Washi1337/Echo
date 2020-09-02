@@ -88,9 +88,6 @@ namespace Echo.ControlFlow
         public ControlFlowNode<TInstruction> GetNodeByOffset(long offset) => Nodes[offset];
 
         /// <inheritdoc />
-        INode ISubGraph.GetNodeById(long id) => Nodes[id];
-
-        /// <inheritdoc />
         IEnumerable<ControlFlowNode<TInstruction>> IControlFlowRegion<TInstruction>.GetNodes() => Nodes;
 
         /// <inheritdoc />
