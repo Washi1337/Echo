@@ -56,6 +56,15 @@ namespace Echo.Core.Graphing.Serialization.Dot
         } = true;
 
         /// <summary>
+        /// Gets or sets the object responsible for assigning unique identifiers to nodes in a graph.
+        /// </summary>
+        public INodeIdentifier NodeIdentifier
+        {
+            get;
+            set;
+        } = new IncrementingNodeIdentifier();
+
+        /// <summary>
         /// Gets or sets the adorner to use for adorning the nodes in the final output.
         /// </summary>
         /// <remarks>
@@ -190,7 +199,7 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <param name="node">The node to append.</param>
         protected virtual void WriteNode(INode node)
         {
-            throw new NotImplementedException();
+            WriteIdentifier(NodeIdentifier.GetIdentifier(node).ToString());
             
             if (NodeAdorner != null)
                 WriteEntityAttributes(NodeAdorner.GetNodeAttributes(node));
@@ -205,16 +214,15 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <param name="edge">The edge to append.</param>
         protected virtual void WriteEdge(IEdge edge)
         {
-            throw new NotImplementedException();
-            // WriteIdentifier(edge.Origin.Id.ToString());
-            // Writer.Write(" -> ");
-            // WriteIdentifier(edge.Target.Id.ToString());
-            //
-            // if (EdgeAdorner != null)
-            //     WriteEntityAttributes(EdgeAdorner.GetEdgeAttributes(edge));
-            //
-            // WriteSemicolon();
-            // Writer.WriteLine();
+            WriteIdentifier(NodeIdentifier.GetIdentifier(edge.Origin).ToString());
+            Writer.Write(" -> ");
+            WriteIdentifier(NodeIdentifier.GetIdentifier(edge.Target).ToString());
+            
+            if (EdgeAdorner != null)
+                WriteEntityAttributes(EdgeAdorner.GetEdgeAttributes(edge));
+            
+            WriteSemicolon();
+            Writer.WriteLine();
         }
 
         private void WriteEntityAttributes(IEnumerable<KeyValuePair<string, string>> attributes)
