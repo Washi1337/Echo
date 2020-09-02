@@ -199,10 +199,11 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <param name="node">The node to append.</param>
         protected virtual void WriteNode(INode node)
         {
-            WriteIdentifier(NodeIdentifier.GetIdentifier(node).ToString());
+            long id = NodeIdentifier.GetIdentifier(node);
+            WriteIdentifier(id.ToString());
             
             if (NodeAdorner != null)
-                WriteEntityAttributes(NodeAdorner.GetNodeAttributes(node));
+                WriteEntityAttributes(NodeAdorner.GetNodeAttributes(node, id));
             
             WriteSemicolon();
             Writer.WriteLine();

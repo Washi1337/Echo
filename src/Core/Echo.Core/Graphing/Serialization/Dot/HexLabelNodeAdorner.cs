@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Echo.Core.Graphing.Serialization.Dot
@@ -35,11 +34,11 @@ namespace Echo.Core.Graphing.Serialization.Dot
             get;
             set;
         } = 0;
-        
+
         /// <inheritdoc />
-        public IDictionary<string, string> GetNodeAttributes(INode node)
+        public IDictionary<string, string> GetNodeAttributes(INode node, long id) => new Dictionary<string, string>
         {
-            throw new NotImplementedException();
-        }
+            ["label"] = $"{Prefix}{id.ToString($"X{PaddingZeroes.ToString()}")}{Suffix}"
+        };
     }
 }
