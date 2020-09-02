@@ -10,7 +10,7 @@ namespace Echo.DataFlow
     /// Represents a single node in a data flow graph.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to store in the node.</typeparam>
-    public class DataFlowNode<TContents> : INode
+    public class DataFlowNode<TContents> : IIdentifiedNode
     {
         /// <summary>
         /// Creates a new data flow graph node.
@@ -34,9 +34,7 @@ namespace Echo.DataFlow
             internal set;
         }
 
-        /// <summary>
-        /// Gets the unique identifier for the node, used for indexing the node.
-        /// </summary>
+        /// <inheritdoc />
         public long Id
         {
             get;
