@@ -148,7 +148,10 @@ namespace Echo.Core.Graphing.Serialization.Dot
                 var attributes = SubGraphAdorner.GetSubGraphAttributes(subGraph);
                 if (attributes.Count > 0)
                 {
-                    string delimeter = (IncludeSemicolons ? ";" : string.Empty);
+                    string delimeter = IncludeSemicolons
+                        ? ";"
+                        : string.Empty;
+                    
                     WriteAttributes(attributes, delimeter, true);
                     Writer.WriteLine(delimeter);
                     Writer.WriteLine();
