@@ -8,14 +8,6 @@ namespace Echo.Core.Graphing
     public interface INode
     {
         /// <summary>
-        /// Gets the identifier of the node.
-        /// </summary>
-        long Id
-        {
-            get;
-        }
-
-        /// <summary>
         /// Gets a value indicating the number of incoming edges that this node is incident to.
         /// </summary>
         int InDegree

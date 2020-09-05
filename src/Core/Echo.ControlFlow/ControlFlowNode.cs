@@ -14,7 +14,7 @@ namespace Echo.ControlFlow
     /// in a sequence.
     /// </summary>
     /// <typeparam name="TInstruction">The type of data to store in the node.</typeparam>
-    public class ControlFlowNode<TInstruction> : INode
+    public class ControlFlowNode<TInstruction> : IIdentifiedNode
     {
         private ControlFlowEdge<TInstruction> _fallThroughEdge;
 
@@ -103,7 +103,7 @@ namespace Echo.ControlFlow
         }
 
         /// <inheritdoc />
-        long INode.Id => Offset;
+        public long Id => Offset;
 
         /// <inheritdoc />
         public int InDegree => IncomingEdges.Count;

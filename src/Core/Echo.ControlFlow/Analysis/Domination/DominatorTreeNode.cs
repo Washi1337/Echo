@@ -11,10 +11,9 @@ namespace Echo.ControlFlow.Analysis.Domination
     /// It stores the original control flow graph node from which this tree node was inferred, as well a reference to its
     /// immediate dominator, and the node it immediate dominates.
     /// </remarks>
-    public class DominatorTreeNode : TreeNodeBase
+    public class DominatorTreeNode : TreeNodeBase, IIdentifiedNode
     {
-        internal DominatorTreeNode(INode node)
-            : base(node.Id)
+        internal DominatorTreeNode(IIdentifiedNode node)
         {
             OriginalNode = node;
         }
@@ -22,10 +21,13 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// <summary>
         /// Gets the node that this tree node was derived from. 
         /// </summary>
-        public INode OriginalNode
+        public IIdentifiedNode OriginalNode
         {
             get;
         }
+
+        /// <inheritdoc />
+        public long Id => OriginalNode.Id;
 
         /// <summary>
         /// Gets a collection of children representing all nodes that were dominated by the original node, as well as an

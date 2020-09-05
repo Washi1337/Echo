@@ -1,7 +1,7 @@
 namespace Echo.Core.Graphing
 {
     /// <summary>
-    /// Represents a single edge that connects to nodes together in a directed graph.
+    /// Represents a single edge that connects two nodes together in a directed graph.
     /// </summary>
     public interface IEdge
     {

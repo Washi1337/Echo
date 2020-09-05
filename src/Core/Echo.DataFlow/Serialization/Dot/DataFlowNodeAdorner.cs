@@ -20,7 +20,7 @@ namespace Echo.DataFlow.Serialization.Dot
         } = "box3d";
 
         /// <inheritdoc />
-        public IDictionary<string, string> GetNodeAttributes(INode node)
+        public IDictionary<string, string> GetNodeAttributes(INode node, long id)
         {
             switch (node)
             {

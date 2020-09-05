@@ -11,7 +11,8 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// Obtains the adornments that should be added to the node. 
         /// </summary>
         /// <param name="node">The node to adorn.</param>
+        /// <param name="id">The identifier assigned to the node.</param>
         /// <returns>The adornments.</returns>
-        IDictionary<string, string> GetNodeAttributes(INode node);
+        IDictionary<string, string> GetNodeAttributes(INode node, long id);
     }
 }

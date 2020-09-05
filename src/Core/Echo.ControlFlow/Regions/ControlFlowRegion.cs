@@ -62,8 +62,6 @@ namespace Echo.ControlFlow.Regions
 
             return null;
         }
-        /// <inheritdoc />
-        INode ISubGraph.GetNodeById(long id) => GetNodeByOffset(id);
 
         /// <inheritdoc />
         public abstract IEnumerable<ControlFlowNode<TInstruction>> GetNodes();

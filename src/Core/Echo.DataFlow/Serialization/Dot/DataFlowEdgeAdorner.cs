@@ -50,7 +50,7 @@ namespace Echo.DataFlow.Serialization.Dot
         } = true;
         
         /// <inheritdoc />
-        public IDictionary<string, string> GetEdgeAttributes(IEdge edge)
+        public IDictionary<string, string> GetEdgeAttributes(IEdge edge, long sourceId, long targetId)
         {
             if (edge is DataFlowEdge<TContents> e)
             {

@@ -9,12 +9,10 @@ namespace Echo.Core.Graphing
     public abstract class TreeNodeBase : INode
     {
         /// <summary>
-        /// Initializes the node with an <paramref name="id"/>
+        /// Initializes a tree node.
         /// </summary>
-        /// <param name="id">The unique ID to assign to the node</param>
-        protected TreeNodeBase(long id)
+        protected TreeNodeBase()
         {
-            Id = id;
             Children = new TreeNodeCollection<TreeNodeBase>(this);
         }
         
@@ -36,12 +34,6 @@ namespace Echo.Core.Graphing
         }
 
         /// <inheritdoc />
-        public long Id
-        {
-            get;
-        }
-
-        /// <inheritdoc />
         public int InDegree => Parent is null ? 0 : 1;
 
         /// <inheritdoc />
@@ -55,7 +47,7 @@ namespace Echo.Core.Graphing
 
         /// <inheritdoc />
         public IEnumerable<IEdge> GetOutgoingEdges() =>
-            Children.Select(child => (IEdge) new Edge(this, child));
+            Children.Select(child => new Edge(this, child));
 
         /// <inheritdoc />
         public IEnumerable<INode> GetPredecessors()

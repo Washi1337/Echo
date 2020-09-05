@@ -8,13 +8,6 @@ namespace Echo.Core.Graphing
     public interface ISubGraph
     {
         /// <summary>
-        /// Obtains a node by its unique identifier.
-        /// </summary>
-        /// <param name="id">The node identifier.</param>
-        /// <returns>The node, or <c>null</c> if no such node was found.</returns>
-        INode GetNodeById(long id);
-        
-        /// <summary>
         /// Gets a collection of nodes that this segment contains.
         /// </summary>
         /// <returns>The nodes.</returns>
