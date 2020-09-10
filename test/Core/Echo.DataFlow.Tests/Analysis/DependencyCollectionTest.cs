@@ -1,5 +1,7 @@
-﻿using Echo.DataFlow.Analysis;
+﻿using System.Collections.Generic;
+using Echo.DataFlow.Analysis;
 using Echo.Platforms.DummyPlatform;
+using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
 namespace Echo.DataFlow.Tests.Analysis
@@ -191,6 +193,52 @@ namespace Echo.DataFlow.Tests.Analysis
             n4.StackDependencies.Add(new DataDependency<int>(n1));
 
             Assert.Throws<CyclicDependencyException>(() => n1.GetOrderedDependencies());
+        }
+
+        [Fact]
+        public void IgnoreVariableDependenciesWhenNotIncluded()
+        {
+            var variable = new DummyVariable("v1");
+            
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
+            var n1 = dfg.Nodes.Add(1, 1);
+            var n2 = dfg.Nodes.Add(2, 2);
+            var n3 = dfg.Nodes.Add(3, 3);
+            var n4 = dfg.Nodes.Add(4, 4);
+            var n5 = dfg.Nodes.Add(5, 5);
+            
+            n1.StackDependencies.Add(new DataDependency<int>(n2));
+            n1.VariableDependencies.Add(variable, new DataDependency<int>(n3));
+            n2.StackDependencies.Add(new DataDependency<int>(n4));
+            n2.VariableDependencies.Add(variable, new DataDependency<int>(n5));
+
+            Assert.Equal(new[]
+            {
+                n4, n2, n1
+            }, n1.GetOrderedDependencies(DependencyCollectionFlags.IncludeStackDependencies));
+        }
+
+        [Fact]
+        public void IgnoreStackDependenciesWhenNotIncluded()
+        {
+            var variable = new DummyVariable("v1");
+            
+            var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
+            var n1 = dfg.Nodes.Add(1, 1);
+            var n2 = dfg.Nodes.Add(2, 2);
+            var n3 = dfg.Nodes.Add(3, 3);
+            var n4 = dfg.Nodes.Add(4, 4);
+            var n5 = dfg.Nodes.Add(5, 5);
+            
+            n1.StackDependencies.Add(new DataDependency<int>(n2));
+            n1.VariableDependencies.Add(variable, new DataDependency<int>(n3));
+            n3.StackDependencies.Add(new DataDependency<int>(n4));
+            n3.VariableDependencies.Add(variable, new DataDependency<int>(n5));
+
+            Assert.Equal(new[]
+            {
+                n5, n3, n1
+            }, n1.GetOrderedDependencies(DependencyCollectionFlags.IncludeVariableDependencies));
         }
     }
 }

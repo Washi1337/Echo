@@ -72,7 +72,7 @@ namespace Echo.ControlFlow.Serialization.Dot
         }
         
         /// <inheritdoc />
-        public IDictionary<string, string> GetNodeAttributes(INode node)
+        public IDictionary<string, string> GetNodeAttributes(INode node, long id)
         {
             if (node is ControlFlowNode<TInstruction> cfgNode)
             {

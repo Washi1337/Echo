@@ -56,6 +56,15 @@ namespace Echo.Core.Graphing.Serialization.Dot
         } = true;
 
         /// <summary>
+        /// Gets or sets the object responsible for assigning unique identifiers to nodes in a graph.
+        /// </summary>
+        public INodeIdentifier NodeIdentifier
+        {
+            get;
+            set;
+        } = new IncrementingNodeIdentifier();
+
+        /// <summary>
         /// Gets or sets the adorner to use for adorning the nodes in the final output.
         /// </summary>
         /// <remarks>
@@ -139,7 +148,10 @@ namespace Echo.Core.Graphing.Serialization.Dot
                 var attributes = SubGraphAdorner.GetSubGraphAttributes(subGraph);
                 if (attributes.Count > 0)
                 {
-                    string delimeter = (IncludeSemicolons ? ";" : string.Empty);
+                    string delimeter = IncludeSemicolons
+                        ? ";"
+                        : string.Empty;
+                    
                     WriteAttributes(attributes, delimeter, true);
                     Writer.WriteLine(delimeter);
                     Writer.WriteLine();
@@ -190,10 +202,11 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <param name="node">The node to append.</param>
         protected virtual void WriteNode(INode node)
         {
-            WriteIdentifier(node.Id.ToString());
+            long id = NodeIdentifier.GetIdentifier(node);
+            WriteIdentifier(id.ToString());
             
             if (NodeAdorner != null)
-                WriteEntityAttributes(NodeAdorner.GetNodeAttributes(node));
+                WriteEntityAttributes(NodeAdorner.GetNodeAttributes(node, id));
             
             WriteSemicolon();
             Writer.WriteLine();
@@ -205,13 +218,16 @@ namespace Echo.Core.Graphing.Serialization.Dot
         /// <param name="edge">The edge to append.</param>
         protected virtual void WriteEdge(IEdge edge)
         {
-            WriteIdentifier(edge.Origin.Id.ToString());
+            long sourceId = NodeIdentifier.GetIdentifier(edge.Origin);
+            long targetId = NodeIdentifier.GetIdentifier(edge.Target);
+            
+            WriteIdentifier(sourceId.ToString());
             Writer.Write(" -> ");
-            WriteIdentifier(edge.Target.Id.ToString());
-
+            WriteIdentifier(targetId.ToString());
+            
             if (EdgeAdorner != null)
-                WriteEntityAttributes(EdgeAdorner.GetEdgeAttributes(edge));
-
+                WriteEntityAttributes(EdgeAdorner.GetEdgeAttributes(edge, sourceId, targetId));
+            
             WriteSemicolon();
             Writer.WriteLine();
         }

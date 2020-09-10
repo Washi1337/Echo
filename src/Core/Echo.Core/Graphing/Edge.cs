@@ -29,6 +29,6 @@
         }
 
         /// <inheritdoc />
-        public override string ToString() => Origin.Id + " -> " + Target.Id;
+        public override string ToString() => $"{Origin} -> {Target}";
     }
 }

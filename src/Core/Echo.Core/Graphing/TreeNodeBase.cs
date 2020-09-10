@@ -9,12 +9,11 @@ namespace Echo.Core.Graphing
     public abstract class TreeNodeBase : INode
     {
         /// <summary>
-        /// Initializes the node with an <paramref name="id"/>
+        /// Initializes a tree node.
         /// </summary>
-        /// <param name="id">The unique ID to assign to the node</param>
-        protected TreeNodeBase(long id)
+        protected TreeNodeBase()
         {
-            Id = id;
+            Children = new TreeNodeCollection<TreeNodeBase>(this);
         }
         
         /// <summary>
@@ -24,12 +23,6 @@ namespace Echo.Core.Graphing
         {
             get;
             internal set;
-        }
-
-        /// <inheritdoc />
-        public long Id
-        {
-            get;
         }
 
         /// <inheritdoc />
@@ -69,4 +62,3 @@ namespace Echo.Core.Graphing
         /// <inheritdoc />
         public bool HasSuccessor(INode node) => GetChildren().Contains(node);
     }
-}

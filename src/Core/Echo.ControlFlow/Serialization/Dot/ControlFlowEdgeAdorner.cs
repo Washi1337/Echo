@@ -48,7 +48,7 @@ namespace Echo.ControlFlow.Serialization.Dot
         } = new DotEntityStyle("gray", "dashed");
 
         /// <inheritdoc />
-        public IDictionary<string, string> GetEdgeAttributes(IEdge edge)
+        public IDictionary<string, string> GetEdgeAttributes(IEdge edge, long sourceId, long targetId)
         {
             if (edge is ControlFlowEdge<TInstruction> cfgEdge)
             {

@@ -34,14 +34,11 @@ namespace Echo.Core.Graphing.Serialization.Dot
             get;
             set;
         } = 0;
-        
+
         /// <inheritdoc />
-        public IDictionary<string, string> GetNodeAttributes(INode node)
+        public IDictionary<string, string> GetNodeAttributes(INode node, long id) => new Dictionary<string, string>
         {
-            return new Dictionary<string, string>
-            {
-                ["label"] = Prefix + node.Id.ToString("X" + PaddingZeroes) + Suffix
-            };
-        }
+            ["label"] = $"{Prefix}{id.ToString($"X{PaddingZeroes.ToString()}")}{Suffix}"
+        };
     }
 }

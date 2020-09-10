@@ -29,8 +29,9 @@ Data Flow Graph Models
 
 There are three main classes that are used to model DFGs. Given a ``TContents`` type, representing the type of data to store in each node of the DFG, Echo defines the following classes:
 
-- ``DataFlowNode<TContents>``: A single node, wrapping an .
-- ``DataDependency<TContents>``: A data dependency between two objects.
+- ``DataFlowNode<TContents>``: A single node, wrapping an instruction or component.
+- ``DataDependency<TContents>``: A stack or variable value that an instruction or component depends on, that keeps track of a collection of data sources.
+- ``DataSource<TContents>``: A single data source referenced by a ``DataDependency<TContents>``. This object translates to a single edge in the data flow graph.
 - ``DataFlowGraph<TContents>``: A collection of nodes and their dependencies.
 
 These classes implement the ``INode``, ``IEdge`` and ``IGraph`` interfaces, and work therefore with all kinds of generic graph algorithms and export features.
@@ -44,7 +45,7 @@ Nodes expose their direct dependencies using the following properties:
 - ``StackDependencies``: A collection of stack slots that the node depends on.
 - ``VariableDependencies``: A collection of variables the node depends on.
 
-These properties are collections of type ``DataDependency<TContents>`` and are fully mutable, and can be used to add or remove dependencies between nodes. Every ``DataDependency<TContents>`` represents a single value with potentially multiple data sources. As a result, every stack value that an instruction pops is assigned exactly one ``DataDependency<TContents>`` in the ``StackDependencies`` property. 
+These properties are collections of type ``DataDependency<TContents>`` and are fully mutable, and can be used to add or remove dependencies between nodes. Every ``DataDependency<TContents>`` represents a single value with potentially multiple data sources. As a result, every stack value that an instruction pops is assigned exactly one ``DataDependency<TContents>`` in the ``StackDependencies`` property, and every value that was read from a variable is put in the ``VariableDependencies`` property.
 
 Simple data dependencies
 -------------------------
@@ -59,17 +60,12 @@ Below an example snippet that obtains the dependency instructions of the ``add``
     DataFlowNode<T> add = dfg.GetNodeById(...);  
 
     // Obtain the symbolic values that are popped by the instruction.
-    var dependency1 = add.StackDependencies[0];
-    var dependency2 = add.StackDependencies[1];
+    DataDependency<T> argument1 = add.StackDependencies[0];
+    DataDependency<T> argument2 = add.StackDependencies[1];
     
     // Get the instructions responsible for pushing the values 
-    var argument1 = dependency1.First().Contents; // returns "push 1"
-    var argument2 = dependency2.First().Contents; // returns "push 2"
-
-
-.. note::
-
-    The ``DataDependency<TContents>`` class also defines a property called ``DataSources``. In an attempt to reduce heap allocations, this extra collection is merged with the ``DataDependency<TContents>`` class, and the property was made obsolete. You can still use it, but it is redundent.
+    DataFlowNode<T> argument1Source = dependency1.First().Node; // returns the node representing "push 1"
+    DataFlowNode<T> argument2Source = dependency2.First().Node; // returns the node representing "push 2"
 
 
 To speed up the process, Echo defines an extension methods that obtains all of the dependency data flow nodes, and sorts them in such a way that they can be evaluated in order.
@@ -80,6 +76,21 @@ To speed up the process, Echo defines an extension methods that obtains all of t
     DataFlowNode<T> add = dfg.GetNodeById(...);  
 
     var dependencies = add.GetOrderedDependencies(); // returns {"push 1", "push 2"}
+
+
+By default, ``GetOrderedDependencies`` traverses all edges in the data flow graph. This includes variable dependencies that were registered in the graph. If only the stack dependnecies are meant to be traversed (e.g. to get the instructions that make up a single expression), additional flags can be specified to alter the behaviour of the traversal.
+
+.. code-block:: csharp
+
+    DataFlowGraph<T> dfg = ...
+    DataFlowNode<T> add = dfg.GetNodeById(...);  
+
+    var dependencies = add.GetOrderedDependencies(DependencyCollectionFlags.IncludeStackDependencies);
+
+
+.. warning::
+
+    When a data dependency has multiple data sources, ``GetOrderedDependencies`` will only choose one. The method is defined to find one sequence of instructions that produce the values of the dependencies, not all possible sequences of instructions. It is undefined which sequence is picked.
 
 
 Multiple data sources
@@ -108,6 +119,6 @@ Below an example on how to find the direct dependencies of the ``store v1`` node
     var dependency = storeV1.StackDependencies[0];
 
     // Print out the possible data sources for this value:
-    foreach (DataFlowNode<T> sourceNode in dependency)
-        Console.WriteLine(sourceNode.Contents);
+    foreach (DataSource<T> source in dependency)
+        Console.WriteLine(sourceNode.Node.Contents);
 
