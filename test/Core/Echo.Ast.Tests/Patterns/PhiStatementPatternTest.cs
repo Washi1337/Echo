@@ -10,13 +10,13 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyPhiWithAnyVariables()
         {
-            var statement = new PhiStatement<int>(new List<VariableExpression<int>>
+            var statement = new PhiStatement<int>(new AstVariable("phi1"), new List<VariableExpression<int>>
             {
                 new VariableExpression<int>(new AstVariable("v1")),
                 new VariableExpression<int>(new AstVariable("v2")),
                 new VariableExpression<int>(new AstVariable("v3")),
                 new VariableExpression<int>(new AstVariable("v4")),
-            }, new AstVariable("phi1"));
+            });
 
             var pattern = StatementPattern.Phi<int>();
 
@@ -28,13 +28,13 @@ namespace Echo.Ast.Tests.Patterns
         {
             var group = new CaptureGroup("phiGroup");
             
-            var statement = new PhiStatement<int>(new List<VariableExpression<int>>
+            var statement = new PhiStatement<int>(new AstVariable("phi1"), new List<VariableExpression<int>>
             {
                 new VariableExpression<int>(new AstVariable("v1")),
                 new VariableExpression<int>(new AstVariable("v2")),
                 new VariableExpression<int>(new AstVariable("v3")),
                 new VariableExpression<int>(new AstVariable("v4")),
-            }, new AstVariable("phi1"));
+            });
 
             var pattern = StatementPattern.Phi<int>()
                 .WithTarget(Pattern.Any<IVariable>().CaptureAs(group));
@@ -48,12 +48,12 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyPhiWithFixedVariables()
         {
-            var statement = new PhiStatement<int>(new List<VariableExpression<int>>
+            var statement = new PhiStatement<int>(new AstVariable("phi1"), new List<VariableExpression<int>>
             {
                 new VariableExpression<int>(new AstVariable("v1")),
                 new VariableExpression<int>(new AstVariable("v2")),
                 new VariableExpression<int>(new AstVariable("v3")),
-            }, new AstVariable("phi1"));
+            });
 
             var pattern = StatementPattern.Phi<int>()
                 .WithSources(

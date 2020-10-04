@@ -99,7 +99,7 @@ namespace Echo.Ast.Patterns
             }
 
             // Match contents.
-            Content.Match(expression.Content, result);
+            Content.Match(expression.Instruction, result);
             if (!result.IsSuccess)
                 return;
 

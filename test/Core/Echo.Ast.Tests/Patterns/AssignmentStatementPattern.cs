@@ -10,11 +10,10 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyVariableAndAnyExpression()
         {
-            var statement = new AssignmentStatement<int>(new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty), 
-                new IVariable[]
-                {
-                    new AstVariable("var1"),
-                });
+            var statement = new AssignmentStatement<int>(new IVariable[]
+            {
+                new AstVariable("var1"),
+            }, new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty));
             
             var pattern = StatementPattern.Assignment<int>();
 
@@ -26,11 +25,10 @@ namespace Echo.Ast.Tests.Patterns
         {
             var group = new CaptureGroup("group");
             
-            var statement = new AssignmentStatement<int>(new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty), 
-                new IVariable[]
-                {
-                    new AstVariable("var1"),
-                });
+            var statement = new AssignmentStatement<int>(new IVariable[]
+            {
+                new AstVariable("var1"),
+            }, new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty));
 
             var pattern = StatementPattern
                 .Assignment<int>()
@@ -47,11 +45,10 @@ namespace Echo.Ast.Tests.Patterns
         {
             var group = new CaptureGroup("group");
             
-            var statement = new AssignmentStatement<int>(new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty), 
-                new IVariable[]
-                {
-                    new AstVariable("var1"),
-                });
+            var statement = new AssignmentStatement<int>(new IVariable[]
+            {
+                new AstVariable("var1"),
+            }, new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty));
 
             var pattern = StatementPattern
                 .Assignment<int>()

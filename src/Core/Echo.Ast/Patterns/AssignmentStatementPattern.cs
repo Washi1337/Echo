@@ -63,7 +63,7 @@ namespace Echo.Ast.Patterns
         protected override void MatchChildren(Statement<TInstruction> input, MatchResult result)
         {
             if (!(input is AssignmentStatement<TInstruction> statement)
-                || statement.Variables.Length != Variables.Count)
+                || statement.Variables.Count != Variables.Count)
             {
                 result.IsSuccess = false;
                 return;
