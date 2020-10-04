@@ -53,22 +53,37 @@ namespace Echo.Ast
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
 
+        /// <summary>
+        /// Modifies the current <see cref="PhiStatement{TInstruction}"/> to assign to <paramref name="target"/>
+        /// </summary>
+        /// <param name="target">The new target to assign</param>
+        /// <returns>The same <see cref="PhiStatement{TInstruction}"/> instance but with the new <paramref name="target"/></returns>
         public PhiStatement<TInstruction> WithTarget(IVariable target)
         {
             Target = target;
             return this;
         }
 
+        /// <summary>
+        /// Modifies the current <see cref="PhiStatement{TInstruction}"/> to assign values from <paramref name="sources"/>
+        /// </summary>
+        /// <param name="sources">The sources to get values from</param>
+        /// <returns>The same <see cref="PhiStatement{TInstruction}"/> instance but with the new <paramref name="sources"/></returns>
         public PhiStatement<TInstruction> WithSources(params VariableExpression<TInstruction>[] sources) =>
             WithSources(sources as IEnumerable<VariableExpression<TInstruction>>);
 
+        /// <summary>
+        /// Modifies the current <see cref="PhiStatement{TInstruction}"/> to assign values from <paramref name="sources"/>
+        /// </summary>
+        /// <param name="sources">The sources to get values from</param>
+        /// <returns>The same <see cref="PhiStatement{TInstruction}"/> instance but with the new <paramref name="sources"/></returns>
         public PhiStatement<TInstruction> WithSources(IEnumerable<VariableExpression<TInstruction>> sources)
         {
-            var collection = new TreeNodeCollection<PhiStatement<TInstruction>, VariableExpression<TInstruction>>(this);
+            Sources.Clear();
+            
             foreach (var source in sources)
-                collection.Add(source);
+                Sources.Add(source);
 
-            Sources = collection;
             return this;
         }
 

@@ -40,6 +40,11 @@ namespace Echo.Ast
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
 
+        /// <summary>
+        /// Modifies the current <see cref="ExpressionStatement{TInstruction}"/> to have <paramref name="expression"/>
+        /// </summary>
+        /// <param name="expression">The <see cref="Expression{TInstruction}"/></param>
+        /// <returns>The same <see cref="ExpressionStatement{TInstruction}"/> instance but with the new <paramref name="expression"/></returns>
         public ExpressionStatement<TInstruction> WithExpression(Expression<TInstruction> expression)
         {
             Expression = expression;

@@ -37,6 +37,11 @@ namespace Echo.Ast
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
 
+        /// <summary>
+        /// Modifies the current <see cref="VariableExpression{TInstruction}"/> to target <paramref name="variable"/>
+        /// </summary>
+        /// <param name="variable">The new <see cref="IVariable"/> to target</param>
+        /// <returns>The same <see cref="VariableExpression{TInstruction}"/> instance but with the new <paramref name="variable"/></returns>
         public VariableExpression<TInstruction> WithVariable(IVariable variable)
         {
             Variable = variable;

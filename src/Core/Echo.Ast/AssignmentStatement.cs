@@ -64,15 +64,30 @@ namespace Echo.Ast
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
 
+        /// <summary>
+        /// Modifies the current <see cref="AssignmentStatement{TInstruction}"/> to assign to <paramref name="variables"/>
+        /// </summary>
+        /// <param name="variables">The variables to assign the <see cref="Expression"/> to</param>
+        /// <returns>The same <see cref="AssignmentStatement{TInstruction}"/> instance but with the new <paramref name="variables"/></returns>
         public AssignmentStatement<TInstruction> WithVariables(params IVariable[] variables) =>
             WithVariables(variables as IEnumerable<IVariable>);
 
+        /// <summary>
+        /// Modifies the current <see cref="AssignmentStatement{TInstruction}"/> to assign to <paramref name="variables"/>
+        /// </summary>
+        /// <param name="variables">The variables to assign the <see cref="Expression"/> to</param>
+        /// <returns>The same <see cref="AssignmentStatement{TInstruction}"/> instance but with the new <paramref name="variables"/></returns>
         public AssignmentStatement<TInstruction> WithVariables(IEnumerable<IVariable> variables)
         {
             Variables = new List<IVariable>(variables);
             return this;
         }
 
+        /// <summary>
+        /// Modifies the current <see cref="AssignmentStatement{TInstruction}"/> to assign the value of <paramref name="expression"/>
+        /// </summary>
+        /// <param name="expression">The <see cref="Expression{TInstruction}"/> to assign</param>
+        /// <returns>The same <see cref="AssignmentStatement{TInstruction}"/> instance but with the new <paramref name="expression"/></returns>
         public AssignmentStatement<TInstruction> WithExpression(Expression<TInstruction> expression)
         {
             Expression = expression;

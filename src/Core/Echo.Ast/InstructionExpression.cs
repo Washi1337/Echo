@@ -53,22 +53,37 @@ namespace Echo.Ast
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
 
+        /// <summary>
+        /// Modifies the current <see cref="InstructionExpression{TInstruction}"/> to have the <paramref name="instruction"/>
+        /// </summary>
+        /// <param name="instruction">The instruction</param>
+        /// <returns>The same <see cref="Instruction"/> instance but with the new <paramref name="instruction"/></returns>
         public InstructionExpression<TInstruction> WithInstruction(TInstruction instruction)
         {
             Instruction = instruction;
             return this;
         }
 
+        /// <summary>
+        /// Modifies the current <see cref="InstructionExpression{TInstruction}"/>'s <paramref name="arguments"/>
+        /// </summary>
+        /// <param name="arguments">The arguments</param>
+        /// <returns>The same <see cref="InstructionExpression{TInstruction}"/> instance but with the new <paramref name="arguments"/></returns>
         public InstructionExpression<TInstruction> WithArguments(params Expression<TInstruction>[] arguments) =>
             WithArguments(arguments as IEnumerable<Expression<TInstruction>>);
         
+        /// <summary>
+        /// Modifies the current <see cref="InstructionExpression{TInstruction}"/>'s <paramref name="arguments"/>
+        /// </summary>
+        /// <param name="arguments">The arguments</param>
+        /// <returns>The same <see cref="InstructionExpression{TInstruction}"/> instance but with the new <paramref name="arguments"/></returns>
         public InstructionExpression<TInstruction> WithArguments(IEnumerable<Expression<TInstruction>> arguments)
         {
-            var collection = new TreeNodeCollection<InstructionExpression<TInstruction>, Expression<TInstruction>>(this);
+            Arguments.Clear();
+            
             foreach (var argument in arguments)
-                collection.Add(argument);
+                Arguments.Add(argument);
 
-            Arguments = collection;
             return this;
         }
 
