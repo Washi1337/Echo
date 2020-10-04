@@ -23,6 +23,20 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (!(obj is AstVariable other))
+                return false;
+
+            return Name == other.Name;
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode() => Name.GetHashCode();
+
+        /// <inheritdoc />
         public override string ToString() => Name;
     }
 }
