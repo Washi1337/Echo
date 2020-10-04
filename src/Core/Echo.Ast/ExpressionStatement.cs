@@ -32,12 +32,6 @@ namespace Echo.Ast
             visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override IEnumerable<TreeNodeBase> GetChildren()
-        {
-            yield return Expression;
-        }
-
-        /// <inheritdoc />
         public override string ToString() => $"{Expression}";
 
         internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>

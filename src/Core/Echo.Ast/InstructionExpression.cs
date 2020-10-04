@@ -46,12 +46,9 @@ namespace Echo.Ast
             visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override IEnumerable<TreeNodeBase> GetChildren() => Arguments;
-
-        /// <inheritdoc />
-        public override string ToString() => $"{Content}({string.Join(", ", GetChildren())})";
+        public override string ToString() => $"{Content}({string.Join(", ", Children)})";
 
         internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
-            $"{instructionFormatter.Format(Content)}({string.Join(", ", GetChildren())})";
+            $"{instructionFormatter.Format(Content)}({string.Join(", ", Children)})";
     }
 }

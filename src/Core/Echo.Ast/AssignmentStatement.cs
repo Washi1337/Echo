@@ -47,12 +47,6 @@ namespace Echo.Ast
             visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override IEnumerable<TreeNodeBase> GetChildren()
-        {
-            yield return Expression;
-        }
-
-        /// <inheritdoc />
         public override string ToString() => $"{string.Join(", ", Variables.Select(v => v.Name))} = {Expression}";
         
         internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
