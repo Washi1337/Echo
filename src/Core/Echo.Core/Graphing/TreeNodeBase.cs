@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Echo.Core.Graphing
@@ -8,13 +9,12 @@ namespace Echo.Core.Graphing
     /// </summary>
     public abstract class TreeNodeBase : INode
     {
+        private readonly object _lock = new object();
+        
         /// <summary>
         /// Initializes a tree node.
         /// </summary>
-        protected TreeNodeBase()
-        {
-            Children = new TreeNodeCollection<TreeNodeBase>(this);
-        }
+        protected TreeNodeBase() => Children = new TreeNodeCollection<TreeNodeBase>(this);
         
         /// <summary>
         /// The parent of this <see cref="TreeNodeBase"/>
@@ -25,17 +25,19 @@ namespace Echo.Core.Graphing
             internal set;
         }
 
+        /// <summary>
+        /// The children of this <see cref="TreeNodeBase"/>
+        /// </summary>
+        public IList<TreeNodeBase> Children
+        {
+            get;
+        }
+
         /// <inheritdoc />
         public int InDegree => Parent is null ? 0 : 1;
 
         /// <inheritdoc />
-        public int OutDegree => GetChildren().Count();
-
-        /// <summary>
-        /// Gets the children of the current <see cref="TreeNodeBase"/>
-        /// </summary>
-        /// <returns>The children of the current <see cref="TreeNodeBase"/></returns>
-        public abstract IEnumerable<TreeNodeBase> GetChildren();
+        public int OutDegree => Children.Count();
 
         /// <inheritdoc />
         public IEnumerable<IEdge> GetIncomingEdges()
@@ -45,7 +47,7 @@ namespace Echo.Core.Graphing
 
         /// <inheritdoc />
         public IEnumerable<IEdge> GetOutgoingEdges() =>
-            GetChildren().Select(child => (IEdge) new Edge(this, child));
+            Children.Select(child => (IEdge) new Edge(this, child));
 
         /// <inheritdoc />
         public IEnumerable<INode> GetPredecessors()
@@ -54,11 +56,32 @@ namespace Echo.Core.Graphing
         }
 
         /// <inheritdoc />
-        public IEnumerable<INode> GetSuccessors() => GetChildren();
+        public IEnumerable<INode> GetSuccessors() => Children;
 
         /// <inheritdoc />
         public bool HasPredecessor(INode node) => node == Parent;
 
         /// <inheritdoc />
-        public bool HasSuccessor(INode node) => GetChildren().Contains(node);
+        public bool HasSuccessor(INode node) => Children.Contains(node);
+
+        /// <summary>
+        /// Updates the value and the parent of the <paramref name="child"/> node.
+        /// </summary>
+        /// <param name="child">The child element to update.</param>
+        /// <param name="value">The new value to assign to the <paramref name="child"/>.</param>
+        /// <exception cref="InvalidOperationException">When the node already has a parent.</exception>
+        protected void UpdateChild(ref TreeNodeBase child, TreeNodeBase value)
+        {
+            lock (_lock)
+            {
+                if (value?.Parent is {})
+                    throw new InvalidOperationException("Node already has a parent.");
+                if (child is {})
+                    child.Parent = null;
+                child = value;
+                if (child is {})
+                    child.Parent = this;
+            }
+        }
     }
+}

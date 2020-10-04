@@ -14,11 +14,9 @@ namespace Echo.Ast
         /// <summary>
         /// Creates a new assignment statement
         /// </summary>
-        /// <param name="id">The unique ID to assign to the node</param>
         /// <param name="expression">The expression</param>
         /// <param name="variables">The variables</param>
-        public AssignmentStatement(long id, Expression<TInstruction> expression, IVariable[] variables)
-            : base(id)
+        public AssignmentStatement(Expression<TInstruction> expression, IVariable[] variables)
         {
             Expression = expression;
             Variables = variables;

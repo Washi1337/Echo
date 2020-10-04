@@ -11,13 +11,10 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void TestComplexCapture()
         {
-            var valueExpression = new InstructionExpression<DummyInstruction>(2, 
-                DummyInstruction.Push(0, 1),
+            var valueExpression = new InstructionExpression<DummyInstruction>(DummyInstruction.Push(0, 1),
                 ArraySegment<Expression<DummyInstruction>>.Empty);
 
-            var statement = new ExpressionStatement<DummyInstruction>(0,
-                new InstructionExpression<DummyInstruction>(1,
-                    DummyInstruction.Ret(1), new List<Expression<DummyInstruction>>
+            var statement = new ExpressionStatement<DummyInstruction>(new InstructionExpression<DummyInstruction>(DummyInstruction.Ret(1), new List<Expression<DummyInstruction>>
                     {
                         valueExpression
                     }));

@@ -13,11 +13,9 @@ namespace Echo.Ast
         /// <summary>
         /// Creates a new Phi statement
         /// </summary>
-        /// <param name="id">The unique ID to assign to the node</param>
         /// <param name="sources">The possible sources for the assignment</param>
         /// <param name="target">The target variable that will be assigned to</param>
-        public PhiStatement(long id, ICollection<VariableExpression<TInstruction>> sources, IVariable target)
-            : base(id)
+        public PhiStatement(ICollection<VariableExpression<TInstruction>> sources, IVariable target)
         {
             Sources = sources;
             Target = target;
@@ -46,9 +44,6 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
-
-        /// <inheritdoc />
-        public override IEnumerable<TreeNodeBase> GetChildren() => Sources;
 
         /// <inheritdoc />
         public override string ToString() => $"{Target} = φ({string.Join(", ", Sources)})";

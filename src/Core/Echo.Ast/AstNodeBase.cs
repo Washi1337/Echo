@@ -9,13 +9,6 @@ namespace Echo.Ast
     public abstract class AstNodeBase<TInstruction> : TreeNodeBase
     {
         /// <summary>
-        /// Assigns the unique ID to the node
-        /// </summary>
-        /// <param name="id">The unique identifier</param>
-        protected AstNodeBase(long id)
-            : base(id) { }
-
-        /// <summary>
         /// Implements the visitor pattern
         /// </summary>
         public abstract void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state);

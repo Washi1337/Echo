@@ -12,10 +12,8 @@ namespace Echo.Ast
         /// <summary>
         /// Creates a new expression statement
         /// </summary>
-        /// <param name="id">The unique ID to assign to the node</param>
         /// <param name="expression">The expression</param>
-        public ExpressionStatement(long id, Expression<TInstruction> expression)
-            : base(id) => Expression = expression;
+        public ExpressionStatement(Expression<TInstruction> expression) => Expression = expression;
 
         /// <summary>
         /// The expression that this <see cref="ExpressionStatement{TInstruction}"/> holds

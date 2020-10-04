@@ -13,11 +13,9 @@ namespace Echo.Ast
         /// <summary>
         /// Creates a new instruction expression node
         /// </summary>
-        /// <param name="id">The unique ID to give to the node</param>
         /// <param name="content">The instruction</param>
         /// <param name="arguments">The parameters to this instruction</param>
-        public InstructionExpression(long id, TInstruction content, IEnumerable<Expression<TInstruction>> arguments)
-            : base(id)
+        public InstructionExpression(TInstruction content, IEnumerable<Expression<TInstruction>> arguments)
         {
             Content = content;
             Arguments = arguments.ToList();

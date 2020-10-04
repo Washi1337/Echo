@@ -21,7 +21,7 @@ namespace Echo.Ast
             _flowControlDeterminer = new FlowControlDeterminer<TInstruction>(isa);
 
         /// <inheritdoc />
-        public long GetOffset(in Statement<TInstruction> instruction) => instruction.Id;
+        public long GetOffset(in Statement<TInstruction> instruction) => throw new NotSupportedException();
 
         /// <inheritdoc />
         public int GetSize(in Statement<TInstruction> instruction) => 1;

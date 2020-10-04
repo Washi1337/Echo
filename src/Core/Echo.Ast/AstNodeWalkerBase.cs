@@ -4,136 +4,120 @@ namespace Echo.Ast
     /// Provides a base contract for Ast walkers
     /// </summary>
     /// <typeparam name="TInstruction">The type of the instruction</typeparam>
-    /// <typeparam name="TState">The type of the state to pass</typeparam>
-    public abstract class AstNodeWalkerBase<TInstruction, TState> : IAstNodeVisitor<TInstruction, TState>
+    public abstract class AstNodeWalkerBase<TInstruction> : IAstNodeVisitor<TInstruction, object>
     {
         /// <summary>
         /// Begin visiting a given <see cref="AssignmentStatement{TInstruction}"/>
         /// </summary>
         /// <param name="assignmentStatement">The <see cref="AssignmentStatement{TInstruction}"/> that is being entered</param>
-        /// <param name="state">The state</param>
-        protected virtual void EnterAssignmentStatement(
-            AssignmentStatement<TInstruction> assignmentStatement, TState state) =>
-                VisitChildren(assignmentStatement, state);
+        protected virtual void EnterAssignmentStatement(AssignmentStatement<TInstruction> assignmentStatement) =>
+            VisitChildren(assignmentStatement);
 
         /// <summary>
         /// Finish visiting a given <see cref="AssignmentStatement{TInstruction}"/>
         /// </summary>
         /// <param name="assignmentStatement">The <see cref="AssignmentStatement{TInstruction}"/> that is being entered</param>
-        /// <param name="state">The state</param>
-        protected virtual void ExitAssignmentStatement(
-            AssignmentStatement<TInstruction> assignmentStatement, TState state) { }
+        protected virtual void ExitAssignmentStatement(AssignmentStatement<TInstruction> assignmentStatement) { }
 
         /// <summary>
         /// Begin visiting a given <see cref="ExpressionStatement{TInstruction}"/>
         /// </summary>
         /// <param name="expressionStatement">The <see cref="ExpressionStatement{TInstruction}"/> that is being entered</param>
-        /// <param name="state">The state</param>
-        protected virtual void EnterExpressionStatement(
-            ExpressionStatement<TInstruction> expressionStatement, TState state) =>
-                VisitChildren(expressionStatement, state);
-        
+        protected virtual void EnterExpressionStatement(ExpressionStatement<TInstruction> expressionStatement) =>
+            VisitChildren(expressionStatement);
+
         /// <summary>
         /// Finish visiting a given <see cref="ExpressionStatement{TInstruction}"/>
         /// </summary>
         /// <param name="expressionStatement">The <see cref="ExpressionStatement{TInstruction}"/> that is being finished</param>
-        /// <param name="state">The state</param>
-        protected virtual void ExitExpressionStatement(
-            ExpressionStatement<TInstruction> expressionStatement, TState state) { }
+        protected virtual void ExitExpressionStatement(ExpressionStatement<TInstruction> expressionStatement) { }
 
         /// <summary>
         /// Begin visiting a given <see cref="PhiStatement{TInstruction}"/>
         /// </summary>
         /// <param name="phiStatement">The <see cref="PhiStatement{TInstruction}"/> that is being entered</param>
-        /// <param name="state">The state</param>
-        protected virtual void EnterPhiStatement(
-            PhiStatement<TInstruction> phiStatement, TState state) => VisitChildren(phiStatement, state);
+        protected virtual void EnterPhiStatement(PhiStatement<TInstruction> phiStatement) =>
+            VisitChildren(phiStatement);
 
         /// <summary>
         /// Finish visiting a given <see cref="PhiStatement{TInstruction}"/>
         /// </summary>
         /// <param name="phiStatement">The <see cref="PhiStatement{TInstruction}"/> that is being finished</param>
-        /// <param name="state">The state</param>
-        protected virtual void ExitPhiStatement(
-            PhiStatement<TInstruction> phiStatement, TState state) { }
+        protected virtual void ExitPhiStatement(PhiStatement<TInstruction> phiStatement) { }
 
         /// <summary>
         /// Begin visiting a given <see cref="InstructionExpression{TInstruction}"/>
         /// </summary>
         /// <param name="instructionExpression">The <see cref="InstructionExpression{TInstruction}"/> that is being entered</param>
-        /// <param name="state">The state</param>
-        protected virtual void EnterInstructionExpression(
-            InstructionExpression<TInstruction> instructionExpression, TState state) =>
-                VisitChildren(instructionExpression, state);
+        protected virtual void EnterInstructionExpression(InstructionExpression<TInstruction> instructionExpression) =>
+            VisitChildren(instructionExpression);
 
         /// <summary>
         /// Finish visiting a given <see cref="InstructionExpression{TInstruction}"/>
         /// </summary>
         /// <param name="instructionExpression">The <see cref="InstructionExpression{TInstruction}"/> that is being finished</param>
-        /// <param name="state">The state</param>
-        protected virtual void ExitInstructionExpression(
-            InstructionExpression<TInstruction> instructionExpression, TState state) { }
+        protected virtual void ExitInstructionExpression(InstructionExpression<TInstruction> instructionExpression) { }
 
         /// <summary>
         /// Visiting a given <see cref="VariableExpression{TInstruction}"/>
         /// </summary>
         /// <param name="variableExpression">The <see cref="VariableExpression{TInstruction}"/> that is will be visited</param>
-        /// <param name="state">The state</param>
-        protected virtual void VisitVariableExpression(
-            VariableExpression<TInstruction> variableExpression, TState state) { }
+        protected virtual void VisitVariableExpression(VariableExpression<TInstruction> variableExpression) { }
 
-        private void VisitChildren(AstNodeBase<TInstruction> node, TState state)
+        private void VisitChildren(AstNodeBase<TInstruction> node)
         {
-            foreach (var child in node.GetChildren())
-                ((AstNodeBase<TInstruction>) child).Accept(this, state);
+            foreach (var child in node.Children)
+                ((AstNodeBase<TInstruction>) child).Accept(this, null);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, TState>.Visit(AssignmentStatement<TInstruction> assignmentStatement, TState state)
+        void IAstNodeVisitor<TInstruction, object>.Visit(AssignmentStatement<TInstruction> assignmentStatement,
+            object state)
         {
-            EnterAssignmentStatement(assignmentStatement, state);
+            EnterAssignmentStatement(assignmentStatement);
 
             assignmentStatement.Expression.Accept(this, state);
-            
-            ExitAssignmentStatement(assignmentStatement, state);
+
+            ExitAssignmentStatement(assignmentStatement);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, TState>.Visit(ExpressionStatement<TInstruction> expressionStatement, TState state)
+        void IAstNodeVisitor<TInstruction, object>.Visit(ExpressionStatement<TInstruction> expressionStatement,
+            object state)
         {
-            EnterExpressionStatement(expressionStatement, state);
+            EnterExpressionStatement(expressionStatement);
 
             expressionStatement.Expression.Accept(this, state);
 
-            ExitExpressionStatement(expressionStatement, state);
+            ExitExpressionStatement(expressionStatement);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, TState>.Visit(PhiStatement<TInstruction> phiStatement, TState state)
+        void IAstNodeVisitor<TInstruction, object>.Visit(PhiStatement<TInstruction> phiStatement, object state)
         {
-            EnterPhiStatement(phiStatement, state);
-            
+            EnterPhiStatement(phiStatement);
+
             foreach (var source in phiStatement.Sources)
                 source.Accept(this, state);
-            
-            ExitPhiStatement(phiStatement, state);
+
+            ExitPhiStatement(phiStatement);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, TState>.Visit(InstructionExpression<TInstruction> instructionExpression, TState state)
+        void IAstNodeVisitor<TInstruction, object>.Visit(InstructionExpression<TInstruction> instructionExpression, object state)
         {
-            EnterInstructionExpression(instructionExpression, state);
+            EnterInstructionExpression(instructionExpression);
 
             foreach (var parameter in instructionExpression.GetChildren())
                 ((Expression<TInstruction>) parameter).Accept(this, state);
-            
-            ExitInstructionExpression(instructionExpression, state);
+
+            ExitInstructionExpression(instructionExpression);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, TState>.Visit(VariableExpression<TInstruction> variableExpression, TState state)
+        void IAstNodeVisitor<TInstruction, object>.Visit(VariableExpression<TInstruction> variableExpression, object state)
         {
-            VisitVariableExpression(variableExpression, state);
+            VisitVariableExpression(variableExpression);
         }
     }
 }

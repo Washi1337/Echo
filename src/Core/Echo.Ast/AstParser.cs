@@ -19,7 +19,6 @@ namespace Echo.Ast
     {
         private readonly AstParserContext<TInstruction> _context;
 
-        private long _id = -1;
         private long _varCount;
         private long _phiVarCount;
         
@@ -156,8 +155,8 @@ namespace Echo.Ast
                     {
                         var phiVar = CreatePhiSlot();
                         var slots = sources.Select(s => 
-                            new VariableExpression<TInstruction>(_id--, GetOrCreateStackSlot(s)));
-                        var phiStatement = new PhiStatement<TInstruction>(_id--, slots.ToArray(), phiVar);
+                            new VariableExpression<TInstruction>(GetOrCreateStackSlot(s)));
+                        var phiStatement = new PhiStatement<TInstruction>(slots.ToArray(), phiVar);
                         
                         result.Instructions.Insert(phiStatementCount++, phiStatement);
                         targetVariables[i] = phiVar;
@@ -192,8 +191,7 @@ namespace Echo.Ast
                         {
                             phiSlot = CreatePhiSlot();
                             var phiStatement = new PhiStatement<TInstruction>(
-                                _id--,
-                                sources.Select(s => new VariableExpression<TInstruction>(_id--, s)).ToArray(),
+                                sources.Select(s => new VariableExpression<TInstruction>(s)).ToArray(),
                                 phiSlot);
                             result.Instructions.Insert(phiStatementCount++, phiStatement);
                             phiSlots[sources] = phiSlot;
@@ -202,11 +200,9 @@ namespace Echo.Ast
                     }
                 }
 
-                var instructionExpression = new InstructionExpression<TInstruction>(
-                    offset,
-                    instruction,
+                var instructionExpression = new InstructionExpression<TInstruction>(instruction,
                     targetVariables
-                        .Select(t => new VariableExpression<TInstruction>(_id--, t))
+                        .Select(t => new VariableExpression<TInstruction>(t))
                         .ToArray()
                 );
 
@@ -240,7 +236,7 @@ namespace Echo.Ast
 
                 if (!dataFlowNode.GetDependants().Any() && writtenVariables.Length == 0)
                 {
-                    result.Instructions.Add(new ExpressionStatement<TInstruction>(_id--, instructionExpression));
+                    result.Instructions.Add(new ExpressionStatement<TInstruction>(instructionExpression));
                 }
                 else
                 {
@@ -265,7 +261,7 @@ namespace Echo.Ast
 
                     stackSlots[offset] = slots;
                     result.Instructions.Add(
-                        new AssignmentStatement<TInstruction>(_id--, instructionExpression, combined));
+                        new AssignmentStatement<TInstruction>(instructionExpression, combined));
                 }
             }
 

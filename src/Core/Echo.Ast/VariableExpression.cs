@@ -13,13 +13,8 @@ namespace Echo.Ast
         /// <summary>
         /// Creates a new variable expression
         /// </summary>
-        /// <param name="id">The unique ID to give to the node</param>
         /// <param name="variable">The variable</param>
-        public VariableExpression(long id, IVariable variable)
-            : base(id)
-        {
-            Variable = variable;
-        }
+        public VariableExpression(IVariable variable) => Variable = variable;
 
         /// <summary>
         /// The variable that is represented by the AST node
@@ -36,12 +31,6 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
-
-        /// <inheritdoc />
-        public override IEnumerable<TreeNodeBase> GetChildren()
-        {
-            yield break;
-        }
 
         /// <inheritdoc />
         public override string ToString() => $"{Variable.Name}";

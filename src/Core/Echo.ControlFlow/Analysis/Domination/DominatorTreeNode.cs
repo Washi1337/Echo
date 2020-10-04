@@ -16,8 +16,10 @@ namespace Echo.ControlFlow.Analysis.Domination
         internal DominatorTreeNode(IIdentifiedNode node)
         {
             OriginalNode = node;
-            Children = new TreeNodeCollection<DominatorTreeNode>(this);
         }
+
+        /// <inheritdoc/>
+        public long Id => OriginalNode.Id;
 
         /// <summary>
         /// Gets the node that this tree node was derived from. 
@@ -26,20 +28,6 @@ namespace Echo.ControlFlow.Analysis.Domination
         {
             get;
         }
-
-        /// <inheritdoc />
-        public long Id => OriginalNode.Id;
-
-        /// <summary>
-        /// Gets the children of the current <see cref="DominatorTreeNode"/>
-        /// </summary>
-        public TreeNodeCollection<DominatorTreeNode> Children
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        public override IEnumerable<TreeNodeBase> GetChildren() => Children;
 
         /// <summary>
         /// Gets a collection of children representing all nodes that were dominated by the original node, as well as an
