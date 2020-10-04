@@ -9,6 +9,8 @@ namespace Echo.Ast
     /// </summary>
     public sealed class ExpressionStatement<TInstruction> : Statement<TInstruction>
     {
+        private Expression<TInstruction> _expression;
+
         /// <summary>
         /// Creates a new expression statement
         /// </summary>
@@ -20,7 +22,14 @@ namespace Echo.Ast
         /// </summary>
         public Expression<TInstruction> Expression
         {
-            get;
+            get => _expression;
+            set => UpdateChild(ref _expression, value);
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<TreeNodeBase> GetChildren()
+        {
+            yield return _expression;
         }
 
         /// <inheritdoc />
@@ -30,6 +39,12 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
+
+        public ExpressionStatement<TInstruction> WithExpression(Expression<TInstruction> expression)
+        {
+            Expression = expression;
+            return this;
+        }
 
         /// <inheritdoc />
         public override string ToString() => $"{Expression}";

@@ -20,7 +20,7 @@ namespace Echo.Ast.Helpers
             InstructionFlowControl.Fallthrough;
 
         public InstructionFlowControl Visit(InstructionExpression<TInstruction> instructionExpression, object state) =>
-            _isa.GetFlowControl(instructionExpression.Content);
+            _isa.GetFlowControl(instructionExpression.Instruction);
 
         public InstructionFlowControl Visit(VariableExpression<TInstruction> variableExpression, object state) =>
             InstructionFlowControl.Fallthrough;

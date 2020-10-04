@@ -156,7 +156,7 @@ namespace Echo.Ast
                         var phiVar = CreatePhiSlot();
                         var slots = sources.Select(s => 
                             new VariableExpression<TInstruction>(GetOrCreateStackSlot(s)));
-                        var phiStatement = new PhiStatement<TInstruction>(slots.ToArray(), phiVar);
+                        var phiStatement = new PhiStatement<TInstruction>(phiVar, slots.ToArray());
                         
                         result.Instructions.Insert(phiStatementCount++, phiStatement);
                         targetVariables[i] = phiVar;
@@ -191,8 +191,7 @@ namespace Echo.Ast
                         {
                             phiSlot = CreatePhiSlot();
                             var phiStatement = new PhiStatement<TInstruction>(
-                                sources.Select(s => new VariableExpression<TInstruction>(s)).ToArray(),
-                                phiSlot);
+                                phiSlot, sources.Select(s => new VariableExpression<TInstruction>(s)).ToArray());
                             result.Instructions.Insert(phiStatementCount++, phiStatement);
                             phiSlots[sources] = phiSlot;
                             targetVariables[index++] = phiSlot;
@@ -247,8 +246,8 @@ namespace Echo.Ast
                             .Select(_ => CreateStackSlot())
                             .ToArray();
 
-                    var combined = VariableFactory.CreateVariableBuffer(writtenVariables.Length + slots.Length);
-                    slots.CopyTo(combined, 0);
+                    var combined = new List<IVariable>(writtenVariables.Length + slots.Length);
+                    combined.AddRange(slots);
                     foreach (var writtenVariable in writtenVariables)
                     {
                         int version = variableVersions[writtenVariable];
@@ -256,12 +255,12 @@ namespace Echo.Ast
                         if (!versionedAstVariables.ContainsKey(key))
                             versionedAstVariables.Add(key, CreateVersionedVariable(writtenVariable));
                         
-                        combined[stackPushCount++] = versionedAstVariables[key];
+                        combined.Add(versionedAstVariables[key]);
                     }
 
                     stackSlots[offset] = slots;
                     result.Instructions.Add(
-                        new AssignmentStatement<TInstruction>(instructionExpression, combined));
+                        new AssignmentStatement<TInstruction>(combined, instructionExpression));
                 }
             }
 

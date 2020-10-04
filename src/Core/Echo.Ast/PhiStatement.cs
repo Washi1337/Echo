@@ -13,20 +13,15 @@ namespace Echo.Ast
         /// <summary>
         /// Creates a new Phi statement
         /// </summary>
-        /// <param name="sources">The possible sources for the assignment</param>
         /// <param name="target">The target variable that will be assigned to</param>
-        public PhiStatement(ICollection<VariableExpression<TInstruction>> sources, IVariable target)
+        /// <param name="sources">The possible sources for the assignment</param>
+        public PhiStatement(IVariable target, IEnumerable<VariableExpression<TInstruction>> sources)
         {
-            Sources = sources;
+            Sources = new TreeNodeCollection<PhiStatement<TInstruction>, VariableExpression<TInstruction>>(this);
             Target = target;
-        }
-
-        /// <summary>
-        /// The possible sources for that could be assigned to <see cref="Target"/>
-        /// </summary>
-        public ICollection<VariableExpression<TInstruction>> Sources
-        {
-            get;
+            
+            foreach (var source in sources)
+                Sources.Add(source);
         }
 
         /// <summary>
@@ -35,7 +30,20 @@ namespace Echo.Ast
         public IVariable Target
         {
             get;
+            private set;
         }
+
+        /// <summary>
+        /// The possible sources for that could be assigned to <see cref="Target"/>
+        /// </summary>
+        public ICollection<VariableExpression<TInstruction>> Sources
+        {
+            get;
+            private set;
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<TreeNodeBase> GetChildren() => Sources;
 
         /// <inheritdoc />
         public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
@@ -44,6 +52,25 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
+
+        public PhiStatement<TInstruction> WithTarget(IVariable target)
+        {
+            Target = target;
+            return this;
+        }
+
+        public PhiStatement<TInstruction> WithSources(params VariableExpression<TInstruction>[] sources) =>
+            WithSources(sources as IEnumerable<VariableExpression<TInstruction>>);
+
+        public PhiStatement<TInstruction> WithSources(IEnumerable<VariableExpression<TInstruction>> sources)
+        {
+            var collection = new TreeNodeCollection<PhiStatement<TInstruction>, VariableExpression<TInstruction>>(this);
+            foreach (var source in sources)
+                collection.Add(source);
+
+            Sources = collection;
+            return this;
+        }
 
         /// <inheritdoc />
         public override string ToString() => $"{Target} = φ({string.Join(", ", Sources)})";

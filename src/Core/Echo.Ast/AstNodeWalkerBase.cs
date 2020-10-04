@@ -66,7 +66,7 @@ namespace Echo.Ast
 
         private void VisitChildren(AstNodeBase<TInstruction> node)
         {
-            foreach (var child in node.Children)
+            foreach (var child in node.GetChildren())
                 ((AstNodeBase<TInstruction>) child).Accept(this, null);
         }
 
@@ -108,8 +108,8 @@ namespace Echo.Ast
         {
             EnterInstructionExpression(instructionExpression);
 
-            foreach (var parameter in instructionExpression.Children)
-                ((Expression<TInstruction>) parameter).Accept(this, state);
+            foreach (var parameter in instructionExpression.Arguments)
+                parameter.Accept(this, state);
 
             ExitInstructionExpression(instructionExpression);
         }

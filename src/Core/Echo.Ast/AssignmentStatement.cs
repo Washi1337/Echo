@@ -11,15 +11,34 @@ namespace Echo.Ast
     /// </summary>
     public sealed class AssignmentStatement<TInstruction> : Statement<TInstruction>
     {
+        private Expression<TInstruction> _expression;
+
         /// <summary>
         /// Creates a new assignment statement
         /// </summary>
+        /// <param name="variable">The variable</param>
         /// <param name="expression">The expression</param>
+        public AssignmentStatement(IVariable variable, Expression<TInstruction> expression)
+            : this(new[] { variable }, expression) { }
+
+        /// <summary>
+        /// Creates a new assignment statement
+        /// </summary>
         /// <param name="variables">The variables</param>
-        public AssignmentStatement(Expression<TInstruction> expression, IVariable[] variables)
+        /// <param name="expression">The expression</param>
+        public AssignmentStatement(IEnumerable<IVariable> variables, Expression<TInstruction> expression)
         {
             Expression = expression;
-            Variables = variables;
+            Variables = variables.ToList();
+        }
+
+        /// <summary>
+        /// The variables that will get assigned to
+        /// </summary>
+        public IList<IVariable> Variables
+        {
+            get;
+            private set;
         }
 
         /// <summary>
@@ -27,15 +46,14 @@ namespace Echo.Ast
         /// </summary>
         public Expression<TInstruction> Expression
         {
-            get;
+            get => _expression;
+            set => UpdateChild(ref _expression, value);
         }
 
-        /// <summary>
-        /// The variables that will get assigned to
-        /// </summary>
-        public IVariable[] Variables
+        /// <inheritdoc />
+        public override IEnumerable<TreeNodeBase> GetChildren()
         {
-            get;
+            yield return Expression;
         }
 
         /// <inheritdoc />
@@ -45,6 +63,21 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
+
+        public AssignmentStatement<TInstruction> WithVariables(params IVariable[] variables) =>
+            WithVariables(variables as IEnumerable<IVariable>);
+
+        public AssignmentStatement<TInstruction> WithVariables(IEnumerable<IVariable> variables)
+        {
+            Variables = new List<IVariable>(variables);
+            return this;
+        }
+
+        public AssignmentStatement<TInstruction> WithExpression(Expression<TInstruction> expression)
+        {
+            Expression = expression;
+            return this;
+        }
 
         /// <inheritdoc />
         public override string ToString() => $"{string.Join(", ", Variables.Select(v => v.Name))} = {Expression}";

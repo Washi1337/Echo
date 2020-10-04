@@ -7,16 +7,19 @@ namespace Echo.Core.Graphing
     /// <summary>
     /// Represents a collection of tree node children
     /// </summary>
-    /// <typeparam name="TNode">The node to create a collection of</typeparam>
-    public class TreeNodeCollection<TNode> : Collection<TNode> where TNode : TreeNodeBase
+    /// <typeparam name="TParent">The type of the parent</typeparam>
+    /// <typeparam name="TChild">The node to create a collection of</typeparam>
+    public class TreeNodeCollection<TParent, TChild> : Collection<TChild>
+        where TParent : TreeNodeBase
+        where TChild : TreeNodeBase
     {
-        private readonly TNode _owner;
+        private readonly TParent _owner;
 
         /// <summary>
         /// Creates a new tree node collection with the specified <paramref name="owner"/>
         /// </summary>
         /// <param name="owner">The owner whose children this collection represents</param>
-        public TreeNodeCollection(TNode owner)
+        public TreeNodeCollection(TParent owner)
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
@@ -26,14 +29,14 @@ namespace Echo.Core.Graphing
         /// </summary>
         /// <param name="node">The node to verify.</param>
         /// <exception cref="ArgumentException">Occurs if the node is already added to another node.</exception>
-        protected static void AssertNoParent(TNode node)
+        protected static void AssertNoParent(TChild node)
         {
             if (node.Parent != null)
                 throw new ArgumentException("Cannot add a node that is already a child of another node.");
         }
 
         /// <inheritdoc />
-        protected override void SetItem(int index, TNode item)
+        protected override void SetItem(int index, TChild item)
         {
             AssertNoParent(item);
             var old = Items[index];
@@ -58,7 +61,7 @@ namespace Echo.Core.Graphing
         }
 
         /// <inheritdoc />
-        protected override void InsertItem(int index, TNode item)
+        protected override void InsertItem(int index, TChild item)
         {
             AssertNoParent(item);
             item.Parent = _owner;

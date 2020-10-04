@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Echo.ControlFlow.Serialization.Dot;
 using Echo.Core.Code;
 using Echo.Core.Graphing;
@@ -22,8 +23,12 @@ namespace Echo.Ast
         public IVariable Variable
         {
             get;
+            private set;
         }
-        
+
+        /// <inheritdoc />
+        public override IEnumerable<TreeNodeBase> GetChildren() => Array.Empty<TreeNodeBase>();
+
         /// <inheritdoc />
         public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
             visitor.Visit(this, state);
@@ -31,6 +36,12 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
+
+        public VariableExpression<TInstruction> WithVariable(IVariable variable)
+        {
+            Variable = variable;
+            return this;
+        }
 
         /// <inheritdoc />
         public override string ToString() => $"{Variable.Name}";

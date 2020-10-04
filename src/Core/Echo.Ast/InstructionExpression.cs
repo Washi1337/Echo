@@ -13,20 +13,24 @@ namespace Echo.Ast
         /// <summary>
         /// Creates a new instruction expression node
         /// </summary>
-        /// <param name="content">The instruction</param>
+        /// <param name="instruction">The instruction</param>
         /// <param name="arguments">The parameters to this instruction</param>
-        public InstructionExpression(TInstruction content, IEnumerable<Expression<TInstruction>> arguments)
+        public InstructionExpression(TInstruction instruction, IEnumerable<Expression<TInstruction>> arguments)
         {
-            Content = content;
-            Arguments = arguments.ToList();
+            Instruction = instruction;
+            Arguments = new TreeNodeCollection<InstructionExpression<TInstruction>, Expression<TInstruction>>(this);
+            
+            foreach (var argument in arguments)
+                Arguments.Add(argument);
         }
 
         /// <summary>
         /// The instruction that the AST node represents
         /// </summary>
-        public TInstruction Content
+        public TInstruction Instruction
         {
             get;
+            private set;
         }
 
         /// <summary>
@@ -35,7 +39,11 @@ namespace Echo.Ast
         public IList<Expression<TInstruction>> Arguments
         {
             get;
+            private set;
         }
+
+        /// <inheritdoc />
+        public override IEnumerable<TreeNodeBase> GetChildren() => Arguments;
 
         /// <inheritdoc />
         public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
@@ -45,10 +53,29 @@ namespace Echo.Ast
         public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
             visitor.Visit(this, state);
 
+        public InstructionExpression<TInstruction> WithInstruction(TInstruction instruction)
+        {
+            Instruction = instruction;
+            return this;
+        }
+
+        public InstructionExpression<TInstruction> WithArguments(params Expression<TInstruction>[] arguments) =>
+            WithArguments(arguments as IEnumerable<Expression<TInstruction>>);
+        
+        public InstructionExpression<TInstruction> WithArguments(IEnumerable<Expression<TInstruction>> arguments)
+        {
+            var collection = new TreeNodeCollection<InstructionExpression<TInstruction>, Expression<TInstruction>>(this);
+            foreach (var argument in arguments)
+                collection.Add(argument);
+
+            Arguments = collection;
+            return this;
+        }
+
         /// <inheritdoc />
-        public override string ToString() => $"{Content}({string.Join(", ", Children)})";
+        public override string ToString() => $"{Instruction}({string.Join(", ", Arguments)})";
 
         internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
-            $"{instructionFormatter.Format(Content)}({string.Join(", ", Children)})";
+            $"{instructionFormatter.Format(Instruction)}({string.Join(", ", Arguments)})";
     }
 }
