@@ -16,6 +16,8 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
                 case DummyOpCode.Op:
                 case DummyOpCode.Push:
                 case DummyOpCode.Pop:
+                case DummyOpCode.Get:
+                case DummyOpCode.Set:
                 case DummyOpCode.Jmp:
                     return 1;
                 
@@ -42,6 +44,8 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
                 case DummyOpCode.Op:
                 case DummyOpCode.Push:
                 case DummyOpCode.Pop:
+                case DummyOpCode.Get:
+                case DummyOpCode.Set:
                     successorBuffer[0] = new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough);
                     return 1;
                 

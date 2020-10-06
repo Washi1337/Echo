@@ -1,7 +1,7 @@
 ﻿namespace Echo.ControlFlow.Serialization.Dot
 {
     /// <summary>
-    /// Allows the user to format instructions in the <see cref="ControlFlowEdgeAdorner{TInstruction}"/>.
+    /// Allows the user to format instructions in the <see cref="ControlFlowNodeAdorner{TInstruction}"/>.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions the nodes contain.</typeparam>
     public interface IInstructionFormatter<TInstruction>
