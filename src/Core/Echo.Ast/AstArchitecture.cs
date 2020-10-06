@@ -51,7 +51,10 @@ namespace Echo.Ast
             var visitor = new ReadVariableFinderWalker<TInstruction>();
             instruction.Accept(visitor, null);
             
-            visitor.Variables.CopyTo(variablesBuffer);
+            int i = 0;
+            foreach (var variable in visitor.Variables)
+                variablesBuffer[i++] = variable;
+
             return visitor.Count;
         }
 
@@ -70,7 +73,10 @@ namespace Echo.Ast
             var visitor = new WrittenVariableFinderWalker<TInstruction>();
             instruction.Accept(visitor, null);
             
-            visitor.Variables.CopyTo(variablesBuffer);
+            int i = 0;
+            foreach (var variable in visitor.Variables)
+                variablesBuffer[i++] = variable;
+
             return visitor.Count;
         }
     }

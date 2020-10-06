@@ -39,7 +39,6 @@ namespace Echo.Ast
         public IList<Expression<TInstruction>> Arguments
         {
             get;
-            private set;
         }
 
         /// <inheritdoc />

@@ -39,7 +39,6 @@ namespace Echo.Ast
         public ICollection<VariableExpression<TInstruction>> Sources
         {
             get;
-            private set;
         }
 
         /// <inheritdoc />

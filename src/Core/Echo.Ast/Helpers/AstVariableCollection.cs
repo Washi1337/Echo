@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Echo.Ast.Helpers
 {
@@ -6,10 +7,10 @@ namespace Echo.Ast.Helpers
     {
         public override bool Equals(object obj)
         {
-            if (!(obj is AstVariableCollection))
+            if (!(obj is AstVariableCollection other))
                 return false;
 
-            return GetHashCode() == obj.GetHashCode();
+            return this.SequenceEqual(other);
         }
 
         public override int GetHashCode()

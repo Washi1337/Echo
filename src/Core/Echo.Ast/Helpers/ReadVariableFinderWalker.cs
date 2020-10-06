@@ -6,13 +6,14 @@ namespace Echo.Ast.Helpers
 {
     internal sealed class ReadVariableFinderWalker<TInstruction> : AstNodeWalkerBase<TInstruction>
     {
-        private readonly HashSet<IVariable> _variables = new HashSet<IVariable>();
+        internal int Count => Variables.Count;
 
-        internal int Count => _variables.Count;
-
-        internal IVariable[] Variables => _variables.ToArray();
+        internal HashSet<IVariable> Variables
+        {
+            get;
+        } = new HashSet<IVariable>();
 
         protected override void VisitVariableExpression(VariableExpression<TInstruction> variableExpression) =>
-            _variables.Add(variableExpression.Variable);
+            Variables.Add(variableExpression.Variable);
     }
 }

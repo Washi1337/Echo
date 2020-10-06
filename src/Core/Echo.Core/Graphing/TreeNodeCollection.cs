@@ -31,6 +31,8 @@ namespace Echo.Core.Graphing
         /// <exception cref="ArgumentException">Occurs if the node is already added to another node.</exception>
         protected static void AssertNoParent(TChild node)
         {
+            if (node is null)
+                throw new ArgumentNullException(nameof(node));
             if (node.Parent != null)
                 throw new ArgumentException("Cannot add a node that is already a child of another node.");
         }

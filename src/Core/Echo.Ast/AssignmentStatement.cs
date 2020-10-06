@@ -38,7 +38,6 @@ namespace Echo.Ast
         public IList<IVariable> Variables
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -79,7 +78,11 @@ namespace Echo.Ast
         /// <returns>The same <see cref="AssignmentStatement{TInstruction}"/> instance but with the new <paramref name="variables"/></returns>
         public AssignmentStatement<TInstruction> WithVariables(IEnumerable<IVariable> variables)
         {
-            Variables = new List<IVariable>(variables);
+            Variables.Clear();
+            
+            foreach (var variable in variables)
+                Variables.Add(variable);
+
             return this;
         }
 

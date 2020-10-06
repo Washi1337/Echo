@@ -6,19 +6,20 @@ namespace Echo.Ast.Helpers
 {
     internal sealed class WrittenVariableFinderWalker<TInstruction> : AstNodeWalkerBase<TInstruction>
     {
-        private readonly HashSet<IVariable> _variables = new HashSet<IVariable>();
-
-        internal int Count => _variables.Count;
-
-        internal IVariable[] Variables => _variables.ToArray();
+        internal int Count => Variables.Count;
+        
+        internal HashSet<IVariable> Variables
+        {
+            get;
+        } = new HashSet<IVariable>();
 
         protected override void ExitAssignmentStatement(AssignmentStatement<TInstruction> assignmentStatement)
         {
             foreach (var target in assignmentStatement.Variables)
-                _variables.Add(target);
+                Variables.Add(target);
         }
 
         protected override void ExitPhiStatement(PhiStatement<TInstruction> phiStatement) =>
-            _variables.Add(phiStatement.Target);
+            Variables.Add(phiStatement.Target);
     }
 }
