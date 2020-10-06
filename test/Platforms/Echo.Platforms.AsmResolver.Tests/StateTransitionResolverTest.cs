@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Platforms.AsmResolver.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests

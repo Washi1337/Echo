@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Echo.Platforms.Dnlib.Tests.Mock
+namespace Mocks
 {
     public class SimpleClass
     {

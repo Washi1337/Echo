@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
-using Echo.Platforms.Dnlib.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.Dnlib.Tests

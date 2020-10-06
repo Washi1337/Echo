@@ -6,6 +6,7 @@ using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers

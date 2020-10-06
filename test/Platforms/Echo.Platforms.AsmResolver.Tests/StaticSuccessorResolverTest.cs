@@ -1,6 +1,6 @@
 using System.Linq;
 using AsmResolver.DotNet;
-using Echo.Platforms.AsmResolver.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests
