@@ -1,6 +1,7 @@
 ﻿using dnlib.DotNet.Emit;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.Dnlib.Tests

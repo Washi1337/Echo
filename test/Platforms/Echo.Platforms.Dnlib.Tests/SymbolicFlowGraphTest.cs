@@ -3,6 +3,7 @@ using System.Linq;
 using dnlib.DotNet.Emit;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Symbolic;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.Dnlib.Tests
