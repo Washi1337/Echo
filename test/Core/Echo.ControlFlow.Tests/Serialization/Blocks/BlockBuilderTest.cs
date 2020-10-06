@@ -82,6 +82,37 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         }
 
         [Fact]
+        public void If()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Op(0, 0, 1),
+                DummyInstruction.JmpCond(1, 4),
+                
+                DummyInstruction.Op(2, 0, 0),
+                DummyInstruction.Jmp(3, 5),
+                
+                DummyInstruction.Op(4,0,0),
+                
+                DummyInstruction.Ret(5),
+            };
+
+            var cfgBuilder = new StaticFlowGraphBuilder<DummyInstruction>(
+                DummyArchitecture.Instance,
+                instructions,
+                DummyArchitecture.Instance.SuccessorResolver);
+
+            var cfg = cfgBuilder.ConstructFlowGraph(0);
+            var blockBuilder = new BlockBuilder<DummyInstruction>();
+            var rootScope = blockBuilder.ConstructBlocks(cfg);
+            
+            var order = rootScope.GetAllBlocks().ToArray();
+            Assert.Equal(
+                new long[] {0, 2, 4, 5}, 
+                order.Select(b => b.Offset));
+        }
+
+        [Fact]
         public void Loop()
         {
             var instructions = new[]
@@ -108,6 +139,39 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var order = rootScope.GetAllBlocks().ToArray();
             Assert.Equal(
                 new long[] {0, 1, 4}, 
+                order.Select(b => b.Offset));
+        }
+
+        [Fact]
+        public void WhileLoop()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.Jmp(0, 2),
+
+                DummyInstruction.Op(1, 0, 0),
+
+                DummyInstruction.Push(2, 1),
+                DummyInstruction.Push(3, 1),
+                DummyInstruction.Op(4, 2, 1),
+                DummyInstruction.JmpCond(5, 1),
+
+                DummyInstruction.Op(6, 0, 0),
+                DummyInstruction.Ret(7),
+            };
+
+            var cfgBuilder = new StaticFlowGraphBuilder<DummyInstruction>(
+                DummyArchitecture.Instance,
+                instructions,
+                DummyArchitecture.Instance.SuccessorResolver);
+
+            var cfg = cfgBuilder.ConstructFlowGraph(0);
+            var blockBuilder = new BlockBuilder<DummyInstruction>();
+            var rootScope = blockBuilder.ConstructBlocks(cfg);
+            
+            var order = rootScope.GetAllBlocks().ToArray();
+            Assert.Equal(
+                new long[] {0, 1, 2, 6}, 
                 order.Select(b => b.Offset));
         }
 
