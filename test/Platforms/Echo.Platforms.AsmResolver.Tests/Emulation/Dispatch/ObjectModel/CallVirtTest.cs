@@ -19,7 +19,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public CallVirtTest(MockModuleFixture moduleFixture)
             : base(moduleFixture)
         {
-            var module = ModuleDefinition.FromFile(typeof(CallTest).Assembly.Location);
+            var module = moduleFixture.MockModule;
             _type = (TypeDefinition) module.LookupMember(typeof(SimpleClass).MetadataToken);
         }
 
