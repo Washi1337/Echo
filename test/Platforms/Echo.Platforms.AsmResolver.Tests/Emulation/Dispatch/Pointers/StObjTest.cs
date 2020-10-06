@@ -11,16 +11,16 @@ using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 {
-    public class StObjTest : DispatcherTestBase, IClassFixture<CurrentModuleFixture>
+    public class StObjTest : DispatcherTestBase
     {
         private readonly TypeDefinition _structType;
         private readonly FieldDefinition _x;
         private readonly FieldDefinition _y;
         
-        public StObjTest(MockModuleFixture moduleFixture, CurrentModuleFixture currentModuleFixture)
+        public StObjTest(MockModuleFixture moduleFixture)
             : base(moduleFixture)
         {
-            var module = currentModuleFixture.Module;
+            var module = moduleFixture.Module;
             
             _structType = (TypeDefinition) module.LookupMember(typeof(SimpleStruct).MetadataToken);
             _x = _structType.Fields.First(f => f.Name == nameof(SimpleStruct.X));

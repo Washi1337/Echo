@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using AsmResolver.DotNet;
+using Mocks;
 
 namespace Echo.Platforms.AsmResolver.Tests.Mock
 {
@@ -30,5 +31,10 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
 
             return module;
         }
+
+        public ModuleDefinition Module
+        {
+            get;
+        } = ModuleDefinition.FromFile(typeof(SimpleClass).Assembly.Location);
     }
 }
