@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Serialization.Dot;
 using Echo.Core.Graphing;
@@ -11,10 +12,25 @@ namespace Echo.Ast
     public sealed class InstructionExpression<TInstruction> : Expression<TInstruction>
     {
         /// <summary>
+        /// Creates a new instruction expression node with no arguments
+        /// </summary>
+        /// <param name="instruction">The instruction</param>
+        public InstructionExpression(TInstruction instruction)
+            : this(instruction, Array.Empty<Expression<TInstruction>>()) { }
+        
+        /// <summary>
         /// Creates a new instruction expression node
         /// </summary>
         /// <param name="instruction">The instruction</param>
-        /// <param name="arguments">The parameters to this instruction</param>
+        /// <param name="arguments">The parameters to the <paramref name="instruction" /></param>
+        public InstructionExpression(TInstruction instruction, params Expression<TInstruction>[] arguments)
+            : this(instruction, arguments as IEnumerable<Expression<TInstruction>>) { }
+
+        /// <summary>
+        /// Creates a new instruction expression node
+        /// </summary>
+        /// <param name="instruction">The instruction</param>
+        /// <param name="arguments">The parameters to <paramref name="instruction" /></param>
         public InstructionExpression(TInstruction instruction, IEnumerable<Expression<TInstruction>> arguments)
         {
             Instruction = instruction;
