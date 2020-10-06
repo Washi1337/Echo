@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
         public StObjTest(MockModuleFixture moduleFixture)
             : base(moduleFixture)
         {
-            var module = moduleFixture.Module;
+            var module = moduleFixture.MockModule;
             
             _structType = (TypeDefinition) module.LookupMember(typeof(SimpleStruct).MetadataToken);
             _x = _structType.Fields.First(f => f.Name == nameof(SimpleStruct.X));

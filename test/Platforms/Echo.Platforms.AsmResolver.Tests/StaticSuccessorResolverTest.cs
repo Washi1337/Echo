@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         [Fact]
         public void SingleBlock()
         {
-            var type = (TypeDefinition) _moduleFixture.Module.LookupMember(typeof(SimpleClass).MetadataToken);
+            var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.HelloWorld));
             var body = method.CilMethodBody;
             var cfg = body.ConstructStaticFlowGraph();
@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         [Fact]
         public void If()
         {
-            var type = (TypeDefinition) _moduleFixture.Module.LookupMember(typeof(SimpleClass).MetadataToken);
+            var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.If));
             var body = method.CilMethodBody;
             var cfg = body.ConstructStaticFlowGraph();
@@ -43,7 +43,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         [Fact]
         public void Switch()
         {
-            var type = (TypeDefinition) _moduleFixture.Module.LookupMember(typeof(SimpleClass).MetadataToken);
+            var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.Switch));
             var body = method.CilMethodBody;
             var cfg = body.ConstructStaticFlowGraph();

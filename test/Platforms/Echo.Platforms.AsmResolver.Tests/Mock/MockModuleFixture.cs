@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
             return module;
         }
 
-        public ModuleDefinition Module
+        public ModuleDefinition MockModule
         {
             get;
         } = ModuleDefinition.FromFile(typeof(SimpleClass).Assembly.Location);
