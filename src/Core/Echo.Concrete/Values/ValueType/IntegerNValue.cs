@@ -23,6 +23,7 @@ namespace Echo.Concrete.Values.ValueType
         public IntegerNValue(int byteCount)
         {
             _bits = Pool.Rent(byteCount);
+            _bits.AsSpan().Fill(0);
             _mask = Pool.Rent(byteCount);
             _mask.AsSpan().Fill(0xFF);
 
