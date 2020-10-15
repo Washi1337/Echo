@@ -162,7 +162,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
 
             // Read transitions.
             var transitionsBufferSlice = new Span<StateTransition<TInstruction>>(transitionsBuffer, 0, transitionCount);
-            int actualTransitionCount = TransitionResolver.GetTransitions(currentState, instruction, transitionsBufferSlice);
+            int actualTransitionCount = TransitionResolver.GetTransitions(currentState, instruction, transitionsBufferSlice,
+                state =>
+                {
+                    agenda.Push(state);
+                    context.Result.BlockHeaders.Add(state.ProgramCounter);
+                });
             if (actualTransitionCount > transitionCount)
             {
                 // Sanity check: This should only happen if the transition resolver contains a bug.
