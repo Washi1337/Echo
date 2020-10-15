@@ -45,6 +45,10 @@ namespace Echo.ControlFlow.Blocks
             _listener.EnterProtectedBlock(block);
             block.ProtectedBlock.AcceptVisitor(this);
             _listener.ExitProtectedBlock(block);
+            
+            _listener.EnterPrologueBlock(block);
+            block.PrologueBlock.AcceptVisitor(this);
+            _listener.ExitPrologueBlock(block);
 
             for (int i = 0; i < block.HandlerBlocks.Count; i++)
             {
@@ -54,6 +58,10 @@ namespace Echo.ControlFlow.Blocks
                 handlerBlock.AcceptVisitor(this);
                 _listener.ExitHandlerBlock(block, i);
             }
+            
+            _listener.EnterEpilogueBlock(block);
+            block.EpilogueBlock.AcceptVisitor(this);
+            _listener.ExitEpilogueBlock(block);
 
             _listener.ExitExceptionHandlerBlock(block);
         }

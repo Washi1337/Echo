@@ -116,6 +116,18 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <inheritdoc />
+        public void EnterPrologueBlock(ExceptionHandlerBlock<TInstruction> block)
+        {
+            AppendIndentationString();
+            _builder.AppendLine("prologue:");
+        }
+
+        /// <inheritdoc />
+        public void ExitPrologueBlock(ExceptionHandlerBlock<TInstruction> block)
+        {
+        }
+
+        /// <inheritdoc />
         public void EnterHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex)
         {
             AppendIndentationString();
@@ -124,6 +136,18 @@ namespace Echo.ControlFlow.Blocks
 
         /// <inheritdoc />
         public void ExitHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex)
+        {
+        }
+
+        /// <inheritdoc />
+        public void EnterEpilogueBlock(ExceptionHandlerBlock<TInstruction> block)
+        {
+            AppendIndentationString();
+            _builder.AppendLine("epilogue:");
+        }
+
+        /// <inheritdoc />
+        public void ExitEpilogueBlock(ExceptionHandlerBlock<TInstruction> block)
         {
         }
     }

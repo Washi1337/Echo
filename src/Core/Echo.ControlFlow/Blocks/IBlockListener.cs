@@ -49,6 +49,18 @@ namespace Echo.ControlFlow.Blocks
         void ExitProtectedBlock(ExceptionHandlerBlock<TInstruction> block);
 
         /// <summary>
+        /// Enters the prologue region of an exception handler block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        void EnterPrologueBlock(ExceptionHandlerBlock<TInstruction> block);
+        
+        /// <summary>
+        /// Exits the prologue region of an exception handler block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        void ExitPrologueBlock(ExceptionHandlerBlock<TInstruction> block);
+
+        /// <summary>
         /// Enters a handler region of an exception handler block.
         /// </summary>
         /// <param name="block">The block.</param>
@@ -61,5 +73,17 @@ namespace Echo.ControlFlow.Blocks
         /// <param name="block">The block.</param>
         /// <param name="handlerIndex">The index of the handler that was exit.</param>
         void ExitHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex);
+
+        /// <summary>
+        /// Enters the epilogue region of an exception handler block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        void EnterEpilogueBlock(ExceptionHandlerBlock<TInstruction> block);
+        
+        /// <summary>
+        /// Exits the epilogue region of an exception handler block.
+        /// </summary>
+        /// <param name="block">The block.</param>
+        void ExitEpilogueBlock(ExceptionHandlerBlock<TInstruction> block);
     }
 }
