@@ -104,7 +104,7 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
             Span<StateTransition<DummyInstruction>> successorBuffer)
         {
             nextState.ProgramCounter = (long) instruction.Operands[0];
-            successorBuffer[0] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough);
+            successorBuffer[0] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.Unconditional);
             return 1;
         }
 
