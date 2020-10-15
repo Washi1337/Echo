@@ -91,7 +91,8 @@ namespace Echo.Platforms.Dnlib
         /// <inheritdoc />
         public override int GetTransitions(SymbolicProgramState<Instruction> currentState,
             in Instruction instruction,
-            Span<StateTransition<Instruction>> transitionBuffer)
+            Span<StateTransition<Instruction>> transitionBuffer,
+            Action<SymbolicProgramState<Instruction>> addHeaderFunc)
         {
             // Multiplex based on flow control.
 

@@ -56,10 +56,10 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
             }
         }
 
-        public override int GetTransitions(
-            SymbolicProgramState<DummyInstruction> currentState,
-            in DummyInstruction instruction, 
-            Span<StateTransition<DummyInstruction>> transitionBuffer)
+        public override int GetTransitions(SymbolicProgramState<DummyInstruction> currentState,
+            in DummyInstruction instruction,
+            Span<StateTransition<DummyInstruction>> transitionBuffer,
+            Action<SymbolicProgramState<DummyInstruction>> addHeaderFunc)
         {
             var nextState = currentState.Copy();
             ApplyDefaultBehaviour(nextState, instruction);

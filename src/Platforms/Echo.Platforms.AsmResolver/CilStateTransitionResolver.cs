@@ -93,7 +93,8 @@ namespace Echo.Platforms.AsmResolver
         /// <inheritdoc />
         public override int GetTransitions(SymbolicProgramState<CilInstruction> currentState,
             in CilInstruction instruction,
-            Span<StateTransition<CilInstruction>> transitionBuffer)
+            Span<StateTransition<CilInstruction>> transitionBuffer,
+            Action<SymbolicProgramState<CilInstruction>> addHeaderFunc)
         {
             // Multiplex based on flow control.
             

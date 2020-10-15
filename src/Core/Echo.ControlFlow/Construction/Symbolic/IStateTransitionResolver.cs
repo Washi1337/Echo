@@ -30,17 +30,18 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <param name="instruction">The instruction to evaluate.</param>
         /// <returns>The number of transitions that the provided instruction might apply.</returns>
         int GetTransitionCount(SymbolicProgramState<TInstruction> currentState, in TInstruction instruction);
-        
+
         /// <summary>
         /// Resolves all possible program state transitions that the provided instruction can apply. 
         /// </summary>
         /// <param name="currentState">The current state of the program.</param>
         /// <param name="instruction">The instruction to evaluate.</param>
         /// <param name="transitionBuffer">The output buffer to write the transitions that the instruction might apply.</param>
+        /// <param name="addHeaderFunc">The callback function to inform the graph builder of a new block header.</param>
         /// <returns>The number of transitions that were written into <paramref name="transitionBuffer"/>.</returns>
-        int GetTransitions(
-            SymbolicProgramState<TInstruction> currentState, 
-            in TInstruction instruction, 
-            Span<StateTransition<TInstruction>> transitionBuffer);
+        int GetTransitions(SymbolicProgramState<TInstruction> currentState,
+            in TInstruction instruction,
+            Span<StateTransition<TInstruction>> transitionBuffer,
+            Action<SymbolicProgramState<TInstruction>> addHeaderFunc);
     }
 }

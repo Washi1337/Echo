@@ -45,7 +45,8 @@ namespace Echo.Platforms.Iced
         /// <inheritdoc />
         public override int GetTransitions(SymbolicProgramState<Instruction> currentState,
             in Instruction instruction,
-            Span<StateTransition<Instruction>> transitionBuffer)
+            Span<StateTransition<Instruction>> transitionBuffer,
+            Action<SymbolicProgramState<Instruction>> addHeaderFunc)
         {
             var nextState = currentState.Copy();
             ApplyDefaultBehaviour(nextState, instruction);
