@@ -75,7 +75,7 @@ namespace Echo.Platforms.Iced
             Span<StateTransition<Instruction>> successorBuffer)
         {
             nextState.ProgramCounter = (long) instruction.NearBranchTarget;
-            successorBuffer[0] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough);
+            successorBuffer[0] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.Unconditional);
             return 1;
         }
 
