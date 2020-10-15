@@ -20,7 +20,17 @@ namespace Echo.ControlFlow.Regions
                 ParentRegion = this
             };
             
+            PrologueRegion = new BasicControlFlowRegion<TInstruction>
+            {
+                ParentRegion = this
+            };
+            
             HandlerRegions = new RegionCollection<TInstruction>(this);
+            
+            EpilogueRegion = new BasicControlFlowRegion<TInstruction>
+            {
+                ParentRegion = this
+            };
         }
 
         /// <summary>
@@ -32,9 +42,25 @@ namespace Echo.ControlFlow.Regions
         }
 
         /// <summary>
+        /// Gets the region of nodes that form the code that precedes the handler(s).
+        /// </summary>
+        public BasicControlFlowRegion<TInstruction> PrologueRegion
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the regions that form the handler blocks.
         /// </summary>
         public RegionCollection<TInstruction> HandlerRegions
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the region of nodes that form the code that proceeds the handler(s).
+        /// </summary>
+        public BasicControlFlowRegion<TInstruction> EpilogueRegion
         {
             get;
         }
@@ -51,8 +77,12 @@ namespace Echo.ControlFlow.Regions
         {
             yield return ProtectedRegion;
 
+            yield return PrologueRegion;
+            
             foreach (var handlerRegion in HandlerRegions)
                 yield return handlerRegion;
+
+            yield return EpilogueRegion;
         }
 
         /// <inheritdoc />

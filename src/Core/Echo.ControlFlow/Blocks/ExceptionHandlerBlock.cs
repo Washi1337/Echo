@@ -17,12 +17,28 @@ namespace Echo.ControlFlow.Blocks
         } = new ScopeBlock<TInstruction>();
 
         /// <summary>
+        /// Gets the prologue block.
+        /// </summary>
+        public ScopeBlock<TInstruction> PrologueBlock
+        {
+            get;
+        } = new ScopeBlock<TInstruction>();
+
+        /// <summary>
         /// Gets a collection of handler blocks.
         /// </summary>
         public IList<ScopeBlock<TInstruction>> HandlerBlocks
         {
             get;
         } = new List<ScopeBlock<TInstruction>>();
+
+        /// <summary>
+        /// Gets the epilogue block.
+        /// </summary>
+        public ScopeBlock<TInstruction> EpilogueBlock
+        {
+            get;
+        } = new ScopeBlock<TInstruction>();
 
         /// <inheritdoc />
         public IEnumerable<BasicBlock<TInstruction>> GetAllBlocks()
