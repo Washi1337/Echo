@@ -231,8 +231,9 @@ namespace Echo.ControlFlow
             switch (edgeType)
             {
                 case ControlFlowEdgeType.FallThrough:
+                case ControlFlowEdgeType.Unconditional:
                     if (UnconditionalEdge != null)
-                        throw new InvalidOperationException("Node already has a fallthrough edge to another node.");
+                        throw new InvalidOperationException("Node already has an unconditional edge to another node.");
                     UnconditionalEdge = edge;
                     break;
 
