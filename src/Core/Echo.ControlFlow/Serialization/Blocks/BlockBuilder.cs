@@ -97,29 +97,25 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 else if (enteredRegion.ParentRegion is ExceptionHandlerRegion<TInstruction> parentEhRegion)
                 {
                     // We entered one of the exception handler sub regions. Figure out which one it is.
+                    var enteredBlock = default(ScopeBlock<TInstruction>);
+
                     if (!(currentScope.Block is ExceptionHandlerBlock<TInstruction> ehBlock))
                         throw new InvalidOperationException("The parent scope is not an exception handler scope.");
 
                     if (parentEhRegion.ProtectedRegion == enteredRegion)
                     {
                         // We entered the protected region.
-                        scopeStack.Push(new ScopeInfo(parentEhRegion.ProtectedRegion, ehBlock.ProtectedBlock));
-                    }
-                    else if (parentEhRegion.PrologueRegion == enteredRegion)
-                    {
-                        // We entered the prologue region.
-                        scopeStack.Push(new ScopeInfo(parentEhRegion.PrologueRegion, ehBlock.PrologueBlock));
-                    }
-                    else if (parentEhRegion.EpilogueRegion == enteredRegion)
-                    {
-                        // We entered the epilogue region.
-                        scopeStack.Push(new ScopeInfo(parentEhRegion.EpilogueRegion, ehBlock.EpilogueBlock));
+                        enteredBlock = ehBlock.ProtectedBlock;
                     }
                     else
                     {
                         // We entered a handler region.
-                        ehBlock.HandlerBlocks.Add(new ScopeBlock<TInstruction>());
+                        enteredBlock = new ScopeBlock<TInstruction>();
+                        ehBlock.HandlerBlocks.Add(enteredBlock);
                     }
+
+                    // Push the entered scope.
+                    scopeStack.Push(new ScopeInfo(parentEhRegion.ProtectedRegion, enteredBlock));
                 }
                 else
                 {
