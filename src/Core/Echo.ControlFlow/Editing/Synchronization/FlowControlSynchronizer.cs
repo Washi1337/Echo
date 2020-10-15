@@ -267,10 +267,10 @@ namespace Echo.ControlFlow.Editing.Synchronization
 
             if (!successorOffset.HasValue)
             {
-                if (node.FallThroughNeighbour is {})
+                if (node.UnconditionalNeighbour is {})
                     fallThroughChanged = true; // Fallthrough was removed.
             }
-            else if (node.FallThroughNeighbour is null || node.FallThroughNeighbour.Offset != successorOffset.Value)
+            else if (node.UnconditionalNeighbour is null || node.UnconditionalNeighbour.Offset != successorOffset.Value)
             {
                 // Fallthrough was added or changed.
                 fallThroughChanged = true;

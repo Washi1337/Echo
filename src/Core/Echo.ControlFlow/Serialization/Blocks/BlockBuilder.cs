@@ -136,7 +136,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             var result = new List<ControlFlowNode<TInstruction>>();
 
             // Add fallthrough.
-            if (node.FallThroughNeighbour is {} neighbour)
+            if (node.UnconditionalNeighbour is {} neighbour)
             {
                 result.Add(neighbour);
                 visited.Add(neighbour);
