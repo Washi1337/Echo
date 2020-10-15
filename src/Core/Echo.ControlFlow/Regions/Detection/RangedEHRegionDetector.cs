@@ -48,6 +48,18 @@ namespace Echo.ControlFlow.Regions.Detection
                     ehRegions.Add(currentEHRange.ProtectedRange, ehRegion);
                     rangeToRegion.Add(currentEHRange.ProtectedRange, ehRegion.ProtectedRegion);
 
+                    if (currentEHRange.PrologueRange != AddressRange.NilRange)
+                    {
+                        ehRegions.Add(currentEHRange.PrologueRange, ehRegion);
+                        rangeToRegion.Add(currentEHRange.PrologueRange, ehRegion.PrologueRegion);
+                    }
+
+                    if (currentEHRange.EpilogueRange != AddressRange.NilRange)
+                    {
+                        ehRegions.Add(currentEHRange.EpilogueRange, ehRegion);
+                        rangeToRegion.Add(currentEHRange.EpilogueRange, ehRegion.EpilogueRegion);
+                    }
+
                     // Since the ranges are sorted by enclosing EHs first, we can backtrack the list of ranges to find.
                     // the parent region (if there is any).
                     BasicControlFlowRegion<TInstruction> parentRegion = null;
@@ -56,8 +68,12 @@ namespace Echo.ControlFlow.Regions.Detection
                         var potentialParentRange = sortedRanges[j];
                         if (potentialParentRange.ProtectedRange.Contains(currentEHRange.ProtectedRange))
                             parentRegion = rangeToRegion[potentialParentRange.ProtectedRange];
+                        if (potentialParentRange.PrologueRange.Contains(currentEHRange.PrologueRange))
+                            parentRegion = rangeToRegion[potentialParentRange.PrologueRange];
                         if (potentialParentRange.HandlerRange.Contains(currentEHRange.HandlerRange))
                             parentRegion = rangeToRegion[potentialParentRange.HandlerRange];
+                        if (potentialParentRange.EpilogueRange.Contains(currentEHRange.EpilogueRange))
+                            parentRegion = rangeToRegion[potentialParentRange.EpilogueRange];
                     }
 
                     // Insert region into graph or parent region.
@@ -103,8 +119,12 @@ namespace Echo.ControlFlow.Regions.Detection
 
                 if (currentRange.ProtectedRange.Contains(node.Offset))
                     return currentRange.ProtectedRange;
+                if (currentRange.PrologueRange.Contains(node.Offset))
+                    return currentRange.PrologueRange;
                 if (currentRange.HandlerRange.Contains(node.Offset))
                     return currentRange.HandlerRange;
+                if (currentRange.EpilogueRange.Contains(node.Offset))
+                    return currentRange.EpilogueRange;
             }
 
             return null;
@@ -120,8 +140,13 @@ namespace Echo.ControlFlow.Regions.Detection
 
                 var handlerRegion = rangeToRegionMapping[range.HandlerRange];
                 handlerRegion.Entrypoint ??= cfg.GetNodeByOffset(range.HandlerRange.Start);
+
+                if (rangeToRegionMapping.TryGetValue(range.PrologueRange, out var prologueRegion))
+                    prologueRegion.Entrypoint ??= cfg.GetNodeByOffset(range.PrologueRange.Start);
+
+                if (rangeToRegionMapping.TryGetValue(range.EpilogueRange, out var epilogueRegion))
+                    epilogueRegion.Entrypoint ??= cfg.GetNodeByOffset(range.EpilogueRange.Start);
             }
         }
-        
     }
 }
