@@ -11,6 +11,11 @@ namespace Echo.ControlFlow
         FallThrough,
         
         /// <summary>
+        /// Indicates the edge is traversed as a result from an unconditional jump instruction. 
+        /// </summary>
+        Unconditional,
+        
+        /// <summary>
         /// Indicates the edge is only traversed when a specific condition is met.
         /// </summary>
         Conditional,
