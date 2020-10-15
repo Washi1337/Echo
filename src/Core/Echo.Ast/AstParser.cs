@@ -103,10 +103,16 @@ namespace Echo.Ast
                     // existing protected region.
                     TransformSubRegions(ehRegion.ProtectedRegion, newEhRegion.ProtectedRegion);
                     _context.RegionsMapping[ehRegion.ProtectedRegion] = newEhRegion.ProtectedRegion;
+                    
+                    TransformSubRegions(ehRegion.PrologueRegion, newEhRegion.PrologueRegion);
+                    _context.RegionsMapping[ehRegion.PrologueRegion] = newEhRegion.PrologueRegion;
 
                     // Add handler regions.
                     foreach (var subRegion in ehRegion.HandlerRegions)
                         newEhRegion.HandlerRegions.Add(TransformRegion(subRegion));
+                    
+                    TransformSubRegions(ehRegion.EpilogueRegion, newEhRegion.EpilogueRegion);
+                    _context.RegionsMapping[ehRegion.EpilogueRegion] = newEhRegion.EpilogueRegion;
 
                     return newEhRegion;
 
