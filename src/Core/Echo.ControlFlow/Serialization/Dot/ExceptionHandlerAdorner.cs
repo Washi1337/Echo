@@ -31,6 +31,15 @@ namespace Echo.ControlFlow.Serialization.Dot
         } = new DotEntityStyle("green", "dashed");
 
         /// <summary>
+        /// Gets or sets the style of a prologue region in an exception handler region.
+        /// </summary>
+        public DotEntityStyle PrologueRegionColor
+        {
+            get;
+            set;
+        } = new DotEntityStyle("purple", "dashed");
+
+        /// <summary>
         /// Gets or sets the style of a handler region in an exception handler region.
         /// </summary>
         public DotEntityStyle HandlerRegionColor
@@ -38,6 +47,15 @@ namespace Echo.ControlFlow.Serialization.Dot
             get;
             set;
         } = new DotEntityStyle("blue", "dashed");
+
+        /// <summary>
+        /// Gets or sets the style of an epilogue region in an exception handler region.
+        /// </summary>
+        public DotEntityStyle EpilogueRegionColor
+        {
+            get;
+            set;
+        } = new DotEntityStyle("orange", "dashed");
 
         /// <summary>
         /// Gets or sets the default style of a control flow region.
@@ -110,8 +128,12 @@ namespace Echo.ControlFlow.Serialization.Dot
                     {
                         if (parentEh.ProtectedRegion == basicRegion)
                             regionStyle = ProtectedRegionColor;
+                        else if (parentEh.PrologueRegion == basicRegion)
+                            regionStyle = PrologueRegionColor;
                         else if (parentEh.HandlerRegions.Contains(basicRegion))
                             regionStyle = HandlerRegionColor;
+                        else if (parentEh.EpilogueRegion == basicRegion)
+                            regionStyle = EpilogueRegionColor;
                     }
 
                     break;
