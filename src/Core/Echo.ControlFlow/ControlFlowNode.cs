@@ -438,6 +438,7 @@ namespace Echo.ControlFlow
                 switch (incomingEdge.Type)
                 {
                     case ControlFlowEdgeType.FallThrough:
+                    case ControlFlowEdgeType.Unconditional:
                         incomingEdge.Origin.UnconditionalEdge = null;
                         break;
                     case ControlFlowEdgeType.Conditional:

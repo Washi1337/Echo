@@ -129,6 +129,7 @@ namespace Echo.ControlFlow.Collections
                 {
                     switch (edge.Type)
                     {
+                        case ControlFlowEdgeType.Unconditional:
                         case ControlFlowEdgeType.FallThrough:
                             edge.Origin.UnconditionalEdge = null;
                             break;

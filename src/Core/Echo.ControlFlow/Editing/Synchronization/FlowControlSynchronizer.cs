@@ -216,7 +216,7 @@ namespace Echo.ControlFlow.Editing.Synchronization
                     throw new InvalidOperationException();
 
                 // Group successors by type:
-                long? fallthroughSuccessor = null;
+                long? unconditionalSuccessor = null;
                 var conditionalSuccessors = new List<long>();
                 var abnormalSuccessors = new List<long>();
 
@@ -226,10 +226,11 @@ namespace Echo.ControlFlow.Editing.Synchronization
                     switch (successor.EdgeType)
                     {
                         case ControlFlowEdgeType.FallThrough:
-                            if (fallthroughSuccessor.HasValue)
+                        case ControlFlowEdgeType.Unconditional:
+                            if (unconditionalSuccessor.HasValue)
                                 throw new ArgumentException("Instruction has multiple fallthrough successors.");
                             else
-                                fallthroughSuccessor = successor.DestinationAddress;
+                                unconditionalSuccessor = successor.DestinationAddress;
                             break;
 
                         case ControlFlowEdgeType.Conditional:
@@ -246,7 +247,7 @@ namespace Echo.ControlFlow.Editing.Synchronization
                 }
 
                 // Check if there are any changes to the outgoing edges.
-                hasChanges |= CheckIfFallThroughChanged(transaction, node, fallthroughSuccessor);
+                hasChanges |= CheckIfFallThroughChanged(transaction, node, unconditionalSuccessor);
                 hasChanges |= CheckIfAdjacencyListChanged(transaction, node.ConditionalEdges, conditionalSuccessors);
                 hasChanges |= CheckIfAdjacencyListChanged(transaction, node.AbnormalEdges, abnormalSuccessors);
             }
