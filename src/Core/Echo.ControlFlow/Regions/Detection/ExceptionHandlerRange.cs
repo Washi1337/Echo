@@ -14,10 +14,71 @@ namespace Echo.ControlFlow.Regions.Detection
         /// <param name="protectedRange">The range indicating the code that is protected by the handler.</param>
         /// <param name="handlerRange">The range indicating the handler code.</param>
         public ExceptionHandlerRange(AddressRange protectedRange, AddressRange handlerRange)
+            : this(protectedRange, handlerRange, null)
         {
-            ProtectedRange = protectedRange;
-            HandlerRange = handlerRange;
-            UserData = null;
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ExceptionHandlerRange"/> structure.
+        /// </summary>
+        /// <param name="protectedRange">The range indicating the code that is protected by the handler.</param>
+        /// <param name="prologueRange">The range indicating the prologue range that precedes the handler.</param>
+        /// <param name="handlerRange">The range indicating the handler code.</param>
+        public ExceptionHandlerRange(AddressRange protectedRange, AddressRange prologueRange, AddressRange handlerRange)
+            : this(protectedRange, prologueRange, handlerRange, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ExceptionHandlerRange"/> structure.
+        /// </summary>
+        /// <param name="protectedRange">The range indicating the code that is protected by the handler.</param>
+        /// <param name="prologueRange">The range indicating the prologue range that precedes the handler.</param>
+        /// <param name="handlerRange">The range indicating the handler code.</param>
+        /// <param name="userData">A user defined tag that is added to the exception handler.</param>
+        public ExceptionHandlerRange(
+            AddressRange protectedRange,
+            AddressRange prologueRange,
+            AddressRange handlerRange,
+            object userData) 
+            : this(protectedRange, prologueRange, handlerRange, AddressRange.NilRange, userData)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ExceptionHandlerRange"/> structure.
+        /// </summary>
+        /// <param name="protectedRange">The range indicating the code that is protected by the handler.</param>
+        /// <param name="prologueRange">The range indicating the prologue range that precedes the handler.</param>
+        /// <param name="handlerRange">The range indicating the handler code.</param>
+        /// <param name="epilogueRange">The range indicating the epilogue range that proceeds the handler.</param>
+        public ExceptionHandlerRange(
+            AddressRange protectedRange,
+            AddressRange prologueRange,
+            AddressRange handlerRange,
+            AddressRange epilogueRange)
+            : this(protectedRange, prologueRange, handlerRange, epilogueRange, null)
+        {
+        }
+        
+        /// <summary>
+        /// Creates a new instance of the <see cref="ExceptionHandlerRange"/> structure.
+        /// </summary>
+        /// <param name="protectedRange">The range indicating the code that is protected by the handler.</param>
+        /// <param name="prologueRange">The range indicating the prologue range that precedes the handler.</param>
+        /// <param name="handlerRange">The range indicating the handler code.</param>
+        /// <param name="epilogueRange">The range indicating the epilogue range that proceeds the handler.</param>
+        /// <param name="userData">A user defined tag that is added to the exception handler.</param>
+        public ExceptionHandlerRange(
+            AddressRange protectedRange,
+            AddressRange prologueRange,
+            AddressRange handlerRange,
+            AddressRange epilogueRange,
+            object userData)
+            : this(protectedRange, handlerRange, userData)
+        {
+            PrologueRange = prologueRange;
+            EpilogueRange = epilogueRange;
         }
 
         /// <summary>
@@ -29,7 +90,9 @@ namespace Echo.ControlFlow.Regions.Detection
         public ExceptionHandlerRange(AddressRange protectedRange, AddressRange handlerRange, object userData)
         {
             ProtectedRange = protectedRange;
+            PrologueRange = AddressRange.NilRange;
             HandlerRange = handlerRange;
+            EpilogueRange = AddressRange.NilRange;
             UserData = userData;
         }
         
@@ -42,9 +105,28 @@ namespace Echo.ControlFlow.Regions.Detection
         }
 
         /// <summary>
+        /// Gets the address range indicating the start and end of the code that is executed before transferring
+        /// control to the <see cref="HandlerRange"/>.
+        /// </summary>
+        /// <remarks>A good example would be exception filters in CIL.</remarks>
+        public AddressRange PrologueRange
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the address range indicating the start and end of the handler code.
         /// </summary>
         public AddressRange HandlerRange
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the address range indicating the start and end of the code that is
+        /// executed after the <see cref="HandlerRange"/>.
+        /// </summary>
+        public AddressRange EpilogueRange
         {
             get;
         }
@@ -62,7 +144,7 @@ namespace Echo.ControlFlow.Regions.Detection
         /// </summary>
         /// <param name="other">The other exception handler.</param>
         /// <returns><c>true</c> if the handler is equal, <c>false</c> otherwise.</returns>
-        public bool Equals(ExceptionHandlerRange other) => 
+        public bool Equals(in ExceptionHandlerRange other) => 
             ProtectedRange.Equals(other.ProtectedRange) && HandlerRange.Equals(other.HandlerRange);
 
         /// <inheritdoc />
