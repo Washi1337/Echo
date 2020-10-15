@@ -159,7 +159,7 @@ namespace Echo.Platforms.AsmResolver
             
             nextState.ProgramCounter = ((ICilLabel) instruction.Operand).Offset;
 
-            successorBuffer[0] = new StateTransition<CilInstruction>(nextState, ControlFlowEdgeType.FallThrough);
+            successorBuffer[0] = new StateTransition<CilInstruction>(nextState, ControlFlowEdgeType.Unconditional);
             return 1;
         }
 
