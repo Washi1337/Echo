@@ -45,12 +45,18 @@ namespace Echo.ControlFlow.Blocks
         {
             foreach (var block in ProtectedBlock.GetAllBlocks())
                 yield return block;
+                
+            foreach (var block in PrologueBlock.GetAllBlocks())
+                yield return block;
 
             foreach (var handler in HandlerBlocks)
             {
                 foreach (var block in handler.GetAllBlocks())
                     yield return block;
             }
+                
+            foreach (var block in EpilogueBlock.GetAllBlocks())
+                yield return block;
         }
 
         /// <inheritdoc />
