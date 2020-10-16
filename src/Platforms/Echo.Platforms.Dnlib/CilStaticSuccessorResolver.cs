@@ -21,7 +21,7 @@ namespace Echo.Platforms.Dnlib
         } = new CilStaticSuccessorResolver();
 
         /// <inheritdoc />
-        public int GetSuccessorsCount(in Instruction instruction)
+        public int GetSuccessorsCount(in Instruction instruction, GraphBuilderContext<Instruction> context)
         {
             switch (instruction.OpCode.FlowControl)
             {
@@ -51,7 +51,8 @@ namespace Echo.Platforms.Dnlib
         }
 
         /// <inheritdoc />
-        public int GetSuccessors(in Instruction instruction, Span<SuccessorInfo> successorsBuffer)
+        public int GetSuccessors(in Instruction instruction, Span<SuccessorInfo> successorsBuffer,
+            GraphBuilderContext<Instruction> context)
         {
             switch (instruction.OpCode.FlowControl)
             {

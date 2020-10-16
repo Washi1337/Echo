@@ -21,7 +21,7 @@ namespace Echo.Platforms.AsmResolver
         } = new CilStaticSuccessorResolver();
 
         /// <inheritdoc />
-        public int GetSuccessorsCount(in CilInstruction instruction)
+        public int GetSuccessorsCount(in CilInstruction instruction, GraphBuilderContext<CilInstruction> context)
         {
             switch (instruction.OpCode.FlowControl)
             {
@@ -51,7 +51,8 @@ namespace Echo.Platforms.AsmResolver
         }
 
         /// <inheritdoc />
-        public int GetSuccessors(in CilInstruction instruction, Span<SuccessorInfo> successorsBuffer)
+        public int GetSuccessors(in CilInstruction instruction, Span<SuccessorInfo> successorsBuffer,
+            GraphBuilderContext<CilInstruction> context)
         {
             // Multiplex based on flow control.
             

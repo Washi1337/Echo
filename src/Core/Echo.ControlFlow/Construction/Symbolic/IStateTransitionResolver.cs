@@ -28,12 +28,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// </summary>
         /// <param name="currentState">The current state of the program.</param>
         /// <param name="instruction">The instruction to evaluate.</param>
-        /// <param name="context"></param>
+        /// <param name="context">The context that is used to communicate with the graph builder.</param>
         /// <returns>The number of transitions that the provided instruction might apply.</returns>
         int GetTransitionCount(
             SymbolicProgramState<TInstruction> currentState,
             in TInstruction instruction,
-            GraphBuilderContext<TInstruction> context);
+            SymbolicGraphBuilderContext<TInstruction> context);
 
         /// <summary>
         /// Resolves all possible program state transitions that the provided instruction can apply. 
@@ -41,12 +41,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <param name="currentState">The current state of the program.</param>
         /// <param name="instruction">The instruction to evaluate.</param>
         /// <param name="transitionBuffer">The output buffer to write the transitions that the instruction might apply.</param>
-        /// <param name="context"></param>
+        /// <param name="context">The context that is used to communicate with the graph builder.</param>
         /// <returns>The number of transitions that were written into <paramref name="transitionBuffer"/>.</returns>
         int GetTransitions(
             SymbolicProgramState<TInstruction> currentState,
             in TInstruction instruction,
             Span<StateTransition<TInstruction>> transitionBuffer,
-            GraphBuilderContext<TInstruction> context);
+            SymbolicGraphBuilderContext<TInstruction> context);
     }
 }

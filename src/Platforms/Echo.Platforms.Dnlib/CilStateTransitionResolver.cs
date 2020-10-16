@@ -58,7 +58,7 @@ namespace Echo.Platforms.Dnlib
 
         /// <inheritdoc />
         public override int GetTransitionCount(SymbolicProgramState<Instruction> currentState,
-            in Instruction instruction, GraphBuilderContext<Instruction> context)
+            in Instruction instruction, SymbolicGraphBuilderContext<Instruction> context)
         {
             switch (instruction.OpCode.FlowControl)
             {
@@ -91,7 +91,7 @@ namespace Echo.Platforms.Dnlib
         /// <inheritdoc />
         public override int GetTransitions(SymbolicProgramState<Instruction> currentState,
             in Instruction instruction,
-            Span<StateTransition<Instruction>> transitionBuffer, GraphBuilderContext<Instruction> context)
+            Span<StateTransition<Instruction>> transitionBuffer, SymbolicGraphBuilderContext<Instruction> context)
         {
             // Multiplex based on flow control.
 

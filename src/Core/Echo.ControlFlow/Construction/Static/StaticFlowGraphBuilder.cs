@@ -27,13 +27,13 @@ namespace Echo.ControlFlow.Construction.Static
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
         public StaticFlowGraphBuilder(
             IInstructionSetArchitecture<TInstruction> architecture,
-            IEnumerable<TInstruction> instructions, 
+            IEnumerable<TInstruction> instructions,
             IStaticSuccessorResolver<TInstruction> successorResolver)
         {
             Instructions = new ListInstructionProvider<TInstruction>(architecture, instructions);
             SuccessorResolver = successorResolver ?? throw new ArgumentNullException(nameof(successorResolver));
         }
-        
+
         /// <summary>
         /// Creates a new static graph builder using the provided instruction successor resolver.
         /// </summary>
@@ -41,7 +41,7 @@ namespace Echo.ControlFlow.Construction.Static
         /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
         public StaticFlowGraphBuilder(
-            IStaticInstructionProvider<TInstruction> instructions, 
+            IStaticInstructionProvider<TInstruction> instructions,
             IStaticSuccessorResolver<TInstruction> successorResolver)
         {
             Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
@@ -70,7 +70,8 @@ namespace Echo.ControlFlow.Construction.Static
         /// <inheritdoc />
         protected override IInstructionTraversalResult<TInstruction> CollectInstructions(long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
-            var result = new InstructionTraversalResult<TInstruction>(Architecture);
+            var context = new GraphBuilderContext<TInstruction>(Architecture);
+            var result = context.TraversalResult;
             result.BlockHeaders.Add(entrypoint);
             result.BlockHeaders.UnionWith(knownBlockHeaders);
             
@@ -101,7 +102,7 @@ namespace Echo.ControlFlow.Construction.Static
                     {
                         // Get the instruction at the provided offset, and figure out how many successors it has.
                         var instruction = Instructions.GetInstructionAtOffset(currentOffset);
-                        int successorCount = GetSuccessors(successorsBufferPool, ref successorsBuffer, instruction);
+                        int successorCount = GetSuccessors(context, successorsBufferPool, ref successorsBuffer, instruction);
 
                         // Store collected data.
                         result.AddInstruction(instruction);
@@ -149,11 +150,12 @@ namespace Echo.ControlFlow.Construction.Static
         }
 
         private int GetSuccessors(
+            GraphBuilderContext<TInstruction> context,
             ArrayPool<SuccessorInfo> arrayPool, 
             ref SuccessorInfo[] successorsBuffer, 
             in TInstruction instruction)
         {
-            int successorCount = SuccessorResolver.GetSuccessorsCount(instruction);
+            int successorCount = SuccessorResolver.GetSuccessorsCount(instruction, context);
 
             // Verify that our buffer has enough elements.
             if (successorsBuffer.Length < successorCount)
@@ -164,7 +166,7 @@ namespace Echo.ControlFlow.Construction.Static
 
             // Get successor information.
             var successorsBufferSlice = new Span<SuccessorInfo>(successorsBuffer, 0, successorCount);
-            int actualSuccessorCount = SuccessorResolver.GetSuccessors(instruction, successorsBufferSlice);
+            int actualSuccessorCount = SuccessorResolver.GetSuccessors(instruction, successorsBufferSlice, context);
             if (actualSuccessorCount > successorCount)
             {
                 // Sanity check: This should only happen if the successor resolver contains a bug.
@@ -175,7 +177,5 @@ namespace Echo.ControlFlow.Construction.Static
 
             return actualSuccessorCount;
         }
-
     }
-    
 }

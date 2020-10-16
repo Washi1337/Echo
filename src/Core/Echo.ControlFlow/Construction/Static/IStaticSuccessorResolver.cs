@@ -43,15 +43,20 @@ namespace Echo.ControlFlow.Construction.Static
         /// Gets the number of successors of the provided instruction.
         /// </summary>
         /// <param name="instruction">The instruction to resolve the successors from.</param>
+        /// <param name="context">The context that is used to communicate with the graph builder.</param>
         /// <returns>The number of successors.</returns>
-        int GetSuccessorsCount(in TInstruction instruction);
+        int GetSuccessorsCount(in TInstruction instruction, GraphBuilderContext<TInstruction> context);
 
         /// <summary>
         /// Gets a collection of references that represent the successors of the provided instruction.
         /// </summary>
         /// <param name="instruction">The instruction to resolve the successors from.</param>
         /// <param name="successorsBuffer">The buffer to write the successors into.</param>
+        /// <param name="context">The context that is used to communicate with the graph builder.</param>
         /// <returns>The extracted successor references.</returns>
-        int GetSuccessors(in TInstruction instruction, Span<SuccessorInfo> successorsBuffer);
+        int GetSuccessors(
+            in TInstruction instruction,
+            Span<SuccessorInfo> successorsBuffer,
+            GraphBuilderContext<TInstruction> context);
     }
 }
