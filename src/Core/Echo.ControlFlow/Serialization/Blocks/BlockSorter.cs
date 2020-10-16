@@ -9,6 +9,33 @@ namespace Echo.ControlFlow.Serialization.Blocks
     /// </summary>
     public static class BlockSorter
     {
+        // -------------------------
+        // Implementation rationale
+        // -------------------------
+        //
+        // Two key observations are:
+        //
+        // - Topological orderings of nodes for directed acyclic graphs (DAGs) are orderings that "respect" dominance
+        //   without actually needing to compute the entire dominator tree. Nodes sorted by dominance are easier 
+        //   to read, since they resemble structured flow more. If node A dominates B, it would mean that in the
+        //   resulting ordering, node A will appear before node B, as it would appear in "normal" programs.
+        //   For cyclic graphs we can simply ignore back-edges to turn the input graph into a DAG.
+        //
+        // - Paths constructed by fallthrough edges in the control flow graph cannot be broken up into smaller
+        //   paths in the resulting node sequence without changing the code of the basic block (e.g. inserting a goto).
+        //   This puts constraints on what kind of topological orderings we can construct.
+        //
+        // In this implementation, we create a "view" on the input control flow graph, that contracts nodes in a single
+        // path induced by fallthrough edges into a single node. It is safe to put the nodes of this new graph in any
+        // ordering without invalidating the requirements for fallthrough edges, since the new nodes never have outgoing
+        // fallthrough edges by construction. The exception to this rule is the entry point node, which always has to
+        // start at the beginning of the sequence. Therefore, doing a topological sorting starting at this entry point
+        // node results in a valid sequence of basic blocks that is reasonably readable.
+        //
+        // There is still some form of "non-determinism" in the algorithm, as neighbours of each node are still somewhat
+        // arbitrarily ordered.  As a result, an exit point block (e.g. a block with a return) might still end up
+        // somewhere in the middle of the sequence, which can be somewhat counter-intuitive.
+        
         /// <summary>
         /// Determines an ordering of nodes in the control flow graph in such a way that the basic blocks can be
         /// concatenated together in sequence, and still result in a valid execution of the original program. 
