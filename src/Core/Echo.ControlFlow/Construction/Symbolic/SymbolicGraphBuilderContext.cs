@@ -7,17 +7,17 @@ using Echo.DataFlow.Emulation;
 namespace Echo.ControlFlow.Construction.Symbolic
 {
     /// <summary>
-    /// Helper data structure to pass information between transition resolver and the graph builder.
+    /// Helper data structure to pass information between the transition resolver and the graph builder.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to store in the control flow graph.</typeparam>
-    public sealed class GraphBuilderContext<TInstruction> : IDisposable
+    public sealed class SymbolicGraphBuilderContext<TInstruction> : GraphBuilderContext<TInstruction>, IDisposable
     {
         private readonly ArrayPool<StateTransition<TInstruction>> _transitionsBufferPool;
         private StateTransition<TInstruction>[] _transitionsBuffer;
 
-        internal GraphBuilderContext(IInstructionSetArchitecture<TInstruction> architecture)
+        internal SymbolicGraphBuilderContext(IInstructionSetArchitecture<TInstruction> architecture)
+            : base(architecture)
         {
-            Result = new InstructionTraversalResult<TInstruction>(architecture);
             RecordedStates = new Dictionary<long, SymbolicProgramState<TInstruction>>();
 
             _transitionsBufferPool = ArrayPool<StateTransition<TInstruction>>.Shared;
@@ -30,14 +30,6 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// Gets the map of offsets to recorded program states.
         /// </summary>
         public IDictionary<long, SymbolicProgramState<TInstruction>> RecordedStates
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the the collected instructions.
-        /// </summary>
-        public InstructionTraversalResult<TInstruction> Result
         {
             get;
         }
