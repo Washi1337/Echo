@@ -6,9 +6,19 @@ using Echo.Core.Graphing.Analysis.Sorting;
 
 namespace Echo.ControlFlow.Serialization.Blocks
 {
-    public sealed class BlockSorter<TInstruction>
+    /// <summary>
+    /// Provides a mechanism for ordering nodes in control flow graph, based on the outgoing edges of every node. 
+    /// </summary>
+    public static class BlockSorter
     {
-        public IEnumerable<ControlFlowNode<TInstruction>> GetSorting(ControlFlowGraph<TInstruction> cfg)
+        /// <summary>
+        /// Determines an ordering of nodes in the control flow graph in such a way that the basic blocks can be
+        /// concatenated together in sequence, and still result in a valid execution of the original program. 
+        /// </summary>
+        /// <param name="cfg">The control flow graph to pull the nodes from.</param>
+        /// <typeparam name="TInstruction">The type of instructions stored in the graph.</typeparam>
+        /// <returns>The ordering.</returns>
+        public static IEnumerable<ControlFlowNode<TInstruction>> SortNodes<TInstruction>(this ControlFlowGraph<TInstruction> cfg)
         {
             // Obtain paths that cannot be reordered.
             var fallThroughPaths = GetFallThroughPaths(cfg);
@@ -80,7 +90,8 @@ namespace Echo.ControlFlow.Serialization.Blocks
             }
         }
 
-        private static List<List<ControlFlowNode<TInstruction>>> GetFallThroughPaths(ControlFlowGraph<TInstruction> cfg)
+        private static List<List<ControlFlowNode<TInstruction>>> GetFallThroughPaths<TInstruction>(
+            ControlFlowGraph<TInstruction> cfg)
         {
             var visited = new HashSet<ControlFlowNode<TInstruction>>();
             var result = new List<List<ControlFlowNode<TInstruction>>>();
@@ -94,8 +105,9 @@ namespace Echo.ControlFlow.Serialization.Blocks
             return result;
         }
 
-        private static List<ControlFlowNode<TInstruction>> GetFallThroughPath(
-            ControlFlowNode<TInstruction> start, ISet<ControlFlowNode<TInstruction>> visited)
+        private static List<ControlFlowNode<TInstruction>> GetFallThroughPath<TInstruction>(
+            ControlFlowNode<TInstruction> start, 
+            ISet<ControlFlowNode<TInstruction>> visited)
         {
             // Navigate back to root of fallthrough path.
             var predecessor = start;
@@ -131,7 +143,8 @@ namespace Echo.ControlFlow.Serialization.Blocks
             return result;
         }
 
-        private static ControlFlowNode<TInstruction> GetFallThroughPredecessor(ControlFlowNode<TInstruction> node)
+        private static ControlFlowNode<TInstruction> GetFallThroughPredecessor<TInstruction>(
+            ControlFlowNode<TInstruction> node)
         {
             // There can only be one incoming fallthrough edge for every node. If more than one exists,
             // the input control flow graph is constructed incorrectly.

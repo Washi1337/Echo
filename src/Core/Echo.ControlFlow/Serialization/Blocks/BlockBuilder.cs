@@ -9,23 +9,20 @@ namespace Echo.ControlFlow.Serialization.Blocks
     /// <summary>
     /// Provides a mechanism for transforming a control flow graph into a tree of scopes and basic blocks.
     /// </summary>
-    /// <typeparam name="TInstruction">The type of instructions.</typeparam>
-    public class BlockBuilder<TInstruction>
+    public static class BlockBuilder
     {
         /// <summary>
         /// Constructs the tree of scopes and basic blocks based on the provided control flow graph. 
         /// </summary>
-        /// <param name="cfg">The control flow graph.</param>
+        /// <param name="cfg">The control flow graph .</param>
+        /// <typeparam name="TInstruction">The type of instructions stored in the graph.</typeparam>
         /// <returns>The root scope.</returns>
-        public ScopeBlock<TInstruction> ConstructBlocks(ControlFlowGraph<TInstruction> cfg)
+        public static ScopeBlock<TInstruction> ConstructBlocks<TInstruction>(this ControlFlowGraph<TInstruction> cfg)
         {
-            var sorter = new BlockSorter<TInstruction>();
-            var sorting = sorter.GetSorting(cfg);
-            return BuildBlocksFromSortedNodes(cfg, sorting);
+            return BuildBlocksFromSortedNodes(cfg, cfg.SortNodes());
         }
 
-
-        private static ScopeBlock<TInstruction> BuildBlocksFromSortedNodes(
+        private static ScopeBlock<TInstruction> BuildBlocksFromSortedNodes<TInstruction>(
             ControlFlowGraph<TInstruction> cfg, 
             IEnumerable<ControlFlowNode<TInstruction>> sorting)
         {
@@ -33,8 +30,8 @@ namespace Echo.ControlFlow.Serialization.Blocks
             // and similarly, we leave a scope when we leave a region.
 
             var rootScope = new ScopeBlock<TInstruction>();
-            var scopeStack = new IndexableStack<ScopeInfo>();
-            scopeStack.Push(new ScopeInfo(cfg, rootScope));
+            var scopeStack = new IndexableStack<ScopeInfo<TInstruction>>();
+            scopeStack.Push(new ScopeInfo<TInstruction>(cfg, rootScope));
 
             // Add the nodes in the order of the sorting.
             foreach (var node in sorting)
@@ -52,7 +49,8 @@ namespace Echo.ControlFlow.Serialization.Blocks
             return rootScope;
         }
 
-        private static void UpdateScopeStack(ControlFlowNode<TInstruction> node, IndexableStack<ScopeInfo> scopeStack)
+        private static void UpdateScopeStack<TInstruction>(
+            ControlFlowNode<TInstruction> node, IndexableStack<ScopeInfo<TInstruction>> scopeStack)
         {
             var activeRegions = node.GetSituatedRegions()
                 .Reverse()
@@ -87,7 +85,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
                     // We entered an exception handler region.
                     var ehBlock = new ExceptionHandlerBlock<TInstruction>();
                     currentScope.AddBlock(ehBlock);
-                    scopeStack.Push(new ScopeInfo(ehRegion, ehBlock));
+                    scopeStack.Push(new ScopeInfo<TInstruction>(ehRegion, ehBlock));
                 }
                 else if (enteredRegion.ParentRegion is ExceptionHandlerRegion<TInstruction> parentEhRegion)
                 {
@@ -110,19 +108,19 @@ namespace Echo.ControlFlow.Serialization.Blocks
                     }
 
                     // Push the entered scope.
-                    scopeStack.Push(new ScopeInfo(parentEhRegion.ProtectedRegion, enteredBlock));
+                    scopeStack.Push(new ScopeInfo<TInstruction>(parentEhRegion.ProtectedRegion, enteredBlock));
                 }
                 else
                 {
                     // Fall back method: just enter a new scope block.
                     var scopeBlock = new ScopeBlock<TInstruction>();
                     currentScope.AddBlock(scopeBlock);
-                    scopeStack.Push(new ScopeInfo(enteredRegion, scopeBlock));
+                    scopeStack.Push(new ScopeInfo<TInstruction>(enteredRegion, scopeBlock));
                 }
             }
         }
 
-        private readonly struct ScopeInfo
+        private readonly struct ScopeInfo<TInstruction>
         {
             public ScopeInfo(IControlFlowRegion<TInstruction> region, IBlock<TInstruction> block)
             {

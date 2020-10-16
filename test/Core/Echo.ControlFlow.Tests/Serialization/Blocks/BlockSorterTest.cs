@@ -17,12 +17,6 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             return cfg;
         }
 
-        private static ControlFlowNode<int>[] GetSorting(ControlFlowGraph<int> cfg)
-        {
-            var sorter = new BlockSorter<int>();
-            return sorter.GetSorting(cfg).ToArray();
-        }
-
         private static void AssertHasSubSequence(ControlFlowNode<int>[] ordering, params int[] subSequence)
         {
             var cfg = ordering[0].ParentGraph;
@@ -43,7 +37,10 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             cfg.Nodes[0].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.Unconditional);
             cfg.Nodes[1].ConnectWith(cfg.Nodes[0], ControlFlowEdgeType.Unconditional);
 
-            var sorting = GetSorting(cfg);
+            var sorting = cfg
+                .SortNodes()
+                .ToArray();
+            
             Assert.Equal(entrypoint, sorting[0].Offset);
         }
 
@@ -65,7 +62,10 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             
             cfg.Nodes[5].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.FallThrough);
 
-            var sorting = GetSorting(cfg);
+            var sorting = cfg
+                .SortNodes()
+                .ToArray();
+            
             AssertHasSubSequence(sorting, 0, 1);
             AssertHasSubSequence(sorting, 2, 3);
             AssertHasSubSequence(sorting, 4, 5, 6, 7);
@@ -78,7 +78,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             cfg.Nodes[0].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.FallThrough);
             cfg.Nodes[1].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.FallThrough);
 
-            Assert.Throws<BlockOrderingException>(() => GetSorting(cfg));
+            Assert.Throws<BlockOrderingException>(() => cfg.SortNodes());
         }
     }
 }

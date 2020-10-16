@@ -32,9 +32,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
                 DummyArchitecture.Instance.SuccessorResolver);
 
             var cfg = cfgBuilder.ConstructFlowGraph(0);
-            
-            var blockBuilder = new BlockBuilder<DummyInstruction>();
-            var rootScope = blockBuilder.ConstructBlocks(cfg);
+            var rootScope = cfg.ConstructBlocks();
             
             Assert.Single(rootScope.Blocks);
             Assert.IsAssignableFrom<BasicBlock<DummyInstruction>>(rootScope.Blocks[0]);
@@ -67,8 +65,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             cfg.Regions.Add(region);
             region.Nodes.Add(cfg.Nodes[2]);
             
-            var blockBuilder = new BlockBuilder<DummyInstruction>();
-            var rootScope = blockBuilder.ConstructBlocks(cfg);
+            var rootScope = cfg.ConstructBlocks();
             
             Assert.Equal(3, rootScope.Blocks.Count);
             Assert.IsAssignableFrom<BasicBlock<DummyInstruction>>(rootScope.Blocks[0]);
@@ -103,8 +100,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
                 DummyArchitecture.Instance.SuccessorResolver);
 
             var cfg = cfgBuilder.ConstructFlowGraph(0);
-            var blockBuilder = new BlockBuilder<DummyInstruction>();
-            var rootScope = blockBuilder.ConstructBlocks(cfg);
+            var rootScope = cfg.ConstructBlocks();
             
             var order = rootScope.GetAllBlocks().ToArray();
             Assert.Equal(
@@ -133,8 +129,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
                 DummyArchitecture.Instance.SuccessorResolver);
 
             var cfg = cfgBuilder.ConstructFlowGraph(0);
-            var blockBuilder = new BlockBuilder<DummyInstruction>();
-            var rootScope = blockBuilder.ConstructBlocks(cfg);
+            var rootScope = cfg.ConstructBlocks();
             
             var order = rootScope.GetAllBlocks().ToArray();
             Assert.Equal(
@@ -166,8 +161,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
                 DummyArchitecture.Instance.SuccessorResolver);
 
             var cfg = cfgBuilder.ConstructFlowGraph(0);
-            var blockBuilder = new BlockBuilder<DummyInstruction>();
-            var rootScope = blockBuilder.ConstructBlocks(cfg);
+            var rootScope = cfg.ConstructBlocks();
             
             var order = rootScope.GetAllBlocks().ToArray();
             Assert.Equal(
@@ -214,8 +208,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             };
 
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
-            var blockBuilder = new BlockBuilder<DummyInstruction>();
-            var rootScope = blockBuilder.ConstructBlocks(cfg);
+            var rootScope = cfg.ConstructBlocks();
 
             var order = rootScope.GetAllBlocks().ToArray();
 
@@ -255,8 +248,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             };
 
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
-            var blockBuilder = new BlockBuilder<DummyInstruction>();
-            var rootScope = blockBuilder.ConstructBlocks(cfg);
+            var rootScope = cfg.ConstructBlocks();
             
             var order = rootScope.GetAllBlocks().ToArray();
 
