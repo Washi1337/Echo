@@ -19,5 +19,10 @@ namespace Echo.ControlFlow
         /// Indicates the edge is only traversed in abnormal circumstances, typically when an exception occurs.
         /// </summary>
         Abnormal,
+        
+        /// <summary>
+        /// Indicates the edge is not actually a real edge, but a new node was found at the target.
+        /// </summary>
+        None
     }
 }
