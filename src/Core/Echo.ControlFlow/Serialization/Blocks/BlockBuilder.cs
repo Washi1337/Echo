@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Blocks;
 using Echo.ControlFlow.Regions;
-using Echo.Core.Graphing.Analysis.Sorting;
 
 namespace Echo.ControlFlow.Serialization.Blocks
 {
@@ -20,27 +19,23 @@ namespace Echo.ControlFlow.Serialization.Blocks
         /// <returns>The root scope.</returns>
         public ScopeBlock<TInstruction> ConstructBlocks(ControlFlowGraph<TInstruction> cfg)
         {
-            // Sort the nodes in topological order, where we ignore cyclic dependencies.
-            var sorter = new TopologicalSorter<ControlFlowNode<TInstruction>>(ChildrenLister)
-            {
-                IgnoreCycles = true
-            };
-            
-            var sorting = sorter
-                    .GetTopologicalSorting(cfg.Entrypoint)
-                    .Reverse()
-#if DEBUG
-                    .ToArray()
-#endif
-                ;
-            
+            var sorter = new BlockSorter<TInstruction>(cfg);
+            var sorting = sorter.GetSorting();
+            return BuildBlocksFromSortedNodes(cfg, sorting);
+        }
+
+
+        private static ScopeBlock<TInstruction> BuildBlocksFromSortedNodes(
+            ControlFlowGraph<TInstruction> cfg, 
+            IEnumerable<ControlFlowNode<TInstruction>> sorting)
+        {
             // We maintain a stack of scope information. Every time we enter a new region, we enter a new scope,
             // and similarly, we leave a scope when we leave a region.
-            
+
             var rootScope = new ScopeBlock<TInstruction>();
             var scopeStack = new IndexableStack<ScopeInfo>();
             scopeStack.Push(new ScopeInfo(cfg, rootScope));
-            
+
             // Add the nodes in the order of the sorting.
             foreach (var node in sorting)
             {
@@ -57,7 +52,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             return rootScope;
         }
 
-        private void UpdateScopeStack(ControlFlowNode<TInstruction> node, IndexableStack<ScopeInfo> scopeStack)
+        private static void UpdateScopeStack(ControlFlowNode<TInstruction> node, IndexableStack<ScopeInfo> scopeStack)
         {
             var activeRegions = node.GetSituatedRegions()
                 .Reverse()
@@ -125,57 +120,6 @@ namespace Echo.ControlFlow.Serialization.Blocks
                     scopeStack.Push(new ScopeInfo(enteredRegion, scopeBlock));
                 }
             }
-        }
-
-        private IReadOnlyList<ControlFlowNode<TInstruction>> ChildrenLister(ControlFlowNode<TInstruction> node)
-        {
-            // NOTE: Order of the resulting list is important.
-            //       We want to prioritize normal edges over abnormal edges and exception handlers.
-            
-            var visited = new HashSet<ControlFlowNode<TInstruction>>();
-            var result = new List<ControlFlowNode<TInstruction>>();
-
-            // Add fallthrough.
-            if (node.UnconditionalNeighbour is {} neighbour)
-            {
-                result.Add(neighbour);
-                visited.Add(neighbour);
-            }
-
-            // Conditional edges.
-            foreach (var edge in node.ConditionalEdges)
-            {
-                var target = edge.Target;
-                if (visited.Add(target))
-                    result.Add(target);
-            }
-
-            // Abnormal edges.
-            foreach (var edge in node.AbnormalEdges)
-            {
-                var target = edge.Target;
-                if (visited.Add(target))
-                    result.Add(target);
-            }
-
-            // Check if any exception handler might catch an error within this node.
-            var ehRegion = node.GetParentExceptionHandler();
-            while (ehRegion is {})
-            {
-                if (node.IsInRegion(ehRegion.ProtectedRegion))
-                {
-                    foreach (var handlerRegion in ehRegion.HandlerRegions)
-                    {
-                        var entrypoint = handlerRegion.GetEntrypoint();
-                        if (visited.Add(entrypoint))
-                            result.Add(entrypoint);
-                    }
-                }
-                
-                ehRegion = ehRegion.GetParentExceptionHandler();
-            }
-            
-            return result;
         }
 
         private readonly struct ScopeInfo
