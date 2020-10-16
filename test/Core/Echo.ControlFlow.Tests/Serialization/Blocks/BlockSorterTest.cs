@@ -1,9 +1,7 @@
 using System;
-using System.IO;
 using System.Linq;
+using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Blocks;
-using Echo.ControlFlow.Serialization.Dot;
-using Echo.Core.Graphing.Serialization.Dot;
 using Echo.Platforms.DummyPlatform;
 using Xunit;
 
@@ -34,6 +32,26 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
 
             for (int i = 0; i < subSequence.Length; i++)
                 Assert.Equal(cfg.Nodes[subSequence[i]], ordering[i + index]);
+        }
+
+        private static void AssertHasCombination(ControlFlowNode<int>[] ordering, params int[] combination)
+        {
+            var cfg = ordering[0].ParentGraph;
+
+            int minIndex = int.MaxValue;
+            int maxIndex = int.MinValue;
+            foreach (int id in combination)
+            {
+                int index = Array.IndexOf(ordering, cfg.Nodes[id]);
+                Assert.NotEqual(-1, index);
+                minIndex = Math.Min(index, minIndex);
+                maxIndex = Math.Max(index, maxIndex);
+            }
+
+            Assert.Equal(combination.Length, maxIndex - minIndex);
+            
+            for (int i = 0; i < combination.Length; i++)
+                Assert.Contains((int) ordering[minIndex + i].Offset, combination);
         }
 
         [Theory]
@@ -80,7 +98,27 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             cfg.Nodes[0].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.FallThrough);
             cfg.Nodes[1].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.FallThrough);
 
-            Assert.Throws<ArgumentException>(() => GetSorting(cfg));
+            Assert.Throws<BlockOrderingException>(() => GetSorting(cfg));
+        }
+
+        [Fact]
+        public void NodesInBasicRegionShouldStickTogether()
+        {
+            var cfg = GenerateGraph(4);
+            
+            cfg.Nodes[0].ConnectWith(cfg.Nodes[3], ControlFlowEdgeType.Unconditional);
+            cfg.Nodes[3].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.Unconditional);
+            cfg.Nodes[2].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.FallThrough);
+
+            var region = new BasicControlFlowRegion<int>();
+            cfg.Regions.Add(region);
+            
+            region.Nodes.Add(cfg.Nodes[3]);
+            region.Nodes.Add(cfg.Nodes[2]);
+                
+            var sorting = GetSorting(cfg);
+            AssertHasSubSequence(sorting, 2, 1);
+            AssertHasCombination(sorting, 2, 3);
         }
     }
 }
