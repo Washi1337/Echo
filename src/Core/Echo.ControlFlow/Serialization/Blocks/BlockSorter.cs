@@ -1,6 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using Echo.ControlFlow.Collections;
+using Echo.ControlFlow.Regions;
+using Echo.Core.Graphing.Analysis.Sorting;
 
 namespace Echo.ControlFlow.Serialization.Blocks
 {
@@ -8,11 +10,77 @@ namespace Echo.ControlFlow.Serialization.Blocks
     {
         public IEnumerable<ControlFlowNode<TInstruction>> GetSorting(ControlFlowGraph<TInstruction> cfg)
         {
+            // Obtain paths that cannot be reordered.
             var fallThroughPaths = GetFallThroughPaths(cfg);
-            return fallThroughPaths.SelectMany(n => n);
+            
+            // Map nodes to the path they are part of.
+            var nodeToPath = new Dictionary<ControlFlowNode<TInstruction>, List<ControlFlowNode<TInstruction>>>();
+            foreach (var path in fallThroughPaths)
+            {
+                foreach (var item in path)
+                    nodeToPath.Add(item, path);
+            }
+            
+            // Topological sort the unbreakable paths.
+            var sorter = new TopologicalSorter<ControlFlowNode<TInstruction>>(GetPathChildren)
+            {
+                IgnoreCycles = true
+            };
+
+            return sorter
+                .GetTopologicalSorting(cfg.Entrypoint)
+                .Reverse()
+                .SelectMany(n => nodeToPath[n]);
+            
+            IReadOnlyList<ControlFlowNode<TInstruction>> GetPathChildren(ControlFlowNode<TInstruction> node)
+            {
+                var result = new List<ControlFlowNode<TInstruction>>();
+                var path = nodeToPath[node];
+
+                // Get every outgoing edge in the entire path. 
+                foreach (var n in path)
+                {
+                    // Add explicit path successors.
+                    if (n.UnconditionalEdge != null && n.UnconditionalEdge.Type == ControlFlowEdgeType.Unconditional)
+                        result.Add(nodeToPath[n.UnconditionalNeighbour][0]);
+                    AddAdjacencyListToResult(result, n.ConditionalEdges);
+                    AddAdjacencyListToResult(result, n.AbnormalEdges);
+                    
+                    // Check if any exception handler might catch an error within this node.
+                    var ehRegion = n.GetParentExceptionHandler();
+                    while (ehRegion is {})
+                    {
+                        if (n.IsInRegion(ehRegion.ProtectedRegion))
+                        {
+                            foreach (var handlerRegion in ehRegion.HandlerRegions)
+                            {
+                                var entrypoint = handlerRegion.GetEntrypoint();
+                                if (!result.Contains(entrypoint))
+                                    result.Add(entrypoint);
+                            }
+                        }
+                
+                        ehRegion = ehRegion.GetParentExceptionHandler();
+                    }
+                }
+
+                return result;
+            }
+
+            void AddAdjacencyListToResult(
+                IList<ControlFlowNode<TInstruction>> result,
+                AdjacencyCollection<TInstruction> adjacency)
+            {
+                foreach (var edge in adjacency)
+                {
+                    var target = nodeToPath[edge.Target][0];
+                    if (!result.Contains(target))
+                        result.Add(target);
+                }
+            }
         }
-        
-        public List<List<ControlFlowNode<TInstruction>>> GetFallThroughPaths(ControlFlowGraph<TInstruction> cfg)
+
+        private static List<List<ControlFlowNode<TInstruction>>> GetFallThroughPaths(ControlFlowGraph<TInstruction> cfg)
         {
             var visited = new HashSet<ControlFlowNode<TInstruction>>();
             var result = new List<List<ControlFlowNode<TInstruction>>>();
@@ -26,7 +94,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             return result;
         }
 
-        private List<ControlFlowNode<TInstruction>> GetFallThroughPath(
+        private static List<ControlFlowNode<TInstruction>> GetFallThroughPath(
             ControlFlowNode<TInstruction> start, ISet<ControlFlowNode<TInstruction>> visited)
         {
             // Navigate back to root of fallthrough path.

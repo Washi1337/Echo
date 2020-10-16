@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Echo.Core.Graphing.Analysis.Sorting
 {
