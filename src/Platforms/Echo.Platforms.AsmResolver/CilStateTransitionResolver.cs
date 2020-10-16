@@ -61,7 +61,7 @@ namespace Echo.Platforms.AsmResolver
 
         /// <inheritdoc />
         public override int GetTransitionCount(SymbolicProgramState<CilInstruction> currentState,
-            in CilInstruction instruction)
+            in CilInstruction instruction, GraphBuilderContext<CilInstruction> context)
         {
             switch (instruction.OpCode.FlowControl)
             {
@@ -93,8 +93,7 @@ namespace Echo.Platforms.AsmResolver
         /// <inheritdoc />
         public override int GetTransitions(SymbolicProgramState<CilInstruction> currentState,
             in CilInstruction instruction,
-            Span<StateTransition<CilInstruction>> transitionBuffer,
-            Action<SymbolicProgramState<CilInstruction>> addHeaderFunc)
+            Span<StateTransition<CilInstruction>> transitionBuffer, GraphBuilderContext<CilInstruction> context)
         {
             // Multiplex based on flow control.
             

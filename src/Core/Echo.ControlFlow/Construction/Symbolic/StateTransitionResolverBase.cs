@@ -49,13 +49,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
 
         /// <inheritdoc />
         public abstract int GetTransitionCount(SymbolicProgramState<TInstruction> currentState,
-            in TInstruction instruction);
+            in TInstruction instruction, GraphBuilderContext<TInstruction> context);
 
         /// <inheritdoc />
         public abstract int GetTransitions(SymbolicProgramState<TInstruction> currentState,
             in TInstruction instruction,
-            Span<StateTransition<TInstruction>> transitionBuffer,
-            Action<SymbolicProgramState<TInstruction>> addHeaderFunc);
+            Span<StateTransition<TInstruction>> transitionBuffer, GraphBuilderContext<TInstruction> context);
 
         /// <summary>
         /// Applies the default fallthrough transition on a symbolic program state. 

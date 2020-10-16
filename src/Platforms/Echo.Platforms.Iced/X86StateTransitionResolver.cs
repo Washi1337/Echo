@@ -24,7 +24,7 @@ namespace Echo.Platforms.Iced
 
         /// <inheritdoc />
         public override int GetTransitionCount(SymbolicProgramState<Instruction> currentState,
-            in Instruction instruction)
+            in Instruction instruction, GraphBuilderContext<Instruction> context)
         {   
             switch (instruction.FlowControl)
             {
@@ -45,8 +45,7 @@ namespace Echo.Platforms.Iced
         /// <inheritdoc />
         public override int GetTransitions(SymbolicProgramState<Instruction> currentState,
             in Instruction instruction,
-            Span<StateTransition<Instruction>> transitionBuffer,
-            Action<SymbolicProgramState<Instruction>> addHeaderFunc)
+            Span<StateTransition<Instruction>> transitionBuffer, GraphBuilderContext<Instruction> context)
         {
             var nextState = currentState.Copy();
             ApplyDefaultBehaviour(nextState, instruction);

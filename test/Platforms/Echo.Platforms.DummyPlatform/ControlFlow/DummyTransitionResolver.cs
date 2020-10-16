@@ -30,7 +30,7 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
         }
 
         public override int GetTransitionCount(SymbolicProgramState<DummyInstruction> currentState,
-            in DummyInstruction instruction)
+            in DummyInstruction instruction, GraphBuilderContext<DummyInstruction> context)
         {
             switch (instruction.OpCode)
             {
@@ -58,8 +58,7 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
 
         public override int GetTransitions(SymbolicProgramState<DummyInstruction> currentState,
             in DummyInstruction instruction,
-            Span<StateTransition<DummyInstruction>> transitionBuffer,
-            Action<SymbolicProgramState<DummyInstruction>> addHeaderFunc)
+            Span<StateTransition<DummyInstruction>> transitionBuffer, GraphBuilderContext<DummyInstruction> context)
         {
             var nextState = currentState.Copy();
             ApplyDefaultBehaviour(nextState, instruction);
