@@ -1,42 +1,86 @@
-using System.Collections.Generic;
+using System;
+using System.IO;
 using System.Linq;
-using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Serialization.Blocks;
-using Echo.Platforms.DummyPlatform.Code;
+using Echo.ControlFlow.Serialization.Dot;
+using Echo.Core.Graphing.Serialization.Dot;
+using Echo.Platforms.DummyPlatform;
 using Xunit;
 
 namespace Echo.ControlFlow.Tests.Serialization.Blocks
 {
     public class BlockSorterTest
     {
-        private ControlFlowNode<DummyInstruction>[] GetSorting(DummyInstruction[] instructions)
+        private static ControlFlowGraph<int> GenerateGraph(int nodeCount)
         {
-            var builder = new StaticFlowGraphBuilder<DummyInstruction>(
-                DummyArchitecture.Instance, 
-                instructions,
-                DummyArchitecture.Instance.SuccessorResolver);
-
-            var cfg = builder.ConstructFlowGraph(0);
-            
-            var sorter = new BlockSorter<DummyInstruction>(cfg);
-            return sorter.GetSorting().ToArray();
+            var cfg = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            for (int i =0 ; i < nodeCount;i++)
+                cfg.Nodes.Add(new ControlFlowNode<int>(i,i));
+            cfg.Entrypoint = cfg.Nodes[0];
+            return cfg;
         }
-        
-        [Fact]
-        public void SequenceShouldStartWithEntrypointNode()
+
+        private static ControlFlowNode<int>[] GetSorting(ControlFlowGraph<int> cfg)
         {
-            var sorting = GetSorting(new[]
-            {
-                DummyInstruction.Op(0, 0, 1),
-                DummyInstruction.JmpCond(1, 4),
-                DummyInstruction.Op(2, 0, 0),
-                DummyInstruction.Jmp(3, 5),
-                DummyInstruction.Op(4, 0, 0),
-                DummyInstruction.Ret(5), 
-            });
+            var sorter = new BlockSorter<int>();
+            return sorter.GetSorting(cfg).ToArray();
+        }
+
+        private static void AssertHasSubSequence(ControlFlowNode<int>[] ordering, params int[] subSequence)
+        {
+            var cfg = ordering[0].ParentGraph;
+            int index = Array.IndexOf(ordering, cfg.Nodes[subSequence[0]]);
+            Assert.NotEqual(-1, index);
+
+            for (int i = 0; i < subSequence.Length; i++)
+                Assert.Equal(cfg.Nodes[subSequence[i]], ordering[i + index]);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        public void SequenceShouldStartWithEntrypointNode(long entrypoint)
+        {
+            var cfg = GenerateGraph(2);
+            cfg.Nodes[0].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.Unconditional);
+            cfg.Nodes[1].ConnectWith(cfg.Nodes[0], ControlFlowEdgeType.Unconditional);
+
+            var sorting = GetSorting(cfg);
+            Assert.Equal(entrypoint, sorting[0].Offset);
+        }
+
+        [Fact]
+        public void FallThroughEdgesShouldStickTogether()
+        {
+            var cfg = GenerateGraph(8);
+            cfg.Nodes[0].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[1].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.Unconditional);
             
-            Assert.Equal(0, sorting[0].Offset);
+            cfg.Nodes[6].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.Conditional);
+            cfg.Nodes[6].ConnectWith(cfg.Nodes[7], ControlFlowEdgeType.FallThrough);
+            
+            cfg.Nodes[2].ConnectWith(cfg.Nodes[3], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[2].ConnectWith(cfg.Nodes[4], ControlFlowEdgeType.Conditional);
+            
+            cfg.Nodes[3].ConnectWith(cfg.Nodes[5], ControlFlowEdgeType.Unconditional);
+            cfg.Nodes[4].ConnectWith(cfg.Nodes[5], ControlFlowEdgeType.FallThrough);
+            
+            cfg.Nodes[5].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.FallThrough);
+
+            var sorting = GetSorting(cfg);
+            AssertHasSubSequence(sorting, 0, 1);
+            AssertHasSubSequence(sorting, 2, 3);
+            AssertHasSubSequence(sorting, 4, 5, 6, 7);
+        }
+
+        [Fact]
+        public void MultipleIncomingFallThroughEdgesShouldThrow()
+        {
+            var cfg = GenerateGraph(3);
+            cfg.Nodes[0].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[1].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.FallThrough);
+
+            Assert.Throws<ArgumentException>(() => GetSorting(cfg));
         }
     }
 }

@@ -6,25 +6,18 @@ namespace Echo.ControlFlow.Serialization.Blocks
 {
     public sealed class BlockSorter<TInstruction>
     {
-        private readonly ControlFlowGraph<TInstruction> _cfg;
-
-        public BlockSorter(ControlFlowGraph<TInstruction> cfg)
+        public IEnumerable<ControlFlowNode<TInstruction>> GetSorting(ControlFlowGraph<TInstruction> cfg)
         {
-            _cfg = cfg ?? throw new ArgumentNullException(nameof(cfg));
-        }
-
-        public IEnumerable<ControlFlowNode<TInstruction>> GetSorting()
-        {
-            var components = GetFallThroughComponents();
+            var components = GetFallThroughComponents(cfg);
             return components.SelectMany(n => n);
         }
         
-        public List<List<ControlFlowNode<TInstruction>>> GetFallThroughComponents()
+        public List<List<ControlFlowNode<TInstruction>>> GetFallThroughComponents(ControlFlowGraph<TInstruction> cfg)
         {
             var visited = new HashSet<ControlFlowNode<TInstruction>>();
             var result = new List<List<ControlFlowNode<TInstruction>>>();
             
-            foreach (var node in _cfg.Nodes)
+            foreach (var node in cfg.Nodes)
             {
                 if (visited.Add(node))
                     result.Add(GetFallThroughComponent(node, visited));

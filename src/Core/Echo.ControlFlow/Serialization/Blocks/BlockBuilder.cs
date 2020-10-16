@@ -19,8 +19,8 @@ namespace Echo.ControlFlow.Serialization.Blocks
         /// <returns>The root scope.</returns>
         public ScopeBlock<TInstruction> ConstructBlocks(ControlFlowGraph<TInstruction> cfg)
         {
-            var sorter = new BlockSorter<TInstruction>(cfg);
-            var sorting = sorter.GetSorting();
+            var sorter = new BlockSorter<TInstruction>();
+            var sorting = sorter.GetSorting(cfg);
             return BuildBlocksFromSortedNodes(cfg, sorting);
         }
 
