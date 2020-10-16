@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Echo.ControlFlow.Collections;
-using Echo.ControlFlow.Regions;
 using Echo.Core.Graphing.Analysis.Sorting;
 
 namespace Echo.ControlFlow.Serialization.Blocks
@@ -18,21 +16,12 @@ namespace Echo.ControlFlow.Serialization.Blocks
         /// <param name="cfg">The control flow graph to pull the nodes from.</param>
         /// <typeparam name="TInstruction">The type of instructions stored in the graph.</typeparam>
         /// <returns>The ordering.</returns>
-        public static IEnumerable<ControlFlowNode<TInstruction>> SortNodes<TInstruction>(this ControlFlowGraph<TInstruction> cfg)
+        public static IEnumerable<ControlFlowNode<TInstruction>> SortNodes<TInstruction>(
+            this ControlFlowGraph<TInstruction> cfg)
         {
-            // Obtain paths that cannot be reordered.
-            var fallThroughPaths = GetFallThroughPaths(cfg);
+            var pathsView = DetermineUnbreakablePaths(cfg);
             
-            // Map nodes to the path they are part of.
-            var nodeToPath = new Dictionary<ControlFlowNode<TInstruction>, List<ControlFlowNode<TInstruction>>>();
-            foreach (var path in fallThroughPaths)
-            {
-                foreach (var item in path)
-                    nodeToPath.Add(item, path);
-            }
-            
-            // Topological sort the unbreakable paths.
-            var sorter = new TopologicalSorter<ControlFlowNode<TInstruction>>(GetPathChildren)
+            var sorter = new TopologicalSorter<ControlFlowNode<TInstruction>>(pathsView.GetImpliedNeighbours)
             {
                 IgnoreCycles = true
             };
@@ -40,66 +29,19 @@ namespace Echo.ControlFlow.Serialization.Blocks
             return sorter
                 .GetTopologicalSorting(cfg.Entrypoint)
                 .Reverse()
-                .SelectMany(n => nodeToPath[n]);
-            
-            IReadOnlyList<ControlFlowNode<TInstruction>> GetPathChildren(ControlFlowNode<TInstruction> node)
-            {
-                var result = new List<ControlFlowNode<TInstruction>>();
-                var path = nodeToPath[node];
-
-                // Get every outgoing edge in the entire path. 
-                foreach (var n in path)
-                {
-                    // Add explicit path successors.
-                    if (n.UnconditionalEdge != null && n.UnconditionalEdge.Type == ControlFlowEdgeType.Unconditional)
-                        result.Add(nodeToPath[n.UnconditionalNeighbour][0]);
-                    AddAdjacencyListToResult(result, n.ConditionalEdges);
-                    AddAdjacencyListToResult(result, n.AbnormalEdges);
-                    
-                    // Check if any exception handler might catch an error within this node.
-                    var ehRegion = n.GetParentExceptionHandler();
-                    while (ehRegion is {})
-                    {
-                        if (n.IsInRegion(ehRegion.ProtectedRegion))
-                        {
-                            foreach (var handlerRegion in ehRegion.HandlerRegions)
-                            {
-                                var entrypoint = handlerRegion.GetEntrypoint();
-                                if (!result.Contains(entrypoint))
-                                    result.Add(entrypoint);
-                            }
-                        }
-                
-                        ehRegion = ehRegion.GetParentExceptionHandler();
-                    }
-                }
-
-                return result;
-            }
-
-            void AddAdjacencyListToResult(
-                IList<ControlFlowNode<TInstruction>> result,
-                AdjacencyCollection<TInstruction> adjacency)
-            {
-                foreach (var edge in adjacency)
-                {
-                    var target = nodeToPath[edge.Target][0];
-                    if (!result.Contains(target))
-                        result.Add(target);
-                }
-            }
+                .SelectMany(n => pathsView.GetPath(n));
         }
 
-        private static List<List<ControlFlowNode<TInstruction>>> GetFallThroughPaths<TInstruction>(
+        private static UnbreakablePathsView<TInstruction> DetermineUnbreakablePaths<TInstruction>(
             ControlFlowGraph<TInstruction> cfg)
         {
             var visited = new HashSet<ControlFlowNode<TInstruction>>();
-            var result = new List<List<ControlFlowNode<TInstruction>>>();
+            var result = new UnbreakablePathsView<TInstruction>();
             
             foreach (var node in cfg.Nodes)
             {
                 if (!visited.Contains(node))
-                    result.Add(GetFallThroughPath(node, visited));
+                    result.AddPath(GetFallThroughPath(node, visited));
             }
 ;
             return result;
