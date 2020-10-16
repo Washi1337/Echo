@@ -70,8 +70,7 @@ namespace Echo.ControlFlow.Construction.Static
         /// <inheritdoc />
         protected override IInstructionTraversalResult<TInstruction> CollectInstructions(long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
-            var context = new GraphBuilderContext<TInstruction>(Architecture);
-            var result = context.TraversalResult;
+            var result = new InstructionTraversalResult<TInstruction>(Architecture);
             result.BlockHeaders.Add(entrypoint);
             result.BlockHeaders.UnionWith(knownBlockHeaders);
             
@@ -102,7 +101,7 @@ namespace Echo.ControlFlow.Construction.Static
                     {
                         // Get the instruction at the provided offset, and figure out how many successors it has.
                         var instruction = Instructions.GetInstructionAtOffset(currentOffset);
-                        int successorCount = GetSuccessors(context, successorsBufferPool, ref successorsBuffer, instruction);
+                        int successorCount = GetSuccessors(successorsBufferPool, ref successorsBuffer, instruction);
 
                         // Store collected data.
                         result.AddInstruction(instruction);
@@ -157,12 +156,11 @@ namespace Echo.ControlFlow.Construction.Static
         }
 
         private int GetSuccessors(
-            GraphBuilderContext<TInstruction> context,
             ArrayPool<SuccessorInfo> arrayPool, 
             ref SuccessorInfo[] successorsBuffer, 
             in TInstruction instruction)
         {
-            int successorCount = SuccessorResolver.GetSuccessorsCount(instruction, context);
+            int successorCount = SuccessorResolver.GetSuccessorsCount(instruction);
 
             // Verify that our buffer has enough elements.
             if (successorsBuffer.Length < successorCount)
@@ -173,7 +171,7 @@ namespace Echo.ControlFlow.Construction.Static
 
             // Get successor information.
             var successorsBufferSlice = new Span<SuccessorInfo>(successorsBuffer, 0, successorCount);
-            int actualSuccessorCount = SuccessorResolver.GetSuccessors(instruction, successorsBufferSlice, context);
+            int actualSuccessorCount = SuccessorResolver.GetSuccessors(instruction, successorsBufferSlice);
             if (actualSuccessorCount > successorCount)
             {
                 // Sanity check: This should only happen if the successor resolver contains a bug.

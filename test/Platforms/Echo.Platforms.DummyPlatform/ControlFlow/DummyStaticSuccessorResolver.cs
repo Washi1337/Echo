@@ -9,7 +9,7 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
     public class DummyStaticSuccessorResolver : IStaticSuccessorResolver<DummyInstruction>
     {
         /// <inheritdoc />
-        public int GetSuccessorsCount(in DummyInstruction instruction, GraphBuilderContext<DummyInstruction> context)
+        public int GetSuccessorsCount(in DummyInstruction instruction)
         {
             switch (instruction.OpCode)
             {
@@ -37,8 +37,7 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
         }
 
         /// <inheritdoc />
-        public int GetSuccessors(in DummyInstruction instruction, Span<SuccessorInfo> successorBuffer,
-            GraphBuilderContext<DummyInstruction> context)
+        public int GetSuccessors(in DummyInstruction instruction, Span<SuccessorInfo> successorBuffer)
         {
             switch (instruction.OpCode)
             {

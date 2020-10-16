@@ -14,7 +14,7 @@ namespace Echo.Platforms.Iced
     public class X86StaticSuccessorResolver : IStaticSuccessorResolver<Instruction>
     {
         /// <inheritdoc />
-        public int GetSuccessorsCount(in Instruction instruction, GraphBuilderContext<Instruction> context)
+        public int GetSuccessorsCount(in Instruction instruction)
         {
             switch (instruction.FlowControl)
             {
@@ -31,8 +31,7 @@ namespace Echo.Platforms.Iced
         }
 
         /// <inheritdoc />
-        public int GetSuccessors(in Instruction instruction, Span<SuccessorInfo> successorsBuffer,
-            GraphBuilderContext<Instruction> context)
+        public int GetSuccessors(in Instruction instruction, Span<SuccessorInfo> successorsBuffer)
         {
             switch (instruction.FlowControl)
             {

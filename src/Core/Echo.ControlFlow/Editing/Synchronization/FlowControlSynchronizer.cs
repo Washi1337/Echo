@@ -142,7 +142,7 @@ namespace Echo.ControlFlow.Editing.Synchronization
                         transaction.EnqueueAction(new UpdateFallThroughAction<TInstruction>(offset, null));
                         
                         // Verify that our buffer has enough elements.
-                        int successorCount = SuccessorResolver.GetSuccessorsCount(instruction, TODO);
+                        int successorCount = SuccessorResolver.GetSuccessorsCount(instruction);
                         if (successorsBuffer.Length < successorCount)
                         {
                             arrayPool.Return(successorsBuffer);
@@ -151,7 +151,7 @@ namespace Echo.ControlFlow.Editing.Synchronization
                         
                         // Get new successors.
                         var successorBufferSlice = new Span<SuccessorInfo>(successorsBuffer, 0, successorCount);
-                        int actualSuccessorCount = SuccessorResolver.GetSuccessors(instruction, successorBufferSlice, TODO);
+                        int actualSuccessorCount = SuccessorResolver.GetSuccessors(instruction, successorBufferSlice);
                         if (actualSuccessorCount > successorCount)
                             throw new InvalidOperationException();
                         
@@ -204,14 +204,14 @@ namespace Echo.ControlFlow.Editing.Synchronization
             var arrayPool = ArrayPool<SuccessorInfo>.Shared;
             
             // Verify that our buffer has enough elements.
-            int successorCount = SuccessorResolver.GetSuccessorsCount(node.Contents.Footer, TODO);
+            int successorCount = SuccessorResolver.GetSuccessorsCount(node.Contents.Footer);
             var successorsBuffer = arrayPool.Rent(successorCount);
 
             try
             {
                 // Get new successors.
                 var successorBufferSlice = new Span<SuccessorInfo>(successorsBuffer, 0, successorCount);
-                int actualSuccessorCount = SuccessorResolver.GetSuccessors(node.Contents.Footer, successorBufferSlice, TODO);
+                int actualSuccessorCount = SuccessorResolver.GetSuccessors(node.Contents.Footer, successorBufferSlice);
                 if (actualSuccessorCount > successorCount)
                     throw new InvalidOperationException();
 
