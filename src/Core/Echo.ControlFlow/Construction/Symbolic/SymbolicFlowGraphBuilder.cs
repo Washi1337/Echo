@@ -175,6 +175,13 @@ namespace Echo.ControlFlow.Construction.Symbolic
             {
                 // Translate transition into successor info and register.
                 var transition = transitionsBufferSlice[i];
+                if (!transition.IsRealEdge)
+                {
+                    context.Result.BlockHeaders.Add(transition.NextState.ProgramCounter);
+                    agenda.Push(transition.NextState);
+                    continue;
+                }
+                
                 var successor = new SuccessorInfo(transition.NextState.ProgramCounter, transition.EdgeType);
                 result.RegisterSuccessor(instruction, successor);
                 

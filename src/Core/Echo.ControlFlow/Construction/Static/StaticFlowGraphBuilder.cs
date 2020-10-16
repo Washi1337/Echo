@@ -112,6 +112,13 @@ namespace Echo.ControlFlow.Construction.Static
                         {
                             var successor = successorsBuffer[i];
                             long destinationAddress = successor.DestinationAddress;
+
+                            if (!successor.IsRealEdge)
+                            {
+                                result.BlockHeaders.Add(destinationAddress);
+                                agenda.Push(destinationAddress);
+                                continue;
+                            }
                             
                             if (destinationAddress == currentOffset + Architecture.GetSize(instruction))
                             {
