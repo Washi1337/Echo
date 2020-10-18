@@ -6,8 +6,7 @@ using Echo.ControlFlow.Regions;
 namespace Echo.ControlFlow.Serialization.Blocks
 {
     internal sealed class UnbreakablePathsView<TInstruction> 
-    {
-        private readonly List<IList<ControlFlowNode<TInstruction>>> _paths = new List<IList<ControlFlowNode<TInstruction>>>(); 
+    { 
         private readonly Dictionary<ControlFlowNode<TInstruction>, IList<ControlFlowNode<TInstruction>>> _nodeToPath =
             new Dictionary<ControlFlowNode<TInstruction>, IList<ControlFlowNode<TInstruction>>>(); 
             
@@ -15,7 +14,6 @@ namespace Echo.ControlFlow.Serialization.Blocks
         {
             foreach (var item in path)
                 _nodeToPath.Add(item, path);
-            _paths.Add(path);
         }
 
         public IList<ControlFlowNode<TInstruction>> GetPath(ControlFlowNode<TInstruction> node)
