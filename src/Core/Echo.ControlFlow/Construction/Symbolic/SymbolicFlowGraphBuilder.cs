@@ -173,18 +173,21 @@ namespace Echo.ControlFlow.Construction.Symbolic
 
             for (int i = 0; i < actualTransitionCount; i++)
             {
-                // Translate transition into successor info and register.
                 var transition = transitionsBufferSlice[i];
-                if (!transition.IsRealEdge)
+
+                if (transition.IsRealEdge)
                 {
-                    context.Result.BlockHeaders.Add(transition.NextState.ProgramCounter);
-                    agenda.Push(transition.NextState);
-                    continue;
+                    // Translate transition into successor info, register it and schedule it for processing.
+                    var successor = new SuccessorInfo(transition.NextState.ProgramCounter, transition.EdgeType);
+                    result.RegisterSuccessor(instruction, successor);
                 }
-                
-                var successor = new SuccessorInfo(transition.NextState.ProgramCounter, transition.EdgeType);
-                result.RegisterSuccessor(instruction, successor);
-                
+                else
+                {
+                    // Transition describes the discovery of a new block header, but does not transfer control to
+                    // it directly. Only register it as a new block header.
+                    context.Result.BlockHeaders.Add(transition.NextState.ProgramCounter);
+                }
+
                 // Schedule transition for further processing.
                 agenda.Push(transition.NextState);
             }

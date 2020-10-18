@@ -115,6 +115,8 @@ namespace Echo.ControlFlow.Construction.Static
 
                             if (!successor.IsRealEdge)
                             {
+                                // Successor is implied by the instruction but does not necessarily
+                                // transfer control to it directly. Only register the block header. 
                                 result.BlockHeaders.Add(destinationAddress);
                                 agenda.Push(destinationAddress);
                                 continue;

@@ -29,9 +29,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <param name="currentState">The current state of the program.</param>
         /// <param name="instruction">The instruction to evaluate.</param>
         /// <returns>The number of transitions that the provided instruction might apply.</returns>
-        int GetTransitionCount(
-            SymbolicProgramState<TInstruction> currentState,
-            in TInstruction instruction);
+        int GetTransitionCount(SymbolicProgramState<TInstruction> currentState, in TInstruction instruction);
 
         /// <summary>
         /// Resolves all possible program state transitions that the provided instruction can apply. 

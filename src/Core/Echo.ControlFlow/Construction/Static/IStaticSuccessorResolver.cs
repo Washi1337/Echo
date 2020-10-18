@@ -52,8 +52,6 @@ namespace Echo.ControlFlow.Construction.Static
         /// <param name="instruction">The instruction to resolve the successors from.</param>
         /// <param name="successorsBuffer">The buffer to write the successors into.</param>
         /// <returns>The extracted successor references.</returns>
-        int GetSuccessors(
-            in TInstruction instruction,
-            Span<SuccessorInfo> successorsBuffer);
+        int GetSuccessors(in TInstruction instruction, Span<SuccessorInfo> successorsBuffer);
     }
 }
