@@ -43,6 +43,7 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
                     return 1;
                 
                 case DummyOpCode.JmpCond:
+                case DummyOpCode.PushOffset:
                     return 2;
                 
                 case DummyOpCode.Ret:
@@ -77,6 +78,9 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
                 
                 case DummyOpCode.JmpCond:
                     return GetJumpCondTransitions(nextState, instruction, transitionBuffer);
+                
+                case DummyOpCode.PushOffset:
+                    return GetPushOffsetTransitions(nextState, instruction, transitionBuffer);
                 
                 case DummyOpCode.Ret:
                     return 0;
@@ -134,6 +138,18 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
 
             successorBuffer[targets.Count] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough);
             return targets.Count + 1;
+        }
+
+        private static int GetPushOffsetTransitions(
+            SymbolicProgramState<DummyInstruction> nextState,
+            DummyInstruction instruction, 
+            Span<StateTransition<DummyInstruction>> successorBuffer)
+        {
+            var branchState = nextState.Copy();
+            branchState.ProgramCounter = (long) instruction.Operands[0];
+            successorBuffer[1] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough);
+            successorBuffer[0] = new StateTransition<DummyInstruction>(branchState, ControlFlowEdgeType.None);
+            return 2;
         }
     }
 }
