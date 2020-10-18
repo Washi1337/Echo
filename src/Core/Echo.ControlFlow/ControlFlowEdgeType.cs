@@ -6,18 +6,23 @@ namespace Echo.ControlFlow
     public enum ControlFlowEdgeType
     {
         /// <summary>
+        /// Indicates the edge is not actually a real edge, but a new node was found at the target.
+        /// </summary>
+        None,
+
+        /// <summary>
         /// Indicates the edge is the default fallthrough edge of a node, and is traversed when no other edge is traversed.
         /// </summary>
         FallThrough,
-        
+
         /// <summary>
         /// Indicates the edge is only traversed when a specific condition is met.
         /// </summary>
         Conditional,
-        
+
         /// <summary>
         /// Indicates the edge is only traversed in abnormal circumstances, typically when an exception occurs.
         /// </summary>
-        Abnormal,
+        Abnormal
     }
 }

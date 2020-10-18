@@ -30,7 +30,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <param name="instruction">The instruction to evaluate.</param>
         /// <returns>The number of transitions that the provided instruction might apply.</returns>
         int GetTransitionCount(SymbolicProgramState<TInstruction> currentState, in TInstruction instruction);
-        
+
         /// <summary>
         /// Resolves all possible program state transitions that the provided instruction can apply. 
         /// </summary>
@@ -39,8 +39,8 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <param name="transitionBuffer">The output buffer to write the transitions that the instruction might apply.</param>
         /// <returns>The number of transitions that were written into <paramref name="transitionBuffer"/>.</returns>
         int GetTransitions(
-            SymbolicProgramState<TInstruction> currentState, 
-            in TInstruction instruction, 
+            SymbolicProgramState<TInstruction> currentState,
+            in TInstruction instruction,
             Span<StateTransition<TInstruction>> transitionBuffer);
     }
 }

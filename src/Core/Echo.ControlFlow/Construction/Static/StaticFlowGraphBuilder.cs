@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Linq;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction.Static
@@ -27,13 +28,13 @@ namespace Echo.ControlFlow.Construction.Static
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
         public StaticFlowGraphBuilder(
             IInstructionSetArchitecture<TInstruction> architecture,
-            IEnumerable<TInstruction> instructions, 
+            IEnumerable<TInstruction> instructions,
             IStaticSuccessorResolver<TInstruction> successorResolver)
         {
             Instructions = new ListInstructionProvider<TInstruction>(architecture, instructions);
             SuccessorResolver = successorResolver ?? throw new ArgumentNullException(nameof(successorResolver));
         }
-        
+
         /// <summary>
         /// Creates a new static graph builder using the provided instruction successor resolver.
         /// </summary>
@@ -41,7 +42,7 @@ namespace Echo.ControlFlow.Construction.Static
         /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
         public StaticFlowGraphBuilder(
-            IStaticInstructionProvider<TInstruction> instructions, 
+            IStaticInstructionProvider<TInstruction> instructions,
             IStaticSuccessorResolver<TInstruction> successorResolver)
         {
             Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
@@ -108,11 +109,22 @@ namespace Echo.ControlFlow.Construction.Static
 
                         // Figure out next offsets to process.
                         bool nextInstructionIsSuccessor = false;
+                        int realSuccessorCount = 0;
                         for (int i = 0; i < successorCount; i++)
                         {
                             var successor = successorsBuffer[i];
                             long destinationAddress = successor.DestinationAddress;
+
+                            if (!successor.IsRealEdge)
+                            {
+                                // Successor is implied by the instruction but does not necessarily
+                                // transfer control to it directly. Only register the block header. 
+                                result.BlockHeaders.Add(destinationAddress);
+                                agenda.Push(destinationAddress);
+                                continue;
+                            }
                             
+                            realSuccessorCount++;
                             if (destinationAddress == currentOffset + Architecture.GetSize(instruction))
                             {
                                 // Successor is just the next instruction.
@@ -131,7 +143,7 @@ namespace Echo.ControlFlow.Construction.Static
                         // If we have multiple successors (e.g. as with an if-else construct), or the next instruction is
                         // not a successor (e.g. with a return address), the next instruction is another block header. 
                         if (!nextInstructionIsSuccessor
-                            || successorCount > 1
+                            || realSuccessorCount > 1
                             || (Architecture.GetFlowControl(instruction) & InstructionFlowControl.CanBranch) != 0)
                         {
                             result.BlockHeaders.Add(currentOffset + Architecture.GetSize(instruction));
@@ -175,7 +187,5 @@ namespace Echo.ControlFlow.Construction.Static
 
             return actualSuccessorCount;
         }
-
     }
-    
 }

@@ -33,6 +33,11 @@ namespace Echo.ControlFlow.Construction
             get;
         }
 
+        /// <summary>
+        /// Gets whether the edge is a real edge (not <see cref="ControlFlowEdgeType.None"/>).
+        /// </summary>
+        public bool IsRealEdge => EdgeType != ControlFlowEdgeType.None;
+
         /// <inheritdoc />
         public override string ToString() => 
             $"{DestinationAddress:X8} ({EdgeType})";

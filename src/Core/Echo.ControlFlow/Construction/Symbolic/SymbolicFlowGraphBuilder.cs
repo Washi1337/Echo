@@ -173,11 +173,21 @@ namespace Echo.ControlFlow.Construction.Symbolic
 
             for (int i = 0; i < actualTransitionCount; i++)
             {
-                // Translate transition into successor info and register.
                 var transition = transitionsBufferSlice[i];
-                var successor = new SuccessorInfo(transition.NextState.ProgramCounter, transition.EdgeType);
-                result.RegisterSuccessor(instruction, successor);
-                
+
+                if (transition.IsRealEdge)
+                {
+                    // Translate transition into successor info, register it and schedule it for processing.
+                    var successor = new SuccessorInfo(transition.NextState.ProgramCounter, transition.EdgeType);
+                    result.RegisterSuccessor(instruction, successor);
+                }
+                else
+                {
+                    // Transition describes the discovery of a new block header, but does not transfer control to
+                    // it directly. Only register it as a new block header.
+                    context.Result.BlockHeaders.Add(transition.NextState.ProgramCounter);
+                }
+
                 // Schedule transition for further processing.
                 agenda.Push(transition.NextState);
             }
@@ -237,29 +247,29 @@ namespace Echo.ControlFlow.Construction.Symbolic
         {
             private readonly ArrayPool<StateTransition<TInstruction>> _transitionsBufferPool;
             private StateTransition<TInstruction>[] _transitionsBuffer;
-            
-            public GraphBuilderContext(IInstructionSetArchitecture<TInstruction> architecture)
+
+            internal GraphBuilderContext(IInstructionSetArchitecture<TInstruction> architecture)
             {
                 Result = new InstructionTraversalResult<TInstruction>(architecture);
                 RecordedStates = new Dictionary<long, SymbolicProgramState<TInstruction>>();
-                
+
                 _transitionsBufferPool = ArrayPool<StateTransition<TInstruction>>.Shared;
-                
+
                 // Most common case is at most 2 transitions per instruction.
                 _transitionsBuffer = _transitionsBufferPool.Rent(2);
             }
 
-            public IDictionary<long, SymbolicProgramState<TInstruction>> RecordedStates
+            internal InstructionTraversalResult<TInstruction> Result
             {
                 get;
             }
 
-            public InstructionTraversalResult<TInstruction> Result
+            internal IDictionary<long, SymbolicProgramState<TInstruction>> RecordedStates
             {
                 get;
             }
 
-            public StateTransition<TInstruction>[] GetTransitionsBuffer(int minimalSize)
+            internal StateTransition<TInstruction>[] GetTransitionsBuffer(int minimalSize)
             {
                 if (_transitionsBuffer.Length < minimalSize)
                 {
@@ -274,11 +284,10 @@ namespace Echo.ControlFlow.Construction.Symbolic
             {
                 if (_transitionsBuffer is null)
                     return;
-                
+
                 _transitionsBufferPool.Return(_transitionsBuffer);
                 _transitionsBuffer = null;
             }
         }
-
     }
 }

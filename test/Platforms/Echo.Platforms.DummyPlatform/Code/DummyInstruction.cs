@@ -49,6 +49,11 @@ namespace Echo.Platforms.DummyPlatform.Code
             return new DummyInstruction(offset, DummyOpCode.Ret, 0, 0);
         }
 
+        public static DummyInstruction PushOffset(long offset, long target)
+        {
+            return new DummyInstruction(offset, DummyOpCode.PushOffset, 0, 1, target);
+        }
+
         public DummyInstruction(long offset, DummyOpCode opCode, int popCount, int pushCount, params object[] operands)
         {
             Offset = offset;
