@@ -48,12 +48,12 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
                 int index = Array.IndexOf(ordering, node);
                 Assert.NotEqual(-1, index);
                 minIndex = Math.Min(index, minIndex);
-                maxIndex = Math.Min(index, maxIndex);
+                maxIndex = Math.Max(index, maxIndex);
             }
 
-            Assert.Equal(cluster.Length, maxIndex - minIndex);
+            Assert.Equal(cluster.Length, maxIndex - minIndex + 1);
 
-            var range = ordering[minIndex..maxIndex];
+            var range = ordering[minIndex..(maxIndex+1)];
             Assert.Equal(expected, new HashSet<ControlFlowNode<int>>(range));
         }
 
@@ -183,6 +183,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var handlerRegion = new BasicControlFlowRegion<int>();
             ehRegion.HandlerRegions.Add(handlerRegion);
             handlerRegion.Nodes.Add(cfg.Nodes[5]);
+            handlerRegion.Entrypoint = cfg.Nodes[5];
 
             var sorting = cfg
                 .SortNodes()

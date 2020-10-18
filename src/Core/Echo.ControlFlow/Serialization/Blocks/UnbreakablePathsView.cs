@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Echo.ControlFlow.Collections;
 using Echo.ControlFlow.Regions;
@@ -32,7 +33,12 @@ namespace Echo.ControlFlow.Serialization.Blocks
             {
                 // Add explicit path successors.
                 if (n.UnconditionalEdge != null && n.UnconditionalEdge.Type == ControlFlowEdgeType.Unconditional)
-                    result.Add(GetPath(n.UnconditionalNeighbour)[0]);
+                {
+                    var neighbourEntry = GetPath(n.UnconditionalNeighbour)[0];
+                    if (!result.Contains(neighbourEntry))
+                        result.Add(neighbourEntry);
+                }
+
                 AddAdjacencyListToResult(n.ConditionalEdges, result);
                 AddAdjacencyListToResult(n.AbnormalEdges, result);
                 
@@ -42,11 +48,21 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 {
                     if (n.IsInRegion(ehRegion.ProtectedRegion))
                     {
-                        foreach (var handlerRegion in ehRegion.HandlerRegions)
+                        for (int i = 0; i < ehRegion.HandlerRegions.Count; i++)
                         {
+                            var handlerRegion = ehRegion.HandlerRegions[i];
+                            
+                            // Ensure the handler has an entrypoint that we can jump to.
                             var entrypoint = handlerRegion.GetEntrypoint();
-                            if (!result.Contains(entrypoint))
-                                result.Add(entrypoint);
+                            if (entrypoint is null)
+                            {
+                                throw new InvalidOperationException(
+                                    $"Handler region {i} of exception handler does not have an entrypoint assigned.");
+                            }
+
+                            var entryNode = GetPath(entrypoint)[0];
+                            if (!result.Contains(entryNode))
+                                result.Add(entryNode);
                         }
                     }
                 
