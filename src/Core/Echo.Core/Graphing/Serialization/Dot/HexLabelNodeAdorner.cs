@@ -4,7 +4,7 @@ namespace Echo.Core.Graphing.Serialization.Dot
 {
     /// <summary>
     /// Represents a node adorner that adds a label to a node containing the hexadecimal representation of the
-    /// node's identifier.
+    /// <see cref="IIdentifiedNode.Id"/> property.
     /// </summary>
     public class HexLabelNodeAdorner : IDotNodeAdorner
     {
