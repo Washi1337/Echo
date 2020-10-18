@@ -119,12 +119,12 @@ namespace Echo.ControlFlow.Construction.Static
                             {
                                 // Successor is implied by the instruction but does not necessarily
                                 // transfer control to it directly. Only register the block header. 
-                                realSuccessorCount++;
                                 result.BlockHeaders.Add(destinationAddress);
                                 agenda.Push(destinationAddress);
                                 continue;
                             }
                             
+                            realSuccessorCount++;
                             if (destinationAddress == currentOffset + Architecture.GetSize(instruction))
                             {
                                 // Successor is just the next instruction.
