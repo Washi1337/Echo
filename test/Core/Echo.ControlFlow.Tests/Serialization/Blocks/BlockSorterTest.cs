@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Blocks;
-using Echo.ControlFlow.Serialization.Dot;
-using Echo.Core.Graphing.Serialization.Dot;
 using Echo.Platforms.DummyPlatform;
 using Xunit;
 
@@ -16,8 +13,8 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         private static ControlFlowGraph<int> GenerateGraph(int nodeCount)
         {
             var cfg = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            for (int i =0 ; i < nodeCount;i++)
-                cfg.Nodes.Add(new ControlFlowNode<int>(i,i));
+            for (int i = 0; i < nodeCount; i++)
+                cfg.Nodes.Add(new ControlFlowNode<int>(i, i));
             cfg.Entrypoint = cfg.Nodes[0];
             return cfg;
         }
@@ -44,7 +41,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             {
                 var node = cfg.Nodes[id];
                 expected.Add(node);
-                
+
                 int index = Array.IndexOf(ordering, node);
                 Assert.NotEqual(-1, index);
                 minIndex = Math.Min(index, minIndex);
@@ -53,7 +50,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
 
             Assert.Equal(cluster.Length, maxIndex - minIndex + 1);
 
-            var range = ordering[minIndex..(maxIndex+1)];
+            var range = ordering[minIndex..(maxIndex + 1)];
             Assert.Equal(expected, new HashSet<ControlFlowNode<int>>(range));
         }
 
@@ -70,7 +67,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var sorting = cfg
                 .SortNodes()
                 .ToArray();
-            
+
             Assert.Equal(entrypoint, sorting[0].Offset);
         }
 
@@ -80,22 +77,22 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var cfg = GenerateGraph(8);
             cfg.Nodes[0].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.FallThrough);
             cfg.Nodes[1].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.Unconditional);
-            
+
             cfg.Nodes[6].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.Conditional);
             cfg.Nodes[6].ConnectWith(cfg.Nodes[7], ControlFlowEdgeType.FallThrough);
-            
+
             cfg.Nodes[2].ConnectWith(cfg.Nodes[3], ControlFlowEdgeType.FallThrough);
             cfg.Nodes[2].ConnectWith(cfg.Nodes[4], ControlFlowEdgeType.Conditional);
-            
+
             cfg.Nodes[3].ConnectWith(cfg.Nodes[5], ControlFlowEdgeType.Unconditional);
             cfg.Nodes[4].ConnectWith(cfg.Nodes[5], ControlFlowEdgeType.FallThrough);
-            
+
             cfg.Nodes[5].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.FallThrough);
 
             var sorting = cfg
                 .SortNodes()
                 .ToArray();
-            
+
             AssertHasSubSequence(sorting, 0, 1);
             AssertHasSubSequence(sorting, 2, 3);
             AssertHasSubSequence(sorting, 4, 5, 6, 7);
@@ -161,25 +158,25 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         }
 
         [Theory]
-        [InlineData(new[]{0,1,2,3,4,5,6})]
-        [InlineData(new[]{6,5,4,3,2,1,0})]
-        [InlineData(new[]{1,5,3,6,4,0,2})]
+        [InlineData(new[] {0, 1, 2, 3, 4, 5, 6})]
+        [InlineData(new[] {6, 5, 4, 3, 2, 1, 0})]
+        [InlineData(new[] {1, 5, 3, 6, 4, 0, 2})]
         public void NodesInExceptionHandlerBlocksShouldStickTogether(int[] indices)
         {
             var cfg = GenerateGraph(7);
 
             // pre
             cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.FallThrough);
-            
+
             // protected region.
             cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[2]], ControlFlowEdgeType.FallThrough);
             cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[3]], ControlFlowEdgeType.Conditional);
             cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[4]], ControlFlowEdgeType.Unconditional);
             cfg.Nodes[indices[3]].ConnectWith(cfg.Nodes[indices[4]], ControlFlowEdgeType.FallThrough);
-            
+
             // handler region.
             cfg.Nodes[indices[5]].ConnectWith(cfg.Nodes[indices[6]], ControlFlowEdgeType.Unconditional);
-            
+
             // post
             cfg.Nodes[indices[4]].ConnectWith(cfg.Nodes[indices[6]], ControlFlowEdgeType.Unconditional);
 
@@ -201,11 +198,13 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var sorting = cfg
                 .SortNodes()
                 .ToArray();
-            
+
             // Validate.
             AssertHasSubSequence(sorting, indices[0], indices[1], indices[2]);
             AssertHasSubSequence(sorting, indices[3], indices[4]);
             AssertHasCluster(sorting, indices[1], indices[2], indices[3], indices[4]);
+            Assert.True(Array.IndexOf(sorting, cfg.Nodes[indices[1]]) < Array.IndexOf(sorting, cfg.Nodes[indices[5]]),
+                "Handler region was ordered before protected region.");
         }
     }
 }
