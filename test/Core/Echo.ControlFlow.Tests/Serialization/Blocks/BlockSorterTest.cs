@@ -160,38 +160,52 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             }, sorting.Select(n => n.Offset));
         }
 
-        [Fact]
-        public void NodesInExceptionHandlerBlocksShouldStickTogether()
+        [Theory]
+        [InlineData(new[]{0,1,2,3,4,5,6})]
+        [InlineData(new[]{6,5,4,3,2,1,0})]
+        [InlineData(new[]{1,5,3,6,4,0,2})]
+        public void NodesInExceptionHandlerBlocksShouldStickTogether(int[] indices)
         {
             var cfg = GenerateGraph(7);
 
-            cfg.Nodes[0].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[1].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[1].ConnectWith(cfg.Nodes[3], ControlFlowEdgeType.Conditional);
-            cfg.Nodes[2].ConnectWith(cfg.Nodes[4], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[3].ConnectWith(cfg.Nodes[4], ControlFlowEdgeType.FallThrough);
+            // pre
+            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.FallThrough);
             
-            cfg.Nodes[5].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[4].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.Unconditional);
+            // protected region.
+            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[2]], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[3]], ControlFlowEdgeType.Conditional);
+            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[4]], ControlFlowEdgeType.Unconditional);
+            cfg.Nodes[indices[3]].ConnectWith(cfg.Nodes[indices[4]], ControlFlowEdgeType.FallThrough);
+            
+            // handler region.
+            cfg.Nodes[indices[5]].ConnectWith(cfg.Nodes[indices[6]], ControlFlowEdgeType.Unconditional);
+            
+            // post
+            cfg.Nodes[indices[4]].ConnectWith(cfg.Nodes[indices[6]], ControlFlowEdgeType.Unconditional);
 
+            cfg.Entrypoint = cfg.Nodes[indices[0]];
+
+            // Set up regions.
             var ehRegion = new ExceptionHandlerRegion<int>();
             cfg.Regions.Add(ehRegion);
             ehRegion.ProtectedRegion.Nodes.AddRange(new[]
             {
-                cfg.Nodes[1], cfg.Nodes[2], cfg.Nodes[3], cfg.Nodes[4]
+                cfg.Nodes[indices[1]], cfg.Nodes[indices[2]], cfg.Nodes[indices[3]], cfg.Nodes[indices[4]]
             });
             var handlerRegion = new BasicControlFlowRegion<int>();
             ehRegion.HandlerRegions.Add(handlerRegion);
-            handlerRegion.Nodes.Add(cfg.Nodes[5]);
-            handlerRegion.Entrypoint = cfg.Nodes[5];
+            handlerRegion.Nodes.Add(cfg.Nodes[indices[5]]);
+            handlerRegion.Entrypoint = cfg.Nodes[indices[5]];
 
+            // Sort
             var sorting = cfg
                 .SortNodes()
                 .ToArray();
             
-            AssertHasSubSequence(sorting, 0, 1, 2);
-            AssertHasSubSequence(sorting, 3, 4);
-            AssertHasCluster(sorting, 1, 2, 3, 4);
+            // Validate.
+            AssertHasSubSequence(sorting, indices[0], indices[1], indices[2]);
+            AssertHasSubSequence(sorting, indices[3], indices[4]);
+            AssertHasCluster(sorting, indices[1], indices[2], indices[3], indices[4]);
         }
     }
 }
