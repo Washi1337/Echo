@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using Echo.ControlFlow.Regions;
 
 namespace Echo.ControlFlow.Collections
@@ -63,6 +65,19 @@ namespace Echo.ControlFlow.Collections
             foreach (var item in Items)
                 item.ParentRegion = _owner.ParentGraph;
             base.ClearItems();
+        }
+
+        /// <summary>
+        /// Adds a collection of nodes to the node collection.
+        /// </summary>
+        /// <param name="items">The nodes to add.</param>
+        public void AddRange(IEnumerable<ControlFlowNode<TInstruction>> items)
+        {
+            var nodes = items as ControlFlowNode<TInstruction>[] ?? items.ToArray();
+            foreach (var item in nodes)
+                AssertNodeValidity(item);
+            foreach (var item in nodes)
+                Add(item);
         }
     }
 }
