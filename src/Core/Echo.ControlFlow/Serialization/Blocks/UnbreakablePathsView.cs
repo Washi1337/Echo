@@ -33,8 +33,8 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 // Add explicit path successors.
                 if (n.UnconditionalEdge != null && n.UnconditionalEdge.Type == ControlFlowEdgeType.Unconditional)
                     result.Add(GetPath(n.UnconditionalNeighbour)[0]);
-                AddAdjacencyListToResult(n.ConditionalEdges);
-                AddAdjacencyListToResult(n.AbnormalEdges);
+                AddAdjacencyListToResult(n.ConditionalEdges, result);
+                AddAdjacencyListToResult(n.AbnormalEdges, result);
                 
                 // Check if any exception handler might catch an error within this node.
                 var ehRegion = n.GetParentExceptionHandler();
@@ -53,19 +53,20 @@ namespace Echo.ControlFlow.Serialization.Blocks
                     ehRegion = ehRegion.GetParentExceptionHandler();
                 }
             }
-
-            return result;
             
-            void AddAdjacencyListToResult(AdjacencyCollection<TInstruction> adjacency)
+            return result;
+        }
+
+        private void AddAdjacencyListToResult(
+            AdjacencyCollection<TInstruction> adjacency,
+            List<ControlFlowNode<TInstruction>> result)
+        {
+            foreach (var edge in adjacency)
             {
-                foreach (var edge in adjacency)
-                {
-                    var target = GetPath(edge.Target)[0];
-                    if (!result.Contains(target))
-                        result.Add(target);
-                }
+                var target = GetPath(edge.Target)[0];
+                if (!result.Contains(target))
+                    result.Add(target);
             }
         }
-        
     }
 }

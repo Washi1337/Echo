@@ -1,6 +1,9 @@
 using System;
+using System.IO;
 using System.Linq;
 using Echo.ControlFlow.Serialization.Blocks;
+using Echo.ControlFlow.Serialization.Dot;
+using Echo.Core.Graphing.Serialization.Dot;
 using Echo.Platforms.DummyPlatform;
 using Xunit;
 
@@ -79,6 +82,55 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             cfg.Nodes[1].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.FallThrough);
 
             Assert.Throws<BlockOrderingException>(() => cfg.SortNodes());
+        }
+
+        [Theory]
+        [InlineData(new long[] {0, 1, 2, 3})]
+        [InlineData(new long[] {3, 2, 1, 0})]
+        [InlineData(new long[] {2, 3, 0, 1})]
+        public void PreferExitPointsLastInDoLoop(long[] indices)
+        {
+            var cfg = GenerateGraph(4);
+
+            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[2]], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[3]], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.Conditional);
+            cfg.Entrypoint = cfg.Nodes[indices[0]];
+
+            var sorting = cfg
+                .SortNodes()
+                .ToArray();
+
+            Assert.Equal(new[]
+            {
+                indices[0], indices[1], indices[2], indices[3]
+            }, sorting.Select(n => n.Offset));
+        }
+
+        [Theory]
+        [InlineData(new long[] {0, 1, 2, 3})]
+        [InlineData(new long[] {3, 2, 1, 0})]
+        [InlineData(new long[] {2, 3, 0, 1})]
+        public void PreferExitPointsLastInWhileLoop(long[] indices)
+        {
+            var cfg = GenerateGraph(4);
+
+            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[2]], ControlFlowEdgeType.Unconditional);
+            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[2]], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[3]], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.Conditional);
+
+            cfg.Entrypoint = cfg.Nodes[indices[0]];
+
+            var sorting = cfg
+                .SortNodes()
+                .ToArray();
+
+            Assert.Equal(new[]
+            {
+                indices[0], indices[1], indices[2], indices[3]
+            }, sorting.Select(n => n.Offset));
         }
     }
 }
