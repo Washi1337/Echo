@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -99,7 +100,11 @@ namespace Echo.Core.Graphing.Analysis.Sorting
                     // Schedule children to be processed.
                     var children = TopologicalChildrenLister(current.Node);
                     for (int i = children.Count - 1; i >= 0; i--)
+                    {
+                        if (children[i] is null)
+                            throw new InvalidOperationException($"Node {current.Node} contains null children.");
                         agenda.Push(new State(children[i], false));
+                    }
                 }
                 else
                 {
