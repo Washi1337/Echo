@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Linq;
 using Echo.Core.Code;
 
 namespace Echo.ControlFlow.Construction.Static
@@ -108,6 +109,7 @@ namespace Echo.ControlFlow.Construction.Static
 
                         // Figure out next offsets to process.
                         bool nextInstructionIsSuccessor = false;
+                        int realSuccessorCount = 0;
                         for (int i = 0; i < successorCount; i++)
                         {
                             var successor = successorsBuffer[i];
@@ -117,6 +119,7 @@ namespace Echo.ControlFlow.Construction.Static
                             {
                                 // Successor is implied by the instruction but does not necessarily
                                 // transfer control to it directly. Only register the block header. 
+                                realSuccessorCount++;
                                 result.BlockHeaders.Add(destinationAddress);
                                 agenda.Push(destinationAddress);
                                 continue;
@@ -140,7 +143,7 @@ namespace Echo.ControlFlow.Construction.Static
                         // If we have multiple successors (e.g. as with an if-else construct), or the next instruction is
                         // not a successor (e.g. with a return address), the next instruction is another block header. 
                         if (!nextInstructionIsSuccessor
-                            || successorCount > 1
+                            || realSuccessorCount > 1
                             || (Architecture.GetFlowControl(instruction) & InstructionFlowControl.CanBranch) != 0)
                         {
                             result.BlockHeaders.Add(currentOffset + Architecture.GetSize(instruction));
