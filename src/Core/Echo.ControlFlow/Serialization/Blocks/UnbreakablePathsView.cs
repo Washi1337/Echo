@@ -31,7 +31,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             // Get every outgoing edge in the entire path. 
             foreach (var n in path)
             {
-                // Add explicit path successors.
+                // Add unconditional edge.
                 if (n.UnconditionalEdge != null && n.UnconditionalEdge.Type == ControlFlowEdgeType.Unconditional)
                 {
                     var neighbourEntry = GetPath(n.UnconditionalNeighbour)[0];
@@ -39,43 +39,20 @@ namespace Echo.ControlFlow.Serialization.Blocks
                         result.Add(neighbourEntry);
                 }
 
-                AddAdjacencyListToResult(n.ConditionalEdges, result);
-                AddAdjacencyListToResult(n.AbnormalEdges, result);
+                // Add explicit conditional / abnormal edges.
+                AddAdjacencyListToResult(result, n.ConditionalEdges);
+                AddAdjacencyListToResult(result, n.AbnormalEdges);
                 
                 // Check if any exception handler might catch an error within this node.
-                var ehRegion = n.GetParentExceptionHandler();
-                while (ehRegion is {})
-                {
-                    if (n.IsInRegion(ehRegion.ProtectedRegion))
-                    {
-                        for (int i = 0; i < ehRegion.HandlerRegions.Count; i++)
-                        {
-                            var handlerRegion = ehRegion.HandlerRegions[i];
-                            
-                            // Ensure the handler has an entrypoint that we can jump to.
-                            var entrypoint = handlerRegion.GetEntrypoint();
-                            if (entrypoint is null)
-                            {
-                                throw new InvalidOperationException(
-                                    $"Handler region {i} of exception handler does not have an entrypoint assigned.");
-                            }
-
-                            var entryNode = GetPath(entrypoint)[0];
-                            if (!result.Contains(entryNode))
-                                result.Add(entryNode);
-                        }
-                    }
-                
-                    ehRegion = ehRegion.GetParentExceptionHandler();
-                }
+                AddPotentialHandlerSuccessors(result, n);
             }
             
             return result;
         }
 
         private void AddAdjacencyListToResult(
-            AdjacencyCollection<TInstruction> adjacency,
-            List<ControlFlowNode<TInstruction>> result)
+            ICollection<ControlFlowNode<TInstruction>> result,
+            AdjacencyCollection<TInstruction> adjacency)
         {
             foreach (var edge in adjacency)
             {
@@ -84,5 +61,42 @@ namespace Echo.ControlFlow.Serialization.Blocks
                     result.Add(target);
             }
         }
+
+        private void AddPotentialHandlerSuccessors(
+            ICollection<ControlFlowNode<TInstruction>> result, 
+            ControlFlowNode<TInstruction> node)
+        {
+            var ehRegion = node.GetParentExceptionHandler();
+            
+            while (ehRegion is {})
+            {
+                // If the node is in a protected region of an exception handler, a potential successor is the
+                // entrypoint of every handler. This is not explicitly specified as an edge in the CFG.
+                
+                if (node.IsInRegion(ehRegion.ProtectedRegion))
+                {
+                    for (int i = 0; i < ehRegion.HandlerRegions.Count; i++)
+                    {
+                        var handlerRegion = ehRegion.HandlerRegions[i];
+
+                        // Ensure the handler that we can jump to has an entrypoint node.
+                        var entrypoint = handlerRegion.GetEntrypoint();
+                        if (entrypoint is null)
+                        {
+                            throw new InvalidOperationException(
+                                $"Handler region {i} of exception handler does not have an entrypoint assigned.");
+                        }
+
+                        var target = GetPath(entrypoint)[0];
+                        if (!result.Contains(target))
+                            result.Add(target);
+                    }
+                }
+
+                // Move up the EH region tree.
+                ehRegion = ehRegion.GetParentExceptionHandler();
+            }
+        }
+        
     }
 }
