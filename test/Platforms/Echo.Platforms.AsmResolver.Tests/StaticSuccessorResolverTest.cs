@@ -1,18 +1,16 @@
 using System.Linq;
 using AsmResolver.DotNet;
-using Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests
 {
-    public class StaticSuccessorResolverTest : DispatcherTestBase
+    public class StaticSuccessorResolverTest : IClassFixture<MockModuleFixture>
     {
         private readonly MockModuleFixture _moduleFixture;
 
         public StaticSuccessorResolverTest(MockModuleFixture moduleFixture)
-            : base(moduleFixture)
         {
             _moduleFixture = moduleFixture;
         }
