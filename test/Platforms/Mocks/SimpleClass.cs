@@ -1,6 +1,8 @@
 // ReSharper disable UnassignedField.Global
+using static InlineIL.IL.Emit;
 
 using System;
+using InlineIL;
 
 namespace Mocks
 {
@@ -26,20 +28,54 @@ namespace Mocks
             Console.WriteLine("Hello, world!");
         }
 
+        /// <remarks>Implemented in IL because Release builds don't converge to a single <c>ret</c>.</remarks>
         public static string If(int argument)
         {
-            return argument >= 18 ? "Adult" : "Child";
+            Ldarg_0();
+            Ldc_I4_S(18);
+            Bge_S("BranchAdult");
+
+            Ldstr("Child");
+            Br_S("Ret");
+
+            IL.MarkLabel("BranchAdult");
+            Ldstr("Adult");
+
+            IL.MarkLabel("Ret");
+            return IL.Return<string>();
         }
 
-        public static string Switch(int argument)
+        /// <remarks>Implemented in IL because Debug builds insert arbitrary <c>if (true) {}</c> blocks.</remarks>
+        public static string SwitchColor(int argument)
         {
-            return argument switch
-            {
-                0 => "Red",
-                1 => "Orange",
-                2 => "Green",
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            IL.DeclareLocals(new LocalVar(typeof(string)));
+
+            Ldarg_0();
+            Switch("0_Red", "1_Orange", "2_Green");
+            Br_S("Default");
+
+            IL.MarkLabel("0_Red");
+            Ldstr("Red");
+            Stloc_0();
+            Br_S("End");
+
+            IL.MarkLabel("1_Orange");
+            Ldstr("Orange");
+            Stloc_0();
+            Br_S("End");
+
+            IL.MarkLabel("2_Green");
+            Ldstr("Green");
+            Stloc_0();
+            Br_S("End");
+
+            IL.MarkLabel("Default");
+            Newobj(MethodRef.Constructor(typeof(ArgumentOutOfRangeException)));
+            Throw();
+
+            IL.MarkLabel("End");
+            Ldloc_0();
+            return IL.Return<string>();
         }
     }
 }

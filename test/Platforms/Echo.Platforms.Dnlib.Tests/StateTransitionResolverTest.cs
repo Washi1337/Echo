@@ -76,7 +76,7 @@ namespace Echo.Platforms.Dnlib.Tests
         public void Switch()
         {
             var type = (TypeDef) _moduleFixture.MockModule.ResolveToken(typeof(SimpleClass).MetadataToken);
-            var method = type.Methods.First(m => m.Name == nameof(SimpleClass.Switch));
+            var method = type.Methods.First(m => m.Name == nameof(SimpleClass.SwitchColor));
             var cfg = method.ConstructSymbolicFlowGraph(out _);
             
             Assert.Equal(3, cfg.Entrypoint.ConditionalEdges.Count);

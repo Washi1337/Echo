@@ -42,7 +42,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         public void Switch()
         {
             var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
-            var method = type.Methods.First(m => m.Name == nameof(SimpleClass.Switch));
+            var method = type.Methods.First(m => m.Name == nameof(SimpleClass.SwitchColor));
             var body = method.CilMethodBody;
             var cfg = body.ConstructStaticFlowGraph();
             
