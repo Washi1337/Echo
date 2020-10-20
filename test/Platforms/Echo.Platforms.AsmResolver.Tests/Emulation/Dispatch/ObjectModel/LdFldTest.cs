@@ -9,6 +9,7 @@ using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
@@ -20,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public LdFldTest(MockModuleFixture moduleFixture)
             : base(moduleFixture)
         {
-            _module = ModuleDefinition.FromFile(typeof(LdFldTest).Assembly.Location);
+            _module = moduleFixture.MockModule;
         }
 
         private TypeDefinition LookupTestType(Type type)
