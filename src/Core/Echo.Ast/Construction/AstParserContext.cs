@@ -19,10 +19,10 @@ namespace Echo.Ast.Construction
 
         internal IInstructionSetArchitecture<TInstruction> Architecture => _controlFlowGraph.Architecture;
 
-        internal Dictionary<long, AstVariable[]> StackSlots
+        internal Dictionary<TInstruction, AstVariable[]> StackSlots
         {
             get;
-        } = new Dictionary<long, AstVariable[]>();
+        } = new Dictionary<TInstruction, AstVariable[]>();
 
         internal Dictionary<ExternalDataSourceNode<TInstruction>, AstVariable> ExternalSources
         {
@@ -66,12 +66,26 @@ namespace Echo.Ast.Construction
             set;
         }
 
+        internal AstVariable CreateStackSlot()
+        {
+            return new AstVariable($"stack_slot_{StackSlotCount++}");
+        }
+
         internal int GetVariableVersion(IVariable variable)
         {
             if (!VariableVersions.ContainsKey(variable))
                 VariableVersions.Add(variable, 0);
 
             return VariableVersions[variable];
+        }
+
+        internal int IncrementVariableVersion(IVariable variable)
+        {
+            // Ensure variable is created first.
+            GetVariableVersion(variable);
+
+            // Increment the version and return the incremented result
+            return ++VariableVersions[variable];
         }
 
         internal AstVariable GetVersionedVariable(VariableSnapshot snapshot)
