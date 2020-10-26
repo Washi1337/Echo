@@ -5,7 +5,7 @@ using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Blocks;
 using Echo.DataFlow;
 
-namespace Echo.Ast
+namespace Echo.Ast.Construction
 {
     /// <summary>
     /// Transforms a <see cref="ControlFlowGraph{TInstruction}"/> and a <see cref="DataFlowGraph{TContents}"/> into an Ast
@@ -14,7 +14,7 @@ namespace Echo.Ast
     {
         private readonly ControlFlowGraph<TInstruction> _controlFlowGraph;
         private readonly AstArchitecture<TInstruction> _architecture;
-        private readonly MonadGudGotoBad<TInstruction> _transformer;
+        private readonly BlockTransformer<TInstruction> _transformer;
         private readonly Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<Statement<TInstruction>>> _regionsMapping =
             new Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<Statement<TInstruction>>>();
         
@@ -29,7 +29,7 @@ namespace Echo.Ast
             _architecture = new AstArchitecture<TInstruction>(controlFlowGraph.Architecture);
 
             var context = new AstParserContext<TInstruction>(_controlFlowGraph, dataFlowGraph);
-            _transformer = new MonadGudGotoBad<TInstruction>(context);
+            _transformer = new BlockTransformer<TInstruction>(context);
         }
         
         /// <summary>

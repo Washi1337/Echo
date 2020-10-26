@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Echo.Ast.Construction;
 using Echo.Ast.Patterns;
 using Echo.Ast.Tests.Patterns;
 using Echo.ControlFlow;
