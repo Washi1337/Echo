@@ -7,7 +7,7 @@ namespace Echo.Ast.Construction
     {
         internal VariableSnapshot(IVariable variable, int version)
         {
-            Variable = variable;
+            Variable = variable ?? throw new ArgumentNullException(nameof(variable));
             Version = version;
         }
 

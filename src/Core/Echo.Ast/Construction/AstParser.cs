@@ -25,7 +25,9 @@ namespace Echo.Ast.Construction
         /// <param name="dataFlowGraph">The <see cref="DataFlowGraph{TContents}"/> to parse</param>
         public AstParser(ControlFlowGraph<TInstruction> controlFlowGraph, DataFlowGraph<TInstruction> dataFlowGraph)
         {
-            _controlFlowGraph = controlFlowGraph;
+            if (dataFlowGraph == null)
+                throw new ArgumentNullException(nameof(dataFlowGraph));
+            _controlFlowGraph = controlFlowGraph ?? throw new ArgumentNullException(nameof(controlFlowGraph));
             _architecture = new AstArchitecture<TInstruction>(controlFlowGraph.Architecture);
 
             var context = new AstParserContext<TInstruction>(_controlFlowGraph, dataFlowGraph);

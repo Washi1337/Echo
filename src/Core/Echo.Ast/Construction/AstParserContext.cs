@@ -60,7 +60,7 @@ namespace Echo.Ast.Construction
             set;
         }
 
-        internal int StackSlotCount
+        private int StackSlotCount
         {
             get;
             set;
