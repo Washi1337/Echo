@@ -21,12 +21,6 @@ namespace Echo.Ast.Construction
             get;
         }
 
-        internal void Deconstruct(out IVariable variable, out int version)
-        {
-            variable = Variable;
-            version = Version;
-        }
-
         public bool Equals(VariableSnapshot other) => Variable.Equals(other.Variable) && Version == other.Version;
 
         public override bool Equals(object obj) => obj is VariableSnapshot other && Equals(other);
