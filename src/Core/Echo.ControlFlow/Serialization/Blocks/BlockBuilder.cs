@@ -39,7 +39,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 var currentScope = scopeStack.Peek();
                 if (node.ParentRegion != currentScope.Region)
                 {
-                    UpdateScopeStack(node, scopeStack);
+                    UpdateScopeStack(scopeStack, node);
                     currentScope = scopeStack.Peek();
                 }
 
@@ -50,15 +50,29 @@ namespace Echo.ControlFlow.Serialization.Blocks
         }
 
         private static void UpdateScopeStack<TInstruction>(
-            ControlFlowNode<TInstruction> node, IndexableStack<ScopeInfo<TInstruction>> scopeStack)
+            IndexableStack<ScopeInfo<TInstruction>> scopeStack, ControlFlowNode<TInstruction> node)
         {
+            // Figure out regions the node is in.
             var activeRegions = node.GetSituatedRegions()
                 .Reverse()
                 .ToArray();
-            
+
+            // Leave for every left region a scope block.   
+            int commonDepth = GetCommonRegionDepth(scopeStack, activeRegions);
+            while (scopeStack.Count > commonDepth)
+                scopeStack.Pop();
+
+            // Enter for every entered region a new block.
+            while (scopeStack.Count < activeRegions.Length)
+                EnterNextRegion(scopeStack, activeRegions);
+        }
+
+        private static int GetCommonRegionDepth<TInstruction>(
+            IndexableStack<ScopeInfo<TInstruction>> scopeStack, 
+            IControlFlowRegion<TInstruction>[] activeRegions)
+        {
             int largestPossibleCommonDepth = Math.Min(scopeStack.Count, activeRegions.Length);
 
-            // Figure out common region depth.
             int commonDepth = 1;
             while (commonDepth < largestPossibleCommonDepth)
             {
@@ -67,56 +81,53 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 commonDepth++;
             }
 
-            // Leave for every left region a scope block.   
-            while (scopeStack.Count > commonDepth)
-                scopeStack.Pop();
+            return commonDepth;
+        }
 
-            // Enter for every entered region a new block.
-            while (scopeStack.Count < activeRegions.Length)
+        private static void EnterNextRegion<TInstruction>(
+            IndexableStack<ScopeInfo<TInstruction>> scopeStack, 
+            IControlFlowRegion<TInstruction>[] activeRegions)
+        {
+            var enteredRegion = activeRegions[scopeStack.Count];
+
+            // Add new scope block to the current scope.
+            var currentScope = scopeStack.Peek();
+            if (enteredRegion is ExceptionHandlerRegion<TInstruction> ehRegion)
             {
-                // Create new scope block.
-                var enteredRegion = activeRegions[scopeStack.Count];
+                // We entered an exception handler region.
+                var ehBlock = new ExceptionHandlerBlock<TInstruction>();
+                currentScope.AddBlock(ehBlock);
+                scopeStack.Push(new ScopeInfo<TInstruction>(ehRegion, ehBlock));
+            }
+            else if (enteredRegion.ParentRegion is ExceptionHandlerRegion<TInstruction> parentEhRegion)
+            {
+                // We entered one of the exception handler sub regions. Figure out which one it is.
+                ScopeBlock<TInstruction> enteredBlock;
 
-                // Add new cope block to the current scope.
-                var currentScope = scopeStack.Peek();
+                if (!(currentScope.Block is ExceptionHandlerBlock<TInstruction> ehBlock))
+                    throw new InvalidOperationException("The parent scope is not an exception handler scope.");
 
-                if (enteredRegion is ExceptionHandlerRegion<TInstruction> ehRegion)
+                if (parentEhRegion.ProtectedRegion == enteredRegion)
                 {
-                    // We entered an exception handler region.
-                    var ehBlock = new ExceptionHandlerBlock<TInstruction>();
-                    currentScope.AddBlock(ehBlock);
-                    scopeStack.Push(new ScopeInfo<TInstruction>(ehRegion, ehBlock));
-                }
-                else if (enteredRegion.ParentRegion is ExceptionHandlerRegion<TInstruction> parentEhRegion)
-                {
-                    // We entered one of the exception handler sub regions. Figure out which one it is.
-                    var enteredBlock = default(ScopeBlock<TInstruction>);
-
-                    if (!(currentScope.Block is ExceptionHandlerBlock<TInstruction> ehBlock))
-                        throw new InvalidOperationException("The parent scope is not an exception handler scope.");
-
-                    if (parentEhRegion.ProtectedRegion == enteredRegion)
-                    {
-                        // We entered the protected region.
-                        enteredBlock = ehBlock.ProtectedBlock;
-                    }
-                    else
-                    {
-                        // We entered a handler region.
-                        enteredBlock = new ScopeBlock<TInstruction>();
-                        ehBlock.HandlerBlocks.Add(enteredBlock);
-                    }
-
-                    // Push the entered scope.
-                    scopeStack.Push(new ScopeInfo<TInstruction>(parentEhRegion.ProtectedRegion, enteredBlock));
+                    // We entered the protected region.
+                    enteredBlock = ehBlock.ProtectedBlock;
                 }
                 else
                 {
-                    // Fall back method: just enter a new scope block.
-                    var scopeBlock = new ScopeBlock<TInstruction>();
-                    currentScope.AddBlock(scopeBlock);
-                    scopeStack.Push(new ScopeInfo<TInstruction>(enteredRegion, scopeBlock));
+                    // We entered a handler region.
+                    enteredBlock = new ScopeBlock<TInstruction>();
+                    ehBlock.HandlerBlocks.Add(enteredBlock);
                 }
+
+                // Push the entered scope.
+                scopeStack.Push(new ScopeInfo<TInstruction>(parentEhRegion.ProtectedRegion, enteredBlock));
+            }
+            else
+            {
+                // Fall back method: just enter a new scope block.
+                var scopeBlock = new ScopeBlock<TInstruction>();
+                currentScope.AddBlock(scopeBlock);
+                scopeStack.Push(new ScopeInfo<TInstruction>(enteredRegion, scopeBlock));
             }
         }
 
@@ -124,8 +135,8 @@ namespace Echo.ControlFlow.Serialization.Blocks
         {
             public ScopeInfo(IControlFlowRegion<TInstruction> region, IBlock<TInstruction> block)
             {
-                Region = region;
-                Block = block;
+                Region = region ?? throw new ArgumentNullException(nameof(region));
+                Block = block ?? throw new ArgumentNullException(nameof(block));
             }
             
             public IControlFlowRegion<TInstruction> Region
@@ -151,6 +162,6 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 return $"{Region.GetType().Name}, Offset: {Region.GetEntrypoint().Offset:X8}";
             }
         }
+        
     }
-
 }
