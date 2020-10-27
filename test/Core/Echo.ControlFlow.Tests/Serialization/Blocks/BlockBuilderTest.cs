@@ -253,8 +253,8 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var order = rootScope.GetAllBlocks().ToArray();
 
             Assert.Equal(3, rootScope.Blocks.Count);
-            Assert.IsAssignableFrom<ExceptionHandlerBlock<DummyInstruction>>(rootScope.Blocks[1]);
-            Assert.Equal(2, ((ExceptionHandlerBlock<DummyInstruction>) rootScope.Blocks[1]).HandlerBlocks.Count);
+            var ehBlock = Assert.IsAssignableFrom<ExceptionHandlerBlock<DummyInstruction>>(rootScope.Blocks[1]);
+            Assert.Equal(2, ehBlock.HandlerBlocks.Count);
         }
     }
 }

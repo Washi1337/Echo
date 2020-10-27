@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Blocks;
+using Echo.ControlFlow.Serialization.Dot;
+using Echo.Core.Graphing.Serialization.Dot;
 using Echo.Platforms.DummyPlatform;
+using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
 namespace Echo.ControlFlow.Tests.Serialization.Blocks
@@ -206,5 +210,37 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             Assert.True(Array.IndexOf(sorting, cfg.Nodes[indices[1]]) < Array.IndexOf(sorting, cfg.Nodes[indices[5]]),
                 "Handler region was ordered before protected region.");
         }
+
+        [Theory]
+        [InlineData(new[] {0, 1, 2, 3})]
+        [InlineData(new[] {3, 2, 1, 0})]
+        [InlineData(new[] {2, 3, 0, 1})]
+        public void HandlerRegionWithNoExitShouldBeOrderedBeforeNormalExit(int[] indices)
+        {
+            var cfg = GenerateGraph(4);
+            cfg.Entrypoint = cfg.Nodes[indices[0]];
+
+            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[3]], ControlFlowEdgeType.Unconditional);
+            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[2]], ControlFlowEdgeType.Unconditional);
+
+            // Set up regions.
+            var ehRegion = new ExceptionHandlerRegion<int>();
+            cfg.Regions.Add(ehRegion);
+            ehRegion.ProtectedRegion.Nodes.Add(cfg.Nodes[indices[1]]);
+            var handlerRegion = new BasicControlFlowRegion<int>();
+            ehRegion.HandlerRegions.Add(handlerRegion);
+            handlerRegion.Nodes.Add(cfg.Nodes[indices[2]]);
+            handlerRegion.Entrypoint = cfg.Nodes[indices[2]];
+
+            // Sort
+            var sorting = cfg
+                .SortNodes()
+                .ToArray();
+            
+            Assert.True(Array.IndexOf(sorting, cfg.Nodes[indices[2]]) < Array.IndexOf(sorting, cfg.Nodes[indices[3]]),
+                "Handler region was ordered after normal exit.");
+        }
+
     }
 }
