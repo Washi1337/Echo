@@ -1,4 +1,5 @@
 ﻿using dnlib.DotNet.Emit;
+using Mocks;
 using Xunit;
 using IVariable = Echo.Core.Code.IVariable;
 

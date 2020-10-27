@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Echo.Platforms.Dnlib.Tests
+namespace Mocks
 {
     // ReSharper disable once MemberCanBePrivate.Global
     public class TestClass

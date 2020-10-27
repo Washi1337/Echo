@@ -207,5 +207,25 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             Assert.Contains(graph.Nodes, n => n.Offset == 0);
             Assert.Contains(graph.Nodes, n => n.Offset == 1);
         }
+
+        [Fact]
+        public void BlockHeadersImpliedByInstructionsShouldAlwaysBeAdded()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.PushOffset(0, 10),
+                DummyInstruction.Ret(1),
+                
+                DummyInstruction.Op(10, 0 ,0),
+                DummyInstruction.Ret(11),
+            };
+            
+            var graph = BuildControlFlowGraph(instructions);
+            Assert.Contains(graph.Nodes, n => n.Offset == 0);
+            Assert.Contains(graph.Nodes, n => n.Offset == 10);
+            Assert.DoesNotContain(graph.Nodes, n => n.Offset == 1);
+            Assert.Empty(graph.Nodes[0].GetOutgoingEdges());
+            Assert.Empty(graph.Nodes[10].GetIncomingEdges());
+        }
     }
 }

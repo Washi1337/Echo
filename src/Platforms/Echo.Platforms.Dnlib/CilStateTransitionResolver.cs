@@ -31,6 +31,9 @@ namespace Echo.Platforms.Dnlib
             
             foreach (var eh in _architecture.MethodBody.ExceptionHandlers)
             {
+                if (eh.HandlerType == ExceptionHandlerType.Fault || eh.HandlerType == ExceptionHandlerType.Finally)
+                    continue;
+                
                 var exceptionSource = default(ExternalDataSourceNode<Instruction>);
                 if (eh.HandlerStart.Offset == entrypointAddress)
                 {

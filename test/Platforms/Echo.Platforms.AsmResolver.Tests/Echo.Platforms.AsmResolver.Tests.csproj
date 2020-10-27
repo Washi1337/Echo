@@ -14,7 +14,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\src\Platforms\Echo.Platforms.AsmResolver\Echo.Platforms.AsmResolver.csproj" />
+        <ProjectReference Include="..\..\..\src\Platforms\Echo.Platforms.AsmResolver\Echo.Platforms.AsmResolver.csproj" />
+        <ProjectReference Include="..\Mocks\Mocks.csproj" />
     </ItemGroup>
 
 </Project>

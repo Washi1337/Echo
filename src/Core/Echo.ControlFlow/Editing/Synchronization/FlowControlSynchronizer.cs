@@ -223,6 +223,9 @@ namespace Echo.ControlFlow.Editing.Synchronization
                 for (int i = 0; i < actualSuccessorCount; i++)
                 {
                     var successor = successorsBuffer[i];
+                    if (!successor.IsRealEdge)
+                        continue;
+
                     switch (successor.EdgeType)
                     {
                         case ControlFlowEdgeType.FallThrough:

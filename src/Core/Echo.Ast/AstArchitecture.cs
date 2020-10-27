@@ -1,5 +1,5 @@
 using System;
-using Echo.Ast.Helpers;
+using Echo.Ast.Analysis;
 using Echo.Core.Code;
 
 namespace Echo.Ast

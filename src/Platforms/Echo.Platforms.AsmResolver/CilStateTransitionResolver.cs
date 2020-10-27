@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction.Symbolic;
@@ -34,6 +35,10 @@ namespace Echo.Platforms.AsmResolver
             
             foreach (var eh in _architecture.MethodBody.ExceptionHandlers)
             {
+                if (eh.HandlerType == CilExceptionHandlerType.Fault ||
+                    eh.HandlerType == CilExceptionHandlerType.Finally)
+                    continue;
+                
                 var exceptionSource = default(ExternalDataSourceNode<CilInstruction>);
                 if (eh.HandlerStart.Offset == entrypointAddress)
                 {

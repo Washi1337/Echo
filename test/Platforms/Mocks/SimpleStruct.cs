@@ -1,6 +1,6 @@
 // ReSharper disable UnassignedField.Global
 
-namespace Echo.Platforms.AsmResolver.Tests.Mock
+namespace Mocks
 {
     public struct SimpleStruct
     {

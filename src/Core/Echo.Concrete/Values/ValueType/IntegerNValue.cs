@@ -12,8 +12,9 @@ namespace Echo.Concrete.Values.ValueType
     public class IntegerNValue : IntegerValue
     {
         private readonly byte[] _bits;
-
         private readonly byte[] _mask;
+        
+        private static readonly ArrayPool<byte> Pool = ArrayPool<byte>.Create();
         
         /// <summary>
         /// Creates a new zero integer.
@@ -21,8 +22,9 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="byteCount">The number of bytes to use for encoding this integer.</param>
         public IntegerNValue(int byteCount)
         {
-            _bits = ArrayPool<byte>.Shared.Rent(byteCount);
-            _mask = ArrayPool<byte>.Shared.Rent(byteCount);
+            _bits = Pool.Rent(byteCount);
+            _bits.AsSpan().Fill(0);
+            _mask = Pool.Rent(byteCount);
             _mask.AsSpan().Fill(0xFF);
 
             Size = byteCount;
@@ -34,10 +36,10 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="bits">The raw bits of the integer.</param>
         public IntegerNValue(Span<byte> bits)
         {
-            _bits = ArrayPool<byte>.Shared.Rent(bits.Length);
+            _bits = Pool.Rent(bits.Length);
             bits.CopyTo(_bits);
 
-            _mask = ArrayPool<byte>.Shared.Rent(bits.Length);
+            _mask = Pool.Rent(bits.Length);
             _mask.AsSpan().Fill(0xFF);
 
             Size = bits.Length;
@@ -53,10 +55,10 @@ namespace Echo.Concrete.Values.ValueType
             if (bits.Length != knownMask.Length)
                 throw new ArgumentException("Known bit mask does not have the same bit-length as the raw value.");
 
-            _bits = ArrayPool<byte>.Shared.Rent(bits.Length);
+            _bits = Pool.Rent(bits.Length);
             bits.CopyTo(_bits);
 
-            _mask = ArrayPool<byte>.Shared.Rent(knownMask.Length);
+            _mask = Pool.Rent(knownMask.Length);
             knownMask.CopyTo(_mask);
 
             Size = bits.Length;
@@ -68,8 +70,8 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="bitString">The bit string to parse.</param>
         public IntegerNValue(string bitString)
         {
-            _bits = ArrayPool<byte>.Shared.Rent(bitString.Length / 8);
-            _mask = ArrayPool<byte>.Shared.Rent(bitString.Length / 8);
+            _bits = Pool.Rent(bitString.Length / 8);
+            _mask = Pool.Rent(bitString.Length / 8);
 
             Size = bitString.Length / 8;
             SetBits(bitString);
@@ -82,12 +84,12 @@ namespace Echo.Concrete.Values.ValueType
         {
             if (_bits is {})
             {
-                ArrayPool<byte>.Shared.Return(_bits, true);
+                Pool.Return(_bits, true);
             }
 
             if (_mask is {})
             {
-                ArrayPool<byte>.Shared.Return(_mask, true);
+                Pool.Return(_mask, true);
             }
         }
 
