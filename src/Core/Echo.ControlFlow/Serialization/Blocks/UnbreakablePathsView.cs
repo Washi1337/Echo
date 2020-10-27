@@ -10,13 +10,13 @@ namespace Echo.ControlFlow.Serialization.Blocks
         private readonly Dictionary<ControlFlowNode<TInstruction>, IList<ControlFlowNode<TInstruction>>> _nodeToPath =
             new Dictionary<ControlFlowNode<TInstruction>, IList<ControlFlowNode<TInstruction>>>(); 
             
-        public void AddPath(IList<ControlFlowNode<TInstruction>> path)
+        public void AddUnbreakablePath(IList<ControlFlowNode<TInstruction>> path)
         {
             foreach (var item in path)
                 _nodeToPath.Add(item, path);
         }
 
-        public IList<ControlFlowNode<TInstruction>> GetPath(ControlFlowNode<TInstruction> node)
+        public IList<ControlFlowNode<TInstruction>> GetUnbreakablePath(ControlFlowNode<TInstruction> node)
         {
             return _nodeToPath[node];
         }
@@ -24,18 +24,14 @@ namespace Echo.ControlFlow.Serialization.Blocks
         public IReadOnlyList<ControlFlowNode<TInstruction>> GetImpliedNeighbours(ControlFlowNode<TInstruction> node)
         {
             var result = new List<ControlFlowNode<TInstruction>>();
-            var path = GetPath(node);
+            var path = GetUnbreakablePath(node);
 
             // Get every outgoing edge in the entire path. 
             foreach (var n in path)
             {
                 // Add unconditional edge.
                 if (n.UnconditionalEdge != null && n.UnconditionalEdge.Type == ControlFlowEdgeType.Unconditional)
-                {
-                    var neighbourEntry = GetPath(n.UnconditionalNeighbour)[0];
-                    if (!result.Contains(neighbourEntry))
-                        result.Add(neighbourEntry);
-                }
+                    AddSuccessorToResult(result, n.UnconditionalNeighbour);
 
                 // Add explicit conditional / abnormal edges.
                 AddAdjacencyListToResult(result, n.ConditionalEdges);
@@ -48,16 +44,21 @@ namespace Echo.ControlFlow.Serialization.Blocks
             return result;
         }
 
+        private void AddSuccessorToResult(
+            ICollection<ControlFlowNode<TInstruction>> result, 
+            ControlFlowNode<TInstruction> node)
+        {
+            var target = GetUnbreakablePath(node)[0];
+            if (!result.Contains(target))
+                result.Add(target);
+        }
+
         private void AddAdjacencyListToResult(
             ICollection<ControlFlowNode<TInstruction>> result,
             AdjacencyCollection<TInstruction> adjacency)
         {
             foreach (var edge in adjacency)
-            {
-                var target = GetPath(edge.Target)[0];
-                if (!result.Contains(target))
-                    result.Add(target);
-            }
+                AddSuccessorToResult(result, edge.Target);
         }
 
         private void AddPotentialHandlerSuccessors(
@@ -78,16 +79,14 @@ namespace Echo.ControlFlow.Serialization.Blocks
                         var handlerRegion = ehRegion.HandlerRegions[i];
 
                         // Ensure the handler that we can jump to has an entrypoint node.
-                        var entrypoint = handlerRegion.GetEntrypoint();
-                        if (entrypoint is null)
+                        var handlerEntry = handlerRegion.GetEntrypoint();
+                        if (handlerEntry is null)
                         {
                             throw new InvalidOperationException(
                                 $"Handler region {i} of exception handler does not have an entrypoint assigned.");
                         }
 
-                        var target = GetPath(entrypoint)[0];
-                        if (!result.Contains(target))
-                            result.Add(target);
+                        AddSuccessorToResult(result, handlerEntry);
                     }
                 }
 

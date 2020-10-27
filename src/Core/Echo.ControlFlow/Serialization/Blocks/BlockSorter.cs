@@ -56,7 +56,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             return sorter
                 .GetTopologicalSorting(cfg.Entrypoint)
                 .Reverse()
-                .SelectMany(n => pathsView.GetPath(n));
+                .SelectMany(n => pathsView.GetUnbreakablePath(n));
         }
 
         private static UnbreakablePathsView<TInstruction> DetermineUnbreakablePaths<TInstruction>(
@@ -68,7 +68,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             foreach (var node in cfg.Nodes)
             {
                 if (!visited.Contains(node))
-                    result.AddPath(GetFallThroughPath(node, visited));
+                    result.AddUnbreakablePath(GetFallThroughPath(node, visited));
             }
 ;
             return result;
