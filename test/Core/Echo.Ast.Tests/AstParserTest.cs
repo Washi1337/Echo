@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Echo.Ast.Construction;
 using Echo.Ast.Patterns;
 using Echo.Ast.Tests.Patterns;
 using Echo.ControlFlow;
@@ -452,6 +453,20 @@ namespace Echo.Ast.Tests
             Assert.True(phiPattern.Matches(cfg.Nodes[13].Contents.Header),
                 "Node 13 was expected to start with a phi node with 4 sources.");
         }
-        
+
+        [Fact]
+        public void VariableAccessThatHasntBeenWrittenToBeforeShouldntResultInPhi()
+        {
+            var variable = new DummyVariable("dummy");
+            var cfg = ConstructAst(new[]
+            {
+                DummyInstruction.Get(0, variable), 
+                DummyInstruction.Op(1, 1, 0), 
+                DummyInstruction.Ret(2)
+            });
+            
+            Assert.Single(cfg.Nodes);
+            Assert.All(cfg.Entrypoint.Contents.Instructions, Assert.IsNotType<PhiStatement<DummyInstruction>>);
+        }
     }
 }
