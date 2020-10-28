@@ -165,6 +165,22 @@ namespace Echo.Concrete.Tests.Values.ValueType
             
             Assert.Equal(new Integer32Value(expected), value1);
         }
+
+        [Theory]
+        [InlineData("00001111", "00001000", "00000001")]
+        [InlineData("00001000", "00000001", "00001000")]
+        [InlineData("00001???", "00000001", "0000????")]
+        [InlineData("00001???", "0000000?", "0000????")]
+        [InlineData("11111111111111110000000000000000", "00000000000000001111111111111111", "00000000000000010000000000000000")]
+        public void Divide(string a, string b, string expected)
+        {
+            var value1 = new Integer32Value(a);
+            var value2 = new Integer32Value(b);
+
+            value1.Divide(value2);
+
+            Assert.Equal(new Integer32Value(expected), value1);
+        }
     }
 
 }

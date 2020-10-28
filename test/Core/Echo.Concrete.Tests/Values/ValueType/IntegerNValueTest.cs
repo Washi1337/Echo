@@ -1,5 +1,6 @@
 using Echo.Concrete.Values.ValueType;
 using Echo.Core;
+using System;
 using Xunit;
 using static Echo.Core.TrileanValue;
 
@@ -191,6 +192,63 @@ namespace Echo.Concrete.Tests.Values.ValueType
             value1.Multiply(value2);
             
             Assert.Equal(new IntegerNValue(expected), value1);
+        }
+
+        [Theory]
+        [InlineData("00000001", "00000001", "00000001")]
+        [InlineData("00000001", "0000000?", "0000000?")]
+        [InlineData("0000000?", "00000001", "0000000?")]
+        [InlineData("00000111", "00000010", "00000011")]
+        [InlineData("000000?1", "00000010", "0000000?")]
+        [InlineData("00001001", "00000011", "00000011")]
+        public void Divide(string a, string b, string expected)
+        {
+            var value1 = new IntegerNValue(a);
+            var value2 = new IntegerNValue(b);
+
+            value1.Divide(value2);
+
+            Assert.Equal(new IntegerNValue(expected), value1);
+        }
+
+        [Theory]
+        [InlineData("00000001", "00000000")]
+        [InlineData("0000000?", "00000000")]
+        public void Divide_DividingByZero(string a, string b)
+        {
+            var value1 = new IntegerNValue(a);
+            var value2 = new IntegerNValue(b);
+            bool exceptionThrowed = false;
+            try
+            {
+                value1.Divide(value2);
+            }
+            catch (ArgumentException)
+            {
+                exceptionThrowed = true;
+            }
+
+            Assert.True(exceptionThrowed);
+        }
+
+        [Theory]
+        [InlineData("000000?1000000?1", "00000010")]
+        [InlineData("00001001", "0000000110000011")]
+        public void Divide_DifferentSizes(string a, string b)
+        {
+            var value1 = new IntegerNValue(a);
+            var value2 = new IntegerNValue(b);
+            bool exceptionThrowed = false;
+            try
+            {
+                value1.Divide(value2);
+            }
+            catch (ArgumentException)
+            {
+                exceptionThrowed = true;
+            }
+
+            Assert.True(exceptionThrowed);
         }
 
         [Fact]
