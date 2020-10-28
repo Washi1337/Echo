@@ -216,20 +216,24 @@ namespace Echo.ControlFlow.Editing.Synchronization
                     throw new InvalidOperationException();
 
                 // Group successors by type:
-                long? fallthroughSuccessor = null;
+                long? unconditionalSuccessor = null;
                 var conditionalSuccessors = new List<long>();
                 var abnormalSuccessors = new List<long>();
 
                 for (int i = 0; i < actualSuccessorCount; i++)
                 {
                     var successor = successorsBuffer[i];
+                    if (!successor.IsRealEdge)
+                        continue;
+
                     switch (successor.EdgeType)
                     {
                         case ControlFlowEdgeType.FallThrough:
-                            if (fallthroughSuccessor.HasValue)
+                        case ControlFlowEdgeType.Unconditional:
+                            if (unconditionalSuccessor.HasValue)
                                 throw new ArgumentException("Instruction has multiple fallthrough successors.");
                             else
-                                fallthroughSuccessor = successor.DestinationAddress;
+                                unconditionalSuccessor = successor.DestinationAddress;
                             break;
 
                         case ControlFlowEdgeType.Conditional:
@@ -246,7 +250,7 @@ namespace Echo.ControlFlow.Editing.Synchronization
                 }
 
                 // Check if there are any changes to the outgoing edges.
-                hasChanges |= CheckIfFallThroughChanged(transaction, node, fallthroughSuccessor);
+                hasChanges |= CheckIfFallThroughChanged(transaction, node, unconditionalSuccessor);
                 hasChanges |= CheckIfAdjacencyListChanged(transaction, node.ConditionalEdges, conditionalSuccessors);
                 hasChanges |= CheckIfAdjacencyListChanged(transaction, node.AbnormalEdges, abnormalSuccessors);
             }
@@ -267,10 +271,10 @@ namespace Echo.ControlFlow.Editing.Synchronization
 
             if (!successorOffset.HasValue)
             {
-                if (node.FallThroughNeighbour is {})
+                if (node.UnconditionalNeighbour is {})
                     fallThroughChanged = true; // Fallthrough was removed.
             }
-            else if (node.FallThroughNeighbour is null || node.FallThroughNeighbour.Offset != successorOffset.Value)
+            else if (node.UnconditionalNeighbour is null || node.UnconditionalNeighbour.Offset != successorOffset.Value)
             {
                 // Fallthrough was added or changed.
                 fallThroughChanged = true;

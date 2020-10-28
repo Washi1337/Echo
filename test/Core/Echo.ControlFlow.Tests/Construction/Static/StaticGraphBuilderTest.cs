@@ -107,10 +107,10 @@ namespace Echo.ControlFlow.Tests.Construction.Static
 
             Assert.Equal(4, graph.Nodes.Count);
             Assert.Single(graph.Entrypoint.ConditionalEdges);
-            Assert.NotNull(graph.Entrypoint.FallThroughEdge);
+            Assert.NotNull(graph.Entrypoint.UnconditionalEdge);
             Assert.Equal(
-                graph.Entrypoint.FallThroughNeighbour.FallThroughNeighbour, 
-                graph.Entrypoint.ConditionalEdges.First().Target.FallThroughNeighbour);
+                graph.Entrypoint.UnconditionalNeighbour.UnconditionalNeighbour, 
+                graph.Entrypoint.ConditionalEdges.First().Target.UnconditionalNeighbour);
         }
 
         [Fact]
@@ -145,21 +145,21 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             Assert.Equal(4, graph.Nodes.Count);
             
             // Entrypoint.
-            Assert.NotNull(graph.Entrypoint.FallThroughNeighbour);
+            Assert.NotNull(graph.Entrypoint.UnconditionalNeighbour);
             Assert.Empty(graph.Entrypoint.ConditionalEdges);
             
             // Loop header
-            var loopHeader = graph.Entrypoint.FallThroughNeighbour;
-            Assert.NotNull(loopHeader.FallThroughEdge);
+            var loopHeader = graph.Entrypoint.UnconditionalNeighbour;
+            Assert.NotNull(loopHeader.UnconditionalEdge);
             Assert.Single(loopHeader.ConditionalEdges);
             
             // Loop body
             var loopBody = loopHeader.ConditionalEdges.First().Target;
-            Assert.Equal(loopHeader, loopBody.FallThroughNeighbour);
+            Assert.Equal(loopHeader, loopBody.UnconditionalNeighbour);
             Assert.Empty(loopBody.ConditionalEdges);
             
             // Exit
-            var exit = loopHeader.FallThroughNeighbour;
+            var exit = loopHeader.UnconditionalNeighbour;
             Assert.Empty(exit.GetOutgoingEdges());
         }
 
@@ -206,6 +206,26 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             var graph = BuildControlFlowGraph(instructions, 0, new long[] {1});
             Assert.Contains(graph.Nodes, n => n.Offset == 0);
             Assert.Contains(graph.Nodes, n => n.Offset == 1);
+        }
+
+        [Fact]
+        public void BlockHeadersImpliedByInstructionsShouldAlwaysBeAdded()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.PushOffset(0, 10),
+                DummyInstruction.Ret(1),
+                
+                DummyInstruction.Op(10, 0 ,0),
+                DummyInstruction.Ret(11),
+            };
+            
+            var graph = BuildControlFlowGraph(instructions);
+            Assert.Contains(graph.Nodes, n => n.Offset == 0);
+            Assert.Contains(graph.Nodes, n => n.Offset == 10);
+            Assert.DoesNotContain(graph.Nodes, n => n.Offset == 1);
+            Assert.Empty(graph.Nodes[0].GetOutgoingEdges());
+            Assert.Empty(graph.Nodes[10].GetIncomingEdges());
         }
     }
 }

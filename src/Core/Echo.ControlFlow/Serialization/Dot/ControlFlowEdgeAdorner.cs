@@ -18,6 +18,15 @@ namespace Echo.ControlFlow.Serialization.Dot
         {
             get;
             set;
+        } = new DotEntityStyle("gray", null);
+        
+        /// <summary>
+        /// Gets or sets the edge style to use for unconditional branch edges.
+        /// </summary>
+        public DotEntityStyle UnconditionalStyle
+        {
+            get;
+            set;
         } = new DotEntityStyle(null, null);
 
         /// <summary>
@@ -56,9 +65,10 @@ namespace Echo.ControlFlow.Serialization.Dot
 
                 var style = cfgEdge.Type switch
                 {
-                    ControlFlowEdgeType.FallThrough => (cfgEdge.Origin.ConditionalEdges.Count > 0
+                    ControlFlowEdgeType.FallThrough => cfgEdge.Origin.ConditionalEdges.Count > 0
                         ? FalseStyle
-                        : FallthroughStyle),
+                        : FallthroughStyle,
+                    ControlFlowEdgeType.Unconditional => UnconditionalStyle, 
                     ControlFlowEdgeType.Conditional => TrueStyle,
                     ControlFlowEdgeType.Abnormal => AbnormalStyle,
                     _ => throw new ArgumentOutOfRangeException()

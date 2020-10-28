@@ -1,12 +1,13 @@
 using dnlib.DotNet;
+using Mocks;
 
 namespace Echo.Platforms.Dnlib.Tests
 {
     public class CurrentModuleFixture
     {
-        public ModuleDef Module
+        public ModuleDef MockModule
         {
             get;
-        } = ModuleDefMD.Load(typeof(CurrentModuleFixture).Assembly.Location);
+        } = ModuleDefMD.Load(typeof(SimpleClass).Assembly.Location);
     }
 }

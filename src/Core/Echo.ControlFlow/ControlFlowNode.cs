@@ -16,7 +16,7 @@ namespace Echo.ControlFlow
     /// <typeparam name="TInstruction">The type of data to store in the node.</typeparam>
     public class ControlFlowNode<TInstruction> : IIdentifiedNode
     {
-        private ControlFlowEdge<TInstruction> _fallThroughEdge;
+        private ControlFlowEdge<TInstruction> _unconditionalEdge;
 
         /// <summary>
         /// Creates a new control flow graph node with an empty basic block, to be added to the graph.
@@ -114,7 +114,7 @@ namespace Echo.ControlFlow
             get
             {
                 int count = ConditionalEdges.Count + AbnormalEdges.Count;
-                if (FallThroughEdge is {})
+                if (UnconditionalEdge is {})
                     count++;
                 return count;
             }
@@ -132,27 +132,31 @@ namespace Echo.ControlFlow
         /// Gets or sets the neighbour to which the control is transferred to after execution of this block and no
         /// other condition is met.
         /// </summary>
-        public ControlFlowNode<TInstruction> FallThroughNeighbour
+        public ControlFlowNode<TInstruction> UnconditionalNeighbour
         {
-            get => FallThroughEdge?.Target;
-            set => FallThroughEdge = value == null ? null : new ControlFlowEdge<TInstruction>(this, value);
+            get => UnconditionalEdge?.Target;
+            set => UnconditionalEdge = value == null ? null : new ControlFlowEdge<TInstruction>(this, value);
         }
 
         /// <summary>
         /// Gets or sets the edge to the neighbour to which the control is transferred to after execution of this block
         /// and no other condition is met.
         /// </summary>
-        public ControlFlowEdge<TInstruction> FallThroughEdge
+        public ControlFlowEdge<TInstruction> UnconditionalEdge
         {
-            get => _fallThroughEdge;
+            get => _unconditionalEdge;
             set
             {
                 if (value is {})
-                    AdjacencyCollection<TInstruction>.AssertEdgeValidity(this, ControlFlowEdgeType.FallThrough, value);
+                {
+                    if (value.Type != ControlFlowEdgeType.FallThrough && value.Type != ControlFlowEdgeType.Unconditional)
+                        throw new ArgumentException("New edge must be either a fallthrough edge or an unconditional edge.");
+                    AdjacencyCollection<TInstruction>.AssertEdgeValidity(this, value, value.Type);
+                }
 
-                _fallThroughEdge?.Target.IncomingEdges.Remove(_fallThroughEdge);
-                _fallThroughEdge = value;
-                _fallThroughEdge?.Target.IncomingEdges.Add(value);
+                _unconditionalEdge?.Target.IncomingEdges.Remove(_unconditionalEdge);
+                _unconditionalEdge = value;
+                _unconditionalEdge?.Target.IncomingEdges.Add(value);
 
             }
         }
@@ -227,9 +231,10 @@ namespace Echo.ControlFlow
             switch (edgeType)
             {
                 case ControlFlowEdgeType.FallThrough:
-                    if (FallThroughEdge != null)
-                        throw new InvalidOperationException("Node already has a fallthrough edge to another node.");
-                    FallThroughEdge = edge;
+                case ControlFlowEdgeType.Unconditional:
+                    if (UnconditionalEdge != null)
+                        throw new InvalidOperationException("Node already has an unconditional edge to another node.");
+                    UnconditionalEdge = edge;
                     break;
 
                 case ControlFlowEdgeType.Conditional:
@@ -281,7 +286,7 @@ namespace Echo.ControlFlow
             var edges = GetOutgoingEdges().ToArray();
             ConditionalEdges.Clear();
             AbnormalEdges.Clear();
-            FallThroughNeighbour = newNode;
+            UnconditionalNeighbour = newNode;
 
             // Move removed outgoing edges to new node.
             foreach (var edge in edges)
@@ -323,7 +328,7 @@ namespace Echo.ControlFlow
         /// </exception>
         public void MergeWithSuccessor()
         {
-            var successor = FallThroughNeighbour;
+            var successor = UnconditionalNeighbour;
             if (successor is null)
                 throw new InvalidOperationException("Node has no fallthrough neighbour to merge into.");
             
@@ -334,7 +339,7 @@ namespace Echo.ControlFlow
                 Contents.Instructions.Add(instruction);
             successor.Contents.Instructions.Clear();
 
-            FallThroughNeighbour = null;
+            UnconditionalNeighbour = null;
             foreach (var edge in successor.GetOutgoingEdges())
                 ConnectWith(edge.Target, edge.Type);
 
@@ -357,8 +362,8 @@ namespace Echo.ControlFlow
         public IEnumerable<ControlFlowEdge<TInstruction>> GetOutgoingEdges()
         {
             var result = new List<ControlFlowEdge<TInstruction>>();
-            if (FallThroughEdge != null)
-                result.Add(FallThroughEdge);
+            if (UnconditionalEdge != null)
+                result.Add(UnconditionalEdge);
             result.AddRange(ConditionalEdges);
             result.AddRange(AbnormalEdges);
             return result;
@@ -413,7 +418,7 @@ namespace Echo.ControlFlow
         {
             if (neighbour == null)
                 throw new ArgumentNullException(nameof(neighbour));
-            return FallThroughNeighbour == neighbour
+            return UnconditionalNeighbour == neighbour
                    || ConditionalEdges.Contains(neighbour)
                    || AbnormalEdges.Contains(neighbour);
         }
@@ -424,7 +429,7 @@ namespace Echo.ControlFlow
         /// </summary>
         public void Disconnect()
         {
-            FallThroughEdge = null;
+            UnconditionalEdge = null;
             ConditionalEdges.Clear();
             AbnormalEdges.Clear();
 
@@ -433,7 +438,8 @@ namespace Echo.ControlFlow
                 switch (incomingEdge.Type)
                 {
                     case ControlFlowEdgeType.FallThrough:
-                        incomingEdge.Origin.FallThroughEdge = null;
+                    case ControlFlowEdgeType.Unconditional:
+                        incomingEdge.Origin.UnconditionalEdge = null;
                         break;
                     case ControlFlowEdgeType.Conditional:
                         incomingEdge.Origin.ConditionalEdges.Remove(incomingEdge);

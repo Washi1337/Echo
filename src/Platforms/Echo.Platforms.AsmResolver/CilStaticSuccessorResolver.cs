@@ -84,7 +84,7 @@ namespace Echo.Platforms.AsmResolver
         private static int GetFallThroughTransitions(CilInstruction instruction, Span<SuccessorInfo> successorsBuffer)
         {
             // Fallthrough instructions always move to the next instruction.
-            successorsBuffer[0] = CreateFallThroughTransition(instruction);
+            successorsBuffer[0] = FallThrough(instruction);
             return 1;
         }
 
@@ -92,7 +92,7 @@ namespace Echo.Platforms.AsmResolver
         {
             // Unconditional branches always move to the instruction referenced in the operand.
             var label = (ICilLabel) instruction.Operand;
-            successorsBuffer[0] = new SuccessorInfo(label.Offset, ControlFlowEdgeType.FallThrough);
+            successorsBuffer[0] = new SuccessorInfo(label.Offset, ControlFlowEdgeType.Unconditional);
             return 1;
         }
 
@@ -102,14 +102,14 @@ namespace Echo.Platforms.AsmResolver
             switch (instruction.Operand)
             {
                 case ICilLabel singleTarget:
-                    successorsBuffer[0] = CreateConditionalTransition(singleTarget);
-                    successorsBuffer[1] = CreateFallThroughTransition(instruction);
+                    successorsBuffer[0] = Conditional(singleTarget);
+                    successorsBuffer[1] = FallThrough(instruction);
                     return 2;
 
                 case IList<ICilLabel> multipleTargets:
                     for (int i = 0; i < multipleTargets.Count; i++)
-                        successorsBuffer[i] = CreateConditionalTransition(multipleTargets[i]);
-                    successorsBuffer[multipleTargets.Count] = CreateFallThroughTransition(instruction);
+                        successorsBuffer[i] = Conditional(multipleTargets[i]);
+                    successorsBuffer[multipleTargets.Count] = FallThrough(instruction);
                     return multipleTargets.Count + 1;
                 
                 default:
@@ -117,12 +117,12 @@ namespace Echo.Platforms.AsmResolver
             }
         }
 
-        private static SuccessorInfo CreateFallThroughTransition(CilInstruction instruction)
+        private static SuccessorInfo FallThrough(CilInstruction instruction)
         {
             return new SuccessorInfo(instruction.Offset + instruction.Size, ControlFlowEdgeType.FallThrough);
         }
 
-        private static SuccessorInfo CreateConditionalTransition(ICilLabel singleTarget)
+        private static SuccessorInfo Conditional(ICilLabel singleTarget)
         {
             return new SuccessorInfo(singleTarget.Offset, ControlFlowEdgeType.Conditional);
         }

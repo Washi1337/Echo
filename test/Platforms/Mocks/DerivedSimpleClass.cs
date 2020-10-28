@@ -1,6 +1,6 @@
 using System;
 
-namespace Echo.Platforms.AsmResolver.Tests.Mock
+namespace Mocks
 {
     public class DerivedSimpleClass : SimpleClass
     {

@@ -1,15 +1,16 @@
 using System.Linq;
 using AsmResolver.DotNet;
 using Echo.Platforms.AsmResolver.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests
 {
-    public class StaticSuccessorResolverTest : IClassFixture<CurrentModuleFixture>
+    public class StaticSuccessorResolverTest : IClassFixture<MockModuleFixture>
     {
-        private readonly CurrentModuleFixture _moduleFixture;
+        private readonly MockModuleFixture _moduleFixture;
 
-        public StaticSuccessorResolverTest(CurrentModuleFixture moduleFixture)
+        public StaticSuccessorResolverTest(MockModuleFixture moduleFixture)
         {
             _moduleFixture = moduleFixture;
         }
@@ -17,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         [Fact]
         public void SingleBlock()
         {
-            var type = (TypeDefinition) _moduleFixture.Module.LookupMember(typeof(SimpleClass).MetadataToken);
+            var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.HelloWorld));
             var body = method.CilMethodBody;
             var cfg = body.ConstructStaticFlowGraph();
@@ -29,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         [Fact]
         public void If()
         {
-            var type = (TypeDefinition) _moduleFixture.Module.LookupMember(typeof(SimpleClass).MetadataToken);
+            var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.If));
             var body = method.CilMethodBody;
             var cfg = body.ConstructStaticFlowGraph();
@@ -40,8 +41,8 @@ namespace Echo.Platforms.AsmResolver.Tests
         [Fact]
         public void Switch()
         {
-            var type = (TypeDefinition) _moduleFixture.Module.LookupMember(typeof(SimpleClass).MetadataToken);
-            var method = type.Methods.First(m => m.Name == nameof(SimpleClass.Switch));
+            var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
+            var method = type.Methods.First(m => m.Name == nameof(SimpleClass.SwitchColor));
             var body = method.CilMethodBody;
             var cfg = body.ConstructStaticFlowGraph();
             

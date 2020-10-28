@@ -120,10 +120,8 @@ namespace Echo.ControlFlow.Construction
         public void RegisterSuccessor(in TInstruction instruction, SuccessorInfo successorInfo)
         {
             long offset = Architecture.GetOffset(instruction);
-            long size = Architecture.GetSize(instruction);
             
-            if (successorInfo.EdgeType == ControlFlowEdgeType.FallThrough
-                && offset + size == successorInfo.DestinationAddress)
+            if (successorInfo.EdgeType == ControlFlowEdgeType.FallThrough)
             {
                 // Register the fallthrough successor info.
                 _fallThroughOffsets.Add(offset);

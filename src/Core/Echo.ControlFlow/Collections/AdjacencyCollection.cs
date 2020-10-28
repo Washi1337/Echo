@@ -80,7 +80,7 @@ namespace Echo.ControlFlow.Collections
         /// </exception>
         public ControlFlowEdge<TContents> Add(ControlFlowEdge<TContents> edge)
         {
-            AssertEdgeValidity(Owner, EdgeType, edge);
+            AssertEdgeValidity(Owner, edge, EdgeType);
             GetEdges(edge.Target).Add(edge);
             edge.Target.IncomingEdges.Add(edge);
             _count++;
@@ -170,7 +170,8 @@ namespace Echo.ControlFlow.Collections
             return result;
         }
 
-        internal static void AssertEdgeValidity(ControlFlowNode<TContents> owner, ControlFlowEdgeType type, ControlFlowEdge<TContents> item)
+        internal static void AssertEdgeValidity(
+            ControlFlowNode<TContents> owner, ControlFlowEdge<TContents> item, ControlFlowEdgeType type)
         {
             if (item.Type != type)
             {

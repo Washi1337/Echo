@@ -26,11 +26,11 @@ namespace Echo.ControlFlow.Tests
         public void ValidFallthroughEdge()
         {
             var nodes = CreateDummyGraph(2);
-            nodes[0].FallThroughEdge = new ControlFlowEdge<int>(nodes[0], nodes[1]);
+            nodes[0].UnconditionalEdge = new ControlFlowEdge<int>(nodes[0], nodes[1]);
             
-            Assert.Equal(nodes[0], nodes[0].FallThroughEdge.Origin);
-            Assert.Equal(nodes[1], nodes[0].FallThroughEdge.Target);
-            Assert.Equal(ControlFlowEdgeType.FallThrough, nodes[0].FallThroughEdge.Type);
+            Assert.Equal(nodes[0], nodes[0].UnconditionalEdge.Origin);
+            Assert.Equal(nodes[1], nodes[0].UnconditionalEdge.Target);
+            Assert.Equal(ControlFlowEdgeType.FallThrough, nodes[0].UnconditionalEdge.Type);
             Assert.Equal(1, nodes[0].OutDegree);
             Assert.Equal(1, nodes[1].InDegree);
         }
@@ -41,10 +41,10 @@ namespace Echo.ControlFlow.Tests
             var nodes = CreateDummyGraph(2);
             
             Assert.Throws<ArgumentException>(
-                () => nodes[0].FallThroughEdge = new ControlFlowEdge<int>(nodes[1], nodes[0]));
+                () => nodes[0].UnconditionalEdge = new ControlFlowEdge<int>(nodes[1], nodes[0]));
             
             Assert.Throws<ArgumentException>(
-                () => nodes[0].FallThroughEdge = new ControlFlowEdge<int>(nodes[0], nodes[1], ControlFlowEdgeType.Conditional));
+                () => nodes[0].UnconditionalEdge = new ControlFlowEdge<int>(nodes[0], nodes[1], ControlFlowEdgeType.Conditional));
             
             Assert.Equal(0, nodes[0].OutDegree);
             Assert.Equal(0, nodes[1].InDegree);
@@ -100,7 +100,7 @@ namespace Echo.ControlFlow.Tests
             Assert.Equal(nodes[0], edge.Origin);
             Assert.Equal(nodes[1], edge.Target);
             Assert.Equal(ControlFlowEdgeType.FallThrough, edge.Type);
-            Assert.Equal(edge, nodes[0].FallThroughEdge);
+            Assert.Equal(edge, nodes[0].UnconditionalEdge);
         }
 
         [Fact]
@@ -221,7 +221,7 @@ namespace Echo.ControlFlow.Tests
 
             Assert.Equal(new[] { 0, 1 }, first.Contents.Instructions);
             Assert.Equal(new[] { 2, 3, 4 }, second.Contents.Instructions);
-            Assert.Same(first.FallThroughNeighbour, second);
+            Assert.Same(first.UnconditionalNeighbour, second);
         }
 
         [Fact]
@@ -270,7 +270,7 @@ namespace Echo.ControlFlow.Tests
             
             var (first, second) = graph.Nodes[1].SplitAtIndex(1);
             
-            Assert.Same(graph.Nodes[3], second.FallThroughNeighbour); 
+            Assert.Same(graph.Nodes[3], second.UnconditionalNeighbour); 
         }
 
         [Fact]
@@ -289,7 +289,7 @@ namespace Echo.ControlFlow.Tests
             
             var (first, second) = graph.Nodes[1].SplitAtIndex(1);
             
-            Assert.Same(graph.Nodes[4], second.FallThroughNeighbour);
+            Assert.Same(graph.Nodes[4], second.UnconditionalNeighbour);
             Assert.Contains(graph.Nodes[3], second.ConditionalEdges.Select(e => e.Target));
         }
 
@@ -299,12 +299,12 @@ namespace Echo.ControlFlow.Tests
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
             
             graph.Nodes.Add(new ControlFlowNode<int>(0, 0, 1));
-            graph.Nodes[0].FallThroughNeighbour = graph.Nodes[0];
+            graph.Nodes[0].UnconditionalNeighbour = graph.Nodes[0];
 
             var (first, second) = graph.Nodes[0].SplitAtIndex(1);
             
-            Assert.Same(second, first.FallThroughNeighbour);
-            Assert.Same(first, second.FallThroughNeighbour);
+            Assert.Same(second, first.UnconditionalNeighbour);
+            Assert.Same(first, second.UnconditionalNeighbour);
         }
 
         [Fact]
@@ -352,7 +352,7 @@ namespace Echo.ControlFlow.Tests
             
             graph.Nodes[0].MergeWithSuccessor();
 
-            Assert.Same(graph.Nodes[2], graph.Nodes[0].FallThroughNeighbour);
+            Assert.Same(graph.Nodes[2], graph.Nodes[0].UnconditionalNeighbour);
         }
 
         [Fact]

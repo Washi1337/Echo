@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using Echo.Core.Code;
 
-namespace Echo.Ast.Helpers
+namespace Echo.Ast.Analysis
 {
     internal sealed class WrittenVariableFinderWalker<TInstruction> : AstNodeWalkerBase<TInstruction>
     {

@@ -6,20 +6,21 @@ using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 {
-    public class LdObjTest : DispatcherTestBase, IClassFixture<CurrentModuleFixture>
+    public class LdObjTest : DispatcherTestBase
     {
         private readonly TypeDefinition _structType;
         private readonly FieldDefinition _x;
         private readonly FieldDefinition _y;
 
-        public LdObjTest(MockModuleFixture moduleFixture, CurrentModuleFixture currentModuleFixture)
+        public LdObjTest(MockModuleFixture moduleFixture)
             : base(moduleFixture)
         {
-            var module = currentModuleFixture.Module;
+            var module = moduleFixture.MockModule;
             
             _structType = (TypeDefinition) module.LookupMember(typeof(SimpleStruct).MetadataToken);
             _x = _structType.Fields.First(f => f.Name == nameof(SimpleStruct.X));
