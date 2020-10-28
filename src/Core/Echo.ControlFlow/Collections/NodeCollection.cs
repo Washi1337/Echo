@@ -120,7 +120,7 @@ namespace Echo.ControlFlow.Collections
             if (_nodes.TryGetValue(offset, out var item))
             {
                 // Remove outgoing edges.
-                item.FallThroughEdge = null;
+                item.UnconditionalEdge = null;
                 item.ConditionalEdges.Clear();
                 item.AbnormalEdges.Clear();
                 
@@ -129,8 +129,9 @@ namespace Echo.ControlFlow.Collections
                 {
                     switch (edge.Type)
                     {
+                        case ControlFlowEdgeType.Unconditional:
                         case ControlFlowEdgeType.FallThrough:
-                            edge.Origin.FallThroughEdge = null;
+                            edge.Origin.UnconditionalEdge = null;
                             break;
                         case ControlFlowEdgeType.Conditional:
                             edge.Origin.ConditionalEdges.Remove(edge);

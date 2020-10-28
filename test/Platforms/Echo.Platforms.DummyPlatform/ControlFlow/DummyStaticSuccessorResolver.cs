@@ -51,7 +51,7 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
                     return 1;
                 
                 case DummyOpCode.Jmp:
-                    successorBuffer[0] = new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.FallThrough);
+                    successorBuffer[0] = new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.Unconditional);
                     return 1;
                 
                 case DummyOpCode.JmpCond:

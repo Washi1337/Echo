@@ -41,8 +41,7 @@ namespace Echo.Ast.Construction
         public ControlFlowGraph<Statement<TInstruction>> Parse()
         {
             var newGraph = new ControlFlowGraph<Statement<TInstruction>>(_architecture);
-            var blockBuilder = new BlockBuilder<TInstruction>();
-            var rootScope = blockBuilder.ConstructBlocks(_controlFlowGraph);
+            var rootScope = _controlFlowGraph.ConstructBlocks();
 
             // Transform and add regions.
             foreach (var originalRegion in _controlFlowGraph.Regions)

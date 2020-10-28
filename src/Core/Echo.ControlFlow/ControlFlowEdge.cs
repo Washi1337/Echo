@@ -69,5 +69,8 @@ namespace Echo.ControlFlow
         {
             get;
         }
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Origin.Offset:X8} -> {Target.Offset:X8} ({Type})";
     }
 }

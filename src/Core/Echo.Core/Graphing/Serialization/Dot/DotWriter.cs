@@ -146,7 +146,7 @@ namespace Echo.Core.Graphing.Serialization.Dot
                 Writer.Indent++;
                 
                 var attributes = SubGraphAdorner.GetSubGraphAttributes(subGraph);
-                if (attributes.Count > 0)
+                if (attributes?.Count > 0)
                 {
                     string delimeter = IncludeSemicolons
                         ? ";"

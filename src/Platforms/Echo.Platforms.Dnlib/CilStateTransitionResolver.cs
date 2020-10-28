@@ -104,7 +104,7 @@ namespace Echo.Platforms.Dnlib
                 case FlowControl.Meta:
                 case FlowControl.Next:
                 case FlowControl.Break:
-                    transitionBuffer[0] = Next(currentState, instruction);
+                    transitionBuffer[0] = FallThrough(currentState, instruction);
                     return 1;
 
                 case FlowControl.Branch:
@@ -121,12 +121,12 @@ namespace Echo.Platforms.Dnlib
                         transitionBuffer[i] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.Conditional);
                     }
 
-                    transitionBuffer[targets.Length] = Next(currentState, instruction);
+                    transitionBuffer[targets.Length] = FallThrough(currentState, instruction);
                     return targets.Length + 1;
 
                 case FlowControl.Cond_Branch:
                     transitionBuffer[0] = Branch(true, currentState, instruction);
-                    transitionBuffer[1] = Next(currentState, instruction);
+                    transitionBuffer[1] = FallThrough(currentState, instruction);
                     return 2;
 
                 case FlowControl.Return:
@@ -142,7 +142,7 @@ namespace Echo.Platforms.Dnlib
             }
         }
 
-        private StateTransition<Instruction> Next(SymbolicProgramState<Instruction> currentState, Instruction instruction)
+        private StateTransition<Instruction> FallThrough(SymbolicProgramState<Instruction> currentState, Instruction instruction)
         {
             var nextState = currentState.Copy();
             ApplyDefaultBehaviour(nextState, instruction);
@@ -159,7 +159,7 @@ namespace Echo.Platforms.Dnlib
             nextState.ProgramCounter = ((Instruction) instruction.Operand).Offset;
             return new StateTransition<Instruction>(nextState, conditional
                 ? ControlFlowEdgeType.Conditional
-                : ControlFlowEdgeType.FallThrough);
+                : ControlFlowEdgeType.Unconditional);
         }
     }
 }

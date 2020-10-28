@@ -197,7 +197,7 @@ namespace Echo.ControlFlow.Tests
             n1.ConnectWith(n3, ControlFlowEdgeType.Conditional);
             n1.ConnectWith(n3, ControlFlowEdgeType.Conditional);
             
-            Assert.Same(n2, n1.FallThroughNeighbour);
+            Assert.Same(n2, n1.UnconditionalNeighbour);
             Assert.Equal(new[]
             {
                 n3, n3, n3, n3
