@@ -536,7 +536,7 @@ namespace Echo.Concrete.Values.ValueType
 
             // Throw exception because of dividing by zero
             if (other.IsZero == Trilean.True)
-                throw new ArgumentException("Divisor is zero and dividing by zero is not allowed.");
+                throw new DivideByZeroException();
 
             // There are two possibilities which has to be count before result
             // First is that first number has all unknown bits set to False and divisor to true
@@ -635,7 +635,7 @@ namespace Echo.Concrete.Values.ValueType
 
             // Throw exception because of dividing by zero
             if (other.IsZero == Trilean.True)
-                throw new ArgumentException("Divisor is zero and dividing by zero is not allowed.");
+                throw new DivideByZeroException();
 
             // There are 2 possibilities
             // First is that both numbers are known. In this possibility remainder is counted as usual.
