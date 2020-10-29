@@ -218,17 +218,8 @@ namespace Echo.Concrete.Tests.Values.ValueType
         {
             var value1 = new IntegerNValue(a);
             var value2 = new IntegerNValue(b);
-            bool exceptionThrowed = false;
-            try
-            {
-                value1.Divide(value2);
-            }
-            catch (ArgumentException)
-            {
-                exceptionThrowed = true;
-            }
 
-            Assert.True(exceptionThrowed);
+            Assert.Throws<DivideByZeroException>(() => value1.Divide(value2));
         }
 
         [Theory]
@@ -275,17 +266,8 @@ namespace Echo.Concrete.Tests.Values.ValueType
         {
             var value1 = new IntegerNValue(a);
             var value2 = new IntegerNValue(b);
-            bool exceptionThrowed = false;
-            try
-            {
-                value1.Remainder(value2);
-            }
-            catch (ArgumentException)
-            {
-                exceptionThrowed = true;
-            }
 
-            Assert.True(exceptionThrowed);
+            Assert.Throws<DivideByZeroException>(() => value1.Divide(value2));
         }
 
         [Theory]
@@ -295,17 +277,8 @@ namespace Echo.Concrete.Tests.Values.ValueType
         {
             var value1 = new IntegerNValue(a);
             var value2 = new IntegerNValue(b);
-            bool exceptionThrowed = false;
-            try
-            {
-                value1.Remainder(value2);
-            }
-            catch (ArgumentException)
-            {
-                exceptionThrowed = true;
-            }
 
-            Assert.True(exceptionThrowed);
+            Assert.Throws<ArgumentException>(() => value1.Divide(value2));
         }
 
         [Fact]
