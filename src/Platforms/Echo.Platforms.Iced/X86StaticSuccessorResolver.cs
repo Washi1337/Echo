@@ -54,7 +54,7 @@ namespace Echo.Platforms.Iced
         {
             successorsBuffer[0] = new SuccessorInfo(
                 (long) instruction.NearBranchTarget, 
-                ControlFlowEdgeType.FallThrough);
+                ControlFlowEdgeType.Unconditional);
             
             return 1;
         }

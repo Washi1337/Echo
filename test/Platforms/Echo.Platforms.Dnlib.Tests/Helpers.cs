@@ -8,7 +8,7 @@ namespace Echo.Platforms.Dnlib.Tests
     {
         public static MethodDef GetTestMethod(Type containingType, string name)
         {
-            var assembly = AssemblyDef.Load(typeof(Helpers).Assembly.Location);
+            var assembly = AssemblyDef.Load(containingType.Assembly.Location);
             var module = assembly.ManifestModule;
             var type = module.GetTypes().Single(t =>
                 t.Name == containingType.Name && t.DeclaringType?.Name == containingType.DeclaringType?.Name);

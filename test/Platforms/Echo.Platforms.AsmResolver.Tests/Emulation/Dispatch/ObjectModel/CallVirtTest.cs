@@ -7,6 +7,7 @@ using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
@@ -18,7 +19,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public CallVirtTest(MockModuleFixture moduleFixture)
             : base(moduleFixture)
         {
-            var module = ModuleDefinition.FromFile(typeof(CallTest).Assembly.Location);
+            var module = moduleFixture.MockModule;
             _type = (TypeDefinition) module.LookupMember(typeof(SimpleClass).MetadataToken);
         }
 

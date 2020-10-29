@@ -10,6 +10,7 @@ namespace Echo.Platforms.DummyPlatform.Code
         Jmp,
         JmpCond,
         Ret,
-        Switch
+        Switch,
+        PushOffset,
     }
 }

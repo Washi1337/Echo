@@ -25,11 +25,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\deps\AsmResolver\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
-      <ProjectReference Include="..\..\..\deps\AsmResolver\src\AsmResolver.PE\AsmResolver.PE.csproj" />
       <ProjectReference Include="..\..\Core\Echo.Concrete\Echo.Concrete.csproj" />
       <ProjectReference Include="..\..\Core\Echo.ControlFlow\Echo.ControlFlow.csproj" />
       <ProjectReference Include="..\..\Core\Echo.Core\Echo.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AsmResolver.DotNet" Version="4.1.0" />
     </ItemGroup>
 
 </Project>

@@ -63,10 +63,10 @@ namespace Echo.Platforms.Iced.Tests
             {
                 0x0, 0x7, 0xe, 0x11, 0x17,
             }.ToHashSet(), cfg.Nodes.Select(n => n.Offset).ToHashSet());
-            Assert.Equal(cfg.Nodes[0x7], cfg.Nodes[0x0].FallThroughNeighbour);
-            Assert.Equal(cfg.Nodes[0xE], cfg.Nodes[0x7].FallThroughNeighbour);
+            Assert.Equal(cfg.Nodes[0x7], cfg.Nodes[0x0].UnconditionalNeighbour);
+            Assert.Equal(cfg.Nodes[0xE], cfg.Nodes[0x7].UnconditionalNeighbour);
             Assert.Contains(cfg.Nodes[0x11], cfg.Nodes[0x7].ConditionalEdges.Select(e=>e.Target));
-            Assert.Equal(cfg.Nodes[0x11], cfg.Nodes[0xE].FallThroughNeighbour);
+            Assert.Equal(cfg.Nodes[0x11], cfg.Nodes[0xE].UnconditionalNeighbour);
             Assert.Contains(cfg.Nodes[0x7], cfg.Nodes[0x11].ConditionalEdges.Select(e=>e.Target));
         }
 
@@ -124,9 +124,9 @@ namespace Echo.Platforms.Iced.Tests
                 0x0, 0xD, 0x14, 0x15,
             }.ToHashSet(), cfg.Nodes.Select(n => n.Offset).ToHashSet());
 
-            Assert.Equal(cfg.Nodes[0xD], cfg.Nodes[0].FallThroughNeighbour);
-            Assert.Equal(cfg.Nodes[0x15], cfg.Nodes[0xD].FallThroughNeighbour);
-            Assert.Equal(cfg.Nodes[0x15], cfg.Nodes[0x14].FallThroughNeighbour);
+            Assert.Equal(cfg.Nodes[0xD], cfg.Nodes[0].UnconditionalNeighbour);
+            Assert.Equal(cfg.Nodes[0x15], cfg.Nodes[0xD].UnconditionalNeighbour);
+            Assert.Equal(cfg.Nodes[0x15], cfg.Nodes[0x14].UnconditionalNeighbour);
             Assert.Contains(
                 cfg.Nodes[0x0].ConditionalEdges
                     .Select(e => e.Target),
