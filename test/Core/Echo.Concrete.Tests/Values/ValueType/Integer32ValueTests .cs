@@ -181,6 +181,23 @@ namespace Echo.Concrete.Tests.Values.ValueType
 
             Assert.Equal(new Integer32Value(expected), value1);
         }
+
+        [Theory]
+        [InlineData("00001111", "00001000", "00000111")]
+        [InlineData("00001001", "00000001", "00000000")]
+        [InlineData("00001???", "00000001", "0000000?")]
+        [InlineData("00001???", "0000000?", "0000000?")]
+        [InlineData("00000001", "00001???", "0000000?")]
+        [InlineData("11111111111111110000000000000000", "00000000000000001111111110111111", "00000000000000000001000001000000")]
+        public void Remainder(string a, string b, string expected)
+        {
+            var value1 = new Integer32Value(a);
+            var value2 = new Integer32Value(b);
+
+            value1.Remainder(value2);
+
+            Assert.Equal(new Integer32Value(expected), value1);
+        }
     }
 
 }

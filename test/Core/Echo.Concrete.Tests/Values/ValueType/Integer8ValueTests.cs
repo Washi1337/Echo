@@ -273,5 +273,20 @@ namespace Echo.Concrete.Tests.Values.ValueType
 
             Assert.Equal(new Integer8Value(expected), value1);
         }
+
+        [Theory]
+        [InlineData("00001111", "00001000", "00000111")]
+        [InlineData("00001000", "00000001", "00000000")]
+        [InlineData("00001???", "00000001", "0000000?")]
+        [InlineData("00001???", "0000000?", "0000000?")]
+        public void Remainder(string a, string b, string expected)
+        {
+            var value1 = new Integer8Value(a);
+            var value2 = new Integer8Value(b);
+
+            value1.Remainder(value2);
+
+            Assert.Equal(new Integer8Value(expected), value1);
+        }
     }
 }
