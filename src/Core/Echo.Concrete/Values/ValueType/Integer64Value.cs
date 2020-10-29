@@ -261,6 +261,15 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
+        public override void Remainder(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer64Value int64)
+                U64 %= int64.U64;
+            else
+                base.Remainder(other);
+        }
+
+        /// <inheritdoc />
         public override Trilean IsEqualTo(IntegerValue other)
         {
             if (other is Integer64Value int64)

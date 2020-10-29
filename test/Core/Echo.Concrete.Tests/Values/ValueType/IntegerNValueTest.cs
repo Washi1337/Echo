@@ -251,6 +251,63 @@ namespace Echo.Concrete.Tests.Values.ValueType
             Assert.True(exceptionThrowed);
         }
 
+        [Theory]
+        [InlineData("00000001", "00000001", "00000000")]
+        [InlineData("00000001", "0000000?", "0000000?")]
+        [InlineData("0000000?", "00000001", "0000000?")]
+        [InlineData("00000111", "00000010", "00000001")]
+        [InlineData("000000?1", "00000010", "000000??")]
+        [InlineData("00001001", "00000011", "00000000")]
+        public void Remainder(string a, string b, string expected)
+        {
+            var value1 = new IntegerNValue(a);
+            var value2 = new IntegerNValue(b);
+
+            value1.Remainder(value2);
+
+            Assert.Equal(new IntegerNValue(expected), value1);
+        }
+
+        [Theory]
+        [InlineData("00000001", "00000000")]
+        [InlineData("0000000?", "00000000")]
+        public void Remainder_DividingByZero(string a, string b)
+        {
+            var value1 = new IntegerNValue(a);
+            var value2 = new IntegerNValue(b);
+            bool exceptionThrowed = false;
+            try
+            {
+                value1.Remainder(value2);
+            }
+            catch (ArgumentException)
+            {
+                exceptionThrowed = true;
+            }
+
+            Assert.True(exceptionThrowed);
+        }
+
+        [Theory]
+        [InlineData("000000?1000000?1", "00000010")]
+        [InlineData("00001001", "0000000110000011")]
+        public void Remainder_DifferentSizes(string a, string b)
+        {
+            var value1 = new IntegerNValue(a);
+            var value2 = new IntegerNValue(b);
+            bool exceptionThrowed = false;
+            try
+            {
+                value1.Remainder(value2);
+            }
+            catch (ArgumentException)
+            {
+                exceptionThrowed = true;
+            }
+
+            Assert.True(exceptionThrowed);
+        }
+
         [Fact]
         public void Extend8BitsTo8Bits()
         {

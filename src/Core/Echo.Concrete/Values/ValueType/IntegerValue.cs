@@ -625,6 +625,75 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <summary>
+        /// Divides the current integer with a second (partially) known integer and returns remainder of division. 
+        /// </summary>
+        /// <param name="other">The integer to divide with</param>
+        /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match or there is dividing by zero.</exception>
+        public virtual void Remainder(IntegerValue other)
+        {
+            AssertSameBitSize(other);
+
+            // Throw exception because of dividing by zero
+            if (other.IsZero == Trilean.True)
+                throw new ArgumentException("Divisor is zero and dividing by zero is not allowed.");
+
+            // There are 2 possibilities
+            // First is that both numbers are known. In this possibility remainder is counted as usual.
+            // Second possibility is that some of numbers are unknown.
+            // Remainder in second possibility is count as shorter number of this two numbers with all bits set to unknown.
+
+            var firstNum = (IntegerValue) Copy();
+            var secondNum = (IntegerValue) other.Copy();
+            var result = (IntegerValue) Copy();
+
+            // Possibilities of count
+            if (firstNum.IsKnown && secondNum.IsKnown)
+            {
+                // Remainder is count by classic way
+                while (firstNum.IsGreaterThan(secondNum, false) || firstNum.IsEqualTo(secondNum))
+                    firstNum.Subtract(secondNum);
+
+                result = firstNum;
+            }
+            else
+            {
+                // Setting all unknown bits to True because of finding out smaller number
+                for (int i = 0; i < Size * 8; i++)
+                {
+                    if (firstNum.GetBit(i) == Trilean.Unknown)
+                        firstNum.SetBit(i, Trilean.True);
+
+                    if (secondNum.GetBit(i) == Trilean.Unknown)
+                        secondNum.SetBit(i, Trilean.True);
+                }
+
+                // Result is shorter number
+                result = (firstNum.IsGreaterThan(secondNum, false)) 
+                    ? (IntegerValue) secondNum.Copy() 
+                    : (IntegerValue) firstNum.Copy();
+
+                // Setting all bits to unknown in result
+                bool isZeroBit = false;
+                for (int i = Size * 8 - 1; i >= 0; i--)
+                {
+                    // Jumping through zeros
+                    if (result.GetBit(i) != Trilean.False || isZeroBit)
+                    {
+                        isZeroBit = true;
+                        result.SetBit(i, Trilean.Unknown);
+                    }
+                }
+            }
+
+            Span<byte> resultBits = stackalloc byte[Size];
+            Span<byte> resultMask = stackalloc byte[Size];
+            result.GetBits(resultBits);
+            result.GetMask(resultMask);
+
+            SetBits(resultBits, resultMask);
+        }
+
+        /// <summary>
         /// Determines whether the integer is equal to the provided integer.
         /// </summary>
         /// <param name="other">The other integer.</param>
