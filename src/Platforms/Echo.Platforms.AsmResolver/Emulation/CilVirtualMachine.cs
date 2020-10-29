@@ -55,14 +55,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Instructions = instructions;
             Architecture = instructions.Architecture;
             
+            var valueFactory = new UnknownValueFactory(this);
+            
             Is32Bit = is32Bit;
             Status = VirtualMachineStatus.Idle;
             CurrentState = new CilProgramState();
             Dispatcher = new DefaultCilDispatcher();
             CliMarshaller = new DefaultCliMarshaller(this);
             MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
-            MethodInvoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(this), CliMarshaller);
-            StaticFieldFactory = new StaticFieldFactory();
+            MethodInvoker = new ReturnUnknownMethodInvoker(valueFactory, CliMarshaller);
+            StaticFieldFactory = new StaticFieldFactory(valueFactory);
             
             _services[typeof(ICilRuntimeEnvironment)] = this;
         }

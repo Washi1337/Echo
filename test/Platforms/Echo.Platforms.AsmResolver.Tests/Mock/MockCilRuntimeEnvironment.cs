@@ -12,6 +12,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
         public MockCilRuntimeEnvironment()
         {
             CliMarshaller = new DefaultCliMarshaller(this);
+            StaticFieldFactory = new StaticFieldFactory(new UnknownValueFactory(this));
         }
 
         public IInstructionSetArchitecture<CilInstruction> Architecture
@@ -53,7 +54,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
         public StaticFieldFactory StaticFieldFactory
         {
             get;
-        } = new StaticFieldFactory();
+            set;
+        }
 
         IMethodInvoker ICilRuntimeEnvironment.MethodInvoker => MethodInvoker;
 
