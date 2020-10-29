@@ -10,6 +10,7 @@ namespace Mocks
     {
         public static int StaticIntField;
         public static string StaticStringField;
+        public static object StaticObjectField;
         
         public int IntField;
         public string StringField;
