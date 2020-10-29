@@ -48,12 +48,12 @@ namespace Echo.Concrete.Values.ValueType
 
                 Span<byte> mask = stackalloc byte[Size];
                 GetMask(mask);
-                
+
                 var bitField = new BitField(bits);
                 var maskField = new BitField(mask);
-                
+
                 bitField.And(maskField);
-                
+
                 for (int i = 0; i < bits.Length * 8; i++)
                 {
                     if (bitField[i])
@@ -114,7 +114,7 @@ namespace Echo.Concrete.Values.ValueType
             Span<byte> backingBits = stackalloc byte[Size];
             Span<byte> backingMask = stackalloc byte[Size];
             backingMask.Fill(0xFF);
-            
+
             var bits = new BitField(backingBits);
             var mask = new BitField(backingMask);
 
@@ -144,14 +144,14 @@ namespace Echo.Concrete.Values.ValueType
             }
 
             SetBits(backingBits, backingMask);
-        } 
+        }
 
         /// <inheritdoc />
         public override string ToString()
         {
             var size = Size * 8;
             var sb = new StringBuilder(size);
-            
+
             for (int i = size - 1; i >= 0; i--)
                 sb.Append(GetBit(i).ToString());
 
@@ -168,13 +168,13 @@ namespace Echo.Concrete.Values.ValueType
         {
             Span<byte> bitsBuffer = stackalloc byte[Size];
             Span<byte> maskBuffer = stackalloc byte[Size];
-            
+
             GetBits(bitsBuffer);
             GetMask(maskBuffer);
-            
+
             var bits = new BitField(bitsBuffer);
             var mask = new BitField(maskBuffer);
-            
+
             bits.Not();
             bits.And(mask);
 
@@ -190,10 +190,10 @@ namespace Echo.Concrete.Values.ValueType
 
             Span<byte> bits = stackalloc byte[Size];
             GetBits(bits);
-            
+
             Span<byte> mask = stackalloc byte[Size];
             GetMask(mask);
-            
+
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
@@ -227,10 +227,10 @@ namespace Echo.Concrete.Values.ValueType
 
             Span<byte> bits = stackalloc byte[Size];
             GetBits(bits);
-            
+
             Span<byte> mask = stackalloc byte[Size];
             GetMask(mask);
-            
+
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
@@ -243,7 +243,7 @@ namespace Echo.Concrete.Values.ValueType
                 // Some bits are unknown, perform operation manually.
                 var bitField = new BitField(bits);
                 var maskField = new BitField(mask);
-                
+
                 for (int i = 0; i < mask.Length * 8; i++)
                 {
                     var result = GetBit(i) | other.GetBit(i);
@@ -264,10 +264,10 @@ namespace Echo.Concrete.Values.ValueType
 
             Span<byte> bits = stackalloc byte[Size];
             GetBits(bits);
-            
+
             Span<byte> mask = stackalloc byte[Size];
             GetMask(mask);
-            
+
             if (IsKnown && other.IsKnown)
             {
                 // Catch common case where everything is known.
@@ -303,15 +303,15 @@ namespace Echo.Concrete.Values.ValueType
 
             Span<byte> bitsBuffer = stackalloc byte[Size];
             GetBits(bitsBuffer);
-            
+
             Span<byte> maskBuffer = stackalloc byte[Size];
             GetMask(maskBuffer);
-            
+
             var bits = new BitField(bitsBuffer);
             var mask = new BitField(maskBuffer);
 
             count = Math.Min(Size * 8, count);
-            
+
             for (int i = 8 * bitsBuffer.Length - count - 1; i >= 0; i--)
             {
                 bits[i + count] = bits[i];
@@ -340,21 +340,21 @@ namespace Echo.Concrete.Values.ValueType
 
             Span<byte> bitsBuffer = stackalloc byte[Size];
             GetBits(bitsBuffer);
-            
+
             Span<byte> maskBuffer = stackalloc byte[Size];
             GetMask(maskBuffer);
-            
+
             var bits = new BitField(bitsBuffer);
             var mask = new BitField(maskBuffer);
 
-            var sign = signExtend 
-                ? mask[8 * bitsBuffer.Length - 1] 
-                    ? bits[8 * bitsBuffer.Length - 1] 
-                    : Trilean.Unknown 
+            var sign = signExtend
+                ? mask[8 * bitsBuffer.Length - 1]
+                    ? bits[8 * bitsBuffer.Length - 1]
+                    : Trilean.Unknown
                 : Trilean.False;
-            
+
             count = Math.Min(Size * 8, count);
-            
+
             for (int i = count; i < bitsBuffer.Length * 8; i++)
             {
                 bits[i - count] = bits[i];
@@ -378,13 +378,13 @@ namespace Echo.Concrete.Values.ValueType
         public virtual void Add(IntegerValue other)
         {
             // The following implements a ripple full-adder.
-            
+
             AssertSameBitSize(other);
 
             Span<byte> sumBuffer = stackalloc byte[Size];
             Span<byte> maskBuffer = stackalloc byte[Size];
             maskBuffer.Fill(0xFF);
-            
+
             var sum = new BitField(sumBuffer);
             var mask = new BitField(maskBuffer);
 
@@ -396,8 +396,8 @@ namespace Echo.Concrete.Values.ValueType
 
                 // Implement full-adder logic.
                 var s = a ^ b ^ carry;
-                var c = (carry & (a ^ b)) | (a & b); 
-                
+                var c = (carry & (a ^ b)) | (a & b);
+
                 sum[i] = s.ToBooleanOrFalse();
                 mask[i] = s.IsKnown;
                 carry = c;
@@ -426,13 +426,13 @@ namespace Echo.Concrete.Values.ValueType
         public virtual void Subtract(IntegerValue other)
         {
             // The following implements a ripple full-subtractor.
-            
+
             AssertSameBitSize(other);
 
             Span<byte> differenceBuffer = stackalloc byte[Size];
             Span<byte> maskBuffer = stackalloc byte[Size];
             maskBuffer.Fill(0xFF);
-            
+
             var difference = new BitField(differenceBuffer);
             var mask = new BitField(maskBuffer);
 
@@ -441,7 +441,7 @@ namespace Echo.Concrete.Values.ValueType
             {
                 var a = GetBit(i);
                 var b = other.GetBit(i);
-                
+
                 // Implement full-subtractor logic.
                 var d = a ^ b ^ borrow;
                 var bOut = (!a & borrow) | (!a & b) | (b & borrow);
@@ -466,12 +466,12 @@ namespace Echo.Concrete.Values.ValueType
             // We implement the standard multiplication by adding and shifting, but instead of storing all intermediate
             // results, we can precompute the two possible intermediate results and shift those and add them to an end
             // result to preserve time and memory.
-            
+
             // First possible intermediate result is the current value multiplied by 0. It is redundant to compute this.
-            
+
             // Second possibility is the current value multiplied by 1.
             var multipliedByOne = (IntegerValue) Copy();
-            
+
             // Third possibility is thee current value multiplied by ?. This is effectively marking all set bits unknown.  
             // TODO: We could probably optimise the following operations for the native integer types.
             var multipliedByUnknown = (IntegerValue) Copy();
@@ -481,19 +481,19 @@ namespace Echo.Concrete.Values.ValueType
 
             Span<byte> bitsBuffer = stackalloc byte[Size];
             multipliedByOne.GetBits(bitsBuffer);
-            
+
             var mask = new BitField(maskBuffer);
             var bits = new BitField(bitsBuffer);
-            
+
             mask.Not();
             mask.Or(bits);
             mask.Not();
 
             Span<byte> unknownBits = stackalloc byte[Size];
             multipliedByUnknown.GetBits(unknownBits);
-            
+
             multipliedByUnknown.SetBits(unknownBits, maskBuffer);
-            
+
             // Final result.
             var result = new IntegerNValue(Size);
 
@@ -502,7 +502,7 @@ namespace Echo.Concrete.Values.ValueType
             for (int i = 0; i < Size * 8; i++)
             {
                 Trilean bit = other.GetBit(i);
-                
+
                 if (!bit.IsKnown)
                 {
                     multipliedByUnknown.LeftShift(i - lastShiftByUnknown);
@@ -521,7 +521,104 @@ namespace Echo.Concrete.Values.ValueType
             Span<byte> resultMask = stackalloc byte[Size];
             result.GetBits(resultBits);
             result.GetMask(resultMask);
-            
+
+            SetBits(resultBits, resultMask);
+        }
+
+        /// <summary>
+        /// Divides the current integer with a second (partially) known integer.
+        /// </summary>
+        /// <param name="other">The integer to divide with</param>
+        /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match or there is dividing by zero.</exception>
+        public virtual void Divide(IntegerValue other)
+        {
+            AssertSameBitSize(other);
+
+            // Throw exception because of dividing by zero
+            if (other.IsZero == Trilean.True)
+                throw new ArgumentException("Divisor is zero and dividing by zero is not allowed.");
+
+            // There are two possibilities which has to be count before result
+            // First is that first number has all unknown bits set to False and divisor to true
+            // Second that divisor has all unknown bits set to False instead and first number to True
+            // And finally set all bits as unknown in greater result
+
+            // First possibility
+            var firstNum = (IntegerValue) Copy();
+            var secondNum = (IntegerValue) other.Copy();
+            var oneNum = (IntegerValue) Copy();
+            var firstResult = (IntegerValue) Copy();
+
+            for (int i = 0; i < Size * 8; i++)
+            {
+                if (firstNum.GetBit(i) == Trilean.Unknown)
+                    firstNum.SetBit(i, Trilean.False);
+
+                if (secondNum.GetBit(i) == Trilean.Unknown)
+                    secondNum.SetBit(i, Trilean.True);
+
+                oneNum.SetBit(i, Trilean.False);
+                firstResult.SetBit(i, Trilean.False);
+            }
+
+            oneNum.SetBit(0, Trilean.True);
+
+            while ((firstNum.IsGreaterThan(secondNum, false) == Trilean.True || firstNum.IsEqualTo(secondNum)))
+            {
+                firstResult.Add(oneNum);
+                firstNum.Subtract(secondNum);
+            }
+
+            // Second possibility
+            firstNum = (IntegerValue)Copy();
+            secondNum = (IntegerValue)other.Copy();
+            var secondResult = (IntegerValue)Copy();
+
+            for (int i = 0; i < Size * 8; i++)
+            {
+                if (firstNum.GetBit(i) == Trilean.Unknown)
+                    firstNum.SetBit(i, Trilean.True);
+
+                if (secondNum.GetBit(i) == Trilean.Unknown)
+                    secondNum.SetBit(i, Trilean.False);
+
+                secondResult.SetBit(i, Trilean.False);
+            }
+
+            // Adding 1 to second number if it is zero
+            if (secondNum.IsZero)
+                secondNum.Add(oneNum);
+
+            // There must be found out if divisor is equal to zero
+            while (firstNum.IsGreaterThan(secondNum, false) == Trilean.True || firstNum.IsEqualTo(secondNum))
+            {
+                secondResult.Add(oneNum);
+                firstNum.Subtract(secondNum);
+            }
+
+            // Assignig bigger number
+            var result = (firstResult.IsGreaterThan(secondResult, false)) ? (IntegerValue) firstResult.Copy() : (IntegerValue) secondResult.Copy();
+
+            // Changing all known bits to unknown in greater result 
+            if (!IsKnown || !other.IsKnown)
+            {
+                bool isZeroBit = false;
+                for (int i = Size * 8 - 1; i >= 0; i--)
+                {
+                    // Jumping through zeros
+                    if (result.GetBit(i) != Trilean.False || isZeroBit)
+                    {
+                        isZeroBit = true;
+                        result.SetBit(i, Trilean.Unknown);
+                    }
+                }
+            }
+
+            Span<byte> resultBits = stackalloc byte[Size];
+            Span<byte> resultMask = stackalloc byte[Size];
+            result.GetBits(resultBits);
+            result.GetMask(resultMask);
+
             SetBits(resultBits, resultMask);
         }
 
@@ -537,7 +634,7 @@ namespace Echo.Concrete.Values.ValueType
             {
                 // We are dealing with at least one unknown bit in the bit fields.
                 // Conclusion is therefore either false or unknown.
-                
+
                 if (Size != other.Size)
                     return Trilean.False;
 
@@ -554,7 +651,7 @@ namespace Echo.Concrete.Values.ValueType
 
                 return Trilean.Unknown;
             }
-            
+
             return Equals(other);
         }
 
@@ -573,7 +670,7 @@ namespace Echo.Concrete.Values.ValueType
                 var otherSigned = other.GetLastBit();
                 if (thisSigned.IsUnknown || otherSigned.IsUnknown)
                     return Trilean.Unknown;
-                            
+
                 // If the signs do not match, we know the result
                 if (thisSigned ^ otherSigned)
                     return otherSigned;
@@ -592,7 +689,7 @@ namespace Echo.Concrete.Values.ValueType
             //  1 | 1 | - | ?
             //  --+---+---+---
             //  ? | ? | 0 | ?
-            
+
             AssertSameBitSize(other);
 
             for (int i = Size * 8 - 1; i >= 0; i--)
@@ -606,10 +703,10 @@ namespace Echo.Concrete.Values.ValueType
                     case (False, Unknown):
                     case (Unknown, True):
                         return Trilean.False;
-                    
+
                     case (True, False):
                         return Trilean.True;
-                    
+
                     case (True, Unknown):
                     case (Unknown, False):
                     case (Unknown, Unknown):
@@ -635,7 +732,7 @@ namespace Echo.Concrete.Values.ValueType
                 var otherSigned = other.GetLastBit();
                 if (thisSigned.IsUnknown || otherSigned.IsUnknown)
                     return Trilean.Unknown;
-                
+
                 // If the signs do not match, we know the result
                 if (thisSigned ^ otherSigned)
                     return thisSigned;
@@ -654,7 +751,7 @@ namespace Echo.Concrete.Values.ValueType
             //  1 | 0 | - | 0
             //  --+---+---+---
             //  ? | 0 | ? | ?
-            
+
             AssertSameBitSize(other);
 
             for (int i = Size * 8 - 1; i >= 0; i--)
@@ -666,12 +763,12 @@ namespace Echo.Concrete.Values.ValueType
                 {
                     case (False, True):
                         return Trilean.True;
-                    
+
                     case (True, False):
                     case (True, Unknown):
                     case (Unknown, False):
                         return Trilean.False;
-                    
+
                     case (False, Unknown):
                     case (Unknown, True):
                         return Trilean.Unknown;
@@ -727,7 +824,7 @@ namespace Echo.Concrete.Values.ValueType
             Span<byte> newBitsBuffer = stackalloc byte[newBitLength / 8];
             Span<byte> newMaskBuffer = stackalloc byte[newBitLength / 8];
             newMaskBuffer.Fill(0xFF);
-            
+
             var newBits = new BitField(newBitsBuffer);
             var newMask = new BitField(newMaskBuffer);
 
@@ -764,7 +861,7 @@ namespace Echo.Concrete.Values.ValueType
 
             // Set contents.
             result.SetBits(newBitsBuffer, newMaskBuffer);
-            
+
             return result;
         }
 
@@ -789,7 +886,7 @@ namespace Echo.Concrete.Values.ValueType
 
                 Span<byte> one = stackalloc byte[Size];
                 Span<byte> two = stackalloc byte[Size];
-                
+
                 GetBits(one);
                 integerValue.GetBits(two);
 
@@ -797,10 +894,10 @@ namespace Echo.Concrete.Values.ValueType
                 {
                     return false;
                 }
-                
+
                 GetMask(one);
                 integerValue.GetMask(two);
-                
+
                 return new BitField(one).Equals(new BitField(two));
             }
 
@@ -814,7 +911,7 @@ namespace Echo.Concrete.Values.ValueType
             Span<byte> maskBuffer = stackalloc byte[Size];
             GetBits(bitsBuffer);
             GetMask(maskBuffer);
-            
+
             return new BitField(bitsBuffer).GetHashCode() ^ new BitField(maskBuffer).GetHashCode();
         }
     }

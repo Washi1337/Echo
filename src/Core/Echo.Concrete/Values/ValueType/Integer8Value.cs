@@ -251,6 +251,15 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
+        public override void Divide(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer8Value int8)
+                U8 /= int8.U8;
+            else
+                base.Divide(other);
+        }
+
+        /// <inheritdoc />
         public override Trilean IsEqualTo(IntegerValue other)
         {
             if (other is Integer8Value int8)

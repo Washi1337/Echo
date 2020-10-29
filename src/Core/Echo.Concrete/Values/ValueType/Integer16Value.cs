@@ -252,6 +252,15 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
+        public override void Divide(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer16Value int16)
+                U16 /= int16.U16;
+            else
+                base.Divide(other);
+        }
+
+        /// <inheritdoc />
         public override Trilean IsEqualTo(IntegerValue other)
         {
             if (other is Integer16Value int16)
