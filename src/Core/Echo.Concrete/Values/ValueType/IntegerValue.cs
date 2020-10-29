@@ -470,11 +470,11 @@ namespace Echo.Concrete.Values.ValueType
             // First possible intermediate result is the current value multiplied by 0. It is redundant to compute this.
 
             // Second possibility is the current value multiplied by 1.
-            var multipliedByOne = (IntegerValue)Copy();
+            var multipliedByOne = (IntegerValue) Copy();
 
             // Third possibility is thee current value multiplied by ?. This is effectively marking all set bits unknown.  
             // TODO: We could probably optimise the following operations for the native integer types.
-            var multipliedByUnknown = (IntegerValue)Copy();
+            var multipliedByUnknown = (IntegerValue) Copy();
 
             Span<byte> maskBuffer = stackalloc byte[Size];
             multipliedByOne.GetMask(maskBuffer);
@@ -536,9 +536,7 @@ namespace Echo.Concrete.Values.ValueType
 
             // Throw exception because of dividing by zero
             if (other.IsZero == Trilean.True)
-            {
                 throw new ArgumentException("Divisor is zero and dividing by zero is not allowed.");
-            }
 
             // There are two possibilities which has to be count before result
             // First is that first number has all unknown bits set to False and divisor to true
@@ -546,22 +544,18 @@ namespace Echo.Concrete.Values.ValueType
             // And finally set all bits as unknown in greater result
 
             // First possibility
-            var firstNum = (IntegerValue)Copy();
-            var secondNum = (IntegerValue)other.Copy();
-            var oneNum = (IntegerValue)Copy();
-            var firstResult = (IntegerValue)Copy();
+            var firstNum = (IntegerValue) Copy();
+            var secondNum = (IntegerValue) other.Copy();
+            var oneNum = (IntegerValue) Copy();
+            var firstResult = (IntegerValue) Copy();
 
             for (int i = 0; i < Size * 8; i++)
             {
                 if (firstNum.GetBit(i) == Trilean.Unknown)
-                {
                     firstNum.SetBit(i, Trilean.False);
-                }
 
                 if (secondNum.GetBit(i) == Trilean.Unknown)
-                {
                     secondNum.SetBit(i, Trilean.True);
-                }
 
                 oneNum.SetBit(i, Trilean.False);
                 firstResult.SetBit(i, Trilean.False);
@@ -583,23 +577,17 @@ namespace Echo.Concrete.Values.ValueType
             for (int i = 0; i < Size * 8; i++)
             {
                 if (firstNum.GetBit(i) == Trilean.Unknown)
-                {
                     firstNum.SetBit(i, Trilean.True);
-                }
 
                 if (secondNum.GetBit(i) == Trilean.Unknown)
-                {
                     secondNum.SetBit(i, Trilean.False);
-                }
 
                 secondResult.SetBit(i, Trilean.False);
             }
 
             // Adding 1 to second number if it is zero
             if (secondNum.IsZero)
-            {
                 secondNum.Add(oneNum);
-            }
 
             // There must be found out if divisor is equal to zero
             while (firstNum.IsGreaterThan(secondNum, false) == Trilean.True || firstNum.IsEqualTo(secondNum))
@@ -608,16 +596,8 @@ namespace Echo.Concrete.Values.ValueType
                 firstNum.Subtract(secondNum);
             }
 
-            // Finding out difference
-            var result = (IntegerValue)Copy();
-            if (firstResult.IsGreaterThan(secondResult, false))
-            {
-                result = (IntegerValue)firstResult.Copy();
-            }
-            else
-            {
-                result = (IntegerValue)secondResult.Copy();
-            }
+            // Assignig bigger number
+            var result = (firstResult.IsGreaterThan(secondResult, false)) ? (IntegerValue) firstResult.Copy() : (IntegerValue) secondResult.Copy();
 
             // Changing all known bits to unknown in greater result 
             if (!IsKnown || !other.IsKnown)
@@ -626,11 +606,7 @@ namespace Echo.Concrete.Values.ValueType
                 for (int i = Size * 8 - 1; i >= 0; i--)
                 {
                     // Jumping through zeros
-                    if (result.GetBit(i) == Trilean.False && !isZeroBit)
-                    {
-                        continue;
-                    }
-                    else
+                    if (result.GetBit(i) != Trilean.False || isZeroBit)
                     {
                         isZeroBit = true;
                         result.SetBit(i, Trilean.Unknown);

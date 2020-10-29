@@ -252,6 +252,15 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
+        public override void Divide(IntegerValue other)
+        {
+            if (IsKnown && other.IsKnown && other is Integer32Value int32)
+                U32 /= int32.U32;
+            else
+                base.Divide(other);
+        }
+
+        /// <inheritdoc />
         public override Trilean IsEqualTo(IntegerValue other)
         {
             if (other is Integer32Value int32)
