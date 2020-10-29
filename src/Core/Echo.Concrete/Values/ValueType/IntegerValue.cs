@@ -597,7 +597,9 @@ namespace Echo.Concrete.Values.ValueType
             }
 
             // Assignig bigger number
-            var result = (firstResult.IsGreaterThan(secondResult, false)) ? (IntegerValue) firstResult.Copy() : (IntegerValue) secondResult.Copy();
+            var result = (firstResult.IsGreaterThan(secondResult, false)) 
+                ? (IntegerValue) firstResult.Copy() 
+                : (IntegerValue) secondResult.Copy();
 
             // Changing all known bits to unknown in greater result 
             if (!IsKnown || !other.IsKnown)
@@ -666,7 +668,9 @@ namespace Echo.Concrete.Values.ValueType
                 }
 
                 // Result is shorter number
-                result = (firstNum.IsGreaterThan(secondNum, false)) ? (IntegerValue) secondNum.Copy() : (IntegerValue) firstNum.Copy();
+                result = (firstNum.IsGreaterThan(secondNum, false)) 
+                    ? (IntegerValue) secondNum.Copy() 
+                    : (IntegerValue) firstNum.Copy();
 
                 // Setting all bits to unknown in result
                 bool isZeroBit = false;
