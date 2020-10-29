@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Concurrent;
 using AsmResolver.DotNet;
+using Echo.Platforms.AsmResolver.Emulation.Values;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
@@ -11,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     {
         private readonly ConcurrentDictionary<IFieldDescriptor, StaticField> _cache =
             new ConcurrentDictionary<IFieldDescriptor, StaticField>();
-
+        
         /// <summary>
         /// Gets or creates an instance of a static field. 
         /// </summary>

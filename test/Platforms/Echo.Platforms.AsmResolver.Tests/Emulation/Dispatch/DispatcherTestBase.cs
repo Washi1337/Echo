@@ -37,7 +37,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
                 MemoryAllocator = new DefaultMemoryAllocator(dummyModule, is32Bit)
             };
             
-            var methodInvoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(environment));
+            var methodInvoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(environment), environment.CliMarshaller);
             environment.MethodInvoker = new HookedMethodInvoker(methodInvoker);
 
             var container = new ServiceContainer();
