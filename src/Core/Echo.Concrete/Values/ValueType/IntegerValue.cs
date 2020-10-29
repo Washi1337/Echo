@@ -563,16 +563,16 @@ namespace Echo.Concrete.Values.ValueType
 
             oneNum.SetBit(0, Trilean.True);
 
-            while ((firstNum.IsGreaterThan(secondNum, false) == Trilean.True || firstNum.IsEqualTo(secondNum)))
+            while (firstNum.IsGreaterThan(secondNum, false) == Trilean.True || firstNum.IsEqualTo(secondNum))
             {
                 firstResult.Add(oneNum);
                 firstNum.Subtract(secondNum);
             }
 
             // Second possibility
-            firstNum = (IntegerValue)Copy();
-            secondNum = (IntegerValue)other.Copy();
-            var secondResult = (IntegerValue)Copy();
+            firstNum = (IntegerValue) Copy();
+            secondNum = (IntegerValue) other.Copy();
+            var secondResult = (IntegerValue) Copy();
 
             for (int i = 0; i < Size * 8; i++)
             {
@@ -596,8 +596,10 @@ namespace Echo.Concrete.Values.ValueType
                 firstNum.Subtract(secondNum);
             }
 
-            // Assignig bigger number
-            var result = (firstResult.IsGreaterThan(secondResult, false)) ? (IntegerValue) firstResult.Copy() : (IntegerValue) secondResult.Copy();
+            // Assigning bigger number
+            var result = firstResult.IsGreaterThan(secondResult, false)
+                ? (IntegerValue) firstResult.Copy()
+                : (IntegerValue) secondResult.Copy();
 
             // Changing all known bits to unknown in greater result 
             if (!IsKnown || !other.IsKnown)
