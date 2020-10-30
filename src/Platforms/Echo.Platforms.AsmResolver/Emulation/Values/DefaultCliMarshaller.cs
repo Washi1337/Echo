@@ -272,10 +272,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 case ElementType.Array:
                 case ElementType.SzArray:
                 case ElementType.String:
-                {
-                    return value.InterpretAsRef(Is32Bit).ReferencedObject;
-                }
-
                 case ElementType.Class:
                 {
                     var oValue = value.InterpretAsRef(Is32Bit);

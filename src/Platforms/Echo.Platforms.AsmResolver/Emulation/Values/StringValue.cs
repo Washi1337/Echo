@@ -49,7 +49,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public int Size => _contents.Size;
 
         /// <inheritdoc />
-        public bool IsValueType => false;
+        public bool IsValueType => true;
 
         /// <inheritdoc />
         public Trilean IsZero => false;
