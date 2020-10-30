@@ -1,7 +1,8 @@
 
 using AsmResolver.DotNet.Signatures.Types;
+using Echo.Concrete.Values;
 
-namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
+namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
     /// <summary>
     /// Provides factory members for creating unknown values by type. 
@@ -13,6 +14,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns>The unknown value.</returns>
-        ICliValue CreateUnknown(TypeSignature type);
+        IConcreteValue CreateUnknown(TypeSignature type);
     }
 }

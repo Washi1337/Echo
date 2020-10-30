@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation
@@ -13,12 +14,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
     /// </summary>
     public class ReturnUnknownMethodInvoker : IMethodInvoker
     {
+        private readonly ICliMarshaller _marshaller;
+
         /// <summary>
         /// Creates a new instance of the <see cref="ReturnUnknownMethodInvoker"/> class.
         /// </summary>
         /// <param name="unknownValueFactory">The factory responsible for constructing the unknown values.</param>
-        public ReturnUnknownMethodInvoker(IUnknownValueFactory unknownValueFactory)
+        public ReturnUnknownMethodInvoker(IUnknownValueFactory unknownValueFactory, ICliMarshaller marshaller)
         {
+            _marshaller = marshaller ?? throw new ArgumentNullException(nameof(marshaller));
             UnknownValueFactory = unknownValueFactory ?? throw new ArgumentNullException(nameof(unknownValueFactory));
         }
         
@@ -51,7 +55,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         {
             var returnType = methodSig.ReturnType;
             return returnType.ElementType != ElementType.Void 
-                ? UnknownValueFactory.CreateUnknown(returnType) 
+                ? _marshaller.ToCliValue(UnknownValueFactory.CreateUnknown(returnType), returnType) 
                 : null;
         }
     }
