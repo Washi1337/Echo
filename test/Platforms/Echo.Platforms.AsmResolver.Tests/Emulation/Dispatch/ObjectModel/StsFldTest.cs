@@ -2,6 +2,7 @@ using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Values;
+using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
@@ -44,8 +45,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void WriteStaticStringField()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldValue = environment.MemoryAllocator.GetStringValue("Hello, World!");
-            Verify(nameof(SimpleClass.StaticStringField), new OValue(fieldValue, true, environment.Is32Bit), fieldValue);
+            var fieldContents = environment.MemoryAllocator.GetStringValue("Hello, World!");
+            var fieldValue = new OValue(fieldContents, true, environment.Is32Bit);
+            Verify(nameof(SimpleClass.StaticStringField), fieldValue, new ObjectReference(fieldContents, environment.Is32Bit));
         }
     }
 }
