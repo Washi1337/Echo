@@ -100,6 +100,5 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.False(result.IsSuccess);
             Assert.IsAssignableFrom<NullReferenceException>(result.Exception);
         }
-        
     }
 }

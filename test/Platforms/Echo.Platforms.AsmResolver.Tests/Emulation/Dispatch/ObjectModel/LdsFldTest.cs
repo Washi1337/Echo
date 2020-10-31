@@ -36,7 +36,6 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         [Fact]
         public void ReadStaticIntField()
         {
-            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var fieldValue = new Integer32Value(0x12345678);
             Verify(nameof(SimpleClass.StaticIntField), fieldValue, new I4Value(fieldValue.I32));
         }
@@ -47,6 +46,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var fieldValue = environment.MemoryAllocator.GetStringValue("Hello, World!");
             Verify(nameof(SimpleClass.StaticStringField), fieldValue, new OValue(fieldValue, true, environment.Is32Bit));
+        }
+
+        [Fact]
+        public void ReadFromInt32EnumShouldResultInI4()
+        {
+            var fieldValue = new Integer32Value(1);
+            Verify(nameof(SimpleClass.StaticInt32Enum), fieldValue, new I4Value(fieldValue.I32));
         }
     }
 }
