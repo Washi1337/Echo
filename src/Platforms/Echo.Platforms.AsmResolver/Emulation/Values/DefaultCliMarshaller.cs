@@ -54,7 +54,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 ElementType.I => IntToI(value as IntegerValue),
                 ElementType.U => IntToI(value as IntegerValue),
                 ElementType.Ptr => PtrToPointerValue(value as IPointerValue),
-                ElementType.ValueType => ObjectToStruct(value as LleObjectValue),
+                ElementType.ValueType => ObjectToStruct(value, originalType),
                 _ => ObjectToO(value)
             };
         }
@@ -174,9 +174,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// </summary>
         /// <param name="value">The value to marshal.</param>
         /// <returns>The marshalled value.</returns>
-        protected virtual ICliValue ObjectToStruct(LleObjectValue value)
+        protected virtual ICliValue ObjectToStruct(IConcreteValue value, TypeSignature type)
         {
-            return new StructValue(Environment.MemoryAllocator, value.Type, value.Contents);
+            var enumType = type.Resolve();
+            if (enumType.IsEnum)
+                return ToCliValue(value, enumType.GetEnumUnderlyingType());
+            
+            if (value is LleObjectValue lleObjectValue)
+                return new StructValue(Environment.MemoryAllocator, lleObjectValue.Type, lleObjectValue.Contents);
+
+            throw new NotSupportedException($"Invalid or unsupported value {value}.");
         }
 
         /// <summary>
@@ -286,6 +293,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
                 case ElementType.ValueType:
                 {
+                    var enumType = targetType.Resolve();
+                    if (enumType.IsEnum)
+                        return ToCtsValue(value, enumType.GetEnumUnderlyingType());
+
                     var structValue = (StructValue) value;
                     return new LleObjectValue(Environment.MemoryAllocator, structValue.Type, structValue.Contents);
                 }

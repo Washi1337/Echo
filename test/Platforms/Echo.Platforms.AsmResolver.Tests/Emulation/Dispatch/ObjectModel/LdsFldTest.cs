@@ -54,5 +54,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var fieldValue = new Integer32Value(1);
             Verify(nameof(SimpleClass.StaticInt32Enum), fieldValue, new I4Value(fieldValue.I32));
         }
+
+        [Fact]
+        public void ReadFromInt16EnumShouldResultInI4()
+        {
+            var fieldValue = new Integer16Value(1);
+            Verify(nameof(SimpleClass.StaticInt16Enum), fieldValue, new I4Value(fieldValue.I16));
+        }
     }
 }
