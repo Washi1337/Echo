@@ -125,7 +125,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         }
 
         [Fact]
-        public void UndocumentedReadStaticFromAnyObjectReferenceShouldNotThrow()
+        public void UndocumentedWriteStaticFromAnyObjectReferenceShouldNotThrow()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var instanceObject = new OValue(
@@ -139,7 +139,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         }
 
         [Fact]
-        public void UndocumentedReadStaticFromNullReferenceShouldNotThrow()
+        public void UndocumentedWriteStaticFromNullReferenceShouldNotThrow()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             VerifyUndocumentedWriteStatic(
