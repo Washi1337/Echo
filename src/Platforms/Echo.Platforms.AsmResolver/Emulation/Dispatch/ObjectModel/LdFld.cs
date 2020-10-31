@@ -52,7 +52,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 switch (objectValue)
                 {
                     case { IsKnown: false }:
-                        fieldValue = new UnknownValue();
+                        fieldValue = environment.UnknownValueFactory.CreateUnknown(field.Signature.FieldType);
                         break;
 
                     case OValue { IsZero: { Value: TrileanValue.True } }:
