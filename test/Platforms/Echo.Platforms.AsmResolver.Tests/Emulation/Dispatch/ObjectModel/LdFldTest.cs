@@ -49,7 +49,6 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.Equal(expectedValue, stack.Top);
         }
 
-
         [Fact]
         public void ReadIntegerField()
         {

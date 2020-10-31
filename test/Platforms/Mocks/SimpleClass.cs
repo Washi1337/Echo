@@ -24,6 +24,8 @@ namespace Mocks
         {
         }
 
+        public virtual int VirtualIntInstanceMethod() => 123;
+
         public static void HelloWorld()
         {
             Console.WriteLine("Hello, world!");
