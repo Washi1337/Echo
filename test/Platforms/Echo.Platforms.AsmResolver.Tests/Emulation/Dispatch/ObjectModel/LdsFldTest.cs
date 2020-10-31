@@ -18,15 +18,24 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         {
         }
 
-        private void Verify(string fieldName, IConcreteValue fieldValue, ICliValue expectedValue)
+        private void SetAndVerify(string fieldName, IConcreteValue fieldValue, ICliValue expectedValue)
         {
             var module = ModuleDefinition.FromFile(typeof(SimpleClass).Assembly.Location);
             var type = (TypeDefinition) module.LookupMember(typeof(SimpleClass).MetadataToken);
             var field = type.Fields.First(f => f.Name == fieldName);
 
+            SetAndVerify(field, fieldValue, expectedValue);
+        }
+
+        private void SetAndVerify(IFieldDescriptor field, IConcreteValue fieldValue, ICliValue expectedValue)
+        {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             environment.StaticFieldFactory.Get(field).Value = fieldValue;
+            Verify(field, expectedValue);
+        }
 
+        private void Verify(IFieldDescriptor field, ICliValue expectedValue)
+        {
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldsfld, field));
 
             Assert.True(result.IsSuccess);
@@ -37,7 +46,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void ReadStaticIntField()
         {
             var fieldValue = new Integer32Value(0x12345678);
-            Verify(nameof(SimpleClass.StaticIntField), fieldValue, new I4Value(fieldValue.I32));
+            SetAndVerify(nameof(SimpleClass.StaticIntField), fieldValue, new I4Value(fieldValue.I32));
         }
 
         [Fact]
@@ -45,21 +54,31 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var fieldValue = environment.MemoryAllocator.GetStringValue("Hello, World!");
-            Verify(nameof(SimpleClass.StaticStringField), fieldValue, new OValue(fieldValue, true, environment.Is32Bit));
+            SetAndVerify(nameof(SimpleClass.StaticStringField), fieldValue, new OValue(fieldValue, true, environment.Is32Bit));
         }
 
         [Fact]
         public void ReadFromInt32EnumShouldResultInI4()
         {
             var fieldValue = new Integer32Value(1);
-            Verify(nameof(SimpleClass.StaticInt32Enum), fieldValue, new I4Value(fieldValue.I32));
+            SetAndVerify(nameof(SimpleClass.StaticInt32Enum), fieldValue, new I4Value(fieldValue.I32));
         }
 
         [Fact]
         public void ReadFromInt16EnumShouldResultInI4()
         {
             var fieldValue = new Integer16Value(1);
-            Verify(nameof(SimpleClass.StaticInt16Enum), fieldValue, new I4Value(fieldValue.I16));
+            SetAndVerify(nameof(SimpleClass.StaticInt16Enum), fieldValue, new I4Value(fieldValue.I16));
+        }
+
+        [Fact]
+        public void ReadFromInt16EnumMemberShouldResultInI4()
+        {
+            var module = ModuleDefinition.FromFile(typeof(Int16Enum).Assembly.Location);
+            var type = (TypeDefinition) module.LookupMember(typeof(Int16Enum).MetadataToken);
+            var field = type.Fields.First(f => f.Name == nameof(Int16Enum.Member1));
+
+            Verify(field, new I4Value((short) Int16Enum.Member1));
         }
     }
 }
