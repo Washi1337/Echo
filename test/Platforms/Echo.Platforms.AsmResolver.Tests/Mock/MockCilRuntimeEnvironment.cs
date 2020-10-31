@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Core.Code;
@@ -9,10 +10,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
 {
     public sealed class MockCilRuntimeEnvironment : ICilRuntimeEnvironment
     {
-        public MockCilRuntimeEnvironment()
+        public MockCilRuntimeEnvironment(ModuleDefinition module, bool is32Bit)
         {
+            Is32Bit = is32Bit;
+            Module = module ?? throw new ArgumentNullException(nameof(module));
+            MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
             CliMarshaller = new DefaultCliMarshaller(this);
-            StaticFieldFactory = new StaticFieldFactory(new UnknownValueFactory(this));
+            StaticFieldFactory = new StaticFieldFactory(new UnknownValueFactory(this), MemoryAllocator);
         }
 
         public IInstructionSetArchitecture<CilInstruction> Architecture

@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 .GetField(nameof(SimpleClass.StaticIntField))
                 .MetadataToken);
             
-            var environment = new MockCilRuntimeEnvironment();
+            var environment = new MockCilRuntimeEnvironment(_moduleFixture.MockModule, false);
             var staticField = environment.StaticFieldFactory.Get(field);
             
             Assert.IsAssignableFrom<Integer32Value>(staticField.Value);
@@ -38,7 +38,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 .GetField(nameof(SimpleClass.StaticObjectField))
                 .MetadataToken);
             
-            var environment = new MockCilRuntimeEnvironment();
+            var environment = new MockCilRuntimeEnvironment(_moduleFixture.MockModule, false);
             var staticField = environment.StaticFieldFactory.Get(field);
             
             Assert.IsAssignableFrom<ObjectReference>(staticField.Value);

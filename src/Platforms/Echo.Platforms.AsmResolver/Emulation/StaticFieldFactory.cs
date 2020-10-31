@@ -1,6 +1,12 @@
 using System;
 using System.Collections.Concurrent;
+using System.Text;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using Echo.Concrete.Values;
+using Echo.Concrete.Values.ReferenceType;
+using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -12,6 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     public class StaticFieldFactory
     {
         private readonly IUnknownValueFactory _unknownValueFactory;
+        private readonly IMemoryAllocator _memoryAllocator;
 
         private readonly ConcurrentDictionary<IFieldDescriptor, StaticField> _cache =
             new ConcurrentDictionary<IFieldDescriptor, StaticField>();
@@ -20,9 +27,11 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Creates a new instance of the <see cref="StaticFieldFactory"/> class.
         /// </summary>
         /// <param name="unknownValueFactory">The factory responsible for creating unknown values.</param>
-        public StaticFieldFactory(IUnknownValueFactory unknownValueFactory)
+        /// <param name="memoryAllocator">The object responsible for allocating memory for default values of fields.</param>
+        public StaticFieldFactory(IUnknownValueFactory unknownValueFactory, IMemoryAllocator memoryAllocator)
         {
             _unknownValueFactory = unknownValueFactory ?? throw new ArgumentNullException(nameof(unknownValueFactory));
+            _memoryAllocator = memoryAllocator ?? throw new ArgumentNullException(nameof(memoryAllocator));
         }
         
         /// <summary>
@@ -41,12 +50,58 @@ namespace Echo.Platforms.AsmResolver.Emulation
             while (!_cache.TryGetValue(field, out staticField))
             {
                 staticField = new StaticField(field);
-                staticField.Value = _unknownValueFactory.CreateUnknown(field.Signature.FieldType);
+
+                var definition = field.Resolve();
+                
+                // Check if the field has a constant.
+                var constant = definition?.Constant;
+                if (constant?.Value != null)
+                    staticField.Value = ObjectToCtsValue(constant.Value.Data, constant.Type);
+
+                staticField.Value ??= _unknownValueFactory.CreateUnknown(field.Signature.FieldType);
                 _cache.TryAdd(field, staticField);
             }
 
             return staticField;
         }
 
+        private IConcreteValue ObjectToCtsValue(byte[] rawData, ElementType type)
+        {
+            switch (type)
+            {
+                case ElementType.Boolean:
+                case ElementType.I1:
+                case ElementType.U1:
+                    return new Integer8Value(rawData[0]);
+
+                case ElementType.Char:
+                case ElementType.I2:
+                case ElementType.U2:
+                    return new Integer16Value(BitConverter.ToUInt16(rawData, 0));
+
+                case ElementType.I4:
+                case ElementType.U4:
+                    return new Integer32Value(BitConverter.ToUInt32(rawData, 0));
+
+                case ElementType.I8:
+                case ElementType.U8:
+                    return new Integer64Value(BitConverter.ToUInt64(rawData, 0));
+
+                case ElementType.R4:
+                    return new Float32Value(BitConverter.ToSingle(rawData, 0));
+
+                case ElementType.R8:
+                    return new Float64Value(BitConverter.ToDouble(rawData, 0));
+
+                case ElementType.String:
+                    return new ObjectReference(
+                        _memoryAllocator.GetStringValue(Encoding.Unicode.GetString(rawData)),
+                        _memoryAllocator.Is32Bit);
+
+                default:
+                    return null;
+            }
+        }
+        
     }
 }

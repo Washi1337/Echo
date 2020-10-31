@@ -64,7 +64,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             CliMarshaller = new DefaultCliMarshaller(this);
             MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
             MethodInvoker = new ReturnUnknownMethodInvoker(valueFactory, CliMarshaller);
-            StaticFieldFactory = new StaticFieldFactory(valueFactory);
+            StaticFieldFactory = new StaticFieldFactory(valueFactory, MemoryAllocator);
             
             _services[typeof(ICilRuntimeEnvironment)] = this;
         }
