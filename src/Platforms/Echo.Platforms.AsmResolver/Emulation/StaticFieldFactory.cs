@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Text;
+using AsmResolver;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
@@ -45,29 +47,53 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 throw new ArgumentNullException(nameof(field));
             if (field.Signature.HasThis)
                 throw new ArgumentException("Field has the HasThis flag set in the field signature.");
-                
+
             StaticField staticField;
             while (!_cache.TryGetValue(field, out staticField))
             {
-                staticField = new StaticField(field);
-
-                var definition = field.Resolve();
-                
-                // Check if the field has a constant.
-                var constant = definition?.Constant;
-                if (constant?.Value != null)
-                    staticField.Value = ObjectToCtsValue(constant.Value.Data, constant.Type);
-
-                staticField.Value ??= _unknownValueFactory.CreateUnknown(field.Signature.FieldType);
+                staticField = Create(field);
                 _cache.TryAdd(field, staticField);
             }
 
             return staticField;
         }
 
-        private IConcreteValue ObjectToCtsValue(byte[] rawData, ElementType type)
+        private StaticField Create(IFieldDescriptor field) => new StaticField(field)
         {
-            switch (type)
+            Value = GetInitialFieldValue(field)
+        };
+
+        private IConcreteValue GetInitialFieldValue(IFieldDescriptor field)
+        {
+            var definition = field.Resolve();
+            
+            if (definition != null)
+            {
+                // Check if the field has an initial value through a Constant row.
+                var constant = definition.Constant;
+                if (constant?.Value != null)
+                {
+                    return ObjectToCtsValue(
+                        constant.Value.Data,
+                        definition.Module.CorLibTypeFactory.FromElementType(constant.Type));
+                }
+
+                // Check if the field has an initial value through a field RVA row.
+                if (definition.HasFieldRva && definition.FieldRva != null
+                    && definition.FieldRva is IReadableSegment readableSegment)
+                {
+                    return ObjectToCtsValue(
+                        readableSegment.ToArray(),
+                        field.Signature.FieldType);
+                }
+            }
+
+            return _unknownValueFactory.CreateUnknown(field.Signature.FieldType);
+        }
+
+        private IConcreteValue ObjectToCtsValue(byte[] rawData, TypeSignature type)
+        {
+            switch (type.ElementType)
             {
                 case ElementType.Boolean:
                 case ElementType.I1:
@@ -98,8 +124,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
                         _memoryAllocator.GetStringValue(Encoding.Unicode.GetString(rawData)),
                         _memoryAllocator.Is32Bit);
 
+                case ElementType.ValueType:
+                    var memory = _memoryAllocator.AllocateMemory(rawData.Length, false);
+                    memory.WriteBytes(0, rawData);
+                    return new LleObjectValue(_memoryAllocator, type, memory);
+                
                 default:
-                    return null;
+                    return _unknownValueFactory.CreateUnknown(type);
             }
         }
         
