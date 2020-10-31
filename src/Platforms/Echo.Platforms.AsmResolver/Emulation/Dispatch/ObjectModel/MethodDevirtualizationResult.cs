@@ -65,5 +65,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         {
             get;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the devirtualization process of the referenced method was successful.
+        /// </summary>
+        public bool IsSuccess => ResultingMethod != null || ResultingMethodSignature != null;
+
+        /// <summary>
+        /// Gets a value indicating whether the devirtualization process could not be completed due to an unknown
+        /// object that was dereferenced.
+        /// </summary>
+        public bool IsUnknown => !IsSuccess && Exception is null;
     }
 }
