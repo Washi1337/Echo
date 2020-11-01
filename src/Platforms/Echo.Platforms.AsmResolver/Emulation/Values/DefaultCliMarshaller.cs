@@ -173,10 +173,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// Converts the provided value-typed object into a struct value. 
         /// </summary>
         /// <param name="value">The value to marshal.</param>
+        /// <param name="originalType">The original type of the object.</param>
         /// <returns>The marshalled value.</returns>
-        protected virtual ICliValue ObjectToStruct(IConcreteValue value, TypeSignature type)
+        protected virtual ICliValue ObjectToStruct(IConcreteValue value, TypeSignature originalType)
         {
-            var enumType = type.Resolve();
+            var enumType = originalType.Resolve();
             if (enumType.IsEnum)
                 return ToCliValue(value, enumType.GetEnumUnderlyingType());
             

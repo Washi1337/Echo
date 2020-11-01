@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Text;
 using AsmResolver;
@@ -103,15 +104,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 case ElementType.Char:
                 case ElementType.I2:
                 case ElementType.U2:
-                    return new Integer16Value(BitConverter.ToUInt16(rawData, 0));
+                    return new Integer16Value(BinaryPrimitives.ReadUInt16LittleEndian(rawData));
 
                 case ElementType.I4:
                 case ElementType.U4:
-                    return new Integer32Value(BitConverter.ToUInt32(rawData, 0));
+                    return new Integer32Value(BinaryPrimitives.ReadUInt32LittleEndian(rawData));
 
                 case ElementType.I8:
                 case ElementType.U8:
-                    return new Integer64Value(BitConverter.ToUInt64(rawData, 0));
+                    return new Integer64Value(BinaryPrimitives.ReadUInt64LittleEndian(rawData));
 
                 case ElementType.R4:
                     return new Float32Value(BitConverter.ToSingle(rawData, 0));
