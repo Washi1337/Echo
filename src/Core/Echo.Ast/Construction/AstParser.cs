@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Blocks;
@@ -71,10 +72,26 @@ namespace Echo.Ast.Construction
                 newOrigin.ConnectWith(newTarget, originalEdge.Type);
             }
             
-            // Fix entry point.
+            // Fix entry point(s).
             newGraph.Entrypoint = newGraph.Nodes[_controlFlowGraph.Entrypoint.Offset];
+            FixEntryPoint(_controlFlowGraph);
 
             return newGraph;
+
+            void FixEntryPoint(IControlFlowRegion<TInstruction> region)
+            {
+                foreach (var child in region.GetSubRegions().Where(r => r is {}))
+                    FixEntryPoint(child);
+
+                if (!(region is BasicControlFlowRegion<TInstruction> basicControlFlowRegion))
+                    return;
+
+                var entry = basicControlFlowRegion.Entrypoint;
+                if (entry is null)
+                    return;
+
+                _regionsMapping[basicControlFlowRegion].Entrypoint = newGraph.Nodes[entry.Offset];
+            }
         }
 
         private ControlFlowRegion<Statement<TInstruction>> TransformRegion(IControlFlowRegion<TInstruction> region)
@@ -98,16 +115,24 @@ namespace Echo.Ast.Construction
                     // existing protected region.
                     TransformSubRegions(ehRegion.ProtectedRegion, newEhRegion.ProtectedRegion);
                     _regionsMapping[ehRegion.ProtectedRegion] = newEhRegion.ProtectedRegion;
-                    
-                    TransformSubRegions(ehRegion.PrologueRegion, newEhRegion.PrologueRegion);
-                    _regionsMapping[ehRegion.PrologueRegion] = newEhRegion.PrologueRegion;
-                    
+
+                    if (ehRegion.PrologueRegion is {})
+                    {
+                        newEhRegion.PrologueRegion = new BasicControlFlowRegion<Statement<TInstruction>>();
+                        TransformSubRegions(ehRegion.PrologueRegion, newEhRegion.PrologueRegion);
+                        _regionsMapping[ehRegion.PrologueRegion] = newEhRegion.PrologueRegion;
+                    }
+
                     // Add handler regions.
                     foreach (var subRegion in ehRegion.HandlerRegions)
                         newEhRegion.HandlerRegions.Add(TransformRegion(subRegion));
-                    
-                    TransformSubRegions(ehRegion.EpilogueRegion, newEhRegion.EpilogueRegion);
-                    _regionsMapping[ehRegion.EpilogueRegion] = newEhRegion.EpilogueRegion;
+
+                    if (ehRegion.EpilogueRegion is {})
+                    {
+                        newEhRegion.EpilogueRegion = new BasicControlFlowRegion<Statement<TInstruction>>();
+                        TransformSubRegions(ehRegion.EpilogueRegion, newEhRegion.EpilogueRegion);
+                        _regionsMapping[ehRegion.EpilogueRegion] = newEhRegion.EpilogueRegion;
+                    }
 
                     return newEhRegion;
 
