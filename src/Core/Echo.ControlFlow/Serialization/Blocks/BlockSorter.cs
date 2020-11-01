@@ -47,11 +47,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             this ControlFlowGraph<TInstruction> cfg)
         {
             var pathsView = DetermineUnbreakablePaths(cfg);
-            
-            var sorter = new TopologicalSorter<ControlFlowNode<TInstruction>>(pathsView.GetImpliedNeighbours)
-            {
-                IgnoreCycles = true
-            };
+            var sorter = new TopologicalSorter<ControlFlowNode<TInstruction>>(pathsView.GetImpliedNeighbours, true);
 
             return sorter
                 .GetTopologicalSorting(cfg.Entrypoint)
@@ -70,7 +66,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 if (!visited.Contains(node))
                     result.AddUnbreakablePath(GetFallThroughPath(node, visited));
             }
-;
+
             return result;
         }
 
