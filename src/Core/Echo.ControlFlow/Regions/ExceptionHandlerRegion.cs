@@ -10,6 +10,9 @@ namespace Echo.ControlFlow.Regions
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public class ExceptionHandlerRegion<TInstruction> : ControlFlowRegion<TInstruction>
     {
+        private BasicControlFlowRegion<TInstruction> _prologue;
+        private BasicControlFlowRegion<TInstruction> _epilogue;
+        
         /// <summary>
         /// Creates a new instance of the <see cref="ExceptionHandlerRegion{TInstruction}"/> class.
         /// </summary>
@@ -20,17 +23,7 @@ namespace Echo.ControlFlow.Regions
                 ParentRegion = this
             };
             
-            PrologueRegion = new BasicControlFlowRegion<TInstruction>
-            {
-                ParentRegion = this
-            };
-            
             HandlerRegions = new RegionCollection<TInstruction>(this);
-            
-            EpilogueRegion = new BasicControlFlowRegion<TInstruction>
-            {
-                ParentRegion = this
-            };
         }
 
         /// <summary>
@@ -46,7 +39,12 @@ namespace Echo.ControlFlow.Regions
         /// </summary>
         public BasicControlFlowRegion<TInstruction> PrologueRegion
         {
-            get;
+            get => _prologue;
+            set
+            {
+                _prologue = value;
+                _prologue.ParentRegion = this;
+            }
         }
 
         /// <summary>
@@ -62,7 +60,12 @@ namespace Echo.ControlFlow.Regions
         /// </summary>
         public BasicControlFlowRegion<TInstruction> EpilogueRegion
         {
-            get;
+            get => _epilogue;
+            set
+            {
+                _epilogue = value;
+                _epilogue.ParentRegion = this;
+            }
         }
 
         /// <inheritdoc />
@@ -77,12 +80,14 @@ namespace Echo.ControlFlow.Regions
         {
             yield return ProtectedRegion;
 
-            yield return PrologueRegion;
+            if (PrologueRegion is {})
+                yield return PrologueRegion;
             
             foreach (var handlerRegion in HandlerRegions)
                 yield return handlerRegion;
 
-            yield return EpilogueRegion;
+            if (EpilogueRegion is {}) 
+                yield return EpilogueRegion;
         }
 
         /// <inheritdoc />
