@@ -50,12 +50,20 @@ namespace Echo.ControlFlow.Regions.Detection
 
                     if (currentEHRange.PrologueRange != AddressRange.NilRange)
                     {
+                        ehRegion.PrologueRegion = new BasicControlFlowRegion<TInstruction>
+                        {
+                            ParentRegion = ehRegion
+                        };
                         ehRegions.Add(currentEHRange.PrologueRange, ehRegion);
                         rangeToRegion.Add(currentEHRange.PrologueRange, ehRegion.PrologueRegion);
                     }
 
                     if (currentEHRange.EpilogueRange != AddressRange.NilRange)
                     {
+                        ehRegion.EpilogueRegion = new BasicControlFlowRegion<TInstruction>
+                        {
+                            ParentRegion = ehRegion
+                        };
                         ehRegions.Add(currentEHRange.EpilogueRange, ehRegion);
                         rangeToRegion.Add(currentEHRange.EpilogueRange, ehRegion.EpilogueRegion);
                     }
