@@ -5,11 +5,11 @@ using Echo.ControlFlow.Regions;
 
 namespace Echo.ControlFlow.Serialization.Blocks
 {
-    internal sealed class UnbreakablePathsView<TInstruction> 
-    { 
+    internal sealed class UnbreakablePathsView<TInstruction>
+    {
         private readonly Dictionary<ControlFlowNode<TInstruction>, IList<ControlFlowNode<TInstruction>>> _nodeToPath =
-            new Dictionary<ControlFlowNode<TInstruction>, IList<ControlFlowNode<TInstruction>>>(); 
-            
+            new Dictionary<ControlFlowNode<TInstruction>, IList<ControlFlowNode<TInstruction>>>();
+
         public void AddUnbreakablePath(IList<ControlFlowNode<TInstruction>> path)
         {
             foreach (var item in path)
@@ -36,16 +36,16 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 // Add explicit conditional / abnormal edges.
                 AddAdjacencyListToResult(result, n.ConditionalEdges);
                 AddAdjacencyListToResult(result, n.AbnormalEdges);
-                
+
                 // Check if any exception handler might catch an error within this node.
                 AddPotentialHandlerSuccessors(result, n);
             }
-            
+
             return result;
         }
 
         private void AddSuccessorToResult(
-            ICollection<ControlFlowNode<TInstruction>> result, 
+            ICollection<ControlFlowNode<TInstruction>> result,
             ControlFlowNode<TInstruction> node)
         {
             var target = GetUnbreakablePath(node)[0];
@@ -62,31 +62,39 @@ namespace Echo.ControlFlow.Serialization.Blocks
         }
 
         private void AddPotentialHandlerSuccessors(
-            ICollection<ControlFlowNode<TInstruction>> result, 
+            ICollection<ControlFlowNode<TInstruction>> result,
             ControlFlowNode<TInstruction> node)
         {
             var ehRegion = node.GetParentExceptionHandler();
-            
+
             while (ehRegion is {})
             {
-                // If the node is in a protected region of an exception handler, a potential successor is the
-                // entrypoint of every handler. This is not explicitly specified as an edge in the CFG.
-                
-                if (node.IsInRegion(ehRegion.ProtectedRegion))
+                if (ehRegion.PrologueRegion is {} && node.IsInRegion(ehRegion.PrologueRegion))
                 {
-                    for (int i = 0; i < ehRegion.HandlerRegions.Count; i++)
+                    // If there is a prologue region, the handlers will be the successors.
+                    // This is not explicitly specified as an edge in the CFG.
+                    AddExceptionHandlerSuccessors(result, ehRegion);
+                }
+                else if (node.IsInRegion(ehRegion.ProtectedRegion))
+                {
+                    // If the EH region has a prologue region, the predecessor of the handler
+                    // regions will be the prologue region. Otherwise the predecessor will be the
+                    // protected region. This is not explicitly specified as an edge in the CFG.
+                    if (ehRegion.PrologueRegion is {})
+                        AddSuccessorToResult(result, GetRegionEntryPoint(ehRegion.PrologueRegion, "Prologue region"));
+                    else
+                        AddExceptionHandlerSuccessors(result, ehRegion);
+                }
+                else if (ehRegion.EpilogueRegion is {})
+                {
+                    // If there is an epilogue region, the handlers' successors will be the epilogue region.
+                    // This is not explicitly specified as an edge in the CFG.
+                    foreach (var handler in ehRegion.HandlerRegions)
                     {
-                        var handlerRegion = ehRegion.HandlerRegions[i];
+                        if (!node.IsInRegion(handler))
+                            continue;
 
-                        // Ensure the handler that we can jump to has an entrypoint node.
-                        var handlerEntry = handlerRegion.GetEntrypoint();
-                        if (handlerEntry is null)
-                        {
-                            throw new InvalidOperationException(
-                                $"Handler region {i} of exception handler does not have an entrypoint assigned.");
-                        }
-
-                        AddSuccessorToResult(result, handlerEntry);
+                        AddSuccessorToResult(result, GetRegionEntryPoint(ehRegion.EpilogueRegion, "Epilogue region"));
                     }
                 }
 
@@ -94,6 +102,31 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 ehRegion = ehRegion.GetParentExceptionHandler();
             }
         }
-        
+
+        private void AddExceptionHandlerSuccessors(
+            ICollection<ControlFlowNode<TInstruction>> result,
+            ExceptionHandlerRegion<TInstruction> ehRegion)
+        {
+            for (int i = 0; i < ehRegion.HandlerRegions.Count; i++)
+            {
+                var handlerRegion = ehRegion.HandlerRegions[i];
+
+                // Ensure the handler that we can jump to has an entrypoint node.
+                var entry = GetRegionEntryPoint(
+                    handlerRegion, $"Handler region {i} of exception handler");
+                AddSuccessorToResult(result, entry);
+            }
+        }
+
+        private static ControlFlowNode<TInstruction> GetRegionEntryPoint(
+            IControlFlowRegion<TInstruction> region,
+            string name)
+        {
+            var entry = region.GetEntrypoint();
+            if (entry is null)
+                throw new InvalidOperationException(name + " does not have an entrypoint assigned.");
+
+            return entry;
+        }
     }
 }

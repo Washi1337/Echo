@@ -103,6 +103,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             {
                 // We entered one of the exception handler sub regions. Figure out which one it is.
                 ScopeBlock<TInstruction> enteredBlock;
+                IControlFlowRegion<TInstruction> enteredSubRegion;
 
                 if (!(currentScope.Block is ExceptionHandlerBlock<TInstruction> ehBlock))
                     throw new InvalidOperationException("The parent scope is not an exception handler scope.");
@@ -111,16 +112,39 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 {
                     // We entered the protected region.
                     enteredBlock = ehBlock.ProtectedBlock;
+                    enteredSubRegion = parentEhRegion.ProtectedRegion;
+                }
+                else if (parentEhRegion.PrologueRegion == enteredRegion)
+                {
+                    // We entered the prologue region.
+                    enteredBlock = ehBlock.PrologueBlock;
+                    enteredSubRegion = parentEhRegion.PrologueRegion;
+                }
+                else if (parentEhRegion.EpilogueRegion == enteredRegion)
+                {
+                    // We entered the epilogue region.
+                    enteredBlock = ehBlock.EpilogueBlock;
+                    enteredSubRegion = parentEhRegion.EpilogueRegion;
                 }
                 else
                 {
                     // We entered a handler region.
                     enteredBlock = new ScopeBlock<TInstruction>();
+                    enteredSubRegion = parentEhRegion.HandlerRegions.SingleOrDefault(r => r == enteredRegion);
                     ehBlock.HandlerBlocks.Add(enteredBlock);
+                }
+                
+                // Sanity check: If the entered subregion's parent is the exception handler region but the region
+                // isn't a protected, prologue, epilogue nor one of the handler regions, that would mean that
+                // something went *seriously* wrong.
+                if (enteredSubRegion is null)
+                {
+                    throw new InvalidOperationException(
+                        "Entered subregion of exception handler doesn't belong to any of its regions!?");
                 }
 
                 // Push the entered scope.
-                scopeStack.Push(new ScopeInfo<TInstruction>(parentEhRegion.ProtectedRegion, enteredBlock));
+                scopeStack.Push(new ScopeInfo<TInstruction>(enteredSubRegion, enteredBlock));
             }
             else
             {
