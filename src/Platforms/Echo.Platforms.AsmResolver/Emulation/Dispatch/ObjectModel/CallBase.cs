@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
+using Echo.Concrete.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
@@ -39,40 +42,91 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             return base.Execute(context, instruction);
         }
 
-        private static ICliValue InvokeAndGetResult(ICilRuntimeEnvironment environment, CilInstruction instruction,
-            MethodDevirtualizationResult methodDispatch, List<ICliValue> arguments)
+        private static IConcreteValue InvokeAndGetResult(ICilRuntimeEnvironment environment, CilInstruction instruction,
+            in MethodDevirtualizationResult methodDispatch, IReadOnlyList<ICliValue> arguments)
         {
+            // If method dispatch's result was unknown, assume a non-null object instance and return an unknown value. 
             if (methodDispatch.IsUnknown)
-            {
-                if (instruction.Operand is IMethodDescriptor method)
-                {
-                    return environment.CliMarshaller.ToCliValue(
-                        environment.UnknownValueFactory.CreateUnknown(method.Signature.ReturnType),
-                        method.Signature.ReturnType);
-                }
+                return CreateUnknownResult(environment, instruction);
 
-                throw new DispatchException("Operand of call instruction is not a method.");
-            }
+            // Marshal stack values to normal values.
+            var marshalledArguments = MarshalMethodArguments(environment, arguments, methodDispatch.GetMethodSignature());
 
+            // Invoke.
             if (methodDispatch.ResultingMethod != null)
-                return environment.MethodInvoker.Invoke(methodDispatch.ResultingMethod, arguments);
+                return environment.MethodInvoker.Invoke(methodDispatch.ResultingMethod, marshalledArguments);
 
             if (methodDispatch.ResultingMethodSignature != null)
             {
-                var address = arguments.Last();
-                arguments.Remove(address);
+                var address = marshalledArguments.Last();
+                marshalledArguments.Remove(address);
                 return environment.MethodInvoker.InvokeIndirect(address, methodDispatch.ResultingMethodSignature,
-                    arguments);
+                    marshalledArguments);
             }
 
             return null;
         }
 
-        private static void UpdateStack(ExecutionContext context, ICliValue result, CilInstruction cilInstruction)
+        internal static List<IConcreteValue> MarshalMethodArguments(
+            ICilRuntimeEnvironment environment,
+            IReadOnlyList<ICliValue> arguments,
+            MethodSignature signature)
+        {
+            var marshaller = environment.CliMarshaller;
+            var marshalledArguments = new List<IConcreteValue>(arguments.Count);
+
+            // Include instance object when necessary. 
+            int index = 0;
+            if (signature.HasThis || signature.ExplicitThis)
+            {
+                // Instance method calls always are object references. This is why we can always just marshal
+                // to a normal object reference.
+                var objectInstance = marshaller.ToCtsValue(arguments[0], environment.Module.CorLibTypeFactory.Object);
+                marshalledArguments.Add(objectInstance);
+            }
+
+            // Marshal remaining arguments.
+            for (int i = 0; i < signature.ParameterTypes.Count; i++)
+            {
+                var marshalledArgument = marshaller.ToCtsValue(arguments[index++], signature.ParameterTypes[i]);
+                marshalledArguments.Add(marshalledArgument);
+            }
+
+            // Add any remaining (excess) arguments. 
+            // This is e.g. used by calli opcodes that also push the address of the function to be called.
+            for (int i = marshalledArguments.Count; i < arguments.Count; i++)
+                marshalledArguments.Add(arguments[i]);
+            
+            return marshalledArguments;
+        }
+
+        private static IConcreteValue CreateUnknownResult(ICilRuntimeEnvironment environment, CilInstruction instruction)
+        {
+            var signature = instruction.Operand switch
+            {
+                IMethodDescriptor method => method.Signature,
+                StandAloneSignature standAlone => (MethodSignature) standAlone.Signature,
+                _ => throw new DispatchException("Operand of call instruction is not a method or a signature.")
+            };
+
+            return environment.CliMarshaller.ToCliValue(
+                environment.UnknownValueFactory.CreateUnknown(signature.ReturnType),
+                signature.ReturnType);
+        }
+
+        private static void UpdateStack(ExecutionContext context, IConcreteValue result, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
+
+            var returnType = instruction.Operand switch
+            {
+                IMethodDescriptor method => method.Signature.ReturnType,
+                StandAloneSignature signature => ((MethodSignatureBase) signature.Signature).ReturnType,
+                _ => throw new DispatchException("Operand of call instruction is not a method or a signature.")
+            };
             
-            bool pushesValue = environment.Architecture.GetStackPushCount(cilInstruction) > 0;
+            bool pushesValue = returnType.ElementType != ElementType.Void;
+            
             if (result is null)
             {
                 if (pushesValue)
@@ -89,7 +143,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                         "Method was not expected to return a value, but the method invoker returned a non-null value.");
                 }
 
-                context.ProgramState.Stack.Push(result);
+                var marshalledReturnValue = environment.CliMarshaller.ToCliValue(result, returnType);
+                context.ProgramState.Stack.Push(marshalledReturnValue);
             }
         }
 

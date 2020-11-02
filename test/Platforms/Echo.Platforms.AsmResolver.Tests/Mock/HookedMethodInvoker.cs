@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
+using Echo.Concrete.Values;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -22,13 +23,14 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
             private set;
         }
             
-        public ICliValue Invoke(IMethodDescriptor method, IEnumerable<ICliValue> arguments)
+        public IConcreteValue Invoke(IMethodDescriptor method, IEnumerable<IConcreteValue> arguments)
         {
             LastInvokedMethod = method;
             return _original.Invoke(method, arguments);
         }
 
-        public ICliValue InvokeIndirect(ICliValue address, MethodSignature methodSig, IEnumerable<ICliValue> arguments)
+        public IConcreteValue InvokeIndirect(IConcreteValue address, MethodSignature methodSig,
+            IEnumerable<IConcreteValue> arguments)
         {
             return _original.InvokeIndirect(address,methodSig, arguments);
         }

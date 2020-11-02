@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using Echo.Concrete.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values;
-using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation
 {
@@ -14,15 +14,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
     /// </summary>
     public class ReturnUnknownMethodInvoker : IMethodInvoker
     {
-        private readonly ICliMarshaller _marshaller;
-
         /// <summary>
         /// Creates a new instance of the <see cref="ReturnUnknownMethodInvoker"/> class.
         /// </summary>
         /// <param name="unknownValueFactory">The factory responsible for constructing the unknown values.</param>
-        public ReturnUnknownMethodInvoker(IUnknownValueFactory unknownValueFactory, ICliMarshaller marshaller)
+        public ReturnUnknownMethodInvoker(IUnknownValueFactory unknownValueFactory)
         {
-            _marshaller = marshaller ?? throw new ArgumentNullException(nameof(marshaller));
             UnknownValueFactory = unknownValueFactory ?? throw new ArgumentNullException(nameof(unknownValueFactory));
         }
         
@@ -35,13 +32,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         }
 
         /// <inheritdoc />
-        public ICliValue Invoke(IMethodDescriptor method, IEnumerable<ICliValue> arguments)
+        public IConcreteValue Invoke(IMethodDescriptor method, IEnumerable<IConcreteValue> arguments)
         {
             return CreateReturnValue(method.Signature);
         }
 
         /// <inheritdoc />
-        public ICliValue InvokeIndirect(ICliValue address, MethodSignature methodSig, IEnumerable<ICliValue> arguments)
+        public IConcreteValue InvokeIndirect(IConcreteValue address, MethodSignature methodSig,
+            IEnumerable<IConcreteValue> arguments)
         {
             return CreateReturnValue(methodSig);
         }
@@ -51,11 +49,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// </summary>
         /// <param name="methodSig">Method Signature</param>
         /// <returns></returns>
-        private ICliValue CreateReturnValue(MethodSignature methodSig)
+        private IConcreteValue CreateReturnValue(MethodSignatureBase methodSig)
         {
             var returnType = methodSig.ReturnType;
             return returnType.ElementType != ElementType.Void 
-                ? _marshaller.ToCliValue(UnknownValueFactory.CreateUnknown(returnType), returnType) 
+                ? UnknownValueFactory.CreateUnknown(returnType)
                 : null;
         }
     }

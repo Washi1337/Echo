@@ -43,8 +43,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 return new DispatchResult(methodDispatch.Exception);
 
             // Invoke.
-
-            var result = environment.MethodInvoker.Invoke(method, arguments);
+            var marshalledArguments = CallBase.MarshalMethodArguments(environment, arguments, method.Signature);
+            var result = environment.MethodInvoker.Invoke(method, marshalledArguments);
 
             if (result == null)
                 context.ProgramState.Stack.Push(cilValueObject);

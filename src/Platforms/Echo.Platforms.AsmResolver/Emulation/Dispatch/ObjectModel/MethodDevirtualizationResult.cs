@@ -76,5 +76,20 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// object that was dereferenced.
         /// </summary>
         public bool IsUnknown => !IsSuccess && Exception is null;
+
+        /// <summary>
+        /// Gets the method signature of the method that was resolved.
+        /// </summary>
+        /// <returns>The signature.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when the dispatch was unsuccessful.</exception>
+        public MethodSignature GetMethodSignature()
+        {
+            if (ResultingMethod != null)
+                return ResultingMethod.Signature;
+            if (ResultingMethodSignature != null)
+                return ResultingMethodSignature;
+
+            throw new ArgumentOutOfRangeException();
+        }
     }
 }

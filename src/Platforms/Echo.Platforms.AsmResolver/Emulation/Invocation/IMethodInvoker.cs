@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
+using Echo.Concrete.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation
 {
@@ -18,8 +18,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// <returns>
         /// The return value of the method, or <c>null</c> if the method returned <see cref="System.Void"/>.
         /// </returns>
-        ICliValue Invoke(IMethodDescriptor method, IEnumerable<ICliValue> arguments);
-        
+        IConcreteValue Invoke(IMethodDescriptor method, IEnumerable<IConcreteValue> arguments);
+
         /// <summary>
         /// Invokes a function pointer and returns the result.
         /// </summary>
@@ -29,6 +29,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// <returns>
         /// The return value of the method, or <c>null</c> if the method returned <see cref="System.Void"/>.
         /// </returns>
-        ICliValue InvokeIndirect(ICliValue address,MethodSignature methodSig, IEnumerable<ICliValue> arguments);
+        IConcreteValue InvokeIndirect(IConcreteValue address, MethodSignature methodSig,
+            IEnumerable<IConcreteValue> arguments);
     }
 }
