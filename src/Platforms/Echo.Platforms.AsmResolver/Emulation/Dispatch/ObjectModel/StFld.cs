@@ -31,21 +31,40 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var fieldValue = (ICliValue) stack.Pop();
             var objectValue = (ICliValue) stack.Pop();
 
-            switch (objectValue)
+            if (field.IsStatic)
             {
-                case { IsKnown: false }:
-                    throw new DispatchException("Could not infer object instance of field to set the value for.");
+                // Undocumented: The runtime does allow access of static fields through the stlfd opcode.
+                // In this case, the object instance that is pushed is ignored, allowing constructs like:
+                //
+                //    ldnull
+                //    ldc.i4 1234
+                //    ldfld <some_static_field>
+                //
+                // without the runtime throwing a NullReferenceException.
                 
-                case OValue { IsZero: { Value: TrileanValue.True } }:
-                    return new DispatchResult(new NullReferenceException());
+                var staticField = environment.StaticFieldFactory.Get(field);
+                staticField.Value = environment.CliMarshaller.ToCtsValue(fieldValue, field.Signature.FieldType);
+            }
+            else
+            {
+                // Attempt to dereference the object instance.
                 
-                case OValue { ReferencedObject: HleObjectValue compoundObject }:
-                    compoundObject.SetFieldValue(field,
-                        environment.CliMarshaller.ToCtsValue(fieldValue, field.Signature.FieldType));
-                    break;
-                
-                default:
-                    return DispatchResult.InvalidProgram();
+                switch (objectValue)
+                {
+                    case { IsKnown: false }:
+                        throw new DispatchException("Could not infer object instance of field to set the value for.");
+
+                    case OValue { IsZero: { Value: TrileanValue.True } }:
+                        return new DispatchResult(new NullReferenceException());
+
+                    case OValue { ReferencedObject: HleObjectValue compoundObject }:
+                        compoundObject.SetFieldValue(field,
+                            environment.CliMarshaller.ToCtsValue(fieldValue, field.Signature.FieldType));
+                        break;
+
+                    default:
+                        return DispatchResult.InvalidProgram();
+                }
             }
 
             return base.Execute(context, instruction);

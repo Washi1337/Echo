@@ -104,5 +104,48 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.False(result.IsSuccess);
             Assert.IsAssignableFrom<NullReferenceException>(result.Exception);
         }
+
+        private void VerifyUndocumentedWriteStatic(IConcreteValue instanceObject, ICliValue stackValue, IConcreteValue expectedValue)
+        {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var stack = ExecutionContext.ProgramState.Stack;
+
+            // Set initial field value.
+            var simpleClassType = LookupTestType(typeof(SimpleClass));
+            var field = simpleClassType.Fields.First(f => f.Name == nameof(SimpleClass.StaticIntField));
+
+            // Push random object.
+            stack.Push(instanceObject);
+            stack.Push(stackValue);
+
+            // Test.
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Stfld, field));
+            Assert.True(result.IsSuccess);
+            Assert.Equal(expectedValue, environment.StaticFieldFactory.Get(field).Value);
+        }
+
+        [Fact]
+        public void UndocumentedWriteStaticFromAnyObjectReferenceShouldNotThrow()
+        {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var instanceObject = new OValue(
+                environment.MemoryAllocator.GetStringValue("Hello, world"),
+                true,
+                environment.Is32Bit);
+            
+            VerifyUndocumentedWriteStatic(instanceObject, 
+                new I4Value(0x12345678), 
+                new Integer32Value(0x12345678));
+        }
+
+        [Fact]
+        public void UndocumentedWriteStaticFromNullReferenceShouldNotThrow()
+        {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            VerifyUndocumentedWriteStatic(
+                OValue.Null(environment.Is32Bit), 
+                new I4Value(0x12345678),
+                new Integer32Value(0x12345678));
+        }
     }
 }

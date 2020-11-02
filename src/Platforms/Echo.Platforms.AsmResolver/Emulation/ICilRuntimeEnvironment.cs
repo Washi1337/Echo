@@ -1,8 +1,6 @@
 using System;
 using AsmResolver.DotNet;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete.Values.ReferenceType;
 using Echo.Core.Code;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
@@ -70,6 +68,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             get;
         }
-        
+
+        /// <summary>
+        /// Gets the object responsible for constructing new unknown values.
+        /// </summary>
+        IUnknownValueFactory UnknownValueFactory
+        {
+            get;
+        }
     }
 }

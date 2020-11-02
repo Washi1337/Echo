@@ -16,7 +16,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
             Module = module ?? throw new ArgumentNullException(nameof(module));
             MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
             CliMarshaller = new DefaultCliMarshaller(this);
-            StaticFieldFactory = new StaticFieldFactory(new UnknownValueFactory(this), MemoryAllocator);
+            UnknownValueFactory = new UnknownValueFactory(this);
+            StaticFieldFactory = new StaticFieldFactory(UnknownValueFactory, MemoryAllocator);
         }
 
         public IInstructionSetArchitecture<CilInstruction> Architecture
@@ -59,6 +60,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
         {
             get;
             set;
+        }
+
+        /// <inheritdoc />
+        public IUnknownValueFactory UnknownValueFactory
+        {
+            get;
         }
 
         IMethodInvoker ICilRuntimeEnvironment.MethodInvoker => MethodInvoker;

@@ -32,21 +32,39 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var objectValue = (ICliValue) stack.Pop();
 
             IConcreteValue fieldValue;
-            switch (objectValue)
+            if (field.IsStatic)
             {
-                case { IsKnown: false }:
-                    fieldValue = new UnknownValue();
-                    break;
+                // Undocumented: The runtime does allow access of static fields through the ldfld opcode.
+                // In this case, the object instance that is pushed is ignored, allowing constructs like:
+                //
+                //    ldnull
+                //    ldfld <some_static_field>
+                //
+                // without the runtime throwing a NullReferenceException.
                 
-                case OValue { IsZero: { Value: TrileanValue.True } }:
-                    return new DispatchResult(new NullReferenceException());
+                var staticField = environment.StaticFieldFactory.Get(field);
+                fieldValue = environment.CliMarshaller.ToCliValue(staticField.Value, field.Signature.FieldType);
+            }
+            else
+            {
+                // Attempt to dereference the object instance.
                 
-                case OValue { ReferencedObject: HleObjectValue compoundObject }:
-                    fieldValue = compoundObject.GetFieldValue(field);
-                    break;
-                
-                default:
-                    return DispatchResult.InvalidProgram();
+                switch (objectValue)
+                {
+                    case { IsKnown: false }:
+                        fieldValue = environment.UnknownValueFactory.CreateUnknown(field.Signature.FieldType);
+                        break;
+
+                    case OValue { IsZero: { Value: TrileanValue.True } }:
+                        return new DispatchResult(new NullReferenceException());
+
+                    case OValue { ReferencedObject: IDotNetObjectValue compoundObject }:
+                        fieldValue = compoundObject.GetFieldValue(field);
+                        break;
+
+                    default:
+                        return DispatchResult.InvalidProgram();
+                }
             }
 
             stack.Push(environment.CliMarshaller.ToCliValue(fieldValue, field.Signature.FieldType));

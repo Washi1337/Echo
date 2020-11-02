@@ -55,7 +55,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Instructions = instructions;
             Architecture = instructions.Architecture;
             
-            var valueFactory = new UnknownValueFactory(this);
+            UnknownValueFactory = new UnknownValueFactory(this);
             
             Is32Bit = is32Bit;
             Status = VirtualMachineStatus.Idle;
@@ -63,8 +63,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Dispatcher = new DefaultCilDispatcher();
             CliMarshaller = new DefaultCliMarshaller(this);
             MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
-            MethodInvoker = new ReturnUnknownMethodInvoker(valueFactory, CliMarshaller);
-            StaticFieldFactory = new StaticFieldFactory(valueFactory, MemoryAllocator);
+            MethodInvoker = new ReturnUnknownMethodInvoker(UnknownValueFactory, CliMarshaller);
+            StaticFieldFactory = new StaticFieldFactory(UnknownValueFactorym MemoryAllocator);
             
             _services[typeof(ICilRuntimeEnvironment)] = this;
         }
@@ -129,6 +129,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
         /// <inheritdoc />
         public StaticFieldFactory StaticFieldFactory
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public IUnknownValueFactory UnknownValueFactory
         {
             get;
             set;
