@@ -36,7 +36,6 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         [Fact]
         public void ReadStaticIntField()
         {
-            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var fieldValue = new Integer32Value(0x12345678);
             Verify(nameof(SimpleClass.StaticIntField), fieldValue, new I4Value(fieldValue.I32));
         }
