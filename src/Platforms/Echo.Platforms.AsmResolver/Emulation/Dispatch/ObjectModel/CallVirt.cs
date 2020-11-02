@@ -27,10 +27,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         {
             var method = ((IMethodDescriptor) instruction.Operand).Resolve();
 
-            // Shortcut: If the method is not virtual, just return the referenced method.
-            if (!method.IsVirtual)
-                return new MethodDevirtualizationResult(method);
-
             switch (arguments[0])
             {
                 case { IsKnown: false }:

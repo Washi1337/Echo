@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
 using Echo.Concrete.Emulation.Dispatch;
@@ -30,26 +31,48 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 return new DispatchResult(methodDispatch.Exception);
 
             // Invoke.
-            bool pushesValue = environment.Architecture.GetStackPushCount(instruction) > 0;
-            ICliValue result;
+            var result = InvokeAndGetResult(environment, instruction, methodDispatch, arguments);
+
+            // Push result if necessary.
+            UpdateStack(context, result, instruction);
+
+            return base.Execute(context, instruction);
+        }
+
+        private static ICliValue InvokeAndGetResult(ICilRuntimeEnvironment environment, CilInstruction instruction,
+            MethodDevirtualizationResult methodDispatch, List<ICliValue> arguments)
+        {
+            if (methodDispatch.IsUnknown)
+            {
+                if (instruction.Operand is IMethodDescriptor method)
+                {
+                    return environment.CliMarshaller.ToCliValue(
+                        environment.UnknownValueFactory.CreateUnknown(method.Signature.ReturnType),
+                        method.Signature.ReturnType);
+                }
+
+                throw new DispatchException("Operand of call instruction is not a method.");
+            }
 
             if (methodDispatch.ResultingMethod != null)
-            {
-                result = environment.MethodInvoker.Invoke(methodDispatch.ResultingMethod, arguments);
-            }
-            else if (methodDispatch.ResultingMethodSignature != null)
+                return environment.MethodInvoker.Invoke(methodDispatch.ResultingMethod, arguments);
+
+            if (methodDispatch.ResultingMethodSignature != null)
             {
                 var address = arguments.Last();
                 arguments.Remove(address);
-                result = environment.MethodInvoker.InvokeIndirect(address, methodDispatch.ResultingMethodSignature,
+                return environment.MethodInvoker.InvokeIndirect(address, methodDispatch.ResultingMethodSignature,
                     arguments);
             }
-            else
-            {
-                result = null;
-            }
 
-            // Push result if necessary.
+            return null;
+        }
+
+        private static void UpdateStack(ExecutionContext context, ICliValue result, CilInstruction cilInstruction)
+        {
+            var environment = context.GetService<ICilRuntimeEnvironment>();
+            
+            bool pushesValue = environment.Architecture.GetStackPushCount(cilInstruction) > 0;
             if (result is null)
             {
                 if (pushesValue)
@@ -68,16 +91,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
                 context.ProgramState.Stack.Push(result);
             }
-
-            return base.Execute(context, instruction);
         }
 
         /// <summary>
-        /// 
+        /// Devirtualizes the method referenced by the provided instruction, and infers the actual method
+        /// implementing the referenced method that was called.
         /// </summary>
-        /// <param name="instruction"></param>
-        /// <param name="arguments"></param>
-        /// <returns></returns>
+        /// <param name="instruction">The call instruction.</param>
+        /// <param name="arguments">The arguments of the method call.</param>
+        /// <returns>The result of the devirtualization process.</returns>
         protected abstract MethodDevirtualizationResult DevirtualizeMethod(
             CilInstruction instruction,
             IList<ICliValue> arguments);
