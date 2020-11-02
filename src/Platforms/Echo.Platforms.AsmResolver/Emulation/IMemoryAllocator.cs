@@ -13,6 +13,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
     public interface IMemoryAllocator : IDisposable
     {
         /// <summary>
+        /// Gets a value indicating whether the memory allocator returns 32-bit or 64-bit pointers.
+        /// </summary>
+        bool Is32Bit
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Allocates a chunk of addressable memory on the virtual heap, and returns a pointer value to the start of
         /// the memory chunk.  
         /// </summary>

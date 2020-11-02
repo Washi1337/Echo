@@ -14,8 +14,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// Provides a high level implementation of an object that consists of a collection of fields.
     /// </summary>
     /// <remarks>
-    /// Instances of the <see cref="HleObjectValue"/> class are passed on by-value. They are used for representing
-    /// instances of value types, or the object referenced in an object reference.
+    /// This class is <strong>not</strong> meant to be used as an object reference. Instances of the
+    /// <see cref="HleObjectValue"/> class are passed on by-value. They are used for representing instances of value
+    /// types, or the object referenced in an object reference, not the object reference itself. 
     /// </remarks>
     public class HleObjectValue : IDotNetObjectValue
     {

@@ -1,6 +1,15 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
+using System.Text;
+using AsmResolver;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using Echo.Concrete.Values;
+using Echo.Concrete.Values.ReferenceType;
+using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -12,6 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     public class StaticFieldFactory
     {
         private readonly IUnknownValueFactory _unknownValueFactory;
+        private readonly IMemoryAllocator _memoryAllocator;
 
         private readonly ConcurrentDictionary<IFieldDescriptor, StaticField> _cache =
             new ConcurrentDictionary<IFieldDescriptor, StaticField>();
@@ -20,9 +30,11 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Creates a new instance of the <see cref="StaticFieldFactory"/> class.
         /// </summary>
         /// <param name="unknownValueFactory">The factory responsible for creating unknown values.</param>
-        public StaticFieldFactory(IUnknownValueFactory unknownValueFactory)
+        /// <param name="memoryAllocator">The object responsible for allocating memory for default values of fields.</param>
+        public StaticFieldFactory(IUnknownValueFactory unknownValueFactory, IMemoryAllocator memoryAllocator)
         {
             _unknownValueFactory = unknownValueFactory ?? throw new ArgumentNullException(nameof(unknownValueFactory));
+            _memoryAllocator = memoryAllocator ?? throw new ArgumentNullException(nameof(memoryAllocator));
         }
         
         /// <summary>
@@ -36,17 +48,92 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 throw new ArgumentNullException(nameof(field));
             if (field.Signature.HasThis)
                 throw new ArgumentException("Field has the HasThis flag set in the field signature.");
-                
+
             StaticField staticField;
             while (!_cache.TryGetValue(field, out staticField))
             {
-                staticField = new StaticField(field);
-                staticField.Value = _unknownValueFactory.CreateUnknown(field.Signature.FieldType);
+                staticField = Create(field);
                 _cache.TryAdd(field, staticField);
             }
 
             return staticField;
         }
 
+        private StaticField Create(IFieldDescriptor field) => new StaticField(field)
+        {
+            Value = GetInitialFieldValue(field)
+        };
+
+        private IConcreteValue GetInitialFieldValue(IFieldDescriptor field)
+        {
+            var definition = field.Resolve();
+            
+            if (definition != null)
+            {
+                // Check if the field has an initial value through a Constant row.
+                var constant = definition.Constant;
+                if (constant?.Value != null)
+                {
+                    return ObjectToCtsValue(
+                        constant.Value.Data,
+                        definition.Module.CorLibTypeFactory.FromElementType(constant.Type));
+                }
+
+                // Check if the field has an initial value through a field RVA row.
+                if (definition.HasFieldRva && definition.FieldRva != null
+                    && definition.FieldRva is IReadableSegment readableSegment)
+                {
+                    return ObjectToCtsValue(
+                        readableSegment.ToArray(),
+                        field.Signature.FieldType);
+                }
+            }
+
+            return _unknownValueFactory.CreateUnknown(field.Signature.FieldType);
+        }
+
+        private IConcreteValue ObjectToCtsValue(byte[] rawData, TypeSignature type)
+        {
+            switch (type.ElementType)
+            {
+                case ElementType.Boolean:
+                case ElementType.I1:
+                case ElementType.U1:
+                    return new Integer8Value(rawData[0]);
+
+                case ElementType.Char:
+                case ElementType.I2:
+                case ElementType.U2:
+                    return new Integer16Value(BinaryPrimitives.ReadUInt16LittleEndian(rawData));
+
+                case ElementType.I4:
+                case ElementType.U4:
+                    return new Integer32Value(BinaryPrimitives.ReadUInt32LittleEndian(rawData));
+
+                case ElementType.I8:
+                case ElementType.U8:
+                    return new Integer64Value(BinaryPrimitives.ReadUInt64LittleEndian(rawData));
+
+                case ElementType.R4:
+                    return new Float32Value(BitConverter.ToSingle(rawData, 0));
+
+                case ElementType.R8:
+                    return new Float64Value(BitConverter.ToDouble(rawData, 0));
+
+                case ElementType.String:
+                    return new ObjectReference(
+                        _memoryAllocator.GetStringValue(Encoding.Unicode.GetString(rawData)),
+                        _memoryAllocator.Is32Bit);
+
+                case ElementType.ValueType:
+                    var memory = _memoryAllocator.AllocateMemory(rawData.Length, false);
+                    memory.WriteBytes(0, rawData);
+                    return new LleObjectValue(_memoryAllocator, type, memory);
+                
+                default:
+                    return _unknownValueFactory.CreateUnknown(type);
+            }
+        }
+        
     }
 }
