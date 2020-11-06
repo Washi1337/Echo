@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
-            var method = instruction.Operand as IMethodDescriptor;
+            var method = (IMethodDescriptor) instruction.Operand;
             
             //Allocate Object
             var allocatedObject = environment.MemoryAllocator.AllocateObject(method.DeclaringType.ToTypeSignature());
@@ -38,7 +38,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             arguments.Insert(0, cilValueObject);
 
             // Dispatch
-            var methodDispatch = new MethodDevirtualizationResult((IMethodDescriptor) instruction.Operand);
+            var methodDispatch = new MethodDevirtualizationResult(method);
             if (methodDispatch.Exception != null)
                 return new DispatchResult(methodDispatch.Exception);
 
