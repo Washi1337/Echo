@@ -25,7 +25,11 @@ namespace Mocks
         }
 
         public virtual int VirtualIntInstanceMethod() => 123;
-
+        
+        public virtual void VirtualParameterizedInstanceMethod(int a, string b)
+        {
+        }
+        
         public static void HelloWorld()
         {
             Console.WriteLine("Hello, world!");

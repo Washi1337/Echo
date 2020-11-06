@@ -46,6 +46,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             in MethodDevirtualizationResult methodDispatch, IReadOnlyList<ICliValue> arguments)
         {
             // If method dispatch's result was unknown, assume a non-null object instance and return an unknown value. 
+            // TODO: This should perhaps be made configurable.
             if (methodDispatch.IsUnknown)
                 return CreateUnknownResult(environment, instruction);
 
@@ -83,6 +84,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 // to a normal object reference.
                 var objectInstance = marshaller.ToCtsValue(arguments[0], environment.Module.CorLibTypeFactory.Object);
                 marshalledArguments.Add(objectInstance);
+                index++;
             }
 
             // Marshal remaining arguments.
