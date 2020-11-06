@@ -11,11 +11,13 @@ namespace Mocks
         public static int StaticIntField;
         public static string StaticStringField;
         public static object StaticObjectField;
-        
+        public static Int16Enum StaticInt16Enum;
+        public static Int32Enum StaticInt32Enum;
+
         public int IntField;
         public string StringField;
         public SimpleClass SimpleClassField;
-
+        
         public void InstanceMethod()
         {
         }

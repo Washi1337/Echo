@@ -49,5 +49,17 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var fieldValue = new OValue(fieldContents, true, environment.Is32Bit);
             Verify(nameof(SimpleClass.StaticStringField), fieldValue, new ObjectReference(fieldContents, environment.Is32Bit));
         }
+
+        [Fact]
+        public void WriteStaticInt16EnumField()
+        {
+            Verify(nameof(SimpleClass.StaticInt16Enum), new I4Value(1), new Integer16Value(1));
+        }
+
+        [Fact]
+        public void WriteStaticInt32EnumField()
+        {
+            Verify(nameof(SimpleClass.StaticInt32Enum), new I4Value(1), new Integer32Value(1));
+        }
     }
 }

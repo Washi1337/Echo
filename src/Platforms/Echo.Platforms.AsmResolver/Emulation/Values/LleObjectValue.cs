@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
@@ -11,6 +10,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// <summary>
     /// Represents a low level implementation of an object.
     /// </summary>
+    /// <remarks>
+    /// This class is <strong>not</strong> meant to be used as an object reference. Instances of the
+    /// <see cref="LleObjectValue"/> class are passed on by-value. They are used for representing instances of value
+    /// types, or the object referenced in an object reference, not the object reference itself. 
+    /// </remarks>
     public partial class LleObjectValue : IValueTypeValue
     {
         private readonly IMemoryAllocator _memoryAllocator;
