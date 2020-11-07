@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         {
             var type = instruction.Operand as ITypeDefOrRef;
             var environment = context.GetService<ICilRuntimeEnvironment>();
-            var allocator = environment.MemoryAllocator;
+            var allocator = environment.ValueFactory;
             var layout = allocator.GetTypeMemoryLayout(type);
             context.ProgramState.Stack.Push(new I4Value((int) layout.Size));
 

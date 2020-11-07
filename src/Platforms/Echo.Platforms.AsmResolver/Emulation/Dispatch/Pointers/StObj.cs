@@ -34,10 +34,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
 
             // Determine type layout.
             var type = ((ITypeDefOrRef) instruction.Operand).ToTypeSignature();
-            var memoryLayout = environment.MemoryAllocator.GetTypeMemoryLayout(type);
+            var memoryLayout = environment.ValueFactory.GetTypeMemoryLayout(type);
 
             // Write
-            pointerValue.WriteStruct(0, environment.MemoryAllocator, memoryLayout, elementValue);
+            pointerValue.WriteStruct(0, environment.ValueFactory, memoryLayout, elementValue);
 
             return DispatchResult.Success();
         }

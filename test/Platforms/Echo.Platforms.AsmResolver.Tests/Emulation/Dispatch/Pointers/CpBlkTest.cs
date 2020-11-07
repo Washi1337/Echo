@@ -23,11 +23,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 
             var stack = ExecutionContext.ProgramState.Stack;
             
-            var sourceMemory = environment.MemoryAllocator.AllocateMemory(16, true);
+            var sourceMemory = environment.ValueFactory.AllocateMemory(16, true);
             sourceMemory.WriteInteger64(0, new Integer64Value(0x0102030405060708));
             sourceMemory.WriteInteger64(8, new Integer64Value(0x090A0B0C0D0E0F00));
             
-            var targetMemory = environment.MemoryAllocator.AllocateMemory(16, true);
+            var targetMemory = environment.ValueFactory.AllocateMemory(16, true);
             
             stack.Push(marshaller.ToCliValue(targetMemory, new PointerTypeSignature(environment.Module.CorLibTypeFactory.Int32)));
             stack.Push(marshaller.ToCliValue(sourceMemory, new PointerTypeSignature(environment.Module.CorLibTypeFactory.Int32)));
@@ -48,12 +48,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 
             var stack = ExecutionContext.ProgramState.Stack;
             
-            var sourceMemory = environment.MemoryAllocator.AllocateMemory(16, true);
+            var sourceMemory = environment.ValueFactory.AllocateMemory(16, true);
             sourceMemory.WriteInteger64(0,
                 new Integer64Value("0011??000011??000011??000011??000011??000011??000011??000011??00"));
             sourceMemory.WriteInteger64(8, new Integer64Value(0x090A0B0C0D0E0F00));
             
-            var targetMemory = environment.MemoryAllocator.AllocateMemory(16, true);
+            var targetMemory = environment.ValueFactory.AllocateMemory(16, true);
             
             stack.Push(marshaller.ToCliValue(targetMemory, new PointerTypeSignature(environment.Module.CorLibTypeFactory.Int32)));
             stack.Push(marshaller.ToCliValue(sourceMemory, new PointerTypeSignature(environment.Module.CorLibTypeFactory.Int32)));

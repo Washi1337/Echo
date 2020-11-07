@@ -1,4 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Values;
@@ -13,14 +17,23 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// </summary>
     public class DefaultValueFactory : IValueFactory
     {
-        private readonly ICilRuntimeEnvironment _environment;
+        private readonly IDictionary<string, StringValue> _cachedStrings = new Dictionary<string, StringValue>();
+        private readonly IDictionary<ITypeDescriptor, TypeMemoryLayout> _memoryLayouts = new Dictionary<ITypeDescriptor, TypeMemoryLayout>();
+        private readonly ModuleDefinition _contextModule;
 
         /// <summary>
         /// Creates a new instance of the <see cref="DefaultValueFactory"/> class.
         /// </summary>
-        public DefaultValueFactory(ICilRuntimeEnvironment environment)
+        public DefaultValueFactory(ModuleDefinition contextModule, bool is32Bit)
         {
-            _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+            _contextModule = contextModule ?? throw new ArgumentNullException(nameof(contextModule));
+            Is32Bit = is32Bit;
+        }
+
+        /// <inheritdoc />
+        public bool Is32Bit
+        {
+            get;
         }
 
         /// <inheritdoc />
@@ -60,17 +73,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
                     case ElementType.I:
                     case ElementType.U:
-                        return new NativeIntegerValue(0, _environment.Is32Bit);
+                        return new NativeIntegerValue(0, Is32Bit);
 
                     case ElementType.MVar:
                     case ElementType.Var:
                         // TODO: resolve type argument (maybe add a generic context parameter to this factory method?)
-                        return ObjectReference.Null(_environment.Is32Bit);
+                        return ObjectReference.Null(Is32Bit);
 
                     case ElementType.ByRef:
                     case ElementType.ValueType:
                     case ElementType.TypedByRef:
-                        return _environment.MemoryAllocator.AllocateStruct(type, true);
+                        return AllocateStruct(type, true);
 
                     case ElementType.CModReqD:
                     case ElementType.CModOpt:
@@ -80,7 +93,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                         continue;
 
                     default:
-                        return ObjectReference.Null(_environment.Is32Bit);
+                        return ObjectReference.Null(Is32Bit);
                 }
             }
         }
@@ -88,8 +101,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <inheritdoc />
         public ObjectReference CreateDefaultObject(TypeSignature type)
         {
-            var contents =  _environment.MemoryAllocator.AllocateStruct(type, true);
-            return new ObjectReference(contents, _environment.Is32Bit);
+            var contents = AllocateStruct(type, true);
+            return new ObjectReference(contents, Is32Bit);
         }
 
         /// <inheritdoc />
@@ -132,17 +145,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                     
                     case ElementType.I:
                     case ElementType.U:
-                        return new NativeIntegerValue(0, 0, _environment.Is32Bit);
+                        return new NativeIntegerValue(0, 0, Is32Bit);
 
                     case ElementType.MVar:
                     case ElementType.Var:
                         // TODO: resolve type argument (maybe add a generic context parameter to this factory method?)
-                        return new ObjectReference(null, false, _environment.Is32Bit);
+                        return new ObjectReference(null, false, Is32Bit);
 
                     case ElementType.ByRef:
                     case ElementType.ValueType:
                     case ElementType.TypedByRef:
-                        return _environment.MemoryAllocator.AllocateStruct(type, false);
+                        return AllocateStruct(type, false);
 
                     case ElementType.CModReqD:
                     case ElementType.CModOpt:
@@ -156,7 +169,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                         // At this point we know it is at least an object reference, as value types have been captured by
                         // other cases. Return an unknown object reference.
 
-                        return new ObjectReference(null, false, _environment.Is32Bit);
+                        return new ObjectReference(null, false, Is32Bit);
                 }
             }
         }
@@ -164,8 +177,89 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <inheritdoc />
         public ObjectReference CreateUnknownObject(TypeSignature type)
         {
-            var contents =  _environment.MemoryAllocator.AllocateStruct(type, false);
-            return new ObjectReference(contents, _environment.Is32Bit);
+            var contents =  AllocateStruct(type, false);
+            return new ObjectReference(contents, Is32Bit);
+        }
+
+        /// <inheritdoc />
+        public MemoryPointerValue AllocateMemory(int size, bool initializeWithZeroes)
+        {
+            var memory = new Memory<byte>(new byte[size]);
+            var knownBitMask = new Memory<byte>(new byte[size]);
+            if (initializeWithZeroes)
+                knownBitMask.Span.Fill(0xFF);
+            return new MemoryPointerValue(memory, knownBitMask, Is32Bit);
+        }
+
+        /// <inheritdoc />
+        public IDotNetArrayValue AllocateArray(TypeSignature elementType, int length)
+        {
+            if (elementType.IsValueType)
+            {
+                int size = length * (int) GetTypeMemoryLayout(elementType).Size;
+                var memory = AllocateMemory(size, true);
+                return new LleStructValue(this, new SzArrayTypeSignature(elementType), memory);
+            }
+            
+            throw new NotSupportedException();
+        }
+
+        /// <inheritdoc />
+        public IDotNetStructValue AllocateStruct(TypeSignature type, bool initializeWithZeroes)
+        {
+            IDotNetStructValue result;
+            
+            if (type.IsValueType)
+            {
+                var memoryLayout = GetTypeMemoryLayout(type);
+                var contents = AllocateMemory((int) memoryLayout.Size, initializeWithZeroes);
+                result = new LleStructValue(this, type, contents);
+            }
+            else
+            {
+                result = new HleStructValue(type, Is32Bit);
+            }
+
+            return result;
+        }
+
+        /// <inheritdoc />
+        public StringValue GetStringValue(string value)
+        {
+            if (!_cachedStrings.TryGetValue(value, out var stringValue))
+            {
+                var rawMemory = AllocateMemory(value.Length * 2, false);
+                var span = new ReadOnlySpan<byte>(Encoding.Unicode.GetBytes(value));
+                rawMemory.WriteBytes(0, span);
+                stringValue = new StringValue(_contextModule.CorLibTypeFactory.String, rawMemory);
+                _cachedStrings.Add(value, stringValue);
+            }
+
+            return stringValue;
+        }
+
+        /// <inheritdoc />
+        public TypeMemoryLayout GetTypeMemoryLayout(ITypeDescriptor type)
+        {
+            type = _contextModule.CorLibTypeFactory.FromType(type) ?? type;
+            if (!_memoryLayouts.TryGetValue(type, out var memoryLayout))
+            {
+                memoryLayout = type switch
+                {
+                    ITypeDefOrRef typeDefOrRef => typeDefOrRef.GetImpliedMemoryLayout(Is32Bit),
+                    TypeSignature signature => signature.GetImpliedMemoryLayout(Is32Bit),
+                    _ => throw new ArgumentOutOfRangeException(nameof(type))
+                };
+
+                _memoryLayouts[type] = memoryLayout;
+            }
+
+            return memoryLayout;
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
         }
     }
 }

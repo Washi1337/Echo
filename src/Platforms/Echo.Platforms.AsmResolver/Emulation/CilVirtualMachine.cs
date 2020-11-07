@@ -54,16 +54,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Instructions = instructions;
             Architecture = instructions.Architecture;
             
-            ValueFactory = new DefaultValueFactory(this);
+            ValueFactory = new DefaultValueFactory(module, is32Bit);
             
             Is32Bit = is32Bit;
             Status = VirtualMachineStatus.Idle;
             CurrentState = new CilProgramState();
             Dispatcher = new DefaultCilDispatcher();
             CliMarshaller = new DefaultCliMarshaller(this);
-            MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
             MethodInvoker = new ReturnUnknownMethodInvoker(ValueFactory);
-            StaticFieldFactory = new StaticFieldFactory(ValueFactory, MemoryAllocator);
+            StaticFieldFactory = new StaticFieldFactory(ValueFactory);
             _services[typeof(ICilRuntimeEnvironment)] = this;
         }
 
@@ -106,13 +105,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
         /// <inheritdoc />
         public ICliMarshaller CliMarshaller
-        {
-            get;
-            set;
-        }
-
-        /// <inheritdoc />
-        public IMemoryAllocator MemoryAllocator
         {
             get;
             set;
@@ -207,7 +199,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <inheritdoc />
         public void Dispose()
         {
-            MemoryAllocator?.Dispose();
+            ValueFactory?.Dispose();
         }
     }
 }

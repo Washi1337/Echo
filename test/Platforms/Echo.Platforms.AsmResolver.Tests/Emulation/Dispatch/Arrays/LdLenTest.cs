@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var marshaller = environment.CliMarshaller;
             var stack = ExecutionContext.ProgramState.Stack;
             
-            var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Int32, length);
+            var array = environment.ValueFactory.AllocateArray(environment.Module.CorLibTypeFactory.Int32, length);
             stack.Push(marshaller.ToCliValue(array, array.Type));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldlen));
@@ -54,7 +54,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var stack = ExecutionContext.ProgramState.Stack;
 
-            var stringValue = environment.MemoryAllocator.GetStringValue("Hello, world!");
+            var stringValue = environment.ValueFactory.GetStringValue("Hello, world!");
             stack.Push(environment.CliMarshaller.ToCliValue(stringValue, environment.Module.CorLibTypeFactory.String));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldlen));

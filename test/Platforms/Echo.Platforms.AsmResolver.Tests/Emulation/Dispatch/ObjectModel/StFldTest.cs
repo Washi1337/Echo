@@ -61,7 +61,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void WriteStringField()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldContents = environment.MemoryAllocator.GetStringValue("Hello, world!");
+            var fieldContents = environment.ValueFactory.GetStringValue("Hello, world!");
             var fieldValue = new ObjectReference(fieldContents, environment.Is32Bit);
             var stackValue = environment.CliMarshaller.ToCliValue(fieldValue, _module.CorLibTypeFactory.String);
             Verify(nameof(SimpleClass.StringField), stackValue, fieldValue);
@@ -130,7 +130,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var instanceObject = new OValue(
-                environment.MemoryAllocator.GetStringValue("Hello, world"),
+                environment.ValueFactory.GetStringValue("Hello, world"),
                 true,
                 environment.Is32Bit);
             

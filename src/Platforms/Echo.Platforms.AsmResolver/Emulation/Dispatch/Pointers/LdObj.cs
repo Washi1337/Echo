@@ -32,10 +32,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
 
             // Determine type layout.
             var type = ((ITypeDefOrRef) instruction.Operand).ToTypeSignature();
-            var memoryLayout = environment.MemoryAllocator.GetTypeMemoryLayout(type);
+            var memoryLayout = environment.ValueFactory.GetTypeMemoryLayout(type);
 
             // Dereference.
-            var structureValue = pointerValue.ReadStruct(0, environment.MemoryAllocator, memoryLayout);
+            var structureValue = pointerValue.ReadStruct(0, environment.ValueFactory, memoryLayout);
             stack.Push(environment.CliMarshaller.ToCliValue(structureValue, type));
             
             return DispatchResult.Success();

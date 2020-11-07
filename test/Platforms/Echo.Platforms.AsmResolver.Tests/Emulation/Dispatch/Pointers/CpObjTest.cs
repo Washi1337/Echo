@@ -24,10 +24,10 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             var int32Type = environment.Module.CorLibTypeFactory.Int32;
             var intPointerType = new PointerTypeSignature(int32Type);
             
-            var sourcePointer = environment.MemoryAllocator.AllocateMemory(sizeof(int), false);
+            var sourcePointer = environment.ValueFactory.AllocateMemory(sizeof(int), false);
             sourcePointer.WriteInteger32(0, new Integer32Value(0x12340000, 0xFFFF0000));
             
-            var destinationPointer = environment.MemoryAllocator.AllocateMemory(sizeof(int) * 2, false);
+            var destinationPointer = environment.ValueFactory.AllocateMemory(sizeof(int) * 2, false);
             var stack = ExecutionContext.ProgramState.Stack;
             stack.Push(environment.CliMarshaller.ToCliValue(destinationPointer, intPointerType));
             stack.Push(environment.CliMarshaller.ToCliValue(sourcePointer, intPointerType));
@@ -47,7 +47,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             var int32Type = environment.Module.CorLibTypeFactory.Int32;
             var intPointerType = new PointerTypeSignature(int32Type);
             
-            var destinationPointer = environment.MemoryAllocator.AllocateMemory(sizeof(int), true);
+            var destinationPointer = environment.ValueFactory.AllocateMemory(sizeof(int), true);
             
             var stack = ExecutionContext.ProgramState.Stack;
             stack.Push(environment.CliMarshaller.ToCliValue(destinationPointer, intPointerType));

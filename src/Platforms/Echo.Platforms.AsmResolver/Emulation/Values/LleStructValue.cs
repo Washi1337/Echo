@@ -17,18 +17,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// </remarks>
     public partial class LleStructValue : IValueTypeValue
     {
-        private readonly IMemoryAllocator _memoryAllocator;
+        private readonly IValueFactory _valueFactory;
 
         /// <summary>
         /// Creates a new low level emulated object. 
         /// </summary>
-        /// <param name="memoryAllocator">The object responsible for memory management in the virtual machine.</param>
+        /// <param name="valueFactory">The object responsible for memory management in the virtual machine.</param>
         /// <param name="valueType">The type of the object.</param>
         /// <param name="contents">The raw contents of the object.</param>
-        public LleStructValue(IMemoryAllocator memoryAllocator, TypeSignature valueType, MemoryPointerValue contents)
+        public LleStructValue(IValueFactory valueFactory, TypeSignature valueType, MemoryPointerValue contents)
         {
             Type = valueType;
-            _memoryAllocator = memoryAllocator ?? throw new ArgumentNullException(nameof(memoryAllocator));
+            _valueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
             Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
@@ -74,7 +74,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
         /// <inheritdoc />
         /// <inheritdoc />
-        public IValue Copy() => new LleStructValue(_memoryAllocator, Type, Contents);
+        public IValue Copy() => new LleStructValue(_valueFactory, Type, Contents);
         
         /// <inheritdoc />
         public override string ToString() => $"{Type.FullName} ({Contents.Length.ToString()} bytes)";

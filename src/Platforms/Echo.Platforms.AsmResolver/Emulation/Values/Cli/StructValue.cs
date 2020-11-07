@@ -14,11 +14,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// <summary>
         /// Creates a new structure value.
         /// </summary>
-        /// <param name="memoryAllocator">The object responsible for memory management in the virtual machine.</param>
+        /// <param name="valueFactory">The object responsible for memory management in the virtual machine.</param>
         /// <param name="valueType">The type of the object.</param>
         /// <param name="contents">The raw contents of the structure.</param>
-        public StructValue(IMemoryAllocator memoryAllocator, TypeSignature valueType, MemoryPointerValue contents)
-            : base(memoryAllocator, valueType, contents)
+        public StructValue(IValueFactory valueFactory, TypeSignature valueType, MemoryPointerValue contents)
+            : base(valueFactory, valueType, contents)
         {
         }
 

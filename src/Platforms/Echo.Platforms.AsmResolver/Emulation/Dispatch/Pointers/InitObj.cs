@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
         public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
         {
             var type = (ITypeDefOrRef) instruction.Operand;
-            var memoryLayout = context.GetService<ICilRuntimeEnvironment>().MemoryAllocator.GetTypeMemoryLayout(type);
+            var memoryLayout = context.GetService<ICilRuntimeEnvironment>().ValueFactory.GetTypeMemoryLayout(type);
             Span<byte> zeroes = stackalloc byte[(int) memoryLayout.Size];
             zeroes.Fill(0);
 

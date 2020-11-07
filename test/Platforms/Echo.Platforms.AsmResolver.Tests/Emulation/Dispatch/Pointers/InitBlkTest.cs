@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 
             var stack = ExecutionContext.ProgramState.Stack;
             
-            var memory = environment.MemoryAllocator.AllocateMemory(16, true);
+            var memory = environment.ValueFactory.AllocateMemory(16, true);
             stack.Push(marshaller.ToCliValue(memory, new PointerTypeSignature(environment.Module.CorLibTypeFactory.Int32)));
             stack.Push(new I4Value(0x01));
             stack.Push(new I4Value(8));
@@ -43,7 +43,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 
             var stack = ExecutionContext.ProgramState.Stack;
             
-            var memory = environment.MemoryAllocator.AllocateMemory(16, true);
+            var memory = environment.ValueFactory.AllocateMemory(16, true);
             stack.Push(marshaller.ToCliValue(memory, new PointerTypeSignature(environment.Module.CorLibTypeFactory.Int32)));
             stack.Push(new I4Value("0011??00"));
             stack.Push(new I4Value(8));

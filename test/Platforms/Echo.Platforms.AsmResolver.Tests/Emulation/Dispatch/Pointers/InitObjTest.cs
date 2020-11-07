@@ -21,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             
             var int32Type = environment.Module.CorLibTypeFactory.Int32;
             
-            var pointer = environment.MemoryAllocator.AllocateMemory(sizeof(int) * 2, false);
+            var pointer = environment.ValueFactory.AllocateMemory(sizeof(int) * 2, false);
             var stack = ExecutionContext.ProgramState.Stack;
             stack.Push(environment.CliMarshaller.ToCliValue(pointer, new PointerTypeSignature(int32Type)));
 

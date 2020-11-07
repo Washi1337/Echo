@@ -61,7 +61,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void ReadStringField()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldValue = environment.MemoryAllocator.GetStringValue("Hello, world!");
+            var fieldValue = environment.ValueFactory.GetStringValue("Hello, world!");
             Verify(nameof(SimpleClass.StringField), fieldValue, new OValue(fieldValue, true, environment.Is32Bit));
         }
 
@@ -127,7 +127,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var instanceObject = new OValue(
-                environment.MemoryAllocator.GetStringValue("Hello, world"),
+                environment.ValueFactory.GetStringValue("Hello, world"),
                 true,
                 environment.Is32Bit);
             

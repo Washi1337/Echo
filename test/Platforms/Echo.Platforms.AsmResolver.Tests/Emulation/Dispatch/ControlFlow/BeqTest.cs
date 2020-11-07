@@ -61,7 +61,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
             var marshaller = environment.CliMarshaller;
             
             var instruction = new CilInstruction(CilOpCodes.Beq, new CilOffsetLabel(0x1234));
-            var stringValue = environment.MemoryAllocator.GetStringValue("Hello, World!");
+            var stringValue = environment.ValueFactory.GetStringValue("Hello, World!");
             
             var stack = ExecutionContext.ProgramState.Stack;
             stack.Push(marshaller.ToCliValue(stringValue, environment.Module.CorLibTypeFactory.String));
@@ -81,7 +81,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
             var marshaller = environment.CliMarshaller;
             
             var instruction = new CilInstruction(CilOpCodes.Beq, new CilOffsetLabel(0x1234));
-            var stringValue = environment.MemoryAllocator.GetStringValue("Hello, World!");
+            var stringValue = environment.ValueFactory.GetStringValue("Hello, World!");
             
             var stack = ExecutionContext.ProgramState.Stack;
             stack.Push(marshaller.ToCliValue(stringValue, environment.Module.CorLibTypeFactory.String));

@@ -87,7 +87,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
             
             var stack = ExecutionContext.ProgramState.Stack;
 
-            var stringValue = environment.MemoryAllocator.GetStringValue("Hello, world!");
+            var stringValue = environment.ValueFactory.GetStringValue("Hello, world!");
             stack.Push(marshaller.ToCliValue(stringValue, environment.Module.CorLibTypeFactory.String));
             stack.Push(OValue.Null(environment.Is32Bit));
 
@@ -105,7 +105,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
             
             var stack = ExecutionContext.ProgramState.Stack;
 
-            var stringValue = environment.MemoryAllocator.GetStringValue("Hello, world!");
+            var stringValue = environment.ValueFactory.GetStringValue("Hello, world!");
             stack.Push(OValue.Null(environment.Is32Bit));
             stack.Push(marshaller.ToCliValue(stringValue, environment.Module.CorLibTypeFactory.String));
 

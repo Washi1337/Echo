@@ -21,7 +21,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
     public class StaticFieldFactory
     {
         private readonly IValueFactory _valueFactory;
-        private readonly IMemoryAllocator _memoryAllocator;
 
         private readonly ConcurrentDictionary<IFieldDescriptor, StaticField> _cache =
             new ConcurrentDictionary<IFieldDescriptor, StaticField>();
@@ -30,11 +29,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Creates a new instance of the <see cref="StaticFieldFactory"/> class.
         /// </summary>
         /// <param name="valueFactory">The factory responsible for creating unknown values.</param>
-        /// <param name="memoryAllocator">The object responsible for allocating memory for default values of fields.</param>
-        public StaticFieldFactory(IValueFactory valueFactory, IMemoryAllocator memoryAllocator)
+        public StaticFieldFactory(IValueFactory valueFactory)
         {
             _valueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
-            _memoryAllocator = memoryAllocator ?? throw new ArgumentNullException(nameof(memoryAllocator));
         }
         
         /// <summary>
@@ -122,13 +119,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
                 case ElementType.String:
                     return new ObjectReference(
-                        _memoryAllocator.GetStringValue(Encoding.Unicode.GetString(rawData)),
-                        _memoryAllocator.Is32Bit);
+                        _valueFactory.GetStringValue(Encoding.Unicode.GetString(rawData)),
+                        _valueFactory.Is32Bit);
 
                 case ElementType.ValueType:
-                    var memory = _memoryAllocator.AllocateMemory(rawData.Length, false);
+                    var memory = _valueFactory.AllocateMemory(rawData.Length, false);
                     memory.WriteBytes(0, rawData);
-                    return new LleStructValue(_memoryAllocator, type, memory);
+                    return new LleStructValue(_valueFactory, type, memory);
                 
                 default:
                     return _valueFactory.CreateUnknown(type);

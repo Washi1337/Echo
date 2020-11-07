@@ -29,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
                 return DispatchResult.InvalidProgram();
 
             int size = sizeValue.InterpretAsI4().I32;
-            var memoryValue = environment.MemoryAllocator.AllocateMemory(size, true);
+            var memoryValue = environment.ValueFactory.AllocateMemory(size, true);
             stack.Push(environment.CliMarshaller.ToCliValue(memoryValue,
                 new PointerTypeSignature(environment.Module.CorLibTypeFactory.Byte)));
             
