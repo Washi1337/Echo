@@ -86,6 +86,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
+        public ObjectReference CreateDefaultObject(TypeSignature type)
+        {
+            var contents =  _environment.MemoryAllocator.AllocateObject(type, true);
+            return new ObjectReference(contents, _environment.Is32Bit);
+        }
+
+        /// <inheritdoc />
         public IConcreteValue CreateUnknown(TypeSignature type)
         {
             while (true)
@@ -153,6 +160,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 }
             }
         }
-        
+
+        /// <inheritdoc />
+        public ObjectReference CreateUnknownObject(TypeSignature type)
+        {
+            var contents =  _environment.MemoryAllocator.AllocateObject(type, false);
+            return new ObjectReference(contents, _environment.Is32Bit);
+        }
     }
 }
