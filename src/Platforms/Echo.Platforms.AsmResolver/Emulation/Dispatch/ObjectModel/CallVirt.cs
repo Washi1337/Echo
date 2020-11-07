@@ -29,6 +29,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
             switch (arguments[0])
             {
+                case { IsKnown: false }:
+                    return new MethodDevirtualizationResult(); 
+                
                 case { IsZero: { Value: TrileanValue.True } }:
                     return new MethodDevirtualizationResult(new NullReferenceException());
                 

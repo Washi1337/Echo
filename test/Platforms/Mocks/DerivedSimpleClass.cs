@@ -9,5 +9,12 @@ namespace Mocks
             Console.WriteLine("Overridden.");
             base.VirtualInstanceMethod();
         }
+
+        /// <inheritdoc />
+        public override void VirtualParameterizedInstanceMethod(int a, string b)
+        {
+            Console.WriteLine("Overridden.");
+            base.VirtualParameterizedInstanceMethod(a, b);
+        }
     }
 }

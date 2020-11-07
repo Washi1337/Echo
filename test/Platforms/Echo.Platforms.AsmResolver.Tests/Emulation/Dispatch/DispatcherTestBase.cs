@@ -8,7 +8,6 @@ using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
-using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
@@ -34,7 +33,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
                 Architecture = new CilArchitecture(dummyMethod.CilMethodBody),
             };
             
-            var methodInvoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(environment), environment.CliMarshaller);
+            var methodInvoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(environment));
             environment.MethodInvoker = new HookedMethodInvoker(methodInvoker);
 
             var container = new ServiceContainer();

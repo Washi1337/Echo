@@ -60,7 +60,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         }
 
         [Fact]
-        public void CallVirtOverridedMethod()
+        public void CallVirtOverrideMethod()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var stack = ExecutionContext.ProgramState.Stack;
@@ -84,6 +84,50 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.Equal(
                 objectTypeDef.Methods.First(m => m.Name == method.Name),
                 ((HookedMethodInvoker) environment.MethodInvoker).LastInvokedMethod);
+        }
+
+        [Fact]
+        public void CallVirtOverrideParameterizedMethod()
+        {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var stack = ExecutionContext.ProgramState.Stack;
+
+            // Create instance of the derived type.
+            var objectTypeDef = (TypeDefinition) _type.Module.LookupMember(typeof(DerivedSimpleClass).MetadataToken);
+            var objectTypeSig = objectTypeDef.ToTypeSignature();
+            
+            var objectRef = new ObjectReference(
+                new HleObjectValue(objectTypeSig, environment.Is32Bit),
+                environment.Is32Bit);
+            
+            // Push object.
+            stack.Push(environment.CliMarshaller.ToCliValue(objectRef, objectTypeSig));
+            stack.Push(new I4Value(123));
+            stack.Push(OValue.Null(environment.Is32Bit));
+
+            // Invoke base method using virtual dispatch.
+            var method = _type.Methods.First(m => m.Name == nameof(SimpleClass.VirtualParameterizedInstanceMethod));
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Callvirt, method));
+            
+            Assert.True(result.IsSuccess);
+            Assert.Equal(
+                objectTypeDef.Methods.First(m => m.Name == method.Name),
+                ((HookedMethodInvoker) environment.MethodInvoker).LastInvokedMethod);
+        }
+
+        [Fact]
+        public void CallVirtOnUnknownObjectShouldReturnUnknown()
+        {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var stack = ExecutionContext.ProgramState.Stack;
+            
+            stack.Push(new OValue(null, false, environment.Is32Bit));
+            
+            var method = _type.Methods.First(m => m.Name == nameof(SimpleClass.VirtualIntInstanceMethod));
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Callvirt, method));
+            
+            Assert.True(result.IsSuccess);
+            Assert.Equal(new I4Value(0, 0), stack.Top);
         }
     }
 }
