@@ -46,7 +46,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             // Create object instance of type and push.
             var objectType = _type.ToTypeSignature();
-            var objectRef = environment.ValueFactory.CreateDefaultObject(objectType);
+            var objectRef = environment.ValueFactory.CreateObject(objectType, true);
             stack.Push(environment.CliMarshaller.ToCliValue(objectRef, objectType));
 
             // Call non-virtual method using virtual dispatch.
@@ -67,7 +67,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var objectTypeDef = (TypeDefinition) _type.Module.LookupMember(typeof(DerivedSimpleClass).MetadataToken);
             var objectTypeSig = objectTypeDef.ToTypeSignature();
             
-            var objectRef = environment.ValueFactory.CreateDefaultObject(objectTypeSig);
+            var objectRef = environment.ValueFactory.CreateObject(objectTypeSig, true);
             
             // Push object.
             stack.Push(environment.CliMarshaller.ToCliValue(objectRef, objectTypeSig));
@@ -92,7 +92,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var objectTypeDef = (TypeDefinition) _type.Module.LookupMember(typeof(DerivedSimpleClass).MetadataToken);
             var objectTypeSig = objectTypeDef.ToTypeSignature();
 
-            var objectRef = environment.ValueFactory.CreateDefaultObject(objectTypeSig);
+            var objectRef = environment.ValueFactory.CreateObject(objectTypeSig, true);
             
             // Push object.
             stack.Push(environment.CliMarshaller.ToCliValue(objectRef, objectTypeSig));

@@ -20,34 +20,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             get;
         }
-        
+
         /// <summary>
         /// Creates a value for the provided type that is initialized with the default contents.
         /// </summary>
         /// <param name="type">The type.</param>
+        /// <param name="initialize">Indicates whether the bits in the created object should be initialized to zero.</param>
         /// <returns>The default value.</returns>
-        IConcreteValue CreateDefault(TypeSignature type);
+        IConcreteValue CreateValue(TypeSignature type, bool initialize);
 
         /// <summary>
         /// Creates an object reference to a value for the provided type that is initialized with the default contents.
         /// </summary>
         /// <param name="type">The type.</param>
+        /// /// <param name="initialize">Indicates whether the bits in the created object should be initialized to zero.</param>
         /// <returns>The default value.</returns>
-        ObjectReference CreateDefaultObject(TypeSignature type);
-
-        /// <summary>
-        /// Creates an unknown value for the provided type.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <returns>The unknown value.</returns>
-        IConcreteValue CreateUnknown(TypeSignature type);
-        
-        /// <summary>
-        /// Creates an object reference to an unknown value for the provided type.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <returns>The unknown value.</returns>
-        ObjectReference CreateUnknownObject(TypeSignature type); 
+        ObjectReference CreateObject(TypeSignature type, bool initialize);
         
         /// <summary>
         /// Allocates a chunk of addressable memory on the virtual heap, and returns a pointer value to the start of

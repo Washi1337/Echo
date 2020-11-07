@@ -37,11 +37,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// Creates a new instance of a compound object.
         /// </summary>
         /// <param name="objectType">The type of the object.</param>
-        /// <param name="is32Bit">Indicates any pointer that is defined in this object is 32 or 64 bits wide.</param>
         /// <exception cref="NotSupportedException"></exception>
-        public HleStructValue(TypeSignature objectType, bool is32Bit)
+        public HleStructValue(IValueFactory valueFactory, TypeSignature objectType, bool initializeWithZeroes)
         {
-            _is32Bit = is32Bit;
+            _is32Bit = valueFactory.Is32Bit;
             Type = objectType ?? throw new ArgumentNullException(nameof(objectType));
 
             switch (objectType.ElementType)
@@ -55,7 +54,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                     throw new NotSupportedException("Unsupported object type.");
             }
             
-            InitializeFields();
+            InitializeFields(valueFactory, initializeWithZeroes);
         }
 
         /// <inheritdoc />
@@ -88,7 +87,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <inheritdoc />
         public IValue Copy() => new HleStructValue(Type, _fieldValues, _is32Bit);
 
-        private void InitializeFields()
+        private void InitializeFields(IValueFactory valueFactory, bool initializeWithZeroes)
         {
             var type = Type.GetUnderlyingTypeDefOrRef().Resolve();
             while (type is {})
@@ -96,7 +95,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 foreach (var field in type.Fields)
                 {
                     if (!field.IsStatic)
-                        _fieldValues[field] = new UnknownValue();
+                    {
+                        var value = valueFactory.CreateValue(field.Signature.FieldType, initializeWithZeroes);
+                        _fieldValues[field] = value;
+                    }
                 }
 
                 type = type.BaseType?.Resolve();

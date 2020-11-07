@@ -39,7 +39,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var field = simpleClassType.Fields.First(f => f.Name == fieldName);
 
             // Create new virtual instance and push on stack. 
-            var objectRef = environment.ValueFactory.CreateDefaultObject(simpleClassType.ToTypeSignature());
+            var objectRef = environment.ValueFactory.CreateObject(simpleClassType.ToTypeSignature(), true);
             var contents = (IDotNetStructValue) objectRef.ReferencedObject;
             contents.SetFieldValue(field, fieldValue);
             stack.Push(environment.CliMarshaller.ToCliValue(objectRef, simpleClassType.ToTypeSignature()));
@@ -77,8 +77,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void ReadObjectReferenceFieldWithNonNullValue()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldContents = environment.ValueFactory.CreateDefaultObject(
-                LookupTestType(typeof(SimpleClass)).ToTypeSignature());
+            var fieldContents = environment.ValueFactory.CreateObject(
+                LookupTestType(typeof(SimpleClass)).ToTypeSignature(),
+                true);
             var fieldValue = new ObjectReference(fieldContents, environment.Is32Bit);
             Verify(nameof(SimpleClass.SimpleClassField), fieldValue, new OValue(fieldValue.ReferencedObject, true, environment.Is32Bit));
         }

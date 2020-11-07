@@ -53,7 +53,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         {
             var returnType = methodSig.ReturnType;
             return returnType.ElementType != ElementType.Void 
-                ? ValueFactory.CreateUnknown(returnType)
+                ? ValueFactory.CreateValue(returnType, false)
                 : null;
         }
     }

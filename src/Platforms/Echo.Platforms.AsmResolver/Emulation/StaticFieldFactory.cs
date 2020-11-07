@@ -86,7 +86,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 }
             }
 
-            return _valueFactory.CreateUnknown(field.Signature.FieldType);
+            return _valueFactory.CreateValue(field.Signature.FieldType, false);
         }
 
         private IConcreteValue ObjectToCtsValue(byte[] rawData, TypeSignature type)
@@ -128,7 +128,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                     return new LleStructValue(_valueFactory, type, memory);
                 
                 default:
-                    return _valueFactory.CreateUnknown(type);
+                    return _valueFactory.CreateValue(type, false);
             }
         }
         

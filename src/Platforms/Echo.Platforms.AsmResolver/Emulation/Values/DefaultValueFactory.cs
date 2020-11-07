@@ -37,7 +37,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public IConcreteValue CreateDefault(TypeSignature type)
+        public IConcreteValue CreateValue(TypeSignature type, bool initialize) => initialize
+            ? CreateDefault(type)
+            : CreateUnknown(type);
+
+        /// <inheritdoc />
+        public ObjectReference CreateObject(TypeSignature type, bool initialize) => 
+            new ObjectReference(AllocateStruct(type, initialize), Is32Bit);
+
+        private IConcreteValue CreateDefault(TypeSignature type)
         {
             while (true)
             {
@@ -98,15 +106,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             }
         }
 
-        /// <inheritdoc />
-        public ObjectReference CreateDefaultObject(TypeSignature type)
-        {
-            var contents = AllocateStruct(type, true);
-            return new ObjectReference(contents, Is32Bit);
-        }
-
-        /// <inheritdoc />
-        public IConcreteValue CreateUnknown(TypeSignature type)
+        private IConcreteValue CreateUnknown(TypeSignature type)
         {
             while (true)
             {
@@ -175,13 +175,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public ObjectReference CreateUnknownObject(TypeSignature type)
-        {
-            var contents =  AllocateStruct(type, false);
-            return new ObjectReference(contents, Is32Bit);
-        }
-
-        /// <inheritdoc />
         public MemoryPointerValue AllocateMemory(int size, bool initializeWithZeroes)
         {
             var memory = new Memory<byte>(new byte[size]);
@@ -217,7 +210,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             }
             else
             {
-                result = new HleStructValue(type, Is32Bit);
+                result = new HleStructValue(this, type, Is32Bit);
             }
 
             return result;

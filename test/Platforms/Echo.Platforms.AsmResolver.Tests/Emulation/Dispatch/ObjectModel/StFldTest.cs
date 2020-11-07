@@ -39,9 +39,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var field = simpleClassType.Fields.First(f => f.Name == fieldName);
 
             // Create new virtual instance and push on stack. 
-            var reference = environment.ValueFactory.CreateDefaultObject(simpleClassType.ToTypeSignature());
-            var contents = (IDotNetStructValue) reference.ReferencedObject;
-            stack.Push(environment.CliMarshaller.ToCliValue(reference, simpleClassType.ToTypeSignature()));
+            var objectRef = environment.ValueFactory.CreateObject(simpleClassType.ToTypeSignature(), true);
+            var contents = (IDotNetStructValue) objectRef.ReferencedObject;
+            stack.Push(environment.CliMarshaller.ToCliValue(objectRef, simpleClassType.ToTypeSignature()));
             stack.Push(stackValue);
 
             // Test stfld.
@@ -80,8 +80,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void WriteObjectReferenceFieldWithNonNullValue()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldContents = environment.ValueFactory.CreateDefaultObject(LookupTestType(typeof(SimpleClass)).ToTypeSignature());
-            var fieldValue = new ObjectReference(fieldContents, environment.Is32Bit);
+            var fieldValue = environment.ValueFactory.CreateObject(
+                LookupTestType(typeof(SimpleClass)).ToTypeSignature(), 
+                true);
             var stackValue = environment.CliMarshaller.ToCliValue(fieldValue, _module.CorLibTypeFactory.Object);
             Verify(nameof(SimpleClass.SimpleClassField), stackValue, fieldValue);
         }
