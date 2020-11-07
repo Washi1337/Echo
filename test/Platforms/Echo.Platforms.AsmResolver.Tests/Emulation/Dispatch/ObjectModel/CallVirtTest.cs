@@ -46,9 +46,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             // Create object instance of type and push.
             var objectType = _type.ToTypeSignature();
-            var objectRef = new ObjectReference(
-                new HleObjectValue(objectType, environment.Is32Bit),
-                environment.Is32Bit);
+            var objectRef = environment.ValueFactory.CreateDefaultObject(objectType);
             stack.Push(environment.CliMarshaller.ToCliValue(objectRef, objectType));
 
             // Call non-virtual method using virtual dispatch.
@@ -69,9 +67,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var objectTypeDef = (TypeDefinition) _type.Module.LookupMember(typeof(DerivedSimpleClass).MetadataToken);
             var objectTypeSig = objectTypeDef.ToTypeSignature();
             
-            var objectRef = new ObjectReference(
-                new HleObjectValue(objectTypeSig, environment.Is32Bit),
-                environment.Is32Bit);
+            var objectRef = environment.ValueFactory.CreateDefaultObject(objectTypeSig);
             
             // Push object.
             stack.Push(environment.CliMarshaller.ToCliValue(objectRef, objectTypeSig));
@@ -95,10 +91,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             // Create instance of the derived type.
             var objectTypeDef = (TypeDefinition) _type.Module.LookupMember(typeof(DerivedSimpleClass).MetadataToken);
             var objectTypeSig = objectTypeDef.ToTypeSignature();
-            
-            var objectRef = new ObjectReference(
-                new HleObjectValue(objectTypeSig, environment.Is32Bit),
-                environment.Is32Bit);
+
+            var objectRef = environment.ValueFactory.CreateDefaultObject(objectTypeSig);
             
             // Push object.
             stack.Push(environment.CliMarshaller.ToCliValue(objectRef, objectTypeSig));

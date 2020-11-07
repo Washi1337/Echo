@@ -39,14 +39,15 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var field = simpleClassType.Fields.First(f => f.Name == fieldName);
 
             // Create new virtual instance and push on stack. 
-            var value = new HleObjectValue(simpleClassType.ToTypeSignature(), environment.Is32Bit);
-            stack.Push(environment.CliMarshaller.ToCliValue(value, simpleClassType.ToTypeSignature()));
+            var reference = environment.ValueFactory.CreateDefaultObject(simpleClassType.ToTypeSignature());
+            var contents = (IDotNetObjectValue) reference.ReferencedObject;
+            stack.Push(environment.CliMarshaller.ToCliValue(reference, simpleClassType.ToTypeSignature()));
             stack.Push(stackValue);
 
             // Test stfld.
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Stfld, field));
             Assert.True(result.IsSuccess);
-            Assert.Equal(expectedValue, value.GetFieldValue(field));
+            Assert.Equal(expectedValue, contents.GetFieldValue(field));
         }
         
         [Fact]
@@ -79,7 +80,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void WriteObjectReferenceFieldWithNonNullValue()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldContents = new HleObjectValue(LookupTestType(typeof(SimpleClass)).ToTypeSignature(), environment.Is32Bit);
+            var fieldContents = environment.ValueFactory.CreateDefaultObject(LookupTestType(typeof(SimpleClass)).ToTypeSignature());
             var fieldValue = new ObjectReference(fieldContents, environment.Is32Bit);
             var stackValue = environment.CliMarshaller.ToCliValue(fieldValue, _module.CorLibTypeFactory.Object);
             Verify(nameof(SimpleClass.SimpleClassField), stackValue, fieldValue);

@@ -84,9 +84,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var objectType = _type.ToTypeSignature();
-            var objectRef = new ObjectReference(
-                new HleObjectValue(objectType, environment.Is32Bit),
-                environment.Is32Bit);
+            var objectRef = environment.ValueFactory.CreateDefaultObject(objectType);
             
             var stack = ExecutionContext.ProgramState.Stack;
             stack.Push(environment.CliMarshaller.ToCliValue(objectRef, objectType));
