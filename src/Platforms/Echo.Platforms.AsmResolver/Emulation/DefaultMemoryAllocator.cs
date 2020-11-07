@@ -68,7 +68,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (type.IsValueType)
             {
                 var memoryLayout = GetTypeMemoryLayout(type);
-                var contents = AllocateMemory((int) memoryLayout.Size, true);
+                var contents = AllocateMemory((int) memoryLayout.Size, initializeWithZeroes);
                 result = new LleObjectValue(this, type, contents);
             }
             else

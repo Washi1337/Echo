@@ -16,7 +16,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
             Module = module ?? throw new ArgumentNullException(nameof(module));
             MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
             CliMarshaller = new DefaultCliMarshaller(this);
-            ValueFactory = new ValueFactory(this);
+            ValueFactory = new DefaultValueFactory(this);
             StaticFieldFactory = new StaticFieldFactory(ValueFactory, MemoryAllocator);
         }
 

@@ -11,14 +11,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// <summary>
     /// Provides a default implementation of the <see cref="IValueFactory"/> interface.  
     /// </summary>
-    public class ValueFactory : IValueFactory
+    public class DefaultValueFactory : IValueFactory
     {
         private readonly ICilRuntimeEnvironment _environment;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="ValueFactory"/> class.
+        /// Creates a new instance of the <see cref="DefaultValueFactory"/> class.
         /// </summary>
-        public ValueFactory(ICilRuntimeEnvironment environment)
+        public DefaultValueFactory(ICilRuntimeEnvironment environment)
         {
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }

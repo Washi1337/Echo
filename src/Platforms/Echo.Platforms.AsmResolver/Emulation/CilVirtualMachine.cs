@@ -54,7 +54,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Instructions = instructions;
             Architecture = instructions.Architecture;
             
-            ValueFactory = new ValueFactory(this);
+            ValueFactory = new DefaultValueFactory(this);
             
             Is32Bit = is32Bit;
             Status = VirtualMachineStatus.Idle;
