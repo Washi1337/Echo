@@ -31,7 +31,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
         public void StoreObjectToPointerShouldSetContents()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var originalInstance = environment.MemoryAllocator.AllocateObject(_structType.ToTypeSignature(), true);
+            var originalInstance = environment.MemoryAllocator.AllocateStruct(_structType.ToTypeSignature(), true);
             originalInstance.SetFieldValue(_x, new Integer32Value(0x12345678));
             originalInstance.SetFieldValue(_y, new Integer32Value(0x12345678, 0xFF00FF00));
             
@@ -48,7 +48,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             Assert.True(result.IsSuccess);
             
             // Check structure contents.
-            var instance = (IDotNetObjectValue) destinationAddress.ReadStruct(0, environment.MemoryAllocator,
+            var instance = (IDotNetStructValue) destinationAddress.ReadStruct(0, environment.MemoryAllocator,
                 environment.MemoryAllocator.GetTypeMemoryLayout(_structType));
             Assert.NotSame(originalInstance, instance);
             Assert.Equal(originalInstance.GetFieldValue(_x), instance.GetFieldValue(_x));

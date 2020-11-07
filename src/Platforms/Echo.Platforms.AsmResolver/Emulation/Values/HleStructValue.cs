@@ -11,20 +11,20 @@ using Echo.Core.Values;
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
     /// <summary>
-    /// Provides a high level implementation of an object that consists of a collection of fields.
+    /// Provides a high level implementation of a structure that consists of a collection of fields.
     /// </summary>
     /// <remarks>
     /// This class is <strong>not</strong> meant to be used as an object reference. Instances of the
-    /// <see cref="HleObjectValue"/> class are passed on by-value. They are used for representing instances of value
+    /// <see cref="HleStructValue"/> class are passed on by-value. They are used for representing instances of value
     /// types, or the object referenced in an object reference, not the object reference itself. 
     /// </remarks>
-    public class HleObjectValue : IDotNetObjectValue
+    public class HleStructValue : IDotNetStructValue
     {
         private readonly IDictionary<IFieldDescriptor, IConcreteValue> _fieldValues =
             new Dictionary<IFieldDescriptor, IConcreteValue>();
         private readonly bool _is32Bit;
 
-        private HleObjectValue(TypeSignature objectType, IDictionary<IFieldDescriptor, IConcreteValue> values,
+        private HleStructValue(TypeSignature objectType, IDictionary<IFieldDescriptor, IConcreteValue> values,
             bool is32Bit)
         {
             _is32Bit = is32Bit;
@@ -39,7 +39,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <param name="objectType">The type of the object.</param>
         /// <param name="is32Bit">Indicates any pointer that is defined in this object is 32 or 64 bits wide.</param>
         /// <exception cref="NotSupportedException"></exception>
-        public HleObjectValue(TypeSignature objectType, bool is32Bit)
+        public HleStructValue(TypeSignature objectType, bool is32Bit)
         {
             _is32Bit = is32Bit;
             Type = objectType ?? throw new ArgumentNullException(nameof(objectType));
@@ -86,7 +86,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public Trilean IsNegative => false;
 
         /// <inheritdoc />
-        public IValue Copy() => new HleObjectValue(Type, _fieldValues, _is32Bit);
+        public IValue Copy() => new HleStructValue(Type, _fieldValues, _is32Bit);
 
         private void InitializeFields()
         {

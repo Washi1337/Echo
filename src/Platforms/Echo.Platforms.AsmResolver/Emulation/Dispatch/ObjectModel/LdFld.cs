@@ -58,7 +58,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     case OValue { IsZero: { Value: TrileanValue.True } }:
                         return new DispatchResult(new NullReferenceException());
 
-                    case OValue { ReferencedObject: IDotNetObjectValue compoundObject }:
+                    case OValue { ReferencedObject: IDotNetStructValue compoundObject }:
                         fieldValue = compoundObject.GetFieldValue(field);
                         break;
 

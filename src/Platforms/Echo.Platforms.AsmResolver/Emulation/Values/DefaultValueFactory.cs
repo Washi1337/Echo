@@ -70,7 +70,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                     case ElementType.ByRef:
                     case ElementType.ValueType:
                     case ElementType.TypedByRef:
-                        return _environment.MemoryAllocator.AllocateObject(type, true);
+                        return _environment.MemoryAllocator.AllocateStruct(type, true);
 
                     case ElementType.CModReqD:
                     case ElementType.CModOpt:
@@ -88,7 +88,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <inheritdoc />
         public ObjectReference CreateDefaultObject(TypeSignature type)
         {
-            var contents =  _environment.MemoryAllocator.AllocateObject(type, true);
+            var contents =  _environment.MemoryAllocator.AllocateStruct(type, true);
             return new ObjectReference(contents, _environment.Is32Bit);
         }
 
@@ -142,7 +142,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                     case ElementType.ByRef:
                     case ElementType.ValueType:
                     case ElementType.TypedByRef:
-                        return _environment.MemoryAllocator.AllocateObject(type, false);
+                        return _environment.MemoryAllocator.AllocateStruct(type, false);
 
                     case ElementType.CModReqD:
                     case ElementType.CModOpt:
@@ -164,7 +164,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <inheritdoc />
         public ObjectReference CreateUnknownObject(TypeSignature type)
         {
-            var contents =  _environment.MemoryAllocator.AllocateObject(type, false);
+            var contents =  _environment.MemoryAllocator.AllocateStruct(type, false);
             return new ObjectReference(contents, _environment.Is32Bit);
         }
     }

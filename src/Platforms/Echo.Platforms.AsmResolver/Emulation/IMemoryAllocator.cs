@@ -38,12 +38,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
         IDotNetArrayValue AllocateArray(TypeSignature elementType, int length);
 
         /// <summary>
-        /// Allocates an empty object on the virtual heap.
+        /// Allocates a  structure.
         /// </summary>
         /// <param name="type">The type of object to allocate.</param>
         /// <param name="initializeWithZeroes">Indicates the memory region should be initialized with zeroes.</param>
         /// <returns>The allocated object.</returns>
-        IDotNetObjectValue AllocateObject(TypeSignature type, bool initializeWithZeroes);
+        IDotNetStructValue AllocateStruct(TypeSignature type, bool initializeWithZeroes);
 
         /// <summary>
         /// Gets the string value for the fully known string literal.

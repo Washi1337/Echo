@@ -6,7 +6,7 @@ using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
-    public partial class LleObjectValue : IDotNetArrayValue
+    public partial class LleStructValue : IDotNetArrayValue
     {
         // -------------------------
         // Implementation rationale

@@ -8,14 +8,14 @@ using Echo.Core.Values;
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
     /// <summary>
-    /// Represents a low level implementation of an object.
+    /// Represents a low level implementation of a structure.
     /// </summary>
     /// <remarks>
     /// This class is <strong>not</strong> meant to be used as an object reference. Instances of the
-    /// <see cref="LleObjectValue"/> class are passed on by-value. They are used for representing instances of value
+    /// <see cref="LleStructValue"/> class are passed on by-value. They are used for representing instances of value
     /// types, or the object referenced in an object reference, not the object reference itself. 
     /// </remarks>
-    public partial class LleObjectValue : IValueTypeValue
+    public partial class LleStructValue : IValueTypeValue
     {
         private readonly IMemoryAllocator _memoryAllocator;
 
@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <param name="memoryAllocator">The object responsible for memory management in the virtual machine.</param>
         /// <param name="valueType">The type of the object.</param>
         /// <param name="contents">The raw contents of the object.</param>
-        public LleObjectValue(IMemoryAllocator memoryAllocator, TypeSignature valueType, MemoryPointerValue contents)
+        public LleStructValue(IMemoryAllocator memoryAllocator, TypeSignature valueType, MemoryPointerValue contents)
         {
             Type = valueType;
             _memoryAllocator = memoryAllocator ?? throw new ArgumentNullException(nameof(memoryAllocator));
@@ -74,7 +74,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
 
         /// <inheritdoc />
         /// <inheritdoc />
-        public IValue Copy() => new LleObjectValue(_memoryAllocator, Type, Contents);
+        public IValue Copy() => new LleStructValue(_memoryAllocator, Type, Contents);
         
         /// <inheritdoc />
         public override string ToString() => $"{Type.FullName} ({Contents.Length.ToString()} bytes)";

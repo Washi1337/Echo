@@ -128,7 +128,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 case ElementType.ValueType:
                     var memory = _memoryAllocator.AllocateMemory(rawData.Length, false);
                     memory.WriteBytes(0, rawData);
-                    return new LleObjectValue(_memoryAllocator, type, memory);
+                    return new LleStructValue(_memoryAllocator, type, memory);
                 
                 default:
                     return _valueFactory.CreateUnknown(type);

@@ -40,7 +40,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             // Create new virtual instance and push on stack. 
             var reference = environment.ValueFactory.CreateDefaultObject(simpleClassType.ToTypeSignature());
-            var contents = (IDotNetObjectValue) reference.ReferencedObject;
+            var contents = (IDotNetStructValue) reference.ReferencedObject;
             stack.Push(environment.CliMarshaller.ToCliValue(reference, simpleClassType.ToTypeSignature()));
             stack.Push(stackValue);
 

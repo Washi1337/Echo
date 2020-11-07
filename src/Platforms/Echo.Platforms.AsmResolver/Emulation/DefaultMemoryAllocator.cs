@@ -54,26 +54,26 @@ namespace Echo.Platforms.AsmResolver.Emulation
             {
                 int size = length * (int) GetTypeMemoryLayout(elementType).Size;
                 var memory = AllocateMemory(size, true);
-                return new LleObjectValue(this, new SzArrayTypeSignature(elementType), memory);
+                return new LleStructValue(this, new SzArrayTypeSignature(elementType), memory);
             }
             
             throw new NotSupportedException();
         }
 
         /// <inheritdoc />
-        public IDotNetObjectValue AllocateObject(TypeSignature type, bool initializeWithZeroes)
+        public IDotNetStructValue AllocateStruct(TypeSignature type, bool initializeWithZeroes)
         {
-            IDotNetObjectValue result;
+            IDotNetStructValue result;
             
             if (type.IsValueType)
             {
                 var memoryLayout = GetTypeMemoryLayout(type);
                 var contents = AllocateMemory((int) memoryLayout.Size, initializeWithZeroes);
-                result = new LleObjectValue(this, type, contents);
+                result = new LleStructValue(this, type, contents);
             }
             else
             {
-                result = new HleObjectValue(type, Is32Bit);
+                result = new HleStructValue(type, Is32Bit);
             }
 
             return result;

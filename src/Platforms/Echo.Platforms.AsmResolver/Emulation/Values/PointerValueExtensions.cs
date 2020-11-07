@@ -59,7 +59,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             Span<byte> bitmask = stackalloc byte[(int) typeLayout.Size];
             self.ReadBytes(offset, contents, bitmask);
             
-            var structValue = (IPointerValue) memoryAllocator.AllocateObject(typeLayout.Type.ToTypeSignature(), false);
+            var structValue = (IPointerValue) memoryAllocator.AllocateStruct(typeLayout.Type.ToTypeSignature(), false);
             structValue.WriteBytes(0, contents, bitmask);
             return structValue;
         }

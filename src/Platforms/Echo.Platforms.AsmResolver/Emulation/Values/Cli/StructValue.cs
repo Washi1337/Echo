@@ -9,7 +9,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
     /// <summary>
     /// Represents a structure on the evaluation stack of the Common Language Infrastructure (CLI).
     /// </summary>
-    public class StructValue : LleObjectValue, ICliValue
+    public class StructValue : LleStructValue, ICliValue
     {
         /// <summary>
         /// Creates a new structure value.

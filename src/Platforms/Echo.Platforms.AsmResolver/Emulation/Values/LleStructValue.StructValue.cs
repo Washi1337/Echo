@@ -3,7 +3,7 @@ using Echo.Concrete.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
-    public partial class LleObjectValue : IDotNetObjectValue
+    public partial class LleStructValue : IDotNetStructValue
     {
         // -------------------------
         // Implementation rationale
