@@ -42,9 +42,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// the memory chunk.  
         /// </summary>
         /// <param name="size">The size of the region to allocate.</param>
-        /// <param name="initializeWithZeroes">Indicates the memory region should be initialized with zeroes.</param>
+        /// <param name="initialize">Indicates the memory region should be initialized with zeroes.</param>
         /// <returns>A pointer to the memory.</returns>
-        MemoryPointerValue AllocateMemory(int size, bool initializeWithZeroes);
+        MemoryPointerValue AllocateMemory(int size, bool initialize);
 
         /// <summary>
         /// Allocates an array on the virtual heap.
@@ -58,9 +58,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// Allocates a structure.
         /// </summary>
         /// <param name="type">The type of object to allocate.</param>
-        /// <param name="initializeWithZeroes">Indicates the memory region should be initialized with zeroes.</param>
+        /// <param name="initialize">Indicates the memory region should be initialized with zeroes.</param>
         /// <returns>The allocated object.</returns>
-        IDotNetStructValue AllocateStruct(TypeSignature type, bool initializeWithZeroes);
+        IDotNetStructValue AllocateStruct(TypeSignature type, bool initialize);
 
         /// <summary>
         /// Gets the string value for the fully known string literal.

@@ -27,7 +27,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <param name="contents">The raw contents of the object.</param>
         public LleStructValue(IValueFactory valueFactory, TypeSignature valueType, MemoryPointerValue contents)
         {
-            Type = valueType;
+            Type = valueType ?? throw new ArgumentNullException(nameof(valueType));
             _valueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
             Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
@@ -72,7 +72,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <inheritdoc />
         public Trilean IsNegative => false;
 
-        /// <inheritdoc />
         /// <inheritdoc />
         public IValue Copy() => new LleStructValue(_valueFactory, Type, Contents);
         

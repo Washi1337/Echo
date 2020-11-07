@@ -36,10 +36,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <summary>
         /// Creates a new instance of a compound object.
         /// </summary>
+        /// <param name="valueFactory">The object responsible for creating instances of values in a field.</param>
         /// <param name="objectType">The type of the object.</param>
+        /// <param name="initialize">Indicates whether the object should be initialized with zeroes.</param>
         /// <exception cref="NotSupportedException"></exception>
-        public HleStructValue(IValueFactory valueFactory, TypeSignature objectType, bool initializeWithZeroes)
+        public HleStructValue(IValueFactory valueFactory, TypeSignature objectType, bool initialize)
         {
+            if (valueFactory == null)
+                throw new ArgumentNullException(nameof(valueFactory));
+            
             _is32Bit = valueFactory.Is32Bit;
             Type = objectType ?? throw new ArgumentNullException(nameof(objectType));
 
@@ -54,7 +59,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                     throw new NotSupportedException("Unsupported object type.");
             }
             
-            InitializeFields(valueFactory, initializeWithZeroes);
+            InitializeFields(valueFactory, initialize);
         }
 
         /// <inheritdoc />
@@ -87,7 +92,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <inheritdoc />
         public IValue Copy() => new HleStructValue(Type, _fieldValues, _is32Bit);
 
-        private void InitializeFields(IValueFactory valueFactory, bool initializeWithZeroes)
+        private void InitializeFields(IValueFactory valueFactory, bool initialize)
         {
             var type = Type.GetUnderlyingTypeDefOrRef().Resolve();
             while (type is {})
@@ -96,7 +101,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 {
                     if (!field.IsStatic)
                     {
-                        var value = valueFactory.CreateValue(field.Signature.FieldType, initializeWithZeroes);
+                        var value = valueFactory.CreateValue(field.Signature.FieldType, initialize);
                         _fieldValues[field] = value;
                     }
                 }

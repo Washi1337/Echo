@@ -175,11 +175,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public MemoryPointerValue AllocateMemory(int size, bool initializeWithZeroes)
+        public MemoryPointerValue AllocateMemory(int size, bool initialize)
         {
             var memory = new Memory<byte>(new byte[size]);
             var knownBitMask = new Memory<byte>(new byte[size]);
-            if (initializeWithZeroes)
+            if (initialize)
                 knownBitMask.Span.Fill(0xFF);
             return new MemoryPointerValue(memory, knownBitMask, Is32Bit);
         }
@@ -198,14 +198,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public IDotNetStructValue AllocateStruct(TypeSignature type, bool initializeWithZeroes)
+        public IDotNetStructValue AllocateStruct(TypeSignature type, bool initialize)
         {
             IDotNetStructValue result;
             
             if (type.IsValueType)
             {
                 var memoryLayout = GetTypeMemoryLayout(type);
-                var contents = AllocateMemory((int) memoryLayout.Size, initializeWithZeroes);
+                var contents = AllocateMemory((int) memoryLayout.Size, initialize);
                 result = new LleStructValue(this, type, contents);
             }
             else
