@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var method = (IMethodDescriptor) instruction.Operand;
             
             //Allocate Object
-            var allocatedObject = environment.MemoryAllocator.AllocateObject(method.DeclaringType.ToTypeSignature());
+            var allocatedObject = environment.MemoryAllocator.AllocateObject(method.DeclaringType.ToTypeSignature(), true);
             ICliValue cilValueObject = new OValue(allocatedObject, false, environment.Is32Bit);
 
             // Pop arguments.

@@ -41,8 +41,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Allocates an empty object on the virtual heap.
         /// </summary>
         /// <param name="type">The type of object to allocate.</param>
+        /// <param name="initializeWithZeroes">Indicates the memory region should be initialized with zeroes.</param>
         /// <returns>The allocated object.</returns>
-        IDotNetObjectValue AllocateObject(TypeSignature type);
+        IDotNetObjectValue AllocateObject(TypeSignature type, bool initializeWithZeroes);
 
         /// <summary>
         /// Gets the string value for the fully known string literal.

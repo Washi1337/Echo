@@ -31,7 +31,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
         public void StoreObjectToPointerShouldSetContents()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var originalInstance = environment.MemoryAllocator.AllocateObject(_structType.ToTypeSignature());
+            var originalInstance = environment.MemoryAllocator.AllocateObject(_structType.ToTypeSignature(), true);
             originalInstance.SetFieldValue(_x, new Integer32Value(0x12345678));
             originalInstance.SetFieldValue(_y, new Integer32Value(0x12345678, 0xFF00FF00));
             

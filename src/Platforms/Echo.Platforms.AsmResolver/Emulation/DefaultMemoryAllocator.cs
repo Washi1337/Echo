@@ -61,7 +61,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <inheritdoc />
-        public IDotNetObjectValue AllocateObject(TypeSignature type)
+        public IDotNetObjectValue AllocateObject(TypeSignature type, bool initializeWithZeroes)
         {
             IDotNetObjectValue result;
             

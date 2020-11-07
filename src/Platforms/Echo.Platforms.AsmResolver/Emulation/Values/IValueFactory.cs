@@ -10,6 +10,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     public interface IValueFactory
     {
         /// <summary>
+        /// Creates a value for the provided type that is initialized with the default contents.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>The default value.</returns>
+        IConcreteValue CreateDefault(TypeSignature type);
+
+        /// <summary>
         /// Creates an unknown value for the provided type.
         /// </summary>
         /// <param name="type">The type.</param>
