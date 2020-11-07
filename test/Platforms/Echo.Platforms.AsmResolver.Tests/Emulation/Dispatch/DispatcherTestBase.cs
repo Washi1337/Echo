@@ -33,7 +33,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
                 Architecture = new CilArchitecture(dummyMethod.CilMethodBody),
             };
             
-            var methodInvoker = new ReturnUnknownMethodInvoker(new UnknownValueFactory(environment));
+            var methodInvoker = new ReturnUnknownMethodInvoker(new ValueFactory(environment));
             environment.MethodInvoker = new HookedMethodInvoker(methodInvoker);
 
             var container = new ServiceContainer();

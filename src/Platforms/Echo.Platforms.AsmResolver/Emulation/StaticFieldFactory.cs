@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public class StaticFieldFactory
     {
-        private readonly IUnknownValueFactory _unknownValueFactory;
+        private readonly IValueFactory _valueFactory;
         private readonly IMemoryAllocator _memoryAllocator;
 
         private readonly ConcurrentDictionary<IFieldDescriptor, StaticField> _cache =
@@ -29,11 +29,11 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Creates a new instance of the <see cref="StaticFieldFactory"/> class.
         /// </summary>
-        /// <param name="unknownValueFactory">The factory responsible for creating unknown values.</param>
+        /// <param name="valueFactory">The factory responsible for creating unknown values.</param>
         /// <param name="memoryAllocator">The object responsible for allocating memory for default values of fields.</param>
-        public StaticFieldFactory(IUnknownValueFactory unknownValueFactory, IMemoryAllocator memoryAllocator)
+        public StaticFieldFactory(IValueFactory valueFactory, IMemoryAllocator memoryAllocator)
         {
-            _unknownValueFactory = unknownValueFactory ?? throw new ArgumentNullException(nameof(unknownValueFactory));
+            _valueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
             _memoryAllocator = memoryAllocator ?? throw new ArgumentNullException(nameof(memoryAllocator));
         }
         
@@ -89,7 +89,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 }
             }
 
-            return _unknownValueFactory.CreateUnknown(field.Signature.FieldType);
+            return _valueFactory.CreateUnknown(field.Signature.FieldType);
         }
 
         private IConcreteValue ObjectToCtsValue(byte[] rawData, TypeSignature type)
@@ -131,7 +131,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                     return new LleObjectValue(_memoryAllocator, type, memory);
                 
                 default:
-                    return _unknownValueFactory.CreateUnknown(type);
+                    return _valueFactory.CreateUnknown(type);
             }
         }
         

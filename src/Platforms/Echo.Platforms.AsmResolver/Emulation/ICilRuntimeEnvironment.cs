@@ -72,7 +72,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets the object responsible for constructing new unknown values.
         /// </summary>
-        IUnknownValueFactory UnknownValueFactory
+        IValueFactory ValueFactory
         {
             get;
         }

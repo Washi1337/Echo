@@ -9,16 +9,16 @@ using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
     /// <summary>
-    /// Provides a default implementation of the <see cref="IUnknownValueFactory"/> interface.  
+    /// Provides a default implementation of the <see cref="IValueFactory"/> interface.  
     /// </summary>
-    public class UnknownValueFactory : IUnknownValueFactory
+    public class ValueFactory : IValueFactory
     {
         private readonly ICilRuntimeEnvironment _environment;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="UnknownValueFactory"/> class.
+        /// Creates a new instance of the <see cref="ValueFactory"/> class.
         /// </summary>
-        public UnknownValueFactory(ICilRuntimeEnvironment environment)
+        public ValueFactory(ICilRuntimeEnvironment environment)
         {
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }

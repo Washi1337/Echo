@@ -5,9 +5,9 @@ using Echo.Concrete.Values;
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
     /// <summary>
-    /// Provides factory members for creating unknown values by type. 
+    /// Provides factory members for constructing values by type. 
     /// </summary>
-    public interface IUnknownValueFactory
+    public interface IValueFactory
     {
         /// <summary>
         /// Creates an unknown value for the provided type.

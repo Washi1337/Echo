@@ -112,7 +112,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             };
 
             return environment.CliMarshaller.ToCliValue(
-                environment.UnknownValueFactory.CreateUnknown(signature.ReturnType),
+                environment.ValueFactory.CreateUnknown(signature.ReturnType),
                 signature.ReturnType);
         }
 

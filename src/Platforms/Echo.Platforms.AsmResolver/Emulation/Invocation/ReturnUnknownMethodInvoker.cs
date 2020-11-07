@@ -17,16 +17,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// <summary>
         /// Creates a new instance of the <see cref="ReturnUnknownMethodInvoker"/> class.
         /// </summary>
-        /// <param name="unknownValueFactory">The factory responsible for constructing the unknown values.</param>
-        public ReturnUnknownMethodInvoker(IUnknownValueFactory unknownValueFactory)
+        /// <param name="valueFactory">The factory responsible for constructing the unknown values.</param>
+        public ReturnUnknownMethodInvoker(IValueFactory valueFactory)
         {
-            UnknownValueFactory = unknownValueFactory ?? throw new ArgumentNullException(nameof(unknownValueFactory));
+            ValueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
         }
         
         /// <summary>
         /// Gets the factory that is responsible for constructing the unknown values. 
         /// </summary>
-        public IUnknownValueFactory UnknownValueFactory
+        public IValueFactory ValueFactory
         {
             get;
         }
@@ -53,7 +53,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         {
             var returnType = methodSig.ReturnType;
             return returnType.ElementType != ElementType.Void 
-                ? UnknownValueFactory.CreateUnknown(returnType)
+                ? ValueFactory.CreateUnknown(returnType)
                 : null;
         }
     }
