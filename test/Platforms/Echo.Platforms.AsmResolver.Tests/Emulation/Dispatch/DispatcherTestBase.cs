@@ -19,8 +19,6 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
         {
             const bool is32Bit = false;
             
-            Dispatcher = new DefaultCilDispatcher();
-
             var dummyModule = moduleFixture.GetModule();
             var dummyMethod = new MethodDefinition(
                 "MockMethod",
@@ -39,7 +37,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
             var container = new ServiceContainer();
             container.AddService(typeof(ICilRuntimeEnvironment), environment);
             
-            ExecutionContext = new ExecutionContext(container, new CilProgramState(), default);
+            Dispatcher = new DefaultCilDispatcher();
+            ExecutionContext = new ExecutionContext(
+                container, 
+                new CilProgramState(environment.ValueFactory), 
+                default);
         }
 
         public ExecutionContext ExecutionContext

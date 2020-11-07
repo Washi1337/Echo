@@ -1,5 +1,7 @@
+using System;
 using Echo.Concrete.Values;
 using Echo.Core.Emulation;
+using Echo.Platforms.AsmResolver.Emulation.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
@@ -8,13 +10,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public class CilProgramState : IProgramState<IConcreteValue>
     {
+        private readonly IValueFactory _valueFactory;
+
         /// <summary>
         /// Creates a new empty instance of the <see cref="CilProgramState"/> class.
         /// </summary>
-        public CilProgramState()
+        public CilProgramState(IValueFactory valueFactory)
         {
+            _valueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
             Stack = new StackState<IConcreteValue>();
-            Variables = new VariableState<IConcreteValue>(new UnknownValue());
+            Variables = new CilVariableState(valueFactory);
         }
 
         /// <inheritdoc />
@@ -41,7 +46,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <inheritdoc />
         public IProgramState<IConcreteValue> Copy()
         {
-            return new CilProgramState
+            return new CilProgramState(_valueFactory)
             {
                 Stack = Stack.Copy(),
                 Variables = Variables.Copy()

@@ -50,15 +50,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="is32Bit">Indicates whether the virtual machine should run in 32-bit mode or in 64-bit mode.</param>
         public CilVirtualMachine(ModuleDefinition module, IStaticInstructionProvider<CilInstruction> instructions, bool is32Bit)
         {
-            Module = module;
-            Instructions = instructions;
+            Module = module ?? throw new ArgumentNullException(nameof(module));
+            Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
             Architecture = instructions.Architecture;
             
             ValueFactory = new DefaultValueFactory(module, is32Bit);
             
             Is32Bit = is32Bit;
             Status = VirtualMachineStatus.Idle;
-            CurrentState = new CilProgramState();
+            CurrentState = new CilProgramState(ValueFactory);
             Dispatcher = new DefaultCilDispatcher();
             CliMarshaller = new DefaultCliMarshaller(this);
             MethodInvoker = new ReturnUnknownMethodInvoker(ValueFactory);
