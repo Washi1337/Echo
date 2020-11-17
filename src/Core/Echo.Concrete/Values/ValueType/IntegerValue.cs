@@ -538,41 +538,15 @@ namespace Echo.Concrete.Values.ValueType
             if (other.IsZero == Trilean.True)
                 throw new ArgumentException("Divisor is zero and dividing by zero is not allowed.");
 
-            // There are two possibilities which has to be count before result
-            // First is that first number has all unknown bits set to False and divisor to true
-            // Second that divisor has all unknown bits set to False instead and first number to True
-            // And finally set all bits as unknown in greater result
+            // There is only one possibility to cover all possible result
+            // The solution is to get first number as big as possible by changing all Uknown bits to True
+            // And second number needs to be as small as possible by changing all Unknown bits to false
 
             // First possibility
             var firstNum = (IntegerValue) Copy();
             var secondNum = (IntegerValue) other.Copy();
             var oneNum = (IntegerValue) Copy();
-            var firstResult = (IntegerValue) Copy();
-
-            for (int i = 0; i < Size * 8; i++)
-            {
-                if (firstNum.GetBit(i) == Trilean.Unknown)
-                    firstNum.SetBit(i, Trilean.False);
-
-                if (secondNum.GetBit(i) == Trilean.Unknown)
-                    secondNum.SetBit(i, Trilean.True);
-
-                oneNum.SetBit(i, Trilean.False);
-                firstResult.SetBit(i, Trilean.False);
-            }
-
-            oneNum.SetBit(0, Trilean.True);
-
-            while ((firstNum.IsGreaterThan(secondNum, false) == Trilean.True || firstNum.IsEqualTo(secondNum)))
-            {
-                firstResult.Add(oneNum);
-                firstNum.Subtract(secondNum);
-            }
-
-            // Second possibility
-            firstNum = (IntegerValue)Copy();
-            secondNum = (IntegerValue)other.Copy();
-            var secondResult = (IntegerValue)Copy();
+            var result = (IntegerValue) Copy();
 
             for (int i = 0; i < Size * 8; i++)
             {
@@ -582,24 +556,21 @@ namespace Echo.Concrete.Values.ValueType
                 if (secondNum.GetBit(i) == Trilean.Unknown)
                     secondNum.SetBit(i, Trilean.False);
 
-                secondResult.SetBit(i, Trilean.False);
+                oneNum.SetBit(i, Trilean.False);
+                result.SetBit(i, Trilean.False);
             }
+
+            oneNum.SetBit(0, Trilean.True);
 
             // Adding 1 to second number if it is zero
             if (secondNum.IsZero)
                 secondNum.Add(oneNum);
 
-            // There must be found out if divisor is equal to zero
-            while (firstNum.IsGreaterThan(secondNum, false) == Trilean.True || firstNum.IsEqualTo(secondNum))
+            while ((firstNum.IsGreaterThan(secondNum, false) == Trilean.True || firstNum.IsEqualTo(secondNum)))
             {
-                secondResult.Add(oneNum);
+                result.Add(oneNum);
                 firstNum.Subtract(secondNum);
             }
-
-            // Assignig bigger number
-            var result = (firstResult.IsGreaterThan(secondResult, false)) 
-                ? (IntegerValue) firstResult.Copy() 
-                : (IntegerValue) secondResult.Copy();
 
             // Changing all known bits to unknown in greater result 
             if (!IsKnown || !other.IsKnown)

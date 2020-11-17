@@ -167,6 +167,38 @@ namespace Echo.Concrete.Tests.Values.ValueType
         }
 
         [Theory]
+        [InlineData("0000000000001111", "0000000000001000", "0000000000000111")]
+        [InlineData("0000000000001000", "0000000000000001", "0000000000000111")]
+        [InlineData("0000000000001???", "0000000000000001", "000000000000????")]
+        [InlineData("0000000000001???", "000000000000000?", "000000000000????")]
+        [InlineData("0000000000000000", "000000000000000?", "????????????????????????????????????????????????????????????????")]
+        public void Subtract(string a, string b, string expected)
+        {
+            var value1 = new Integer64Value(a);
+            var value2 = new Integer64Value(b);
+
+            value1.Subtract(value2);
+
+            Assert.Equal(new Integer64Value(expected), value1);
+        }
+
+        [Theory]
+        [InlineData("0000000000000000", "0000000000000000", "0000000000000000")]
+        [InlineData("0000000000000001", "0000000000000000", "0000000000000000")]
+        [InlineData("0000000000000011", "0000000000000010", "0000000000000110")]
+        [InlineData("00000000000000?1", "0000000000000010", "0000000000000?10")]
+        [InlineData("0000000000001001", "0000000000110011", "0000000111001011")]
+        public void Multiply(string a, string b, string expected)
+        {
+            var value1 = new Integer64Value(a);
+            var value2 = new Integer64Value(b);
+
+            value1.Multiply(value2);
+
+            Assert.Equal(new Integer64Value(expected), value1);
+        }
+
+        [Theory]
         [InlineData("00001111", "00001000", "00000001")]
         [InlineData("00001000", "00000001", "00001000")]
         [InlineData("00001???", "00000001", "0000????")]
@@ -198,6 +230,51 @@ namespace Echo.Concrete.Tests.Values.ValueType
             value1.Remainder(value2);
 
             Assert.Equal(new Integer64Value(expected), value1);
+        }
+
+        [Theory]
+        [InlineData("01010101", "01010101", True)]
+        [InlineData("01010101", "10101010", False)]
+        [InlineData("010?0101", "01010101", Unknown)]
+        [InlineData("010?0111", "01010101", False)]
+        public void IsEqualTo(string a, string b, TrileanValue expected)
+        {
+            var value1 = new Integer64Value(a);
+            var value2 = new Integer64Value(b);
+
+            Assert.Equal(expected, value1.IsEqualTo(value2));
+        }
+
+        [Theory]
+        [InlineData("00000000", "00000000", false, False)]
+        [InlineData("00000000", "00000001", false, True)]
+        [InlineData("00000001", "00010000", false, True)]
+        [InlineData("00000001", "00000000", false, False)]
+        [InlineData("0000000?", "00000000", false, False)]
+        [InlineData("0000001?", "000101??", false, True)]
+        [InlineData("000101??", "0000001?", false, False)]
+        [InlineData("0000000?", "000?0000", false, Unknown)]
+        public void IsLessThan(string a, string b, bool signed, TrileanValue expected)
+        {
+            var value1 = new Integer64Value(a);
+            var value2 = new Integer64Value(b);
+
+            Assert.Equal(expected, value1.IsLessThan(value2, signed));
+        }
+
+        [Theory]
+        [InlineData("00000000", "00000000", false, False)]
+        [InlineData("00000001", "00000000", false, True)]
+        [InlineData("00000001", "00010000", false, False)]
+        [InlineData("00010000", "00000001", false, True)]
+        [InlineData("0001000?", "00001000", false, True)]
+        [InlineData("000101??", "0000001?", false, True)]
+        public void IsGreaterThan(string a, string b, bool signed, TrileanValue expected)
+        {
+            var value1 = new Integer64Value(a);
+            var value2 = new Integer64Value(b);
+
+            Assert.Equal(expected, value1.IsGreaterThan(value2, signed));
         }
     }
 

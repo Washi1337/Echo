@@ -272,17 +272,10 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public override Trilean IsEqualTo(IntegerValue other)
         {
-            if (other is Integer16Value int16)
-            {
-                if (IsKnown && other.IsKnown)
-                    return U16 == int16.U16;
-                
-                return U16 == int16.U16 
-                    ? Trilean.Unknown 
-                    : Trilean.False;
-            }
-
-            return base.IsEqualTo(other);
+            if (IsKnown && other.IsKnown && other is Integer16Value int16)
+                return U16 == int16.U16;
+            else
+                return base.IsEqualTo(other);
         }
 
         /// <inheritdoc />
