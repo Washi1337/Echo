@@ -59,7 +59,7 @@ namespace Echo.Platforms.Dnlib
                 case FlowControl.Call:
                 case FlowControl.Meta:
                 case FlowControl.Next:
-                    successorsBuffer[0] = Next(instruction);
+                    successorsBuffer[0] = FallThrough(instruction);
                     return 1;
 
                 case FlowControl.Branch:
@@ -70,12 +70,12 @@ namespace Echo.Platforms.Dnlib
                     var multipleTargets = (Instruction[]) instruction.Operand;
                     for (int i = 0; i < multipleTargets.Length; i++)
                         successorsBuffer[i] = new SuccessorInfo(multipleTargets[i].Offset, ControlFlowEdgeType.Conditional);
-                    successorsBuffer[multipleTargets.Length] = Next(instruction);
+                    successorsBuffer[multipleTargets.Length] = FallThrough(instruction);
                     return multipleTargets.Length + 1;
 
                 case FlowControl.Cond_Branch:
                     successorsBuffer[0] = Branch(true, instruction);
-                    successorsBuffer[1] = Next(instruction);
+                    successorsBuffer[1] = FallThrough(instruction);
                     return 2;
 
                 case FlowControl.Return:
@@ -90,7 +90,7 @@ namespace Echo.Platforms.Dnlib
             }
         }
 
-        private static SuccessorInfo Next(Instruction instruction)
+        private static SuccessorInfo FallThrough(Instruction instruction)
         {
             return new SuccessorInfo(instruction.Offset + instruction.GetSize(), ControlFlowEdgeType.FallThrough);
         }
@@ -98,6 +98,6 @@ namespace Echo.Platforms.Dnlib
         private static SuccessorInfo Branch(bool conditional, Instruction instruction) =>
             new SuccessorInfo(((Instruction) instruction.Operand).Offset, conditional
                 ? ControlFlowEdgeType.Conditional
-                : ControlFlowEdgeType.FallThrough);
+                : ControlFlowEdgeType.Unconditional);
     }
 }

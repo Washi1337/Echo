@@ -292,5 +292,25 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             Assert.Equal(1, dfg.Nodes[1].StackDependencies[0].First().SlotIndex);
             Assert.Equal(0, dfg.Nodes[2].StackDependencies[0].First().SlotIndex);
         }
+
+        [Fact]
+        public void BlockHeadersImpliedByInstructionsShouldAlwaysBeAdded()
+        {
+            var instructions = new[]
+            {
+                DummyInstruction.PushOffset(0, 10),
+                DummyInstruction.Ret(1),
+                
+                DummyInstruction.Op(10, 0 ,0),
+                DummyInstruction.Ret(11),
+            };
+            
+            var (cfg, _) = BuildFlowGraphs(instructions);
+            Assert.Contains(cfg.Nodes, n => n.Offset == 0);
+            Assert.Contains(cfg.Nodes, n => n.Offset == 10);
+            Assert.DoesNotContain(cfg.Nodes, n => n.Offset == 1);
+            Assert.Empty(cfg.Nodes[0].GetOutgoingEdges());
+            Assert.Empty(cfg.Nodes[10].GetIncomingEdges());
+        }
     }
 }

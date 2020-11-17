@@ -52,8 +52,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             in TInstruction instruction);
 
         /// <inheritdoc />
-        public abstract int GetTransitions(
-            SymbolicProgramState<TInstruction> currentState,
+        public abstract int GetTransitions(SymbolicProgramState<TInstruction> currentState,
             in TInstruction instruction,
             Span<StateTransition<TInstruction>> transitionBuffer);
 

@@ -1,7 +1,6 @@
 using System.Linq;
 using dnlib.DotNet;
-using dnlib.DotNet.Emit;
-using Echo.Platforms.Dnlib.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.Dnlib.Tests
@@ -18,7 +17,7 @@ namespace Echo.Platforms.Dnlib.Tests
         [Fact]
         public void SingleBlock()
         {
-            var type = (TypeDef) _moduleFixture.Module.ResolveToken(typeof(SimpleClass).MetadataToken);
+            var type = (TypeDef) _moduleFixture.MockModule.ResolveToken(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.HelloWorld));
             var cfg = method.ConstructStaticFlowGraph();
             
@@ -29,7 +28,7 @@ namespace Echo.Platforms.Dnlib.Tests
         [Fact]
         public void If()
         {
-            var type = (TypeDef) _moduleFixture.Module.ResolveToken(typeof(SimpleClass).MetadataToken);
+            var type = (TypeDef) _moduleFixture.MockModule.ResolveToken(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.If));
             var cfg = method.ConstructStaticFlowGraph();
             
@@ -39,8 +38,8 @@ namespace Echo.Platforms.Dnlib.Tests
         [Fact]
         public void Switch()
         {
-            var type = (TypeDef) _moduleFixture.Module.ResolveToken(typeof(SimpleClass).MetadataToken);
-            var method = type.Methods.First(m => m.Name == nameof(SimpleClass.Switch));
+            var type = (TypeDef) _moduleFixture.MockModule.ResolveToken(typeof(SimpleClass).MetadataToken);
+            var method = type.Methods.First(m => m.Name == nameof(SimpleClass.SwitchColor));
             var cfg = method.ConstructStaticFlowGraph();
             
             Assert.Equal(3, cfg.Entrypoint.ConditionalEdges.Count);

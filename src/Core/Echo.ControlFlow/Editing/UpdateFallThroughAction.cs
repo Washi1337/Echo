@@ -49,10 +49,10 @@ namespace Echo.ControlFlow.Editing
             var node = context.FindNode(BranchOffset);
             
             // Save original fallthrough node offset.
-            _oldFallThroughOffset = node.FallThroughNeighbour?.Offset; 
+            _oldFallThroughOffset = node.UnconditionalNeighbour?.Offset; 
                 
             // Set new fallthrough neighbour.
-            node.FallThroughNeighbour = NewFallThroughOffset.HasValue
+            node.UnconditionalNeighbour = NewFallThroughOffset.HasValue
                 ? context.FindNodeOrSplit(NewFallThroughOffset.Value, out _hasSplit)
                 : null;
             
@@ -70,14 +70,14 @@ namespace Echo.ControlFlow.Editing
             // Re-merge node if it was split.
             if (_hasSplit)
             {
-                var newNeighbour = node.FallThroughNeighbour;
-                node.FallThroughNeighbour = null;
+                var newNeighbour = node.UnconditionalNeighbour;
+                node.UnconditionalNeighbour = null;
                 context.RemoveNodeFromIndex(newNeighbour.Offset);
                 newNeighbour.MergeWithPredecessor();
             }
 
             // Restore original fallthrough neighbour.
-            node.FallThroughNeighbour = _oldFallThroughOffset.HasValue 
+            node.UnconditionalNeighbour = _oldFallThroughOffset.HasValue 
                 ? context.FindNode(_oldFallThroughOffset.Value) 
                 : null;
             

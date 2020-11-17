@@ -22,6 +22,7 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
                     return 1;
                 
                 case DummyOpCode.JmpCond:
+                case DummyOpCode.PushOffset:
                     return 2;
                 
                 case DummyOpCode.Switch:
@@ -50,12 +51,17 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
                     return 1;
                 
                 case DummyOpCode.Jmp:
-                    successorBuffer[0] = new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.FallThrough);
+                    successorBuffer[0] = new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.Unconditional);
                     return 1;
                 
                 case DummyOpCode.JmpCond:
                     successorBuffer[0] = new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough);
                     successorBuffer[1] = new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.Conditional);
+                    return 2;
+                
+                case DummyOpCode.PushOffset:
+                    successorBuffer[0] = new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough);
+                    successorBuffer[1] = new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.None);
                     return 2;
                 
                 case DummyOpCode.Switch:

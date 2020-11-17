@@ -51,7 +51,7 @@ namespace Echo.ControlFlow.Tests.Editing
             cfg.Nodes[0].Contents.Footer.Operands[0] = 20L;
             
             Assert.True(cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
-            Assert.Same(cfg.Nodes[20], cfg.Nodes[0].FallThroughNeighbour);
+            Assert.Same(cfg.Nodes[20], cfg.Nodes[0].UnconditionalNeighbour);
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace Echo.ControlFlow.Tests.Editing
             blockInstructions[blockInstructions.Count - 1] = DummyInstruction.JmpCond(1, 20);
 
             Assert.True(cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
-            Assert.Same(cfg.Nodes[2], cfg.Nodes[0].FallThroughNeighbour);
+            Assert.Same(cfg.Nodes[2], cfg.Nodes[0].UnconditionalNeighbour);
             Assert.Single(cfg.Nodes[0].ConditionalEdges);
             Assert.True(cfg.Nodes[0].ConditionalEdges.Contains(cfg.Nodes[20]));
         }
@@ -132,8 +132,8 @@ namespace Echo.ControlFlow.Tests.Editing
             Assert.True(cfg.Nodes.Contains(10), "Original target does not exist anymore.");
             Assert.True(cfg.Nodes.Contains(13), "Original target was not split up correctly.");
             
-            Assert.Same(cfg.Nodes[13], cfg.Nodes[10].FallThroughNeighbour);
-            Assert.Same(cfg.Nodes[13], cfg.Nodes[0].FallThroughNeighbour);
+            Assert.Same(cfg.Nodes[13], cfg.Nodes[10].UnconditionalNeighbour);
+            Assert.Same(cfg.Nodes[13], cfg.Nodes[0].UnconditionalNeighbour);
         }
 
         [Fact]
@@ -149,7 +149,7 @@ namespace Echo.ControlFlow.Tests.Editing
             
             Assert.Throws<ArgumentException>(() => cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
             
-            Assert.Same(cfg.Nodes[10], cfg.Nodes[0].FallThroughNeighbour);
+            Assert.Same(cfg.Nodes[10], cfg.Nodes[0].UnconditionalNeighbour);
         }
         
         [Fact]
@@ -172,7 +172,7 @@ namespace Echo.ControlFlow.Tests.Editing
             
             Assert.Throws<ArgumentException>(() => cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver));
             
-            Assert.Same(cfg.Nodes[10], cfg.Nodes[0].FallThroughNeighbour);
+            Assert.Same(cfg.Nodes[10], cfg.Nodes[0].UnconditionalNeighbour);
             Assert.False(cfg.Nodes.Contains(12));
         }
         
@@ -229,7 +229,7 @@ namespace Echo.ControlFlow.Tests.Editing
 
             Assert.True(cfg.Nodes.Contains(0));
             Assert.True(cfg.Nodes.Contains(4));
-            Assert.Same(cfg.Nodes[4], cfg.Nodes[0].FallThroughNeighbour);
+            Assert.Same(cfg.Nodes[4], cfg.Nodes[0].UnconditionalNeighbour);
         }
 
         [Fact]
@@ -254,9 +254,9 @@ namespace Echo.ControlFlow.Tests.Editing
             cfg.UpdateFlowControl(DummyArchitecture.Instance.SuccessorResolver);
 
             Assert.True(cfg.Nodes.Contains(2));
-            Assert.Same(cfg.Nodes[2], cfg.Nodes[0].FallThroughNeighbour);
+            Assert.Same(cfg.Nodes[2], cfg.Nodes[0].UnconditionalNeighbour);
             Assert.Same(cfg.Nodes[5], cfg.Nodes[0].ConditionalEdges.First().Target);
-            Assert.Same(cfg.Nodes[4], cfg.Nodes[2].FallThroughNeighbour);
+            Assert.Same(cfg.Nodes[4], cfg.Nodes[2].UnconditionalNeighbour);
             Assert.Empty(cfg.Nodes[2].ConditionalEdges);
         }
     }
