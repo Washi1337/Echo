@@ -288,5 +288,50 @@ namespace Echo.Concrete.Tests.Values.ValueType
 
             Assert.Equal(new Integer8Value(expected), value1);
         }
+
+        [Theory]
+        [InlineData("01010101", "01010101", True)]
+        [InlineData("01010101", "10101010", False)]
+        [InlineData("010?0101", "01010101", Unknown)]
+        [InlineData("010?0111", "01010101", False)]
+        public void IsEqualTo(string a, string b, TrileanValue expected)
+        {
+            var value1 = new Integer8Value(a);
+            var value2 = new Integer8Value(b);
+
+            Assert.Equal(expected, value1.IsEqualTo(value2));
+        }
+
+        [Theory]
+        [InlineData("00000000", "00000000", false, False)]
+        [InlineData("00000000", "00000001", false, True)]
+        [InlineData("00000001", "00010000", false, True)]
+        [InlineData("00000001", "00000000", false, False)]
+        [InlineData("0000000?", "00000000", false, False)]
+        [InlineData("0000001?", "000101??", false, True)]
+        [InlineData("000101??", "0000001?", false, False)]
+        [InlineData("0000000?", "000?0000", false, Unknown)]
+        public void IsLessThan(string a, string b, bool signed, TrileanValue expected)
+        {
+            var value1 = new Integer8Value(a);
+            var value2 = new Integer8Value(b);
+
+            Assert.Equal(expected, value1.IsLessThan(value2, signed));
+        }
+
+        [Theory]
+        [InlineData("00000000", "00000000", false, False)]
+        [InlineData("00000001", "00000000", false, True)]
+        [InlineData("00000001", "00010000", false, False)]
+        [InlineData("00010000", "00000001", false, True)]
+        [InlineData("0001000?", "00001000", false, True)]
+        [InlineData("000101??", "0000001?", false, True)]
+        public void IsGreaterThan(string a, string b, bool signed, TrileanValue expected)
+        {
+            var value1 = new Integer8Value(a);
+            var value2 = new Integer8Value(b);
+
+            Assert.Equal(expected, value1.IsGreaterThan(value2, signed));
+        }
     }
 }
