@@ -23,7 +23,7 @@ namespace Echo.ControlFlow.Regions
                 ParentRegion = this
             };
             
-            HandlerRegions = new RegionCollection<TInstruction>(this);
+            HandlerRegions = new RegionCollection<TInstruction, ControlFlowRegion<TInstruction>>(this);
         }
 
         /// <summary>
@@ -42,6 +42,9 @@ namespace Echo.ControlFlow.Regions
             get => _prologue;
             set
             {
+                if (_prologue?.ParentRegion == this)
+                    _prologue.ParentRegion = null;
+                
                 _prologue = value;
                 _prologue.ParentRegion = this;
             }
@@ -50,7 +53,7 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets the regions that form the handler blocks.
         /// </summary>
-        public RegionCollection<TInstruction> HandlerRegions
+        public RegionCollection<TInstruction, ControlFlowRegion<TInstruction>> HandlerRegions
         {
             get;
         }
@@ -63,6 +66,9 @@ namespace Echo.ControlFlow.Regions
             get => _epilogue;
             set
             {
+                if (_epilogue?.ParentRegion == this)
+                    _epilogue.ParentRegion = null;
+                
                 _epilogue = value;
                 _epilogue.ParentRegion = this;
             }
