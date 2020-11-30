@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
@@ -20,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// </remarks>
     public class HleStructValue : IDotNetStructValue
     {
-        private readonly IDictionary<IFieldDescriptor, IConcreteValue> _fieldValues =
+        private readonly Dictionary<IFieldDescriptor, IConcreteValue> _fieldValues =
             new Dictionary<IFieldDescriptor, IConcreteValue>();
         private readonly bool _is32Bit;
 
@@ -69,7 +70,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
         
         /// <inheritdoc />
-        public bool IsKnown => true;
+        public bool IsKnown
+        {
+            get
+            { 
+                foreach (var value in _fieldValues.Values)
+                {
+                    if (!value.IsKnown)
+                        return false;
+                }
+                
+                return true;
+            }
+        }
 
         /// <inheritdoc />
         public int Size => _is32Bit ? 4 : 8;
