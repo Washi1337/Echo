@@ -52,13 +52,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 switch (objectValue)
                 {
                     case { IsKnown: false }:
-                        fieldValue = environment.UnknownValueFactory.CreateUnknown(field.Signature.FieldType);
+                        fieldValue = environment.ValueFactory.CreateValue(field.Signature.FieldType, false);
                         break;
 
                     case OValue { IsZero: { Value: TrileanValue.True } }:
                         return new DispatchResult(new NullReferenceException());
 
-                    case OValue { ReferencedObject: IDotNetObjectValue compoundObject }:
+                    case OValue { ReferencedObject: IDotNetStructValue compoundObject }:
                         fieldValue = compoundObject.GetFieldValue(field);
                         break;
 

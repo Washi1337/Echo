@@ -39,9 +39,10 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var field = simpleClassType.Fields.First(f => f.Name == fieldName);
 
             // Create new virtual instance and push on stack. 
-            var value = new HleObjectValue(simpleClassType.ToTypeSignature(), environment.Is32Bit);
-            value.SetFieldValue(field, fieldValue);
-            stack.Push(environment.CliMarshaller.ToCliValue(value, simpleClassType.ToTypeSignature()));
+            var objectRef = environment.ValueFactory.CreateObject(simpleClassType.ToTypeSignature(), true);
+            var contents = (IDotNetStructValue) objectRef.ReferencedObject;
+            contents.SetFieldValue(field, fieldValue);
+            stack.Push(environment.CliMarshaller.ToCliValue(objectRef, simpleClassType.ToTypeSignature()));
 
             // Test ldfld.
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldfld, field));
@@ -60,7 +61,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void ReadStringField()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldValue = environment.MemoryAllocator.GetStringValue("Hello, world!");
+            var fieldValue = environment.ValueFactory.GetStringValue("Hello, world!");
             Verify(nameof(SimpleClass.StringField), fieldValue, new OValue(fieldValue, true, environment.Is32Bit));
         }
 
@@ -76,7 +77,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void ReadObjectReferenceFieldWithNonNullValue()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldContents = new HleObjectValue(LookupTestType(typeof(SimpleClass)).ToTypeSignature(), environment.Is32Bit);
+            var fieldContents = environment.ValueFactory.CreateObject(
+                LookupTestType(typeof(SimpleClass)).ToTypeSignature(),
+                true);
             var fieldValue = new ObjectReference(fieldContents, environment.Is32Bit);
             Verify(nameof(SimpleClass.SimpleClassField), fieldValue, new OValue(fieldValue.ReferencedObject, true, environment.Is32Bit));
         }
@@ -125,7 +128,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var instanceObject = new OValue(
-                environment.MemoryAllocator.GetStringValue("Hello, world"),
+                environment.ValueFactory.GetStringValue("Hello, world"),
                 true,
                 environment.Is32Bit);
             

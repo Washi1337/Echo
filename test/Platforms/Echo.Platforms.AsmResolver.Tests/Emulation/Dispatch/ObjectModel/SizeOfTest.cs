@@ -47,7 +47,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         private void Dispatch(CilInstruction instruction, ITypeDescriptor targetType)
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var allocator = environment.MemoryAllocator;
+            var allocator = environment.ValueFactory;
             var layout = allocator.GetTypeMemoryLayout(targetType);
             var value = new I4Value((int) layout.Size);
 

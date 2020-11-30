@@ -6,7 +6,7 @@ using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
-    public partial class LleObjectValue : IDotNetArrayValue
+    public partial class LleStructValue : IDotNetArrayValue
     {
         // -------------------------
         // Implementation rationale
@@ -50,7 +50,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                     ? szArrayType.BaseType
                     : Type.Module.CorLibTypeFactory.Byte;
 
-                var elementTypeLayout = _memoryAllocator.GetTypeMemoryLayout(elementType);
+                var elementTypeLayout = _valueFactory.GetTypeMemoryLayout(elementType);
                 return Contents.Length / (int) elementTypeLayout.Size;
             }
         }
@@ -67,7 +67,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public ICliValue LoadElement(int index, TypeMemoryLayout typeLayout, ICliMarshaller marshaller)
         {
             AssertIndexValidity(index);
-            var elementValue = this.ReadStruct(index * (int) typeLayout.Size, _memoryAllocator, typeLayout);
+            var elementValue = this.ReadStruct(index * (int) typeLayout.Size, _valueFactory, typeLayout);
             return marshaller.ToCliValue(elementValue, typeLayout.Type.ToTypeSignature());
         }
 
@@ -213,7 +213,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         {
             AssertIndexValidity(index);
             var elementValue = marshaller.ToCtsValue(value, typeLayout.Type.ToTypeSignature());
-            this.WriteStruct(index * (int)typeLayout.Size, _memoryAllocator, typeLayout, elementValue);
+            this.WriteStruct(index * (int)typeLayout.Size, _valueFactory, typeLayout, elementValue);
         }
 
         /// <inheritdoc />

@@ -1,33 +1,50 @@
+
 using System;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
+using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
-using Echo.Platforms.AsmResolver.Emulation.Values;
 
-namespace Echo.Platforms.AsmResolver.Emulation
+namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
     /// <summary>
-    /// Provides methods for allocating blocks of memory in a .NET virtual machine.  
+    /// Provides factory members for constructing values by type. 
     /// </summary>
-    public interface IMemoryAllocator : IDisposable
+    public interface IValueFactory : IDisposable
     {
         /// <summary>
-        /// Gets a value indicating whether the memory allocator returns 32-bit or 64-bit pointers.
+        /// Gets a value indicating whether a single pointer returned by this value factory is 32-bits or 64-bits wide.  
         /// </summary>
         bool Is32Bit
         {
             get;
         }
+
+        /// <summary>
+        /// Creates a value for the provided type that is optionally initialized with zeroes. 
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="initialize">Indicates whether the bits in the created object should be initialized to zero.</param>
+        /// <returns>The default value.</returns>
+        IConcreteValue CreateValue(TypeSignature type, bool initialize);
+
+        /// <summary>
+        /// Creates an object reference to a value for the provided type that is optionally initialized with zeroes. 
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// /// <param name="initialize">Indicates whether the bits in the created object should be initialized to zero.</param>
+        /// <returns>The default value.</returns>
+        ObjectReference CreateObject(TypeSignature type, bool initialize);
         
         /// <summary>
         /// Allocates a chunk of addressable memory on the virtual heap, and returns a pointer value to the start of
         /// the memory chunk.  
         /// </summary>
         /// <param name="size">The size of the region to allocate.</param>
-        /// <param name="initializeWithZeroes">Indicates the memory region should be initialized with zeroes.</param>
+        /// <param name="initialize">Indicates the memory region should be initialized with zeroes.</param>
         /// <returns>A pointer to the memory.</returns>
-        MemoryPointerValue AllocateMemory(int size, bool initializeWithZeroes);
+        MemoryPointerValue AllocateMemory(int size, bool initialize);
 
         /// <summary>
         /// Allocates an array on the virtual heap.
@@ -38,11 +55,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
         IDotNetArrayValue AllocateArray(TypeSignature elementType, int length);
 
         /// <summary>
-        /// Allocates an empty object on the virtual heap.
+        /// Allocates a structure.
         /// </summary>
         /// <param name="type">The type of object to allocate.</param>
+        /// <param name="initialize">Indicates the memory region should be initialized with zeroes.</param>
         /// <returns>The allocated object.</returns>
-        IDotNetObjectValue AllocateObject(TypeSignature type);
+        IDotNetStructValue AllocateStruct(TypeSignature type, bool initialize);
 
         /// <summary>
         /// Gets the string value for the fully known string literal.

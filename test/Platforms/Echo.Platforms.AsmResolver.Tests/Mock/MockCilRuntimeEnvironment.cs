@@ -14,10 +14,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
         {
             Is32Bit = is32Bit;
             Module = module ?? throw new ArgumentNullException(nameof(module));
-            MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
             CliMarshaller = new DefaultCliMarshaller(this);
-            UnknownValueFactory = new UnknownValueFactory(this);
-            StaticFieldFactory = new StaticFieldFactory(UnknownValueFactory, MemoryAllocator);
+            ValueFactory = new DefaultValueFactory(module, is32Bit);
+            StaticFieldFactory = new StaticFieldFactory(ValueFactory);
         }
 
         public IInstructionSetArchitecture<CilInstruction> Architecture
@@ -44,12 +43,6 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
             set;
         }
 
-        public IMemoryAllocator MemoryAllocator
-        {
-            get;
-            set;
-        }
-
         public HookedMethodInvoker MethodInvoker
         {
             get;
@@ -63,7 +56,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
         }
 
         /// <inheritdoc />
-        public IUnknownValueFactory UnknownValueFactory
+        public IValueFactory ValueFactory
         {
             get;
         }
@@ -72,7 +65,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
 
         public void Dispose()
         {
-            MemoryAllocator?.Dispose();
+            ValueFactory?.Dispose();
         }
     }
 }

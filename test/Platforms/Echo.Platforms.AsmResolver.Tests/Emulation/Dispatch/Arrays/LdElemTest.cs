@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var marshaller = environment.CliMarshaller;
             
-            var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
+            var array = environment.ValueFactory.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
             array.StoreElementI4(0, new I4Value(0xA), marshaller);
             array.StoreElementI4(1, new I4Value(0xB), marshaller);
             array.StoreElementI4(2, new I4Value(0xC), marshaller);
@@ -51,7 +51,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var marshaller = environment.CliMarshaller;
             
-            var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
+            var array = environment.ValueFactory.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
             array.StoreElementI4(0, new I4Value(0xA), marshaller);
             array.StoreElementI4(1, new I4Value(0xB), marshaller);
             array.StoreElementI4(2, new I4Value(0xC), marshaller);
@@ -74,7 +74,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var marshaller = environment.CliMarshaller;
             
-            var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Byte, 10);
+            var array = environment.ValueFactory.AllocateArray(environment.Module.CorLibTypeFactory.Byte, 10);
             for (int i = 0; i < array.Length; i++)
                 array.StoreElementU1(i, new I4Value(i), marshaller);
             
@@ -104,7 +104,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var marshaller = environment.CliMarshaller;
             
-            var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 1);
+            var array = environment.ValueFactory.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 1);
             array.StoreElementI4(0, new I4Value(arrayElementValue), marshaller);
             
             var stack = ExecutionContext.ProgramState.Stack;
@@ -126,7 +126,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var marshaller = environment.CliMarshaller;
             
-            var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 3);
+            var array = environment.ValueFactory.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 3);
             array.StoreElementI4(0, new I4Value(0), marshaller);
             array.StoreElementI4(1, new I4Value(1), marshaller);
             array.StoreElementI4(2, new I4Value(2), marshaller);
@@ -147,7 +147,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var marshaller = environment.CliMarshaller;
             
-            var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Single, 1);
+            var array = environment.ValueFactory.AllocateArray(environment.Module.CorLibTypeFactory.Single, 1);
             array.StoreElementR4(0, new FValue(1.23f), marshaller);
             
             var stack = ExecutionContext.ProgramState.Stack;
@@ -166,7 +166,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var marshaller = environment.CliMarshaller;
             
-            var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Double, 1);
+            var array = environment.ValueFactory.AllocateArray(environment.Module.CorLibTypeFactory.Double, 1);
             array.StoreElementR8(0, new FValue(1.23D), marshaller);
             
             var stack = ExecutionContext.ProgramState.Stack;
@@ -200,7 +200,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
 
             var stack = ExecutionContext.ProgramState.Stack;
-            var stringValue = environment.MemoryAllocator.GetStringValue("Hello, world!");
+            var stringValue = environment.ValueFactory.GetStringValue("Hello, world!");
             stack.Push(environment.CliMarshaller.ToCliValue(stringValue, environment.Module.CorLibTypeFactory.String));
             stack.Push(new I4Value(0));
 
@@ -233,7 +233,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var marshaller = environment.CliMarshaller;
             
-            var array = environment.MemoryAllocator.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
+            var array = environment.ValueFactory.AllocateArray(environment.Module.CorLibTypeFactory.Int32, 4);
             array.StoreElementI4(0, new I4Value(0xA), marshaller);
             array.StoreElementI4(1, new I4Value(0xB), marshaller);
             array.StoreElementI4(2, new I4Value(0xC), marshaller);

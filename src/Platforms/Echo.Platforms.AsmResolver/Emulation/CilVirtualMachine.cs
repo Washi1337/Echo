@@ -50,20 +50,19 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="is32Bit">Indicates whether the virtual machine should run in 32-bit mode or in 64-bit mode.</param>
         public CilVirtualMachine(ModuleDefinition module, IStaticInstructionProvider<CilInstruction> instructions, bool is32Bit)
         {
-            Module = module;
-            Instructions = instructions;
+            Module = module ?? throw new ArgumentNullException(nameof(module));
+            Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
             Architecture = instructions.Architecture;
             
-            UnknownValueFactory = new UnknownValueFactory(this);
+            ValueFactory = new DefaultValueFactory(module, is32Bit);
             
             Is32Bit = is32Bit;
             Status = VirtualMachineStatus.Idle;
-            CurrentState = new CilProgramState();
+            CurrentState = new CilProgramState(ValueFactory);
             Dispatcher = new DefaultCilDispatcher();
             CliMarshaller = new DefaultCliMarshaller(this);
-            MemoryAllocator = new DefaultMemoryAllocator(module, is32Bit);
-            MethodInvoker = new ReturnUnknownMethodInvoker(UnknownValueFactory);
-            StaticFieldFactory = new StaticFieldFactory(UnknownValueFactory, MemoryAllocator);
+            MethodInvoker = new ReturnUnknownMethodInvoker(ValueFactory);
+            StaticFieldFactory = new StaticFieldFactory(ValueFactory);
             _services[typeof(ICilRuntimeEnvironment)] = this;
         }
 
@@ -112,13 +111,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <inheritdoc />
-        public IMemoryAllocator MemoryAllocator
-        {
-            get;
-            set;
-        }
-
-        /// <inheritdoc />
         public IMethodInvoker MethodInvoker
         {
             get;
@@ -133,7 +125,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <inheritdoc />
-        public IUnknownValueFactory UnknownValueFactory
+        public IValueFactory ValueFactory
         {
             get;
             set;
@@ -205,9 +197,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
             _services[serviceType];
 
         /// <inheritdoc />
-        public void Dispose()
-        {
-            MemoryAllocator?.Dispose();
-        }
+        public void Dispose() => ValueFactory?.Dispose();
     }
 }

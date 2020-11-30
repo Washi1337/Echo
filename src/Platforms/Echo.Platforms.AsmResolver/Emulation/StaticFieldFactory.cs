@@ -5,13 +5,11 @@ using System.Text;
 using AsmResolver;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values;
-using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
@@ -20,8 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public class StaticFieldFactory
     {
-        private readonly IUnknownValueFactory _unknownValueFactory;
-        private readonly IMemoryAllocator _memoryAllocator;
+        private readonly IValueFactory _valueFactory;
 
         private readonly ConcurrentDictionary<IFieldDescriptor, StaticField> _cache =
             new ConcurrentDictionary<IFieldDescriptor, StaticField>();
@@ -29,12 +26,10 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Creates a new instance of the <see cref="StaticFieldFactory"/> class.
         /// </summary>
-        /// <param name="unknownValueFactory">The factory responsible for creating unknown values.</param>
-        /// <param name="memoryAllocator">The object responsible for allocating memory for default values of fields.</param>
-        public StaticFieldFactory(IUnknownValueFactory unknownValueFactory, IMemoryAllocator memoryAllocator)
+        /// <param name="valueFactory">The factory responsible for creating unknown values.</param>
+        public StaticFieldFactory(IValueFactory valueFactory)
         {
-            _unknownValueFactory = unknownValueFactory ?? throw new ArgumentNullException(nameof(unknownValueFactory));
-            _memoryAllocator = memoryAllocator ?? throw new ArgumentNullException(nameof(memoryAllocator));
+            _valueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
         }
         
         /// <summary>
@@ -89,7 +84,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 }
             }
 
-            return _unknownValueFactory.CreateUnknown(field.Signature.FieldType);
+            return _valueFactory.CreateValue(field.Signature.FieldType, false);
         }
 
         private IConcreteValue ObjectToCtsValue(byte[] rawData, TypeSignature type)
@@ -122,16 +117,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
                 case ElementType.String:
                     return new ObjectReference(
-                        _memoryAllocator.GetStringValue(Encoding.Unicode.GetString(rawData)),
-                        _memoryAllocator.Is32Bit);
+                        _valueFactory.GetStringValue(Encoding.Unicode.GetString(rawData)),
+                        _valueFactory.Is32Bit);
 
                 case ElementType.ValueType:
-                    var memory = _memoryAllocator.AllocateMemory(rawData.Length, false);
+                    var memory = _valueFactory.AllocateMemory(rawData.Length, false);
                     memory.WriteBytes(0, rawData);
-                    return new LleObjectValue(_memoryAllocator, type, memory);
+                    return new LleStructValue(_valueFactory, type, memory);
                 
                 default:
-                    return _unknownValueFactory.CreateUnknown(type);
+                    return _valueFactory.CreateValue(type, false);
             }
         }
         

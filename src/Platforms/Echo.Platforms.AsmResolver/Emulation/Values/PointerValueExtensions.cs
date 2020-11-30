@@ -17,13 +17,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// </summary>
         /// <param name="self">The base pointer value to read from.</param>
         /// <param name="offset">The offset to start reading.</param>
-        /// <param name="memoryAllocator">The memory allocator responsible for managing type layouts.</param>
+        /// <param name="valueFactory">The memory allocator responsible for managing type layouts.</param>
         /// <param name="typeLayout">The type layout to read.</param>
         /// <returns>The read structure.</returns>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Occurs when the offset does not fall within the memory range.
         /// </exception>
-        public static IConcreteValue ReadStruct(this IPointerValue self, int offset, IMemoryAllocator memoryAllocator, TypeMemoryLayout typeLayout)
+        public static IConcreteValue ReadStruct(this IPointerValue self, int offset, IValueFactory valueFactory, TypeMemoryLayout typeLayout)
         {
             return typeLayout.Type.ToTypeSignature().ElementType switch
             {
@@ -39,27 +39,27 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 ElementType.U8 => self.ReadInteger64(offset),
                 ElementType.R4 => self.ReadFloat32(offset),
                 ElementType.R8 => self.ReadFloat64(offset),
-                ElementType.ValueType => self.ReadStructSlow(offset, memoryAllocator, typeLayout),
+                ElementType.ValueType => self.ReadStructSlow(offset, valueFactory, typeLayout),
                 ElementType.I => self.Is32Bit ? (IntegerValue) self.ReadInteger32(offset) : self.ReadInteger64(offset),
                 ElementType.U => self.Is32Bit ? (IntegerValue) self.ReadInteger32(offset) : self.ReadInteger64(offset),
-                ElementType.Enum => ReadEnumValue(self, offset, memoryAllocator, typeLayout),
+                ElementType.Enum => ReadEnumValue(self, offset, valueFactory, typeLayout),
                 _ => new UnknownValue()
             };
         }
 
-        private static IConcreteValue ReadEnumValue(IPointerValue self, int offset, IMemoryAllocator memoryAllocator, TypeMemoryLayout typeLayout)
+        private static IConcreteValue ReadEnumValue(IPointerValue self, int offset, IValueFactory valueFactory, TypeMemoryLayout typeLayout)
         {
-            var underlyingTypeLayout = memoryAllocator.GetTypeMemoryLayout(typeLayout.Type.Resolve().GetEnumUnderlyingType());
-            return self.ReadStruct(offset, memoryAllocator, underlyingTypeLayout);
+            var underlyingTypeLayout = valueFactory.GetTypeMemoryLayout(typeLayout.Type.Resolve().GetEnumUnderlyingType());
+            return self.ReadStruct(offset, valueFactory, underlyingTypeLayout);
         }
 
-        private static IConcreteValue ReadStructSlow(this IPointerValue self, int offset, IMemoryAllocator memoryAllocator, TypeMemoryLayout typeLayout)
+        private static IConcreteValue ReadStructSlow(this IPointerValue self, int offset, IValueFactory valueFactory, TypeMemoryLayout typeLayout)
         {
             Span<byte> contents = stackalloc byte[(int) typeLayout.Size];
             Span<byte> bitmask = stackalloc byte[(int) typeLayout.Size];
             self.ReadBytes(offset, contents, bitmask);
             
-            var structValue = (IPointerValue) memoryAllocator.AllocateObject(typeLayout.Type.ToTypeSignature());
+            var structValue = (IPointerValue) valueFactory.AllocateStruct(typeLayout.Type.ToTypeSignature(), false);
             structValue.WriteBytes(0, contents, bitmask);
             return structValue;
         }
@@ -69,7 +69,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// </summary>
         /// <param name="self">The base pointer to write to.</param>
         /// <param name="offset">The offset to start writing at.</param>
-        /// <param name="memoryAllocator">The memory allocator responsible for managing type layouts.</param>
+        /// <param name="valueFactory">The memory allocator responsible for managing type layouts.</param>
         /// <param name="typeLayout">The structure type to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentOutOfRangeException">
@@ -77,7 +77,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// </exception>
         public static void WriteStruct(this IPointerValue self, 
             int offset,
-            IMemoryAllocator memoryAllocator,
+            IValueFactory valueFactory,
             TypeMemoryLayout typeLayout,
             IConcreteValue value)
         {
@@ -122,7 +122,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                     break;
                 
                 case ElementType.Enum:
-                    WriteEnumValue(self, offset, memoryAllocator, typeLayout, value);
+                    WriteEnumValue(self, offset, valueFactory, typeLayout, value);
                     break;
                 
                 case ElementType.String:
@@ -149,12 +149,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         private static void WriteEnumValue(
             IPointerValue self, 
             int offset, 
-            IMemoryAllocator memoryAllocator,
+            IValueFactory valueFactory,
             TypeMemoryLayout typeLayout,
             IConcreteValue value)
         {
-            var enumLayout = memoryAllocator.GetTypeMemoryLayout(typeLayout.Type.Resolve().GetEnumUnderlyingType());
-            self.WriteStruct(offset, memoryAllocator, enumLayout, value);
+            var enumLayout = valueFactory.GetTypeMemoryLayout(typeLayout.Type.Resolve().GetEnumUnderlyingType());
+            self.WriteStruct(offset, valueFactory, enumLayout, value);
         }
 
         private static void WriteStructSlow(this IPointerValue self, int offset, TypeMemoryLayout typeLayout, IConcreteValue value)

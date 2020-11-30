@@ -57,7 +57,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     case OValue { IsZero: { Value: TrileanValue.True } }:
                         return new DispatchResult(new NullReferenceException());
 
-                    case OValue { ReferencedObject: HleObjectValue compoundObject }:
+                    case OValue { ReferencedObject: HleStructValue compoundObject }:
                         compoundObject.SetFieldValue(field,
                             environment.CliMarshaller.ToCtsValue(fieldValue, field.Signature.FieldType));
                         break;

@@ -46,14 +46,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
-        /// Gets the object responsible for allocating memory on the virtual heap of the virtual machine.
-        /// </summary>
-        IMemoryAllocator MemoryAllocator
-        {
-            get;
-        }
-
-        /// <summary>
         /// Gets the object responsible for making calls to procedures outside of the method body.
         /// </summary>
         IMethodInvoker MethodInvoker
@@ -70,9 +62,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
-        /// Gets the object responsible for constructing new unknown values.
+        /// Gets the object responsible for constructing new virtual values.
         /// </summary>
-        IUnknownValueFactory UnknownValueFactory
+        IValueFactory ValueFactory
         {
             get;
         }

@@ -39,14 +39,15 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var field = simpleClassType.Fields.First(f => f.Name == fieldName);
 
             // Create new virtual instance and push on stack. 
-            var value = new HleObjectValue(simpleClassType.ToTypeSignature(), environment.Is32Bit);
-            stack.Push(environment.CliMarshaller.ToCliValue(value, simpleClassType.ToTypeSignature()));
+            var objectRef = environment.ValueFactory.CreateObject(simpleClassType.ToTypeSignature(), true);
+            var contents = (IDotNetStructValue) objectRef.ReferencedObject;
+            stack.Push(environment.CliMarshaller.ToCliValue(objectRef, simpleClassType.ToTypeSignature()));
             stack.Push(stackValue);
 
             // Test stfld.
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Stfld, field));
             Assert.True(result.IsSuccess);
-            Assert.Equal(expectedValue, value.GetFieldValue(field));
+            Assert.Equal(expectedValue, contents.GetFieldValue(field));
         }
         
         [Fact]
@@ -60,7 +61,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void WriteStringField()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldContents = environment.MemoryAllocator.GetStringValue("Hello, world!");
+            var fieldContents = environment.ValueFactory.GetStringValue("Hello, world!");
             var fieldValue = new ObjectReference(fieldContents, environment.Is32Bit);
             var stackValue = environment.CliMarshaller.ToCliValue(fieldValue, _module.CorLibTypeFactory.String);
             Verify(nameof(SimpleClass.StringField), stackValue, fieldValue);
@@ -79,8 +80,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void WriteObjectReferenceFieldWithNonNullValue()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldContents = new HleObjectValue(LookupTestType(typeof(SimpleClass)).ToTypeSignature(), environment.Is32Bit);
-            var fieldValue = new ObjectReference(fieldContents, environment.Is32Bit);
+            var fieldValue = environment.ValueFactory.CreateObject(
+                LookupTestType(typeof(SimpleClass)).ToTypeSignature(), 
+                true);
             var stackValue = environment.CliMarshaller.ToCliValue(fieldValue, _module.CorLibTypeFactory.Object);
             Verify(nameof(SimpleClass.SimpleClassField), stackValue, fieldValue);
         }
@@ -129,7 +131,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var instanceObject = new OValue(
-                environment.MemoryAllocator.GetStringValue("Hello, world"),
+                environment.ValueFactory.GetStringValue("Hello, world"),
                 true,
                 environment.Is32Bit);
             

@@ -181,8 +181,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             if (enumType.IsEnum)
                 return ToCliValue(value, enumType.GetEnumUnderlyingType());
             
-            if (value is LleObjectValue lleObjectValue)
-                return new StructValue(Environment.MemoryAllocator, lleObjectValue.Type, lleObjectValue.Contents);
+            if (value is LleStructValue lleObjectValue)
+                return new StructValue(Environment.ValueFactory, lleObjectValue.Type, lleObjectValue.Contents);
 
             throw new NotSupportedException($"Invalid or unsupported value {value}.");
         }
@@ -299,7 +299,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                         return ToCtsValue(value, enumType.GetEnumUnderlyingType());
 
                     var structValue = (StructValue) value;
-                    return new LleObjectValue(Environment.MemoryAllocator, structValue.Type, structValue.Contents);
+                    return new LleStructValue(Environment.ValueFactory, structValue.Type, structValue.Contents);
                 }
 
                 default:

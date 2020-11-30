@@ -6,7 +6,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// <summary>
     /// Represents an object consisting of a collection of fields.
     /// </summary>
-    public interface IDotNetObjectValue : IDotNetValue
+    public interface IDotNetStructValue : IDotNetValue
     {
         /// <summary>
         /// Gets the value of a field stored in the object.

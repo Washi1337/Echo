@@ -7,7 +7,7 @@ using Echo.Concrete.Values.ValueType;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
-    public partial class LleObjectValue : IPointerValue
+    public partial class LleStructValue : IPointerValue
     {
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer) => Contents.ReadBytes(offset, memoryBuffer);

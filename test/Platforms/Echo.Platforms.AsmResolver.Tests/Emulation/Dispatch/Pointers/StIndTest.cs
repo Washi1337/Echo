@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             
             var stack = ExecutionContext.ProgramState.Stack;
 
-            var memory = environment.MemoryAllocator.AllocateMemory(8, true);
+            var memory = environment.ValueFactory.AllocateMemory(8, true);
             
             var relativePointer = new RelativePointerValue(memory, offset);
             stack.Push(environment.CliMarshaller.ToCliValue(relativePointer, new PointerTypeSignature(factory.Byte)));

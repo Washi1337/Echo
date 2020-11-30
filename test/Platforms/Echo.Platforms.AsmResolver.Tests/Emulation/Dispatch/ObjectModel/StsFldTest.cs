@@ -45,7 +45,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void WriteStaticStringField()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
-            var fieldContents = environment.MemoryAllocator.GetStringValue("Hello, World!");
+            var fieldContents = environment.ValueFactory.GetStringValue("Hello, World!");
             var fieldValue = new OValue(fieldContents, true, environment.Is32Bit);
             Verify(nameof(SimpleClass.StaticStringField), fieldValue, new ObjectReference(fieldContents, environment.Is32Bit));
         }

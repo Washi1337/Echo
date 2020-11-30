@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             
             var stack = ExecutionContext.ProgramState.Stack;
 
-            var memory = environment.MemoryAllocator.AllocateMemory(8, true);
+            var memory = environment.ValueFactory.AllocateMemory(8, true);
             memory.WriteInteger32(0, new Integer32Value(0x12345678));
             memory.WriteInteger32(4, new Integer32Value(0x09ABCDEF));
             

@@ -8,27 +8,27 @@ using Echo.Core.Values;
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
     /// <summary>
-    /// Represents a low level implementation of an object.
+    /// Represents a low level implementation of a structure.
     /// </summary>
     /// <remarks>
     /// This class is <strong>not</strong> meant to be used as an object reference. Instances of the
-    /// <see cref="LleObjectValue"/> class are passed on by-value. They are used for representing instances of value
+    /// <see cref="LleStructValue"/> class are passed on by-value. They are used for representing instances of value
     /// types, or the object referenced in an object reference, not the object reference itself. 
     /// </remarks>
-    public partial class LleObjectValue : IValueTypeValue
+    public partial class LleStructValue : IValueTypeValue
     {
-        private readonly IMemoryAllocator _memoryAllocator;
+        private readonly IValueFactory _valueFactory;
 
         /// <summary>
         /// Creates a new low level emulated object. 
         /// </summary>
-        /// <param name="memoryAllocator">The object responsible for memory management in the virtual machine.</param>
+        /// <param name="valueFactory">The object responsible for memory management in the virtual machine.</param>
         /// <param name="valueType">The type of the object.</param>
         /// <param name="contents">The raw contents of the object.</param>
-        public LleObjectValue(IMemoryAllocator memoryAllocator, TypeSignature valueType, MemoryPointerValue contents)
+        public LleStructValue(IValueFactory valueFactory, TypeSignature valueType, MemoryPointerValue contents)
         {
-            Type = valueType;
-            _memoryAllocator = memoryAllocator ?? throw new ArgumentNullException(nameof(memoryAllocator));
+            Type = valueType ?? throw new ArgumentNullException(nameof(valueType));
+            _valueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
             Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
@@ -73,8 +73,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public Trilean IsNegative => false;
 
         /// <inheritdoc />
-        /// <inheritdoc />
-        public IValue Copy() => new LleObjectValue(_memoryAllocator, Type, Contents);
+        public IValue Copy() => new LleStructValue(_valueFactory, Type, Contents);
         
         /// <inheritdoc />
         public override string ToString() => $"{Type.FullName} ({Contents.Length.ToString()} bytes)";
