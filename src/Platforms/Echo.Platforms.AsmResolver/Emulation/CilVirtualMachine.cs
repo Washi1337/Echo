@@ -197,9 +197,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
             _services[serviceType];
 
         /// <inheritdoc />
-        public void Dispose()
-        {
-            ValueFactory?.Dispose();
-        }
+        public void Dispose() => ValueFactory?.Dispose();
     }
 }

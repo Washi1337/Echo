@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <summary>
-        /// Creates a value for the provided type that is initialized with the default contents.
+        /// Creates a value for the provided type that is optionally initialized with zeroes. 
         /// </summary>
         /// <param name="type">The type.</param>
         /// <param name="initialize">Indicates whether the bits in the created object should be initialized to zero.</param>
@@ -30,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         IConcreteValue CreateValue(TypeSignature type, bool initialize);
 
         /// <summary>
-        /// Creates an object reference to a value for the provided type that is initialized with the default contents.
+        /// Creates an object reference to a value for the provided type that is optionally initialized with zeroes. 
         /// </summary>
         /// <param name="type">The type.</param>
         /// /// <param name="initialize">Indicates whether the bits in the created object should be initialized to zero.</param>
