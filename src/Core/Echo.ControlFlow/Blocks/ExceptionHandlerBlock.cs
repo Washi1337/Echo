@@ -17,14 +17,6 @@ namespace Echo.ControlFlow.Blocks
         } = new ScopeBlock<TInstruction>();
 
         /// <summary>
-        /// Gets the prologue block.
-        /// </summary>
-        public ScopeBlock<TInstruction> PrologueBlock
-        {
-            get;
-        } = new ScopeBlock<TInstruction>();
-
-        /// <summary>
         /// Gets a collection of handler blocks.
         /// </summary>
         public IList<ScopeBlock<TInstruction>> HandlerBlocks
@@ -32,21 +24,10 @@ namespace Echo.ControlFlow.Blocks
             get;
         } = new List<ScopeBlock<TInstruction>>();
 
-        /// <summary>
-        /// Gets the epilogue block.
-        /// </summary>
-        public ScopeBlock<TInstruction> EpilogueBlock
-        {
-            get;
-        } = new ScopeBlock<TInstruction>();
-
         /// <inheritdoc />
         public IEnumerable<BasicBlock<TInstruction>> GetAllBlocks()
         {
             foreach (var block in ProtectedBlock.GetAllBlocks())
-                yield return block;
-                
-            foreach (var block in PrologueBlock.GetAllBlocks())
                 yield return block;
 
             foreach (var handler in HandlerBlocks)
@@ -54,9 +35,6 @@ namespace Echo.ControlFlow.Blocks
                 foreach (var block in handler.GetAllBlocks())
                     yield return block;
             }
-                
-            foreach (var block in EpilogueBlock.GetAllBlocks())
-                yield return block;
         }
 
         /// <inheritdoc />

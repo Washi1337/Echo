@@ -49,18 +49,6 @@ namespace Echo.ControlFlow.Blocks
         void ExitProtectedBlock(ExceptionHandlerBlock<TInstruction> block);
 
         /// <summary>
-        /// Enters the prologue region of an exception handler block.
-        /// </summary>
-        /// <param name="block">The block.</param>
-        void EnterPrologueBlock(ExceptionHandlerBlock<TInstruction> block);
-        
-        /// <summary>
-        /// Exits the prologue region of an exception handler block.
-        /// </summary>
-        /// <param name="block">The block.</param>
-        void ExitPrologueBlock(ExceptionHandlerBlock<TInstruction> block);
-
-        /// <summary>
         /// Enters a handler region of an exception handler block.
         /// </summary>
         /// <param name="block">The block.</param>
@@ -75,15 +63,39 @@ namespace Echo.ControlFlow.Blocks
         void ExitHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex);
 
         /// <summary>
-        /// Enters the epilogue region of an exception handler block.
+        /// Enters the prologue region of a handler block.
         /// </summary>
-        /// <param name="block">The block.</param>
-        void EnterEpilogueBlock(ExceptionHandlerBlock<TInstruction> block);
+        /// <param name="block">The parent handler block this prologue is added to.</param>
+        void EnterPrologueBlock(HandlerBlock<TInstruction> block);
         
         /// <summary>
-        /// Exits the epilogue region of an exception handler block.
+        /// Exits the prologue region of a handler block.
         /// </summary>
-        /// <param name="block">The block.</param>
-        void ExitEpilogueBlock(ExceptionHandlerBlock<TInstruction> block);
+        /// <param name="block">The parent handler block this prologue is added to.</param>
+        void ExitPrologueBlock(HandlerBlock<TInstruction> block);
+
+        /// <summary>
+        /// Enters the epilogue region of a handler block.
+        /// </summary>
+        /// <param name="block">The parent handler block this epilogue is added to.</param>
+        void EnterEpilogueBlock(HandlerBlock<TInstruction> block);
+        
+        /// <summary>
+        /// Exits the epilogue region of a handler block.
+        /// </summary>
+        /// <param name="block">The parent handler block this epilogue is added to.</param>
+        void ExitEpilogueBlock(HandlerBlock<TInstruction> block);
+
+        /// <summary>
+        /// Enters the main code of a handler block.
+        /// </summary>
+        /// <param name="block">The parent handler block this scope is added to.</param>
+        void EnterHandlerContents(HandlerBlock<TInstruction> block);
+        
+        /// <summary>
+        /// Exits the main code of a handler block.
+        /// </summary>
+        /// <param name="block">The parent handler block this scope is added to.</param>
+        void ExitHandlerContents(HandlerBlock<TInstruction> block);
     }
 }

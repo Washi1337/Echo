@@ -45,10 +45,6 @@ namespace Echo.ControlFlow.Blocks
             _listener.EnterProtectedBlock(block);
             block.ProtectedBlock.AcceptVisitor(this);
             _listener.ExitProtectedBlock(block);
-            
-            _listener.EnterPrologueBlock(block);
-            block.PrologueBlock.AcceptVisitor(this);
-            _listener.ExitPrologueBlock(block);
 
             for (int i = 0; i < block.HandlerBlocks.Count; i++)
             {
@@ -59,11 +55,30 @@ namespace Echo.ControlFlow.Blocks
                 _listener.ExitHandlerBlock(block, i);
             }
             
-            _listener.EnterEpilogueBlock(block);
-            block.EpilogueBlock.AcceptVisitor(this);
-            _listener.ExitEpilogueBlock(block);
-
             _listener.ExitExceptionHandlerBlock(block);
         }
+
+        /// <inheritdoc />
+        public void VisitHandlerBlock(HandlerBlock<TInstruction> block)
+        {
+            if (block.Prologue != null)
+            {
+                _listener.EnterPrologueBlock(block);
+                block.Prologue.AcceptVisitor(this);
+                _listener.ExitPrologueBlock(block);
+            }
+
+            _listener.EnterHandlerContents(block);
+            block.Contents.AcceptVisitor(this);
+            _listener.ExitHandlerContents(block);
+            
+            if (block.Epilogue != null)
+            {
+                _listener.EnterEpilogueBlock(block);
+                block.Epilogue.AcceptVisitor(this);
+                _listener.ExitEpilogueBlock(block);
+            }
+        }
+        
     }
 }
