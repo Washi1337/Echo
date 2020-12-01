@@ -74,9 +74,9 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 
                 if (node.IsInRegion(ehRegion.ProtectedRegion))
                 {
-                    for (int i = 0; i < ehRegion.HandlerRegions.Count; i++)
+                    for (int i = 0; i < ehRegion.Handlers.Count; i++)
                     {
-                        var handlerRegion = ehRegion.HandlerRegions[i];
+                        var handlerRegion = ehRegion.Handlers[i];
 
                         // Ensure the handler that we can jump to has an entrypoint node.
                         var handlerEntry = handlerRegion.GetEntrypoint();
@@ -112,9 +112,9 @@ namespace Echo.ControlFlow.Serialization.Blocks
             ICollection<ControlFlowNode<TInstruction>> result,
             ExceptionHandlerRegion<TInstruction> ehRegion)
         {
-            for (int i = 0; i < ehRegion.HandlerRegions.Count; i++)
+            for (int i = 0; i < ehRegion.Handlers.Count; i++)
             {
-                var handlerRegion = ehRegion.HandlerRegions[i];
+                var handlerRegion = ehRegion.Handlers[i];
 
                 // Ensure the handler that we can jump to has an entrypoint node.
                 var entry = GetRegionEntryPoint(

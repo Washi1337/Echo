@@ -21,7 +21,7 @@ namespace Echo.ControlFlow.Regions
                 ParentRegion = this
             };
             
-            HandlerRegions = new RegionCollection<TInstruction, HandlerRegion<TInstruction>>(this);
+            Handlers = new RegionCollection<TInstruction, HandlerRegion<TInstruction>>(this);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets the regions that form the handler blocks.
         /// </summary>
-        public RegionCollection<TInstruction, HandlerRegion<TInstruction>> HandlerRegions
+        public RegionCollection<TInstruction, HandlerRegion<TInstruction>> Handlers
         {
             get;
         }
@@ -52,12 +52,12 @@ namespace Echo.ControlFlow.Regions
         {
             yield return ProtectedRegion;
             
-            foreach (var handlerRegion in HandlerRegions)
+            foreach (var handlerRegion in Handlers)
                 yield return handlerRegion;
         }
 
         /// <inheritdoc />
         public override bool RemoveNode(ControlFlowNode<TInstruction> node) =>
-            ProtectedRegion.RemoveNode(node) || HandlerRegions.Any(r => r.RemoveNode(node));
+            ProtectedRegion.RemoveNode(node) || Handlers.Any(r => r.RemoveNode(node));
     }
 }

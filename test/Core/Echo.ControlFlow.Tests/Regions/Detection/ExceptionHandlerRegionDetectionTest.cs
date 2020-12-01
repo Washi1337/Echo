@@ -59,7 +59,7 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             Assert.NotNull(ehRegion);
             
             Assert.Same(ehRegion.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion.HandlerRegions); 
+            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion.Handlers); 
         }
 
         [Theory]
@@ -108,9 +108,9 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             
             Assert.NotSame(ehRegion1, ehRegion2);
             Assert.Same(ehRegion1.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion1.HandlerRegions); 
+            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion1.Handlers); 
             Assert.Same(ehRegion1.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion1.HandlerRegions); 
+            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion1.Handlers); 
         }
 
         [Theory]
@@ -299,7 +299,7 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
 
             var ehRegion = cfg.Nodes[1].GetParentExceptionHandler();
-            var handlerRegion = Assert.Single(ehRegion.HandlerRegions);
+            var handlerRegion = Assert.Single(ehRegion.Handlers);
             Assert.NotNull(handlerRegion);
             Assert.NotNull(handlerRegion.Prologue);
             Assert.NotNull(handlerRegion.Epilogue);

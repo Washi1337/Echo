@@ -117,8 +117,8 @@ namespace Echo.Ast.Construction
                     _regionsMapping[ehRegion.ProtectedRegion] = newEhRegion.ProtectedRegion;
 
                     // Add handler regions.
-                    foreach (var subRegion in ehRegion.HandlerRegions)
-                        newEhRegion.HandlerRegions.Add(TransformHandlerRegion(subRegion));
+                    foreach (var subRegion in ehRegion.Handlers)
+                        newEhRegion.Handlers.Add(TransformHandlerRegion(subRegion));
 
                     return newEhRegion;
                 

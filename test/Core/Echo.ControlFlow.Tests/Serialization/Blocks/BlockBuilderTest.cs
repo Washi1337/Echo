@@ -254,7 +254,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
 
             Assert.Equal(3, rootScope.Blocks.Count);
             var ehBlock = Assert.IsAssignableFrom<ExceptionHandlerBlock<DummyInstruction>>(rootScope.Blocks[1]);
-            Assert.Equal(2, ehBlock.HandlerBlocks.Count);
+            Assert.Equal(2, ehBlock.Handlers.Count);
         }
         
         [Fact]
@@ -298,7 +298,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             Assert.Equal(3, rootScope.Blocks.Count);
             var ehBlock = Assert.IsAssignableFrom<ExceptionHandlerBlock<DummyInstruction>>(rootScope.Blocks[1]);
             Assert.Equal(new[] {1L}, ehBlock.ProtectedBlock.GetAllBlocks().Select(b => b.Offset));
-            var handlerBlock = Assert.Single(ehBlock.HandlerBlocks);
+            var handlerBlock = Assert.Single(ehBlock.Handlers);
             Assert.NotNull(handlerBlock);
             Assert.Equal(new[] {3L}, handlerBlock.Prologue.GetAllBlocks().Select(b => b.Offset));
             Assert.Equal(new[] {5L}, handlerBlock.Contents.GetAllBlocks().Select(b => b.Offset));

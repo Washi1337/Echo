@@ -65,7 +65,7 @@ namespace Echo.ControlFlow.Regions.Detection
                 // Create and add new handler region from the range.
                 var handlerRegion = new HandlerRegion<TInstruction>();
                 handlerRegion.Tag = currentEHRange.UserData;
-                ehRegion.HandlerRegions.Add(handlerRegion);
+                ehRegion.Handlers.Add(handlerRegion);
                 result.Add(currentEHRange.HandlerRange, handlerRegion.Contents);
                 
                 // Do we need to add a prologue block?

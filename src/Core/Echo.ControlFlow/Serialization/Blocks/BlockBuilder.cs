@@ -148,7 +148,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             else
             {
                 // We entered a handler region.
-                var handlerRegion = parentRegion.HandlerRegions.First(r => r == enteredRegion);
+                var handlerRegion = parentRegion.Handlers.First(r => r == enteredRegion);
                 var handlerBlock = new HandlerBlock<TInstruction>
                 {
                     Tag = handlerRegion.Tag
@@ -156,7 +156,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
 
                 enteredBlock = handlerBlock;
                 enteredSubRegion = handlerRegion;
-                ehBlock.HandlerBlocks.Add(handlerBlock);
+                ehBlock.Handlers.Add(handlerBlock);
             }
 
             // Sanity check: If the entered subregion's parent is the exception handler region but the region

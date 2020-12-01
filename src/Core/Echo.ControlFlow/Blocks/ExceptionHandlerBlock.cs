@@ -19,7 +19,7 @@ namespace Echo.ControlFlow.Blocks
         /// <summary>
         /// Gets a collection of handler blocks.
         /// </summary>
-        public IList<HandlerBlock<TInstruction>> HandlerBlocks
+        public IList<HandlerBlock<TInstruction>> Handlers
         {
             get;
         } = new List<HandlerBlock<TInstruction>>();
@@ -39,7 +39,7 @@ namespace Echo.ControlFlow.Blocks
             foreach (var block in ProtectedBlock.GetAllBlocks())
                 yield return block;
 
-            foreach (var handler in HandlerBlocks)
+            foreach (var handler in Handlers)
             {
                 foreach (var block in handler.GetAllBlocks())
                     yield return block;

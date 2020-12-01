@@ -47,9 +47,9 @@ namespace Echo.ControlFlow.Blocks
             block.ProtectedBlock.AcceptVisitor(this);
             _listener.ExitProtectedBlock(block);
 
-            for (int i = 0; i < block.HandlerBlocks.Count; i++)
+            for (int i = 0; i < block.Handlers.Count; i++)
             {
-                var handlerBlock = block.HandlerBlocks[i];
+                var handlerBlock = block.Handlers[i];
                 
                 _listener.EnterHandlerBlock(block, i);
                 handlerBlock.AcceptVisitor(this);

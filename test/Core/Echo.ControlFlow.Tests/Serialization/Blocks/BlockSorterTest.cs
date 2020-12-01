@@ -190,7 +190,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
                 cfg.Nodes[indices[1]], cfg.Nodes[indices[2]], cfg.Nodes[indices[3]], cfg.Nodes[indices[4]]
             });
             var handlerRegion = new HandlerRegion<int>();
-            ehRegion.HandlerRegions.Add(handlerRegion);
+            ehRegion.Handlers.Add(handlerRegion);
             handlerRegion.Contents.Nodes.Add(cfg.Nodes[indices[5]]);
             handlerRegion.Contents.Entrypoint = cfg.Nodes[indices[5]];
 
@@ -225,7 +225,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             cfg.Regions.Add(ehRegion);
             ehRegion.ProtectedRegion.Nodes.Add(cfg.Nodes[indices[1]]);
             var handlerRegion = new HandlerRegion<int>();
-            ehRegion.HandlerRegions.Add(handlerRegion);
+            ehRegion.Handlers.Add(handlerRegion);
             handlerRegion.Contents.Nodes.Add(cfg.Nodes[indices[2]]);
             handlerRegion.Contents.Entrypoint = cfg.Nodes[indices[2]];
 
@@ -254,7 +254,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             eh.ProtectedRegion.Entrypoint = cfg.Nodes[indices[1]];
             
             var handler = new HandlerRegion<int>();
-            eh.HandlerRegions.Add(handler);
+            eh.Handlers.Add(handler);
             
             handler.Prologue = new ScopeRegion<int>();
             handler.Prologue.Nodes.Add(cfg.Nodes[indices[2]]);
