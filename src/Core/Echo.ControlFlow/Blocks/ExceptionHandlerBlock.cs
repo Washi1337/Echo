@@ -19,10 +19,10 @@ namespace Echo.ControlFlow.Blocks
         /// <summary>
         /// Gets a collection of handler blocks.
         /// </summary>
-        public IList<ScopeBlock<TInstruction>> HandlerBlocks
+        public IList<HandlerBlock<TInstruction>> HandlerBlocks
         {
             get;
-        } = new List<ScopeBlock<TInstruction>>();
+        } = new List<HandlerBlock<TInstruction>>();
 
         /// <inheritdoc />
         public IEnumerable<BasicBlock<TInstruction>> GetAllBlocks()
