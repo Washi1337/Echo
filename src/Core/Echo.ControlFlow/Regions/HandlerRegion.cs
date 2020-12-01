@@ -12,6 +12,10 @@ namespace Echo.ControlFlow.Regions
         private BasicControlFlowRegion<TInstruction> _prologue;
         private BasicControlFlowRegion<TInstruction> _epilogue;
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="HandlerRegion{TInstruction}"/> class without
+        /// an explicit prologue and epilogue set.
+        /// </summary>
         public HandlerRegion()
         {
             Contents = new BasicControlFlowRegion<TInstruction>
@@ -24,7 +28,10 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets the region of nodes that form the code that precedes the handler.
         /// </summary>
-        public BasicControlFlowRegion<TInstruction> PrologueRegion
+        /// <remarks>
+        /// This region is often used for filter clauses of the exception handler.
+        /// </remarks>
+        public BasicControlFlowRegion<TInstruction> Prologue
         {
             get => _prologue;
             set => UpdateChildRegion(ref _prologue, value);
@@ -41,7 +48,7 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets the region of nodes that form the code that proceeds the handler.
         /// </summary>
-        public BasicControlFlowRegion<TInstruction> EpilogueRegion
+        public BasicControlFlowRegion<TInstruction> Epilogue
         {
             get => _epilogue;
             set => UpdateChildRegion(ref _epilogue, value);

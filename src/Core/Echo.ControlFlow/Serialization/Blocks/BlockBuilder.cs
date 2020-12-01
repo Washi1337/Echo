@@ -174,12 +174,12 @@ namespace Echo.ControlFlow.Serialization.Blocks
             if (!(scopeStack.Peek().Block is HandlerBlock<TInstruction> handlerBlock))
                 throw new InvalidOperationException("The parent scope is not a handler scope.");
 
-            if (parentRegion.PrologueRegion == enteredRegion)
+            if (parentRegion.Prologue == enteredRegion)
             {
                 // We entered the prologue.
                 handlerBlock.Prologue = new ScopeBlock<TInstruction>();
                 enteredBlock = handlerBlock.Prologue;
-                enteredSubRegion = parentRegion.PrologueRegion;
+                enteredSubRegion = parentRegion.Prologue;
             }
             else if (parentRegion.Contents == enteredRegion)
             {
@@ -187,12 +187,12 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 enteredBlock = handlerBlock.Contents;
                 enteredSubRegion = parentRegion.Contents;
             }
-            else if (parentRegion.EpilogueRegion == enteredRegion)
+            else if (parentRegion.Epilogue == enteredRegion)
             {
                 // We entered the epilogue.
                 handlerBlock.Epilogue = new ScopeBlock<TInstruction>();
                 enteredBlock = handlerBlock.Epilogue;
-                enteredSubRegion = parentRegion.EpilogueRegion;
+                enteredSubRegion = parentRegion.Epilogue;
             }
             else
             {

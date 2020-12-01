@@ -134,11 +134,11 @@ namespace Echo.Ast.Construction
         {
             var result = new HandlerRegion<Statement<TInstruction>>();
 
-            if (handlerRegion.PrologueRegion != null)
-                result.PrologueRegion = (BasicControlFlowRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.PrologueRegion);
+            if (handlerRegion.Prologue != null)
+                result.Prologue = (BasicControlFlowRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.Prologue);
 
-            if (handlerRegion.EpilogueRegion != null)
-                result.EpilogueRegion = (BasicControlFlowRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.EpilogueRegion);
+            if (handlerRegion.Epilogue != null)
+                result.Epilogue = (BasicControlFlowRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.Epilogue);
 
             // Contents is read-only, so instead we just transform all sub regions and add it to the
             // existing protected region.

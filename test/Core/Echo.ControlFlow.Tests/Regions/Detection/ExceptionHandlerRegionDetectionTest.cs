@@ -301,14 +301,14 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             var ehRegion = cfg.Nodes[1].GetParentExceptionHandler();
             var handlerRegion = Assert.Single(ehRegion.HandlerRegions);
             Assert.NotNull(handlerRegion);
-            Assert.NotNull(handlerRegion.PrologueRegion);
-            Assert.NotNull(handlerRegion.EpilogueRegion);
+            Assert.NotNull(handlerRegion.Prologue);
+            Assert.NotNull(handlerRegion.Epilogue);
 
             Assert.Same(cfg, cfg.Nodes[0].ParentRegion);
             Assert.Same(ehRegion.ProtectedRegion, cfg.Nodes[1].ParentRegion);
-            Assert.Same(handlerRegion.PrologueRegion, cfg.Nodes[3].GetParentHandler().PrologueRegion);
+            Assert.Same(handlerRegion.Prologue, cfg.Nodes[3].GetParentHandler().Prologue);
             Assert.Same(handlerRegion.Contents, cfg.Nodes[5].GetParentHandler().Contents);
-            Assert.Same(handlerRegion.EpilogueRegion, cfg.Nodes[7].GetParentHandler().EpilogueRegion);
+            Assert.Same(handlerRegion.Epilogue, cfg.Nodes[7].GetParentHandler().Epilogue);
             Assert.Same(cfg, cfg.Nodes[9].ParentRegion);
         }
 

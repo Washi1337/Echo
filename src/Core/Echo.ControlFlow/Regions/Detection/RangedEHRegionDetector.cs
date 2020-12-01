@@ -71,17 +71,17 @@ namespace Echo.ControlFlow.Regions.Detection
                 // Do we need to add a prologue block?
                 if (currentEHRange.PrologueRange != AddressRange.NilRange)
                 {
-                    handlerRegion.PrologueRegion = new BasicControlFlowRegion<TInstruction>();
+                    handlerRegion.Prologue = new BasicControlFlowRegion<TInstruction>();
                     ehRegions.Add(currentEHRange.PrologueRange, ehRegion);
-                    result.Add(currentEHRange.PrologueRange, handlerRegion.PrologueRegion);
+                    result.Add(currentEHRange.PrologueRange, handlerRegion.Prologue);
                 }
 
                 // Do we need to add an epilogue block?
                 if (currentEHRange.EpilogueRange != AddressRange.NilRange)
                 {
-                    handlerRegion.EpilogueRegion = new BasicControlFlowRegion<TInstruction>();
+                    handlerRegion.Epilogue = new BasicControlFlowRegion<TInstruction>();
                     ehRegions.Add(currentEHRange.EpilogueRange, ehRegion);
-                    result.Add(currentEHRange.EpilogueRange, handlerRegion.EpilogueRegion);
+                    result.Add(currentEHRange.EpilogueRange, handlerRegion.Epilogue);
                 }
             }
 

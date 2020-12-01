@@ -256,16 +256,16 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var handler = new HandlerRegion<int>();
             eh.HandlerRegions.Add(handler);
             
-            handler.PrologueRegion = new BasicControlFlowRegion<int>();
-            handler.PrologueRegion.Nodes.Add(cfg.Nodes[indices[2]]);
-            handler.PrologueRegion.Entrypoint = cfg.Nodes[indices[2]];
+            handler.Prologue = new BasicControlFlowRegion<int>();
+            handler.Prologue.Nodes.Add(cfg.Nodes[indices[2]]);
+            handler.Prologue.Entrypoint = cfg.Nodes[indices[2]];
             
             handler.Contents.Nodes.Add(cfg.Nodes[indices[3]]);
             handler.Contents.Entrypoint = cfg.Nodes[indices[3]];
             
-            handler.EpilogueRegion = new BasicControlFlowRegion<int>();
-            handler.EpilogueRegion.Nodes.Add(cfg.Nodes[indices[4]]);
-            handler.EpilogueRegion.Entrypoint = cfg.Nodes[indices[4]];
+            handler.Epilogue = new BasicControlFlowRegion<int>();
+            handler.Epilogue.Nodes.Add(cfg.Nodes[indices[4]]);
+            handler.Epilogue.Entrypoint = cfg.Nodes[indices[4]];
         
             cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]]);
             cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[5]], ControlFlowEdgeType.Unconditional);

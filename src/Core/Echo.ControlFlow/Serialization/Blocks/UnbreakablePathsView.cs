@@ -94,10 +94,10 @@ namespace Echo.ControlFlow.Serialization.Blocks
                     var handlerRegion = node.GetParentHandler();
 
                     ControlFlowNode<TInstruction> nextEntry = null;
-                    if (node.ParentRegion == handlerRegion.PrologueRegion)
+                    if (node.ParentRegion == handlerRegion.Prologue)
                         nextEntry = handlerRegion.Contents.Entrypoint;
                     if (nextEntry is null && node.ParentRegion == handlerRegion.Contents)
-                        nextEntry = handlerRegion.EpilogueRegion.Entrypoint;
+                        nextEntry = handlerRegion.Epilogue.Entrypoint;
 
                     if (nextEntry != null)
                         AddSuccessorToResult(result, nextEntry);
