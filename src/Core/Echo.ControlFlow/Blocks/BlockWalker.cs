@@ -32,8 +32,9 @@ namespace Echo.ControlFlow.Blocks
         public void VisitScopeBlock(ScopeBlock<TInstruction> block)
         {
             _listener.EnterScopeBlock(block);
-            foreach (var innerBlock in block.Blocks)
-                innerBlock.AcceptVisitor(this);
+            for (int i = 0; i < block.Blocks.Count; i++)
+                block.Blocks[i].AcceptVisitor(this);
+
             _listener.ExitScopeBlock(block);
         }
 
