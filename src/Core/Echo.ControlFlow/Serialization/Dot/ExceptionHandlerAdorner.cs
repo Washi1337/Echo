@@ -42,7 +42,7 @@ namespace Echo.ControlFlow.Serialization.Dot
         /// <summary>
         /// Gets or sets the style of a handler region in an exception handler region.
         /// </summary>
-        public DotEntityStyle HandlerRegionColor
+        public DotEntityStyle HandlerRegionStyle
         {
             get;
             set;
@@ -95,8 +95,6 @@ namespace Echo.ControlFlow.Serialization.Dot
                     {
                         if (parentEh.ProtectedRegion == basicRegion)
                             prefix = "cluster_protected";
-                        else if (parentEh.HandlerRegions.Contains(basicRegion))
-                            prefix = "cluster_handler";
                     }
 
                     prefix ??= "cluster_block";
@@ -106,6 +104,10 @@ namespace Echo.ControlFlow.Serialization.Dot
                     prefix = "cluster_eh";
                     break;
 
+                case HandlerRegion<TInstruction> _:
+                    prefix = "cluster_handler";
+                    break;
+                
                 default:
                     prefix = "cluster_region";
                     break;
@@ -128,14 +130,16 @@ namespace Echo.ControlFlow.Serialization.Dot
                     {
                         if (parentEh.ProtectedRegion == basicRegion)
                             regionStyle = ProtectedRegionColor;
-                        else if (parentEh.HandlerRegions.Contains(basicRegion))
-                            regionStyle = HandlerRegionColor;
                     }
 
                     break;
 
                 case ExceptionHandlerRegion<TInstruction> _:
                     regionStyle = ExceptionHandlerStyle;
+                    break;
+
+                case HandlerRegion<TInstruction> _:
+                    regionStyle = HandlerRegionStyle;
                     break;
             }
             

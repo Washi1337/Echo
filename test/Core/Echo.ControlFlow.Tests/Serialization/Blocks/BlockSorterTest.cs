@@ -193,10 +193,10 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             {
                 cfg.Nodes[indices[1]], cfg.Nodes[indices[2]], cfg.Nodes[indices[3]], cfg.Nodes[indices[4]]
             });
-            var handlerRegion = new BasicControlFlowRegion<int>();
+            var handlerRegion = new HandlerRegion<int>();
             ehRegion.HandlerRegions.Add(handlerRegion);
-            handlerRegion.Nodes.Add(cfg.Nodes[indices[5]]);
-            handlerRegion.Entrypoint = cfg.Nodes[indices[5]];
+            handlerRegion.Contents.Nodes.Add(cfg.Nodes[indices[5]]);
+            handlerRegion.Contents.Entrypoint = cfg.Nodes[indices[5]];
 
             // Sort
             var sorting = cfg
@@ -228,10 +228,10 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var ehRegion = new ExceptionHandlerRegion<int>();
             cfg.Regions.Add(ehRegion);
             ehRegion.ProtectedRegion.Nodes.Add(cfg.Nodes[indices[1]]);
-            var handlerRegion = new BasicControlFlowRegion<int>();
+            var handlerRegion = new HandlerRegion<int>();
             ehRegion.HandlerRegions.Add(handlerRegion);
-            handlerRegion.Nodes.Add(cfg.Nodes[indices[2]]);
-            handlerRegion.Entrypoint = cfg.Nodes[indices[2]];
+            handlerRegion.Contents.Nodes.Add(cfg.Nodes[indices[2]]);
+            handlerRegion.Contents.Entrypoint = cfg.Nodes[indices[2]];
 
             // Sort
             var sorting = cfg

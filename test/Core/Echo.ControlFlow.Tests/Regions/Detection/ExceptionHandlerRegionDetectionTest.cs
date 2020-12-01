@@ -59,7 +59,7 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             Assert.NotNull(ehRegion);
             
             Assert.Same(ehRegion.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].ParentRegion, ehRegion.HandlerRegions); 
+            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion.HandlerRegions); 
         }
 
         [Theory]
@@ -108,9 +108,9 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             
             Assert.NotSame(ehRegion1, ehRegion2);
             Assert.Same(ehRegion1.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].ParentRegion, ehRegion1.HandlerRegions); 
+            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion1.HandlerRegions); 
             Assert.Same(ehRegion1.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].ParentRegion, ehRegion1.HandlerRegions); 
+            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion1.HandlerRegions); 
         }
 
         [Theory]

@@ -73,12 +73,31 @@ namespace Echo.ControlFlow.Regions
         /// <returns>
         /// The parent exception handler region, or <c>null</c> if the region is not part of any exception handler.
         /// </returns>
-        public static ExceptionHandlerRegion<TInstruction> GetParentExceptionHandler<TInstruction>(this IControlFlowRegion<TInstruction> self)
+        public static ExceptionHandlerRegion<TInstruction> GetParentExceptionHandler<TInstruction>(this IControlFlowRegion<TInstruction> self)=> 
+            GetParentRegion<TInstruction, ExceptionHandlerRegion<TInstruction>>(self);
+        
+        /// <summary>
+        /// Obtains the parent handler region that this region resides in (if any).
+        /// </summary>
+        /// <returns>
+        /// The parent exception handler region, or <c>null</c> if the region is not part of any exception handler.
+        /// </returns>
+        public static HandlerRegion<TInstruction> GetParentHandler<TInstruction>(this IControlFlowRegion<TInstruction> self) => 
+            GetParentRegion<TInstruction, HandlerRegion<TInstruction>>(self);
+
+        /// <summary>
+        /// Obtains the parent region of a specific type that this region resides in (if any).
+        /// </summary>
+        /// <returns>
+        /// The parent region, or <c>null</c> if the region is not part of any region of type <typeparamref name="TRegion"/>.
+        /// </returns>
+        private static TRegion GetParentRegion<TInstruction, TRegion>(IControlFlowRegion<TInstruction> self)
+            where TRegion : class, IControlFlowRegion<TInstruction>
         {
             var region = self.ParentRegion;
             while (region is {})
             {
-                if (region is ExceptionHandlerRegion<TInstruction> ehRegion)
+                if (region is TRegion ehRegion)
                     return ehRegion;
                 region = region.ParentRegion;
             }

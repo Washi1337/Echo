@@ -17,10 +17,11 @@ namespace Echo.ControlFlow.Regions
         {
             ProtectedRegion = new BasicControlFlowRegion<TInstruction>
             {
+                // We need to manually set the parent region here.
                 ParentRegion = this
             };
             
-            HandlerRegions = new RegionCollection<TInstruction, ControlFlowRegion<TInstruction>>(this);
+            HandlerRegions = new RegionCollection<TInstruction, HandlerRegion<TInstruction>>(this);
         }
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets the regions that form the handler blocks.
         /// </summary>
-        public RegionCollection<TInstruction, ControlFlowRegion<TInstruction>> HandlerRegions
+        public RegionCollection<TInstruction, HandlerRegion<TInstruction>> HandlerRegions
         {
             get;
         }

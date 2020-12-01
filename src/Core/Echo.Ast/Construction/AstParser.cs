@@ -118,21 +118,42 @@ namespace Echo.Ast.Construction
 
                     // Add handler regions.
                     foreach (var subRegion in ehRegion.HandlerRegions)
-                        newEhRegion.HandlerRegions.Add(TransformRegion(subRegion));
+                        newEhRegion.HandlerRegions.Add(TransformHandlerRegion(subRegion));
 
                     return newEhRegion;
+                
+                case HandlerRegion<TInstruction> handlerRegion:
+                    return TransformHandlerRegion(handlerRegion);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(region));
             }
+        }
 
-            void TransformSubRegions(
-                BasicControlFlowRegion<TInstruction> originalRegion, 
-                BasicControlFlowRegion<Statement<TInstruction>> newRegion)
-            {
-                foreach (var subRegion in originalRegion.Regions)
-                    newRegion.Regions.Add(TransformRegion(subRegion));
-            }
+        private HandlerRegion<Statement<TInstruction>> TransformHandlerRegion(HandlerRegion<TInstruction> handlerRegion)
+        {
+            var result = new HandlerRegion<Statement<TInstruction>>();
+
+            if (handlerRegion.PrologueRegion != null)
+                result.PrologueRegion = (BasicControlFlowRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.PrologueRegion);
+
+            if (handlerRegion.EpilogueRegion != null)
+                result.EpilogueRegion = (BasicControlFlowRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.EpilogueRegion);
+
+            // Contents is read-only, so instead we just transform all sub regions and add it to the
+            // existing protected region.
+            TransformSubRegions(handlerRegion.Contents, result.Contents);
+            _regionsMapping[handlerRegion.Contents] = result.Contents;
+            
+            return result;
+        }
+
+        private void TransformSubRegions(
+            BasicControlFlowRegion<TInstruction> originalRegion, 
+            BasicControlFlowRegion<Statement<TInstruction>> newRegion)
+        {
+            foreach (var subRegion in originalRegion.Regions)
+                newRegion.Regions.Add(TransformRegion(subRegion));
         }
     }
 }

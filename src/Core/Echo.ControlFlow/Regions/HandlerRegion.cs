@@ -9,13 +9,22 @@ namespace Echo.ControlFlow.Regions
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public class HandlerRegion<TInstruction> : ControlFlowRegion<TInstruction>
     {
-        private ControlFlowRegion<TInstruction> _prologue;
-        private ControlFlowRegion<TInstruction> _epilogue;
+        private BasicControlFlowRegion<TInstruction> _prologue;
+        private BasicControlFlowRegion<TInstruction> _epilogue;
+
+        public HandlerRegion()
+        {
+            Contents = new BasicControlFlowRegion<TInstruction>
+            {
+                // We need to manually set the parent region here.
+                ParentRegion = this
+            };
+        }
         
         /// <summary>
         /// Gets the region of nodes that form the code that precedes the handler.
         /// </summary>
-        public ControlFlowRegion<TInstruction> PrologueRegion
+        public BasicControlFlowRegion<TInstruction> PrologueRegion
         {
             get => _prologue;
             set => UpdateChildRegion(ref _prologue, value);
@@ -27,18 +36,18 @@ namespace Echo.ControlFlow.Regions
         public BasicControlFlowRegion<TInstruction> Contents
         {
             get;
-        } = new BasicControlFlowRegion<TInstruction>();
+        }
 
         /// <summary>
         /// Gets the region of nodes that form the code that proceeds the handler.
         /// </summary>
-        public ControlFlowRegion<TInstruction> EpilogueRegion
+        public BasicControlFlowRegion<TInstruction> EpilogueRegion
         {
             get => _epilogue;
             set => UpdateChildRegion(ref _epilogue, value);
         }
 
-        private void UpdateChildRegion(ref ControlFlowRegion<TInstruction> field, ControlFlowRegion<TInstruction> value)
+        private void UpdateChildRegion(ref BasicControlFlowRegion<TInstruction> field, BasicControlFlowRegion<TInstruction> value)
         {
             if (field?.ParentRegion == this)
                 field.ParentRegion = null;

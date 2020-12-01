@@ -482,6 +482,15 @@ namespace Echo.ControlFlow
             ParentRegion?.GetParentExceptionHandler();
 
         /// <summary>
+        /// Obtains the parent handler region that this node resides in (if any).
+        /// </summary>
+        /// <returns>
+        /// The parent handler region, or <c>null</c> if the node is not part of any handler.
+        /// </returns>
+        public HandlerRegion<TInstruction> GetParentHandler() =>
+            ParentRegion?.GetParentHandler();
+
+        /// <summary>
         /// Traverses the region tree upwards and collects all regions this node is situated in. 
         /// </summary>
         /// <returns>The regions this node is situated in, starting with the inner-most regions.</returns>
