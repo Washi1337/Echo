@@ -261,5 +261,56 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             Assert.Null(cfg.Nodes[9].GetParentExceptionHandler());
         }
 
+        [Fact]
+        public void ExceptionHandlerWithPrologueAndEpilogue()
+        {
+            var ranges = new[]
+            {
+                new ExceptionHandlerRange(
+                    new AddressRange(1, 3),
+                    new AddressRange(3, 5),
+                    new AddressRange(5, 7),
+                    new AddressRange(7, 9))
+            };
+            
+            var instructions = new[]
+            {
+                DummyInstruction.Op(0, 0, 0),
+                
+                // try start
+                DummyInstruction.Op(1, 0, 0),
+                DummyInstruction.Jmp(2, 9),
+                
+                // handler prologue start
+                DummyInstruction.Op(3, 0, 0),
+                DummyInstruction.Ret(4),
+                
+                // handler start
+                DummyInstruction.Op(5, 0, 0),
+                DummyInstruction.Jmp(6, 9),
+                
+                // handler epilogue start
+                DummyInstruction.Op(7, 0, 0),
+                DummyInstruction.Ret(8),
+                
+                DummyInstruction.Ret(9),
+            };
+
+            var cfg = ConstructGraphWithEHRegions(instructions, ranges);
+
+            var ehRegion = cfg.Nodes[1].GetParentExceptionHandler();
+            var handlerRegion = Assert.Single(ehRegion.HandlerRegions);
+            Assert.NotNull(handlerRegion);
+            Assert.NotNull(handlerRegion.PrologueRegion);
+            Assert.NotNull(handlerRegion.EpilogueRegion);
+
+            Assert.Same(cfg, cfg.Nodes[0].ParentRegion);
+            Assert.Same(ehRegion.ProtectedRegion, cfg.Nodes[1].ParentRegion);
+            Assert.Same(handlerRegion.PrologueRegion, cfg.Nodes[3].GetParentHandler().PrologueRegion);
+            Assert.Same(handlerRegion.Contents, cfg.Nodes[5].GetParentHandler().Contents);
+            Assert.Same(handlerRegion.EpilogueRegion, cfg.Nodes[7].GetParentHandler().EpilogueRegion);
+            Assert.Same(cfg, cfg.Nodes[9].ParentRegion);
+        }
+
     }
 }
