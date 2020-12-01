@@ -118,7 +118,11 @@ namespace Echo.ControlFlow.Serialization.Blocks
             IndexableStack<ScopeInfo<TInstruction>> scopeStack, 
             ExceptionHandlerRegion<TInstruction> ehRegion)
         {
-            var ehBlock = new ExceptionHandlerBlock<TInstruction>();
+            var ehBlock = new ExceptionHandlerBlock<TInstruction>
+            {
+                Tag = ehRegion.Tag
+            };
+            
             scopeStack.Peek().AddBlock(ehBlock);
             scopeStack.Push(new ScopeInfo<TInstruction>(ehRegion, ehBlock));
         }
@@ -144,9 +148,14 @@ namespace Echo.ControlFlow.Serialization.Blocks
             else
             {
                 // We entered a handler region.
-                var handlerBlock = new HandlerBlock<TInstruction>();
+                var handlerRegion = parentRegion.HandlerRegions.First(r => r == enteredRegion);
+                var handlerBlock = new HandlerBlock<TInstruction>
+                {
+                    Tag = handlerRegion.Tag
+                };
+
                 enteredBlock = handlerBlock;
-                enteredSubRegion = parentRegion.HandlerRegions.SingleOrDefault(r => r == enteredRegion);
+                enteredSubRegion = handlerRegion;
                 ehBlock.HandlerBlocks.Add(handlerBlock);
             }
 

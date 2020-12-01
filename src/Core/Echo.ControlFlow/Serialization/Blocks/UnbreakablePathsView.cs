@@ -97,7 +97,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
                     if (node.ParentRegion == handlerRegion.Prologue)
                         nextEntry = handlerRegion.Contents.Entrypoint;
                     if (nextEntry is null && node.ParentRegion == handlerRegion.Contents)
-                        nextEntry = handlerRegion.Epilogue.Entrypoint;
+                        nextEntry = handlerRegion.Epilogue?.Entrypoint;
 
                     if (nextEntry != null)
                         AddSuccessorToResult(result, nextEntry);

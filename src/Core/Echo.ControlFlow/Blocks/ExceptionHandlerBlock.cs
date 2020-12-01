@@ -24,6 +24,15 @@ namespace Echo.ControlFlow.Blocks
             get;
         } = new List<HandlerBlock<TInstruction>>();
 
+        /// <summary>
+        /// Gets or sets a user-defined tag that is assigned to this block. 
+        /// </summary>
+        public object Tag
+        {
+            get;
+            set;
+        }
+        
         /// <inheritdoc />
         public IEnumerable<BasicBlock<TInstruction>> GetAllBlocks()
         {
