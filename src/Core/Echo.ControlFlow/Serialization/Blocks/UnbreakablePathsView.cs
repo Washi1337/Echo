@@ -89,6 +89,19 @@ namespace Echo.ControlFlow.Serialization.Blocks
                         AddSuccessorToResult(result, handlerEntry);
                     }
                 }
+                else
+                {
+                    var handlerRegion = node.GetParentHandler();
+
+                    ControlFlowNode<TInstruction> nextEntry = null;
+                    if (node.ParentRegion == handlerRegion.PrologueRegion)
+                        nextEntry = handlerRegion.Contents.Entrypoint;
+                    if (nextEntry is null && node.ParentRegion == handlerRegion.Contents)
+                        nextEntry = handlerRegion.EpilogueRegion.Entrypoint;
+
+                    if (nextEntry != null)
+                        AddSuccessorToResult(result, nextEntry);
+                }
 
                 // Move up the EH region tree.
                 ehRegion = ehRegion.GetParentExceptionHandler();

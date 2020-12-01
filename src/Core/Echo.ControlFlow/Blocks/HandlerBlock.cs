@@ -54,9 +54,6 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <inheritdoc />
-        public void AcceptVisitor(IBlockVisitor<TInstruction> visitor)
-        {
-            visitor.VisitHandlerBlock(this);
-        }
+        public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitHandlerBlock(this);
     }
 }
