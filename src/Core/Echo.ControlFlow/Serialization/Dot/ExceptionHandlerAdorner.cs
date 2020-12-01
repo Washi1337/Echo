@@ -89,30 +89,9 @@ namespace Echo.ControlFlow.Serialization.Dot
         {
             switch (region)
             {
-                case ScopeRegion<TInstruction> basicRegion:
-                    switch (basicRegion.ParentRegion)
-                    {
-                        case ExceptionHandlerRegion<TInstruction> parentEh:
-                        {
-                            if (parentEh.ProtectedRegion == basicRegion)
-                                return "cluster_protected";
-                            break;
-                        }
-
-                        case HandlerRegion<TInstruction> parentHandler:
-                        {
-                            if (parentHandler.Prologue == basicRegion)
-                                return "cluster_handler_prologue";
-                            if (parentHandler.Contents == basicRegion)
-                                return  "cluster_handler";
-                            if (parentHandler.Epilogue == basicRegion)
-                                return "cluster_handler_epilogue";
-                            break;
-                        }
-                    }
-
-                    return "cluster_block";
-
+                case ScopeRegion<TInstruction> scopeRegion:
+                    return GetScopeRegionPrefix(scopeRegion);
+                
                 case ExceptionHandlerRegion<TInstruction> _:
                     return "cluster_eh";
 
@@ -124,47 +103,40 @@ namespace Echo.ControlFlow.Serialization.Dot
             }
         }
 
+        private static string GetScopeRegionPrefix(ScopeRegion<TInstruction> basicRegion)
+        {
+            switch (basicRegion.ParentRegion)
+            {
+                case ExceptionHandlerRegion<TInstruction> parentEh:
+                {
+                    if (parentEh.ProtectedRegion == basicRegion)
+                        return "cluster_protected";
+                    break;
+                }
+
+                case HandlerRegion<TInstruction> parentHandler:
+                {
+                    if (parentHandler.Prologue == basicRegion)
+                        return "cluster_handler_prologue";
+                    if (parentHandler.Contents == basicRegion)
+                        return "cluster_handler";
+                    if (parentHandler.Epilogue == basicRegion)
+                        return "cluster_handler_epilogue";
+                    break;
+                }
+            }
+
+            return "cluster_block";;
+        }
+
         /// <inheritdoc />
         public IDictionary<string, string> GetSubGraphAttributes(ISubGraph subGraph)
         {
             if (!(subGraph is IControlFlowRegion<TInstruction> region))
                 return null;
             
-            var regionStyle = DefaultRegionStyle;
-            switch (region)
-            {
-                case ScopeRegion<TInstruction> basicRegion:
-                    switch (basicRegion.ParentRegion)
-                    {
-                        case ExceptionHandlerRegion<TInstruction> parentEh:
-                        {
-                            if (parentEh.ProtectedRegion == basicRegion)
-                                regionStyle = ProtectedRegionColor;
-                            break;
-                        }
+            var regionStyle = GetSubGraphStyle(region);
 
-                        case HandlerRegion<TInstruction> parentHandler:
-                        {
-                            if (parentHandler.Prologue == basicRegion)
-                                regionStyle = PrologueRegionStyle;
-                            else if (parentHandler.Contents == basicRegion)
-                                regionStyle = DefaultRegionStyle;
-                            else if (parentHandler.Epilogue == basicRegion)
-                                regionStyle = EpilogueRegionStyle;
-                            break;
-                        }
-                    }
-                    break;
-
-                case ExceptionHandlerRegion<TInstruction> _:
-                    regionStyle = ExceptionHandlerStyle;
-                    break;
-
-                case HandlerRegion<TInstruction> _:
-                    regionStyle = HandlerRegionStyle;
-                    break;
-            }
-            
             return new Dictionary<string, string>
             {
                 ["color"] = regionStyle.Color,
@@ -172,5 +144,48 @@ namespace Echo.ControlFlow.Serialization.Dot
             };
         }
 
+        private DotEntityStyle GetSubGraphStyle(IControlFlowRegion<TInstruction> region)
+        {
+            switch (region)
+            {
+                case ScopeRegion<TInstruction> basicRegion:
+                    return GetScopeRegionStyle(basicRegion);
+
+                case ExceptionHandlerRegion<TInstruction> _:
+                    return ExceptionHandlerStyle;
+
+                case HandlerRegion<TInstruction> _:
+                    return HandlerRegionStyle;
+            }
+
+            return DefaultRegionStyle;
+        }
+
+        private DotEntityStyle GetScopeRegionStyle(ScopeRegion<TInstruction> basicRegion)
+        {
+            switch (basicRegion.ParentRegion)
+            {
+                case ExceptionHandlerRegion<TInstruction> parentEh:
+                {
+                    if (parentEh.ProtectedRegion == basicRegion)
+                        return ProtectedRegionColor;
+                    break;
+                }
+
+                case HandlerRegion<TInstruction> parentHandler:
+                {
+                    if (parentHandler.Prologue == basicRegion)
+                        return PrologueRegionStyle;
+                    if (parentHandler.Contents == basicRegion)
+                        return DefaultRegionStyle;
+                    if (parentHandler.Epilogue == basicRegion)
+                        return EpilogueRegionStyle;
+                    break;
+                }
+            }
+
+            return DefaultRegionStyle;
+        }
+        
     }
 }
