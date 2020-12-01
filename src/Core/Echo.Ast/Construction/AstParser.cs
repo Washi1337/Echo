@@ -116,23 +116,9 @@ namespace Echo.Ast.Construction
                     TransformSubRegions(ehRegion.ProtectedRegion, newEhRegion.ProtectedRegion);
                     _regionsMapping[ehRegion.ProtectedRegion] = newEhRegion.ProtectedRegion;
 
-                    if (ehRegion.PrologueRegion is {})
-                    {
-                        newEhRegion.PrologueRegion = new BasicControlFlowRegion<Statement<TInstruction>>();
-                        TransformSubRegions(ehRegion.PrologueRegion, newEhRegion.PrologueRegion);
-                        _regionsMapping[ehRegion.PrologueRegion] = newEhRegion.PrologueRegion;
-                    }
-
                     // Add handler regions.
                     foreach (var subRegion in ehRegion.HandlerRegions)
                         newEhRegion.HandlerRegions.Add(TransformRegion(subRegion));
-
-                    if (ehRegion.EpilogueRegion is {})
-                    {
-                        newEhRegion.EpilogueRegion = new BasicControlFlowRegion<Statement<TInstruction>>();
-                        TransformSubRegions(ehRegion.EpilogueRegion, newEhRegion.EpilogueRegion);
-                        _regionsMapping[ehRegion.EpilogueRegion] = newEhRegion.EpilogueRegion;
-                    }
 
                     return newEhRegion;
 

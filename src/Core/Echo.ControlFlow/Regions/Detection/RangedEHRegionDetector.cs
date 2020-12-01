@@ -48,26 +48,6 @@ namespace Echo.ControlFlow.Regions.Detection
                     ehRegions.Add(currentEHRange.ProtectedRange, ehRegion);
                     rangeToRegion.Add(currentEHRange.ProtectedRange, ehRegion.ProtectedRegion);
 
-                    if (currentEHRange.PrologueRange != AddressRange.NilRange)
-                    {
-                        ehRegion.PrologueRegion = new BasicControlFlowRegion<TInstruction>
-                        {
-                            ParentRegion = ehRegion
-                        };
-                        ehRegions.Add(currentEHRange.PrologueRange, ehRegion);
-                        rangeToRegion.Add(currentEHRange.PrologueRange, ehRegion.PrologueRegion);
-                    }
-
-                    if (currentEHRange.EpilogueRange != AddressRange.NilRange)
-                    {
-                        ehRegion.EpilogueRegion = new BasicControlFlowRegion<TInstruction>
-                        {
-                            ParentRegion = ehRegion
-                        };
-                        ehRegions.Add(currentEHRange.EpilogueRange, ehRegion);
-                        rangeToRegion.Add(currentEHRange.EpilogueRange, ehRegion.EpilogueRegion);
-                    }
-
                     // Since the ranges are sorted by enclosing EHs first, we can backtrack the list of ranges to find.
                     // the parent region (if there is any).
                     BasicControlFlowRegion<TInstruction> parentRegion = null;

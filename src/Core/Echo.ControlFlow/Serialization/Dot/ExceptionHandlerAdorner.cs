@@ -128,12 +128,8 @@ namespace Echo.ControlFlow.Serialization.Dot
                     {
                         if (parentEh.ProtectedRegion == basicRegion)
                             regionStyle = ProtectedRegionColor;
-                        else if (parentEh.PrologueRegion == basicRegion)
-                            regionStyle = PrologueRegionColor;
                         else if (parentEh.HandlerRegions.Contains(basicRegion))
                             regionStyle = HandlerRegionColor;
-                        else if (parentEh.EpilogueRegion == basicRegion)
-                            regionStyle = EpilogueRegionColor;
                     }
 
                     break;

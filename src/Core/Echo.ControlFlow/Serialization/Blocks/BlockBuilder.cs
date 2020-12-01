@@ -114,18 +114,6 @@ namespace Echo.ControlFlow.Serialization.Blocks
                     enteredBlock = ehBlock.ProtectedBlock;
                     enteredSubRegion = parentEhRegion.ProtectedRegion;
                 }
-                else if (parentEhRegion.PrologueRegion == enteredRegion)
-                {
-                    // We entered the prologue region.
-                    enteredBlock = ehBlock.PrologueBlock;
-                    enteredSubRegion = parentEhRegion.PrologueRegion;
-                }
-                else if (parentEhRegion.EpilogueRegion == enteredRegion)
-                {
-                    // We entered the epilogue region.
-                    enteredBlock = ehBlock.EpilogueBlock;
-                    enteredSubRegion = parentEhRegion.EpilogueRegion;
-                }
                 else
                 {
                     // We entered a handler region.

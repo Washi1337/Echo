@@ -10,9 +10,6 @@ namespace Echo.ControlFlow.Regions
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public class ExceptionHandlerRegion<TInstruction> : ControlFlowRegion<TInstruction>
     {
-        private BasicControlFlowRegion<TInstruction> _prologue;
-        private BasicControlFlowRegion<TInstruction> _epilogue;
-        
         /// <summary>
         /// Creates a new instance of the <see cref="ExceptionHandlerRegion{TInstruction}"/> class.
         /// </summary>
@@ -33,45 +30,13 @@ namespace Echo.ControlFlow.Regions
         {
             get;
         }
-
-        /// <summary>
-        /// Gets the region of nodes that form the code that precedes the handler(s).
-        /// </summary>
-        public BasicControlFlowRegion<TInstruction> PrologueRegion
-        {
-            get => _prologue;
-            set
-            {
-                if (_prologue?.ParentRegion == this)
-                    _prologue.ParentRegion = null;
-                
-                _prologue = value;
-                _prologue.ParentRegion = this;
-            }
-        }
-
+        
         /// <summary>
         /// Gets the regions that form the handler blocks.
         /// </summary>
         public RegionCollection<TInstruction, ControlFlowRegion<TInstruction>> HandlerRegions
         {
             get;
-        }
-
-        /// <summary>
-        /// Gets the region of nodes that form the code that proceeds the handler(s).
-        /// </summary>
-        public BasicControlFlowRegion<TInstruction> EpilogueRegion
-        {
-            get => _epilogue;
-            set
-            {
-                if (_epilogue?.ParentRegion == this)
-                    _epilogue.ParentRegion = null;
-                
-                _epilogue = value;
-                _epilogue.ParentRegion = this;
-            }
         }
 
         /// <inheritdoc />
@@ -85,15 +50,9 @@ namespace Echo.ControlFlow.Regions
         public override IEnumerable<ControlFlowRegion<TInstruction>> GetSubRegions()
         {
             yield return ProtectedRegion;
-
-            if (PrologueRegion is {})
-                yield return PrologueRegion;
             
             foreach (var handlerRegion in HandlerRegions)
                 yield return handlerRegion;
-
-            if (EpilogueRegion is {}) 
-                yield return EpilogueRegion;
         }
 
         /// <inheritdoc />

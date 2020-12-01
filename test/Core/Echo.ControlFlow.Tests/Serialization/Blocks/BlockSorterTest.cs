@@ -242,47 +242,47 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
                 "Handler region was ordered after normal exit.");
         }
 
-        [Fact]
-        public void PrologueAndEpilogueRegionsShouldHaveCorrectPrecedence()
-        {
-            var cfg = GenerateGraph(7);
-            cfg.Entrypoint = cfg.Nodes[6];
-
-            var eh = new ExceptionHandlerRegion<int>
-            {
-                PrologueRegion = new BasicControlFlowRegion<int>(),
-                EpilogueRegion = new BasicControlFlowRegion<int>()
-            };
-            
-            cfg.Regions.Add(eh);
-            
-            eh.ProtectedRegion.Nodes.Add(cfg.Nodes[5]);
-            eh.ProtectedRegion.Entrypoint = cfg.Nodes[5];
-            
-            eh.PrologueRegion.Nodes.Add(cfg.Nodes[4]);
-            eh.PrologueRegion.Entrypoint = cfg.Nodes[4];
-            
-            var handler = new BasicControlFlowRegion<int>();
-            eh.HandlerRegions.Add(handler);
-            handler.Nodes.Add(cfg.Nodes[3]);
-            handler.Entrypoint = cfg.Nodes[3];
-            
-            eh.EpilogueRegion.Nodes.Add(cfg.Nodes[2]);
-            eh.EpilogueRegion.Entrypoint = cfg.Nodes[2];
-
-            cfg.Nodes[6].ConnectWith(cfg.Nodes[5]);
-            cfg.Nodes[5].ConnectWith(cfg.Nodes[4], ControlFlowEdgeType.Abnormal);
-            cfg.Nodes[5].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[4].ConnectWith(cfg.Nodes[3]);
-            cfg.Nodes[3].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[2].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[1].ConnectWith(cfg.Nodes[0]);
-
-            var sorted = cfg.SortNodes();
-            Assert.Equal(new[]
-            {
-                cfg.Nodes[6], cfg.Nodes[5], cfg.Nodes[4], cfg.Nodes[3], cfg.Nodes[2], cfg.Nodes[1], cfg.Nodes[0]
-            }, sorted);
-        }
+        // [Fact]
+        // public void PrologueAndEpilogueRegionsShouldHaveCorrectPrecedence()
+        // {
+        //     var cfg = GenerateGraph(7);
+        //     cfg.Entrypoint = cfg.Nodes[6];
+        //
+        //     var eh = new ExceptionHandlerRegion<int>
+        //     {
+        //         PrologueRegion = new BasicControlFlowRegion<int>(),
+        //         EpilogueRegion = new BasicControlFlowRegion<int>()
+        //     };
+        //     
+        //     cfg.Regions.Add(eh);
+        //     
+        //     eh.ProtectedRegion.Nodes.Add(cfg.Nodes[5]);
+        //     eh.ProtectedRegion.Entrypoint = cfg.Nodes[5];
+        //     
+        //     eh.PrologueRegion.Nodes.Add(cfg.Nodes[4]);
+        //     eh.PrologueRegion.Entrypoint = cfg.Nodes[4];
+        //     
+        //     var handler = new BasicControlFlowRegion<int>();
+        //     eh.HandlerRegions.Add(handler);
+        //     handler.Nodes.Add(cfg.Nodes[3]);
+        //     handler.Entrypoint = cfg.Nodes[3];
+        //     
+        //     eh.EpilogueRegion.Nodes.Add(cfg.Nodes[2]);
+        //     eh.EpilogueRegion.Entrypoint = cfg.Nodes[2];
+        //
+        //     cfg.Nodes[6].ConnectWith(cfg.Nodes[5]);
+        //     cfg.Nodes[5].ConnectWith(cfg.Nodes[4], ControlFlowEdgeType.Abnormal);
+        //     cfg.Nodes[5].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.Unconditional);
+        //     cfg.Nodes[4].ConnectWith(cfg.Nodes[3]);
+        //     cfg.Nodes[3].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.Unconditional);
+        //     cfg.Nodes[2].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.Unconditional);
+        //     cfg.Nodes[1].ConnectWith(cfg.Nodes[0]);
+        //
+        //     var sorted = cfg.SortNodes();
+        //     Assert.Equal(new[]
+        //     {
+        //         cfg.Nodes[6], cfg.Nodes[5], cfg.Nodes[4], cfg.Nodes[3], cfg.Nodes[2], cfg.Nodes[1], cfg.Nodes[0]
+        //     }, sorted);
+        // }
     }
 }
