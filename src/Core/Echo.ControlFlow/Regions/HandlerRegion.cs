@@ -9,8 +9,8 @@ namespace Echo.ControlFlow.Regions
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public class HandlerRegion<TInstruction> : ControlFlowRegion<TInstruction>
     {
-        private BasicControlFlowRegion<TInstruction> _prologue;
-        private BasicControlFlowRegion<TInstruction> _epilogue;
+        private ScopeRegion<TInstruction> _prologue;
+        private ScopeRegion<TInstruction> _epilogue;
 
         /// <summary>
         /// Creates a new instance of the <see cref="HandlerRegion{TInstruction}"/> class without
@@ -18,7 +18,7 @@ namespace Echo.ControlFlow.Regions
         /// </summary>
         public HandlerRegion()
         {
-            Contents = new BasicControlFlowRegion<TInstruction>
+            Contents = new ScopeRegion<TInstruction>
             {
                 // We need to manually set the parent region here.
                 ParentRegion = this
@@ -31,7 +31,7 @@ namespace Echo.ControlFlow.Regions
         /// <remarks>
         /// This region is often used for filter clauses of the exception handler.
         /// </remarks>
-        public BasicControlFlowRegion<TInstruction> Prologue
+        public ScopeRegion<TInstruction> Prologue
         {
             get => _prologue;
             set => UpdateChildRegion(ref _prologue, value);
@@ -40,7 +40,7 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets the region of nodes that form the code of the handler block.
         /// </summary>
-        public BasicControlFlowRegion<TInstruction> Contents
+        public ScopeRegion<TInstruction> Contents
         {
             get;
         }
@@ -48,13 +48,13 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets the region of nodes that form the code that proceeds the handler.
         /// </summary>
-        public BasicControlFlowRegion<TInstruction> Epilogue
+        public ScopeRegion<TInstruction> Epilogue
         {
             get => _epilogue;
             set => UpdateChildRegion(ref _epilogue, value);
         }
 
-        private void UpdateChildRegion(ref BasicControlFlowRegion<TInstruction> field, BasicControlFlowRegion<TInstruction> value)
+        private void UpdateChildRegion(ref ScopeRegion<TInstruction> field, ScopeRegion<TInstruction> value)
         {
             if (field?.ParentRegion == this)
                 field.ParentRegion = null;

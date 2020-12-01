@@ -466,7 +466,7 @@ namespace Echo.ControlFlow
         /// Moves the node from its current region (if any) into the provided sub region.
         /// </summary>
         /// <param name="region">The region to move the node to.</param>
-        public void MoveToRegion(BasicControlFlowRegion<TInstruction> region)
+        public void MoveToRegion(ScopeRegion<TInstruction> region)
         {
             RemoveFromAnyRegion();
             region.Nodes.Add(this);

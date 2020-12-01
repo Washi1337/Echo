@@ -16,8 +16,8 @@ namespace Echo.Ast.Construction
         private readonly ControlFlowGraph<TInstruction> _controlFlowGraph;
         private readonly AstArchitecture<TInstruction> _architecture;
         private readonly BlockTransformer<TInstruction> _transformer;
-        private readonly Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<Statement<TInstruction>>> _regionsMapping =
-            new Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<Statement<TInstruction>>>();
+        private readonly Dictionary<ScopeRegion<TInstruction>, ScopeRegion<Statement<TInstruction>>> _regionsMapping =
+            new Dictionary<ScopeRegion<TInstruction>, ScopeRegion<Statement<TInstruction>>>();
         
         /// <summary>
         /// Creates a new Ast parser with the given <see cref="ControlFlowGraph{TInstruction}"/>
@@ -60,7 +60,7 @@ namespace Echo.Ast.Construction
                 newGraph.Nodes.Add(newNode);
                 
                 // Move node to newly created region.
-                if (originalNode.ParentRegion is BasicControlFlowRegion<TInstruction> basicRegion)
+                if (originalNode.ParentRegion is ScopeRegion<TInstruction> basicRegion)
                     newNode.MoveToRegion(_regionsMapping[basicRegion]);
             }
 
@@ -83,7 +83,7 @@ namespace Echo.Ast.Construction
                 foreach (var child in region.GetSubRegions().Where(r => r is {}))
                     FixEntryPoint(child);
 
-                if (!(region is BasicControlFlowRegion<TInstruction> basicControlFlowRegion))
+                if (!(region is ScopeRegion<TInstruction> basicControlFlowRegion))
                     return;
 
                 var entry = basicControlFlowRegion.Entrypoint;
@@ -98,9 +98,9 @@ namespace Echo.Ast.Construction
         {
             switch (region)
             {
-                case BasicControlFlowRegion<TInstruction> basicRegion:
+                case ScopeRegion<TInstruction> basicRegion:
                     // Create new basic region.
-                    var newBasicRegion = new BasicControlFlowRegion<Statement<TInstruction>>();
+                    var newBasicRegion = new ScopeRegion<Statement<TInstruction>>();
                     TransformSubRegions(basicRegion, newBasicRegion);
 
                     // Register basic region pair.
@@ -135,10 +135,10 @@ namespace Echo.Ast.Construction
             var result = new HandlerRegion<Statement<TInstruction>>();
 
             if (handlerRegion.Prologue != null)
-                result.Prologue = (BasicControlFlowRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.Prologue);
+                result.Prologue = (ScopeRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.Prologue);
 
             if (handlerRegion.Epilogue != null)
-                result.Epilogue = (BasicControlFlowRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.Epilogue);
+                result.Epilogue = (ScopeRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.Epilogue);
 
             // Contents is read-only, so instead we just transform all sub regions and add it to the
             // existing protected region.
@@ -149,8 +149,8 @@ namespace Echo.Ast.Construction
         }
 
         private void TransformSubRegions(
-            BasicControlFlowRegion<TInstruction> originalRegion, 
-            BasicControlFlowRegion<Statement<TInstruction>> newRegion)
+            ScopeRegion<TInstruction> originalRegion, 
+            ScopeRegion<Statement<TInstruction>> newRegion)
         {
             foreach (var subRegion in originalRegion.Regions)
                 newRegion.Regions.Add(TransformRegion(subRegion));

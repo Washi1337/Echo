@@ -15,7 +15,7 @@ namespace Echo.ControlFlow.Regions
         /// </summary>
         public ExceptionHandlerRegion()
         {
-            ProtectedRegion = new BasicControlFlowRegion<TInstruction>
+            ProtectedRegion = new ScopeRegion<TInstruction>
             {
                 // We need to manually set the parent region here.
                 ParentRegion = this
@@ -27,7 +27,7 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets the region of nodes that is protected by the exception handler. 
         /// </summary>
-        public BasicControlFlowRegion<TInstruction> ProtectedRegion
+        public ScopeRegion<TInstruction> ProtectedRegion
         {
             get;
         }

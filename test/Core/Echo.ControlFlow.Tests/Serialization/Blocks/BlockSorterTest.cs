@@ -256,14 +256,14 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var handler = new HandlerRegion<int>();
             eh.HandlerRegions.Add(handler);
             
-            handler.Prologue = new BasicControlFlowRegion<int>();
+            handler.Prologue = new ScopeRegion<int>();
             handler.Prologue.Nodes.Add(cfg.Nodes[indices[2]]);
             handler.Prologue.Entrypoint = cfg.Nodes[indices[2]];
             
             handler.Contents.Nodes.Add(cfg.Nodes[indices[3]]);
             handler.Contents.Entrypoint = cfg.Nodes[indices[3]];
             
-            handler.Epilogue = new BasicControlFlowRegion<int>();
+            handler.Epilogue = new ScopeRegion<int>();
             handler.Epilogue.Nodes.Add(cfg.Nodes[indices[4]]);
             handler.Epilogue.Entrypoint = cfg.Nodes[indices[4]];
         

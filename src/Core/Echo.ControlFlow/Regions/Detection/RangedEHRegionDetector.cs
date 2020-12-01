@@ -31,11 +31,11 @@ namespace Echo.ControlFlow.Regions.Detection
             DetermineRegionEntrypoints(cfg, sortedRanges, rangeToRegionMapping);
         }
 
-        private static Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> CreateEHRegions<TInstruction>(
+        private static Dictionary<AddressRange, ScopeRegion<TInstruction>> CreateEHRegions<TInstruction>(
             ControlFlowGraph<TInstruction> cfg, 
             IReadOnlyList<ExceptionHandlerRange> sortedRanges)
         {
-            var result = new Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>>();
+            var result = new Dictionary<AddressRange, ScopeRegion<TInstruction>>();
 
             var ehRegions = new Dictionary<AddressRange, ExceptionHandlerRegion<TInstruction>>();
             for (int i = 0; i < sortedRanges.Count; i++)
@@ -71,7 +71,7 @@ namespace Echo.ControlFlow.Regions.Detection
                 // Do we need to add a prologue block?
                 if (currentEHRange.PrologueRange != AddressRange.NilRange)
                 {
-                    handlerRegion.Prologue = new BasicControlFlowRegion<TInstruction>();
+                    handlerRegion.Prologue = new ScopeRegion<TInstruction>();
                     ehRegions.Add(currentEHRange.PrologueRange, ehRegion);
                     result.Add(currentEHRange.PrologueRange, handlerRegion.Prologue);
                 }
@@ -79,7 +79,7 @@ namespace Echo.ControlFlow.Regions.Detection
                 // Do we need to add an epilogue block?
                 if (currentEHRange.EpilogueRange != AddressRange.NilRange)
                 {
-                    handlerRegion.Epilogue = new BasicControlFlowRegion<TInstruction>();
+                    handlerRegion.Epilogue = new ScopeRegion<TInstruction>();
                     ehRegions.Add(currentEHRange.EpilogueRange, ehRegion);
                     result.Add(currentEHRange.EpilogueRange, handlerRegion.Epilogue);
                 }
@@ -88,8 +88,8 @@ namespace Echo.ControlFlow.Regions.Detection
             return result;
         }
 
-        private static BasicControlFlowRegion<TInstruction> FindParentRegion<TInstruction>(
-            Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> regions,
+        private static ScopeRegion<TInstruction> FindParentRegion<TInstruction>(
+            Dictionary<AddressRange, ScopeRegion<TInstruction>> regions,
             IReadOnlyList<ExceptionHandlerRange> sortedRanges,
             int currentRangeIndex)
         {
@@ -117,7 +117,7 @@ namespace Echo.ControlFlow.Regions.Detection
         private static void InsertNodesInEHRegions<TInstruction>(
             ControlFlowGraph<TInstruction> cfg, 
             IReadOnlyList<ExceptionHandlerRange> sortedRanges,
-            Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> rangeToRegionMapping)
+            Dictionary<AddressRange, ScopeRegion<TInstruction>> rangeToRegionMapping)
         {
             foreach (var node in cfg.Nodes)
             {
@@ -152,7 +152,7 @@ namespace Echo.ControlFlow.Regions.Detection
         }
 
         private static void DetermineRegionEntrypoints<TInstruction>(ControlFlowGraph<TInstruction> cfg, List<ExceptionHandlerRange> sortedRanges,
-            Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> rangeToRegionMapping)
+            Dictionary<AddressRange, ScopeRegion<TInstruction>> rangeToRegionMapping)
         {
             foreach (var range in sortedRanges)
             {

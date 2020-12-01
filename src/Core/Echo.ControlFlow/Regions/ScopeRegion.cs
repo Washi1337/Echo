@@ -5,17 +5,17 @@ using Echo.ControlFlow.Collections;
 namespace Echo.ControlFlow.Regions
 {
     /// <summary>
-    /// Represents a simple unordered region in a control flow graph. 
+    /// Represents a simple unordered region defining an inner scope in the control flow graph.
     /// </summary>
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
-    public class BasicControlFlowRegion<TInstruction> : ControlFlowRegion<TInstruction>
+    public class ScopeRegion<TInstruction> : ControlFlowRegion<TInstruction>
     {
         private ControlFlowNode<TInstruction> _entrypoint;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="BasicControlFlowRegion{TInstruction}"/> class.
+        /// Creates a new instance of the <see cref="ScopeRegion{TInstruction}"/> class.
         /// </summary>
-        public BasicControlFlowRegion()
+        public ScopeRegion()
         {
             Regions = new RegionCollection<TInstruction, ControlFlowRegion<TInstruction>>(this);
             Nodes = new RegionNodeCollection<TInstruction>(this);
@@ -82,5 +82,6 @@ namespace Echo.ControlFlow.Regions
 
             return false;
         }
+        
     }
 }

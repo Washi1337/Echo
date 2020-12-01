@@ -90,7 +90,7 @@ namespace Echo.ControlFlow.Serialization.Dot
             string prefix = null;
             switch (region)
             {
-                case BasicControlFlowRegion<TInstruction> basicRegion:
+                case ScopeRegion<TInstruction> basicRegion:
                     if (basicRegion.ParentRegion is ExceptionHandlerRegion<TInstruction> parentEh)
                     {
                         if (parentEh.ProtectedRegion == basicRegion)
@@ -125,7 +125,7 @@ namespace Echo.ControlFlow.Serialization.Dot
             var regionStyle = DefaultRegionColor;
             switch (region)
             {
-                case BasicControlFlowRegion<TInstruction> basicRegion:
+                case ScopeRegion<TInstruction> basicRegion:
                     if (basicRegion.ParentRegion is ExceptionHandlerRegion<TInstruction> parentEh)
                     {
                         if (parentEh.ProtectedRegion == basicRegion)

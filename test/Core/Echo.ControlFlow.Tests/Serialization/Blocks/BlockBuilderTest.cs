@@ -61,7 +61,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
 
             var cfg = cfgBuilder.ConstructFlowGraph(0);
             
-            var region = new BasicControlFlowRegion<DummyInstruction>();
+            var region = new ScopeRegion<DummyInstruction>();
             cfg.Regions.Add(region);
             region.Nodes.Add(cfg.Nodes[2]);
             
