@@ -13,58 +13,121 @@ namespace Echo.ControlFlow.Serialization.Dot
     public class ExceptionHandlerAdorner<TInstruction> : IDotSubGraphAdorner
     {
         /// <summary>
-        /// Gets or sets the style of an exception handler region.
+        /// Gets or sets the style of an enclosing exception handler region.
         /// </summary>
         public DotEntityStyle ExceptionHandlerStyle
         {
             get;
             set;
-        } = new DotEntityStyle("red", "solid");
+        } = new DotEntityStyle("black", "dashed");
+
+        /// <summary>
+        /// Gets or sets the label of an enclosing exception handler region.
+        /// </summary>
+        public string ExceptionHandlerLabel
+        {
+            get;
+            set;
+        } = "Exception Handler Region";
 
         /// <summary>
         /// Gets or sets the style of the protected region in an exception handler region.
         /// </summary>
-        public DotEntityStyle ProtectedRegionColor
+        public DotEntityStyle ProtectedStyle
         {
             get;
             set;
-        } = new DotEntityStyle("green", "dashed");
+        } = new DotEntityStyle("green", "solid");
 
         /// <summary>
-        /// Gets or sets the style of a prologue region in an exception handler region.
+        /// Gets or sets the label of the protected region in an exception handler region.
         /// </summary>
-        public DotEntityStyle PrologueRegionStyle
+        public string ProtectedLabel
         {
             get;
             set;
-        } = new DotEntityStyle("purple", "dashed");
+        } = "Protected";
 
         /// <summary>
         /// Gets or sets the style of a handler region in an exception handler region.
         /// </summary>
-        public DotEntityStyle HandlerRegionStyle
+        public DotEntityStyle HandlerStyle
         {
             get;
             set;
-        } = new DotEntityStyle("blue", "dashed");
+        } = new DotEntityStyle("red", "dashed");
 
         /// <summary>
-        /// Gets or sets the style of an epilogue region in an exception handler region.
+        /// Gets or sets the label of a handler region in an exception handler region.
         /// </summary>
-        public DotEntityStyle EpilogueRegionStyle
+        public string HandlerLabel
         {
             get;
             set;
-        } = new DotEntityStyle("orange", "dashed");
+        } = "Handler Region";
+
+        /// <summary>
+        /// Gets or sets the style of a prologue region in an exception handler region.
+        /// </summary>
+        public DotEntityStyle PrologueStyle
+        {
+            get;
+            set;
+        } = new DotEntityStyle("royalblue", "solid");
+
+        /// <summary>
+        /// Gets or sets the label of the prologue region in an exception handler region.
+        /// </summary>
+        public string PrologueLabel
+        {
+            get;
+            set;
+        } = "Prologue";
 
         /// <summary>
         /// Gets or sets the default style of a control flow region.
         /// </summary>
-        public DotEntityStyle DefaultRegionStyle
+        public DotEntityStyle HandlerContentsStyle
         {
             get;
             set;
-        } = new DotEntityStyle("gray", "dashed");
+        } = new DotEntityStyle("red", "solid");
+        
+        /// <summary>
+        /// Gets or sets the label of a contents region in a handler of an exception handler region.
+        /// </summary>
+        public string HandlerContentsLabel
+        {
+            get;
+            set;
+        } = "Handler";
+
+        /// <summary>
+        /// Gets or sets the style of an epilogue region in an exception handler region.
+        /// </summary>
+        public DotEntityStyle EpilogueStyle
+        {
+            get;
+            set;
+        } = new DotEntityStyle("orange", "solid");
+
+        /// <summary>
+        /// Gets or sets the label of an epilogue region in an exception handler region.
+        /// </summary>
+        public string EpilogueLabel
+        {
+            get;
+            set;
+        } = "Epilogue";
+
+        /// <summary>
+        /// Gets or sets the default style of a control flow region.
+        /// </summary>
+        public DotEntityStyle DefaultStyle
+        {
+            get;
+            set;
+        } = new DotEntityStyle("gray", "solid");
         
         /// <inheritdoc />
         public string GetSubGraphName(ISubGraph subGraph)
@@ -135,56 +198,57 @@ namespace Echo.ControlFlow.Serialization.Dot
             if (!(subGraph is IControlFlowRegion<TInstruction> region))
                 return null;
             
-            var regionStyle = GetSubGraphStyle(region);
+            var (style, label) = GetSubGraphStyle(region);
 
             return new Dictionary<string, string>
             {
-                ["color"] = regionStyle.Color,
-                ["style"] = regionStyle.Style
+                ["color"] = style.Color,
+                ["style"] = style.Style,
+                ["label"] = label
             };
         }
 
-        private DotEntityStyle GetSubGraphStyle(IControlFlowRegion<TInstruction> region)
+        private (DotEntityStyle Style, string Label) GetSubGraphStyle(IControlFlowRegion<TInstruction> region)
         {
             switch (region)
             {
                 case ScopeRegion<TInstruction> basicRegion:
-                    return GetScopeRegionStyle(basicRegion);
+                    return GetScopeStyle(basicRegion);
 
                 case ExceptionHandlerRegion<TInstruction> _:
-                    return ExceptionHandlerStyle;
+                    return (ExceptionHandlerStyle, ExceptionHandlerLabel);
 
                 case HandlerRegion<TInstruction> _:
-                    return HandlerRegionStyle;
+                    return (HandlerStyle, HandlerLabel);
             }
 
-            return DefaultRegionStyle;
+            return (DefaultStyle, string.Empty);
         }
 
-        private DotEntityStyle GetScopeRegionStyle(ScopeRegion<TInstruction> basicRegion)
+        private (DotEntityStyle Style, string Label) GetScopeStyle(ScopeRegion<TInstruction> basicRegion)
         {
             switch (basicRegion.ParentRegion)
             {
                 case ExceptionHandlerRegion<TInstruction> parentEh:
                 {
                     if (parentEh.ProtectedRegion == basicRegion)
-                        return ProtectedRegionColor;
+                        return (ProtectedStyle, ProtectedLabel);
                     break;
                 }
 
                 case HandlerRegion<TInstruction> parentHandler:
                 {
                     if (parentHandler.Prologue == basicRegion)
-                        return PrologueRegionStyle;
+                        return (PrologueStyle, PrologueLabel);
                     if (parentHandler.Contents == basicRegion)
-                        return DefaultRegionStyle;
+                        return (HandlerContentsStyle, HandlerContentsLabel);
                     if (parentHandler.Epilogue == basicRegion)
-                        return EpilogueRegionStyle;
+                        return (EpilogueStyle, EpilogueLabel);
                     break;
                 }
             }
 
-            return DefaultRegionStyle;
+            return (DefaultStyle, HandlerContentsLabel);
         }
         
     }
