@@ -25,7 +25,7 @@ namespace Echo.ControlFlow
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
             Nodes = new NodeCollection<TInstruction>(this);
-            Regions = new RegionCollection<TInstruction>(this);
+            Regions = new RegionCollection<TInstruction, ControlFlowRegion<TInstruction>>(this);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets a collection of top-level regions that this control flow graph defines. 
         /// </summary>
-        public RegionCollection<TInstruction> Regions
+        public RegionCollection<TInstruction, ControlFlowRegion<TInstruction>> Regions
         {
             get;
         }

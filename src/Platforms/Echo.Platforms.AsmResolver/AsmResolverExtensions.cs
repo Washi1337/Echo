@@ -24,9 +24,16 @@ namespace Echo.Platforms.AsmResolver
         /// <returns>The converted handler.</returns>
         public static ExceptionHandlerRange ToEchoRange(this CilExceptionHandler handler)
         {
-            return new ExceptionHandlerRange(
-                new AddressRange(handler.TryStart.Offset, handler.TryEnd.Offset),
-                new AddressRange(handler.HandlerStart.Offset, handler.HandlerEnd.Offset));
+            var tryRange = new AddressRange(handler.TryStart.Offset, handler.TryEnd.Offset);
+            var handlerRange = new AddressRange(handler.HandlerStart.Offset, handler.HandlerEnd.Offset);
+            
+            if (handler.HandlerType == CilExceptionHandlerType.Filter)
+            {
+                var filterRange = new AddressRange(handler.FilterStart.Offset, handler.HandlerStart.Offset);
+                return new ExceptionHandlerRange(tryRange, filterRange, handlerRange, handler);
+            }
+
+            return new ExceptionHandlerRange(tryRange, handlerRange, handler);
         }
 
         /// <summary>

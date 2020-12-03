@@ -11,7 +11,7 @@ namespace Echo.ControlFlow.Tests.Regions
         public void AddSubRegionShouldSetParentRegion()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            var region = new BasicControlFlowRegion<int>();
+            var region = new ScopeRegion<int>();
             
             Assert.Null(region.ParentRegion);
             graph.Regions.Add(region);
@@ -22,7 +22,7 @@ namespace Echo.ControlFlow.Tests.Regions
         public void RemoveSubRegionShouldUnsetParentRegion()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            var region = new BasicControlFlowRegion<int>();
+            var region = new ScopeRegion<int>();
             
             graph.Regions.Add(region);
             Assert.Same(graph, region.ParentRegion);
@@ -37,7 +37,7 @@ namespace Echo.ControlFlow.Tests.Regions
 
             var regions = new[]
             {
-                new BasicControlFlowRegion<int>(), new BasicControlFlowRegion<int>(), new BasicControlFlowRegion<int>(),
+                new ScopeRegion<int>(), new ScopeRegion<int>(), new ScopeRegion<int>(),
             };
 
             foreach (var region in regions)
@@ -54,7 +54,7 @@ namespace Echo.ControlFlow.Tests.Regions
         public void AddingRegionSecondTimeShouldThrow()
         { 
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            var region = new BasicControlFlowRegion<int>();
+            var region = new ScopeRegion<int>();
 
             graph.Regions.Add(region);
 
@@ -66,7 +66,7 @@ namespace Echo.ControlFlow.Tests.Regions
         { 
             var graph1 = new ControlFlowGraph<int>(IntArchitecture.Instance);
             var graph2 = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            var region = new BasicControlFlowRegion<int>();
+            var region = new ScopeRegion<int>();
 
             graph1.Regions.Add(region);
 
@@ -79,7 +79,7 @@ namespace Echo.ControlFlow.Tests.Regions
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
             var node = new ControlFlowNode<int>(0);
             
-            var region = new BasicControlFlowRegion<int>();
+            var region = new ScopeRegion<int>();
             graph.Regions.Add(region);
 
             Assert.Throws<ArgumentException>(() => region.Nodes.Add(node));
@@ -92,7 +92,7 @@ namespace Echo.ControlFlow.Tests.Regions
             var node = new ControlFlowNode<int>(0);
             graph.Nodes.Add(node);
             
-            var region = new BasicControlFlowRegion<int>();
+            var region = new ScopeRegion<int>();
 
             Assert.Throws<InvalidOperationException>(() => region.Nodes.Add(node));
         }
@@ -104,7 +104,7 @@ namespace Echo.ControlFlow.Tests.Regions
             var node = new ControlFlowNode<int>(0);
             graph.Nodes.Add(node);
             
-            var region = new BasicControlFlowRegion<int>();
+            var region = new ScopeRegion<int>();
             graph.Regions.Add(region);
 
             region.Nodes.Add(node);
@@ -119,7 +119,7 @@ namespace Echo.ControlFlow.Tests.Regions
             var node = new ControlFlowNode<int>(0);
             graph.Nodes.Add(node);
             
-            var region = new BasicControlFlowRegion<int>();
+            var region = new ScopeRegion<int>();
             graph.Regions.Add(region);
 
             region.Nodes.Add(node);
@@ -135,8 +135,8 @@ namespace Echo.ControlFlow.Tests.Regions
             var node = new ControlFlowNode<int>(0);
             graph.Nodes.Add(node);
             
-            var region1 = new BasicControlFlowRegion<int>();
-            var region2 = new BasicControlFlowRegion<int>();
+            var region1 = new ScopeRegion<int>();
+            var region2 = new ScopeRegion<int>();
             graph.Regions.Add(region1);
             graph.Regions.Add(region2);
 
@@ -152,7 +152,7 @@ namespace Echo.ControlFlow.Tests.Regions
             var node = new ControlFlowNode<int>(0);
             graph.Nodes.Add(node);
             
-            var region = new BasicControlFlowRegion<int>();
+            var region = new ScopeRegion<int>();
             graph.Regions.Add(region);
             region.Nodes.Add(node);
 

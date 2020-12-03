@@ -15,26 +15,27 @@ namespace Echo.ControlFlow.Regions
         /// </summary>
         public ExceptionHandlerRegion()
         {
-            ProtectedRegion = new BasicControlFlowRegion<TInstruction>
+            ProtectedRegion = new ScopeRegion<TInstruction>
             {
+                // We need to manually set the parent region here.
                 ParentRegion = this
             };
             
-            HandlerRegions = new RegionCollection<TInstruction>(this);
+            Handlers = new RegionCollection<TInstruction, HandlerRegion<TInstruction>>(this);
         }
 
         /// <summary>
         /// Gets the region of nodes that is protected by the exception handler. 
         /// </summary>
-        public BasicControlFlowRegion<TInstruction> ProtectedRegion
+        public ScopeRegion<TInstruction> ProtectedRegion
         {
             get;
         }
-
+        
         /// <summary>
         /// Gets the regions that form the handler blocks.
         /// </summary>
-        public RegionCollection<TInstruction> HandlerRegions
+        public RegionCollection<TInstruction, HandlerRegion<TInstruction>> Handlers
         {
             get;
         }
@@ -50,13 +51,13 @@ namespace Echo.ControlFlow.Regions
         public override IEnumerable<ControlFlowRegion<TInstruction>> GetSubRegions()
         {
             yield return ProtectedRegion;
-
-            foreach (var handlerRegion in HandlerRegions)
+            
+            foreach (var handlerRegion in Handlers)
                 yield return handlerRegion;
         }
 
         /// <inheritdoc />
         public override bool RemoveNode(ControlFlowNode<TInstruction> node) =>
-            ProtectedRegion.RemoveNode(node) || HandlerRegions.Any(r => r.RemoveNode(node));
+            ProtectedRegion.RemoveNode(node) || Handlers.Any(r => r.RemoveNode(node));
     }
 }

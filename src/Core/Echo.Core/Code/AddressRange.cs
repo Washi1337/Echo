@@ -8,6 +8,11 @@ namespace Echo.Core.Code
     public readonly struct AddressRange
     {
         /// <summary>
+        /// A range that starts and ends at index 0.
+        /// </summary>
+        public static readonly AddressRange NilRange = new AddressRange(0, 0);
+        
+        /// <summary>
         /// Determines whether two address ranges are considered equal.
         /// </summary>
         /// <param name="a">The first range.</param>

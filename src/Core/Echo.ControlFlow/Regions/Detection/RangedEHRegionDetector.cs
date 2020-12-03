@@ -31,56 +31,93 @@ namespace Echo.ControlFlow.Regions.Detection
             DetermineRegionEntrypoints(cfg, sortedRanges, rangeToRegionMapping);
         }
 
-        private static Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> CreateEHRegions<TInstruction>(
+        private static Dictionary<AddressRange, ScopeRegion<TInstruction>> CreateEHRegions<TInstruction>(
             ControlFlowGraph<TInstruction> cfg, 
             IReadOnlyList<ExceptionHandlerRange> sortedRanges)
         {
-            var rangeToRegion = new Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>>();
+            var result = new Dictionary<AddressRange, ScopeRegion<TInstruction>>();
 
             var ehRegions = new Dictionary<AddressRange, ExceptionHandlerRegion<TInstruction>>();
             for (int i = 0; i < sortedRanges.Count; i++)
             {
                 var currentEHRange = sortedRanges[i];
+                
+                // We want to merge exception handlers that have the exact same protected region.
+                // This allows for exception handler constructs that have multiple handler blocks.
+                
+                // Check if we have already created the EH region in an earlier iteration: 
                 if (!ehRegions.TryGetValue(currentEHRange.ProtectedRange, out var ehRegion))
                 {
-                    // Register new EH region for the protected range.
+                    // If not, create and register a new EH region for the protected range.
                     ehRegion = new ExceptionHandlerRegion<TInstruction>();
                     ehRegions.Add(currentEHRange.ProtectedRange, ehRegion);
-                    rangeToRegion.Add(currentEHRange.ProtectedRange, ehRegion.ProtectedRegion);
-
-                    // Since the ranges are sorted by enclosing EHs first, we can backtrack the list of ranges to find.
-                    // the parent region (if there is any).
-                    BasicControlFlowRegion<TInstruction> parentRegion = null;
-                    for (int j = i; j >= 0 && parentRegion is null; j--)
-                    {
-                        var potentialParentRange = sortedRanges[j];
-                        if (potentialParentRange.ProtectedRange.Contains(currentEHRange.ProtectedRange))
-                            parentRegion = rangeToRegion[potentialParentRange.ProtectedRange];
-                        if (potentialParentRange.HandlerRange.Contains(currentEHRange.HandlerRange))
-                            parentRegion = rangeToRegion[potentialParentRange.HandlerRange];
-                    }
-
-                    // Insert region into graph or parent region.
+                    result.Add(currentEHRange.ProtectedRange, ehRegion.ProtectedRegion);
+                    
+                    // We need to add the EH region to a parent region. This can either be the CFG itself, or a
+                    // sub region that was previously added. 
+                    var parentRegion = FindParentRegion(result, sortedRanges, i);
                     if (parentRegion is null)
                         cfg.Regions.Add(ehRegion);
                     else
                         parentRegion.Regions.Add(ehRegion);
                 }
 
-                // Register handler region.
-                var handlerRegion = new BasicControlFlowRegion<TInstruction>();
+                // Create and add new handler region from the range.
+                var handlerRegion = new HandlerRegion<TInstruction>();
                 handlerRegion.Tag = currentEHRange.UserData;
-                ehRegion.HandlerRegions.Add(handlerRegion);
-                rangeToRegion.Add(currentEHRange.HandlerRange, handlerRegion);
+                ehRegion.Handlers.Add(handlerRegion);
+                result.Add(currentEHRange.HandlerRange, handlerRegion.Contents);
+                
+                // Do we need to add a prologue block?
+                if (currentEHRange.PrologueRange != AddressRange.NilRange)
+                {
+                    handlerRegion.Prologue = new ScopeRegion<TInstruction>();
+                    ehRegions.Add(currentEHRange.PrologueRange, ehRegion);
+                    result.Add(currentEHRange.PrologueRange, handlerRegion.Prologue);
+                }
+
+                // Do we need to add an epilogue block?
+                if (currentEHRange.EpilogueRange != AddressRange.NilRange)
+                {
+                    handlerRegion.Epilogue = new ScopeRegion<TInstruction>();
+                    ehRegions.Add(currentEHRange.EpilogueRange, ehRegion);
+                    result.Add(currentEHRange.EpilogueRange, handlerRegion.Epilogue);
+                }
             }
 
-            return rangeToRegion;
+            return result;
+        }
+
+        private static ScopeRegion<TInstruction> FindParentRegion<TInstruction>(
+            Dictionary<AddressRange, ScopeRegion<TInstruction>> regions,
+            IReadOnlyList<ExceptionHandlerRange> sortedRanges,
+            int currentRangeIndex)
+        {
+            var ehRange = sortedRanges[currentRangeIndex];
+            
+            // Since the ranges are sorted by enclosing EHs first, we can backtrack the list of ranges to find.
+            // the parent region (if there is any).
+            
+            for (int j = currentRangeIndex; j >= 0; j--)
+            {
+                var potentialParentRange = sortedRanges[j];
+                if (potentialParentRange.ProtectedRange.Contains(ehRange.ProtectedRange))
+                    return regions[potentialParentRange.ProtectedRange];
+                if (potentialParentRange.PrologueRange.Contains(ehRange.PrologueRange))
+                    return regions[potentialParentRange.PrologueRange];
+                if (potentialParentRange.HandlerRange.Contains(ehRange.HandlerRange))
+                    return regions[potentialParentRange.HandlerRange];
+                if (potentialParentRange.EpilogueRange.Contains(ehRange.EpilogueRange))
+                    return regions[potentialParentRange.EpilogueRange];
+            }
+
+            return null;
         }
 
         private static void InsertNodesInEHRegions<TInstruction>(
             ControlFlowGraph<TInstruction> cfg, 
             IReadOnlyList<ExceptionHandlerRange> sortedRanges,
-            Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> rangeToRegionMapping)
+            Dictionary<AddressRange, ScopeRegion<TInstruction>> rangeToRegionMapping)
         {
             foreach (var node in cfg.Nodes)
             {
@@ -103,15 +140,19 @@ namespace Echo.ControlFlow.Regions.Detection
 
                 if (currentRange.ProtectedRange.Contains(node.Offset))
                     return currentRange.ProtectedRange;
+                if (currentRange.PrologueRange.Contains(node.Offset))
+                    return currentRange.PrologueRange;
                 if (currentRange.HandlerRange.Contains(node.Offset))
                     return currentRange.HandlerRange;
+                if (currentRange.EpilogueRange.Contains(node.Offset))
+                    return currentRange.EpilogueRange;
             }
 
             return null;
         }
 
         private static void DetermineRegionEntrypoints<TInstruction>(ControlFlowGraph<TInstruction> cfg, List<ExceptionHandlerRange> sortedRanges,
-            Dictionary<AddressRange, BasicControlFlowRegion<TInstruction>> rangeToRegionMapping)
+            Dictionary<AddressRange, ScopeRegion<TInstruction>> rangeToRegionMapping)
         {
             foreach (var range in sortedRanges)
             {
@@ -120,6 +161,12 @@ namespace Echo.ControlFlow.Regions.Detection
 
                 var handlerRegion = rangeToRegionMapping[range.HandlerRange];
                 handlerRegion.Entrypoint ??= cfg.GetNodeByOffset(range.HandlerRange.Start);
+
+                if (rangeToRegionMapping.TryGetValue(range.PrologueRange, out var prologueRegion))
+                    prologueRegion.Entrypoint ??= cfg.GetNodeByOffset(range.PrologueRange.Start);
+
+                if (rangeToRegionMapping.TryGetValue(range.EpilogueRange, out var epilogueRegion))
+                    epilogueRegion.Entrypoint ??= cfg.GetNodeByOffset(range.EpilogueRange.Start);
             }
         }
         

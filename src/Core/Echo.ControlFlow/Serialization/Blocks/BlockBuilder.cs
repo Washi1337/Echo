@@ -89,46 +89,137 @@ namespace Echo.ControlFlow.Serialization.Blocks
             IControlFlowRegion<TInstruction>[] activeRegions)
         {
             var enteredRegion = activeRegions[scopeStack.Count];
-
-            // Add new scope block to the current scope.
-            var currentScope = scopeStack.Peek();
+            
             if (enteredRegion is ExceptionHandlerRegion<TInstruction> ehRegion)
             {
                 // We entered an exception handler region.
-                var ehBlock = new ExceptionHandlerBlock<TInstruction>();
-                currentScope.AddBlock(ehBlock);
-                scopeStack.Push(new ScopeInfo<TInstruction>(ehRegion, ehBlock));
+                EnterExceptionHandlerRegion(scopeStack, ehRegion);
             }
-            else if (enteredRegion.ParentRegion is ExceptionHandlerRegion<TInstruction> parentEhRegion)
+            else switch (enteredRegion.ParentRegion)
             {
-                // We entered one of the exception handler sub regions. Figure out which one it is.
-                ScopeBlock<TInstruction> enteredBlock;
+                case ExceptionHandlerRegion<TInstruction> parentEhRegion:
+                    // We entered one of the exception handler sub regions.
+                    EnterExceptionHandlerSubRegion(scopeStack, parentEhRegion, enteredRegion);
+                    break;
 
-                if (!(currentScope.Block is ExceptionHandlerBlock<TInstruction> ehBlock))
-                    throw new InvalidOperationException("The parent scope is not an exception handler scope.");
+                case HandlerRegion<TInstruction> parentHandlerRegion:
+                    // We entered one of the handler sub regions.
+                    EnterHandlerSubRegion(scopeStack, parentHandlerRegion, enteredRegion);
+                    break;
 
-                if (parentEhRegion.ProtectedRegion == enteredRegion)
-                {
-                    // We entered the protected region.
-                    enteredBlock = ehBlock.ProtectedBlock;
-                }
-                else
-                {
-                    // We entered a handler region.
-                    enteredBlock = new ScopeBlock<TInstruction>();
-                    ehBlock.HandlerBlocks.Add(enteredBlock);
-                }
+                default:
+                    // Fall back method: just enter a new scope block.
+                    EnterGenericRegion(scopeStack, enteredRegion);
+                    break;
+            }
+        }
 
-                // Push the entered scope.
-                scopeStack.Push(new ScopeInfo<TInstruction>(parentEhRegion.ProtectedRegion, enteredBlock));
+        private static void EnterExceptionHandlerRegion<TInstruction>(
+            IndexableStack<ScopeInfo<TInstruction>> scopeStack, 
+            ExceptionHandlerRegion<TInstruction> ehRegion)
+        {
+            var ehBlock = new ExceptionHandlerBlock<TInstruction>
+            {
+                Tag = ehRegion.Tag
+            };
+            
+            scopeStack.Peek().AddBlock(ehBlock);
+            scopeStack.Push(new ScopeInfo<TInstruction>(ehRegion, ehBlock));
+        }
+
+        private static void EnterExceptionHandlerSubRegion<TInstruction>(
+            IndexableStack<ScopeInfo<TInstruction>> scopeStack, 
+            ExceptionHandlerRegion<TInstruction> parentRegion, 
+            IControlFlowRegion<TInstruction> enteredRegion)
+        {
+            IBlock<TInstruction> enteredBlock;
+            IControlFlowRegion<TInstruction> enteredSubRegion;
+
+            if (!(scopeStack.Peek().Block is ExceptionHandlerBlock<TInstruction> ehBlock))
+                throw new InvalidOperationException("The parent scope is not an exception handler scope.");
+
+            // Did we enter the protected region, or one of the handler regions?
+            if (parentRegion.ProtectedRegion == enteredRegion)
+            {
+                // We entered the protected region.
+                enteredBlock = ehBlock.ProtectedBlock;
+                enteredSubRegion = parentRegion.ProtectedRegion;
             }
             else
             {
-                // Fall back method: just enter a new scope block.
-                var scopeBlock = new ScopeBlock<TInstruction>();
-                currentScope.AddBlock(scopeBlock);
-                scopeStack.Push(new ScopeInfo<TInstruction>(enteredRegion, scopeBlock));
+                // We entered a handler region.
+                var handlerRegion = parentRegion.Handlers.First(r => r == enteredRegion);
+                var handlerBlock = new HandlerBlock<TInstruction>
+                {
+                    Tag = handlerRegion.Tag
+                };
+
+                enteredBlock = handlerBlock;
+                enteredSubRegion = handlerRegion;
+                ehBlock.Handlers.Add(handlerBlock);
             }
+
+            // Sanity check: If the entered subregion's parent is the exception handler region but the region
+            // isn't a protected, prologue, epilogue nor one of the handler regions, that would mean that
+            // something went *seriously* wrong.
+            if (enteredSubRegion is null)
+            {
+                throw new InvalidOperationException(
+                    "Entered subregion of exception handler doesn't belong to any of its regions!?");
+            }
+
+            // Push the entered scope.
+            scopeStack.Push(new ScopeInfo<TInstruction>(enteredSubRegion, enteredBlock));
+        }
+
+        private static void EnterHandlerSubRegion<TInstruction>(
+            IndexableStack<ScopeInfo<TInstruction>> scopeStack,
+            HandlerRegion<TInstruction> parentRegion, 
+            IControlFlowRegion<TInstruction> enteredRegion)
+        {
+            IBlock<TInstruction> enteredBlock;
+            IControlFlowRegion<TInstruction> enteredSubRegion;
+
+            if (!(scopeStack.Peek().Block is HandlerBlock<TInstruction> handlerBlock))
+                throw new InvalidOperationException("The parent scope is not a handler scope.");
+
+            if (parentRegion.Prologue == enteredRegion)
+            {
+                // We entered the prologue.
+                handlerBlock.Prologue = new ScopeBlock<TInstruction>();
+                enteredBlock = handlerBlock.Prologue;
+                enteredSubRegion = parentRegion.Prologue;
+            }
+            else if (parentRegion.Contents == enteredRegion)
+            {
+                // We entered the contents.
+                enteredBlock = handlerBlock.Contents;
+                enteredSubRegion = parentRegion.Contents;
+            }
+            else if (parentRegion.Epilogue == enteredRegion)
+            {
+                // We entered the epilogue.
+                handlerBlock.Epilogue = new ScopeBlock<TInstruction>();
+                enteredBlock = handlerBlock.Epilogue;
+                enteredSubRegion = parentRegion.Epilogue;
+            }
+            else
+            {
+                // Exhaustive search, this should never happen.
+                throw new InvalidOperationException(
+                    "Entered subregion of handler doesn't belong to any of its regions.");
+            }
+
+            // Push the entered scope.
+            scopeStack.Push(new ScopeInfo<TInstruction>(enteredSubRegion, enteredBlock));
+        }
+
+        private static void EnterGenericRegion<TInstruction>(IndexableStack<ScopeInfo<TInstruction>> scopeStack,
+            IControlFlowRegion<TInstruction> enteredRegion)
+        {
+            var scopeBlock = new ScopeBlock<TInstruction>();
+            scopeStack.Peek().AddBlock(scopeBlock);
+            scopeStack.Push(new ScopeInfo<TInstruction>(enteredRegion, scopeBlock));
         }
 
         private readonly struct ScopeInfo<TInstruction>

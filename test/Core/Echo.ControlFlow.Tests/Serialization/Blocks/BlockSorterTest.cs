@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Blocks;
-using Echo.ControlFlow.Serialization.Dot;
-using Echo.Core.Graphing.Serialization.Dot;
 using Echo.Platforms.DummyPlatform;
-using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
 namespace Echo.ControlFlow.Tests.Serialization.Blocks
@@ -193,10 +189,10 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             {
                 cfg.Nodes[indices[1]], cfg.Nodes[indices[2]], cfg.Nodes[indices[3]], cfg.Nodes[indices[4]]
             });
-            var handlerRegion = new BasicControlFlowRegion<int>();
-            ehRegion.HandlerRegions.Add(handlerRegion);
-            handlerRegion.Nodes.Add(cfg.Nodes[indices[5]]);
-            handlerRegion.Entrypoint = cfg.Nodes[indices[5]];
+            var handlerRegion = new HandlerRegion<int>();
+            ehRegion.Handlers.Add(handlerRegion);
+            handlerRegion.Contents.Nodes.Add(cfg.Nodes[indices[5]]);
+            handlerRegion.Contents.Entrypoint = cfg.Nodes[indices[5]];
 
             // Sort
             var sorting = cfg
@@ -228,10 +224,10 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var ehRegion = new ExceptionHandlerRegion<int>();
             cfg.Regions.Add(ehRegion);
             ehRegion.ProtectedRegion.Nodes.Add(cfg.Nodes[indices[1]]);
-            var handlerRegion = new BasicControlFlowRegion<int>();
-            ehRegion.HandlerRegions.Add(handlerRegion);
-            handlerRegion.Nodes.Add(cfg.Nodes[indices[2]]);
-            handlerRegion.Entrypoint = cfg.Nodes[indices[2]];
+            var handlerRegion = new HandlerRegion<int>();
+            ehRegion.Handlers.Add(handlerRegion);
+            handlerRegion.Contents.Nodes.Add(cfg.Nodes[indices[2]]);
+            handlerRegion.Contents.Entrypoint = cfg.Nodes[indices[2]];
 
             // Sort
             var sorting = cfg
@@ -242,5 +238,48 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
                 "Handler region was ordered after normal exit.");
         }
 
+        [Theory]
+        [InlineData(new[] {0, 1, 2, 3, 4, 5})]
+        [InlineData(new[] {5, 4, 3, 2, 1, 0})]
+        [InlineData(new[] {2, 3, 0, 4, 5, 1})]
+        public void PrologueAndEpilogueRegionsShouldHaveCorrectPrecedence(int[] indices)
+        {
+            var cfg = GenerateGraph(6);
+            cfg.Entrypoint = cfg.Nodes[indices[0]];
+
+            var eh = new ExceptionHandlerRegion<int>();
+            cfg.Regions.Add(eh);
+            
+            eh.ProtectedRegion.Nodes.Add(cfg.Nodes[indices[1]]);
+            eh.ProtectedRegion.Entrypoint = cfg.Nodes[indices[1]];
+            
+            var handler = new HandlerRegion<int>();
+            eh.Handlers.Add(handler);
+            
+            handler.Prologue = new ScopeRegion<int>();
+            handler.Prologue.Nodes.Add(cfg.Nodes[indices[2]]);
+            handler.Prologue.Entrypoint = cfg.Nodes[indices[2]];
+            
+            handler.Contents.Nodes.Add(cfg.Nodes[indices[3]]);
+            handler.Contents.Entrypoint = cfg.Nodes[indices[3]];
+            
+            handler.Epilogue = new ScopeRegion<int>();
+            handler.Epilogue.Nodes.Add(cfg.Nodes[indices[4]]);
+            handler.Epilogue.Entrypoint = cfg.Nodes[indices[4]];
+        
+            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]]);
+            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[5]], ControlFlowEdgeType.Unconditional);
+        
+            var sorted = cfg.SortNodes();
+            Assert.Equal(new[]
+            {
+                cfg.Nodes[indices[0]], // start
+                cfg.Nodes[indices[1]], // protected
+                cfg.Nodes[indices[2]], // prologue
+                cfg.Nodes[indices[3]], // handler
+                cfg.Nodes[indices[4]], // epilogue
+                cfg.Nodes[indices[5]], // exit
+            }, sorted);
+        }
     }
 }

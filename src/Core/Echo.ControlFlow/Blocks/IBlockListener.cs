@@ -61,5 +61,41 @@ namespace Echo.ControlFlow.Blocks
         /// <param name="block">The block.</param>
         /// <param name="handlerIndex">The index of the handler that was exit.</param>
         void ExitHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex);
+
+        /// <summary>
+        /// Enters the prologue region of a handler block.
+        /// </summary>
+        /// <param name="block">The parent handler block this prologue is added to.</param>
+        void EnterPrologueBlock(HandlerBlock<TInstruction> block);
+        
+        /// <summary>
+        /// Exits the prologue region of a handler block.
+        /// </summary>
+        /// <param name="block">The parent handler block this prologue is added to.</param>
+        void ExitPrologueBlock(HandlerBlock<TInstruction> block);
+
+        /// <summary>
+        /// Enters the epilogue region of a handler block.
+        /// </summary>
+        /// <param name="block">The parent handler block this epilogue is added to.</param>
+        void EnterEpilogueBlock(HandlerBlock<TInstruction> block);
+        
+        /// <summary>
+        /// Exits the epilogue region of a handler block.
+        /// </summary>
+        /// <param name="block">The parent handler block this epilogue is added to.</param>
+        void ExitEpilogueBlock(HandlerBlock<TInstruction> block);
+
+        /// <summary>
+        /// Enters the main code of a handler block.
+        /// </summary>
+        /// <param name="block">The parent handler block this scope is added to.</param>
+        void EnterHandlerContents(HandlerBlock<TInstruction> block);
+        
+        /// <summary>
+        /// Exits the main code of a handler block.
+        /// </summary>
+        /// <param name="block">The parent handler block this scope is added to.</param>
+        void ExitHandlerContents(HandlerBlock<TInstruction> block);
     }
 }

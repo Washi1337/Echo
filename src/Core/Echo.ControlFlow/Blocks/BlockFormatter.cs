@@ -64,44 +64,16 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <inheritdoc />
-        public void EnterScopeBlock(ScopeBlock<TInstruction> block)
-        {
-            AppendIndentationString();
-            _builder.Append('{');
-            _builder.AppendLine();
-            
-            _indentationLevel++;
-        }
+        public void EnterScopeBlock(ScopeBlock<TInstruction> block) => OpenScope();
 
         /// <inheritdoc />
-        public void ExitScopeBlock(ScopeBlock<TInstruction> block)
-        {
-            _indentationLevel--;
-            
-            AppendIndentationString();
-            _builder.Append('}');
-            _builder.AppendLine();
-        }
+        public void ExitScopeBlock(ScopeBlock<TInstruction> block) => CloseScope();
 
         /// <inheritdoc />
-        public void EnterExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block)
-        {
-            AppendIndentationString();
-            _builder.Append('{');
-            _builder.AppendLine();
-            
-            _indentationLevel++;
-        }
+        public void EnterExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block) => OpenScope();
 
         /// <inheritdoc />
-        public void ExitExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block)
-        {
-            _indentationLevel--;
-            
-            AppendIndentationString();
-            _builder.Append('}');
-            _builder.AppendLine();
-        }
+        public void ExitExceptionHandlerBlock(ExceptionHandlerBlock<TInstruction> block) => CloseScope();
 
         /// <inheritdoc />
         public void EnterProtectedBlock(ExceptionHandlerBlock<TInstruction> block)
@@ -119,12 +91,66 @@ namespace Echo.ControlFlow.Blocks
         public void EnterHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex)
         {
             AppendIndentationString();
-            _builder.AppendLine("handler:");
+            _builder.AppendLine($"handler{handlerIndex}:");
+            
+            OpenScope();
         }
 
         /// <inheritdoc />
-        public void ExitHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex)
+        public void ExitHandlerBlock(ExceptionHandlerBlock<TInstruction> block, int handlerIndex) => CloseScope();
+
+        /// <inheritdoc />
+        public void EnterPrologueBlock(HandlerBlock<TInstruction> block)
         {
+            AppendIndentationString();
+            _builder.AppendLine("prologue:");
+        }
+
+        /// <inheritdoc />
+        public void ExitPrologueBlock(HandlerBlock<TInstruction> block)
+        {
+        }
+
+        /// <inheritdoc />
+        public void EnterEpilogueBlock(HandlerBlock<TInstruction> block)
+        {
+            AppendIndentationString();
+            _builder.AppendLine("epilogue:");
+        }
+
+        /// <inheritdoc />
+        public void ExitEpilogueBlock(HandlerBlock<TInstruction> block)
+        {
+        }
+
+        /// <inheritdoc />
+        public void EnterHandlerContents(HandlerBlock<TInstruction> block)
+        {
+            AppendIndentationString();
+            _builder.AppendLine("code:");
+        }
+
+        /// <inheritdoc />
+        public void ExitHandlerContents(HandlerBlock<TInstruction> block)
+        {
+        }
+        
+        private void OpenScope()
+        {
+            AppendIndentationString();
+            _builder.Append('{');
+            _builder.AppendLine();
+
+            _indentationLevel++;
+        }
+
+        private void CloseScope()
+        {
+            _indentationLevel--;
+
+            AppendIndentationString();
+            _builder.Append('}');
+            _builder.AppendLine();
         }
     }
 }

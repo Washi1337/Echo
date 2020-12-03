@@ -59,7 +59,7 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             Assert.NotNull(ehRegion);
             
             Assert.Same(ehRegion.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].ParentRegion, ehRegion.HandlerRegions); 
+            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion.Handlers); 
         }
 
         [Theory]
@@ -108,9 +108,9 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             
             Assert.NotSame(ehRegion1, ehRegion2);
             Assert.Same(ehRegion1.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].ParentRegion, ehRegion1.HandlerRegions); 
+            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion1.Handlers); 
             Assert.Same(ehRegion1.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].ParentRegion, ehRegion1.HandlerRegions); 
+            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion1.Handlers); 
         }
 
         [Theory]
@@ -259,6 +259,57 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             Assert.Same(ehRegion2, cfg.Nodes[6].GetParentExceptionHandler());
             Assert.Same(ehRegion1, cfg.Nodes[8].GetParentExceptionHandler());
             Assert.Null(cfg.Nodes[9].GetParentExceptionHandler());
+        }
+
+        [Fact]
+        public void ExceptionHandlerWithPrologueAndEpilogue()
+        {
+            var ranges = new[]
+            {
+                new ExceptionHandlerRange(
+                    new AddressRange(1, 3),
+                    new AddressRange(3, 5),
+                    new AddressRange(5, 7),
+                    new AddressRange(7, 9))
+            };
+            
+            var instructions = new[]
+            {
+                DummyInstruction.Op(0, 0, 0),
+                
+                // try start
+                DummyInstruction.Op(1, 0, 0),
+                DummyInstruction.Jmp(2, 9),
+                
+                // handler prologue start
+                DummyInstruction.Op(3, 0, 0),
+                DummyInstruction.Ret(4),
+                
+                // handler start
+                DummyInstruction.Op(5, 0, 0),
+                DummyInstruction.Jmp(6, 9),
+                
+                // handler epilogue start
+                DummyInstruction.Op(7, 0, 0),
+                DummyInstruction.Ret(8),
+                
+                DummyInstruction.Ret(9),
+            };
+
+            var cfg = ConstructGraphWithEHRegions(instructions, ranges);
+
+            var ehRegion = cfg.Nodes[1].GetParentExceptionHandler();
+            var handlerRegion = Assert.Single(ehRegion.Handlers);
+            Assert.NotNull(handlerRegion);
+            Assert.NotNull(handlerRegion.Prologue);
+            Assert.NotNull(handlerRegion.Epilogue);
+
+            Assert.Same(cfg, cfg.Nodes[0].ParentRegion);
+            Assert.Same(ehRegion.ProtectedRegion, cfg.Nodes[1].ParentRegion);
+            Assert.Same(handlerRegion.Prologue, cfg.Nodes[3].GetParentHandler().Prologue);
+            Assert.Same(handlerRegion.Contents, cfg.Nodes[5].GetParentHandler().Contents);
+            Assert.Same(handlerRegion.Epilogue, cfg.Nodes[7].GetParentHandler().Epilogue);
+            Assert.Same(cfg, cfg.Nodes[9].ParentRegion);
         }
 
     }

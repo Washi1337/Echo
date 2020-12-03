@@ -466,7 +466,7 @@ namespace Echo.ControlFlow
         /// Moves the node from its current region (if any) into the provided sub region.
         /// </summary>
         /// <param name="region">The region to move the node to.</param>
-        public void MoveToRegion(BasicControlFlowRegion<TInstruction> region)
+        public void MoveToRegion(ScopeRegion<TInstruction> region)
         {
             RemoveFromAnyRegion();
             region.Nodes.Add(this);
@@ -480,6 +480,15 @@ namespace Echo.ControlFlow
         /// </returns>
         public ExceptionHandlerRegion<TInstruction> GetParentExceptionHandler() =>
             ParentRegion?.GetParentExceptionHandler();
+
+        /// <summary>
+        /// Obtains the parent handler region that this node resides in (if any).
+        /// </summary>
+        /// <returns>
+        /// The parent handler region, or <c>null</c> if the node is not part of any handler.
+        /// </returns>
+        public HandlerRegion<TInstruction> GetParentHandler() =>
+            ParentRegion?.GetParentHandler();
 
         /// <summary>
         /// Traverses the region tree upwards and collects all regions this node is situated in. 

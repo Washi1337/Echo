@@ -19,18 +19,27 @@ namespace Echo.ControlFlow.Blocks
         /// <summary>
         /// Gets a collection of handler blocks.
         /// </summary>
-        public IList<ScopeBlock<TInstruction>> HandlerBlocks
+        public IList<HandlerBlock<TInstruction>> Handlers
         {
             get;
-        } = new List<ScopeBlock<TInstruction>>();
+        } = new List<HandlerBlock<TInstruction>>();
 
+        /// <summary>
+        /// Gets or sets a user-defined tag that is assigned to this block. 
+        /// </summary>
+        public object Tag
+        {
+            get;
+            set;
+        }
+        
         /// <inheritdoc />
         public IEnumerable<BasicBlock<TInstruction>> GetAllBlocks()
         {
             foreach (var block in ProtectedBlock.GetAllBlocks())
                 yield return block;
 
-            foreach (var handler in HandlerBlocks)
+            foreach (var handler in Handlers)
             {
                 foreach (var block in handler.GetAllBlocks())
                     yield return block;

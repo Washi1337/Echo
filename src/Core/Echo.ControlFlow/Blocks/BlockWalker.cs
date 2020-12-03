@@ -32,8 +32,9 @@ namespace Echo.ControlFlow.Blocks
         public void VisitScopeBlock(ScopeBlock<TInstruction> block)
         {
             _listener.EnterScopeBlock(block);
-            foreach (var innerBlock in block.Blocks)
-                innerBlock.AcceptVisitor(this);
+            for (int i = 0; i < block.Blocks.Count; i++)
+                block.Blocks[i].AcceptVisitor(this);
+
             _listener.ExitScopeBlock(block);
         }
 
@@ -46,16 +47,39 @@ namespace Echo.ControlFlow.Blocks
             block.ProtectedBlock.AcceptVisitor(this);
             _listener.ExitProtectedBlock(block);
 
-            for (int i = 0; i < block.HandlerBlocks.Count; i++)
+            for (int i = 0; i < block.Handlers.Count; i++)
             {
-                var handlerBlock = block.HandlerBlocks[i];
+                var handlerBlock = block.Handlers[i];
                 
                 _listener.EnterHandlerBlock(block, i);
                 handlerBlock.AcceptVisitor(this);
                 _listener.ExitHandlerBlock(block, i);
             }
-
+            
             _listener.ExitExceptionHandlerBlock(block);
         }
+
+        /// <inheritdoc />
+        public void VisitHandlerBlock(HandlerBlock<TInstruction> block)
+        {
+            if (block.Prologue != null)
+            {
+                _listener.EnterPrologueBlock(block);
+                block.Prologue.AcceptVisitor(this);
+                _listener.ExitPrologueBlock(block);
+            }
+
+            _listener.EnterHandlerContents(block);
+            block.Contents.AcceptVisitor(this);
+            _listener.ExitHandlerContents(block);
+            
+            if (block.Epilogue != null)
+            {
+                _listener.EnterEpilogueBlock(block);
+                block.Epilogue.AcceptVisitor(this);
+                _listener.ExitEpilogueBlock(block);
+            }
+        }
+        
     }
 }

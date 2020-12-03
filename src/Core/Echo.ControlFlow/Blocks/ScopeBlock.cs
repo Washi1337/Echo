@@ -6,7 +6,7 @@ namespace Echo.ControlFlow.Blocks
     /// <summary>
     /// Represents a collection of blocks grouped together into one single block. 
     /// </summary>
-    /// <typeparam name="TInstruction"></typeparam>
+    /// <typeparam name="TInstruction">The type of instructions that this block contains.</typeparam>
     public class ScopeBlock<TInstruction> : IBlock<TInstruction>
     {
         /// <summary>
@@ -18,15 +18,15 @@ namespace Echo.ControlFlow.Blocks
         } = new List<IBlock<TInstruction>>();
 
         /// <inheritdoc />
-        public IEnumerable<BasicBlock<TInstruction>> GetAllBlocks()
-        {
-            return Blocks.SelectMany(b => b.GetAllBlocks());
-        }
+        public IEnumerable<BasicBlock<TInstruction>> GetAllBlocks() => 
+            Blocks.SelectMany(b => b.GetAllBlocks());
 
         /// <inheritdoc />
-        public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitScopeBlock(this);
+        public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => 
+            visitor.VisitScopeBlock(this);
 
         /// <inheritdoc />
-        public override string ToString() => BlockFormatter<TInstruction>.Format(this);
+        public override string ToString() => 
+            BlockFormatter<TInstruction>.Format(this);
     }
 }

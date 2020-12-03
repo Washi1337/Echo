@@ -61,7 +61,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
 
             var cfg = cfgBuilder.ConstructFlowGraph(0);
             
-            var region = new BasicControlFlowRegion<DummyInstruction>();
+            var region = new ScopeRegion<DummyInstruction>();
             cfg.Regions.Add(region);
             region.Nodes.Add(cfg.Nodes[2]);
             
@@ -254,7 +254,55 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
 
             Assert.Equal(3, rootScope.Blocks.Count);
             var ehBlock = Assert.IsAssignableFrom<ExceptionHandlerBlock<DummyInstruction>>(rootScope.Blocks[1]);
-            Assert.Equal(2, ehBlock.HandlerBlocks.Count);
+            Assert.Equal(2, ehBlock.Handlers.Count);
+        }
+        
+        [Fact]
+        public void ExceptionHandlerWithPrologueAndEpilogue()
+        {
+            var ranges = new[]
+            {
+                new ExceptionHandlerRange(
+                    new AddressRange(1, 3),
+                    new AddressRange(3, 5),
+                    new AddressRange(5, 7),
+                    new AddressRange(7, 9))
+            };
+            
+            var instructions = new[]
+            {
+                DummyInstruction.Op(0, 0, 0),
+                
+                // try start
+                DummyInstruction.Op(1, 0, 0),
+                DummyInstruction.Jmp(2, 9),
+                
+                // handler prologue start
+                DummyInstruction.Op(3, 0, 0),
+                DummyInstruction.Ret(4),
+                
+                // handler start
+                DummyInstruction.Op(5, 0, 0),
+                DummyInstruction.Jmp(6, 9),
+                
+                // handler epilogue start
+                DummyInstruction.Op(7, 0, 0),
+                DummyInstruction.Ret(8),
+                
+                DummyInstruction.Ret(9),
+            };
+
+            var cfg = ConstructGraphWithEHRegions(instructions, ranges);
+            var rootScope = cfg.ConstructBlocks();
+            
+            Assert.Equal(3, rootScope.Blocks.Count);
+            var ehBlock = Assert.IsAssignableFrom<ExceptionHandlerBlock<DummyInstruction>>(rootScope.Blocks[1]);
+            Assert.Equal(new[] {1L}, ehBlock.ProtectedBlock.GetAllBlocks().Select(b => b.Offset));
+            var handlerBlock = Assert.Single(ehBlock.Handlers);
+            Assert.NotNull(handlerBlock);
+            Assert.Equal(new[] {3L}, handlerBlock.Prologue.GetAllBlocks().Select(b => b.Offset));
+            Assert.Equal(new[] {5L}, handlerBlock.Contents.GetAllBlocks().Select(b => b.Offset));
+            Assert.Equal(new[] {7L}, handlerBlock.Epilogue.GetAllBlocks().Select(b => b.Offset));
         }
     }
 }

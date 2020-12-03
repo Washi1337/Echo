@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Blocks;
@@ -15,8 +16,8 @@ namespace Echo.Ast.Construction
         private readonly ControlFlowGraph<TInstruction> _controlFlowGraph;
         private readonly AstArchitecture<TInstruction> _architecture;
         private readonly BlockTransformer<TInstruction> _transformer;
-        private readonly Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<Statement<TInstruction>>> _regionsMapping =
-            new Dictionary<BasicControlFlowRegion<TInstruction>, BasicControlFlowRegion<Statement<TInstruction>>>();
+        private readonly Dictionary<ScopeRegion<TInstruction>, ScopeRegion<Statement<TInstruction>>> _regionsMapping =
+            new Dictionary<ScopeRegion<TInstruction>, ScopeRegion<Statement<TInstruction>>>();
         
         /// <summary>
         /// Creates a new Ast parser with the given <see cref="ControlFlowGraph{TInstruction}"/>
@@ -59,7 +60,7 @@ namespace Echo.Ast.Construction
                 newGraph.Nodes.Add(newNode);
                 
                 // Move node to newly created region.
-                if (originalNode.ParentRegion is BasicControlFlowRegion<TInstruction> basicRegion)
+                if (originalNode.ParentRegion is ScopeRegion<TInstruction> basicRegion)
                     newNode.MoveToRegion(_regionsMapping[basicRegion]);
             }
 
@@ -71,19 +72,35 @@ namespace Echo.Ast.Construction
                 newOrigin.ConnectWith(newTarget, originalEdge.Type);
             }
             
-            // Fix entry point.
+            // Fix entry point(s).
             newGraph.Entrypoint = newGraph.Nodes[_controlFlowGraph.Entrypoint.Offset];
+            FixEntryPoint(_controlFlowGraph);
 
             return newGraph;
+
+            void FixEntryPoint(IControlFlowRegion<TInstruction> region)
+            {
+                foreach (var child in region.GetSubRegions())
+                    FixEntryPoint(child);
+
+                if (!(region is ScopeRegion<TInstruction> basicControlFlowRegion))
+                    return;
+
+                var entry = basicControlFlowRegion.Entrypoint;
+                if (entry is null)
+                    return;
+
+                _regionsMapping[basicControlFlowRegion].Entrypoint = newGraph.Nodes[entry.Offset];
+            }
         }
 
         private ControlFlowRegion<Statement<TInstruction>> TransformRegion(IControlFlowRegion<TInstruction> region)
         {
             switch (region)
             {
-                case BasicControlFlowRegion<TInstruction> basicRegion:
+                case ScopeRegion<TInstruction> basicRegion:
                     // Create new basic region.
-                    var newBasicRegion = new BasicControlFlowRegion<Statement<TInstruction>>();
+                    var newBasicRegion = new ScopeRegion<Statement<TInstruction>>();
                     TransformSubRegions(basicRegion, newBasicRegion);
 
                     // Register basic region pair.
@@ -98,24 +115,45 @@ namespace Echo.Ast.Construction
                     // existing protected region.
                     TransformSubRegions(ehRegion.ProtectedRegion, newEhRegion.ProtectedRegion);
                     _regionsMapping[ehRegion.ProtectedRegion] = newEhRegion.ProtectedRegion;
-                    
+
                     // Add handler regions.
-                    foreach (var subRegion in ehRegion.HandlerRegions)
-                        newEhRegion.HandlerRegions.Add(TransformRegion(subRegion));
+                    foreach (var subRegion in ehRegion.Handlers)
+                        newEhRegion.Handlers.Add(TransformHandlerRegion(subRegion));
 
                     return newEhRegion;
+                
+                case HandlerRegion<TInstruction> handlerRegion:
+                    return TransformHandlerRegion(handlerRegion);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(region));
             }
+        }
 
-            void TransformSubRegions(
-                BasicControlFlowRegion<TInstruction> originalRegion, 
-                BasicControlFlowRegion<Statement<TInstruction>> newRegion)
-            {
-                foreach (var subRegion in originalRegion.Regions)
-                    newRegion.Regions.Add(TransformRegion(subRegion));
-            }
+        private HandlerRegion<Statement<TInstruction>> TransformHandlerRegion(HandlerRegion<TInstruction> handlerRegion)
+        {
+            var result = new HandlerRegion<Statement<TInstruction>>();
+
+            if (handlerRegion.Prologue != null)
+                result.Prologue = (ScopeRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.Prologue);
+
+            if (handlerRegion.Epilogue != null)
+                result.Epilogue = (ScopeRegion<Statement<TInstruction>>) TransformRegion(handlerRegion.Epilogue);
+
+            // Contents is read-only, so instead we just transform all sub regions and add it to the
+            // existing protected region.
+            TransformSubRegions(handlerRegion.Contents, result.Contents);
+            _regionsMapping[handlerRegion.Contents] = result.Contents;
+            
+            return result;
+        }
+
+        private void TransformSubRegions(
+            ScopeRegion<TInstruction> originalRegion, 
+            ScopeRegion<Statement<TInstruction>> newRegion)
+        {
+            foreach (var subRegion in originalRegion.Regions)
+                newRegion.Regions.Add(TransformRegion(subRegion));
         }
     }
 }

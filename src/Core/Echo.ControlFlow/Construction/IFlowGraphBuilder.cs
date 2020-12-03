@@ -72,7 +72,9 @@ namespace Echo.ControlFlow.Construction
             foreach (var range in exceptionHandlers)
             {
                 knownBlockHeaders.Add(range.ProtectedRange.Start);
+                knownBlockHeaders.Add(range.PrologueRange.Start);
                 knownBlockHeaders.Add(range.HandlerRange.Start);
+                knownBlockHeaders.Add(range.EpilogueRange.Start);
             }
             
             return self.ConstructFlowGraph(entrypoint, knownBlockHeaders);
