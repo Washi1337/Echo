@@ -80,7 +80,7 @@ namespace Echo.Ast.Construction
 
             void FixEntryPoint(IControlFlowRegion<TInstruction> region)
             {
-                foreach (var child in region.GetSubRegions().Where(r => r is {}))
+                foreach (var child in region.GetSubRegions())
                     FixEntryPoint(child);
 
                 if (!(region is ScopeRegion<TInstruction> basicControlFlowRegion))

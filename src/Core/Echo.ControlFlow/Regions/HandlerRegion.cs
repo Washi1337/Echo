@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -56,9 +57,11 @@ namespace Echo.ControlFlow.Regions
 
         private void UpdateChildRegion(ref ScopeRegion<TInstruction> field, ScopeRegion<TInstruction> value)
         {
+            if (value?.ParentRegion != null)
+                throw new ArgumentException("Region is already added to another region.");
             if (field?.ParentRegion == this)
                 field.ParentRegion = null;
-
+            
             field = value;
             if (value != null)
                 field.ParentRegion = this;
