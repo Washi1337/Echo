@@ -48,7 +48,19 @@ namespace Echo.Concrete.Values.ReferenceType
         }
 
         /// <inheritdoc />
-        public bool IsKnown => true;
+        public bool IsKnown
+        {
+            get
+            {
+                for (int i = 0; i < _knownBitMask.Length; i++)
+                {
+                    if (_knownBitMask.Span[i] != 0xFF)
+                        return false;
+                }
+
+                return true;
+            }
+        }
 
         /// <summary>
         /// Gets the length of the memory chunk that is referenced.

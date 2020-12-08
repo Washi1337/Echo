@@ -49,7 +49,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         private CorLibTypeFactory CorLibTypeFactory => Type.Module.CorLibTypeFactory;
 
         /// <inheritdoc />
-        public bool IsKnown => true;
+        public bool IsKnown => Contents.IsKnown;
         
         /// <inheritdoc />
         public bool Is32Bit => Contents.Is32Bit;
