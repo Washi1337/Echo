@@ -16,6 +16,19 @@ namespace Echo.Concrete.Values.ReferenceType
         private readonly Memory<byte> _knownBitMask;
 
         /// <summary>
+        /// Creates a new fully known memory pointer value.
+        /// </summary>
+        /// <param name="memory">The referenced memory.</param>
+        /// <param name="is32Bit">Indicates the pointer is 32 bit or 64 bit wide.</param>
+        public MemoryPointerValue(Memory<byte> memory, bool is32Bit)
+        {
+            _memory = memory;
+            _knownBitMask = new Memory<byte>(new byte[memory.Length]);
+            _knownBitMask.Span.Fill(0xFF);
+            Is32Bit = is32Bit;
+        }
+        
+        /// <summary>
         /// Creates a new memory pointer value.
         /// </summary>
         /// <param name="memory">The referenced memory.</param>
