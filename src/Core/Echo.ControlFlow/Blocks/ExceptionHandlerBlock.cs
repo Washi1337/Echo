@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Echo.ControlFlow.Blocks
 {
@@ -44,6 +45,24 @@ namespace Echo.ControlFlow.Blocks
                 foreach (var block in handler.GetAllBlocks())
                     yield return block;
             }
+        }
+
+        /// <inheritdoc />
+        public BasicBlock<TInstruction> GetFirstBlock()
+        {
+            var result = ProtectedBlock.GetFirstBlock();
+            for (int i = 0; i < Handlers.Count && result is null; i++)
+                result = Handlers[i].GetFirstBlock();
+            return result;
+        }
+
+        /// <inheritdoc />
+        public BasicBlock<TInstruction> GetLastBlock()
+        {
+            BasicBlock<TInstruction> result = null;
+            for (int i = Handlers.Count - 1; i > 0 && result is null; i--)
+                result = Handlers[i].GetFirstBlock();
+            return result ?? ProtectedBlock.GetLastBlock();
         }
 
         /// <inheritdoc />

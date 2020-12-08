@@ -63,6 +63,18 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <inheritdoc />
+        public BasicBlock<TInstruction> GetFirstBlock() =>
+            Prologue?.GetFirstBlock()
+            ?? Contents.GetFirstBlock()
+            ?? Epilogue?.GetFirstBlock();
+
+        /// <inheritdoc />
+        public BasicBlock<TInstruction> GetLastBlock() =>
+            Epilogue?.GetLastBlock()
+            ?? Contents.GetLastBlock()
+            ?? Prologue?.GetLastBlock();
+
+        /// <inheritdoc />
         public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitHandlerBlock(this);
     }
 }

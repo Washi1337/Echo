@@ -15,6 +15,18 @@ namespace Echo.ControlFlow.Blocks
         IEnumerable<BasicBlock<TInstruction>> GetAllBlocks();
 
         /// <summary>
+        /// Gets the first basic block that appears in the ordered list of blocks. 
+        /// </summary>
+        /// <returns>The first basic block, or <c>null</c> if the block contains no basic blocks..</returns>
+        BasicBlock<TInstruction> GetFirstBlock();
+
+        /// <summary>
+        /// Gets the last basic block that appears in the ordered list of blocks. 
+        /// </summary>
+        /// <returns>The last basic block, or <c>null</c> if the block contains no basic blocks..</returns>
+        BasicBlock<TInstruction> GetLastBlock();
+
+        /// <summary>
         /// Visit the current block using the provided visitor.
         /// </summary>
         /// <param name="visitor">The visitor to accept.</param>
