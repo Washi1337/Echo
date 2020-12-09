@@ -1,4 +1,5 @@
 using System;
+using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 
 namespace Echo.Concrete.Values
@@ -159,5 +160,18 @@ namespace Echo.Concrete.Values
         /// Occurs when the offset does not fall within the memory range.
         /// </exception>
         void WriteFloat64(int offset, Float64Value value);
+    }
+
+    public static class MemoryAccessValueExtensions
+    {
+        public static IPointerValue MakePointer(this IMemoryAccessValue self, bool is32Bit)
+        {
+            return new RelativePointerValue(self, is32Bit);
+        }
+        
+        public static IPointerValue MakePointer(this IMemoryAccessValue self, int offset, bool is32Bit)
+        {
+            return new RelativePointerValue(self, offset, is32Bit);
+        }
     }
 }

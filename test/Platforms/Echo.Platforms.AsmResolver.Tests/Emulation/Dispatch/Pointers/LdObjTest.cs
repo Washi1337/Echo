@@ -1,6 +1,7 @@
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation;
@@ -59,7 +60,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             
             var stack = ExecutionContext.ProgramState.Stack;
 
-            stack.Push(new PointerValue((IPointerValue) originalInstance, environment.Is32Bit));
+            stack.Push(new PointerValue((IMemoryAccessValue) originalInstance, environment.Is32Bit));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldobj, _structType));
             

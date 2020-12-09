@@ -39,7 +39,7 @@ namespace Echo.Concrete.Values.ReferenceType
             Is32Bit = is32Bit;
             ReferencedMemory = referencedMemory;
             CurrentOffset = offset;
-            IsKnown = referencedMemory.IsKnown;
+            IsKnown = true;
         }
 
         /// <summary>
