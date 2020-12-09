@@ -175,13 +175,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public MemoryPointerValue AllocateMemory(int size, bool initialize)
+        public MemoryBlockValue AllocateMemory(int size, bool initialize)
         {
             var memory = new Memory<byte>(new byte[size]);
             var knownBitMask = new Memory<byte>(new byte[size]);
             if (initialize)
                 knownBitMask.Span.Fill(0xFF);
-            return new MemoryPointerValue(memory, knownBitMask, Is32Bit);
+            return new MemoryBlockValue(memory, knownBitMask, Is32Bit);
         }
 
         /// <inheritdoc />

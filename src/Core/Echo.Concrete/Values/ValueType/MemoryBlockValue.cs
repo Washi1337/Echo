@@ -1,16 +1,15 @@
 using System;
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
-using Echo.Concrete.Values.ValueType;
 using Echo.Core;
 using Echo.Core.Values;
 
-namespace Echo.Concrete.Values.ReferenceType
+namespace Echo.Concrete.Values.ValueType
 {
     /// <summary>
-    /// Represents a pointer to the beginning of a chunk of memory.
+    /// Represents a chunk of memory.
     /// </summary>
-    public class MemoryPointerValue : IPointerValue
+    public class MemoryBlockValue : IValueTypeValue, IMemoryAccessValue
     {
         private readonly Memory<byte> _memory;
         private readonly Memory<byte> _knownBitMask;
@@ -20,7 +19,7 @@ namespace Echo.Concrete.Values.ReferenceType
         /// </summary>
         /// <param name="memory">The referenced memory.</param>
         /// <param name="is32Bit">Indicates the pointer is 32 bit or 64 bit wide.</param>
-        public MemoryPointerValue(Memory<byte> memory, bool is32Bit)
+        public MemoryBlockValue(Memory<byte> memory, bool is32Bit)
         {
             _memory = memory;
             _knownBitMask = new Memory<byte>(new byte[memory.Length]);
@@ -34,7 +33,7 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <param name="memory">The referenced memory.</param>
         /// <param name="knownBitMask">The bit mask indicating the known and unknown bits.</param>
         /// <param name="is32Bit">Indicates the pointer is 32 bit or 64 bit wide.</param>
-        public MemoryPointerValue(Memory<byte> memory, Memory<byte> knownBitMask, bool is32Bit)
+        public MemoryBlockValue(Memory<byte> memory, Memory<byte> knownBitMask, bool is32Bit)
         {
             _memory = memory;
             _knownBitMask = knownBitMask;
@@ -88,6 +87,21 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <inheritdoc />
         public Trilean IsNegative => false;
 
+        /// <inheritdoc />
+        public void GetBits(Span<byte> buffer) => 
+            _memory.Span.Slice(buffer.Length).CopyTo(buffer);
+
+        /// <inheritdoc />
+        public void GetMask(Span<byte> buffer) => 
+            _knownBitMask.Span.Slice(buffer.Length).CopyTo(buffer);
+
+        /// <inheritdoc />
+        public void SetBits(Span<byte> bits, Span<byte> mask)
+        {
+            bits.CopyTo(_memory.Span);
+            mask.CopyTo(_knownBitMask.Span);
+        }
+        
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer)
         {
@@ -262,7 +276,7 @@ namespace Echo.Concrete.Values.ReferenceType
         }
 
         /// <inheritdoc />
-        public IValue Copy() => new MemoryPointerValue(_memory, _knownBitMask, Is32Bit);
+        public IValue Copy() => new MemoryBlockValue(_memory, _knownBitMask, Is32Bit);
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void AssertOffsetValidity(int offset, int size)
@@ -273,5 +287,6 @@ namespace Echo.Concrete.Values.ReferenceType
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool OffsetIsInRange(int offset, int size) => offset >= 0 && offset < _memory.Length - size + 1;
+
     }
 }

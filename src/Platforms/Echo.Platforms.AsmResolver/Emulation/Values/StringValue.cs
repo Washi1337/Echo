@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// </summary>
     public class StringValue : IDotNetValue
     {
-        private readonly MemoryPointerValue _contents;
+        private readonly MemoryBlockValue _contents;
 
         /// <summary>
         /// Creates a new string value.
@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <exception cref="ArgumentException">
         /// Occurs when the memory block referenced by <paramref name="contents"/> is of an invalid size.
         /// </exception>
-        public StringValue(TypeSignature stringType, MemoryPointerValue contents)
+        public StringValue(TypeSignature stringType, MemoryBlockValue contents)
         {
             Type = stringType ?? throw new ArgumentNullException(nameof(stringType));
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));

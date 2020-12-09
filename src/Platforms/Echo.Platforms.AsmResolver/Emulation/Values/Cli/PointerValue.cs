@@ -1,3 +1,4 @@
+using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Core.Values;
 
@@ -12,27 +13,27 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// Creates a new null pointer value.
         /// </summary>
         /// <param name="isKnown">Indicates whether the pointer is known.</param>
-        public PointerValue(bool isKnown)
-            : base(isKnown)
+        public PointerValue(bool isKnown, bool is32Bit)
+            : base(isKnown, is32Bit)
         {
         }
 
         /// <summary>
         /// Creates a new pointer value.
         /// </summary>
-        /// <param name="basePointer">The base pointer value.</param>
-        public PointerValue(IPointerValue basePointer)
-            : base(basePointer)
+        /// <param name="referencedMemory">The base pointer value.</param>
+        public PointerValue(IMemoryAccessValue referencedMemory, bool is32Bit)
+            : base(referencedMemory, is32Bit)
         {
         }
 
         /// <summary>
         /// Creates a new pointer value.
         /// </summary>
-        /// <param name="basePointer">The base pointer value.</param>
+        /// <param name="referencedMemory">The base pointer value.</param>
         /// <param name="offset">The offset relative to the base pointer.</param>
-        public PointerValue(IPointerValue basePointer, int offset)
-            : base(basePointer, offset)
+        public PointerValue(IMemoryAccessValue referencedMemory, int offset, bool is32Bit)
+            : base(referencedMemory, offset, is32Bit)
         {
         }
 
@@ -155,6 +156,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public FValue ConvertToR() => InterpretAsR8();
 
         /// <inheritdoc />
-        IValue IValue.Copy() => new PointerValue(BasePointer, CurrentOffset);
+        IValue IValue.Copy() => new PointerValue(ReferencedMemory, CurrentOffset, Is32Bit);
     }
 }

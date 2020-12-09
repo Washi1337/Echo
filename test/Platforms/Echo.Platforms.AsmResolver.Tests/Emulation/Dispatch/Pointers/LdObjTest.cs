@@ -30,10 +30,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
         [Fact]
         public void LoadObjectFromUnknownPointerShouldResultInUnknownObjectContents()
         {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var stack = ExecutionContext.ProgramState.Stack;
 
             // Push unknown pointer.
-            stack.Push(new PointerValue(false));
+            stack.Push(new PointerValue(false, environment.Is32Bit));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldobj, _structType));
             
@@ -58,7 +59,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             
             var stack = ExecutionContext.ProgramState.Stack;
 
-            stack.Push(new PointerValue((IPointerValue) originalInstance));
+            stack.Push(new PointerValue((IPointerValue) originalInstance, environment.Is32Bit));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldobj, _structType));
             

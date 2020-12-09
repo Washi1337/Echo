@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <param name="valueFactory">The object responsible for memory management in the virtual machine.</param>
         /// <param name="valueType">The type of the object.</param>
         /// <param name="contents">The raw contents of the object.</param>
-        public LleStructValue(IValueFactory valueFactory, TypeSignature valueType, MemoryPointerValue contents)
+        public LleStructValue(IValueFactory valueFactory, TypeSignature valueType, MemoryBlockValue contents)
         {
             Type = valueType ?? throw new ArgumentNullException(nameof(valueType));
             _valueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
@@ -41,7 +41,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <summary>
         /// The pointer to the raw data of the object.
         /// </summary>
-        public MemoryPointerValue Contents
+        public MemoryBlockValue Contents
         {
             get;
         }

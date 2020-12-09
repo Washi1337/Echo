@@ -5,6 +5,7 @@ using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
+using Echo.Concrete.Values.ValueType;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
@@ -44,7 +45,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <param name="size">The size of the region to allocate.</param>
         /// <param name="initialize">Indicates the memory region should be initialized with zeroes.</param>
         /// <returns>A pointer to the memory.</returns>
-        MemoryPointerValue AllocateMemory(int size, bool initialize);
+        MemoryBlockValue AllocateMemory(int size, bool initialize);
 
         /// <summary>
         /// Allocates an array on the virtual heap.

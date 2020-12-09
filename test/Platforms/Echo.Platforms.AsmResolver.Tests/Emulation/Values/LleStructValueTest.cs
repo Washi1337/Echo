@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Values
         public unsafe void AllFieldsKnown()
         {
             var type = (TypeDefinition) _fixture.MockModule.LookupMember(typeof(SimpleStruct).MetadataToken);
-            var contents = new MemoryPointerValue(
+            var contents = new MemoryBlockValue(
                 new Memory<byte>(new byte[sizeof(SimpleStruct)]),
                 _environment.Is32Bit);
 
@@ -38,7 +38,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Values
         public unsafe void AllFieldsUnknown()
         {
             var type = (TypeDefinition) _fixture.MockModule.LookupMember(typeof(SimpleStruct).MetadataToken);
-            var contents = new MemoryPointerValue(
+            var contents = new MemoryBlockValue(
                 new Memory<byte>(new byte[sizeof(SimpleStruct)]),
                 new Memory<byte>(new byte[sizeof(SimpleStruct)]),
                 _environment.Is32Bit);
@@ -52,7 +52,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Values
         {
             var type = (TypeDefinition) _fixture.MockModule.LookupMember(typeof(SimpleStruct).MetadataToken);
             var field = type.Fields.First(f => f.Name == nameof(SimpleStruct.Y));
-            var contents = new MemoryPointerValue(
+            var contents = new MemoryBlockValue(
                 new Memory<byte>(new byte[sizeof(SimpleStruct)]),
                 _environment.Is32Bit);
 

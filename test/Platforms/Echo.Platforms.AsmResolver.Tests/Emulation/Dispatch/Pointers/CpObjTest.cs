@@ -51,7 +51,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             
             var stack = ExecutionContext.ProgramState.Stack;
             stack.Push(environment.CliMarshaller.ToCliValue(destinationPointer, intPointerType));
-            stack.Push(new PointerValue(false));
+            stack.Push(new PointerValue(false, environment.Is32Bit));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Cpobj, int32Type.Type));
             

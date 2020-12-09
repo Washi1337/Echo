@@ -40,7 +40,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             var destinationAddress = environment.ValueFactory.AllocateMemory(100, true);
             
             // Push unknown pointer and object to write.
-            stack.Push(new PointerValue(destinationAddress));
+            stack.Push(new PointerValue(destinationAddress, environment.Is32Bit));
             stack.Push(environment.CliMarshaller.ToCliValue(originalInstance, _structType.ToTypeSignature()));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Stobj, _structType));
