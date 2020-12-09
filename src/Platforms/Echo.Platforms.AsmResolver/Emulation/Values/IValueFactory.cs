@@ -37,7 +37,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// /// <param name="initialize">Indicates whether the bits in the created object should be initialized to zero.</param>
         /// <returns>The default value.</returns>
         ObjectReference CreateObject(TypeSignature type, bool initialize);
-        
+
         /// <summary>
         /// Allocates a chunk of addressable memory on the virtual heap, and returns a pointer value to the start of
         /// the memory chunk.  
@@ -45,7 +45,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <param name="size">The size of the region to allocate.</param>
         /// <param name="initialize">Indicates the memory region should be initialized with zeroes.</param>
         /// <returns>A pointer to the memory.</returns>
-        MemoryBlockValue AllocateMemory(int size, bool initialize);
+        IMemoryAccessValue AllocateMemory(int size, bool initialize);
 
         /// <summary>
         /// Allocates an array on the virtual heap.

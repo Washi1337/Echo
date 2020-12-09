@@ -27,8 +27,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Values
         {
             var type = (TypeDefinition) _fixture.MockModule.LookupMember(typeof(SimpleStruct).MetadataToken);
             var contents = new MemoryBlockValue(
-                new Memory<byte>(new byte[sizeof(SimpleStruct)]),
-                _environment.Is32Bit);
+                new Memory<byte>(new byte[sizeof(SimpleStruct)]));
 
             var value = new LleStructValue(_environment.ValueFactory, type.ToTypeSignature(), contents);
             Assert.True(value.IsKnown);
@@ -40,8 +39,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Values
             var type = (TypeDefinition) _fixture.MockModule.LookupMember(typeof(SimpleStruct).MetadataToken);
             var contents = new MemoryBlockValue(
                 new Memory<byte>(new byte[sizeof(SimpleStruct)]),
-                new Memory<byte>(new byte[sizeof(SimpleStruct)]),
-                _environment.Is32Bit);
+                new Memory<byte>(new byte[sizeof(SimpleStruct)]));
 
             var value = new LleStructValue(_environment.ValueFactory, type.ToTypeSignature(), contents);
             Assert.False(value.IsKnown);
@@ -53,8 +51,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Values
             var type = (TypeDefinition) _fixture.MockModule.LookupMember(typeof(SimpleStruct).MetadataToken);
             var field = type.Fields.First(f => f.Name == nameof(SimpleStruct.Y));
             var contents = new MemoryBlockValue(
-                new Memory<byte>(new byte[sizeof(SimpleStruct)]),
-                _environment.Is32Bit);
+                new Memory<byte>(new byte[sizeof(SimpleStruct)]));
 
             var value = new LleStructValue(_environment.ValueFactory, type.ToTypeSignature(), contents);
             value.SetFieldValue(field, new Integer32Value(0, 0));

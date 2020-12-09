@@ -18,13 +18,11 @@ namespace Echo.Concrete.Values.ValueType
         /// Creates a new fully known memory pointer value.
         /// </summary>
         /// <param name="memory">The referenced memory.</param>
-        /// <param name="is32Bit">Indicates the pointer is 32 bit or 64 bit wide.</param>
-        public MemoryBlockValue(Memory<byte> memory, bool is32Bit)
+        public MemoryBlockValue(Memory<byte> memory)
         {
             _memory = memory;
             _knownBitMask = new Memory<byte>(new byte[memory.Length]);
             _knownBitMask.Span.Fill(0xFF);
-            Is32Bit = is32Bit;
         }
         
         /// <summary>
@@ -33,17 +31,10 @@ namespace Echo.Concrete.Values.ValueType
         /// <param name="memory">The referenced memory.</param>
         /// <param name="knownBitMask">The bit mask indicating the known and unknown bits.</param>
         /// <param name="is32Bit">Indicates the pointer is 32 bit or 64 bit wide.</param>
-        public MemoryBlockValue(Memory<byte> memory, Memory<byte> knownBitMask, bool is32Bit)
+        public MemoryBlockValue(Memory<byte> memory, Memory<byte> knownBitMask)
         {
             _memory = memory;
             _knownBitMask = knownBitMask;
-            Is32Bit = is32Bit;
-        }
-
-        /// <inheritdoc />
-        public bool Is32Bit
-        {
-            get;
         }
 
         /// <inheritdoc />
@@ -61,19 +52,11 @@ namespace Echo.Concrete.Values.ValueType
             }
         }
 
-        /// <summary>
-        /// Gets the length of the memory chunk that is referenced.
-        /// </summary>
-        public int Length => _memory.Length;
+        /// <inheritdoc />
+        public int Size => _memory.Length;
 
         /// <inheritdoc />
-        /// <remarks>
-        /// This property represents the size of the pointer, and not the size of the memory chunk that is referenced.
-        /// </remarks>
-        public int Size => Is32Bit ? 4 : 8;
-
-        /// <inheritdoc />
-        public bool IsValueType => false;
+        public bool IsValueType => true;
 
         /// <inheritdoc />
         public Trilean IsZero => false;
@@ -276,7 +259,7 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public IValue Copy() => new MemoryBlockValue(_memory, _knownBitMask, Is32Bit);
+        public IValue Copy() => new MemoryBlockValue(_memory, _knownBitMask);
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void AssertOffsetValidity(int offset, int size)
