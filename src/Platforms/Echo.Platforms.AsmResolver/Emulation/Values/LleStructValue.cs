@@ -31,11 +31,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
+        /// <summary>
+        /// Gets the value factory that was used to create this structure.
+        /// </summary>
         protected IValueFactory ValueFactory
         {
             get;
         }
 
+        /// <summary>
+        /// Indicates the value was constructed in a 32 or 64 bit environment.
+        /// </summary>
         public bool Is32Bit => ValueFactory.Is32Bit;
 
         /// <inheritdoc />

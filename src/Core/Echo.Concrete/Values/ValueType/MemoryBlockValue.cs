@@ -30,7 +30,6 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         /// <param name="memory">The referenced memory.</param>
         /// <param name="knownBitMask">The bit mask indicating the known and unknown bits.</param>
-        /// <param name="is32Bit">Indicates the pointer is 32 bit or 64 bit wide.</param>
         public MemoryBlockValue(Memory<byte> memory, Memory<byte> knownBitMask)
         {
             _memory = memory;

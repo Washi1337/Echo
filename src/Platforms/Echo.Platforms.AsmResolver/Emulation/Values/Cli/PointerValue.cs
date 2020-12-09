@@ -13,6 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// Creates a new null pointer value.
         /// </summary>
         /// <param name="isKnown">Indicates whether the pointer is known.</param>
+        /// <param name="is32Bit">Indicates the pointer is 32 or 64 bits wide.</param>
         public PointerValue(bool isKnown, bool is32Bit)
             : base(isKnown, is32Bit)
         {
@@ -22,6 +23,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// Creates a new pointer value.
         /// </summary>
         /// <param name="referencedMemory">The base pointer value.</param>
+        /// <param name="is32Bit">Indicates the pointer is 32 or 64 bits wide.</param>
         public PointerValue(IMemoryAccessValue referencedMemory, bool is32Bit)
             : base(referencedMemory, is32Bit)
         {
@@ -32,6 +34,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// </summary>
         /// <param name="referencedMemory">The base pointer value.</param>
         /// <param name="offset">The offset relative to the base pointer.</param>
+        /// <param name="is32Bit">Indicates the pointer is 32 or 64 bits wide.</param>
         public PointerValue(IMemoryAccessValue referencedMemory, int offset, bool is32Bit)
             : base(referencedMemory, offset, is32Bit)
         {

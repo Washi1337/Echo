@@ -4,6 +4,9 @@ using Echo.Concrete.Values.ValueType;
 
 namespace Echo.Concrete.Values
 {
+    /// <summary>
+    /// Provides memory read/write operations on a concrete value.
+    /// </summary>
     public interface IMemoryAccessValue : IConcreteValue
     {
         /// <summary>
@@ -162,16 +165,28 @@ namespace Echo.Concrete.Values
         void WriteFloat64(int offset, Float64Value value);
     }
 
+    /// <summary>
+    /// Provides extension methods for the <see cref="IMemoryAccessValue"/> interface.
+    /// </summary>
     public static class MemoryAccessValueExtensions
     {
-        public static IPointerValue MakePointer(this IMemoryAccessValue self, bool is32Bit)
-        {
-            return new RelativePointerValue(self, is32Bit);
-        }
-        
-        public static IPointerValue MakePointer(this IMemoryAccessValue self, int offset, bool is32Bit)
-        {
-            return new RelativePointerValue(self, offset, is32Bit);
-        }
+        /// <summary>
+        /// Creates a new pointer to the memory.
+        /// </summary>
+        /// <param name="self">The memory to reference.</param>
+        /// <param name="is32Bit">Indicates whether the pointer is 32 or 64 bits wide.</param>
+        /// <returns>The constructed pointer.</returns>
+        public static IPointerValue MakePointer(this IMemoryAccessValue self, bool is32Bit) => 
+            new RelativePointerValue(self, is32Bit);
+
+        /// <summary>
+        /// Creates a new pointer to an offset within the memory.
+        /// </summary>
+        /// <param name="self">The memory to reference.</param>
+        /// <param name="offset">The offset within the memory.</param>
+        /// <param name="is32Bit">Indicates whether the pointer is 32 or 64 bits wide.</param>
+        /// <returns>The constructed pointer.</returns>
+        public static IPointerValue MakePointer(this IMemoryAccessValue self, int offset, bool is32Bit) => 
+            new RelativePointerValue(self, offset, is32Bit);
     }
 }

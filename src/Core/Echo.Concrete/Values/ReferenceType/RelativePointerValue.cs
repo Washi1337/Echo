@@ -11,9 +11,10 @@ namespace Echo.Concrete.Values.ReferenceType
     public class RelativePointerValue : IPointerValue
     {
         /// <summary>
-        /// Creates a new null pointer value.
+        /// Creates a new null or unknown pointer value.
         /// </summary>
         /// <param name="isKnown">Indicates whether the pointer is known.</param>
+        /// <param name="is32Bit">Indicates the pointer is 32 or 64 bits wide.</param>
         public RelativePointerValue(bool isKnown, bool is32Bit)
         {
             IsKnown = isKnown;
@@ -21,19 +22,21 @@ namespace Echo.Concrete.Values.ReferenceType
         }
         
         /// <summary>
-        /// Creates a new relative pointer value.
+        /// Creates a new known relative pointer value.
         /// </summary>
         /// <param name="referencedMemory">The base memory pointer.</param>
+        /// <param name="is32Bit">Indicates the pointer is 32 or 64 bits wide.</param>
         public RelativePointerValue(IMemoryAccessValue referencedMemory, bool is32Bit)
             : this(referencedMemory, 0, is32Bit)
         {
         }
 
         /// <summary>
-        /// Creates a new relative pointer value.
+        /// Creates a new known relative pointer value.
         /// </summary>
         /// <param name="referencedMemory">The base memory pointer.</param>
         /// <param name="offset">The offset relative to the base po[inter.</param>
+        /// <param name="is32Bit">Indicates the pointer is 32 or 64 bits wide.</param>
         public RelativePointerValue(IMemoryAccessValue referencedMemory, int offset, bool is32Bit)
         {
             Is32Bit = is32Bit;
