@@ -39,7 +39,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 .Pop(argumentCount, true)
                 .Cast<ICliValue>()
                 .ToList();
-            arguments.Insert(0, cilValueObject);
+
+            arguments.Insert(0, type.IsValueType
+                ? new OValue(cilValueObject, true, environment.Is32Bit)
+                : cilValueObject);
 
             // Dispatch
             var methodDispatch = new MethodDevirtualizationResult(method);
