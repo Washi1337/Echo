@@ -1,6 +1,7 @@
 using System;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 
@@ -17,11 +18,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         /// <param name="valueFactory">The object responsible for memory management in the virtual machine.</param>
         /// <param name="valueType">The type of the object.</param>
         /// <param name="contents">The raw contents of the structure.</param>
-        public StructValue(IValueFactory valueFactory, TypeSignature valueType, MemoryPointerValue contents)
+        public StructValue(IValueFactory valueFactory, TypeSignature valueType, IMemoryAccessValue contents)
             : base(valueFactory, valueType, contents)
         {
         }
-
+        
         /// <inheritdoc />
         public CliValueType CliValueType => CliValueType.Structure;
 

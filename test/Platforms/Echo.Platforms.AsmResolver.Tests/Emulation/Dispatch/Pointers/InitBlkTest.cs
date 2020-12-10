@@ -1,5 +1,7 @@
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Concrete.Values;
+using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
@@ -22,8 +24,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             var marshaller = environment.CliMarshaller;
 
             var stack = ExecutionContext.ProgramState.Stack;
-            
-            var memory = environment.ValueFactory.AllocateMemory(16, true);
+
+            var memory = environment.ValueFactory
+                .AllocateMemory(16, true)
+                .MakePointer(environment.Is32Bit);
+                
             stack.Push(marshaller.ToCliValue(memory, new PointerTypeSignature(environment.Module.CorLibTypeFactory.Int32)));
             stack.Push(new I4Value(0x01));
             stack.Push(new I4Value(8));
@@ -43,7 +48,10 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 
             var stack = ExecutionContext.ProgramState.Stack;
             
-            var memory = environment.ValueFactory.AllocateMemory(16, true);
+            var memory = environment.ValueFactory
+                .AllocateMemory(16, true)
+                .MakePointer(environment.Is32Bit);
+            
             stack.Push(marshaller.ToCliValue(memory, new PointerTypeSignature(environment.Module.CorLibTypeFactory.Int32)));
             stack.Push(new I4Value("0011??00"));
             stack.Push(new I4Value(8));

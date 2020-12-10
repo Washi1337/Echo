@@ -179,7 +179,7 @@ namespace Echo.Concrete.Values.ValueType
         public override void GetMask(Span<byte> buffer) => BinaryPrimitives.WriteUInt16LittleEndian(buffer, Mask);
 
         /// <inheritdoc />
-        public override void SetBits(Span<byte> bits, Span<byte> mask)
+        public override void SetBits(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> mask)
         {
             if (bits.Length != 2 || mask.Length != 2)
                 throw new ArgumentException("Number of bits is not 16.");

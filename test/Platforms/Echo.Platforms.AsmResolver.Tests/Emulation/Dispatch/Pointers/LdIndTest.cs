@@ -30,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             memory.WriteInteger32(0, new Integer32Value(0x12345678));
             memory.WriteInteger32(4, new Integer32Value(0x09ABCDEF));
             
-            var relativePointer = new RelativePointerValue(memory, offset);
+            var relativePointer = new RelativePointerValue(memory, offset, environment.Is32Bit);
             stack.Push(environment.CliMarshaller.ToCliValue(relativePointer, new PointerTypeSignature(factory.Byte)));
             
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Ldind_I4));

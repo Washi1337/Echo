@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using AsmResolver.DotNet.Signatures.Types;
+using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core;
@@ -13,7 +14,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// </summary>
     public class StringValue : IDotNetValue
     {
-        private readonly MemoryPointerValue _contents;
+        private readonly IMemoryAccessValue _contents;
 
         /// <summary>
         /// Creates a new string value.
@@ -23,11 +24,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <exception cref="ArgumentException">
         /// Occurs when the memory block referenced by <paramref name="contents"/> is of an invalid size.
         /// </exception>
-        public StringValue(TypeSignature stringType, MemoryPointerValue contents)
+        public StringValue(TypeSignature stringType, IMemoryAccessValue contents)
         {
             Type = stringType ?? throw new ArgumentNullException(nameof(stringType));
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
-            if (contents.Length % sizeof(char) != 0)
+            if (contents.Size % sizeof(char) != 0)
                 throw new ArgumentException($"Length of raw string memory must be a multiple of two.");
         }
 
@@ -40,7 +41,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <summary>
         /// Gets the number of characters stored in the string.
         /// </summary>
-        public int Length => _contents.Length / sizeof(char);
+        public int Length => _contents.Size / sizeof(char);
         
         /// <inheritdoc />
         public bool IsKnown => true;

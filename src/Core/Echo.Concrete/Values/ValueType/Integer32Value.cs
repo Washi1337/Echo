@@ -179,7 +179,7 @@ namespace Echo.Concrete.Values.ValueType
         public override void GetMask(Span<byte> buffer) => BinaryPrimitives.WriteUInt32LittleEndian(buffer, Mask);
 
         /// <inheritdoc />
-        public override void SetBits(Span<byte> bits, Span<byte> mask)
+        public override void SetBits(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> mask)
         {
             if (bits.Length != 4 || mask.Length != 4)
                 throw new ArgumentException("Number of bits is not 32.");

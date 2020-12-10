@@ -11,39 +11,44 @@ namespace Echo.Concrete.Values.ReferenceType
     public class RelativePointerValue : IPointerValue
     {
         /// <summary>
-        /// Creates a new null pointer value.
+        /// Creates a new null or unknown pointer value.
         /// </summary>
         /// <param name="isKnown">Indicates whether the pointer is known.</param>
-        public RelativePointerValue(bool isKnown)
+        /// <param name="is32Bit">Indicates the pointer is 32 or 64 bits wide.</param>
+        public RelativePointerValue(bool isKnown, bool is32Bit)
         {
             IsKnown = isKnown;
+            Is32Bit = is32Bit;
         }
         
         /// <summary>
-        /// Creates a new relative pointer value.
+        /// Creates a new known relative pointer value.
         /// </summary>
-        /// <param name="basePointer">The base memory pointer.</param>
-        public RelativePointerValue(IPointerValue basePointer)
-            : this(basePointer, 0)
+        /// <param name="referencedMemory">The base memory pointer.</param>
+        /// <param name="is32Bit">Indicates the pointer is 32 or 64 bits wide.</param>
+        public RelativePointerValue(IMemoryAccessValue referencedMemory, bool is32Bit)
+            : this(referencedMemory, 0, is32Bit)
         {
         }
 
         /// <summary>
-        /// Creates a new relative pointer value.
+        /// Creates a new known relative pointer value.
         /// </summary>
-        /// <param name="basePointer">The base memory pointer.</param>
+        /// <param name="referencedMemory">The base memory pointer.</param>
         /// <param name="offset">The offset relative to the base po[inter.</param>
-        public RelativePointerValue(IPointerValue basePointer, int offset)
+        /// <param name="is32Bit">Indicates the pointer is 32 or 64 bits wide.</param>
+        public RelativePointerValue(IMemoryAccessValue referencedMemory, int offset, bool is32Bit)
         {
-            BasePointer = basePointer;
+            Is32Bit = is32Bit;
+            ReferencedMemory = referencedMemory;
             CurrentOffset = offset;
-            IsKnown = basePointer.IsKnown;
+            IsKnown = true;
         }
 
         /// <summary>
         /// Gets the base memory pointer. 
         /// </summary>
-        public IPointerValue BasePointer
+        public IMemoryAccessValue ReferencedMemory
         {
             get;
         }
@@ -60,7 +65,10 @@ namespace Echo.Concrete.Values.ReferenceType
         /// <summary>
         /// Gets a value indicating whether the pointer is 32 bit or 64 bit wide.
         /// </summary>
-        public bool Is32Bit => BasePointer.Is32Bit;
+        public bool Is32Bit
+        {
+            get;
+        }
 
         /// <inheritdoc />
         public bool IsKnown
@@ -78,7 +86,7 @@ namespace Echo.Concrete.Values.ReferenceType
         public bool IsValueType => false;
 
         /// <inheritdoc />
-        public Trilean IsZero => BasePointer is null;
+        public Trilean IsZero => ReferencedMemory is null;
 
         /// <inheritdoc />
         public Trilean IsNonZero => !IsZero;
@@ -93,14 +101,14 @@ namespace Echo.Concrete.Values.ReferenceType
         public void ReadBytes(int offset, Span<byte> memoryBuffer)
         {
             if (IsKnown)
-                BasePointer.ReadBytes(CurrentOffset + offset, memoryBuffer);
+                ReferencedMemory.ReadBytes(CurrentOffset + offset, memoryBuffer);
         }
 
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer, Span<byte> knownBitmaskBuffer)
         {
             if (IsKnown)
-                BasePointer.ReadBytes(CurrentOffset + offset, memoryBuffer, knownBitmaskBuffer);
+                ReferencedMemory.ReadBytes(CurrentOffset + offset, memoryBuffer, knownBitmaskBuffer);
             else 
                 knownBitmaskBuffer.Fill(0);
         }
@@ -109,86 +117,86 @@ namespace Echo.Concrete.Values.ReferenceType
         public void WriteBytes(int offset, ReadOnlySpan<byte> data)
         {
             if (IsKnown)
-                BasePointer.WriteBytes(CurrentOffset + offset, data);
+                ReferencedMemory.WriteBytes(CurrentOffset + offset, data);
         }
 
         /// <inheritdoc />
         public void WriteBytes(int offset, ReadOnlySpan<byte> data, ReadOnlySpan<byte> knownBitMask)
         {
             if (IsKnown)
-                BasePointer.WriteBytes(CurrentOffset + offset, data, knownBitMask);
+                ReferencedMemory.WriteBytes(CurrentOffset + offset, data, knownBitMask);
         }
 
         /// <inheritdoc />
         public Integer8Value ReadInteger8(int offset) => IsKnown
-            ? BasePointer.ReadInteger8(CurrentOffset + offset)
+            ? ReferencedMemory.ReadInteger8(CurrentOffset + offset)
             : new Integer8Value(0, 0);
 
         /// <inheritdoc />
         public Integer16Value ReadInteger16(int offset) => IsKnown
-            ? BasePointer.ReadInteger16(CurrentOffset + offset)
+            ? ReferencedMemory.ReadInteger16(CurrentOffset + offset)
             : new Integer16Value(0, 0);
 
         /// <inheritdoc />
         public Integer32Value ReadInteger32(int offset) => IsKnown
-            ? BasePointer.ReadInteger32(CurrentOffset + offset)
+            ? ReferencedMemory.ReadInteger32(CurrentOffset + offset)
             : new Integer32Value(0, 0);
 
         /// <inheritdoc />
         public Integer64Value ReadInteger64(int offset) => IsKnown
-            ? BasePointer.ReadInteger64(CurrentOffset + offset)
+            ? ReferencedMemory.ReadInteger64(CurrentOffset + offset)
             : new Integer64Value(0, 0);
 
         /// <inheritdoc />
         public Float32Value ReadFloat32(int offset) => IsKnown
-            ? BasePointer.ReadFloat32(CurrentOffset + offset)
+            ? ReferencedMemory.ReadFloat32(CurrentOffset + offset)
             : new Float32Value(0); // TODO: unknown float32.
 
         /// <inheritdoc />
         public Float64Value ReadFloat64(int offset) => IsKnown
-            ? BasePointer.ReadFloat64(CurrentOffset + offset)
+            ? ReferencedMemory.ReadFloat64(CurrentOffset + offset)
             : new Float64Value(0); // TODO: unknown float64
 
         /// <inheritdoc />
         public void WriteInteger8(int offset, Integer8Value value)
         {
             if (IsKnown)
-                BasePointer.WriteInteger8(CurrentOffset + offset, value);
+                ReferencedMemory.WriteInteger8(CurrentOffset + offset, value);
         }
 
         /// <inheritdoc />
         public void WriteInteger16(int offset, Integer16Value value)
         {
             if (IsKnown)
-                BasePointer.WriteInteger16(CurrentOffset + offset, value);
+                ReferencedMemory.WriteInteger16(CurrentOffset + offset, value);
         }
 
         /// <inheritdoc />
         public void WriteInteger32(int offset, Integer32Value value)
         {
             if (IsKnown)
-                BasePointer.WriteInteger32(CurrentOffset + offset, value);
+                ReferencedMemory.WriteInteger32(CurrentOffset + offset, value);
         }
 
         /// <inheritdoc />
         public void WriteInteger64(int offset, Integer64Value value)
         {
             if (IsKnown)
-                BasePointer.WriteInteger64(CurrentOffset + offset, value);
+                ReferencedMemory.WriteInteger64(CurrentOffset + offset, value);
         }
 
         /// <inheritdoc />
         public void WriteFloat32(int offset, Float32Value value)
         {
             if (IsKnown)
-                BasePointer.WriteFloat32(CurrentOffset + offset, value);
+                ReferencedMemory.WriteFloat32(CurrentOffset + offset, value);
         }
 
         /// <inheritdoc />
         public void WriteFloat64(int offset, Float64Value value)
         {
             if (IsKnown)
-                BasePointer.WriteFloat64(CurrentOffset + offset, value);
+                ReferencedMemory.WriteFloat64(CurrentOffset + offset, value);
         }
 
         /// <summary>
@@ -204,6 +212,6 @@ namespace Echo.Concrete.Values.ReferenceType
         public void Subtract(int offset) => CurrentOffset -= offset;
 
         /// <inheritdoc />
-        public IValue Copy() => new RelativePointerValue(BasePointer, CurrentOffset);
+        public IValue Copy() => new RelativePointerValue(ReferencedMemory, CurrentOffset, Is32Bit);
     }
 }

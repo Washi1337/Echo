@@ -43,17 +43,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <inheritdoc />
         public IConcreteValue GetFieldValue(IFieldDescriptor field)
         {
-            var typeMemoryLayout = _valueFactory.GetTypeMemoryLayout(field.DeclaringType);
+            var typeMemoryLayout = ValueFactory.GetTypeMemoryLayout(field.DeclaringType);
             var fieldMemoryLayout = typeMemoryLayout[field.Resolve()];
-            return this.ReadStruct((int) fieldMemoryLayout.Offset, _valueFactory, fieldMemoryLayout.ContentsLayout);
+            return this.ReadStruct((int) fieldMemoryLayout.Offset, ValueFactory, fieldMemoryLayout.ContentsLayout);
         }
 
         /// <inheritdoc />
         public void SetFieldValue(IFieldDescriptor field, IConcreteValue value)
         {
-            var typeMemoryLayout = _valueFactory.GetTypeMemoryLayout(field.DeclaringType);
+            var typeMemoryLayout = ValueFactory.GetTypeMemoryLayout(field.DeclaringType);
             var fieldMemoryLayout = typeMemoryLayout[field.Resolve()];
-            this.WriteStruct((int) fieldMemoryLayout.Offset, _valueFactory, fieldMemoryLayout.ContentsLayout, value);
+            this.WriteStruct((int) fieldMemoryLayout.Offset, ValueFactory, fieldMemoryLayout.ContentsLayout, value);
         }
 
     }

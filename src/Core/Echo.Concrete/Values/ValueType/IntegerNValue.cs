@@ -11,11 +11,11 @@ namespace Echo.Concrete.Values.ValueType
     /// </summary>
     public class IntegerNValue : IntegerValue
     {
-        private readonly byte[] _bits;
-        private readonly byte[] _mask;
-        
         private static readonly ArrayPool<byte> Pool = ArrayPool<byte>.Create();
         
+        private readonly byte[] _bits;
+        private readonly byte[] _mask;
+
         /// <summary>
         /// Creates a new zero integer.
         /// </summary>
@@ -83,14 +83,10 @@ namespace Echo.Concrete.Values.ValueType
         ~IntegerNValue()
         {
             if (_bits is {})
-            {
                 Pool.Return(_bits, true);
-            }
 
             if (_mask is {})
-            {
                 Pool.Return(_mask, true);
-            }
         }
 
         /// <inheritdoc />
@@ -157,7 +153,7 @@ namespace Echo.Concrete.Values.ValueType
         public override void GetMask(Span<byte> buffer) => Mask.CopyTo(buffer);
 
         /// <inheritdoc />
-        public override void SetBits(Span<byte> bits, Span<byte> mask)
+        public override void SetBits(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> mask)
         {
             if (bits.Length != Size)
                 throw new ArgumentException("New bit value does not have the same bit-length as the original value.");
