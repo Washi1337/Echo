@@ -538,6 +538,15 @@ namespace Echo.Concrete.Values.ValueType
             if (other.IsZero == Trilean.True)
                 throw new DivideByZeroException();
 
+            Span<byte> mask = stackalloc byte[Size];
+            other.GetMask(mask);
+            if (mask.All<byte>(0))
+            {
+                // If the divider is fully unknown
+                SetBits(mask, mask);
+                return;
+            }
+
             // There is only one possibility to cover all possible result
             // The solution is to get first number as big as possible by changing all Uknown bits to True
             // And second number needs to be as small as possible by changing all Unknown bits to false
@@ -607,6 +616,15 @@ namespace Echo.Concrete.Values.ValueType
             // Throw exception because of dividing by zero
             if (other.IsZero == Trilean.True)
                 throw new DivideByZeroException();
+            
+            Span<byte> mask = stackalloc byte[Size];
+            other.GetMask(mask);
+            if (mask.All<byte>(0))
+            {
+                // If the divider is fully unknown
+                SetBits(mask, mask);
+                return;
+            }
 
             // There are 2 possibilities
             // First is that both numbers are known. In this possibility remainder is counted as usual.
