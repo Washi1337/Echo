@@ -275,6 +275,25 @@ namespace Echo.Concrete.Tests.Values.ValueType
 
             Assert.Equal(expected, value1.IsGreaterThan(value2, signed));
         }
-    }
 
+        [Fact]
+        public void DivisionWithUnknownNumbersShouldNotResultInInfiniteLoop()
+        {
+            var value1 = new Integer32Value("11111111");
+            var value2 = new Integer32Value(0, 0);
+
+            value1.Divide(value2);
+            Assert.False(value1.IsKnown);
+        }
+
+        [Fact]
+        public void RemainderWithUnknownNumbersShouldNotResultInInfiniteLoop()
+        {
+            var value1 = new Integer32Value("11111111");
+            var value2 = new Integer32Value(0, 0);
+
+            value1.Remainder(value2);
+            Assert.False(value1.IsKnown);
+        }
+    }
 }
