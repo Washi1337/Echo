@@ -10,10 +10,7 @@ namespace Echo.Concrete.Tests.Values.ReferenceType
         [Fact]
         public void ReadInteger16()
         {
-            using var memoryOwner = MemoryPool<byte>.Shared.Rent(2);
-            using var bitmaskOwner = MemoryPool<byte>.Shared.Rent(2);
-
-            var ptrValue = new MemoryBlockValue(memoryOwner.Memory, bitmaskOwner.Memory);
+            var ptrValue = new MemoryBlockValue(2);
             
             var value = new Integer16Value("00001111????0000");
             ptrValue.WriteInteger16(0, value);
@@ -23,10 +20,7 @@ namespace Echo.Concrete.Tests.Values.ReferenceType
         [Fact]
         public void WriteInteger16ShouldBeLittleEndian()
         {
-            using var memoryOwner = MemoryPool<byte>.Shared.Rent(2);
-            using var bitmaskOwner = MemoryPool<byte>.Shared.Rent(2);
-
-            var ptrValue = new MemoryBlockValue(memoryOwner.Memory, bitmaskOwner.Memory);
+            var ptrValue = new MemoryBlockValue(2);
             
             var value = new Integer16Value("00001111????0000");
             ptrValue.WriteInteger16(0, value);
@@ -38,10 +32,7 @@ namespace Echo.Concrete.Tests.Values.ReferenceType
         [Fact]
         public void ReadInteger32()
         {
-            using var memoryOwner = MemoryPool<byte>.Shared.Rent(4);
-            using var bitmaskOwner = MemoryPool<byte>.Shared.Rent(4);
-
-            var ptrValue = new MemoryBlockValue(memoryOwner.Memory, bitmaskOwner.Memory);
+            var ptrValue = new MemoryBlockValue(4);
             
             var value = new Integer32Value("00001111????0011001100??00??0101");
             ptrValue.WriteInteger32(0, value);
@@ -51,10 +42,7 @@ namespace Echo.Concrete.Tests.Values.ReferenceType
         [Fact]
         public void WriteInteger32ShouldBeLittleEndian()
         {
-            using var memoryOwner = MemoryPool<byte>.Shared.Rent(4);
-            using var bitmaskOwner = MemoryPool<byte>.Shared.Rent(4);
-
-            var ptrValue = new MemoryBlockValue(memoryOwner.Memory, bitmaskOwner.Memory);
+            var ptrValue = new MemoryBlockValue(4);
 
             var value = new Integer32Value("00001111" + "????0011" + "001100??" + "00??0101");
             ptrValue.WriteInteger32(0, value);
@@ -68,10 +56,7 @@ namespace Echo.Concrete.Tests.Values.ReferenceType
         [Fact]
         public void ReadInteger64()
         {
-            using var memoryOwner = MemoryPool<byte>.Shared.Rent(8);
-            using var bitmaskOwner = MemoryPool<byte>.Shared.Rent(8);
-
-            var ptrValue = new MemoryBlockValue(memoryOwner.Memory, bitmaskOwner.Memory);
+            var ptrValue = new MemoryBlockValue(8);
             
             var value = new Integer32Value("00001111????0011001100??00??0101");
             ptrValue.WriteInteger32(0, value);
@@ -81,10 +66,7 @@ namespace Echo.Concrete.Tests.Values.ReferenceType
         [Fact]
         public void WriteInteger64ShouldBeLittleEndian()
         {
-            using var memoryOwner = MemoryPool<byte>.Shared.Rent(8);
-            using var bitmaskOwner = MemoryPool<byte>.Shared.Rent(8);
-
-            var ptrValue = new MemoryBlockValue(memoryOwner.Memory, bitmaskOwner.Memory);
+            var ptrValue = new MemoryBlockValue(8);
 
             var value = new Integer64Value("00000000" + "11111111" + "????????" + "00001111" +
                                            "????0000" + "01010101" + "0?0?0?0?" + "01010?0?");
@@ -103,10 +85,7 @@ namespace Echo.Concrete.Tests.Values.ReferenceType
         [Fact]
         public void ReadWriteFloat32()
         {
-            using var memoryOwner = MemoryPool<byte>.Shared.Rent(4);
-            using var bitmaskOwner = MemoryPool<byte>.Shared.Rent(4);
-
-            var ptrValue = new MemoryBlockValue(memoryOwner.Memory, bitmaskOwner.Memory);
+            var ptrValue = new MemoryBlockValue(4);
 
             var value = new Float32Value(0.12345678f);
             ptrValue.WriteFloat32(0, value);
@@ -116,10 +95,7 @@ namespace Echo.Concrete.Tests.Values.ReferenceType
         [Fact]
         public void ReadWriteFloat64()
         {
-            using var memoryOwner = MemoryPool<byte>.Shared.Rent(8);
-            using var bitmaskOwner = MemoryPool<byte>.Shared.Rent(8);
-
-            var ptrValue = new MemoryBlockValue(memoryOwner.Memory, bitmaskOwner.Memory);
+            var ptrValue = new MemoryBlockValue(8);
 
             var value = new Float64Value(0.12345678d);
             ptrValue.WriteFloat64(0, value);

@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using AsmResolver.DotNet;
-using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
@@ -26,8 +25,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Values
         public unsafe void AllFieldsKnown()
         {
             var type = (TypeDefinition) _fixture.MockModule.LookupMember(typeof(SimpleStruct).MetadataToken);
-            var contents = new MemoryBlockValue(
-                new Memory<byte>(new byte[sizeof(SimpleStruct)]));
+            var contents = new MemoryBlockValue(sizeof(SimpleStruct), true);
 
             var value = new LleStructValue(_environment.ValueFactory, type.ToTypeSignature(), contents);
             Assert.True(value.IsKnown);
@@ -37,9 +35,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Values
         public unsafe void AllFieldsUnknown()
         {
             var type = (TypeDefinition) _fixture.MockModule.LookupMember(typeof(SimpleStruct).MetadataToken);
-            var contents = new MemoryBlockValue(
-                new Memory<byte>(new byte[sizeof(SimpleStruct)]),
-                new Memory<byte>(new byte[sizeof(SimpleStruct)]));
+            var contents = new MemoryBlockValue(sizeof(SimpleStruct));
 
             var value = new LleStructValue(_environment.ValueFactory, type.ToTypeSignature(), contents);
             Assert.False(value.IsKnown);
@@ -50,8 +46,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Values
         {
             var type = (TypeDefinition) _fixture.MockModule.LookupMember(typeof(SimpleStruct).MetadataToken);
             var field = type.Fields.First(f => f.Name == nameof(SimpleStruct.Y));
-            var contents = new MemoryBlockValue(
-                new Memory<byte>(new byte[sizeof(SimpleStruct)]));
+            var contents = new MemoryBlockValue(sizeof(SimpleStruct), true);
 
             var value = new LleStructValue(_environment.ValueFactory, type.ToTypeSignature(), contents);
             value.SetFieldValue(field, new Integer32Value(0, 0));

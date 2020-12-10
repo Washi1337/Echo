@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 using Echo.Core;
@@ -11,39 +12,84 @@ namespace Echo.Concrete.Values.ValueType
     /// </summary>
     public class MemoryBlockValue : IValueTypeValue, IMemoryAccessValue
     {
-        private readonly Memory<byte> _memory;
-        private readonly Memory<byte> _knownBitMask;
+        private static readonly ArrayPool<byte> Pool = ArrayPool<byte>.Create();
+        
+        private readonly byte[] _memory;
+        private readonly byte[] _knownBitMask;
 
         /// <summary>
-        /// Creates a new fully known memory pointer value.
+        /// Creates a new uninitialized block of memory.
+        /// </summary>
+        /// <param name="size">The size of the memory.</param>
+        public MemoryBlockValue(int size)
+            : this(size, false)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new block of memory.
+        /// </summary>
+        /// <param name="size">The size of the memory.</param>
+        /// <param name="initialize">Determines whether the block should be initialized with zeroes or not.</param>
+        public MemoryBlockValue(int size, bool initialize)
+        {
+            if (size < 0)
+                throw new ArgumentOutOfRangeException(nameof(size));
+            
+            _memory = Pool.Rent(size);
+            _knownBitMask = Pool.Rent(size);
+            Size = size;
+
+            if (initialize)
+            {
+                _memory.AsSpan().Fill(0);
+                _knownBitMask.AsSpan().Fill(0xFF);
+            }
+            else
+            {
+                _knownBitMask.AsSpan().Fill(0);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new fully known memory block.
         /// </summary>
         /// <param name="memory">The referenced memory.</param>
-        public MemoryBlockValue(Memory<byte> memory)
+        public MemoryBlockValue(Span<byte> memory)
+            : this(memory.Length, false)
         {
-            _memory = memory;
-            _knownBitMask = new Memory<byte>(new byte[memory.Length]);
-            _knownBitMask.Span.Fill(0xFF);
+            memory.CopyTo(_memory.AsSpan());
+            _knownBitMask.AsSpan().Fill(0xFF);
         }
-        
+
         /// <summary>
-        /// Creates a new memory pointer value.
+        /// Creates a new memory block.
         /// </summary>
         /// <param name="memory">The referenced memory.</param>
         /// <param name="knownBitMask">The bit mask indicating the known and unknown bits.</param>
-        public MemoryBlockValue(Memory<byte> memory, Memory<byte> knownBitMask)
+        public MemoryBlockValue(Span<byte> memory, Span<byte> knownBitMask)
+            : this(memory.Length, false)
         {
-            _memory = memory;
-            _knownBitMask = knownBitMask;
+            SetBits(memory, knownBitMask);
         }
 
+        ~MemoryBlockValue()
+        {
+            if (_memory is {})
+                Pool.Return(_memory, true);
+
+            if (_knownBitMask is {})
+                Pool.Return(_knownBitMask, true);
+        }
+        
         /// <inheritdoc />
         public bool IsKnown
         {
             get
             {
-                for (int i = 0; i < _knownBitMask.Length; i++)
+                foreach (byte b in _knownBitMask)
                 {
-                    if (_knownBitMask.Span[i] != 0xFF)
+                    if (b != 0xFF)
                         return false;
                 }
 
@@ -52,7 +98,10 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public int Size => _memory.Length;
+        public int Size
+        {
+            get;
+        }
 
         /// <inheritdoc />
         public bool IsValueType => true;
@@ -71,31 +120,31 @@ namespace Echo.Concrete.Values.ValueType
 
         /// <inheritdoc />
         public void GetBits(Span<byte> buffer) => 
-            _memory.Span.Slice(buffer.Length).CopyTo(buffer);
+            _memory.AsSpan(0, Math.Min(Size, buffer.Length)).CopyTo(buffer);
 
         /// <inheritdoc />
         public void GetMask(Span<byte> buffer) => 
-            _knownBitMask.Span.Slice(buffer.Length).CopyTo(buffer);
+            _knownBitMask.AsSpan(0, Math.Min(Size, buffer.Length)).CopyTo(buffer);
 
         /// <inheritdoc />
         public void SetBits(Span<byte> bits, Span<byte> mask)
         {
-            bits.CopyTo(_memory.Span);
-            mask.CopyTo(_knownBitMask.Span);
+            bits.CopyTo(_memory.AsSpan(0, Math.Min(Size, bits.Length)));
+            mask.CopyTo(_knownBitMask.AsSpan(0, Math.Min(Size, bits.Length)));
         }
         
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer)
         {
-            var slicedMemory = _memory.Span.Slice(offset, memoryBuffer.Length);
+            var slicedMemory = _memory.AsSpan(offset, Math.Min(Size - offset, memoryBuffer.Length));
             slicedMemory.CopyTo(memoryBuffer);
         }
 
         /// <inheritdoc />
         public void ReadBytes(int offset, Span<byte> memoryBuffer, Span<byte> knownBitmaskBuffer)
         {
-            var slicedMemory = _memory.Span.Slice(offset, memoryBuffer.Length);
-            var slicedBitMask = _knownBitMask.Span.Slice(offset, memoryBuffer.Length);
+            var slicedMemory = _memory.AsSpan(offset, Math.Min(Size - offset, memoryBuffer.Length));
+            var slicedBitMask = _knownBitMask.AsSpan(offset, Math.Min(Size - offset, memoryBuffer.Length));
 
             slicedMemory.CopyTo(memoryBuffer);
             slicedBitMask.CopyTo(knownBitmaskBuffer);
@@ -104,8 +153,8 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public void WriteBytes(int offset, ReadOnlySpan<byte> data)
         {
-            var slicedMemory = _memory.Span.Slice(offset, data.Length);
-            var slicedBitMask = _knownBitMask.Span.Slice(offset, data.Length);
+            var slicedMemory = _memory.AsSpan(offset, data.Length);
+            var slicedBitMask = _knownBitMask.AsSpan(offset, data.Length);
             
             data.CopyTo(slicedMemory);
             slicedBitMask.Fill(0xFF);
@@ -114,8 +163,8 @@ namespace Echo.Concrete.Values.ValueType
         /// <inheritdoc />
         public void WriteBytes(int offset, ReadOnlySpan<byte> data, ReadOnlySpan<byte> knownBitMask)
         {
-            var slicedMemory = _memory.Span.Slice(offset, data.Length);
-            var slicedBitMask = _knownBitMask.Span.Slice(offset, data.Length);
+            var slicedMemory = _memory.AsSpan(offset, data.Length);
+            var slicedBitMask = _knownBitMask.AsSpan(offset, data.Length);
             
             data.CopyTo(slicedMemory);
             knownBitMask.CopyTo(slicedBitMask);
@@ -125,7 +174,7 @@ namespace Echo.Concrete.Values.ValueType
         public Integer8Value ReadInteger8(int offset)
         {
             return OffsetIsInRange(offset, sizeof(byte))
-                ? new Integer8Value(_memory.Span[offset], _knownBitMask.Span[offset])
+                ? new Integer8Value(_memory[offset], _knownBitMask[offset])
                 : new Integer8Value(0, 0);
         }
 
@@ -135,8 +184,8 @@ namespace Echo.Concrete.Values.ValueType
             if (!OffsetIsInRange(offset, sizeof(ushort)))
                 return new Integer16Value(0, 0);
             
-            ReadOnlySpan<byte> memorySpan = _memory.Span.Slice(offset, 2);
-            ReadOnlySpan<byte> knownBitsSpan = _knownBitMask.Span.Slice(offset, 2);
+            ReadOnlySpan<byte> memorySpan = _memory.AsSpan(offset, 2);
+            ReadOnlySpan<byte> knownBitsSpan = _knownBitMask.AsSpan(offset, 2);
             
             return new Integer16Value(
                 BinaryPrimitives.ReadUInt16LittleEndian(memorySpan), 
@@ -149,8 +198,8 @@ namespace Echo.Concrete.Values.ValueType
             if (!OffsetIsInRange(offset, sizeof(uint)))
                 return new Integer32Value(0, 0);
             
-            ReadOnlySpan<byte> memorySpan = _memory.Span.Slice(offset, 4);
-            ReadOnlySpan<byte> knownBitsSpan =  _knownBitMask.Span.Slice(offset, 4);
+            ReadOnlySpan<byte> memorySpan = _memory.AsSpan(offset, 4);
+            ReadOnlySpan<byte> knownBitsSpan =  _knownBitMask.AsSpan(offset, 4);
             
             return new Integer32Value(
                 BinaryPrimitives.ReadUInt32LittleEndian(memorySpan), 
@@ -163,8 +212,8 @@ namespace Echo.Concrete.Values.ValueType
             if (!OffsetIsInRange(offset, sizeof(ulong)))
                 return new Integer64Value(0, 0);
             
-            ReadOnlySpan<byte> memorySpan = _memory.Span.Slice(offset, 8);
-            ReadOnlySpan<byte> knownBitsSpan =  _knownBitMask.Span.Slice(offset, 8);
+            ReadOnlySpan<byte> memorySpan = _memory.AsSpan(offset, 8);
+            ReadOnlySpan<byte> knownBitsSpan =  _knownBitMask.AsSpan(offset, 8);
             
             return new Integer64Value(
                 BinaryPrimitives.ReadUInt64LittleEndian(memorySpan), 
@@ -179,8 +228,10 @@ namespace Echo.Concrete.Values.ValueType
             // Note: There is unfortunately no BinaryPrimitives method for reading single or double values in 
             // .NET Standard 2.0. Hence we go the unsafe route.
 
-            using var handle = _memory.Pin();
-            return new Float32Value(*(float*) ((byte*) handle.Pointer + offset));
+            fixed (byte* ptr = _memory)
+            {
+                return new Float32Value(*(float*) (ptr + offset));
+            }
         }
 
         /// <inheritdoc />
@@ -191,8 +242,10 @@ namespace Echo.Concrete.Values.ValueType
             // Note: There is unfortunately no BinaryPrimitives method for reading single or double values in 
             // .NET Standard 2.0. Hence we go the unsafe route.
 
-            using var handle = _memory.Pin();
-            return new Float64Value(*(double*) ((byte*) handle.Pointer + offset));
+            fixed (byte* ptr = _memory)
+            {
+                return new Float64Value(*(double*) (ptr + offset));
+            }
         }
 
         /// <inheritdoc />
@@ -200,8 +253,8 @@ namespace Echo.Concrete.Values.ValueType
         {
             AssertOffsetValidity(offset, sizeof(byte));
             
-            _memory.Span[offset] = value.U8;
-            _knownBitMask.Span[offset] = value.Mask;
+            _memory[offset] = value.U8;
+            _knownBitMask[offset] = value.Mask;
         }
 
         /// <inheritdoc />
@@ -209,8 +262,8 @@ namespace Echo.Concrete.Values.ValueType
         {
             AssertOffsetValidity(offset, sizeof(ushort));
             
-            BinaryPrimitives.WriteUInt16LittleEndian(_memory.Span.Slice(offset, 2), value.U16);
-            BinaryPrimitives.WriteUInt16LittleEndian(_knownBitMask.Span.Slice(offset, 2), value.Mask);
+            BinaryPrimitives.WriteUInt16LittleEndian(_memory.AsSpan(offset, 2), value.U16);
+            BinaryPrimitives.WriteUInt16LittleEndian(_knownBitMask.AsSpan(offset, 2), value.Mask);
         }
 
         /// <inheritdoc />
@@ -218,8 +271,8 @@ namespace Echo.Concrete.Values.ValueType
         {
             AssertOffsetValidity(offset, sizeof(uint));
             
-            BinaryPrimitives.WriteUInt32LittleEndian(_memory.Span.Slice(offset, 4), value.U32);
-            BinaryPrimitives.WriteUInt32LittleEndian(_knownBitMask.Span.Slice(offset, 4), value.Mask);
+            BinaryPrimitives.WriteUInt32LittleEndian(_memory.AsSpan(offset, 4), value.U32);
+            BinaryPrimitives.WriteUInt32LittleEndian(_knownBitMask.AsSpan(offset, 4), value.Mask);
         }
 
         /// <inheritdoc />
@@ -227,8 +280,8 @@ namespace Echo.Concrete.Values.ValueType
         {
             AssertOffsetValidity(offset, sizeof(ulong));
             
-            BinaryPrimitives.WriteUInt64LittleEndian(_memory.Span.Slice(offset, 8), value.U64);
-            BinaryPrimitives.WriteUInt64LittleEndian(_knownBitMask.Span.Slice(offset, 8), value.Mask);
+            BinaryPrimitives.WriteUInt64LittleEndian(_memory.AsSpan(offset, 8), value.U64);
+            BinaryPrimitives.WriteUInt64LittleEndian(_knownBitMask.AsSpan(offset, 8), value.Mask);
         }
 
         /// <inheritdoc />
@@ -239,9 +292,12 @@ namespace Echo.Concrete.Values.ValueType
             // Note: There is unfortunately no BinaryPrimitives method for writing single or double values in 
             // .NET Standard 2.0. Hence we go the unsafe route.
 
-            using var handle = _memory.Pin();
-            *(float*) ((byte*) handle.Pointer + offset) = value.F32;
-            _knownBitMask.Span.Slice(offset, 4).Fill(0xFF);
+            fixed (byte* ptr = _memory)
+            {
+                *(float*) (ptr + offset) = value.F32;
+            }
+
+            _knownBitMask.AsSpan(offset, 4).Fill(0xFF);
         }
 
         /// <inheritdoc />
@@ -252,9 +308,12 @@ namespace Echo.Concrete.Values.ValueType
             // Note: There is unfortunately no BinaryPrimitives method for writing single or double values in 
             // .NET Standard 2.0. Hence we go the unsafe route.
 
-            using var handle = _memory.Pin();
-            *(double*) ((byte*) handle.Pointer + offset) = value.F64;
-            _knownBitMask.Span.Slice(offset, 8).Fill(0xFF);
+            fixed (byte* ptr = _memory)
+            {
+                *(double*) (ptr + offset) = value.F64;
+            }
+
+            _knownBitMask.AsSpan(offset, 8).Fill(0xFF);
         }
 
         /// <inheritdoc />
