@@ -31,6 +31,6 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         /// <param name="bits">The new bit values.</param>
         /// <param name="mask">The new bit mask indicating the known bits.</param>
-        public abstract void SetBits(Span<byte> bits, Span<byte> mask);
+        public abstract void SetBits(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> mask);
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.DotNet.Signatures.Types;
+using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core;
@@ -17,20 +18,31 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// </remarks>
     public partial class LleStructValue : IValueTypeValue
     {
-        private readonly IValueFactory _valueFactory;
-
         /// <summary>
         /// Creates a new low level emulated object. 
         /// </summary>
         /// <param name="valueFactory">The object responsible for memory management in the virtual machine.</param>
         /// <param name="valueType">The type of the object.</param>
         /// <param name="contents">The raw contents of the object.</param>
-        public LleStructValue(IValueFactory valueFactory, TypeSignature valueType, MemoryPointerValue contents)
+        public LleStructValue(IValueFactory valueFactory, TypeSignature valueType, IMemoryAccessValue contents)
         {
             Type = valueType ?? throw new ArgumentNullException(nameof(valueType));
-            _valueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
+            ValueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
             Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
+
+        /// <summary>
+        /// Gets the value factory that was used to create this structure.
+        /// </summary>
+        protected IValueFactory ValueFactory
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Indicates the value was constructed in a 32 or 64 bit environment.
+        /// </summary>
+        public bool Is32Bit => ValueFactory.Is32Bit;
 
         /// <inheritdoc />
         public TypeSignature Type
@@ -41,7 +53,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <summary>
         /// The pointer to the raw data of the object.
         /// </summary>
-        public MemoryPointerValue Contents
+        public IMemoryAccessValue Contents
         {
             get;
         }
@@ -49,10 +61,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         private CorLibTypeFactory CorLibTypeFactory => Type.Module.CorLibTypeFactory;
 
         /// <inheritdoc />
-        public bool IsKnown => true;
-        
-        /// <inheritdoc />
-        public bool Is32Bit => Contents.Is32Bit;
+        public bool IsKnown => Contents.IsKnown;
         
         /// <inheritdoc />
         public int Size => Contents.Size;
@@ -73,10 +82,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public Trilean IsNegative => false;
 
         /// <inheritdoc />
-        public IValue Copy() => new LleStructValue(_valueFactory, Type, Contents);
+        public IValue Copy() => new LleStructValue(ValueFactory, Type, Contents);
         
         /// <inheritdoc />
-        public override string ToString() => $"{Type.FullName} ({Contents.Length.ToString()} bytes)";
+        public override string ToString() => $"{Type.FullName} ({Contents.Size.ToString()} bytes)";
 
         /// <inheritdoc />
         public void GetBits(Span<byte> buffer) => Contents.ReadBytes(0, buffer);
@@ -89,6 +98,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public void SetBits(Span<byte> bits, Span<byte> mask) => Contents.WriteBytes(0, bits, mask);
+        public void SetBits(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> mask) => Contents.WriteBytes(0, bits, mask);
     }
 }

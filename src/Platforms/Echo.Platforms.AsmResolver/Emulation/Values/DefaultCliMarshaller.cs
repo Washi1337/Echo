@@ -211,13 +211,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             switch (value)
             {
                 case RelativePointerValue relativePointerValue:
-                    return new PointerValue(relativePointerValue.BasePointer, relativePointerValue.CurrentOffset);
+                    return new PointerValue(relativePointerValue.ReferencedMemory, relativePointerValue.CurrentOffset, Is32Bit);
                 
                 case IPointerValue pointerValue:
-                    return new PointerValue(pointerValue);
+                    return new PointerValue(pointerValue, Is32Bit);
 
                 default:
-                    return new PointerValue(false);
+                    return new PointerValue(false, Is32Bit);
             }
         }
         
@@ -289,7 +289,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 case ElementType.Ptr:
                 {
                     var ptrValue = (PointerValue) value;
-                    return new RelativePointerValue(ptrValue.BasePointer, ptrValue.CurrentOffset);
+                    return new RelativePointerValue(ptrValue.ReferencedMemory, ptrValue.CurrentOffset, Is32Bit);
                 }
 
                 case ElementType.ValueType:

@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <exception cref="ArgumentOutOfRangeException">
         /// Occurs when the offset does not fall within the memory range.
         /// </exception>
-        public static IConcreteValue ReadStruct(this IPointerValue self, int offset, IValueFactory valueFactory, TypeMemoryLayout typeLayout)
+        public static IConcreteValue ReadStruct(this IMemoryAccessValue self, int offset, IValueFactory valueFactory, TypeMemoryLayout typeLayout)
         {
             return typeLayout.Type.ToTypeSignature().ElementType switch
             {
@@ -40,20 +40,20 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 ElementType.R4 => self.ReadFloat32(offset),
                 ElementType.R8 => self.ReadFloat64(offset),
                 ElementType.ValueType => self.ReadStructSlow(offset, valueFactory, typeLayout),
-                ElementType.I => self.Is32Bit ? (IntegerValue) self.ReadInteger32(offset) : self.ReadInteger64(offset),
-                ElementType.U => self.Is32Bit ? (IntegerValue) self.ReadInteger32(offset) : self.ReadInteger64(offset),
+                ElementType.I => valueFactory.Is32Bit ? (IntegerValue) self.ReadInteger32(offset) : self.ReadInteger64(offset),
+                ElementType.U => valueFactory.Is32Bit ? (IntegerValue) self.ReadInteger32(offset) : self.ReadInteger64(offset),
                 ElementType.Enum => ReadEnumValue(self, offset, valueFactory, typeLayout),
                 _ => new UnknownValue()
             };
         }
 
-        private static IConcreteValue ReadEnumValue(IPointerValue self, int offset, IValueFactory valueFactory, TypeMemoryLayout typeLayout)
+        private static IConcreteValue ReadEnumValue(IMemoryAccessValue self, int offset, IValueFactory valueFactory, TypeMemoryLayout typeLayout)
         {
             var underlyingTypeLayout = valueFactory.GetTypeMemoryLayout(typeLayout.Type.Resolve().GetEnumUnderlyingType());
             return self.ReadStruct(offset, valueFactory, underlyingTypeLayout);
         }
 
-        private static IConcreteValue ReadStructSlow(this IPointerValue self, int offset, IValueFactory valueFactory, TypeMemoryLayout typeLayout)
+        private static IConcreteValue ReadStructSlow(this IMemoryAccessValue self, int offset, IValueFactory valueFactory, TypeMemoryLayout typeLayout)
         {
             Span<byte> contents = stackalloc byte[(int) typeLayout.Size];
             Span<byte> bitmask = stackalloc byte[(int) typeLayout.Size];
@@ -75,7 +75,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <exception cref="ArgumentOutOfRangeException">
         /// Occurs when the offset does not fall within the memory range.
         /// </exception>
-        public static void WriteStruct(this IPointerValue self, 
+        public static void WriteStruct(this IMemoryAccessValue self, 
             int offset,
             IValueFactory valueFactory,
             TypeMemoryLayout typeLayout,
@@ -97,15 +97,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 
                 case ElementType.I4:
                 case ElementType.U4:
-                case ElementType.I when self.Is32Bit:
-                case ElementType.U when self.Is32Bit:
+                case ElementType.I when valueFactory.Is32Bit:
+                case ElementType.U when valueFactory.Is32Bit:
                     self.WriteInteger32(offset, (Integer32Value) value);
                     break;
                 
                 case ElementType.I8:
                 case ElementType.U8:
-                case ElementType.I when !self.Is32Bit:
-                case ElementType.U when !self.Is32Bit:
+                case ElementType.I when !valueFactory.Is32Bit:
+                case ElementType.U when !valueFactory.Is32Bit:
                     self.WriteInteger64(offset, (Integer64Value) value);
                     break;
                 
@@ -135,7 +135,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 case ElementType.Object:
                 case ElementType.SzArray:
                     // We cannot really know the raw value of object pointers, write an unknown value.
-                    if (self.Is32Bit)
+                    if (valueFactory.Is32Bit)
                         self.WriteInteger32(offset, new Integer32Value(0, 0));
                     else 
                         self.WriteInteger64(offset, new Integer64Value(0, 0));
@@ -147,7 +147,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         private static void WriteEnumValue(
-            IPointerValue self, 
+            IMemoryAccessValue self, 
             int offset, 
             IValueFactory valueFactory,
             TypeMemoryLayout typeLayout,
@@ -157,7 +157,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
             self.WriteStruct(offset, valueFactory, enumLayout, value);
         }
 
-        private static void WriteStructSlow(this IPointerValue self, int offset, TypeMemoryLayout typeLayout, IConcreteValue value)
+        private static void WriteStructSlow(this IMemoryAccessValue self, int offset, TypeMemoryLayout typeLayout, IConcreteValue value)
         {
             Span<byte> contents = stackalloc byte[(int) typeLayout.Size];
             Span<byte> bitmask = stackalloc byte[(int) typeLayout.Size];

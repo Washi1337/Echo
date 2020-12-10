@@ -175,14 +175,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public MemoryPointerValue AllocateMemory(int size, bool initialize)
-        {
-            var memory = new Memory<byte>(new byte[size]);
-            var knownBitMask = new Memory<byte>(new byte[size]);
-            if (initialize)
-                knownBitMask.Span.Fill(0xFF);
-            return new MemoryPointerValue(memory, knownBitMask, Is32Bit);
-        }
+        public IMemoryAccessValue AllocateMemory(int size, bool initialize) => 
+            new MemoryBlockValue(size, initialize);
 
         /// <inheritdoc />
         public IDotNetArrayValue AllocateArray(TypeSignature elementType, int length)

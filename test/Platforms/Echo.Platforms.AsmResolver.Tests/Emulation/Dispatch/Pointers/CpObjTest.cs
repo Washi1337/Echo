@@ -1,5 +1,7 @@
+using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation;
@@ -22,12 +24,18 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             
             var int32Type = environment.Module.CorLibTypeFactory.Int32;
-            var intPointerType = new PointerTypeSignature(int32Type);
+            var intPointerType = int32Type.MakePointerType();
+
+            var sourcePointer = environment.ValueFactory
+                .AllocateMemory(sizeof(int), false)
+                .MakePointer(environment.Is32Bit);
             
-            var sourcePointer = environment.ValueFactory.AllocateMemory(sizeof(int), false);
             sourcePointer.WriteInteger32(0, new Integer32Value(0x12340000, 0xFFFF0000));
             
-            var destinationPointer = environment.ValueFactory.AllocateMemory(sizeof(int) * 2, false);
+            var destinationPointer = environment.ValueFactory
+                .AllocateMemory(sizeof(int) * 2, false)
+                .MakePointer(environment.Is32Bit);
+            
             var stack = ExecutionContext.ProgramState.Stack;
             stack.Push(environment.CliMarshaller.ToCliValue(destinationPointer, intPointerType));
             stack.Push(environment.CliMarshaller.ToCliValue(sourcePointer, intPointerType));
@@ -47,11 +55,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             var int32Type = environment.Module.CorLibTypeFactory.Int32;
             var intPointerType = new PointerTypeSignature(int32Type);
             
-            var destinationPointer = environment.ValueFactory.AllocateMemory(sizeof(int), true);
+            var destinationPointer = environment.ValueFactory
+                .AllocateMemory(sizeof(int), true)
+                .MakePointer(environment.Is32Bit);
             
             var stack = ExecutionContext.ProgramState.Stack;
             stack.Push(environment.CliMarshaller.ToCliValue(destinationPointer, intPointerType));
-            stack.Push(new PointerValue(false));
+            stack.Push(new PointerValue(false, environment.Is32Bit));
 
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Cpobj, int32Type.Type));
             
