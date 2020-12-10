@@ -86,10 +86,13 @@ namespace Echo.ControlFlow.Blocks
         /// <inheritdoc />
         public override string ToString() => BlockFormatter<TInstruction>.Format(this);
 
-        IEnumerable<BasicBlock<TInstruction>> IBlock<TInstruction>.GetAllBlocks()
-        {
-            return new[] {this};
-        }
+        IEnumerable<BasicBlock<TInstruction>> IBlock<TInstruction>.GetAllBlocks() => new[] {this};
+
+        /// <inheritdoc />
+        public BasicBlock<TInstruction> GetFirstBlock() => this;
+
+        /// <inheritdoc />
+        public BasicBlock<TInstruction> GetLastBlock() => this;
 
         /// <inheritdoc />
         public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitBasicBlock(this);

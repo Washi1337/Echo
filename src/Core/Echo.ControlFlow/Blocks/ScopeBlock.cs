@@ -22,6 +22,16 @@ namespace Echo.ControlFlow.Blocks
             Blocks.SelectMany(b => b.GetAllBlocks());
 
         /// <inheritdoc />
+        public BasicBlock<TInstruction> GetFirstBlock() => Blocks.Count > 0 
+            ? Blocks[0].GetFirstBlock() 
+            : null;
+
+        /// <inheritdoc />
+        public BasicBlock<TInstruction> GetLastBlock() => Blocks.Count > 0
+            ? Blocks[Blocks.Count - 1].GetLastBlock()
+            : null;
+
+        /// <inheritdoc />
         public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => 
             visitor.VisitScopeBlock(this);
 
