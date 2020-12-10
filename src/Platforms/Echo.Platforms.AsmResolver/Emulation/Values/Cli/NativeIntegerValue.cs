@@ -91,7 +91,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public override void GetMask(Span<byte> buffer) => _value.GetMask(buffer);
 
         /// <inheritdoc />
-        public override void SetBits(Span<byte> bits, Span<byte> mask) => _value.SetBits(bits, mask);
+        public override void SetBits(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> mask) => _value.SetBits(bits, mask);
 
         /// <inheritdoc />
         public override void MarkFullyUnknown() => _value.MarkFullyUnknown();

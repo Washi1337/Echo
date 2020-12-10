@@ -153,7 +153,7 @@ namespace Echo.Concrete.Values.ValueType
         public override void GetMask(Span<byte> buffer) => Mask.CopyTo(buffer);
 
         /// <inheritdoc />
-        public override void SetBits(Span<byte> bits, Span<byte> mask)
+        public override void SetBits(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> mask)
         {
             if (bits.Length != Size)
                 throw new ArgumentException("New bit value does not have the same bit-length as the original value.");

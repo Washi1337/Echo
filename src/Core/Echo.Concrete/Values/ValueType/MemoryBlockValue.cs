@@ -55,7 +55,7 @@ namespace Echo.Concrete.Values.ValueType
         /// Creates a new fully known memory block.
         /// </summary>
         /// <param name="memory">The referenced memory.</param>
-        public MemoryBlockValue(Span<byte> memory)
+        public MemoryBlockValue(ReadOnlySpan<byte> memory)
             : this(memory.Length, false)
         {
             memory.CopyTo(_memory.AsSpan());
@@ -67,7 +67,7 @@ namespace Echo.Concrete.Values.ValueType
         /// </summary>
         /// <param name="memory">The referenced memory.</param>
         /// <param name="knownBitMask">The bit mask indicating the known and unknown bits.</param>
-        public MemoryBlockValue(Span<byte> memory, Span<byte> knownBitMask)
+        public MemoryBlockValue(ReadOnlySpan<byte> memory, ReadOnlySpan<byte> knownBitMask)
             : this(memory.Length, false)
         {
             SetBits(memory, knownBitMask);
@@ -127,7 +127,7 @@ namespace Echo.Concrete.Values.ValueType
             _knownBitMask.AsSpan(0, Math.Min(Size, buffer.Length)).CopyTo(buffer);
 
         /// <inheritdoc />
-        public void SetBits(Span<byte> bits, Span<byte> mask)
+        public void SetBits(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> mask)
         {
             bits.CopyTo(_memory.AsSpan(0, Math.Min(Size, bits.Length)));
             mask.CopyTo(_knownBitMask.AsSpan(0, Math.Min(Size, bits.Length)));

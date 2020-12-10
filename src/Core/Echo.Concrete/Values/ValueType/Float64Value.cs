@@ -81,7 +81,7 @@ namespace Echo.Concrete.Values.ValueType
         }
 
         /// <inheritdoc />
-        public unsafe void SetBits(Span<byte> bits, Span<byte> mask)
+        public unsafe void SetBits(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> mask)
         {
             // HACK: .NET standard 2.0 does not provide a method to read floating point numbers from a span.
             // TODO: support unknown bits in float.

@@ -98,6 +98,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <inheritdoc />
-        public void SetBits(Span<byte> bits, Span<byte> mask) => Contents.WriteBytes(0, bits, mask);
+        public void SetBits(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> mask) => Contents.WriteBytes(0, bits, mask);
     }
 }

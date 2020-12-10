@@ -102,7 +102,7 @@ namespace Echo.Concrete.Values.ValueType
         public abstract void GetMask(Span<byte> buffer);
 
         /// <inheritdoc />
-        public abstract void SetBits(Span<byte> bits, Span<byte> mask);
+        public abstract void SetBits(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> mask);
 
         /// <summary>
         /// Parses a (partially) known bit string and sets the contents of integer to the parsed result.
