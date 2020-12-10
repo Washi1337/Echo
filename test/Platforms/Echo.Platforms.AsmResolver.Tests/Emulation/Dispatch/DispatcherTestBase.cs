@@ -17,6 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
     {
         public DispatcherTestBase(MockModuleFixture moduleFixture)
         {
+            ModuleFixture = moduleFixture;
             const bool is32Bit = false;
             
             var dummyModule = moduleFixture.GetModule();
@@ -42,6 +43,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
                 container, 
                 new CilProgramState(environment.ValueFactory), 
                 default);
+        }
+
+        public MockModuleFixture ModuleFixture
+        {
+            get;
         }
 
         public ExecutionContext ExecutionContext
