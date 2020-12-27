@@ -28,6 +28,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         [InlineData(ElementType.U8)]
         [InlineData(ElementType.R4)]
         [InlineData(ElementType.R8)]
+        [InlineData(ElementType.String)]
+        [InlineData(ElementType.Object)]
         public void NewCorLibValueTypeArray(ElementType elementType)
         {
             const int length = 10;
@@ -40,10 +42,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Newarr, elementTypeSig.Type));
             
             Assert.True(result.IsSuccess);
-            Assert.IsAssignableFrom<OValue>(stack.Top);
-            var array = ((OValue) stack.Top).ReferencedObject;
-            Assert.IsAssignableFrom<IDotNetArrayValue>(array);
-            var dotNetArray = (IDotNetArrayValue) array;
+            var reference = Assert.IsAssignableFrom<OValue>(stack.Top);
+            var dotNetArray = Assert.IsAssignableFrom<IDotNetArrayValue>(reference.ReferencedObject);
             
             Assert.Equal(elementTypeSig.FullName, dotNetArray.Type.GetUnderlyingTypeDefOrRef().FullName);
             Assert.Equal(length, dotNetArray.Length);
