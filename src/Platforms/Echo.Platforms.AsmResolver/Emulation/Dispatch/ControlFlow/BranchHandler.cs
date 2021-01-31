@@ -17,11 +17,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
             get;
         }
 
+        /// <summary>
+        /// Gets the number of arguments the branch pops from the stack.
+        /// </summary>
+        protected virtual int ArgumentCount => 1;
+            
         /// <inheritdoc />
         public DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
         {
             var result = VerifyCondition(context, instruction);
-
+            
             int newOffset;
             if (result.IsKnown)
             {
@@ -36,6 +41,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
                 throw new DispatchException("Branch condition could not be evaluated.");
             }
 
+            var stack = context.ProgramState.Stack;
+            for (int i = 0; i < ArgumentCount; i++)
+                stack.Pop();
+            
             context.ProgramState.ProgramCounter = newOffset;
             return DispatchResult.Success();
         }
@@ -47,6 +56,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         /// <param name="instruction">The instruction that is being executed.</param>
         /// <returns><c>true</c> if the branch should be taken, <c>false</c> if not, and <see cref="Trilean.Unknown"/>
         /// if the conclusion is unknown.</returns>
-        protected abstract Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction);
+        public abstract Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction);
     }
 }
