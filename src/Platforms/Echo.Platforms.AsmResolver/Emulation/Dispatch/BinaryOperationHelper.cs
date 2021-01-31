@@ -7,8 +7,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
     {
         public static (ICliValue left, ICliValue right) PopBinaryOperationArguments(ExecutionContext context)
         {
-            var value2 = context.ProgramState.Stack.Pop();
-            var value1 = context.ProgramState.Stack.Pop();
+            var values = PeekBinaryOperationArguments(context);
+            var stack = context.ProgramState.Stack;
+            stack.Pop();
+            stack.Pop();
+            return values;
+        }
+        
+        public static (ICliValue left, ICliValue right) PeekBinaryOperationArguments(ExecutionContext context)
+        {
+            var stack = context.ProgramState.Stack;
+            var value2 = stack[0];
+            var value1 = stack[1];
 
             return (value1, value2) switch
             {
