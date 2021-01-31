@@ -12,16 +12,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
     public abstract class BinaryBranchHandler : BranchHandler
     {
         /// <inheritdoc />
-        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction)
+        protected override int ArgumentCount => 2;
+
+        /// <inheritdoc />
+        public override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction)
         {
-            var (left, right) = BinaryOperationHelper.PopBinaryOperationArguments(context);
+            var (left, right) = BinaryOperationHelper.PeekBinaryOperationArguments(context);
 
             return (left, right) switch
             {
                 (IntegerValue a, IntegerValue b) => VerifyCondition(context, instruction, a, b),
                 (FValue a, FValue b) => VerifyCondition(context, instruction, a, b),
                 (OValue a, OValue b) => VerifyCondition(context, instruction, a, b),
-                _ => null,
+                _ => Trilean.Unknown,
             };
         }
 
