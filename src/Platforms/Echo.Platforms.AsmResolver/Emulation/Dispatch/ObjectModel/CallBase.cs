@@ -48,7 +48,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             // If method dispatch's result was unknown, assume a non-null object instance and return an unknown value. 
             // TODO: This should perhaps be made configurable.
             if (methodDispatch.IsUnknown)
+            {
+                // Void methods do not return a value.
+                if (instruction.Operand is IMethodDescriptor method
+                    && method.Signature.ReturnType.ElementType == ElementType.Void)
+                {
+                    return null;
+                }
+
+                // Create unknown value otherwise.
                 return CreateUnknownResult(environment, instruction);
+            }
 
             // Marshal stack values to normal values.
             var marshalledArguments = MarshalMethodArguments(environment, arguments, methodDispatch.GetMethodSignature());

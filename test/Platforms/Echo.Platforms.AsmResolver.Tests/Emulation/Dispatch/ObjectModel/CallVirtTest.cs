@@ -110,7 +110,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         }
 
         [Fact]
-        public void CallVirtOnUnknownObjectShouldReturnUnknown()
+        public void CallVirtOnUnknownObjectShouldReturnUnknownIfNonVoid()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var stack = ExecutionContext.ProgramState.Stack;
@@ -122,6 +122,21 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             Assert.True(result.IsSuccess);
             Assert.Equal(new I4Value(0, 0), stack.Top);
+        }
+
+        [Fact]
+        public void CallVirtOnUnknownObjectShouldReturnNullIfVoid()
+        {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var stack = ExecutionContext.ProgramState.Stack;
+            
+            stack.Push(new OValue(null, false, environment.Is32Bit));
+            
+            var method = _type.Methods.First(m => m.Name == nameof(SimpleClass.VirtualInstanceMethod));
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Callvirt, method));
+            
+            Assert.True(result.IsSuccess);
+            Assert.Equal(0, stack.Size);
         }
     }
 }
