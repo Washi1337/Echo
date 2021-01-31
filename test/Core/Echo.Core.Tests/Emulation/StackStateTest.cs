@@ -104,5 +104,14 @@ namespace Echo.Core.Tests.Emulation
             Assert.Equal(stack.Size, copy.Size);
             Assert.Equal(stack.GetAllStackSlots(), copy.GetAllStackSlots());
         }
+
+        [Fact]
+        public void FirstIndexShouldReferToTop()
+        {
+            var stack = new StackState<DummyValue>();
+            var values = CreateDummyValues(3);
+            stack.Push(values);
+            Assert.Same(stack.Top, stack[0]);
+        }
     }
 }
