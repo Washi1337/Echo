@@ -18,6 +18,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         };
 
         /// <inheritdoc />
+        protected override int ArgumentCount => 0;
+
+        /// <inheritdoc />
         public override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction) => true;
     }
 }
