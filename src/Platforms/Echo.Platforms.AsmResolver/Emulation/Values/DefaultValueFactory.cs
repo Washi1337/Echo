@@ -187,8 +187,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 var memory = AllocateMemory(size, true);
                 return new LleStructValue(this, new SzArrayTypeSignature(elementType), memory);
             }
-            
-            throw new NotSupportedException();
+
+            return new HleArrayValue(this, elementType, length);
         }
 
         /// <inheritdoc />

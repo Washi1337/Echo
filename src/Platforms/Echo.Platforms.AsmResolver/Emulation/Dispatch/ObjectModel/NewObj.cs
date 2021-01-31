@@ -26,8 +26,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var method = (IMethodDescriptor) instruction.Operand;
             
             //Allocate Object
-            var allocatedObject = environment.ValueFactory.AllocateStruct(method.DeclaringType.ToTypeSignature(), true);
-            ICliValue cilValueObject = new OValue(allocatedObject, false, environment.Is32Bit);
+            var type = method.DeclaringType.ToTypeSignature();
+            var newValue = type.IsValueType
+                ? environment.ValueFactory.CreateValue(type, true)
+                : environment.ValueFactory.CreateObject(type, true);
+
+            var cilValueObject = environment.CliMarshaller.ToCliValue(newValue, type);
 
             // Pop arguments.
             int argumentCount = environment.Architecture.GetStackPopCount(instruction);
@@ -35,7 +39,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 .Pop(argumentCount, true)
                 .Cast<ICliValue>()
                 .ToList();
-            arguments.Insert(0, cilValueObject);
+
+            arguments.Insert(0, type.IsValueType
+                ? new OValue(cilValueObject, true, environment.Is32Bit)
+                : cilValueObject);
 
             // Dispatch
             var methodDispatch = new MethodDevirtualizationResult(method);
