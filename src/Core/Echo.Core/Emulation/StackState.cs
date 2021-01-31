@@ -19,6 +19,9 @@ namespace Echo.Core.Emulation
         /// <inheritdoc />
         public int Size => _stack.Count;
 
+        /// <inheritdoc />
+        public TValue this[int index] => _stack[_stack.Count - index - 1];
+
         /// <summary>
         /// Gets an ordered list of items allocated on the stack. The last item in the list represents the top of the stack.
         /// </summary>
@@ -79,16 +82,10 @@ namespace Echo.Core.Emulation
                 throw new StackImbalanceException("Insufficient items on the stack.");
         }
 
-        IStackState<TValue> IStackState<TValue>.Copy()
-        {
-            return Copy();
-        }
+        IStackState<TValue> IStackState<TValue>.Copy() => Copy();
 
         /// <inheritdoc />
-        public void Clear()
-        {
-            _stack.Clear();
-        }
+        public void Clear() => _stack.Clear();
 
         /// <summary>
         /// Creates a copy of the stack state. This also copies all values inside the stack.
@@ -103,9 +100,6 @@ namespace Echo.Core.Emulation
         }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"Size: {Size}, Top: {Top}";
-        }
+        public override string ToString() => $"Size: {Size}, Top: {Top}";
     }
 }
