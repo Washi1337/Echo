@@ -90,8 +90,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
         private static MethodDefinition TryFindExplicitInterfaceImplementationInType(TypeDefinition type, MethodDefinition baseMethod)
         {
-            foreach (var impl in type.MethodImplementations)
+            for (int i = 0; i < type.MethodImplementations.Count; i++)
             {
+                var impl = type.MethodImplementations[i];
                 if (Comparer.Equals(baseMethod, impl.Declaration))
                     return impl.Body.Resolve();
             }
