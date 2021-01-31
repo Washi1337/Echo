@@ -25,7 +25,16 @@ namespace Echo.Core.Emulation
         {
             get;
         }
-        
+
+        /// <summary>
+        /// Gets the value at the provided index.
+        /// </summary>
+        /// <param name="index">The index.</param>
+        TValue this[int index]
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets an ordered collection of all slots that are in use. 
         /// </summary>
