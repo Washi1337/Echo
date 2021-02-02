@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public class CilVariableState : IVariableState<IConcreteValue>
     {
-        private readonly IDictionary<CilVariable, IConcreteValue> _variables = new Dictionary<CilVariable, IConcreteValue>();
+        private readonly IDictionary<IVariable, IConcreteValue> _variables = new Dictionary<IVariable, IConcreteValue>();
         private readonly IValueFactory _valueFactory;
 
         /// <summary>
@@ -30,16 +30,27 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             get
             {
-                var cilVariable = (CilVariable) variable;
-                if (!_variables.TryGetValue(cilVariable, out var value))
+                if (!_variables.TryGetValue(variable, out var value))
                 {
-                    value = _valueFactory.CreateValue(cilVariable.Variable.VariableType, false);
-                    _variables[cilVariable] = value;
+                    value = variable switch
+                    {
+                        CilVariable cilVariable => _valueFactory.CreateValue(cilVariable.Variable.VariableType, false),
+                        CilParameter cilParameter => _valueFactory.CreateValue(cilParameter.Parameter.ParameterType,
+                            false),
+                        _ => throw new NotSupportedException($"IVariable implementation {variable.GetType()} is not supported.")
+                    };
+                    _variables[variable] = value;
                 }
 
                 return value;
             }
-            set => _variables[(CilVariable) variable] = value;
+            set
+            {
+                if (!(variable is CilParameter) && !(variable is CilVariable))
+                    throw new NotSupportedException($"IVariable implementation {variable.GetType()} is not supported.");
+
+                _variables[variable] = value;
+            }
         }
 
         /// <inheritdoc />
