@@ -121,7 +121,8 @@ namespace Echo.ControlFlow.Construction
         {
             long offset = Architecture.GetOffset(instruction);
             
-            if (successorInfo.EdgeType == ControlFlowEdgeType.FallThrough)
+            if (successorInfo.EdgeType == ControlFlowEdgeType.FallThrough && 
+                successorInfo.DestinationAddress == offset + Architecture.GetSize(instruction))
             {
                 // Register the fallthrough successor info.
                 _fallThroughOffsets.Add(offset);
