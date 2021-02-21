@@ -21,11 +21,12 @@ namespace Echo.Platforms.Dnlib
         /// Converts an instance of <see cref="ExceptionHandler"/> to an <see cref="ExceptionHandlerRange"/>. 
         /// </summary>
         /// <param name="handler">The handler to convert.</param>
+        /// <param name="lastOffset">The IL offset at the end of the method body.</param>
         /// <returns>The converted handler.</returns>
-        public static ExceptionHandlerRange ToEchoRange(this ExceptionHandler handler)
+        private static ExceptionHandlerRange ToEchoRange(ExceptionHandler handler, uint lastOffset)
         {
-            var tryRange = new AddressRange(handler.TryStart.Offset, handler.TryEnd.Offset);
-            var handlerRange = new AddressRange(handler.HandlerStart.Offset, handler.HandlerEnd.Offset);
+            var tryRange = new AddressRange(handler.TryStart.Offset, handler.TryEnd?.Offset ?? lastOffset);
+            var handlerRange = new AddressRange(handler.HandlerStart.Offset, handler.HandlerEnd?.Offset ?? lastOffset);
 
             if (handler.HandlerType == ExceptionHandlerType.Filter)
             {
@@ -37,14 +38,17 @@ namespace Echo.Platforms.Dnlib
         }
 
         /// <summary>
-        /// Converts a collection of <see cref="ExceptionHandler"/> instances to a collection of
+        /// Converts a collection of <see cref="ExceptionHandler"/> instances in a method body to a collection of
         /// <see cref="ExceptionHandlerRange"/> instances. 
         /// </summary>
-        /// <param name="handlers">The handlers to convert.</param>
+        /// <param name="body">The body containing the exception handlers to convert.</param>
         /// <returns>The converted handlers.</returns>
-        public static IEnumerable<ExceptionHandlerRange> ToEchoRanges(this IEnumerable<ExceptionHandler> handlers)
+        public static IEnumerable<ExceptionHandlerRange> GetExceptionHandlerRanges(this CilBody body)
         {
-            return handlers.Select(ToEchoRange);
+            var instruction = body.Instructions[body.Instructions.Count - 1];
+            uint lastOffset = (uint) (instruction.Offset + instruction.GetSize());
+            for (int i = 0; i < body.ExceptionHandlers.Count; i++)
+                yield return ToEchoRange(body.ExceptionHandlers[i], lastOffset);
         }
 
         /// <summary>
@@ -62,8 +66,8 @@ namespace Echo.Platforms.Dnlib
                 body.Instructions,
                 architecture.SuccessorResolver);
 
-            var ehRanges = body.ExceptionHandlers
-                .ToEchoRanges()
+            var ehRanges = body
+                .GetExceptionHandlerRanges()
                 .ToArray();
             
             var cfg = cfgBuilder.ConstructFlowGraph(0, ehRanges);
@@ -83,7 +87,7 @@ namespace Echo.Platforms.Dnlib
             out DataFlowGraph<Instruction> dataFlowGraph)
         {
             var body = self.Body;
-            
+
             var architecture = new CilArchitecture(self);
             var dfgBuilder = new CilStateTransitionResolver(architecture);
             var cfgBuilder = new SymbolicFlowGraphBuilder<Instruction>(
@@ -91,10 +95,10 @@ namespace Echo.Platforms.Dnlib
                 body.Instructions,
                 dfgBuilder);
 
-            var ehRanges = body.ExceptionHandlers
-                .ToEchoRanges()
+            var ehRanges = body
+                .GetExceptionHandlerRanges()
                 .ToArray();
-            
+
             var cfg = cfgBuilder.ConstructFlowGraph(0, ehRanges);
             if (ehRanges.Length > 0)
                 cfg.DetectExceptionHandlerRegions(ehRanges);
@@ -102,7 +106,6 @@ namespace Echo.Platforms.Dnlib
             dataFlowGraph = dfgBuilder.DataFlowGraph;
             return cfg;
         }
-        
-        
+
     }
 }
