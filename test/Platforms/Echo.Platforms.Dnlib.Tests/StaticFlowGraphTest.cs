@@ -68,6 +68,7 @@ namespace Echo.Platforms.Dnlib.Tests
 
             body.UpdateInstructionOffsets();
 
+            // Verify.
             var cfg = method.ConstructStaticFlowGraph();
             Assert.NotNull(cfg);
             Assert.Equal(3, cfg.Nodes.Count);
