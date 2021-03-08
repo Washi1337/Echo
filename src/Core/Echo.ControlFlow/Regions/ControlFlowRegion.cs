@@ -78,5 +78,17 @@ namespace Echo.ControlFlow.Regions
         /// <inheritdoc />
         public abstract bool RemoveNode(ControlFlowNode<TInstruction> node);
 
+        /// <inheritdoc />
+        public virtual IEnumerable<ControlFlowNode<TInstruction>> GetSuccessors()
+        {
+            foreach (var node in GetNodes())
+            {
+                foreach (var candidate in node.GetSuccessors())
+                {
+                    if (!candidate.IsInRegion(this))
+                        yield return candidate;
+                }
+            }
+        }
     }
 }

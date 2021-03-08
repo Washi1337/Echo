@@ -82,6 +82,5 @@ namespace Echo.ControlFlow.Regions
 
             return false;
         }
-        
     }
 }
