@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Blocks;
+using Echo.ControlFlow.Serialization.Dot;
+using Echo.Core.Graphing.Serialization.Dot;
 using Echo.Platforms.DummyPlatform;
 using Xunit;
 
@@ -279,6 +282,43 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
                 cfg.Nodes[indices[3]], // handler
                 cfg.Nodes[indices[4]], // epilogue
                 cfg.Nodes[indices[5]], // exit
+            }, sorted);
+        }
+
+        [Theory]
+        [InlineData(new[] {0, 1, 2, 3, 4})]
+        [InlineData(new[] {4, 3, 2, 1, 0})]
+        [InlineData(new[] {2, 4, 3, 0, 1})]
+        public void HandlerWithNoLeaveBranch(int[] indices)
+        {
+            var cfg = GenerateGraph(5);
+            cfg.Entrypoint = cfg.Nodes[indices[0]];
+            
+            var eh = new ExceptionHandlerRegion<int>();
+            cfg.Regions.Add(eh);
+            
+            eh.ProtectedRegion.Nodes.Add(cfg.Nodes[indices[1]]);
+            eh.ProtectedRegion.Nodes.Add(cfg.Nodes[indices[2]]);
+            eh.ProtectedRegion.Entrypoint = cfg.Nodes[indices[1]];
+            
+            var handler = new HandlerRegion<int>();
+            eh.Handlers.Add(handler);
+            handler.Contents.Nodes.Add(cfg.Nodes[indices[3]]);
+            handler.Contents.Entrypoint = cfg.Nodes[indices[3]];
+
+            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]]);
+            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[2]]);
+            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[4]]);
+            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.Conditional);
+
+            var sorted = cfg.SortNodes();
+            Assert.Equal(new[]
+            {
+                cfg.Nodes[indices[0]],
+                cfg.Nodes[indices[1]],
+                cfg.Nodes[indices[2]],
+                cfg.Nodes[indices[3]],
+                cfg.Nodes[indices[4]],
             }, sorted);
         }
     }
