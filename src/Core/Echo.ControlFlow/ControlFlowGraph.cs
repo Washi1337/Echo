@@ -104,5 +104,9 @@ namespace Echo.ControlFlow
         /// <inheritdoc />
         bool IControlFlowRegion<TInstruction>.RemoveNode(ControlFlowNode<TInstruction> node) => 
             Nodes.Remove(node);
+
+        /// <inheritdoc />
+        IEnumerable<ControlFlowNode<TInstruction>> IControlFlowRegion<TInstruction>.GetSuccessors() =>
+            Enumerable.Empty<ControlFlowNode<TInstruction>>();
     }
 }

@@ -60,6 +60,12 @@ namespace Echo.ControlFlow.Regions
         /// <param name="node">The node to remove.</param>
         /// <returns><c>true</c> if the node was found and removed, <c>false</c> otherwise.</returns>
         bool RemoveNode(ControlFlowNode<TInstruction> node);
+
+        /// <summary>
+        /// Gets the nodes that are immediate successors of any node in this region.
+        /// </summary>
+        /// <returns>The nodes.</returns>
+        IEnumerable<ControlFlowNode<TInstruction>> GetSuccessors();
     }
     
     /// <summary>
