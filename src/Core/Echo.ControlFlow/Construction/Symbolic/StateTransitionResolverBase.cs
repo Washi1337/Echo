@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Echo.Core.Code;
+using Echo.Core.Emulation;
 using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
 
@@ -82,17 +83,26 @@ namespace Echo.ControlFlow.Construction.Symbolic
             int argumentsCount = Architecture.GetStackPopCount(instruction);
             if (argumentsCount == -1)
             {
+                // Instruction clears the stack.
                 stack = stack.Clear();
             }
             else
             {
-                for (int i = 0; i < argumentsCount; i++)
+                // Instruction as a number of arguments, we pop them in reverse order so that 
+                // the resulting order is the order we would expect.
+                for (int i = argumentsCount - 1; i >= 0; i--)
                 {
+                    // Contract expects StackImbalanceException to be thrown if not enough stack items are pushed.
+                    if (stack.IsEmpty)
+                        throw new StackImbalanceException(Architecture.GetOffset(instruction));
+
+                    // Add the stack dependencies.
                     stack = stack.Pop(out var argument);
-                    node.StackDependencies[argumentsCount - i - 1].UnionWith(argument);
+                    node.StackDependencies[i].UnionWith(argument);
                 }
             }
 
+            // Check if instruction pushes any new symbolic values.
             for (int i = 0; i < Architecture.GetStackPushCount(instruction); i++)
                 stack = stack.Push(new SymbolicValue<TInstruction>(new DataSource<TInstruction>(node, i)));
 

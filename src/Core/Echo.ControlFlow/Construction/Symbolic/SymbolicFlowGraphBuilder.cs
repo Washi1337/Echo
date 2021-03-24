@@ -80,7 +80,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
             using var context = new GraphBuilderContext(Architecture);
-            var blockHeaders = knownBlockHeaders as long[] ?? knownBlockHeaders.ToArray();
+            long[] blockHeaders = knownBlockHeaders as long[] ?? knownBlockHeaders.ToArray();
             
             // Perform traversal.
             TraverseInstructions(context, entrypoint, blockHeaders);
@@ -128,15 +128,11 @@ namespace Echo.ControlFlow.Construction.Symbolic
             GraphBuilderContext context, 
             ref SymbolicProgramState<TInstruction> currentState)
         {
-            bool changed = false;
+            bool changed;
             if (context.RecordedStates.TryGetValue(currentState.ProgramCounter, out var recordedState))
             {
-                // // We are revisiting this address, merge program states.
-                // if (recordedState.MergeWith(currentState))
-                // {
-                //     currentState = recordedState;
-                //     changed = true;
-                // }
+                // We are revisiting this address, merge program states.
+                changed = recordedState.MergeStates(currentState, out currentState);
             }
             else
             {

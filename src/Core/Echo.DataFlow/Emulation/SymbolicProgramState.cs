@@ -11,7 +11,7 @@ namespace Echo.DataFlow.Emulation
         public static SymbolicProgramState<T> Empty
         {
             get;
-        } = new SymbolicProgramState<T>(0);
+        } = new(0);
         
         public SymbolicProgramState(long programCounter)
         {
@@ -122,5 +122,10 @@ namespace Echo.DataFlow.Emulation
             return false;
         }
 
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{nameof(ProgramCounter)}: {ProgramCounter:X8}, {nameof(Stack)}: {Stack.Count()} slots";
+        }
     }
 }
