@@ -195,9 +195,7 @@ namespace Echo.DataFlow.Emulation
                 var newValue = value1;
                 if (!value1.SetEquals(value2))
                 {
-                    newValue = new SymbolicValue<T>();
-                    newValue.UnionWith(value1);
-                    newValue.UnionWith(value2);
+                    newValue = new SymbolicValue<T>(value1.Concat(value2));
                     changed = true;
                 }
 
@@ -230,9 +228,7 @@ namespace Echo.DataFlow.Emulation
                 else if (!value.SetEquals(otherValue))
                 {
                     // Variable does exist but has different data sources. Create new merged symbolic value.
-                    var newValue = new SymbolicValue<T>();
-                    newValue.UnionWith(value);
-                    newValue.UnionWith(otherValue);
+                    var newValue = new SymbolicValue<T>(value.Concat(otherValue));
                     result = result.SetItem(variable, newValue);
                     changed = true;
                 }

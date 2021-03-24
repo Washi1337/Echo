@@ -50,6 +50,9 @@ namespace Echo.DataFlow.Emulation
             : base(dataSources.AsEnumerable())
         {
         }
+
+        /// <inheritdoc />
+        public override bool IsReadOnly => true;
         
         /// <inheritdoc />
         public bool IsKnown => HasKnownDataSources;
