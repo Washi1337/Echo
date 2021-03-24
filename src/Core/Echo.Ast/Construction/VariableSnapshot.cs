@@ -33,6 +33,6 @@ namespace Echo.Ast.Construction
             }
         }
 
-        public override string ToString() => $"{Variable}_v{Version}";
+        public override string ToString() => $"{Variable.Name}_v{Version}";
     }
 }
