@@ -4,7 +4,6 @@ using Echo.ControlFlow;
 using Echo.ControlFlow.Construction.Symbolic;
 using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
-using Echo.DataFlow.Values;
 
 namespace Echo.Platforms.Dnlib
 {
@@ -51,7 +50,7 @@ namespace Echo.Platforms.Dnlib
                 if (exceptionSource is {})
                 {
                     DataFlowGraph.Nodes.Add(exceptionSource);
-                    result.Stack.Push(new SymbolicValue<Instruction>(new DataSource<Instruction>(exceptionSource)));
+                    result = result.Push(new SymbolicValue<Instruction>(new DataSource<Instruction>(exceptionSource)));
                     break;
                 }
             }
@@ -60,7 +59,8 @@ namespace Echo.Platforms.Dnlib
         }
 
         /// <inheritdoc />
-        public override int GetTransitionCount(SymbolicProgramState<Instruction> currentState,
+        public override int GetTransitionCount(
+            in SymbolicProgramState<Instruction> currentState,
             in Instruction instruction)
         {
             switch (instruction.OpCode.FlowControl)
@@ -92,7 +92,8 @@ namespace Echo.Platforms.Dnlib
         }
 
         /// <inheritdoc />
-        public override int GetTransitions(SymbolicProgramState<Instruction> currentState,
+        public override int GetTransitions(
+            in SymbolicProgramState<Instruction> currentState,
             in Instruction instruction,
             Span<StateTransition<Instruction>> transitionBuffer)
         {
@@ -115,9 +116,8 @@ namespace Echo.Platforms.Dnlib
                     var targets = (Instruction[]) instruction.Operand;
                     for (int i = 0; i < targets.Length; i++)
                     {
-                        var nextState = currentState.Copy();
-                        ApplyDefaultBehaviour(nextState, instruction);
-                        nextState.ProgramCounter = targets[i].Offset;
+                        var nextState = ApplyDefaultBehaviour(currentState, instruction)
+                            .WithProgramCounter(targets[i].Offset);
                         transitionBuffer[i] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.Conditional);
                     }
 
@@ -131,7 +131,7 @@ namespace Echo.Platforms.Dnlib
 
                 case FlowControl.Return:
                 case FlowControl.Throw:
-                    ApplyDefaultBehaviour(currentState.Copy(), instruction);
+                    ApplyDefaultBehaviour(currentState, instruction);
                     return 0;
 
                 case FlowControl.Phi:
@@ -142,21 +142,21 @@ namespace Echo.Platforms.Dnlib
             }
         }
 
-        private StateTransition<Instruction> FallThrough(SymbolicProgramState<Instruction> currentState, Instruction instruction)
+        private StateTransition<Instruction> FallThrough(
+            in SymbolicProgramState<Instruction> currentState, 
+            Instruction instruction)
         {
-            var nextState = currentState.Copy();
-            ApplyDefaultBehaviour(nextState, instruction);
+            var nextState = ApplyDefaultBehaviour(currentState, instruction);
             return new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough);
         }
 
         private StateTransition<Instruction> Branch(
             bool conditional, 
-            SymbolicProgramState<Instruction> currentState, 
+            in SymbolicProgramState<Instruction> currentState, 
             Instruction instruction)
         {
-            var nextState = currentState.Copy();
-            ApplyDefaultBehaviour(nextState, instruction);
-            nextState.ProgramCounter = ((Instruction) instruction.Operand).Offset;
+            var nextState = ApplyDefaultBehaviour(currentState, instruction)
+                .WithProgramCounter(((Instruction) instruction.Operand).Offset);
             return new StateTransition<Instruction>(nextState, conditional
                 ? ControlFlowEdgeType.Conditional
                 : ControlFlowEdgeType.Unconditional);
