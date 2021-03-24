@@ -97,7 +97,8 @@ namespace Echo.Platforms.AsmResolver.Tests
             var body = method.CilMethodBody;
             var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
             
-            
+            Assert.Equal(2, dfg.Nodes[body.Instructions[6].Offset].VariableDependencies.First().Value.Count);
+            Assert.Equal(2, dfg.Nodes[body.Instructions[7].Offset].VariableDependencies.First().Value.Count);
         }
     }
 }
