@@ -23,7 +23,8 @@ namespace Echo.Platforms.Iced
         }
 
         /// <inheritdoc />
-        public override int GetTransitionCount(SymbolicProgramState<Instruction> currentState,
+        public override int GetTransitionCount(
+            in SymbolicProgramState<Instruction> currentState,
             in Instruction instruction)
         {   
             switch (instruction.FlowControl)
@@ -43,12 +44,12 @@ namespace Echo.Platforms.Iced
         }
 
         /// <inheritdoc />
-        public override int GetTransitions(SymbolicProgramState<Instruction> currentState,
+        public override int GetTransitions(
+            in SymbolicProgramState<Instruction> currentState,
             in Instruction instruction,
             Span<StateTransition<Instruction>> transitionBuffer)
         {
-            var nextState = currentState.Copy();
-            ApplyDefaultBehaviour(nextState, instruction);
+            var nextState = ApplyDefaultBehaviour(currentState, instruction);
             
             switch (instruction.FlowControl)
             {
@@ -70,30 +71,28 @@ namespace Echo.Platforms.Iced
         }
         
         private static int GetUnconditionalBranchTransitions(
-            Instruction instruction,
-            SymbolicProgramState<Instruction> nextState, 
+            in Instruction instruction,
+            in SymbolicProgramState<Instruction> nextState, 
             Span<StateTransition<Instruction>> successorBuffer)
         {
-            nextState.ProgramCounter = (long) instruction.NearBranchTarget;
-            successorBuffer[0] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.Unconditional);
+            var branchState = nextState.WithProgramCounter((long) instruction.NearBranchTarget);
+            successorBuffer[0] = new StateTransition<Instruction>(branchState, ControlFlowEdgeType.Unconditional);
             return 1;
         }
 
         private static int GetConditionalBranchTransitions(
-            Instruction instruction,
-            SymbolicProgramState<Instruction> nextState,
+            in Instruction instruction,
+            in SymbolicProgramState<Instruction> nextState,
             Span<StateTransition<Instruction>> successorBuffer)
         {
-            var branchState = nextState.Copy();
-            branchState.ProgramCounter = (long) instruction.NearBranchTarget;
-
+            var branchState = nextState.WithProgramCounter((long) instruction.NearBranchTarget);
             successorBuffer[0] = new StateTransition<Instruction>(branchState, ControlFlowEdgeType.Conditional);
             successorBuffer[1] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough);
             return 2;
         }
 
         private static int GetFallthroughTransitions(
-            SymbolicProgramState<Instruction> nextState, 
+            in SymbolicProgramState<Instruction> nextState, 
             Span<StateTransition<Instruction>> successorBuffer)
         {
             successorBuffer[0] = new StateTransition<Instruction>(nextState, ControlFlowEdgeType.FallThrough);
