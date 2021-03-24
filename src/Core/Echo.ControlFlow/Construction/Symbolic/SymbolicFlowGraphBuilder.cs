@@ -131,12 +131,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
             bool changed = false;
             if (context.RecordedStates.TryGetValue(currentState.ProgramCounter, out var recordedState))
             {
-                // We are revisiting this address, merge program states.
-                if (recordedState.MergeWith(currentState))
-                {
-                    currentState = recordedState;
-                    changed = true;
-                }
+                // // We are revisiting this address, merge program states.
+                // if (recordedState.MergeWith(currentState))
+                // {
+                //     currentState = recordedState;
+                //     changed = true;
+                // }
             }
             else
             {

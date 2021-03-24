@@ -9,7 +9,6 @@ using Echo.Core.Emulation;
 using Echo.Core.Graphing.Serialization.Dot;
 using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
-using Echo.DataFlow.Values;
 using Echo.Platforms.DummyPlatform.Code;
 using Echo.Platforms.DummyPlatform.ControlFlow;
 using Xunit;

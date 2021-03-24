@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Echo.Core.Emulation;
 using Echo.DataFlow.Emulation;
-using Echo.DataFlow.Values;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace Echo.DataFlow.Tests.Emulation
         {
             return new DataFlowNode<DummyInstruction>(id, DummyInstruction.Op(id, 0, 1));
         }
-        
+
         [Fact]
         public void MergeSingle()
         {
@@ -22,18 +23,37 @@ namespace Echo.DataFlow.Tests.Emulation
                 CreateDummyNode(0), CreateDummyNode(1),
             };
             
-            var stack1 = new StackState<SymbolicValue<DummyInstruction>>();
             var value1 = new SymbolicValue<DummyInstruction>(sources[0]);
-            stack1.Push(value1);
+            var stack1 = ImmutableStack.Create(value1);
             
-            var stack2 = new StackState<SymbolicValue<DummyInstruction>>();
             var value2 = new SymbolicValue<DummyInstruction>(sources[1]);
-            stack2.Push(value2);
+            var stack2 = ImmutableStack.Create(value2);
+
+            var state1 = new SymbolicProgramState<DummyInstruction>(0, stack1);
+            var state2 = new SymbolicProgramState<DummyInstruction>(0, stack2);
             
-            Assert.True(stack1.MergeWith(stack2));
-            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources), stack1.Top.GetNodes());
+            Assert.True(state1.MergeStates(state2, out var newState));
+            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources), newState.Stack.Peek().GetNodes());
         }
-        
+
+        [Fact]
+        public void MergeSingleNoChange()
+        {
+            var source = CreateDummyNode(0);
+            
+            var value1 = new SymbolicValue<DummyInstruction>(source);
+            var stack1 = ImmutableStack.Create(value1);
+            
+            var value2 = new SymbolicValue<DummyInstruction>(source);
+            var stack2 = ImmutableStack.Create(value2);
+
+            var state1 = new SymbolicProgramState<DummyInstruction>(0, stack1);
+            var state2 = new SymbolicProgramState<DummyInstruction>(0, stack2);
+            
+            Assert.False(state1.MergeStates(state2, out var newState));
+            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(new[] {source}), newState.Stack.Peek().GetNodes());
+        }
+
         [Fact]
         public void MergeMultiple()
         {
@@ -56,28 +76,31 @@ namespace Echo.DataFlow.Tests.Emulation
                 }
             };
             
-            var stack1 = new StackState<SymbolicValue<DummyInstruction>>();
             var values1 = new[]
             {
                 new SymbolicValue<DummyInstruction>(sources[0][0]),
                 new SymbolicValue<DummyInstruction>(sources[1][0]),
                 new SymbolicValue<DummyInstruction>(sources[2][0]),
             };
-            stack1.Push(values1);
+
+            var stack1 = ImmutableStack.Create(values1);
             
-            var stack2 = new StackState<SymbolicValue<DummyInstruction>>();
             var values2 = new[]
             {
                 new SymbolicValue<DummyInstruction>(sources[0][1]),
                 new SymbolicValue<DummyInstruction>(sources[1][1]),
                 new SymbolicValue<DummyInstruction>(sources[2][1]),
             };
-            stack2.Push(values2);
             
-            Assert.True(stack1.MergeWith(stack2));
+            var stack2 = ImmutableStack.Create(values2);
+            
+            var state1 = new SymbolicProgramState<DummyInstruction>(0, stack1);
+            var state2 = new SymbolicProgramState<DummyInstruction>(0, stack2);
+
+            Assert.True(state1.MergeStates(state2, out var newState));
 
             int index = sources.Length - 1;
-            foreach (var slot in stack1.GetAllStackSlots())
+            foreach (var slot in newState.Stack)
             {
                 Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources[index]), slot.GetNodes());
                 index--;
@@ -85,22 +108,75 @@ namespace Echo.DataFlow.Tests.Emulation
         }
 
         [Fact]
+        public void MergeMultipleSingleChangeShouldOnlyCreateNewInstancesForChangedSlots()
+        {
+            var nodes = new[]
+            {
+                CreateDummyNode(0),
+                CreateDummyNode(1),
+                CreateDummyNode(2),
+                CreateDummyNode(3),
+            };
+            
+            var sources = new[]
+            {
+                new[]
+                {
+                    nodes[0]
+                },
+                new[]
+                {
+                    nodes[1]
+                },
+                new[]
+                {
+                    nodes[2],
+                    nodes[3],
+                }
+            };
+            
+            var values1 = new[]
+            {
+                new SymbolicValue<DummyInstruction>(sources[0][0]),
+                new SymbolicValue<DummyInstruction>(sources[1][0]),
+                new SymbolicValue<DummyInstruction>(sources[2][0]),
+            };
+
+            var stack1 = ImmutableStack.Create(values1);
+            
+            var values2 = new[]
+            {
+                new SymbolicValue<DummyInstruction>(sources[0][0]),
+                new SymbolicValue<DummyInstruction>(sources[1][0]),
+                new SymbolicValue<DummyInstruction>(sources[2][1]),
+            };
+            
+            var stack2 = ImmutableStack.Create(values2);
+            
+            var state1 = new SymbolicProgramState<DummyInstruction>(0, stack1);
+            var state2 = new SymbolicProgramState<DummyInstruction>(0, stack2);
+
+            Assert.True(state1.MergeStates(state2, out var newState));
+
+            Assert.NotSame(state1.Stack.Peek(), newState.Stack.Peek());
+            Assert.Same(state1.Stack.ElementAt(1), newState.Stack.ElementAt(1));
+            Assert.Same(state1.Stack.ElementAt(2), newState.Stack.ElementAt(2));
+        }
+
+        [Fact]
         public void MergeStackImbalance()
         {
-            var stack1 = new StackState<SymbolicValue<DummyInstruction>>();
-            stack1.Push(new[]
-            {
+            var stack1 = ImmutableStack.Create(
                 new SymbolicValue<DummyInstruction>(),
-                new SymbolicValue<DummyInstruction>(),
-            });
-            
-            var stack2 = new StackState<SymbolicValue<DummyInstruction>>();
-            stack2.Push(new[]
-            {
-                new SymbolicValue<DummyInstruction>(),
-            });
+                new SymbolicValue<DummyInstruction>()
+            );
 
-            Assert.Throws<StackImbalanceException>(() => stack1.MergeWith(stack2));
+            var stack2 = ImmutableStack.Create(new SymbolicValue<DummyInstruction>());
+
+            var state1 = new SymbolicProgramState<DummyInstruction>(0, stack1);
+            var state2 = new SymbolicProgramState<DummyInstruction>(0, stack2);
+
+            Assert.Throws<StackImbalanceException>(() => state1.MergeStates(state2, out _));
         }
     }
 }

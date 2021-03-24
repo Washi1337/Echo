@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Echo.Core.Code;
 using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
-using Echo.DataFlow.Values;
 
 namespace Echo.ControlFlow.Construction.Symbolic
 {
@@ -48,11 +48,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
             new SymbolicProgramState<TInstruction>(entrypointAddress);
 
         /// <inheritdoc />
-        public abstract int GetTransitionCount(SymbolicProgramState<TInstruction> currentState,
+        public abstract int GetTransitionCount(
+            in SymbolicProgramState<TInstruction> currentState,
             in TInstruction instruction);
 
         /// <inheritdoc />
-        public abstract int GetTransitions(SymbolicProgramState<TInstruction> currentState,
+        public abstract int GetTransitions(in SymbolicProgramState<TInstruction> currentState,
             in TInstruction instruction,
             Span<StateTransition<TInstruction>> transitionBuffer);
 
@@ -61,37 +62,46 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// </summary>
         /// <param name="currentState">The current program state to be transitioned.</param>
         /// <param name="instruction">The instruction invoking the state transition.</param>
-        protected void ApplyDefaultBehaviour(SymbolicProgramState<TInstruction> currentState, TInstruction instruction)
+        protected SymbolicProgramState<TInstruction> ApplyDefaultBehaviour(SymbolicProgramState<TInstruction> currentState, TInstruction instruction)
         {
             var node = GetOrCreateDataFlowNode(instruction);
-            
-            ApplyStackTransition(node, currentState);
-            ApplyVariableTransition(node, currentState);
 
-            currentState.ProgramCounter += Architecture.GetSize(instruction);
+            long newPc =currentState.ProgramCounter + Architecture.GetSize(instruction);
+            var newStack = ApplyStackTransition(node, currentState.Stack);
+            var newVariables = ApplyVariableTransition(node, currentState.Variables);
+
+            return new SymbolicProgramState<TInstruction>(newPc, newStack, newVariables);
         }
 
-        private void ApplyStackTransition(DataFlowNode<TInstruction> node, SymbolicProgramState<TInstruction> currentState)
+        private ImmutableStack<SymbolicValue<TInstruction>> ApplyStackTransition(
+            DataFlowNode<TInstruction> node, 
+            ImmutableStack<SymbolicValue<TInstruction>> stack)
         {
             var instruction = node.Contents;
             
             int argumentsCount = Architecture.GetStackPopCount(instruction);
             if (argumentsCount == -1)
             {
-                currentState.Stack.Clear();
+                stack = stack.Clear();
             }
             else
             {
-                var arguments = currentState.Stack.Pop(argumentsCount, true);
-                for (int i = 0; i < arguments.Count; i++)
-                    node.StackDependencies[i].UnionWith(arguments[i]);
+                for (int i = 0; i < argumentsCount; i++)
+                {
+                    stack = stack.Pop(out var argument);
+                    node.StackDependencies[argumentsCount - i - 1].UnionWith(argument);
+                }
             }
 
             for (int i = 0; i < Architecture.GetStackPushCount(instruction); i++)
-                currentState.Stack.Push(new SymbolicValue<TInstruction>(new DataSource<TInstruction>(node, i)));
+                stack = stack.Push(new SymbolicValue<TInstruction>(new DataSource<TInstruction>(node, i)));
+
+            return stack;
         }
 
-        private void ApplyVariableTransition(DataFlowNode<TInstruction> node, SymbolicProgramState<TInstruction> currentState)
+        private ImmutableDictionary<IVariable, SymbolicValue<TInstruction>> ApplyVariableTransition(
+            DataFlowNode<TInstruction> node, 
+            ImmutableDictionary<IVariable, SymbolicValue<TInstruction>> variables)
         {
             var instruction = node.Contents;
 
@@ -113,7 +123,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             for (int i = 0; i < actualCount; i++)
             {
                 var variable = _variablesBuffer[i];
-                node.VariableDependencies[variable].UnionWith(currentState.Variables[variable]);
+                node.VariableDependencies[variable].UnionWith(variables[variable]);
             }
             
             // Get written variables.
@@ -126,8 +136,10 @@ namespace Echo.ControlFlow.Construction.Symbolic
             for (int i = 0; i < actualCount; i++)
             {
                 var variable = _variablesBuffer[i];
-                currentState.Variables[variable] = new SymbolicValue<TInstruction>(new DataSource<TInstruction>(node));
+                variables = variables.SetItem(variable, new SymbolicValue<TInstruction>(new DataSource<TInstruction>(node)));
             }
+
+            return variables;
         }
 
         /// <summary>

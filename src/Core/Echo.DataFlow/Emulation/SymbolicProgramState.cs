@@ -1,91 +1,126 @@
-﻿using System;
+using System;
+using System.Collections.Immutable;
+using System.Linq;
+using Echo.Core.Code;
 using Echo.Core.Emulation;
-using Echo.DataFlow.Values;
 
 namespace Echo.DataFlow.Emulation
 {
-    /// <summary>
-    /// Represents a snapshot of a program during a symbolic execution.  
-    /// </summary>
-    /// <typeparam name="TInstruction">The type of instructions that are evaluated.</typeparam>
-    public class SymbolicProgramState<TInstruction> : IProgramState<SymbolicValue<TInstruction>>
+    public readonly struct SymbolicProgramState<T>
     {
-        /// <summary>
-        /// Creates a new empty symbolic program state, setting the program counter to zero, initializing an empty
-        /// stack and assigning the unknown value to all variables. 
-        /// </summary>
-        public SymbolicProgramState()
-            : this(0, new StackState<SymbolicValue<TInstruction>>(), new VariableState<SymbolicValue<TInstruction>>(new SymbolicValue<TInstruction>()))
+        public static SymbolicProgramState<T> Empty
         {
-        }
-
-        /// <summary>
-        /// Creates a new empty symbolic program state, initializing an empty stack and assigning the unknown
-        /// value to all variables. 
-        /// </summary>
-        /// <param name="programCounter">The value of the current program counter.</param>
+            get;
+        } = new SymbolicProgramState<T>(0);
+        
         public SymbolicProgramState(long programCounter)
-            : this(programCounter, new StackState<SymbolicValue<TInstruction>>(), new VariableState<SymbolicValue<TInstruction>>(new SymbolicValue<TInstruction>()))
-        {
-        }
-
-        /// <summary>
-        /// Creates a new symbolic program state.
-        /// </summary>
-        /// <param name="programCounter">The value of the current program counter.</param>
-        /// <param name="stack">A snapshot of the current state of the stack.</param>
-        /// <param name="variables">A snapshot of the state of all variables.</param>
-        public SymbolicProgramState(long programCounter, IStackState<SymbolicValue<TInstruction>> stack, IVariableState<SymbolicValue<TInstruction>> variables)
         {
             ProgramCounter = programCounter;
-            Stack = stack ?? throw new ArgumentNullException(nameof(stack));
-            Variables = variables ?? throw new ArgumentNullException(nameof(variables));
+            Stack = ImmutableStack<SymbolicValue<T>>.Empty;
+            Variables = ImmutableDictionary<IVariable, SymbolicValue<T>>.Empty;
         }
 
-        /// <inheritdoc />
+        public SymbolicProgramState(
+            long programCounter, 
+            ImmutableStack<SymbolicValue<T>> stack)
+        {
+            ProgramCounter = programCounter;
+            Stack = stack;
+            Variables = ImmutableDictionary<IVariable, SymbolicValue<T>>.Empty;
+        }
+        
+        public SymbolicProgramState(
+            long programCounter, 
+            ImmutableStack<SymbolicValue<T>> stack,
+            ImmutableDictionary<IVariable, SymbolicValue<T>> variables)
+        {
+            ProgramCounter = programCounter;
+            Stack = stack;
+            Variables = variables;
+        }
+
         public long ProgramCounter
         {
             get;
-            set;
         }
-
-        /// <inheritdoc />
-        public IStackState<SymbolicValue<TInstruction>> Stack
+        
+        public ImmutableStack<SymbolicValue<T>> Stack
         {
             get;
         }
 
-        /// <inheritdoc />
-        public IVariableState<SymbolicValue<TInstruction>> Variables
+        public ImmutableDictionary<IVariable, SymbolicValue<T>> Variables
         {
             get;
         }
 
-        /// <summary>
-        /// Creates a deep copy of the snapshot. This includes copying the state of the stack and each variable.
-        /// </summary>
-        /// <returns>The copied program state.</returns>
-        public virtual SymbolicProgramState<TInstruction> Copy()
+        public SymbolicProgramState<T> WithProgramCounter(long programCounter) => 
+            new(programCounter, Stack, Variables);
+        
+        public SymbolicProgramState<T> WithStack(ImmutableStack<SymbolicValue<T>> stack) => 
+            new(ProgramCounter, stack, Variables);
+        
+        public SymbolicProgramState<T> WithVariables(ImmutableDictionary<IVariable, SymbolicValue<T>> variables) => 
+            new(ProgramCounter, Stack, variables);
+
+        public bool MergeStates(in SymbolicProgramState<T> otherState, out SymbolicProgramState<T> newState)
         {
-            return new SymbolicProgramState<TInstruction>(ProgramCounter, Stack.Copy(), Variables.Copy());
+            if (ProgramCounter != otherState.ProgramCounter)
+                throw new ArgumentException("Input program state has a different program counter.");
+
+            bool changed = false;
+
+            var newStack = otherState.Stack;
+            changed |= MergeStacks(ref newStack);
+            var newVariables = otherState.Variables;
+            changed |= MergeVariables(ref newVariables);
+
+            newState = new SymbolicProgramState<T>(ProgramCounter, newStack, newVariables);
+            return changed;
         }
 
-        IProgramState<SymbolicValue<TInstruction>> IProgramState<SymbolicValue<TInstruction>>.Copy() => Copy();
-
-        /// <summary>
-        /// Pulls all symbolic data sources tracked into the current snapshot. 
-        /// </summary>
-        /// <param name="other">The snapshot to pull data sources from.</param>
-        /// <returns><c>true</c> if new data sources were introduced, <c>false</c> otherwise.</returns>
-        public bool MergeWith(IProgramState<SymbolicValue<TInstruction>> other)
+        private bool MergeStacks(ref ImmutableStack<SymbolicValue<T>> other)
         {
-            return Stack.MergeWith(other.Stack) | Variables.MergeWith(other.Variables);
+            var stack1 = Stack;
+            var stack2 = other;
+            
+            int count = stack1.Count();
+            if (count != stack2.Count())
+                throw new StackImbalanceException(ProgramCounter);
+
+            bool changed = false;
+            
+            var result = new SymbolicValue<T>[count];
+
+            count--;
+            while(count >= 0)
+            {
+                stack1 = stack1.Pop(out var value1);
+                stack2 = stack2.Pop(out var value2);
+
+                var newValue = value1;
+                if (!value1.SetEquals(value2))
+                {
+                    newValue = new SymbolicValue<T>();
+                    newValue.UnionWith(value1);
+                    newValue.UnionWith(value2);
+                    changed = true;
+                }
+
+                result[count] = newValue;
+                count--;
+            }
+
+            if (changed)
+                other = ImmutableStack.Create(result);
+
+            return changed;
         }
 
-        /// <inheritdoc />
-        public override string ToString()
+        private bool MergeVariables(ref ImmutableDictionary<IVariable, SymbolicValue<T>> newVariables)
         {
-            return $"PC: {ProgramCounter:X8}, Stack = {{{Stack}}}";
+            return false;
         }
+
     }
 }

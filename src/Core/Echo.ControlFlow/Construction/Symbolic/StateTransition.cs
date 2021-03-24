@@ -16,7 +16,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <param name="edgeType">The type of edge that was taken.</param>
         public StateTransition(SymbolicProgramState<TInstruction> nextState, ControlFlowEdgeType edgeType)
         {
-            NextState = nextState ?? throw new ArgumentNullException(nameof(nextState));
+            NextState = nextState;
             EdgeType = edgeType;
         }
         
@@ -42,8 +42,6 @@ namespace Echo.ControlFlow.Construction.Symbolic
         public bool IsRealEdge => EdgeType != ControlFlowEdgeType.None;
 
         /// <inheritdoc />
-        public override string ToString() => NextState is null
-            ? "<<unknown>>"
-            : $"{NextState.ProgramCounter:X8} ({EdgeType})";
+        public override string ToString() => $"{NextState.ProgramCounter:X8} ({EdgeType})";
     }
 }
