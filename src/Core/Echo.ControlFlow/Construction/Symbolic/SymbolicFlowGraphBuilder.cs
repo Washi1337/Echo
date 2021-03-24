@@ -133,6 +133,8 @@ namespace Echo.ControlFlow.Construction.Symbolic
             {
                 // We are revisiting this address, merge program states.
                 changed = recordedState.MergeStates(currentState, out currentState);
+                if (changed)
+                    context.RecordedStates[currentState.ProgramCounter] = currentState;
             }
             else
             {

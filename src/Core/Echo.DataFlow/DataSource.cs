@@ -76,7 +76,7 @@ namespace Echo.DataFlow
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{nameof(Node)}: {Node}, {nameof(SlotIndex)}: {SlotIndex}";
+            return $"{Node.Id:X8}#{SlotIndex}";
         }
         
         /// <summary>

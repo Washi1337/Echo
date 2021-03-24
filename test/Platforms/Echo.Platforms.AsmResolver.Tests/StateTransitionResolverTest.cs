@@ -88,5 +88,16 @@ namespace Echo.Platforms.AsmResolver.Tests
             var dependencies = dfg.Nodes[body.Instructions.Last(i=>i.OpCode == CilOpCodes.Ldloc_1).Offset].VariableDependencies;
             Assert.Equal(3, dependencies.First().Value.Count);
         }
+
+        [Fact]
+        public void Loop()
+        {
+            var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
+            var method = type.Methods.First(m => m.Name == nameof(SimpleClass.Loop));
+            var body = method.CilMethodBody;
+            var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
+            
+            
+        }
     }
 }
