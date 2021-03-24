@@ -28,6 +28,15 @@ namespace Echo.DataFlow.Emulation
             Stack = stack;
             Variables = ImmutableDictionary<IVariable, SymbolicValue<T>>.Empty;
         }
+
+        public SymbolicProgramState(
+            long programCounter, 
+            ImmutableDictionary<IVariable, SymbolicValue<T>> variables)
+        {
+            ProgramCounter = programCounter;
+            Stack = ImmutableStack<SymbolicValue<T>>.Empty;
+            Variables = variables;
+        }
         
         public SymbolicProgramState(
             long programCounter, 
@@ -84,6 +93,8 @@ namespace Echo.DataFlow.Emulation
             var stack1 = Stack;
             var stack2 = other;
             
+            // If stack heights are not the same, then we are experiencing stack imbalance,
+            // which means we cannot calculate the merged state.
             int count = stack1.Count();
             if (count != stack2.Count())
                 throw new StackImbalanceException(ProgramCounter);
@@ -95,9 +106,12 @@ namespace Echo.DataFlow.Emulation
             count--;
             while(count >= 0)
             {
+                // Pop top values from both stacks.
                 stack1 = stack1.Pop(out var value1);
                 stack2 = stack2.Pop(out var value2);
 
+                // If the two values have different data sources, we must merge them,
+                // and thus create a new stack state.
                 var newValue = value1;
                 if (!value1.SetEquals(value2))
                 {
@@ -119,7 +133,34 @@ namespace Echo.DataFlow.Emulation
 
         private bool MergeVariables(ref ImmutableDictionary<IVariable, SymbolicValue<T>> newVariables)
         {
-            return false;
+            var result = Variables;
+            bool changed = false;
+
+            foreach (var entry in newVariables)
+            {
+                var variable = entry.Key;
+                var otherValue = entry.Value;
+
+                if (!result.TryGetValue(variable, out var value))
+                {
+                    // Variable doesn't exist in our current state yet. Just copy the item and add it.
+                    result = result.SetItem(variable, otherValue);
+                    changed = true;
+                }
+                else if (!value.SetEquals(otherValue))
+                {
+                    // Variable does exist but has different data sources. Create new merged symbolic value.
+                    var newValue = new SymbolicValue<T>();
+                    newValue.UnionWith(value);
+                    newValue.UnionWith(otherValue);
+                    result = result.SetItem(variable, newValue);
+                    changed = true;
+                }
+            }
+
+            if (changed)
+                newVariables = result;
+            return changed;
         }
 
         /// <inheritdoc />
