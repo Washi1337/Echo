@@ -72,6 +72,12 @@ namespace Echo.DataFlow.Emulation
         public SymbolicProgramState<T> WithVariables(ImmutableDictionary<IVariable, SymbolicValue<T>> variables) => 
             new(ProgramCounter, Stack, variables);
 
+        public SymbolicProgramState<T> Push(SymbolicValue<T> value) => 
+            new(ProgramCounter, Stack.Push(value), Variables);
+
+        public SymbolicProgramState<T> Pop(out SymbolicValue<T> value) => 
+            new(ProgramCounter, Stack.Pop(out value), Variables);
+
         public bool MergeStates(in SymbolicProgramState<T> otherState, out SymbolicProgramState<T> newState)
         {
             if (ProgramCounter != otherState.ProgramCounter)

@@ -133,7 +133,8 @@ namespace Echo.ControlFlow.Construction.Symbolic
             for (int i = 0; i < actualCount; i++)
             {
                 var variable = _variablesBuffer[i];
-                node.VariableDependencies[variable].UnionWith(variables[variable]);
+                if (variables.TryGetValue(variable, out var dataSources))
+                    node.VariableDependencies[variable].UnionWith(dataSources);
             }
             
             // Get written variables.

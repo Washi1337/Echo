@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Mocks;
@@ -81,9 +82,11 @@ namespace Echo.Platforms.AsmResolver.Tests
             var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.SwitchColor));
             var body = method.CilMethodBody;
-            var cfg = body.ConstructSymbolicFlowGraph(out _);
+            var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
             
             Assert.Equal(3, cfg.Entrypoint.ConditionalEdges.Count);
+            var dependencies = dfg.Nodes[body.Instructions.Last(i=>i.OpCode == CilOpCodes.Ldloc_1).Offset].VariableDependencies;
+            Assert.Equal(3, dependencies.First().Value.Count);
         }
     }
 }
