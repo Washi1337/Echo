@@ -62,6 +62,31 @@ namespace Echo.DataFlow
         {
             _listObject = new HashSet<DataSource<TContents>>(dataSources);
         }
+        
+        /// <summary>
+        /// Merges two data dependencies into one single dependency.
+        /// </summary>
+        protected DataDependencyBase(DataDependencyBase<TContents> left, DataDependencyBase<TContents> right)
+        {
+            int totalCount = left.Count + right.Count;
+            switch (totalCount)
+            {
+                case 0:
+                    _listObject = null;
+                    break;
+
+                case 1:
+                    _listObject = left._listObject ?? right._listObject;
+                    break;
+
+                default:
+                    var set = new HashSet<DataSource<TContents>>(left);
+                    set.UnionWith(right);
+                    _listObject = set;
+                    break;
+            }
+        }
+        
 
         /// <inheritdoc />
         public abstract bool IsReadOnly

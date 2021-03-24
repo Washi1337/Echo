@@ -51,6 +51,14 @@ namespace Echo.DataFlow.Emulation
         {
         }
 
+        /// <summary>
+        /// Merges two data dependencies into one symbolic value.
+        /// </summary>
+        public SymbolicValue(DataDependencyBase<T> left, DataDependencyBase<T> right)
+            : base(left, right)
+        {
+        }
+
         /// <inheritdoc />
         public override bool IsReadOnly => true;
         
