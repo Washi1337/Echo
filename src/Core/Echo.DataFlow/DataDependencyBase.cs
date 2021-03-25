@@ -131,12 +131,15 @@ namespace Echo.DataFlow
                     return true;
 
                 case DataSource<TContents> node:
+                    if (node == item)
+                        return false;
+                    
                     _listObject = new HashSet<DataSource<TContents>>
                     {
                         node,
                         item
                     };
-                    return node != item;
+                    return true;
 
                 case ISet<DataSource<TContents>> nodes:
                     return nodes.Add(item);

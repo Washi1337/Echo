@@ -41,7 +41,7 @@ namespace Echo.DataFlow.Emulation
             ImmutableStack<SymbolicValue<T>> stack)
         {
             ProgramCounter = programCounter;
-            Stack = stack;
+            Stack = stack ?? throw new ArgumentNullException(nameof(stack));
             Variables = ImmutableDictionary<IVariable, SymbolicValue<T>>.Empty;
         }
 
@@ -56,7 +56,7 @@ namespace Echo.DataFlow.Emulation
         {
             ProgramCounter = programCounter;
             Stack = ImmutableStack<SymbolicValue<T>>.Empty;
-            Variables = variables;
+            Variables = variables ?? throw new ArgumentNullException(nameof(variables));
         }
         
         /// <summary>
@@ -71,8 +71,8 @@ namespace Echo.DataFlow.Emulation
             ImmutableDictionary<IVariable, SymbolicValue<T>> variables)
         {
             ProgramCounter = programCounter;
-            Stack = stack;
-            Variables = variables;
+            Stack = stack ?? throw new ArgumentNullException(nameof(stack));
+            Variables = variables ?? throw new ArgumentNullException(nameof(variables));
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace Echo.DataFlow.Emulation
 
                 if (!result.TryGetValue(variable, out var value))
                 {
-                    // Variable doesn't exist in our current state yet. Just copy the item and add it.
+                    // Variable doesn't exist in our current state yet. Reuse the item and add it to the result.
                     result = result.SetItem(variable, otherValue);
                     changed = true;
                 }

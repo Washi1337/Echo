@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Echo.Core.Code;
 using Echo.Core.Emulation;
@@ -29,7 +30,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <param name="instructions">The instructions.</param>
         public StaticToSymbolicAdapter(IStaticInstructionProvider<TInstruction> instructions)
         {
-            Instructions = instructions;
+            Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
         }
 
         /// <summary>

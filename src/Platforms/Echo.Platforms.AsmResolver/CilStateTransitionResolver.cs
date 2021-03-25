@@ -31,31 +31,35 @@ namespace Echo.Platforms.AsmResolver
         {
             var result = base.GetInitialState(entrypointAddress);
 
-            foreach (var eh in _architecture.MethodBody.ExceptionHandlers)
+            for (int i = 0; i < _architecture.MethodBody.ExceptionHandlers.Count; i++)
             {
-                if (eh.HandlerType == CilExceptionHandlerType.Fault ||
-                    eh.HandlerType == CilExceptionHandlerType.Finally)
+                var handler = _architecture.MethodBody.ExceptionHandlers[i];
+                if (handler.HandlerType == CilExceptionHandlerType.Fault
+                    || handler.HandlerType == CilExceptionHandlerType.Finally)
+                {
                     continue;
+                }
 
                 var exceptionSource = default(ExternalDataSourceNode<CilInstruction>);
-                if (eh.HandlerStart.Offset == entrypointAddress)
+                
+                if (handler.HandlerStart.Offset == entrypointAddress)
                 {
                     exceptionSource = new ExternalDataSourceNode<CilInstruction>(
-                        -(long) eh.HandlerStart.Offset,
-                        $"HandlerException_{eh.HandlerStart.Offset:X4}");
+                        -(long) handler.HandlerStart.Offset,
+                        $"HandlerException_{handler.HandlerStart.Offset:X4}");
                 }
-                else if (eh.FilterStart != null && eh.FilterStart.Offset == entrypointAddress)
+                else if (handler.FilterStart != null && handler.FilterStart.Offset == entrypointAddress)
                 {
                     exceptionSource = new ExternalDataSourceNode<CilInstruction>(
-                        -(long) eh.FilterStart.Offset,
-                        $"FilterException_{eh.FilterStart.Offset:X4}");
+                        -(long) handler.FilterStart.Offset,
+                        $"FilterException_{handler.FilterStart.Offset:X4}");
                 }
 
                 if (exceptionSource is { })
                 {
                     DataFlowGraph.Nodes.Add(exceptionSource);
-                    result = result.Push(
-                        new SymbolicValue<CilInstruction>(new DataSource<CilInstruction>(exceptionSource)));
+                    result = result.Push(new SymbolicValue<CilInstruction>(
+                        new DataSource<CilInstruction>(exceptionSource)));
                     break;
                 }
             }

@@ -27,27 +27,31 @@ namespace Echo.Platforms.Dnlib
         public override SymbolicProgramState<Instruction> GetInitialState(long entrypointAddress)
         {
             var result = base.GetInitialState(entrypointAddress);
-            
-            foreach (var eh in _architecture.MethodBody.ExceptionHandlers)
+
+            for (int i = 0; i < _architecture.MethodBody.ExceptionHandlers.Count; i++)
             {
-                if (eh.HandlerType == ExceptionHandlerType.Fault || eh.HandlerType == ExceptionHandlerType.Finally)
+                var handler = _architecture.MethodBody.ExceptionHandlers[i];
+                if (handler.HandlerType == ExceptionHandlerType.Fault
+                    || handler.HandlerType == ExceptionHandlerType.Finally)
+                {
                     continue;
-                
-                var exceptionSource = default(ExternalDataSourceNode<Instruction>);
-                if (eh.HandlerStart.Offset == entrypointAddress)
-                {
-                    exceptionSource = new ExternalDataSourceNode<Instruction>(
-                        -(long) eh.HandlerStart.Offset,
-                        $"HandlerException_{eh.HandlerStart.Offset:X4}");
-                }
-                else if (eh.FilterStart != null && eh.FilterStart.Offset == entrypointAddress)
-                {
-                    exceptionSource = new ExternalDataSourceNode<Instruction>(
-                        -(long) eh.FilterStart.Offset,
-                        $"FilterException_{eh.FilterStart.Offset:X4}");
                 }
 
-                if (exceptionSource is {})
+                var exceptionSource = default(ExternalDataSourceNode<Instruction>);
+                if (handler.HandlerStart.Offset == entrypointAddress)
+                {
+                    exceptionSource = new ExternalDataSourceNode<Instruction>(
+                        -handler.HandlerStart.Offset,
+                        $"HandlerException_{handler.HandlerStart.Offset:X4}");
+                }
+                else if (handler.FilterStart != null && handler.FilterStart.Offset == entrypointAddress)
+                {
+                    exceptionSource = new ExternalDataSourceNode<Instruction>(
+                        -handler.FilterStart.Offset,
+                        $"FilterException_{handler.FilterStart.Offset:X4}");
+                }
+
+                if (exceptionSource is { })
                 {
                     DataFlowGraph.Nodes.Add(exceptionSource);
                     result = result.Push(new SymbolicValue<Instruction>(new DataSource<Instruction>(exceptionSource)));

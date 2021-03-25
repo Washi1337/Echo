@@ -28,7 +28,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 instructions,
                 dfgBuilder);
 
-            var cfg = cfgBuilder.ConstructFlowGraph(entrypoint, knownBlockHeaders ?? ImmutableArray<long>.Empty);
+            var cfg = cfgBuilder.ConstructFlowGraph(entrypoint, knownBlockHeaders ?? Enumerable.Empty<long>());
             return (cfg, dfgBuilder.DataFlowGraph);
         }
 

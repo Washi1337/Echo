@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Buffers;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using Echo.Core.Code;
 using Echo.Core.Emulation;
@@ -63,7 +61,9 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// </summary>
         /// <param name="currentState">The current program state to be transitioned.</param>
         /// <param name="instruction">The instruction invoking the state transition.</param>
-        protected SymbolicProgramState<TInstruction> ApplyDefaultBehaviour(SymbolicProgramState<TInstruction> currentState, TInstruction instruction)
+        protected SymbolicProgramState<TInstruction> ApplyDefaultBehaviour(
+            in SymbolicProgramState<TInstruction> currentState,
+            TInstruction instruction)
         {
             var node = GetOrCreateDataFlowNode(instruction);
 
@@ -110,7 +110,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         }
 
         private ImmutableDictionary<IVariable, SymbolicValue<TInstruction>> ApplyVariableTransition(
-            DataFlowNode<TInstruction> node, 
+            DataFlowNode<TInstruction> node,
             ImmutableDictionary<IVariable, SymbolicValue<TInstruction>> variables)
         {
             var instruction = node.Contents;
@@ -118,13 +118,13 @@ namespace Echo.ControlFlow.Construction.Symbolic
             // Ensure buffer is large enough.
             int readCount = Architecture.GetReadVariablesCount(instruction);
             int writtenCount = Architecture.GetWrittenVariablesCount(instruction);
-            
+
             int bufferSize = Math.Max(readCount, writtenCount);
             if (_variablesBuffer.Length < bufferSize)
                 _variablesBuffer = new IVariable[bufferSize];
-            
+
             // Get read variables.
-            var variablesBufferSlice = new Span<IVariable>(_variablesBuffer, 0, readCount);
+            var variablesBufferSlice = _variablesBuffer.AsSpan(0, readCount);
             int actualCount = Architecture.GetReadVariables(instruction, variablesBufferSlice);
             if (actualCount > variablesBufferSlice.Length)
                 throw new ArgumentException("GetReadVariables returned a number of variables that is inconsistent.");
@@ -136,9 +136,9 @@ namespace Echo.ControlFlow.Construction.Symbolic
                 if (variables.TryGetValue(variable, out var dataSources))
                     node.VariableDependencies[variable].UnionWith(dataSources);
             }
-            
+
             // Get written variables.
-            variablesBufferSlice = new Span<IVariable>(_variablesBuffer, 0, writtenCount);
+            variablesBufferSlice = _variablesBuffer.AsSpan(0, writtenCount);
             actualCount = Architecture.GetWrittenVariables(instruction, variablesBufferSlice);
             if (actualCount > bufferSize)
                 throw new ArgumentException("GetWrittenVariables returned a number of variables that is inconsistent.");
@@ -147,7 +147,8 @@ namespace Echo.ControlFlow.Construction.Symbolic
             for (int i = 0; i < actualCount; i++)
             {
                 var variable = _variablesBuffer[i];
-                variables = variables.SetItem(variable, new SymbolicValue<TInstruction>(new DataSource<TInstruction>(node)));
+                variables = variables.SetItem(variable,
+                    new SymbolicValue<TInstruction>(new DataSource<TInstruction>(node)));
             }
 
             return variables;
@@ -184,7 +185,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
                 
                 int actualCount = Architecture.GetReadVariables(instruction, _variablesBuffer);
                 if (actualCount > variableReadCount)
-                    throw new ArgumentException("GetWrittenVariables returned a number of variables that is inconsistent.");
+                    throw new ArgumentException("GetReadVariables returned a number of variables that is inconsistent with GetReadVariablesCount.");
 
                 // Register (unknown) variable dependencies.
                 for (int i = 0; i < actualCount; i++)
