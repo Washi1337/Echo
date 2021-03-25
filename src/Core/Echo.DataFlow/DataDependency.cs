@@ -53,6 +53,9 @@ namespace Echo.DataFlow
             : base(dataSources)
         {
         }
+
+        /// <inheritdoc />
+        public override bool IsReadOnly => false;
         
         /// <summary>
         /// Gets the node that owns the dependency.
@@ -112,6 +115,5 @@ namespace Echo.DataFlow
 
             return false;
         }
-        
     }
 }

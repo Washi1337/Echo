@@ -21,6 +21,7 @@ namespace Echo.Ast.Construction
         {
             int phiStatementCount = 0;
             var result = new BasicBlock<Statement<TInstruction>>();
+            result.Offset = originalBlock.Offset;
 
             foreach (var instruction in originalBlock.Instructions)
             {

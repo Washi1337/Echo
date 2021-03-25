@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Echo.Core.Code;
 using Echo.Core.Emulation;
-using Echo.DataFlow.Values;
+using Echo.DataFlow.Emulation;
 
 namespace Echo.ControlFlow.Construction.Symbolic
 {
@@ -29,7 +30,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <param name="instructions">The instructions.</param>
         public StaticToSymbolicAdapter(IStaticInstructionProvider<TInstruction> instructions)
         {
-            Instructions = instructions;
+            Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
         }
 
         /// <summary>
@@ -44,7 +45,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         public IInstructionSetArchitecture<TInstruction> Architecture => Instructions.Architecture;
 
         /// <inheritdoc />
-        public TInstruction GetCurrentInstruction(IProgramState<SymbolicValue<TInstruction>> currentState) =>
+        public TInstruction GetCurrentInstruction(in SymbolicProgramState<TInstruction> currentState) =>
             Instructions.GetInstructionAtOffset(currentState.ProgramCounter);
     }
 }

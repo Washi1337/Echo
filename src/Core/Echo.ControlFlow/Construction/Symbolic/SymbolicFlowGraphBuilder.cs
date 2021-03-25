@@ -80,7 +80,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
             using var context = new GraphBuilderContext(Architecture);
-            var blockHeaders = knownBlockHeaders as long[] ?? knownBlockHeaders.ToArray();
+            long[] blockHeaders = knownBlockHeaders as long[] ?? knownBlockHeaders.ToArray();
             
             // Perform traversal.
             TraverseInstructions(context, entrypoint, blockHeaders);
@@ -128,15 +128,14 @@ namespace Echo.ControlFlow.Construction.Symbolic
             GraphBuilderContext context, 
             ref SymbolicProgramState<TInstruction> currentState)
         {
-            bool changed = false;
+            bool changed;
+            
             if (context.RecordedStates.TryGetValue(currentState.ProgramCounter, out var recordedState))
             {
                 // We are revisiting this address, merge program states.
-                if (recordedState.MergeWith(currentState))
-                {
-                    currentState = recordedState;
-                    changed = true;
-                }
+                changed = recordedState.MergeStates(currentState, out currentState);
+                if (changed)
+                    context.RecordedStates[currentState.ProgramCounter] = currentState;
             }
             else
             {
@@ -161,7 +160,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             var transitionsBuffer = context.GetTransitionsBuffer(transitionCount);
 
             // Read transitions.
-            var transitionsBufferSlice = new Span<StateTransition<TInstruction>>(transitionsBuffer, 0, transitionCount);
+            var transitionsBufferSlice = transitionsBuffer.AsSpan(0, transitionCount);
             int actualTransitionCount = TransitionResolver.GetTransitions(currentState, instruction, transitionsBufferSlice);
             if (actualTransitionCount > transitionCount)
             {
@@ -219,13 +218,13 @@ namespace Echo.ControlFlow.Construction.Symbolic
                     }
 
                     // Get successors.
-                    var successorBufferSlice = new Span<SuccessorInfo>(successorBuffer, 0, successorCount);
+                    var successorBufferSlice = successorBuffer.AsSpan(0, successorCount);
                     int actualSuccessorCount = result.GetSuccessors(offset, successorBufferSlice);
                     if (actualSuccessorCount > successorCount)
                     {
                         // Sanity check: this should only happen if the InstructionTraversalResult has a bug.
                         throw new ArgumentException(
-                            "The number of successors that was returned by the instruction traveral result is "
+                            "The number of successors that was returned by the instruction traversal result is "
                             + "inconsistent with the number of actual written successors.");
                     }
                         

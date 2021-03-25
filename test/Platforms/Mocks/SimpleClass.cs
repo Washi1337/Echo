@@ -86,5 +86,36 @@ namespace Mocks
             Ldloc_0();
             return IL.Return<string>();
         }
+
+        public static int Loop()
+        {
+            IL.DeclareLocals(new LocalVar(typeof(int)), new LocalVar(typeof(int)));
+            
+            Ldc_I4_0();
+            Stloc_0();
+            Ldc_I4_0();
+            Stloc_1();
+            Br_S("Comparison");
+            
+            IL.MarkLabel("Loop");
+            
+            Ldloc_0();
+            Ldloc_1();
+            Add();
+            Stloc_1();
+            
+            Ldloc_0();
+            Ldc_I4_1();
+            Add();
+            Stloc_0();
+            
+            IL.MarkLabel("Comparison");
+            Ldloc_0();
+            Ldc_I4_8();
+            Ble_S("Loop");
+
+            Ldloc_1();
+            return IL.Return<int>();
+        }
     }
 }

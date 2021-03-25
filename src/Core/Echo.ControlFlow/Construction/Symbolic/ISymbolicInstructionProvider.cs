@@ -1,6 +1,6 @@
 using Echo.Core.Code;
 using Echo.Core.Emulation;
-using Echo.DataFlow.Values;
+using Echo.DataFlow.Emulation;
 
 namespace Echo.ControlFlow.Construction.Symbolic
 {
@@ -24,6 +24,6 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// </summary>
         /// <param name="currentState">The current state of the program.</param>
         /// <returns>The instruction.</returns>
-        TInstruction GetCurrentInstruction(IProgramState<SymbolicValue<TInstruction>> currentState);
+        TInstruction GetCurrentInstruction(in SymbolicProgramState<TInstruction> currentState);
     }
 }

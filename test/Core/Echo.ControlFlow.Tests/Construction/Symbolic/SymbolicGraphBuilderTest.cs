@@ -9,7 +9,6 @@ using Echo.Core.Emulation;
 using Echo.Core.Graphing.Serialization.Dot;
 using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
-using Echo.DataFlow.Values;
 using Echo.Platforms.DummyPlatform.Code;
 using Echo.Platforms.DummyPlatform.ControlFlow;
 using Xunit;
@@ -29,7 +28,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 instructions,
                 dfgBuilder);
 
-            var cfg = cfgBuilder.ConstructFlowGraph(entrypoint, knownBlockHeaders ?? ImmutableArray<long>.Empty);
+            var cfg = cfgBuilder.ConstructFlowGraph(entrypoint, knownBlockHeaders ?? Enumerable.Empty<long>());
             return (cfg, dfgBuilder.DataFlowGraph);
         }
 
@@ -240,7 +239,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             
             var dfgBuilder = new DummyTransitionResolver
             {
-                InitialState = new SymbolicProgramState<DummyInstruction>()
+                InitialState = SymbolicProgramState<DummyInstruction>.Empty
             };
 
             var cfgBuilder = new SymbolicFlowGraphBuilder<DummyInstruction>(
@@ -263,8 +262,8 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             var dfgBuilder = new DummyTransitionResolver();
             var argument = new ExternalDataSourceNode<DummyInstruction>(-1, "Argument 1");
             dfgBuilder.DataFlowGraph.Nodes.Add(argument);
-            dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>();
-            dfgBuilder.InitialState.Stack.Push(new SymbolicValue<DummyInstruction>(argument));
+            dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>(0,
+                ImmutableStack.Create(new SymbolicValue<DummyInstruction>(argument)));
 
             var cfgBuilder = new SymbolicFlowGraphBuilder<DummyInstruction>(
                 DummyArchitecture.Instance,

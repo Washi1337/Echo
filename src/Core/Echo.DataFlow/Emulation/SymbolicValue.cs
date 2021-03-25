@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Echo.Core.Values;
 
-namespace Echo.DataFlow.Values
+namespace Echo.DataFlow.Emulation
 {
     /// <summary>
     /// Represents a symbolic value that resides in memory. 
@@ -50,6 +50,17 @@ namespace Echo.DataFlow.Values
             : base(dataSources.AsEnumerable())
         {
         }
+
+        /// <summary>
+        /// Merges two data dependencies into one symbolic value.
+        /// </summary>
+        public SymbolicValue(DataDependencyBase<T> left, DataDependencyBase<T> right)
+            : base(left, right)
+        {
+        }
+
+        /// <inheritdoc />
+        public override bool IsReadOnly => true;
         
         /// <inheritdoc />
         public bool IsKnown => HasKnownDataSources;
@@ -61,21 +72,8 @@ namespace Echo.DataFlow.Values
         /// Creates an exact copy of the value.
         /// </summary>
         /// <returns>The copied value.</returns>
-        public SymbolicValue<T> Copy() => new SymbolicValue<T>(this);
+        public SymbolicValue<T> Copy() => new(this);
 
         IValue IValue.Copy() => Copy();
-
-        /// <summary>
-        /// Pulls data sources from another symbolic value into the current symbolic value. 
-        /// </summary>
-        /// <param name="other">The other symbolic value.</param>
-        /// <returns><c>true</c> if there were new data sources introduced to this symbolic value, <c>false</c> otherwise.</returns>
-        public bool MergeWith(SymbolicValue<T> other)
-        {
-            bool changed = false;
-            foreach (var source in other)
-                changed |= Add(source);
-            return changed;
-        }
     }
 }

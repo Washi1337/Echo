@@ -62,9 +62,37 @@ namespace Echo.DataFlow
         {
             _listObject = new HashSet<DataSource<TContents>>(dataSources);
         }
+        
+        /// <summary>
+        /// Merges two data dependencies into one single dependency.
+        /// </summary>
+        protected DataDependencyBase(DataDependencyBase<TContents> left, DataDependencyBase<TContents> right)
+        {
+            int totalCount = left.Count + right.Count;
+            switch (totalCount)
+            {
+                case 0:
+                    _listObject = null;
+                    break;
+
+                case 1:
+                    _listObject = left._listObject ?? right._listObject;
+                    break;
+
+                default:
+                    var set = new HashSet<DataSource<TContents>>(left);
+                    set.UnionWith(right);
+                    _listObject = set;
+                    break;
+            }
+        }
+        
 
         /// <inheritdoc />
-        bool ICollection<DataSource<TContents>>.IsReadOnly => false;
+        public abstract bool IsReadOnly
+        {
+            get;
+        }
 
         /// <inheritdoc />
         public int Count => _listObject switch
@@ -85,9 +113,17 @@ namespace Echo.DataFlow
             throw new InvalidOperationException("Data dependency is in an invalid state.");
         }
 
+        private void AssertIsWritable()
+        {
+            if (IsReadOnly)
+                throw new InvalidOperationException("Data dependency is in a read-only state.");
+        }
+
         /// <inheritdoc />
         public virtual bool Add(DataSource<TContents> item)
         {
+            AssertIsWritable();
+
             switch (_listObject)
             {
                 case null:
@@ -95,12 +131,15 @@ namespace Echo.DataFlow
                     return true;
 
                 case DataSource<TContents> node:
+                    if (node == item)
+                        return false;
+                    
                     _listObject = new HashSet<DataSource<TContents>>
                     {
                         node,
                         item
                     };
-                    return node != item;
+                    return true;
 
                 case ISet<DataSource<TContents>> nodes:
                     return nodes.Add(item);
@@ -113,6 +152,8 @@ namespace Echo.DataFlow
         /// <inheritdoc />
         public void ExceptWith(IEnumerable<DataSource<TContents>> other)
         {
+            AssertIsWritable();
+            
             foreach (var node in other)
                 Remove(node);
         }
@@ -120,6 +161,8 @@ namespace Echo.DataFlow
         /// <inheritdoc />
         public void IntersectWith(IEnumerable<DataSource<TContents>> other)
         {
+            AssertIsWritable();
+            
             var set = new HashSet<DataSource<TContents>>(other);
             foreach (var item in this)
             {
@@ -240,6 +283,7 @@ namespace Echo.DataFlow
         /// <inheritdoc />
         public void UnionWith(IEnumerable<DataSource<TContents>> other)
         {
+            AssertIsWritable();
             foreach (var node in other)
                 Add(node);
         }
@@ -253,26 +297,27 @@ namespace Echo.DataFlow
 
         /// <inheritdoc />
         public void Clear()
-        {          
+        {
+            AssertIsWritable();
             switch (_listObject)
             {
                 case null:
                     break;
-                
+
                 case DataSource<TContents> node:
                     Remove(node);
                     break;
-                
+
                 case ICollection<DataSource<TContents>> nodes:
                     foreach (var node in nodes.ToArray())
                         Remove(node);
                     break;
-                
+
                 default:
                     ThrowInvalidStateException();
                     break;
             }
-            
+
             _listObject = null;
         }
 
@@ -314,8 +359,10 @@ namespace Echo.DataFlow
         /// <returns><c>true</c> if any data source was removed, <c>false</c> otherwise.</returns>
         public bool Remove(DataFlowNode<TContents> node)
         {
+            AssertIsWritable();
+            
             var sourcesToRemove = new List<DataSource<TContents>>();
-           
+
             foreach (var source in this)
             {
                 if (source.Node == node)
@@ -331,6 +378,8 @@ namespace Echo.DataFlow
         /// <inheritdoc />
         public virtual bool Remove(DataSource<TContents> item) 
         {
+            AssertIsWritable();
+            
             switch (_listObject)
             {
                 case null:

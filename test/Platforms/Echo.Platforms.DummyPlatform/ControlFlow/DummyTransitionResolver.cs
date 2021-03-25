@@ -20,16 +20,15 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
         {
             get;
             set;
-        } = new SymbolicProgramState<DummyInstruction>();
+        } = SymbolicProgramState<DummyInstruction>.Empty;
 
         public override SymbolicProgramState<DummyInstruction> GetInitialState(long entrypointAddress)
         {
-            var state = InitialState.Copy();
-            state.ProgramCounter = entrypointAddress;
-            return state;
+            return InitialState.WithProgramCounter(entrypointAddress);
         }
 
-        public override int GetTransitionCount(SymbolicProgramState<DummyInstruction> currentState,
+        public override int GetTransitionCount(
+            in SymbolicProgramState<DummyInstruction> currentState,
             in DummyInstruction instruction)
         {
             switch (instruction.OpCode)
@@ -57,12 +56,12 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
             }
         }
 
-        public override int GetTransitions(SymbolicProgramState<DummyInstruction> currentState,
+        public override int GetTransitions(
+            in SymbolicProgramState<DummyInstruction> currentState,
             in DummyInstruction instruction,
             Span<StateTransition<DummyInstruction>> transitionBuffer)
         {
-            var nextState = currentState.Copy();
-            ApplyDefaultBehaviour(nextState, instruction);
+            var nextState = ApplyDefaultBehaviour(currentState, instruction);
 
             switch (instruction.OpCode)
             {
@@ -94,7 +93,7 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
         }
 
         private static int GetFallthroughTransitions(
-            SymbolicProgramState<DummyInstruction> nextState,
+            in SymbolicProgramState<DummyInstruction> nextState,
             Span<StateTransition<DummyInstruction>> successorBuffer)
         {
             successorBuffer[0] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough);
@@ -102,37 +101,36 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
         }
 
         private static int GetJumpTransitions(
-            SymbolicProgramState<DummyInstruction> nextState,
+            in SymbolicProgramState<DummyInstruction> nextState,
             DummyInstruction instruction,
             Span<StateTransition<DummyInstruction>> successorBuffer)
         {
-            nextState.ProgramCounter = (long) instruction.Operands[0];
-            successorBuffer[0] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.Unconditional);
+            successorBuffer[0] = new StateTransition<DummyInstruction>(
+                nextState.WithProgramCounter((long) instruction.Operands[0]),
+                ControlFlowEdgeType.Unconditional);
             return 1;
         }
 
         private static int GetJumpCondTransitions(
-            SymbolicProgramState<DummyInstruction> nextState,
+            in SymbolicProgramState<DummyInstruction> nextState,
             DummyInstruction instruction, 
             Span<StateTransition<DummyInstruction>> successorBuffer)
         {
-            var branchState = nextState.Copy();
-            branchState.ProgramCounter = (long) instruction.Operands[0];
+            var branchState = nextState.WithProgramCounter((long) instruction.Operands[0]);
             successorBuffer[0] = new StateTransition<DummyInstruction>(branchState, ControlFlowEdgeType.Conditional);
             successorBuffer[1] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough);
             return 2;
         }
 
         private static int GetSwitchTransitions(
-            SymbolicProgramState<DummyInstruction> nextState,
+            in SymbolicProgramState<DummyInstruction> nextState,
             DummyInstruction instruction,
             Span<StateTransition<DummyInstruction>> successorBuffer)
         {
             var targets = (IList<long>) instruction.Operands[0];
             for (int i = 0; i < targets.Count; i++)
             {
-                var branchState = nextState.Copy();
-                branchState.ProgramCounter = targets[i];
+                var branchState = nextState.WithProgramCounter(targets[i]);
                 successorBuffer[i] =  new StateTransition<DummyInstruction>(branchState, ControlFlowEdgeType.Conditional);
             }
 
@@ -141,12 +139,11 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
         }
 
         private static int GetPushOffsetTransitions(
-            SymbolicProgramState<DummyInstruction> nextState,
+            in SymbolicProgramState<DummyInstruction> nextState,
             DummyInstruction instruction, 
             Span<StateTransition<DummyInstruction>> successorBuffer)
         {
-            var branchState = nextState.Copy();
-            branchState.ProgramCounter = (long) instruction.Operands[0];
+            var branchState = nextState.WithProgramCounter((long) instruction.Operands[0]);
             successorBuffer[1] = new StateTransition<DummyInstruction>(nextState, ControlFlowEdgeType.FallThrough);
             successorBuffer[0] = new StateTransition<DummyInstruction>(branchState, ControlFlowEdgeType.None);
             return 2;
