@@ -12,7 +12,7 @@ namespace Echo.DataFlow.Collections
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in each node.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class VariableDependencyCollection<TContents> : IDictionary<IVariable, VariableDependency<TContents>>
+    public class VariableDependencyCollection<TContents> : ICollection<VariableDependency<TContents>>
     {
         private readonly Dictionary<IVariable, VariableDependency<TContents>> _entries = new();
         private readonly DataFlowNode<TContents> _owner;
@@ -22,23 +22,26 @@ namespace Echo.DataFlow.Collections
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
         
-        /// <inheritdoc />
-        public VariableDependency<TContents> this[IVariable key]
+        /// <summary>
+        /// Gets or sets the variable dependency assigned to the variable.
+        /// </summary>
+        /// <param name="variable">The variable</param>
+        public VariableDependency<TContents> this[IVariable variable]
         {
-            get => _entries[key];
+            get => _entries[variable];
             set
             {
                 AssertDependencyValidity(value);
-                Remove(key);
+                Remove(variable);
                 Add(value);
             }
         }
 
         /// <inheritdoc />
-        public ICollection<IVariable> Keys => _entries.Keys;
-
-        /// <inheritdoc />
-        public ICollection<VariableDependency<TContents>> Values => _entries.Values;
+        public bool Remove(VariableDependency<TContents> item)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <inheritdoc />
         public int Count => _entries.Count;
@@ -63,26 +66,14 @@ namespace Echo.DataFlow.Collections
                 throw new ArgumentException("Dependency contains data sources from another graph.");
         }
         
-        /// <inheritdoc />
-        public bool TryGetValue(IVariable key, out VariableDependency<TContents> value) => 
-            _entries.TryGetValue(key, out value);
-
-        /// <inheritdoc />
-        void ICollection<KeyValuePair<IVariable, VariableDependency<TContents>>>.Add(
-            KeyValuePair<IVariable, VariableDependency<TContents>> item)
-        {
-            if (item.Key != item.Value.Variable)
-                throw new ArgumentException("Key value does not match the variable specified in the dependency.");
-            Add(item.Value);
-        }
-
-        /// <inheritdoc />
-        void IDictionary<IVariable, VariableDependency<TContents>>.Add(IVariable key, VariableDependency<TContents> value)
-        {
-            if (key != value.Variable)
-                throw new ArgumentException("Key value does not match the variable specified in the dependency.");
-            Add(value);
-        }
+        /// <summary>
+        /// Attempts to get the dependency assigned to the provided variable.
+        /// </summary>
+        /// <param name="variable">The variable.</param>
+        /// <param name="dependency">When this function returns <c>true</c>, contains the dependency.</param>
+        /// <returns><c>true</c> if the variable was registered as a dependency, <c>false</c> otherwise.</returns>
+        public bool TryGetDependency(IVariable variable, out VariableDependency<TContents> dependency) => 
+            _entries.TryGetValue(variable, out dependency);
 
         /// <summary>
         /// Adds a variable dependency to the node.
@@ -98,33 +89,41 @@ namespace Echo.DataFlow.Collections
         /// <inheritdoc />
         public void Clear()
         {
-            foreach (var variable in Keys.ToArray())
+            foreach (var variable in _entries.Keys.ToArray())
                 Remove(variable);
         }
 
         /// <inheritdoc />
-        public bool Contains(KeyValuePair<IVariable, VariableDependency<TContents>> item) => 
-            _entries.Contains(item);
-
-        /// <inheritdoc />
-        public bool ContainsKey(IVariable key) => 
-            _entries.ContainsKey(key);
-
-        /// <inheritdoc />
-        public void CopyTo(KeyValuePair<IVariable, VariableDependency<TContents>>[] array, int arrayIndex) => 
-            ((ICollection)_entries).CopyTo(array, arrayIndex);
-
-        /// <inheritdoc />
-        public bool Remove(KeyValuePair<IVariable, VariableDependency<TContents>> item) => 
-            _entries.TryGetValue(item.Key, out var dependency) && dependency == item.Value && Remove(item.Key);
-
-        /// <inheritdoc />
-        public bool Remove(IVariable key)
+        public bool Contains(VariableDependency<TContents> item)
         {
-            if (_entries.TryGetValue(key, out var dependency))
+            return item is not null
+                   && _entries.TryGetValue(item.Variable, out var dependency) 
+                   && dependency == item;
+        }
+
+        /// <summary>
+        /// Determines whether the provided variable is registered as a dependency.
+        /// </summary>
+        /// <param name="variable">The dependency.</param>
+        /// <returns></returns>
+        public bool ContainsVariable(IVariable variable) => 
+            _entries.ContainsKey(variable);
+
+        /// <inheritdoc />
+        public void CopyTo(VariableDependency<TContents>[] array, int arrayIndex) => 
+            _entries.Values.CopyTo(array, arrayIndex);
+
+        /// <summary>
+        /// Unregisters a variable as a dependency. 
+        /// </summary>
+        /// <param name="variable">The variable to unregister.</param>
+        /// <returns><c>true</c> if the variable was registered before and is now unregistered, <c>false</c> otherwise.</returns>
+        public bool Remove(IVariable variable)
+        {
+            if (_entries.TryGetValue(variable, out var dependency))
             {
                 dependency.Dependent = null;
-                _entries.Remove(key);
+                _entries.Remove(variable);
                 return true;
             }
 
@@ -132,16 +131,19 @@ namespace Echo.DataFlow.Collections
         }
 
         /// <summary>
+        /// Obtains a collection of variables that are registered in the dependency. 
+        /// </summary>
+        /// <returns>The variables.</returns>
+        public IEnumerable<IVariable> GetRegisteredVariables() => _entries.Keys;
+
+        /// <summary>
         /// Obtains an enumerator that enumerates all recorded variable dependencies in this collection. 
         /// </summary>
         /// <returns>The enumerator.</returns>
         public Enumerator GetEnumerator() => new(this);
 
-        IEnumerator<KeyValuePair<IVariable, VariableDependency<TContents>>>
-            IEnumerable<KeyValuePair<IVariable, VariableDependency<TContents>>>.GetEnumerator()
-        {
-            return _entries.GetEnumerator();
-        }
+        IEnumerator<VariableDependency<TContents>> IEnumerable<VariableDependency<TContents>>.GetEnumerator() => 
+            GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() =>
             ((IEnumerable) _entries).GetEnumerator();
@@ -149,7 +151,7 @@ namespace Echo.DataFlow.Collections
         /// <summary>
         /// Represents an enumerator that enumerates all entries in a variable dependencies collection.
         /// </summary>
-        public struct Enumerator : IEnumerator<KeyValuePair<IVariable, VariableDependency<TContents>>>
+        public struct Enumerator : IEnumerator<VariableDependency<TContents>>
         {
             private Dictionary<IVariable, VariableDependency<TContents>>.Enumerator _enumerator;
 
@@ -163,7 +165,7 @@ namespace Echo.DataFlow.Collections
             }
 
             /// <inheritdoc />
-            public KeyValuePair<IVariable, VariableDependency<TContents>> Current => _enumerator.Current;
+            public VariableDependency<TContents> Current => _enumerator.Current.Value;
 
             /// <inheritdoc />
             object IEnumerator.Current => Current;

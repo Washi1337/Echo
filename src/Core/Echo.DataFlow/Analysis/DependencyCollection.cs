@@ -58,10 +58,10 @@ namespace Echo.DataFlow.Analysis
                 
                 if ((flags & DependencyCollectionFlags.IncludeVariableDependencies) != 0)
                 {
-                    foreach (var entry in n.VariableDependencies)
+                    foreach (var dependency in n.VariableDependencies)
                     {
-                        if (entry.Value.HasKnownDataSources)
-                            result.Add(entry.Value.First().Node);
+                        if (dependency.HasKnownDataSources)
+                            result.Add(dependency.First().Node);
                     }
                 }
 

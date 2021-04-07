@@ -107,10 +107,9 @@ namespace Echo.Ast.Construction
             int index = 0;
             var variableDependencies = dataFlowNode.VariableDependencies;
             
-            foreach (var pair in variableDependencies)
+            foreach (var dependency in variableDependencies)
             {
-                var variable = pair.Key;
-                var dependency = pair.Value;
+                var variable = dependency.Variable;
                 
                 if (dependency.Count <= 1)
                 {

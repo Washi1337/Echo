@@ -190,7 +190,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
                 for (int i = 0; i < actualCount; i++)
                 {
                     var variable = _variablesBuffer[i];
-                    if (!node.VariableDependencies.ContainsKey(variable))
+                    if (!node.VariableDependencies.ContainsVariable(variable))
                         node.VariableDependencies[variable] = new VariableDependency<TInstruction>(variable);
                 }
 

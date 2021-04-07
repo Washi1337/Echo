@@ -99,7 +99,7 @@ namespace Echo.DataFlow
         {
             return StackDependencies
                 .SelectMany(d => d.GetEdges())
-                .Concat(VariableDependencies.Values.SelectMany(d => d.GetEdges()));
+                .Concat(VariableDependencies.SelectMany(d => d.GetEdges()));
         }
 
         IEnumerable<IEdge> INode.GetOutgoingEdges() => GetOutgoingEdges();
@@ -135,8 +135,8 @@ namespace Echo.DataFlow
             // Clear dependency nodes.
             foreach (var dependency in StackDependencies)
                 dependency.Clear();
-            foreach (var entry in VariableDependencies)
-                entry.Value.Clear();
+            foreach (var dependency in VariableDependencies)
+                dependency.Clear();
         }
 
         private static void RemoveIncomingEdge(DataFlowEdge<TContents> edge)
@@ -153,9 +153,9 @@ namespace Echo.DataFlow
                     break;
 
                 case DataDependencyType.Variable:
-                    foreach (var entry in edge.Dependent.VariableDependencies)
+                    foreach (var dependency in edge.Dependent.VariableDependencies)
                     {
-                        if (entry.Value.Remove((VariableDataSource<TContents>) edge.DataSource))
+                        if (dependency.Remove((VariableDataSource<TContents>) edge.DataSource))
                             break;
                     }
 
