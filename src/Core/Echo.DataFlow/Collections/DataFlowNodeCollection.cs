@@ -13,7 +13,7 @@ namespace Echo.DataFlow.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class DataFlowNodeCollection<TContents> : ICollection<DataFlowNode<TContents>>
     {
-        private readonly IDictionary<long, DataFlowNode<TContents>> _nodes = new Dictionary<long, DataFlowNode<TContents>>();
+        private readonly Dictionary<long, DataFlowNode<TContents>> _nodes = new();
         private readonly DataFlowGraph<TContents> _owner;
 
         internal DataFlowNodeCollection(DataFlowGraph<TContents> owner)
@@ -127,30 +127,7 @@ namespace Echo.DataFlow.Collections
         /// successfully, <c>false</c> otherwise.</returns>
         public bool Remove(long offset)
         {
-            if (_nodes.TryGetValue(offset, out var item))
-            {
-                // Remove incident edges.
-                foreach (var dependent in item.GetDependants().ToArray())
-                {
-                    foreach (var dependency in dependent.StackDependencies)
-                        dependency.Remove(item);
-                    foreach (var dependency in dependent.VariableDependencies)
-                        dependency.Value.Remove(item);
-                }
-                
-                foreach (var dependency in item.StackDependencies)
-                    dependency.Clear();
-                foreach (var entry in item.VariableDependencies)
-                    entry.Value.Clear();
-                
-                // Remove node.
-                _nodes.Remove(offset);
-                item.ParentGraph = null;
-                
-                return true;
-            }
-
-            return false;
+            throw new NotImplementedException();
         }
 
         /// <summary>

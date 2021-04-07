@@ -46,24 +46,24 @@ namespace Echo.DataFlow.Analysis
             {
                 var result = new List<DataFlowNode<T>>();
                 
-                // Prioritize stack dependencies over variable dependencies.
-                if ((flags & DependencyCollectionFlags.IncludeStackDependencies) != 0)
-                {
-                    foreach (var dependency in n.StackDependencies)
-                    {
-                        if (dependency.HasKnownDataSources)
-                            result.Add(dependency.First().Node);
-                    }
-                }
-
-                if ((flags & DependencyCollectionFlags.IncludeVariableDependencies) != 0)
-                {
-                    foreach (var entry in n.VariableDependencies)
-                    {
-                        if (entry.Value.HasKnownDataSources)
-                            result.Add(entry.Value.First().Node);
-                    }
-                }
+                // // Prioritize stack dependencies over variable dependencies.
+                // if ((flags & DependencyCollectionFlags.IncludeStackDependencies) != 0)
+                // {
+                //     foreach (var dependency in n.StackDependencies)
+                //     {
+                //         if (dependency.HasKnownDataSources)
+                //             result.Add(dependency.First().Node);
+                //     }
+                // }
+                //
+                // if ((flags & DependencyCollectionFlags.IncludeVariableDependencies) != 0)
+                // {
+                //     foreach (var entry in n.VariableDependencies)
+                //     {
+                //         if (entry.Value.HasKnownDataSources)
+                //             result.Add(entry.Value.First().Node);
+                //     }
+                // }
 
                 return result;
             }

@@ -42,7 +42,7 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public int InDegree => Dependants.Count;
+        public int InDegree => throw new NotImplementedException();
 
         /// <inheritdoc />
         public int OutDegree => StackDependencies.EdgeCount + VariableDependencies.EdgeCount;
@@ -77,16 +77,11 @@ namespace Echo.DataFlow
             get;
         }
 
-        internal IList<DataFlowNode<TContents>> Dependants
-        {
-            get;
-        } = new List<DataFlowNode<TContents>>();
-
         /// <summary>
         /// Obtains a collection of nodes that depend on this node.
         /// </summary>
         /// <returns>The dependant nodes.</returns>
-        public IEnumerable<DataFlowNode<TContents>> GetDependants() => Dependants;
+        public IEnumerable<DataFlowNode<TContents>> GetDependants() => throw new NotImplementedException();
 
         IEnumerable<IEdge> INode.GetIncomingEdges()
         {
@@ -95,30 +90,28 @@ namespace Echo.DataFlow
 
         IEnumerable<IEdge> INode.GetOutgoingEdges()
         {
-            for (int i = 0; i < StackDependencies.Count; i++)
-            {
-                foreach (var source in StackDependencies[i])
-                    yield return new DataFlowEdge<TContents>(this, source.Node, DataDependencyType.Stack, i);
-            }
-
-            foreach (var dependency in VariableDependencies)
-            {
-                foreach (var source in dependency.Value)
-                    yield return new DataFlowEdge<TContents>(this, source.Node, DataDependencyType.Variable, dependency.Key);
-            }
+            throw new NotImplementedException();
         }
 
-        IEnumerable<INode> INode.GetPredecessors() => Dependants;
+        IEnumerable<INode> INode.GetPredecessors()
+        {
+            throw new NotImplementedException();
+        }
 
-        IEnumerable<INode> INode.GetSuccessors() => StackDependencies
-            .SelectMany(
-                dep => dep,
-                (dep, source) => source.Node);
+        IEnumerable<INode> INode.GetSuccessors()
+        {
+            throw new NotImplementedException();
+        }
 
-        bool INode.HasPredecessor(INode node) => Dependants.Contains(node);
+        bool INode.HasPredecessor(INode node)
+        {
+            throw new NotImplementedException();
+        }
 
-        bool INode.HasSuccessor(INode node) => StackDependencies.Any(
-            dep => dep.Any(source => source.Node == node));
+        bool INode.HasSuccessor(INode node)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Removes all incident edges (both incoming and outgoing edges) from the node, effectively isolating the node
@@ -126,19 +119,7 @@ namespace Echo.DataFlow
         /// </summary>
         public void Disconnect()
         {
-            foreach (var dependency in StackDependencies)
-                dependency.Clear();
-            foreach (var entry in VariableDependencies)
-                entry.Value.Clear();
-
-            foreach (var dependant in Dependants.ToArray())
-            {
-                foreach (var dependency in dependant.StackDependencies)
-                    dependency.Remove(this);
-
-                foreach (var entry in dependant.VariableDependencies)
-                    entry.Value.Remove(this);
-            }
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />

@@ -28,7 +28,7 @@ namespace Echo.DataFlow.Collections
         /// <summary>
         /// Gets the total number of edges that are stored in this dependency collection.
         /// </summary>
-        public int EdgeCount => Items.Sum(i => i.Count);
+        public int EdgeCount => throw new NotImplementedException();
 
         private void AssertDependencyValidity(DataDependency<TContents> item)
         {

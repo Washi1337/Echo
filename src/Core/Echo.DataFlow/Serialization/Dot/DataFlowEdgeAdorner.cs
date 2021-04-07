@@ -68,19 +68,6 @@ namespace Echo.DataFlow.Serialization.Dot
                 if (!string.IsNullOrEmpty(style.Style))
                     result["style"] = style.Style;
 
-                if (e.Metadata is {} metadata)
-                {
-                    bool include = e.Type switch
-                    {
-                        DataDependencyType.Stack => IncludeStackEdgeLabels,
-                        DataDependencyType.Variable => IncludeVariableEdgeLabels,
-                        _ => throw new ArgumentOutOfRangeException()
-                    };
-
-                    if (include)
-                        result["label"] = metadata.ToString();
-                }
-
                 return result;
             }
             

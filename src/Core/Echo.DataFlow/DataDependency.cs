@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,7 +10,7 @@ namespace Echo.DataFlow
     /// the owner node might pull data from.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in a data flow node.</typeparam>
-    public class DataDependency<TContents> : DataDependencyBase<TContents>
+    public class DataDependency<TContents> : ICollection<DataSource<TContents>>
     {
         private DataFlowNode<TContents> _dependant;
 
@@ -24,7 +25,6 @@ namespace Echo.DataFlow
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
         public DataDependency(DataFlowNode<TContents> sourceNode)
-            : base(new DataSource<TContents>(sourceNode))
         {
         }
 
@@ -32,7 +32,6 @@ namespace Echo.DataFlow
         /// Creates a new data dependency with the provided data sources.
         /// </summary>
         public DataDependency(DataSource<TContents> dataSource)
-            : base(dataSource)
         {
         }
         
@@ -41,7 +40,6 @@ namespace Echo.DataFlow
         /// </summary>
         /// <param name="sourceNodes">The data sources.</param>
         public DataDependency(IEnumerable<DataFlowNode<TContents>> sourceNodes)
-            : base(sourceNodes.Select(source => new DataSource<TContents>(source)))
         {
         }
         
@@ -50,13 +48,18 @@ namespace Echo.DataFlow
         /// </summary>
         /// <param name="dataSources">The data sources.</param>
         public DataDependency(IEnumerable<DataSource<TContents>> dataSources)
-            : base(dataSources)
         {
         }
 
         /// <inheritdoc />
-        public override bool IsReadOnly => false;
-        
+        public int Count
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public bool IsReadOnly => false;
+
         /// <summary>
         /// Gets the node that owns the dependency.
         /// </summary>
@@ -65,55 +68,56 @@ namespace Echo.DataFlow
             get => _dependant;
             internal set
             {
-                if (_dependant != value)
-                {
-                    if (_dependant != null)
-                    {
-                        foreach (var source in this)
-                            source.Node.Dependants.Remove(_dependant);
-                    }
-
-                    _dependant = value;
-                    
-                    if (_dependant != null)
-                    {
-                        foreach (var source in this)
-                            source.Node.Dependants.Add(_dependant);
-                    }
-                }
+                throw new NotImplementedException();
             }
         }
 
         /// <inheritdoc />
-        public override bool Add(DataSource<TContents> item)
+        public bool Add(DataSource<TContents> item)
         {
-            if (item is null)
-                throw new ArgumentNullException(nameof(item));
-            if (Dependant != null && item.Node.ParentGraph != Dependant.ParentGraph)
-                throw new ArgumentException("Data source is not added to the same graph.");
-
-            if (base.Add(item))
-            {
-                item.Node.Dependants.Add(Dependant);
-                return true;
-            }
-
-            return false;
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public override bool Remove(DataSource<TContents> item)
+        public void Clear()
         {
-            if (item is null)
-                return false;
-            
-            if (base.Remove(item))
-            {
-                item.Node.Dependants.Remove(Dependant);
-                return true;
-            }
+            throw new NotImplementedException();
+        }
 
-            return false;
+        /// <inheritdoc />
+        public bool Contains(DataSource<TContents> item)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void CopyTo(DataSource<TContents>[] array, int arrayIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        void ICollection<DataSource<TContents>>.Add(DataSource<TContents> item)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public bool Remove(DataSource<TContents> item)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public IEnumerator<DataSource<TContents>> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
