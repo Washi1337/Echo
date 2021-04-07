@@ -28,6 +28,11 @@ namespace Echo.DataFlow
         }
 
         /// <summary>
+        /// Gets a value indicating whether the data dependency has any known data sources. 
+        /// </summary>
+        public bool HasKnownDataSources => Count > 0;
+
+        /// <summary>
         /// Gets the node that owns the dependency.
         /// </summary>
         public DataFlowNode<TContents> Dependent
