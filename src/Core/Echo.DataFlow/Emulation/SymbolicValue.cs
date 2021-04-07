@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Echo.Core.Code;
 using Echo.Core.Values;
 
 namespace Echo.DataFlow.Emulation
@@ -9,6 +10,21 @@ namespace Echo.DataFlow.Emulation
     /// </summary>
     public class SymbolicValue<T> : DataDependencyBase<T>, IValue
     {
+        public static SymbolicValue<T> CreateStackValue(DataFlowNode<T> node)
+        {
+            return new(new StackDataSource<T>(node, 0));
+        }
+        
+        public static SymbolicValue<T> CreateStackValue(DataFlowNode<T> node, int slotIndex)
+        {
+            return new(new StackDataSource<T>(node, slotIndex));
+        }
+        
+        public static SymbolicValue<T> CreateVariableValue(DataFlowNode<T> node, IVariable variable)
+        {
+            return new(new VariableDataSource<T>(node, variable));
+        }
+        
         /// <summary>
         /// Creates a new symbolic value with no data sources.
         /// </summary>

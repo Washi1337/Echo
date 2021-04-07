@@ -25,10 +25,10 @@ namespace Echo.DataFlow.Tests.Emulation
             var variable = new DummyVariable("V_1");
             
             var variables1 = ImmutableDictionary<IVariable, SymbolicValue<DummyInstruction>>.Empty;
-            variables1 = variables1.SetItem(variable, new SymbolicValue<DummyInstruction>(sources[0]));
+            variables1 = variables1.SetItem(variable, SymbolicValue<DummyInstruction>.CreateVariableValue(sources[0], variable));
             
             var variables2 = ImmutableDictionary<IVariable, SymbolicValue<DummyInstruction>>.Empty;
-            variables2 = variables2.SetItem(variable, new SymbolicValue<DummyInstruction>(sources[1]));
+            variables2 = variables2.SetItem(variable, SymbolicValue<DummyInstruction>.CreateVariableValue(sources[1], variable));
 
             var state1 = new SymbolicProgramState<DummyInstruction>(0, variables1);
             var state2 = new SymbolicProgramState<DummyInstruction>(0, variables2);
@@ -45,10 +45,10 @@ namespace Echo.DataFlow.Tests.Emulation
             var variable = new DummyVariable("V_1");
             
             var variables1 = ImmutableDictionary<IVariable, SymbolicValue<DummyInstruction>>.Empty;
-            variables1 = variables1.SetItem(variable, new SymbolicValue<DummyInstruction>(source));
+            variables1 = variables1.SetItem(variable, SymbolicValue<DummyInstruction>.CreateVariableValue(source, variable));
             
             var variables2 = ImmutableDictionary<IVariable, SymbolicValue<DummyInstruction>>.Empty;
-            variables2 = variables2.SetItem(variable, new SymbolicValue<DummyInstruction>(source));
+            variables2 = variables2.SetItem(variable,SymbolicValue<DummyInstruction>.CreateVariableValue(source, variable));
 
             var state1 = new SymbolicProgramState<DummyInstruction>(0, variables1);
             var state2 = new SymbolicProgramState<DummyInstruction>(0, variables2);
@@ -73,10 +73,10 @@ namespace Echo.DataFlow.Tests.Emulation
             };
             
             var variables1 = ImmutableDictionary<IVariable, SymbolicValue<DummyInstruction>>.Empty;
-            variables1 = variables1.SetItem(variables[0], new SymbolicValue<DummyInstruction>(sources[0]));
+            variables1 = variables1.SetItem(variables[0], SymbolicValue<DummyInstruction>.CreateVariableValue(sources[0], variables[0]));
             
             var variables2 = ImmutableDictionary<IVariable, SymbolicValue<DummyInstruction>>.Empty;
-            variables2 = variables2.SetItem(variables[1], new SymbolicValue<DummyInstruction>(sources[1]));
+            variables2 = variables2.SetItem(variables[1], SymbolicValue<DummyInstruction>.CreateVariableValue(sources[1], variables[1]));
 
             var state1 = new SymbolicProgramState<DummyInstruction>(0, variables1);
             var state2 = new SymbolicProgramState<DummyInstruction>(0, variables2);

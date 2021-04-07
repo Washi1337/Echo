@@ -208,10 +208,10 @@ namespace Echo.DataFlow.Tests
             switch (edgeType)
             {
                 case DataDependencyType.Stack:
-                    n1.StackDependencies[0].Add(new DataSource<int>(n2));
+                    n1.StackDependencies[0].Add(new StackDataSource<int>(n2));
                     break;
                 case DataDependencyType.Variable:
-                    n1.VariableDependencies[variable].Add(new DataSource<int>(n2));
+                    n1.VariableDependencies[variable].Add(new VariableDataSource<int>(n2, variable));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(edgeType), edgeType, null);

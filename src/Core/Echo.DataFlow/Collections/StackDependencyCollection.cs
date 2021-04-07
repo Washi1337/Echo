@@ -32,8 +32,11 @@ namespace Echo.DataFlow.Collections
 
         private void AssertDependencyValidity(DataDependency<TContents> item)
         {
-            if (item is not null)
+            if (item is null)
                 throw new ArgumentNullException(nameof(item));
+
+            if (item.DependencyType != DataDependencyType.Stack)
+                throw new ArgumentException("Dependency is not a stack dependency.");
             
             if (item.Dependent is not null)
                 throw new ArgumentException("Stack dependency was already added to another node.");

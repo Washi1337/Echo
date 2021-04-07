@@ -14,8 +14,7 @@ namespace Echo.DataFlow.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class VariableDependencyCollection<TContents> : IDictionary<IVariable, DataDependency<TContents>>
     {
-        private readonly Dictionary<IVariable, DataDependency<TContents>> _entries =
-            new Dictionary<IVariable, DataDependency<TContents>>();
+        private readonly Dictionary<IVariable, DataDependency<TContents>> _entries = new();
         private readonly DataFlowNode<TContents> _owner;
 
         internal VariableDependencyCollection(DataFlowNode<TContents> owner)
@@ -29,6 +28,7 @@ namespace Echo.DataFlow.Collections
             get => _entries[key];
             set
             {
+                AssertDependencyValidity(value);
                 Remove(key);
                 Add(key, value);
             }
@@ -46,17 +46,20 @@ namespace Echo.DataFlow.Collections
         /// <summary>
         /// Gets the total number of edges that are stored in this dependency collection.
         /// </summary>
-        public int EdgeCount => throw new NotImplementedException();
+        public int EdgeCount => _entries.Values.Sum(d => d.Count);
 
         /// <inheritdoc />
         public bool IsReadOnly => false;
 
         private void AssertDependencyValidity(DataDependency<TContents> item)
         {
-            if (item == null)
+            if (item is null)
                 throw new ArgumentNullException(nameof(item));
+
+            if (item.DependencyType != DataDependencyType.Variable)
+                throw new ArgumentException("Dependency is not a variable dependency.");
             
-            if (item.Dependent != null)
+            if (item.Dependent is not null)
                 throw new ArgumentException("Variable dependency was already added to another node.");
             
             if (item.Any(n => n.Node.ParentGraph != _owner.ParentGraph))

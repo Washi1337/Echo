@@ -22,11 +22,11 @@ namespace Echo.DataFlow.Tests.Emulation
             {
                 CreateDummyNode(0), CreateDummyNode(1),
             };
-            
-            var value1 = new SymbolicValue<DummyInstruction>(sources[0]);
+
+            var value1 = SymbolicValue<DummyInstruction>.CreateStackValue(sources[0]);
             var stack1 = ImmutableStack.Create(value1);
-            
-            var value2 = new SymbolicValue<DummyInstruction>(sources[1]);
+
+            var value2 = SymbolicValue<DummyInstruction>.CreateStackValue(sources[1]);
             var stack2 = ImmutableStack.Create(value2);
 
             var state1 = new SymbolicProgramState<DummyInstruction>(0, stack1);
@@ -41,10 +41,10 @@ namespace Echo.DataFlow.Tests.Emulation
         {
             var source = CreateDummyNode(0);
             
-            var value1 = new SymbolicValue<DummyInstruction>(source);
+            var value1 = SymbolicValue<DummyInstruction>.CreateStackValue(source);
             var stack1 = ImmutableStack.Create(value1);
             
-            var value2 = new SymbolicValue<DummyInstruction>(source);
+            var value2 = SymbolicValue<DummyInstruction>.CreateStackValue(source);
             var stack2 = ImmutableStack.Create(value2);
 
             var state1 = new SymbolicProgramState<DummyInstruction>(0, stack1);
@@ -78,18 +78,18 @@ namespace Echo.DataFlow.Tests.Emulation
             
             var values1 = new[]
             {
-                new SymbolicValue<DummyInstruction>(sources[0][0]),
-                new SymbolicValue<DummyInstruction>(sources[1][0]),
-                new SymbolicValue<DummyInstruction>(sources[2][0]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[0][0]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[1][0]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[2][0]),
             };
 
             var stack1 = ImmutableStack.Create(values1);
             
             var values2 = new[]
             {
-                new SymbolicValue<DummyInstruction>(sources[0][1]),
-                new SymbolicValue<DummyInstruction>(sources[1][1]),
-                new SymbolicValue<DummyInstruction>(sources[2][1]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[0][1]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[1][1]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[2][1]),
             };
             
             var stack2 = ImmutableStack.Create(values2);
@@ -137,18 +137,18 @@ namespace Echo.DataFlow.Tests.Emulation
             
             var values1 = new[]
             {
-                new SymbolicValue<DummyInstruction>(sources[0][0]),
-                new SymbolicValue<DummyInstruction>(sources[1][0]),
-                new SymbolicValue<DummyInstruction>(sources[2][0]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[0][0]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[1][0]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[2][0]),
             };
 
             var stack1 = ImmutableStack.Create(values1);
             
             var values2 = new[]
             {
-                new SymbolicValue<DummyInstruction>(sources[0][0]),
-                new SymbolicValue<DummyInstruction>(sources[1][0]),
-                new SymbolicValue<DummyInstruction>(sources[2][1]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[0][0]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[1][0]),
+                SymbolicValue<DummyInstruction>.CreateStackValue(sources[2][1]),
             };
             
             var stack2 = ImmutableStack.Create(values2);

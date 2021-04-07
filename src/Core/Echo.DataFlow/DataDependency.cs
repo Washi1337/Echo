@@ -58,16 +58,11 @@ namespace Echo.DataFlow
             
             if (!Contains(item))
             {
-                AddEdge(CreateEdge(item));
+                AddEdge(new(Dependent, item));
                 return true;
             }
 
             return false;
-        }
-
-        private DataFlowEdge<TContents> CreateEdge(DataSource<TContents> item)
-        {
-            return new(Dependent, item);
         }
 
         /// <inheritdoc />
@@ -134,6 +129,7 @@ namespace Echo.DataFlow
         private void AddEdge(DataFlowEdge<TContents> edge)
         {
             _edges.Add(edge);
+            edge.DataSource.Node.IncomingEdges.Add(edge);
         }
 
         /// <inheritdoc />
@@ -184,7 +180,10 @@ namespace Echo.DataFlow
 
         private void RemoveEdge(DataFlowEdge<TContents> edge)
         {
-            _edges.Remove(edge);
+            if (_edges.Remove(edge))
+            {
+                edge.DataSource.Node.IncomingEdges.Remove(edge);
+            }
         }
 
         /// <inheritdoc />
@@ -194,5 +193,7 @@ namespace Echo.DataFlow
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => 
             GetEnumerator();
+
+        public IEnumerable<DataFlowEdge<TContents>> GetEdges() => _edges;
     }
 }

@@ -23,6 +23,7 @@ namespace Echo.DataFlow
             Contents = contents;
             StackDependencies = new StackDependencyCollection<TContents>(this);
             VariableDependencies = new VariableDependencyCollection<TContents>(this);
+            IncomingEdges = new List<DataFlowEdge<TContents>>();
         }
 
         /// <summary>
@@ -77,41 +78,41 @@ namespace Echo.DataFlow
             get;
         }
 
+        internal IList<DataFlowEdge<TContents>> IncomingEdges
+        {
+            get;
+        }
+
+        public IEnumerable<DataFlowEdge<TContents>> GetIncomingEdges() => IncomingEdges;
+
+        IEnumerable<IEdge> INode.GetIncomingEdges() => IncomingEdges;
+
+        public IEnumerable<DataFlowEdge<TContents>> GetOutgoingEdges()
+        {
+            return StackDependencies
+                .SelectMany(d => d.GetEdges())
+                .Concat(VariableDependencies.Values.SelectMany(d => d.GetEdges()));
+        }
+
+        IEnumerable<IEdge> INode.GetOutgoingEdges() => GetOutgoingEdges();
+
         /// <summary>
         /// Obtains a collection of nodes that depend on this node.
         /// </summary>
         /// <returns>The dependant nodes.</returns>
-        public IEnumerable<DataFlowNode<TContents>> GetDependants() => throw new NotImplementedException();
+        public IEnumerable<DataFlowNode<TContents>> GetDependants()=> IncomingEdges
+            .Select(e => e.DataSource.Node)
+            .Distinct();
+        
+        IEnumerable<INode> INode.GetPredecessors() => GetDependants();
 
-        IEnumerable<IEdge> INode.GetIncomingEdges()
-        {
-            throw new NotImplementedException();
-        }
+        IEnumerable<INode> INode.GetSuccessors() => GetOutgoingEdges()
+            .Select(e => e.DataSource.Node)
+            .Distinct();
 
-        IEnumerable<IEdge> INode.GetOutgoingEdges()
-        {
-            throw new NotImplementedException();
-        }
+        bool INode.HasPredecessor(INode node) => GetOutgoingEdges().Any(e => e.Dependent == node);
 
-        IEnumerable<INode> INode.GetPredecessors()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<INode> INode.GetSuccessors()
-        {
-            throw new NotImplementedException();
-        }
-
-        bool INode.HasPredecessor(INode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool INode.HasSuccessor(INode node)
-        {
-            throw new NotImplementedException();
-        }
+        bool INode.HasSuccessor(INode node) => GetOutgoingEdges().Any(e => e.DataSource.Node == node);
 
         /// <summary>
         /// Removes all incident edges (both incoming and outgoing edges) from the node, effectively isolating the node
