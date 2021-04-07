@@ -84,55 +84,123 @@ namespace Echo.DataFlow
         /// <inheritdoc />
         public void ExceptWith(IEnumerable<TSource> other)
         {
-            throw new NotImplementedException();
+            foreach (var item in other)
+                Remove(item);
         }
 
         /// <inheritdoc />
         public void IntersectWith(IEnumerable<TSource> other)
         {
-            throw new NotImplementedException();
+            var set = new HashSet<TSource>(other);
+            foreach (var edge in _edges)
+            {
+                if (!set.Contains(edge.DataSource))
+                    RemoveEdge(edge);
+            }
         }
 
         /// <inheritdoc />
         public bool IsProperSubsetOf(IEnumerable<TSource> other)
         {
-            throw new NotImplementedException();
+            var set = new HashSet<TSource>(other);
+            if (_edges.Count >= set.Count)
+                return false;
+            
+            foreach (var edge in _edges)
+            {
+                if (!set.Contains(edge.DataSource))
+                    return false;
+            }
+
+            return true;
         }
 
         /// <inheritdoc />
         public bool IsProperSupersetOf(IEnumerable<TSource> other)
         {
-            throw new NotImplementedException();
+            var set = new HashSet<TSource>(other);
+            if (_edges.Count <= set.Count)
+                return false;
+            
+            foreach (var source in set)
+            {
+                if (!Contains(source))
+                    return false;
+            }
+
+            return true;
         }
 
         /// <inheritdoc />
         public bool IsSubsetOf(IEnumerable<TSource> other)
         {
-            throw new NotImplementedException();
+            var set = new HashSet<TSource>(other);
+            if (_edges.Count > set.Count)
+                return false;
+            
+            foreach (var edge in _edges)
+            {
+                if (!set.Contains(edge.DataSource))
+                    return false;
+            }
+
+            return true;
         }
 
         /// <inheritdoc />
         public bool IsSupersetOf(IEnumerable<TSource> other)
         {
-            throw new NotImplementedException();
+            var set = new HashSet<TSource>(other);
+            if (_edges.Count < set.Count)
+                return false;
+            
+            foreach (var source in set)
+            {
+                if (!Contains(source))
+                    return false;
+            }
+
+            return true;
         }
 
         /// <inheritdoc />
         public bool Overlaps(IEnumerable<TSource> other)
         {
-            throw new NotImplementedException();
+            foreach (var item in other)
+            {
+                if (Contains(item))
+                    return true;
+            }
+
+            return false;
         }
 
         /// <inheritdoc />
         public bool SetEquals(IEnumerable<TSource> other)
         {
-            throw new NotImplementedException();
+            var set = new HashSet<TSource>(other);
+            if (set.Count != Count)
+                return false;
+
+            foreach (var edge in _edges)
+            {
+                if (!set.Contains(edge.DataSource))
+                    return false;
+            }
+
+            return true;
         }
 
         /// <inheritdoc />
         public void SymmetricExceptWith(IEnumerable<TSource> other)
         {
-            throw new NotImplementedException();
+            foreach (var item in other)
+            {
+                if (Contains(item))
+                    Remove(item);
+                else
+                    Add(item);
+            }
         }
 
         /// <inheritdoc />

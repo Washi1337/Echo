@@ -10,20 +10,20 @@ namespace Echo.DataFlow.Emulation
     /// <summary>
     /// Represents a symbolic value that resides in memory. 
     /// </summary>
-    public class SymbolicValue<T> : ISet<DataSource<T>>, IValue
+    public sealed class SymbolicValue<T> : ISet<DataSource<T>>, IValue
     {
         // -------------------------
         // Implementation rationale:
         // -------------------------
         //
-        // To prevent allocations of big set objects, we delay initialization of it until we actually need to store
-        // more than one data source. This is worth the extra steps in pattern matching, since there is going to be
-        // a lot of instances of this type. For most architectures and functions written in these languages,
-        // instructions only have zero or one data source per data dependency, and would therefore not need 
-        // special complex heap allocated objects to store zero or just one data source.
+        // To prevent allocations of "big" empty set objects, we delay initialization of it until we actually need
+        // to store more than one data source. This is worth the extra steps in pattern matching, since there is
+        // going to be a lot of instances of this type. For most architectures and functions written in these
+        // languages, instructions only have zero or one data source per data dependency, and would therefore not
+        // need special complex heap allocated objects to store zero or just one data source.
         //
         // For this reason, the following "list object" field can have three possible values:
-        //    - null:                             The dependency has no known data sources.
+        //    - null:                     The dependency has no known data sources.
         //    - DataSource<T>:            The dependency has a single data source.
         //    - HashSet<DataSource<T>>:   The dependency has multiple data sources.
         
@@ -133,7 +133,7 @@ namespace Echo.DataFlow.Emulation
         }
 
         /// <inheritdoc />
-        public virtual bool Add(DataSource<T> item)
+        public bool Add(DataSource<T> item)
         {
             AssertIsWritable();
 
@@ -288,7 +288,9 @@ namespace Echo.DataFlow.Emulation
         {
             foreach (var item in other)
             {
-                if (!Contains(item))
+                if (Contains(item))
+                    Remove(item);
+                else
                     Add(item);
             }
         }
@@ -389,7 +391,7 @@ namespace Echo.DataFlow.Emulation
         }
         
         /// <inheritdoc />
-        public virtual bool Remove(DataSource<T> item) 
+        public bool Remove(DataSource<T> item) 
         {
             AssertIsWritable();
             
