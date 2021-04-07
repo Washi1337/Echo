@@ -22,11 +22,6 @@ namespace Echo.DataFlow
         /// <inheritdoc />
         public bool IsReadOnly => Dependent is null;
 
-        public abstract DataDependencyType DependencyType
-        {
-            get;
-        }
-
         /// <summary>
         /// Gets a value indicating whether the data dependency has any known data sources. 
         /// </summary>

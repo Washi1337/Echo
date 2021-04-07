@@ -16,9 +16,6 @@ namespace Echo.DataFlow
             get;
         }
         
-        /// <inheritdoc />
-        public override DataDependencyType DependencyType => DataDependencyType.Variable;
-        
         public VariableDataSource<TContents> Add(DataFlowNode<TContents> node)
         {
             var source = new VariableDataSource<TContents>(node, Variable);
