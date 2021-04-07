@@ -44,7 +44,7 @@ namespace Echo.DataFlow.Tests
             var dependency = new DataDependency<int>(n0);
             n1.StackDependencies.Add(dependency);
             
-            Assert.Same(n1, dependency.Dependant);
+            Assert.Same(n1, dependency.Dependent);
         }
 
         [Fact]
@@ -57,7 +57,7 @@ namespace Echo.DataFlow.Tests
             var symbolicValue = new DataDependency<int>(n0);
             n1.StackDependencies.Add(symbolicValue);
             n1.StackDependencies.Remove(symbolicValue);
-            Assert.Null(symbolicValue.Dependant);
+            Assert.Null(symbolicValue.Dependent);
         }
 
         [Fact]

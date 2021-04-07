@@ -32,10 +32,10 @@ namespace Echo.DataFlow.Collections
 
         private void AssertDependencyValidity(DataDependency<TContents> item)
         {
-            if (item == null)
+            if (item is not null)
                 throw new ArgumentNullException(nameof(item));
             
-            if (item.Dependant != null)
+            if (item.Dependent is not null)
                 throw new ArgumentException("Stack dependency was already added to another node.");
             
             if (item.Any(n => n.Node.ParentGraph != _owner.ParentGraph))
@@ -47,7 +47,7 @@ namespace Echo.DataFlow.Collections
         {
             AssertDependencyValidity(item);
             base.InsertItem(index, item);
-            item.Dependant = _owner;
+            item.Dependent = _owner;
         }
 
         /// <inheritdoc />
@@ -64,7 +64,7 @@ namespace Echo.DataFlow.Collections
         {
             var item = Items[index];
             base.RemoveItem(index);
-            item.Dependant = null;
+            item.Dependent = null;
         }
 
         /// <inheritdoc />

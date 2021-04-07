@@ -56,7 +56,7 @@ namespace Echo.DataFlow.Collections
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
             
-            if (item.Dependant != null)
+            if (item.Dependent != null)
                 throw new ArgumentException("Variable dependency was already added to another node.");
             
             if (item.Any(n => n.Node.ParentGraph != _owner.ParentGraph))
@@ -76,7 +76,7 @@ namespace Echo.DataFlow.Collections
         {
             AssertDependencyValidity(value);
             _entries.Add(key, value);
-            value.Dependant = _owner;
+            value.Dependent = _owner;
         }
         
         /// <inheritdoc />
@@ -107,7 +107,7 @@ namespace Echo.DataFlow.Collections
         {
             if (_entries.TryGetValue(key, out var dependency))
             {
-                dependency.Dependant = null;
+                dependency.Dependent = null;
                 _entries.Remove(key);
                 return true;
             }
