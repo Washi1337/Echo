@@ -104,7 +104,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
 
             // Check if instruction pushes any new symbolic values.
             for (int i = 0; i < Architecture.GetStackPushCount(instruction); i++)
-                stack = stack.Push(new SymbolicValue<TInstruction>(new DataSource<TInstruction>(node, i)));
+                stack = stack.Push(new SymbolicValue<TInstruction>(new StackDataSource<TInstruction>(node, i)));
 
             return stack;
         }
@@ -148,7 +148,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             {
                 var variable = _variablesBuffer[i];
                 variables = variables.SetItem(variable,
-                    new SymbolicValue<TInstruction>(new DataSource<TInstruction>(node)));
+                    new SymbolicValue<TInstruction>(new VariableDataSource<TInstruction>(node, variable)));
             }
 
             return variables;
@@ -176,7 +176,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
                 // Register (unknown) stack dependencies.
                 int stackArgumentCount = Architecture.GetStackPopCount(instruction);
                 for (int i = 0; i < stackArgumentCount; i++)
-                    node.StackDependencies.Add(new DataDependency<TInstruction>());
+                    node.StackDependencies.Add(new DataDependency<TInstruction>(DataDependencyType.Stack));
                 
                 // Get read variables.
                 int variableReadCount = Architecture.GetReadVariablesCount(instruction);
@@ -192,7 +192,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
                 {
                     var variable = _variablesBuffer[i];
                     if (!node.VariableDependencies.ContainsKey(variable))
-                        node.VariableDependencies[variable] = new DataDependency<TInstruction>();
+                        node.VariableDependencies[variable] = new DataDependency<TInstruction>(DataDependencyType.Variable);
                 }
 
                 DataFlowGraph.Nodes.Add(node);

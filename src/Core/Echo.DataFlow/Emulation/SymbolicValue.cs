@@ -20,25 +20,8 @@ namespace Echo.DataFlow.Emulation
         /// Creates a new symbolic value with a single data source.
         /// </summary>
         /// <param name="dataSource">The data source of the symbolic value.</param>
-        public SymbolicValue(DataFlowNode<T> dataSource)
-            : this(new DataSource<T>(dataSource, 0))
-        {
-        }
-
-        /// <summary>
-        /// Creates a new symbolic value with a single data source.
-        /// </summary>
-        /// <param name="dataSource">The data source of the symbolic value.</param>
         public SymbolicValue(DataSource<T> dataSource)
             : base(dataSource)
-        {
-        }
-        /// <summary>
-        /// Creates a new symbolic value with the provided data sources.
-        /// </summary>
-        /// <param name="dataSources">The data sources of the symbolic value.</param>
-        public SymbolicValue(IEnumerable<DataFlowNode<T>> dataSources)
-            : this(dataSources.Select(node => new DataSource<T>(node)))
         {
         }
         
@@ -54,7 +37,7 @@ namespace Echo.DataFlow.Emulation
         /// <summary>
         /// Merges two data dependencies into one symbolic value.
         /// </summary>
-        public SymbolicValue(DataDependencyBase<T> left, DataDependencyBase<T> right)
+        public SymbolicValue(SymbolicValue<T> left, SymbolicValue<T> right)
             : base(left, right)
         {
         }

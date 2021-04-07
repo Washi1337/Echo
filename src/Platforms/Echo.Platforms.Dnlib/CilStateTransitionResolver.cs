@@ -54,7 +54,7 @@ namespace Echo.Platforms.Dnlib
                 if (exceptionSource is { })
                 {
                     DataFlowGraph.Nodes.Add(exceptionSource);
-                    result = result.Push(new SymbolicValue<Instruction>(new DataSource<Instruction>(exceptionSource)));
+                    result = result.Push(new SymbolicValue<Instruction>(new StackDataSource<Instruction>(exceptionSource)));
                     break;
                 }
             }
