@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet;
-using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Mocks;
