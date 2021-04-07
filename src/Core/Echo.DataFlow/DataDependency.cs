@@ -10,17 +10,10 @@ namespace Echo.DataFlow
     /// the owner node might pull data from.
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in a data flow node.</typeparam>
-    public class DataDependency<TContents> : ISet<DataSource<TContents>>
+    public abstract class DataDependency<TSource, TContents> : ISet<TSource>
+        where TSource : DataSource<TContents>
     {
         private readonly List<DataFlowEdge<TContents>> _edges = new();
-
-        /// <summary>
-        /// Creates a new data dependency with no data sources.
-        /// </summary>
-        public DataDependency(DataDependencyType dependencyType)
-        {
-            DependencyType = dependencyType;
-        }
 
         /// <inheritdoc />
         public int Count => _edges.Count;
@@ -28,7 +21,7 @@ namespace Echo.DataFlow
         /// <inheritdoc />
         public bool IsReadOnly => false;
 
-        public DataDependencyType DependencyType
+        public abstract DataDependencyType DependencyType
         {
             get;
         }
@@ -52,7 +45,7 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public bool Add(DataSource<TContents> item)
+        public bool Add(TSource item)
         {
             AssertDependentIsNotNull();
             
@@ -66,61 +59,61 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public void ExceptWith(IEnumerable<DataSource<TContents>> other)
+        public void ExceptWith(IEnumerable<TSource> other)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public void IntersectWith(IEnumerable<DataSource<TContents>> other)
+        public void IntersectWith(IEnumerable<TSource> other)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public bool IsProperSubsetOf(IEnumerable<DataSource<TContents>> other)
+        public bool IsProperSubsetOf(IEnumerable<TSource> other)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public bool IsProperSupersetOf(IEnumerable<DataSource<TContents>> other)
+        public bool IsProperSupersetOf(IEnumerable<TSource> other)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public bool IsSubsetOf(IEnumerable<DataSource<TContents>> other)
+        public bool IsSubsetOf(IEnumerable<TSource> other)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public bool IsSupersetOf(IEnumerable<DataSource<TContents>> other)
+        public bool IsSupersetOf(IEnumerable<TSource> other)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public bool Overlaps(IEnumerable<DataSource<TContents>> other)
+        public bool Overlaps(IEnumerable<TSource> other)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public bool SetEquals(IEnumerable<DataSource<TContents>> other)
+        public bool SetEquals(IEnumerable<TSource> other)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public void SymmetricExceptWith(IEnumerable<DataSource<TContents>> other)
+        public void SymmetricExceptWith(IEnumerable<TSource> other)
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public void UnionWith(IEnumerable<DataSource<TContents>> other)
+        public void UnionWith(IEnumerable<TSource> other)
         {
             foreach (var item in other)
                 Add(item);
@@ -133,7 +126,7 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        void ICollection<DataSource<TContents>>.Add(DataSource<TContents> item) => Add(item);
+        void ICollection<TSource>.Add(TSource item) => Add(item);
         
         /// <inheritdoc />
         public void Clear()
@@ -145,14 +138,14 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public bool Contains(DataSource<TContents> item)
+        public bool Contains(TSource item)
         {
             AssertDependentIsNotNull();
             return _edges.Any(e => e.DataSource.Equals(item));
         }
 
         /// <inheritdoc />
-        public void CopyTo(DataSource<TContents>[] array, int arrayIndex)
+        public void CopyTo(TSource[] array, int arrayIndex)
         {
             if (array == null)
                 throw new ArgumentNullException(nameof(array));
@@ -162,11 +155,11 @@ namespace Echo.DataFlow
                 throw new ArgumentException("Not enough space in target array.");
 
             for (int i = 0; i < _edges.Count; i++)
-                array[arrayIndex + i] = _edges[i].DataSource;
+                array[arrayIndex + i] = (TSource) _edges[i].DataSource;
         }
 
         /// <inheritdoc />
-        public bool Remove(DataSource<TContents> item)
+        public bool Remove(TSource item)
         {
             AssertDependentIsNotNull();
 
@@ -187,13 +180,15 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public IEnumerator<DataSource<TContents>> GetEnumerator() => 
-            _edges.Select(e => e.DataSource).GetEnumerator();
+        public IEnumerator<TSource> GetEnumerator() => 
+            _edges.Select(e => (TSource) e.DataSource).GetEnumerator();
 
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => 
             GetEnumerator();
 
         public IEnumerable<DataFlowEdge<TContents>> GetEdges() => _edges;
+
+        public IEnumerable<DataFlowNode<TContents>> GetNodes() => _edges.Select(e => e.DataSource.Node);
     }
 }

@@ -41,8 +41,9 @@ namespace Echo.DataFlow.Tests
             var n0 = dfg.Nodes.Add(0, 0);
             var n1 = dfg.Nodes.Add(1, 1);
 
-            var dependency = new DataDependency<int>(n0);
+            var dependency = new StackDependency<int>();
             n1.StackDependencies.Add(dependency);
+            dependency.Add(n0);
             
             Assert.Same(n1, dependency.Dependent);
         }
@@ -54,8 +55,10 @@ namespace Echo.DataFlow.Tests
             var n0 = dfg.Nodes.Add(0, 0);
             var n1 = dfg.Nodes.Add(1, 1);
 
-            var symbolicValue = new DataDependency<int>(n0);
+            var symbolicValue = new StackDependency<int>();
             n1.StackDependencies.Add(symbolicValue);
+            symbolicValue.Add(n0);
+            
             n1.StackDependencies.Remove(symbolicValue);
             Assert.Null(symbolicValue.Dependent);
         }
@@ -68,10 +71,13 @@ namespace Echo.DataFlow.Tests
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
 
-            var dependency1 = new DataDependency<int>(n0);
+            var dependency1 = new StackDependency<int>();
             n1.StackDependencies.Add(dependency1);
-            var dependency2 = new DataDependency<int>(n0);
+            dependency1.Add(n0);
+            
+            var dependency2 = new StackDependency<int>();
             n2.StackDependencies.Add(dependency2);
+            dependency2.Add(n0);
 
             Assert.Equal(new HashSet<DataFlowNode<int>>
             {
@@ -87,10 +93,13 @@ namespace Echo.DataFlow.Tests
             var n1 = dfg.Nodes.Add(1, 1);
             var n2 = dfg.Nodes.Add(2, 2);
 
-            var dependency1 = new DataDependency<int>(n0);
+            var dependency1 = new StackDependency<int>();
             n1.StackDependencies.Add(dependency1);
-            var dependency2 = new DataDependency<int>(n0);
+            dependency1.Add(n0);
+            
+            var dependency2 = new StackDependency<int>();
             n2.StackDependencies.Add(dependency2);
+            dependency1.Add(n0);
 
             n1.StackDependencies.Remove(dependency1);
 
@@ -109,8 +118,10 @@ namespace Echo.DataFlow.Tests
             var dfg2 = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n2 = dfg2.Nodes.Add(2, 0);
 
+            n1.StackDependencies.Add(new StackDependency<int>());
+
             Assert.Throws<ArgumentException>(() =>
-                n1.StackDependencies.Add(new DataDependency<int>(n2)));
+                n1.StackDependencies[0].Add(n2));
         }
 
         [Fact]
@@ -122,8 +133,8 @@ namespace Echo.DataFlow.Tests
             var dfg2 = new DataFlowGraph<int>(IntArchitecture.Instance);
             var n2 = dfg2.Nodes.Add(2, 0);
 
-            n1.StackDependencies.Add(new DataDependency<int>());
-            Assert.Throws<ArgumentException>(() => n1.StackDependencies[0].Add(new DataSource<int>(n2)));
+            n1.StackDependencies.Add(new StackDependency<int>());
+            Assert.Throws<ArgumentException>(() => n1.StackDependencies[0].Add(new StackDataSource<int>(n2)));
         }
 
         [Fact]
@@ -133,7 +144,8 @@ namespace Echo.DataFlow.Tests
             var n1 = dfg.Nodes.Add(1, 0);
             var n2 = dfg.Nodes.Add(2, 0);
             
-            n1.StackDependencies.Add(new DataDependency<int>(n2));
+            n1.StackDependencies.Add(new StackDependency<int>());
+            n1.StackDependencies[0].Add(n2);
             
             Assert.Single(n1.StackDependencies[0]);
             Assert.Single(n2.GetDependants());
@@ -151,7 +163,8 @@ namespace Echo.DataFlow.Tests
             var n1 = dfg.Nodes.Add(1, 0);
             var n2 = dfg.Nodes.Add(2, 0);
             
-            n1.StackDependencies.Add(new DataDependency<int>(n2));
+            n1.StackDependencies.Add(new StackDependency<int>());
+            n1.StackDependencies[0].Add(n2);
             
             Assert.Single(n1.StackDependencies[0]);
             Assert.Single(n2.GetDependants());
@@ -171,7 +184,9 @@ namespace Echo.DataFlow.Tests
             var n1 = dfg.Nodes.Add(1, 0);
             var n2 = dfg.Nodes.Add(2, 0);
 
-            n1.VariableDependencies[variable] = new DataDependency<int>(n2);
+            var dependency = new VariableDependency<int>(variable);
+            n1.VariableDependencies[variable] = dependency;
+            dependency.Add(n2);
             
             Assert.Single(n1.VariableDependencies[variable]);
             Assert.Single(n2.GetDependants());
@@ -194,8 +209,8 @@ namespace Echo.DataFlow.Tests
             var graph = new DataFlowGraph<int>(IntArchitecture.Instance);
 
             var n1 = new DataFlowNode<int>(0, 0);
-            n1.StackDependencies.Add(new DataDependency<int>());
-            n1.VariableDependencies.Add(variable, new DataDependency<int>());
+            n1.StackDependencies.Add(new StackDependency<int>());
+            n1.VariableDependencies.Add(variable, new VariableDependency<int>(variable));
             
             var n2 = new DataFlowNode<int>(1, 1);
 
@@ -237,7 +252,11 @@ namespace Echo.DataFlow.Tests
             
             Assert.Equal(0, n1.OutDegree);
             Assert.Equal(0, n2.InDegree);
-            n1.StackDependencies.Add(new DataDependency<int>(n2));
+            
+            var dependency = new StackDependency<int>();
+            n1.StackDependencies.Add(dependency);
+            dependency.Add(n2);
+            
             Assert.Equal(1, n1.OutDegree);
             Assert.Equal(1, n2.InDegree);
         }
@@ -252,7 +271,12 @@ namespace Echo.DataFlow.Tests
             var n3 = graph.Nodes.Add(3, 3);
             
             Assert.Equal(0, n1.OutDegree);
-            n1.StackDependencies.Add(new DataDependency<int>(new[] {n2, n3}));
+            
+            var dependency = new StackDependency<int>();
+            n1.StackDependencies.Add(dependency);
+            dependency.Add(n2);
+            dependency.Add(n3);
+            
             Assert.Equal(2, n1.OutDegree);
         }
 
@@ -266,7 +290,11 @@ namespace Echo.DataFlow.Tests
             var n2 = graph.Nodes.Add(2, 2);
             
             Assert.Equal(0, n1.OutDegree);
-            n1.VariableDependencies.Add(variable, new DataDependency<int>(n2));
+            
+            var dependency = new VariableDependency<int>(variable);
+            n1.VariableDependencies.Add(variable, dependency);
+            dependency.Add(n2);
+            
             Assert.Equal(1, n1.OutDegree);
             Assert.Equal(1, n2.InDegree);
         }
@@ -282,7 +310,12 @@ namespace Echo.DataFlow.Tests
             var n3 = graph.Nodes.Add(3, 3);
             
             Assert.Equal(0, n1.OutDegree);
-            n1.VariableDependencies.Add(variable, new DataDependency<int>(new[]{n2, n3}));
+            
+            var dependency = new VariableDependency<int>(variable);
+            n1.VariableDependencies.Add(variable, dependency);
+            dependency.Add(n2);
+            dependency.Add(n3);
+            
             Assert.Equal(2, n1.OutDegree);
         }
     }

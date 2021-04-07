@@ -43,7 +43,7 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public int InDegree => throw new NotImplementedException();
+        public int InDegree => IncomingEdges.Count;
 
         /// <inheritdoc />
         public int OutDegree => StackDependencies.EdgeCount + VariableDependencies.EdgeCount;

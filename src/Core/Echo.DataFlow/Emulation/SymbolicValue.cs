@@ -74,5 +74,10 @@ namespace Echo.DataFlow.Emulation
         public SymbolicValue<T> Copy() => new(this);
 
         IValue IValue.Copy() => Copy();
+
+        public IEnumerable<StackDataSource<T>> AsStackValue() => this.Cast<StackDataSource<T>>();
+        
+        public IEnumerable<VariableDataSource<T>> AsVariableValue() => this.Cast<VariableDataSource<T>>();
+
     }
 }
