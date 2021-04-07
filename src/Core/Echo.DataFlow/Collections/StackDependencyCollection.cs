@@ -42,6 +42,10 @@ namespace Echo.DataFlow.Collections
                 throw new ArgumentException("Dependency contains data sources from another graph.");
         }
 
+        /// <summary>
+        /// Ensures the node has the provided amount of stack dependencies.
+        /// </summary>
+        /// <param name="count">The new amount of dependencies.</param>
         public void SetCount(int count)
         {
             if (Count > count)

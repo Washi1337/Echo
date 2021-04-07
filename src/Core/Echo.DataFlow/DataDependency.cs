@@ -6,9 +6,10 @@ using System.Linq;
 namespace Echo.DataFlow
 {
     /// <summary>
-    /// Represents a data dependency of a node in a data flow graph, which is a set of one or more data flow nodes where
-    /// the owner node might pull data from.
+    /// Provides a base for data dependencies of a node in a data flow graph, which is a set of one or more data flow
+    /// nodes where the owner node might pull data from.
     /// </summary>
+    /// <typeparam name="TSource">The type of data source that this dependency uses.</typeparam>
     /// <typeparam name="TContents">The type of contents to put in a data flow node.</typeparam>
     public abstract class DataDependency<TSource, TContents> : ISet<TSource>
         where TSource : DataSource<TContents>
@@ -262,6 +263,11 @@ namespace Echo.DataFlow
             return true;
         }
 
+        /// <summary>
+        /// Removes all data sources that are incident with the provided node.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns><c>true</c> if at least one edge was removed, <c>false</c> otherwise.</returns>
         public bool Remove(DataFlowNode<TContents> node)
         {
             AssertDependentIsNotNull();
@@ -297,8 +303,16 @@ namespace Echo.DataFlow
         IEnumerator IEnumerable.GetEnumerator() => 
             GetEnumerator();
 
+        /// <summary>
+        /// Gets a collection of data flow edges that encode the stored data sources.
+        /// </summary>
+        /// <returns>The edges.</returns>
         public IEnumerable<DataFlowEdge<TContents>> GetEdges() => _edges;
 
+        /// <summary>
+        /// Gets a collection of nodes that are possible data sources for the dependency.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<DataFlowNode<TContents>> GetNodes() => _edges.Select(e => e.DataSource.Node);
     }
 }

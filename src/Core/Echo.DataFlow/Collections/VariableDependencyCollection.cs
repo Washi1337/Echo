@@ -84,6 +84,10 @@ namespace Echo.DataFlow.Collections
             Add(value);
         }
 
+        /// <summary>
+        /// Adds a variable dependency to the node.
+        /// </summary>
+        /// <param name="dependency">The dependency to add.</param>
         public void Add(VariableDependency<TContents> dependency)
         {
             AssertDependencyValidity(dependency);

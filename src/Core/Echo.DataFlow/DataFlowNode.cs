@@ -82,11 +82,19 @@ namespace Echo.DataFlow
         {
             get;
         }
-
+        
+        /// <summary>
+        /// Obtains a collection of edges that refer to dependent nodes.
+        /// </summary>
+        /// <returns>The edges.</returns>
         public IEnumerable<DataFlowEdge<TContents>> GetIncomingEdges() => IncomingEdges;
 
         IEnumerable<IEdge> INode.GetIncomingEdges() => IncomingEdges;
 
+        /// <summary>
+        /// Obtains a collection of edges encoding all the dependencies that this node has.
+        /// </summary>
+        /// <returns>The edges.</returns>
         public IEnumerable<DataFlowEdge<TContents>> GetOutgoingEdges()
         {
             return StackDependencies
@@ -120,7 +128,7 @@ namespace Echo.DataFlow
         /// </summary>
         public void Disconnect()
         {
-            // Update dependent nodes.
+            // Remove edges from dependent nodes.
             while (IncomingEdges.Count > 0)
             {
                 var edge = IncomingEdges[0];

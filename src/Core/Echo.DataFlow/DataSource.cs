@@ -25,6 +25,9 @@ namespace Echo.DataFlow
             get;
         }
 
+        /// <summary>
+        /// Gets the type of data dependency that this data source encodes.
+        /// </summary>
         public abstract DataDependencyType Type
         {
             get;

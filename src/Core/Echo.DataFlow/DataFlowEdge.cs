@@ -14,7 +14,6 @@ namespace Echo.DataFlow
         /// </summary>
         /// <param name="dependent">The dependent node.</param>
         /// <param name="target">The dependency node.</param>
-        /// <param name="type">The type of dependency.</param>
         public DataFlowEdge(DataFlowNode<TContents> dependent, DataSource<TContents> target)
         {
             Dependent = dependent;

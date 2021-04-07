@@ -102,17 +102,42 @@ namespace Echo.DataFlow.Emulation
         /// </summary>
         public bool HasKnownDataSources => Count > 0;
         
+        /// <summary>
+        /// Creates a new symbolic value referencing the first stack value produced by the provided node. 
+        /// </summary>
+        /// <param name="node">The node producing the value.</param>
+        /// <returns>The symbolic value.</returns>
         public static SymbolicValue<T> CreateStackValue(DataFlowNode<T> node) => 
             new(new StackDataSource<T>(node, 0));
 
+        /// <summary>
+        /// Creates a new symbolic value referencing a stack value produced by the provided node. 
+        /// </summary>
+        /// <param name="node">The node producing the value.</param>
+        /// <param name="slotIndex">The index of the stack value that was produced by the node.</param>
+        /// <returns>The symbolic value.</returns>
         public static SymbolicValue<T> CreateStackValue(DataFlowNode<T> node, int slotIndex) => 
             new(new StackDataSource<T>(node, slotIndex));
 
+        /// <summary>
+        /// Creates a new symbolic value referencing a variable value assigned by the provided node. 
+        /// </summary>
+        /// <param name="node">The node assigning the value.</param>
+        /// <param name="variable">The variable that was assigned a value.</param>
+        /// <returns>The symbolic value.</returns>
         public static SymbolicValue<T> CreateVariableValue(DataFlowNode<T> node, IVariable variable) => 
             new(new VariableDataSource<T>(node, variable));
 
+        /// <summary>
+        /// Interprets the symbolic value as a collection of stack data sources.
+        /// </summary>
+        /// <returns>The stack data sources.</returns>
         public IEnumerable<StackDataSource<T>> AsStackValue() => this.Cast<StackDataSource<T>>();
         
+        /// <summary>
+        /// Interprets the symbolic value as a collection of variable data sources.
+        /// </summary>
+        /// <returns>The variable data sources.</returns>
         public IEnumerable<VariableDataSource<T>> AsVariableValue() => this.Cast<VariableDataSource<T>>();
 
         /// <summary>
