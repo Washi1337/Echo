@@ -247,14 +247,14 @@ namespace Echo.DataFlow.Tests.Analysis
             n1.StackDependencies[0].Add(n2);
             
             var dependency = new VariableDependency<int>(variable);
-            n1.VariableDependencies.Add(variable, dependency);
+            n1.VariableDependencies.Add(dependency);
             dependency.Add(n3);
             
             n2.StackDependencies.SetCount(1);
             n2.StackDependencies[0].Add(n4);
             
             dependency = new VariableDependency<int>(variable);
-            n2.VariableDependencies.Add(variable, dependency);
+            n2.VariableDependencies.Add(dependency);
             dependency.Add(n5);
 
             Assert.Equal(new[]
@@ -279,14 +279,14 @@ namespace Echo.DataFlow.Tests.Analysis
             n1.StackDependencies[0].Add(n2);
             
             var dependency = new VariableDependency<int>(variable);
-            n1.VariableDependencies.Add(variable, dependency);
+            n1.VariableDependencies.Add(dependency);
             dependency.Add(n3);
             
             n3.StackDependencies.SetCount(1);
             n3.StackDependencies[0].Add(n4);
             
             dependency = new VariableDependency<int>(variable);
-            n3.VariableDependencies.Add(variable, dependency);
+            n3.VariableDependencies.Add(dependency);
             dependency.Add(n5);
 
             Assert.Equal(new[]

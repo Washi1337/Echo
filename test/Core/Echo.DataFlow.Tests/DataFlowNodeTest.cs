@@ -209,7 +209,7 @@ namespace Echo.DataFlow.Tests
 
             var n1 = new DataFlowNode<int>(0, 0);
             n1.StackDependencies.Add(new StackDependency<int>());
-            n1.VariableDependencies.Add(variable, new VariableDependency<int>(variable));
+            n1.VariableDependencies.Add(new VariableDependency<int>(variable));
             
             var n2 = new DataFlowNode<int>(1, 1);
 
@@ -291,7 +291,7 @@ namespace Echo.DataFlow.Tests
             Assert.Equal(0, n1.OutDegree);
             
             var dependency = new VariableDependency<int>(variable);
-            n1.VariableDependencies.Add(variable, dependency);
+            n1.VariableDependencies.Add(dependency);
             dependency.Add(n2);
             
             Assert.Equal(1, n1.OutDegree);
@@ -311,7 +311,7 @@ namespace Echo.DataFlow.Tests
             Assert.Equal(0, n1.OutDegree);
             
             var dependency = new VariableDependency<int>(variable);
-            n1.VariableDependencies.Add(variable, dependency);
+            n1.VariableDependencies.Add(dependency);
             dependency.Add(n2);
             dependency.Add(n3);
             

@@ -30,7 +30,7 @@ namespace Echo.DataFlow.Collections
             {
                 AssertDependencyValidity(value);
                 Remove(key);
-                Add(key, value);
+                Add(value);
             }
         }
 
@@ -68,15 +68,27 @@ namespace Echo.DataFlow.Collections
             _entries.TryGetValue(key, out value);
 
         /// <inheritdoc />
-        public void Add(KeyValuePair<IVariable, VariableDependency<TContents>> item) => 
-            Add(item.Key, item.Value);
+        void ICollection<KeyValuePair<IVariable, VariableDependency<TContents>>>.Add(
+            KeyValuePair<IVariable, VariableDependency<TContents>> item)
+        {
+            if (item.Key != item.Value.Variable)
+                throw new ArgumentException("Key value does not match the variable specified in the dependency.");
+            Add(item.Value);
+        }
 
         /// <inheritdoc />
-        public void Add(IVariable key, VariableDependency<TContents> value)
+        void IDictionary<IVariable, VariableDependency<TContents>>.Add(IVariable key, VariableDependency<TContents> value)
         {
-            AssertDependencyValidity(value);
-            _entries.Add(key, value);
-            value.Dependent = _owner;
+            if (key != value.Variable)
+                throw new ArgumentException("Key value does not match the variable specified in the dependency.");
+            Add(value);
+        }
+
+        public void Add(VariableDependency<TContents> dependency)
+        {
+            AssertDependencyValidity(dependency);
+            _entries.Add(dependency.Variable, dependency);
+            dependency.Dependent = _owner;
         }
         
         /// <inheritdoc />
