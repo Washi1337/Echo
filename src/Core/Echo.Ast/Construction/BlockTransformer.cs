@@ -270,7 +270,7 @@ namespace Echo.Ast.Construction
             return new AssignmentStatement<TInstruction>(buffer, expression);
         }
         
-        private IVariable GetStackSlot(DataSource<TInstruction> dataSource)
+        private IVariable GetStackSlot(StackDataSource<TInstruction> dataSource)
         {
             var node = dataSource.Node;
             if (node is ExternalDataSourceNode<TInstruction> external)
