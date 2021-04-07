@@ -56,7 +56,7 @@ namespace Echo.DataFlow.Serialization.Dot
             {
                 var result = new Dictionary<string, string>();
                 
-                var style = e.Type switch
+                var style = e.DataSource.Type switch
                 {
                     DataDependencyType.Stack => StackDependencyStyle,
                     DataDependencyType.Variable => VariableDependencyStyle,

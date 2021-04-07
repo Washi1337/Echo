@@ -67,7 +67,7 @@ namespace Echo.DataFlow
 
         private DataFlowEdge<TContents> CreateEdge(DataSource<TContents> item)
         {
-            return new(Dependent, item, DependencyType);
+            return new(Dependent, item);
         }
 
         /// <inheritdoc />

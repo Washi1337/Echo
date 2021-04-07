@@ -25,6 +25,11 @@ namespace Echo.DataFlow
             get;
         }
 
+        public abstract DataDependencyType Type
+        {
+            get;
+        }
+
         /// <summary>
         /// Determines whether the data sources are considered equal.
         /// </summary>

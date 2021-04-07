@@ -18,6 +18,9 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
+        public override DataDependencyType Type => DataDependencyType.Variable;
+
+        /// <inheritdoc />
         public override string ToString() => $"{Node.Id:X8}:{Variable.Name}";
     }
 }

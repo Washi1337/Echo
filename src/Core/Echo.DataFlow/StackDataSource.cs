@@ -20,7 +20,10 @@ namespace Echo.DataFlow
         {
             get;
         }
-        
+
+        /// <inheritdoc />
+        public override DataDependencyType Type => DataDependencyType.Stack;
+
         /// <inheritdoc />
         public override string ToString() => $"{Node.Id:X8}#{SlotIndex}";
 
