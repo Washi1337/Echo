@@ -127,7 +127,15 @@ namespace Echo.DataFlow.Collections
         /// successfully, <c>false</c> otherwise.</returns>
         public bool Remove(long offset)
         {
-            throw new NotImplementedException();
+            if (_nodes.TryGetValue(offset, out var node))
+            {
+                node.Disconnect();
+                node.ParentGraph = null;
+                _nodes.Remove(offset);
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

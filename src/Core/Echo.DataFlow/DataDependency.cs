@@ -14,12 +14,13 @@ namespace Echo.DataFlow
         where TSource : DataSource<TContents>
     {
         private readonly List<DataFlowEdge<TContents>> _edges = new();
+        private DataFlowNode<TContents> _dependent;
 
         /// <inheritdoc />
         public int Count => _edges.Count;
 
         /// <inheritdoc />
-        public bool IsReadOnly => false;
+        public bool IsReadOnly => Dependent is null;
 
         public abstract DataDependencyType DependencyType
         {
@@ -31,13 +32,25 @@ namespace Echo.DataFlow
         /// </summary>
         public DataFlowNode<TContents> Dependent
         {
-            get;
-            internal set;
+            get => _dependent;
+            internal set
+            {          
+                if (_dependent != value)
+                {
+                    if (_dependent is not null)
+                    {
+                        foreach (var edge in _edges)
+                            edge.DataSource.Node.IncomingEdges.Remove(edge);
+                    }
+
+                    _dependent = value;
+                }
+            }
         }
 
         private void AssertDependentIsNotNull()
         {
-            if (Dependent is null)
+            if (IsReadOnly)
             {
                 throw new InvalidOperationException(
                     "Cannot modify data dependency when it is not assigned a dependent node.");
@@ -48,6 +61,11 @@ namespace Echo.DataFlow
         public bool Add(TSource item)
         {
             AssertDependentIsNotNull();
+            
+            if (item is null)
+                throw new ArgumentNullException(nameof(item));
+            if (item.Node.ParentGraph != _dependent.ParentGraph)
+                throw new ArgumentException("Data source is not added to the same graph.");
             
             if (!Contains(item))
             {
@@ -126,8 +144,13 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        void ICollection<TSource>.Add(TSource item) => Add(item);
-        
+        void ICollection<TSource>.Add(TSource item)
+        {
+            if (item is null)
+                throw new ArgumentNullException(nameof(item));
+            Add(item);
+        }
+
         /// <inheritdoc />
         public void Clear()
         {
@@ -169,6 +192,25 @@ namespace Echo.DataFlow
             
             RemoveEdge(edge);
             return true;
+        }
+
+        public bool Remove(DataFlowNode<TContents> node)
+        {
+            AssertDependentIsNotNull();
+
+            bool changed = false;
+            
+            for (int i = 0; i < _edges.Count; i++)
+            {
+                if (_edges[i].DataSource.Node == node)
+                {
+                    RemoveEdge(_edges[i]);
+                    i--;
+                    changed = true;
+                }
+            }
+
+            return changed;
         }
 
         private void RemoveEdge(DataFlowEdge<TContents> edge)

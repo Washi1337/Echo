@@ -78,7 +78,7 @@ namespace Echo.DataFlow
             get;
         }
 
-        internal IList<DataFlowEdge<TContents>> IncomingEdges
+        internal List<DataFlowEdge<TContents>> IncomingEdges
         {
             get;
         }
@@ -101,7 +101,7 @@ namespace Echo.DataFlow
         /// </summary>
         /// <returns>The dependant nodes.</returns>
         public IEnumerable<DataFlowNode<TContents>> GetDependants()=> IncomingEdges
-            .Select(e => e.DataSource.Node)
+            .Select(e => e.Dependent)
             .Distinct();
         
         IEnumerable<INode> INode.GetPredecessors() => GetDependants();
@@ -120,7 +120,32 @@ namespace Echo.DataFlow
         /// </summary>
         public void Disconnect()
         {
-            throw new NotImplementedException();
+            // Update dependent nodes.
+            while (IncomingEdges.Count > 0)
+            {
+                var edge = IncomingEdges[0];
+                switch (edge.DataSource.Type)
+                {
+                    case DataDependencyType.Stack:
+                        foreach (var dependency in edge.Dependent.StackDependencies)
+                            dependency.Remove(this);
+                        break;
+
+                    case DataDependencyType.Variable:
+                        foreach (var entry in edge.Dependent.VariableDependencies)
+                            entry.Value.Remove(this);
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            
+            // Clear dependency nodes.
+            foreach (var dependency in StackDependencies)
+                dependency.Clear();
+            foreach (var entry in VariableDependencies)
+                entry.Value.Clear();
         }
 
         /// <inheritdoc />

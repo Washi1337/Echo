@@ -99,7 +99,7 @@ namespace Echo.DataFlow.Tests
             
             var dependency2 = new StackDependency<int>();
             n2.StackDependencies.Add(dependency2);
-            dependency1.Add(n0);
+            dependency2.Add(n0);
 
             n1.StackDependencies.Remove(dependency1);
 
@@ -120,8 +120,7 @@ namespace Echo.DataFlow.Tests
 
             n1.StackDependencies.Add(new StackDependency<int>());
 
-            Assert.Throws<ArgumentException>(() =>
-                n1.StackDependencies[0].Add(n2));
+            Assert.Throws<ArgumentException>(() => n1.StackDependencies[0].Add(n2));
         }
 
         [Fact]
