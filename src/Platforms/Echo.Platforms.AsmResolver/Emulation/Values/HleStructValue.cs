@@ -6,7 +6,7 @@ using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Values;
 using Echo.Core;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {

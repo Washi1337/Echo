@@ -1,6 +1,6 @@
 using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 {

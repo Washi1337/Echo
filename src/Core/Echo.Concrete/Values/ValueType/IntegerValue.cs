@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using Echo.Core;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 using static Echo.Core.TrileanValue;
 
 namespace Echo.Concrete.Values.ValueType

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Echo.Core.Values;
 
 namespace Echo.Core.Emulation
 {

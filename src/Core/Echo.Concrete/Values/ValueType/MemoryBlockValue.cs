@@ -3,7 +3,7 @@ using System.Buffers;
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 using Echo.Core;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Concrete.Values.ValueType
 {
