@@ -34,9 +34,9 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var cfg = cfgBuilder.ConstructFlowGraph(0);
             var rootScope = cfg.ConstructBlocks();
             
-            Assert.Single(rootScope.Blocks);
-            Assert.IsAssignableFrom<BasicBlock<DummyInstruction>>(rootScope.Blocks[0]);
-            Assert.Equal(instructions, ((BasicBlock<DummyInstruction>) rootScope.Blocks[0]).Instructions);
+            var block = Assert.Single(rootScope.Blocks);
+            var basicBlock = Assert.IsAssignableFrom<BasicBlock<DummyInstruction>>(block);
+            Assert.Equal(instructions, basicBlock.Instructions);
         }
         
         [Fact]
