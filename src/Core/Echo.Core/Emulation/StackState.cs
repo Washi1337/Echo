@@ -59,7 +59,7 @@ namespace Echo.Core.Emulation
         }
 
         /// <inheritdoc />
-        public IList<TValue> Pop(int count, bool reversed = false)
+        public TValue[] Pop(int count, bool reversed = false)
         {
             AssertCanPop(count);
             

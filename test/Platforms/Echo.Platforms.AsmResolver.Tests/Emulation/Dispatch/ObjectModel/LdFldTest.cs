@@ -104,7 +104,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         }
 
         private void VerifyUndocumentedLoadStatic(
-            string fieldName, IConcreteValue instanceObject, IConcreteValue fieldValue, ICliValue expectedValue)
+            string fieldName, ICliValue instanceObject, IConcreteValue fieldValue, ICliValue expectedValue)
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var stack = ExecutionContext.ProgramState.Stack;

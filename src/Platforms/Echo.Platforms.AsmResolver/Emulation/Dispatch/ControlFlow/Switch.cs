@@ -18,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         };
 
         /// <inheritdoc />
-        public DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var stack = context.ProgramState.Stack;
 

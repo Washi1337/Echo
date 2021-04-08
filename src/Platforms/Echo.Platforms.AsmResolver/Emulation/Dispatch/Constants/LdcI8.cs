@@ -19,7 +19,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             context.ProgramState.Stack.Push(new I8Value((long) instruction.Operand));
             return base.Execute(context, instruction);

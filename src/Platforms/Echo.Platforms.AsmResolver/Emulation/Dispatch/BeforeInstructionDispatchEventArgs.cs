@@ -1,17 +1,19 @@
-namespace Echo.Concrete.Emulation.Dispatch
+using AsmResolver.PE.DotNet.Cil;
+using Echo.Concrete.Emulation.Dispatch;
+
+namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
 {
     /// <summary>
     /// Provides arguments for describing an event that fires before an instruction is dispatched and executed. 
     /// </summary>
-    /// <typeparam name="TInstruction">The type of instruction that is being executed.</typeparam>
-    public class BeforeInstructionDispatchEventArgs<TInstruction> : InstructionDispatchEventArgs<TInstruction>
+    public class BeforeInstructionDispatchEventArgs : InstructionDispatchEventArgs
     {
         /// <summary>
-        /// Creates a new instance of the <see cref="BeforeInstructionDispatchEventArgs{TInstruction}"/> class.
+        /// Creates a new instance of the <see cref="BeforeInstructionDispatchEventArgs"/> class.
         /// </summary>
         /// <param name="context">The context in which the instruction is being executed.</param>
         /// <param name="instruction">The instruction that is being executed.</param>
-        public BeforeInstructionDispatchEventArgs(ExecutionContext context, TInstruction instruction)
+        public BeforeInstructionDispatchEventArgs(CilExecutionContext context, CilInstruction instruction)
             : base(context, instruction)
         {
         }

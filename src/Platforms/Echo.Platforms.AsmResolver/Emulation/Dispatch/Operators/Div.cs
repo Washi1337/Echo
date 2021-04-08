@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 
         /// <inheritdoc />
         protected override DispatchResult Execute(
-            ExecutionContext context, CilInstruction instruction, FValue left, FValue right)
+            CilExecutionContext context, CilInstruction instruction, FValue left, FValue right)
         {
             left.F64 /= right.F64;
             context.ProgramState.Stack.Push(left);
@@ -29,16 +29,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 
         /// <inheritdoc />
         protected override DispatchResult Execute(
-            ExecutionContext context, CilInstruction instruction, IntegerValue left, IntegerValue right)
+            CilExecutionContext context, CilInstruction instruction, IntegerValue left, IntegerValue right)
         {
             left.Divide(right);
-            context.ProgramState.Stack.Push(left);
+            context.ProgramState.Stack.Push((ICliValue) left);
             return DispatchResult.Success();
         }
 
         /// <inheritdoc />
         protected override DispatchResult Execute(
-            ExecutionContext context, CilInstruction instruction, OValue left, OValue right)
+            CilExecutionContext context, CilInstruction instruction, OValue left, OValue right)
         {
             return DispatchResult.InvalidProgram();
         }

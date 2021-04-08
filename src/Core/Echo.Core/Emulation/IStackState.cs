@@ -59,14 +59,14 @@ namespace Echo.Core.Emulation
         /// </summary>
         /// <returns>The value that was popped from the stack.</returns>
         TValue Pop();
-        
+
         /// <summary>
         /// Pops a collection of values from the stack.
         /// </summary>
         /// <param name="count">The number of values to pop from the stack.</param>
         /// <param name="reversed">True indicates whether the collection of values should be returned in reversed order.</param>
         /// <returns>The popped values.</returns>
-        IList<TValue> Pop(int count, bool reversed = false);
+        TValue[] Pop(int count, bool reversed = false);
         
         /// <summary>
         /// Creates a copy of the stack state. This also copies all values inside the stack.

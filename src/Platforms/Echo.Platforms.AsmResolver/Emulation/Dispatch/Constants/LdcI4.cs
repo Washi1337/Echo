@@ -30,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             context.ProgramState.Stack.Push(new I4Value(instruction.GetLdcI4Constant()));
             return base.Execute(context, instruction);

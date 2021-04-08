@@ -24,6 +24,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         /// <param name="context">The context to execute the instruction in.</param>
         /// <param name="instruction">The instruction to execute.</param>
         /// <returns>A result.</returns>
-        DispatchResult Execute(ExecutionContext context, CilInstruction instruction);
+        DispatchResult Execute(CilExecutionContext context, CilInstruction instruction);
     }
 }

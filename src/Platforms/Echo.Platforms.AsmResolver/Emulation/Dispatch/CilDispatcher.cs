@@ -10,10 +10,46 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
     /// <summary>
     /// Provides a default implementation for a CIL operation code handler dispatcher.
     /// </summary>
-    public class DefaultCilDispatcher : IVirtualMachineDispatcher<CilInstruction>
+    public class CilDispatcher : ICilDispatcher
     {
-        private static readonly IDictionary<Module, ICollection<ICilOpCodeHandler>> HandlerInstances
-            = new Dictionary<Module, ICollection<ICilOpCodeHandler>>();
+        /// <inheritdoc />
+        public event EventHandler<BeforeInstructionDispatchEventArgs> BeforeInstructionDispatch;
+        
+        /// <inheritdoc />
+        public event EventHandler<InstructionDispatchEventArgs> AfterInstructionDispatch;
+        
+        private static readonly Dictionary<Module, ICollection<ICilOpCodeHandler>> HandlerInstances = new();
+
+        /// <summary>
+        /// Creates a new CIL dispatcher using the handlers defined in the current module. 
+        /// </summary>
+        public CilDispatcher()
+            : this(typeof(CilDispatcher).Module)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new CIL dispatcher using the handlers defined in the provided module. 
+        /// </summary>
+        public CilDispatcher(Module handlerModule)
+        {
+            var table = new Dictionary<CilCode, ICilOpCodeHandler>();
+            foreach (var handler in GetOrCreateHandlersInModule(handlerModule))
+            {
+                foreach (var code in handler.SupportedOpCodes)
+                    table.Add(code, handler);
+            }
+
+            DispatcherTable = table;
+        }
+
+        /// <summary>
+        /// Gets the used dispatcher table.
+        /// </summary>
+        public IDictionary<CilCode, ICilOpCodeHandler> DispatcherTable
+        {
+            get;
+        }
 
         private static IEnumerable<ICilOpCodeHandler> GetOrCreateHandlersInModule(Module module)
         {
@@ -37,46 +73,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         }
         
         /// <inheritdoc />
-        public event EventHandler<BeforeInstructionDispatchEventArgs<CilInstruction>> BeforeInstructionDispatch;
-        
-        /// <inheritdoc />
-        public event EventHandler<InstructionDispatchEventArgs<CilInstruction>> AfterInstructionDispatch;
-
-        /// <summary>
-        /// Creates a new CIL dispatcher using the handlers defined in the current module. 
-        /// </summary>
-        public DefaultCilDispatcher()
-            : this(typeof(DefaultCilDispatcher).Module)
+        public DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
-        }
-
-        /// <summary>
-        /// Creates a new CIL dispatcher using the handlers defined in the provided module. 
-        /// </summary>
-        public DefaultCilDispatcher(Module handlerModule)
-        {
-            var table = new Dictionary<CilCode, ICilOpCodeHandler>();
-            foreach (var handler in GetOrCreateHandlersInModule(handlerModule))
-            {
-                foreach (var code in handler.SupportedOpCodes)
-                    table.Add(code, handler);
-            }
-
-            DispatcherTable = table;
-        }
-
-        /// <summary>
-        /// Gets the used dispatcher table.
-        /// </summary>
-        public IDictionary<CilCode, ICilOpCodeHandler> DispatcherTable
-        {
-            get;
-        }
-        
-        /// <inheritdoc />
-        public DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
-        {
-            var eventArgs = new BeforeInstructionDispatchEventArgs<CilInstruction>(context, instruction);
+            var eventArgs = new BeforeInstructionDispatchEventArgs(context, instruction);
             OnBeforeInstructionDispatch(eventArgs);
 
             DispatchResult result;
@@ -90,7 +89,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
                 result = handler.Execute(context, instruction);
             }
  
-            OnAfterInstructionDispatch(new AfterInstructionDispatchEventArgs<CilInstruction>(context, instruction, result));
+            OnAfterInstructionDispatch(new AfterInstructionDispatchEventArgs(context, instruction, result));
             return result;
         }
 
@@ -112,7 +111,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         /// Invoked when an instruction is about to be dispatched. 
         /// </summary>
         /// <param name="e">The arguments describing the event.</param>
-        protected virtual void OnBeforeInstructionDispatch(BeforeInstructionDispatchEventArgs<CilInstruction> e)
+        protected virtual void OnBeforeInstructionDispatch(BeforeInstructionDispatchEventArgs e)
         {
             BeforeInstructionDispatch?.Invoke(this, e);
         }
@@ -121,7 +120,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         /// Invoked when an instruction is about to be dispatched. 
         /// </summary>
         /// <param name="e">The arguments describing the event.</param>
-        protected virtual void OnAfterInstructionDispatch(InstructionDispatchEventArgs<CilInstruction> e)
+        protected virtual void OnAfterInstructionDispatch(InstructionDispatchEventArgs e)
         {
             AfterInstructionDispatch?.Invoke(this, e);
         }

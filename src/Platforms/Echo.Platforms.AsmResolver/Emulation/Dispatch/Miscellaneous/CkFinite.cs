@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Miscellaneous
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var val = context.ProgramState.Stack.Top;
             if (val is FValue value)

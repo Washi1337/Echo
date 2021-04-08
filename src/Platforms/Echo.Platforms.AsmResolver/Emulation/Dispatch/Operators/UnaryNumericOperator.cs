@@ -24,7 +24,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        public DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var argument = context.ProgramState.Stack.Pop();
 
@@ -47,7 +47,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <param name="context">The context to execute the instruction in.</param>
         /// <param name="value">The pushed value to perform the operation on.</param>
         /// <returns>The result of the operation.</returns>
-        protected abstract DispatchResult Execute(ExecutionContext context, Float64Value value);
+        protected abstract DispatchResult Execute(CilExecutionContext context, FValue value);
 
         /// <summary>
         /// Performs the operation on the pushed integer value.
@@ -55,6 +55,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <param name="context">The context to execute the instruction in.</param>
         /// <param name="value">The pushed value to perform the operation on.</param>
         /// <returns>The result of the operation.</returns>
-        protected abstract DispatchResult Execute(ExecutionContext context, IntegerValue value);
+        protected abstract DispatchResult Execute(CilExecutionContext context, IntegerValue value);
     }
 }

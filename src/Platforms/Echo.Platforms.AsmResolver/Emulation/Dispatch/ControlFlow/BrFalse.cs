@@ -18,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         };
 
         /// <inheritdoc />
-        public override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction) => 
+        public override Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction) => 
             context.ProgramState.Stack.Top.IsZero;
     }
 }

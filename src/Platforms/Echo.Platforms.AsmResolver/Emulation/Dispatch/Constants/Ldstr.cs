@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
             var marshaller = environment.CliMarshaller;

@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
 
         /// <inheritdoc />
         protected override void StoreElement(
-            ExecutionContext context,
+            CilExecutionContext context,
             CilInstruction instruction, 
             IDotNetArrayValue array,
             int index,

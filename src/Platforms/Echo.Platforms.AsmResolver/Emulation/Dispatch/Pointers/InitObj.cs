@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var type = (ITypeDefOrRef) instruction.Operand;
             var memoryLayout = context.GetService<ICilRuntimeEnvironment>().ValueFactory.GetTypeMemoryLayout(type);

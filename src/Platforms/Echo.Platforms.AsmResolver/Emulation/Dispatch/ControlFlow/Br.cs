@@ -21,6 +21,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         protected override int ArgumentCount => 0;
 
         /// <inheritdoc />
-        public override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction) => true;
+        public override Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction) => true;
     }
 }

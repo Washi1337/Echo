@@ -17,16 +17,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     public abstract class CallBase : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
 
             // Pop arguments.
             int argumentCount = environment.Architecture.GetStackPopCount(instruction);
-            var arguments = context.ProgramState.Stack
-                .Pop(argumentCount, true)
-                .Cast<ICliValue>()
-                .ToList();
+            var arguments = context.ProgramState.Stack.Pop(argumentCount, true);
 
             // Dispatch
             var methodDispatch = DevirtualizeMethod(instruction, arguments);
@@ -43,7 +40,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         }
 
         private static IConcreteValue InvokeAndGetResult(ICilRuntimeEnvironment environment, CilInstruction instruction,
-            in MethodDevirtualizationResult methodDispatch, IReadOnlyList<ICliValue> arguments)
+            in MethodDevirtualizationResult methodDispatch, IList<ICliValue> arguments)
         {
             // If method dispatch's result was unknown, assume a non-null object instance and return an unknown value. 
             // TODO: This should perhaps be made configurable.
@@ -80,7 +77,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
         internal static List<IConcreteValue> MarshalMethodArguments(
             ICilRuntimeEnvironment environment,
-            IReadOnlyList<ICliValue> arguments,
+            IList<ICliValue> arguments,
             MethodSignature signature)
         {
             var marshaller = environment.CliMarshaller;
@@ -126,7 +123,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 signature.ReturnType);
         }
 
-        private static void UpdateStack(ExecutionContext context, IConcreteValue result, CilInstruction instruction)
+        private static void UpdateStack(CilExecutionContext context, IConcreteValue result, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
 

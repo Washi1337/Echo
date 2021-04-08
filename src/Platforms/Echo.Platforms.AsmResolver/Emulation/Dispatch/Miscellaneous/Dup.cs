@@ -18,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Miscellaneous
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var stack = context.ProgramState.Stack;
             stack.Push((ICliValue) stack.Top.Copy());

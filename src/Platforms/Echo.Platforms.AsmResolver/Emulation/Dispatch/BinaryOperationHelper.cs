@@ -5,7 +5,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
 {
     internal static class BinaryOperationHelper
     {
-        public static (ICliValue left, ICliValue right) PopBinaryOperationArguments(ExecutionContext context)
+        public static (ICliValue left, ICliValue right) PopBinaryOperationArguments(CilExecutionContext context)
         {
             var values = PeekBinaryOperationArguments(context);
             var stack = context.ProgramState.Stack;
@@ -14,7 +14,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
             return values;
         }
         
-        public static (ICliValue left, ICliValue right) PeekBinaryOperationArguments(ExecutionContext context)
+        public static (ICliValue left, ICliValue right) PeekBinaryOperationArguments(CilExecutionContext context)
         {
             var stack = context.ProgramState.Stack;
             var value2 = stack[0];

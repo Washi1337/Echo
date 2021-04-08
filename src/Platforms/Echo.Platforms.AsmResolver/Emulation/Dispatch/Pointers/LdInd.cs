@@ -28,7 +28,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
             var corLibTypeFactory = environment.Module.CorLibTypeFactory;

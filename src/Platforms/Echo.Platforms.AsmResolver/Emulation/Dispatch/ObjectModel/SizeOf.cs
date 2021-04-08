@@ -18,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(Concrete.Emulation.ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var type = instruction.Operand as ITypeDefOrRef;
             var environment = context.GetService<ICilRuntimeEnvironment>();

@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         }
 
         /// <inheritdoc />
-        public virtual DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public virtual DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             context.ProgramState.ProgramCounter += instruction.Size;
             return DispatchResult.Success();

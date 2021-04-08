@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         protected virtual int ArgumentCount => 1;
             
         /// <inheritdoc />
-        public DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var result = VerifyCondition(context, instruction);
             
@@ -56,6 +56,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         /// <param name="instruction">The instruction that is being executed.</param>
         /// <returns><c>true</c> if the branch should be taken, <c>false</c> if not, and <see cref="Trilean.Unknown"/>
         /// if the conclusion is unknown.</returns>
-        public abstract Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction);
+        public abstract Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction);
     }
 }

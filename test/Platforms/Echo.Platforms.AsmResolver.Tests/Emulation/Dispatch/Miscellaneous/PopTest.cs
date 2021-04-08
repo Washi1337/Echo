@@ -1,6 +1,7 @@
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Values;
 using Echo.Core.Emulation;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
@@ -16,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Miscellaneous
         [Fact]
         public void Pop()
         {
-            ExecutionContext.ProgramState.Stack.Push(new UnknownValue());
+            ExecutionContext.ProgramState.Stack.Push(new I4Value(0, 0));
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Pop));
             Assert.True(result.IsSuccess);
             Assert.Equal(0, ExecutionContext.ProgramState.Stack.Size);

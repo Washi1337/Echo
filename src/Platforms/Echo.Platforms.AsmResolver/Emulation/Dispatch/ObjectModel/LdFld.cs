@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
             var field = ((IFieldDescriptor) instruction.Operand).Resolve();

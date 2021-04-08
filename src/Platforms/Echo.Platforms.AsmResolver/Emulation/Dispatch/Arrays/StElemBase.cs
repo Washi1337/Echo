@@ -14,7 +14,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
     public abstract class StElemBase : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var stack = context.ProgramState.Stack;
             
@@ -66,7 +66,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         /// <param name="index">The index to store the element at.</param>
         /// <param name="value">The value of the element.</param>
         protected abstract void StoreElement(
-            ExecutionContext context,
+            CilExecutionContext context,
             CilInstruction instruction,
             IDotNetArrayValue dotNetArray,
             int index,

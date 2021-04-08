@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        public DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var (left, right) = BinaryOperationHelper.PopBinaryOperationArguments(context);
 
@@ -49,7 +49,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <param name="left">The left side of the operation.</param>
         /// <param name="right">The right side of the operation.</param>
         /// <returns>The result of the operation.</returns>
-        protected abstract DispatchResult Execute(ExecutionContext context, CilInstruction instruction, FValue left, FValue right);
+        protected abstract DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, FValue left, FValue right);
 
         /// <summary>
         /// Performs the operation on the two pushed integers.
@@ -59,7 +59,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <param name="left">The left side of the operation.</param>
         /// <param name="right">The right side of the operation.</param>
         /// <returns>The result of the operation.</returns>
-        protected abstract DispatchResult Execute(ExecutionContext context, CilInstruction instruction, IntegerValue left, IntegerValue right);
+        protected abstract DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, IntegerValue left, IntegerValue right);
 
         /// <summary>
         /// Performs the operation on the two pushed object references.
@@ -69,6 +69,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <param name="left">The left side of the operation.</param>
         /// <param name="right">The right side of the operation.</param>
         /// <returns>The result of the operation.</returns>
-        protected abstract DispatchResult Execute(ExecutionContext context, CilInstruction instruction, OValue left, OValue right);
+        protected abstract DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, OValue left, OValue right);
     }
 }

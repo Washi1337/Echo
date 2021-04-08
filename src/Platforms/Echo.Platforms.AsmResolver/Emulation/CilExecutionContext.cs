@@ -1,26 +1,26 @@
 using System;
 using System.Threading;
+using Echo.Concrete.Emulation;
 using Echo.Concrete.Values;
-using Echo.Core.Emulation;
 
-namespace Echo.Concrete.Emulation
+namespace Echo.Platforms.AsmResolver.Emulation
 {
     /// <summary>
     /// Provides a context for executing instructions within a virtual machine. 
     /// </summary>
-    public class ExecutionContext : IServiceProvider
+    public class CilExecutionContext : IServiceProvider
     {
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="ExecutionContext"/> class.
+        /// Creates a new instance of the <see cref="CilExecutionContext"/> class.
         /// </summary>
         /// <param name="serviceProvider">The object providing additional services to the emulator.</param>
         /// <param name="programState">The current state of the program.</param>
         /// <param name="cancellationToken">The cancellation token to use for cancelling the execution.</param>
-        public ExecutionContext(
+        public CilExecutionContext(
             IServiceProvider serviceProvider,
-            IProgramState<IConcreteValue> programState, 
+            CilProgramState programState, 
             CancellationToken cancellationToken)
         {
             _serviceProvider = serviceProvider;
@@ -32,7 +32,7 @@ namespace Echo.Concrete.Emulation
         /// <summary>
         /// Gets the current state of the program.
         /// </summary>
-        public IProgramState<IConcreteValue> ProgramState
+        public CilProgramState ProgramState
         {
             get;
         }

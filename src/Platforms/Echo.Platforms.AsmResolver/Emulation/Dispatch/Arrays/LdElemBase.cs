@@ -14,7 +14,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
     public abstract class LdElemBase : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var stack = context.ProgramState.Stack;
             
@@ -75,7 +75,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         /// <param name="index">The index of the element to get.</param>
         /// <returns>The value.</returns>
         protected abstract ICliValue GetElementValue(
-            ExecutionContext context,
+            CilExecutionContext context,
             CilInstruction instruction,
             IDotNetArrayValue array,
             int index);
@@ -89,6 +89,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         /// <remarks>
         /// This method is called when either the array or the index of the requested element is not fully known.
         /// </remarks>
-        protected abstract ICliValue GetUnknownElementValue(ExecutionContext context, CilInstruction instruction);
+        protected abstract ICliValue GetUnknownElementValue(CilExecutionContext context, CilInstruction instruction);
     }
 }

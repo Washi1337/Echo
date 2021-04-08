@@ -20,14 +20,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         };
 
         /// <inheritdoc />
-        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected override Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction,
             IntegerValue left, IntegerValue right)
         {
             return left.IsEqualTo(right);
         }
 
         /// <inheritdoc />
-        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected override Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction,
             FValue left, FValue right)
         {
             // ReSharper disable once CompareOfFloatsByEqualityOperator
@@ -35,7 +35,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         }
 
         /// <inheritdoc />
-        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected override Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction,
             OValue left, OValue right)
         {
             return left.IsKnown && right.IsKnown

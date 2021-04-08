@@ -24,7 +24,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        public DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var (left, right) = PopArguments(context);
 
@@ -41,12 +41,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
             return result;
         }
 
-        private static DispatchResult ExecuteDefault(ExecutionContext context, IntegerValue value, IntegerValue left)
+        private static DispatchResult ExecuteDefault(CilExecutionContext context, IntegerValue value, IntegerValue left)
         {
             if (value.IsNonZero.IsUnknown)
                 value.MarkFullyUnknown();
 
-            context.ProgramState.Stack.Push(left);
+            context.ProgramState.Stack.Push((ICliValue) left);
             return DispatchResult.Success();
         }
 
@@ -58,10 +58,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         /// <param name="value">The pushed integer value to shift</param>
         /// <param name="shiftCount">The amount to shift the value with.</param>
         /// <returns>The result of the operation.</returns>
-        protected abstract DispatchResult Execute(ExecutionContext context, CilInstruction instruction,
+        protected abstract DispatchResult Execute(CilExecutionContext context, CilInstruction instruction,
             IntegerValue value, int shiftCount);
         
-        private static (IntegerValue, int?) PopArguments(ExecutionContext context)
+        private static (IntegerValue, int?) PopArguments(CilExecutionContext context)
         {
             var value2 = context.ProgramState.Stack.Pop();
             var value1 = context.ProgramState.Stack.Pop();

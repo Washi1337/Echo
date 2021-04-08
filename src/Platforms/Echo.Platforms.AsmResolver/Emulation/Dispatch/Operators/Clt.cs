@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         };
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
+        protected override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, 
             FValue left, FValue right)
         {
             bool result = left.IsLessThan(right, instruction.OpCode.Code == CilCode.Clt_Un);
@@ -28,7 +28,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
+        protected override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, 
             IntegerValue left, IntegerValue right)
         {
             var result = left.IsLessThan(right, instruction.OpCode.Code == CilCode.Clt);
@@ -36,7 +36,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, OValue left, OValue right)
+        protected override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, OValue left, OValue right)
         {
             var result = left.IsLessThan(right);
             return ConvertToI4AndReturnSuccess(context, result);
