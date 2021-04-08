@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;

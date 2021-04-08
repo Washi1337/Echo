@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Core.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables

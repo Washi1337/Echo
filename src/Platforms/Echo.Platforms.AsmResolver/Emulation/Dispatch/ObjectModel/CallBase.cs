@@ -5,7 +5,6 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 

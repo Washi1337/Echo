@@ -1,5 +1,5 @@
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete.Emulation.Dispatch;
+using Echo.Concrete.Emulation;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
 {

@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Echo.Concrete.Emulation.Dispatch
+namespace Echo.Concrete.Emulation
 {
     /// <summary>
     /// Represents the exception that occurs upon the execution of an undefined instruction.
