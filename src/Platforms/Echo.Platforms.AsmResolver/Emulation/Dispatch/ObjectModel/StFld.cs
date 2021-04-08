@@ -27,8 +27,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var field = ((IFieldDescriptor) instruction.Operand).Resolve();
             var stack = context.ProgramState.Stack;
 
-            var fieldValue = (ICliValue) stack.Pop();
-            var objectValue = (ICliValue) stack.Pop();
+            var fieldValue = stack.Pop();
+            var objectValue = stack.Pop();
 
             if (field.IsStatic)
             {

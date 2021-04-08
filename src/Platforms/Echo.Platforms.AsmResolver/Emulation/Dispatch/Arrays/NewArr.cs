@@ -24,7 +24,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             var environment = context.GetService<ICilRuntimeEnvironment>();
             var stack = context.ProgramState.Stack;
             
-            var sizeValue = (ICliValue) stack.Pop();
+            var sizeValue = stack.Pop();
             if (!sizeValue.IsKnown)
                 return DispatchResult.InvalidProgram();
             

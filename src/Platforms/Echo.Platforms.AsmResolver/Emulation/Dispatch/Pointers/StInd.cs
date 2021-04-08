@@ -31,7 +31,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             var factory = environment.Module.CorLibTypeFactory;
 
             var stack = context.ProgramState.Stack;
-            var valueValue = (ICliValue) stack.Pop();
+            var valueValue = stack.Pop();
             var pointerValue = (IPointerValue) stack.Pop();
 
             var marshaller = environment.CliMarshaller;

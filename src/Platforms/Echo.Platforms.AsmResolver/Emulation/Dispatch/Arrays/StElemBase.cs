@@ -18,9 +18,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             var stack = context.ProgramState.Stack;
             
             // Pop arguments.
-            var valueValue = (ICliValue) stack.Pop();
-            var indexValue = (ICliValue) stack.Pop();
-            var arrayValue = (ICliValue) stack.Pop();
+            var valueValue = stack.Pop();
+            var indexValue = stack.Pop();
+            var arrayValue = stack.Pop();
 
             // Check if both array and index are known.
             if (!arrayValue.IsKnown)

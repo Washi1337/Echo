@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var referencedField = (IFieldDescriptor) instruction.Operand;
             var staticField = environment.StaticFieldFactory.Get(referencedField);
             
-            var value = (ICliValue) context.ProgramState.Stack.Pop();
+            var value = context.ProgramState.Stack.Pop();
             staticField.Value = environment.CliMarshaller.ToCtsValue(value, referencedField.Signature.FieldType);
             
             return base.Execute(context, instruction);

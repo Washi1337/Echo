@@ -35,7 +35,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             {
                 case CilParameter parameter:
                     var value = environment.CliMarshaller.ToCtsValue(
-                        (ICliValue) context.ProgramState.Stack.Pop(),
+                        context.ProgramState.Stack.Pop(),
                         parameter.Parameter.ParameterType);
 
                     context.ProgramState.Variables[variables[0]] = value;

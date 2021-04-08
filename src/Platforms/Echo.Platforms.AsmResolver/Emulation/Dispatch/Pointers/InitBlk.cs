@@ -24,9 +24,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             var stack = context.ProgramState.Stack;
 
             // Pop arguments.
-            var lengthValue = (ICliValue) stack.Pop();
-            var initValue = (ICliValue) stack.Pop();
-            var address = (ICliValue) stack.Pop();
+            var lengthValue = stack.Pop();
+            var initValue = stack.Pop();
+            var address = stack.Pop();
 
             // Interpret arguments.
             if (!(address is IPointerValue pointerValue))
