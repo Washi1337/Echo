@@ -1,4 +1,3 @@
-using System;
 using Echo.Concrete.Values;
 using Echo.Core.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
@@ -20,17 +19,26 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Variables = new CilVariableState(valueFactory);
         }
 
+        /// <summary>
+        /// Gets the offset to the current instruction to be executed.
+        /// </summary>
         public long ProgramCounter
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the current state of the evaluation stack.
+        /// </summary>
         public IStackState<ICliValue> Stack
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the current state of all variables defined in the method body.
+        /// </summary>
         public IVariableState<IConcreteValue> Variables
         {
             get;

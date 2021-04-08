@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Values;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {

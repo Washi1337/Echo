@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public class CilVariableState : IVariableState<IConcreteValue>
     {
-        private readonly IDictionary<IVariable, IConcreteValue> _variables = new Dictionary<IVariable, IConcreteValue>();
+        private readonly Dictionary<IVariable, IConcreteValue> _variables = new();
         private readonly IValueFactory _valueFactory;
 
         /// <summary>

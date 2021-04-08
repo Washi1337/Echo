@@ -51,7 +51,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <summary>
-        /// The pointer to the raw data of the object.
+        /// Gets the raw data of the object.
         /// </summary>
         public IMemoryAccessValue Contents
         {
