@@ -87,8 +87,12 @@ namespace Echo.Concrete.Values.ValueType
         {
             get
             {
-                foreach (byte b in _knownBitMask)
+                // NOTE: Do not use entire known bitmask since it is rented and can therefore be larger than
+                // the Size property indicates.
+                
+                for (int i = 0; i < Size; i++)
                 {
+                    byte b = _knownBitMask[i];
                     if (b != 0xFF)
                         return false;
                 }
