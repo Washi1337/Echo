@@ -19,7 +19,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
             StaticFieldFactory = new StaticFieldFactory(ValueFactory);
         }
 
-        public IInstructionSetArchitecture<CilInstruction> Architecture
+        public CilArchitecture Architecture
         {
             get;
             set;

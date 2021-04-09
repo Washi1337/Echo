@@ -48,7 +48,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             Module = module ?? throw new ArgumentNullException(nameof(module));
             Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
-            Architecture = instructions.Architecture;
+            Architecture = (CilArchitecture) instructions.Architecture;
             
             ValueFactory = new DefaultValueFactory(module, is32Bit);
             
@@ -82,7 +82,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
         
         /// <inheritdoc />
-        public IInstructionSetArchitecture<CilInstruction> Architecture
+        public CilArchitecture Architecture
         {
             get;
         }

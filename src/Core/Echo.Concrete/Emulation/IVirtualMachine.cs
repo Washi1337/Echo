@@ -26,14 +26,6 @@ namespace Echo.Concrete.Emulation
         }
 
         /// <summary>
-        /// Gets the instructions in memory to be executed.
-        /// </summary>
-        IStaticInstructionProvider<TInstruction> Instructions
-        {
-            get;
-        }
-
-        /// <summary>
         /// Executes the instructions until completion.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token to use for aborting the execution.</param>
