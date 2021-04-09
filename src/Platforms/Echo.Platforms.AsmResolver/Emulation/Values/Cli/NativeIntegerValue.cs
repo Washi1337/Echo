@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public NativeIntegerValue(long value, bool is32Bit)
         {
             _value = is32Bit
-                ? (IntegerValue) new I4Value((int) (value & 0xFFFFFFFF))
+                ? new I4Value((int) (value & 0xFFFFFFFF))
                 : new I8Value(value);
         }
 
@@ -35,7 +35,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public NativeIntegerValue(long value, ulong knownBitmask, bool is32Bit)
         {
             _value = is32Bit
-                ? (IntegerValue) new I4Value((int) (value & 0xFFFFFFFF), (uint) (knownBitmask & 0xFFFFFFFF))
+                ? new I4Value((int) (value & 0xFFFFFFFF), (uint) (knownBitmask & 0xFFFFFFFF))
                 : new I8Value(value, knownBitmask);
         }
 

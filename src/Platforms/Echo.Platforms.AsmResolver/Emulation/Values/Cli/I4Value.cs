@@ -66,7 +66,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         }
 
         /// <inheritdoc />
-        public I4Value InterpretAsU1() => new I4Value(I32 & 0xFF, (Mask & 0xFF) | 0xFFFFFF00);
+        public I4Value InterpretAsU1() => new(I32 & 0xFF, (Mask & 0xFF) | 0xFFFFFF00);
 
         /// <inheritdoc />
         public I4Value InterpretAsI2()
@@ -77,7 +77,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         }
 
         /// <inheritdoc />
-        public I4Value InterpretAsU2() => new I4Value(I32 & 0xFFFF, (Mask & 0xFFFF) | 0xFFFF0000);
+        public I4Value InterpretAsU2() => new(I32 & 0xFFFF, (Mask & 0xFFFF) | 0xFFFF0000);
 
         /// <inheritdoc />
         public I4Value InterpretAsI4() => this;
@@ -179,7 +179,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         {
             overflowed = false;
             ulong signMask = !unsigned || GetLastBit().IsKnown ? 0xFFFFFFFF00000000ul : 0ul;
-            return new I8Value(unsigned ? (long) U32 : I32, Mask | signMask);
+            return new I8Value(unsigned ? U32 : I32, Mask | signMask);
         }
 
         /// <inheritdoc />
