@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values.ValueType;
+using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
 {
@@ -18,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         };
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, Float64Value value)
+        protected override DispatchResult Execute(CilExecutionContext context, FValue value)
         {
             value.F64 = -value.F64;
             context.ProgramState.Stack.Push(value);
@@ -26,10 +26,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, IntegerValue value)
+        protected override DispatchResult Execute(CilExecutionContext context, IntegerValue value)
         {
             value.TwosComplement();
-            context.ProgramState.Stack.Push(value);
+            context.ProgramState.Stack.Push((ICliValue) value);
             return DispatchResult.Success();
         }
     }

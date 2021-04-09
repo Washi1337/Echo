@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         };
 
         /// <inheritdoc />
-        protected override void StoreElement(ExecutionContext context, CilInstruction instruction,
+        protected override void StoreElement(CilExecutionContext context, CilInstruction instruction,
             IDotNetArrayValue dotNetArray, int index, ICliValue value)
         {
             var marshaller = context.GetService<ICilRuntimeEnvironment>().CliMarshaller;

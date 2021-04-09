@@ -6,7 +6,7 @@ using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete.Values;
 using Echo.Core;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
@@ -20,8 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// </remarks>
     public class HleStructValue : IDotNetStructValue
     {
-        private readonly Dictionary<IFieldDescriptor, IConcreteValue> _fieldValues =
-            new Dictionary<IFieldDescriptor, IConcreteValue>();
+        private readonly Dictionary<IFieldDescriptor, IConcreteValue> _fieldValues = new();
         private readonly bool _is32Bit;
 
         private HleStructValue(TypeSignature objectType, IDictionary<IFieldDescriptor, IConcreteValue> values,

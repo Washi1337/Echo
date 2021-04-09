@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -30,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             context.ProgramState.Stack.Push(new I4Value(instruction.GetLdcI4Constant()));
             return base.Execute(context, instruction);

@@ -1,7 +1,6 @@
 using System;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
@@ -14,14 +13,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
     public abstract class StElemBase : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var stack = context.ProgramState.Stack;
             
             // Pop arguments.
-            var valueValue = (ICliValue) stack.Pop();
-            var indexValue = (ICliValue) stack.Pop();
-            var arrayValue = (ICliValue) stack.Pop();
+            var valueValue = stack.Pop();
+            var indexValue = stack.Pop();
+            var arrayValue = stack.Pop();
 
             // Check if both array and index are known.
             if (!arrayValue.IsKnown)
@@ -66,7 +65,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         /// <param name="index">The index to store the element at.</param>
         /// <param name="value">The value of the element.</param>
         protected abstract void StoreElement(
-            ExecutionContext context,
+            CilExecutionContext context,
             CilInstruction instruction,
             IDotNetArrayValue dotNetArray,
             int index,

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Core.Code;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -21,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
             
@@ -36,7 +35,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             {
                 case CilVariable cilVariable:
                     var value = environment.CliMarshaller.ToCtsValue(
-                        (ICliValue) context.ProgramState.Stack.Pop(),
+                        context.ProgramState.Stack.Pop(),
                         cilVariable.Variable.VariableType);
 
                     context.ProgramState.Variables[variables[0]] = value;

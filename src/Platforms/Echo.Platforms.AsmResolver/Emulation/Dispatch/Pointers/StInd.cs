@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
@@ -26,13 +25,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
             var factory = environment.Module.CorLibTypeFactory;
 
             var stack = context.ProgramState.Stack;
-            var valueValue = (ICliValue) stack.Pop();
+            var valueValue = stack.Pop();
             var pointerValue = (IPointerValue) stack.Pop();
 
             var marshaller = environment.CliMarshaller;

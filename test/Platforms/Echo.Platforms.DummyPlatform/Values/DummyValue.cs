@@ -1,5 +1,5 @@
 using System;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Platforms.DummyPlatform.Values
 {

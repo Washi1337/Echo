@@ -1,7 +1,6 @@
 using System;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
@@ -14,13 +13,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
     public abstract class LdElemBase : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var stack = context.ProgramState.Stack;
             
             // Pop arguments.
-            var indexValue = (ICliValue) stack.Pop();
-            var arrayValue = (ICliValue) stack.Pop();
+            var indexValue = stack.Pop();
+            var arrayValue = stack.Pop();
 
             // Check if both array and index are known.
             if (!arrayValue.IsKnown || !indexValue.IsKnown)
@@ -75,7 +74,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         /// <param name="index">The index of the element to get.</param>
         /// <returns>The value.</returns>
         protected abstract ICliValue GetElementValue(
-            ExecutionContext context,
+            CilExecutionContext context,
             CilInstruction instruction,
             IDotNetArrayValue array,
             int index);
@@ -89,6 +88,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         /// <remarks>
         /// This method is called when either the array or the index of the requested element is not fully known.
         /// </remarks>
-        protected abstract ICliValue GetUnknownElementValue(ExecutionContext context, CilInstruction instruction);
+        protected abstract ICliValue GetUnknownElementValue(CilExecutionContext context, CilInstruction instruction);
     }
 }

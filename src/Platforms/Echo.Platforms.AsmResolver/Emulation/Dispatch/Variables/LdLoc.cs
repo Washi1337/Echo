@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Core.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
@@ -20,7 +19,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
             

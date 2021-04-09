@@ -5,14 +5,10 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
-using Echo.Concrete.Values;
 using Echo.Core.Code;
-using Echo.Core.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Values;
-using ExecutionContext = Echo.Concrete.Emulation.ExecutionContext;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
@@ -25,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <inheritdoc />
         public event EventHandler<ExecutionTerminatedEventArgs> ExecutionTerminated;
      
-        private readonly IDictionary<Type, object> _services = new Dictionary<Type, object>();
+        private readonly Dictionary<Type, object> _services = new();
 
         /// <summary>
         /// Creates a new instance of the <see cref="CilVirtualMachine"/>. 
@@ -59,7 +55,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Is32Bit = is32Bit;
             Status = VirtualMachineStatus.Idle;
             CurrentState = new CilProgramState(ValueFactory);
-            Dispatcher = new DefaultCilDispatcher();
+            Dispatcher = new CilDispatcher();
             CliMarshaller = new DefaultCliMarshaller(this);
             MethodInvoker = new ReturnUnknownMethodInvoker(ValueFactory);
             StaticFieldFactory = new StaticFieldFactory(ValueFactory);
@@ -74,7 +70,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <inheritdoc />
-        public IProgramState<IConcreteValue> CurrentState
+        public CilProgramState CurrentState
         {
             get;
         }
@@ -134,7 +130,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets or sets the dispatcher used for the execution of instructions.
         /// </summary>
-        public IVirtualMachineDispatcher<CilInstruction> Dispatcher
+        public ICilDispatcher Dispatcher
         {
             get;
             set;
@@ -143,7 +139,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <inheritdoc />
         public ExecutionResult Execute(CancellationToken cancellationToken)
         {
-            var context = new ExecutionContext(this, CurrentState, cancellationToken);
+            var context = new CilExecutionContext(this, CurrentState, cancellationToken);
 
             try
             {

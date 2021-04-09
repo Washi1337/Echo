@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -20,14 +19,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var stack = context.ProgramState.Stack;
 
             // Pop arguments.
-            var lengthValue = (ICliValue) stack.Pop();
-            var sourceAddress = (ICliValue) stack.Pop();
-            var destinationAddress = (ICliValue) stack.Pop();
+            var lengthValue = stack.Pop();
+            var sourceAddress = stack.Pop();
+            var destinationAddress = stack.Pop();
 
             // Interpret arguments.
             if (!(destinationAddress is IPointerValue destinationPointer) || !(sourceAddress is IPointerValue sourcePointer))

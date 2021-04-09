@@ -3,7 +3,6 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
@@ -20,12 +19,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
             var stack = context.ProgramState.Stack;
             
-            var sizeValue = (ICliValue) stack.Pop();
+            var sizeValue = stack.Pop();
             if (!sizeValue.IsKnown)
                 return DispatchResult.InvalidProgram();
             

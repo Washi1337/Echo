@@ -3,7 +3,6 @@ using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
@@ -20,7 +19,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
             var method = (IMethodDescriptor) instruction.Operand;
@@ -35,10 +34,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
             // Pop arguments.
             int argumentCount = environment.Architecture.GetStackPopCount(instruction);
-            var arguments = context.ProgramState.Stack
-                .Pop(argumentCount, true)
-                .Cast<ICliValue>()
-                .ToList();
+            var arguments = context.ProgramState.Stack.Pop(argumentCount, true).ToList();
 
             arguments.Insert(0, type.IsValueType
                 ? new OValue(cilValueObject, true, environment.Is32Bit)
@@ -56,7 +52,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             if (result == null)
                 context.ProgramState.Stack.Push(cilValueObject);
             else
-                context.ProgramState.Stack.Push(result);
+                context.ProgramState.Stack.Push(environment.CliMarshaller.ToCliValue(result, type));
 
             return base.Execute(context, instruction);
         }

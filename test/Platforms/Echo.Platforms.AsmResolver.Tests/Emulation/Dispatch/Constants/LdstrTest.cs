@@ -23,10 +23,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Constants
             Assert.True(result.IsSuccess);
             
             var top = ExecutionContext.ProgramState.Stack.Top;
-            Assert.IsAssignableFrom<OValue>(top);
-            var oValue = (OValue) top;
-            Assert.IsAssignableFrom<StringValue>(oValue.ReferencedObject);
-            var stringValue = (StringValue) oValue.ReferencedObject;
+            var oValue = Assert.IsAssignableFrom<OValue>(top);
+            var stringValue = Assert.IsAssignableFrom<StringValue>(oValue.ReferencedObject);
             Assert.Equal(stringLiteral, stringValue.ToString());
         }
     }

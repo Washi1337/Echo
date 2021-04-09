@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Echo.Concrete.Emulation.Dispatch
+namespace Echo.Concrete.Emulation
 {
     /// <summary>
     /// Represents an exception that occurs during the dispatch phase of a virtual machine.

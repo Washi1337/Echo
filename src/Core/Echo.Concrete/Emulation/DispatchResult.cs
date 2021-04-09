@@ -1,6 +1,6 @@
 using System;
 
-namespace Echo.Concrete.Emulation.Dispatch
+namespace Echo.Concrete.Emulation
 {
     /// <summary>
     /// Represents a result produced after dispatching an instruction to an operation code handler. 

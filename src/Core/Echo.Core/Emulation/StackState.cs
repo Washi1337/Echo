@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.Core.Values;
 
 namespace Echo.Core.Emulation
 {
@@ -59,7 +58,7 @@ namespace Echo.Core.Emulation
         }
 
         /// <inheritdoc />
-        public IList<TValue> Pop(int count, bool reversed = false)
+        public TValue[] Pop(int count, bool reversed = false)
         {
             AssertCanPop(count);
             

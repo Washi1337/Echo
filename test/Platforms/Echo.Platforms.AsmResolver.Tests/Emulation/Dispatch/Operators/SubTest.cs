@@ -24,8 +24,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Sub));
             
             Assert.True(result.IsSuccess);
-            Assert.IsAssignableFrom<I4Value>(stack.Top);
-            Assert.Equal(4444, ((I4Value) stack.Top).I32);
+            var i4Value = Assert.IsAssignableFrom<I4Value>(stack.Top);
+            Assert.Equal(4444, i4Value.I32);
         }
 
         [Fact]
@@ -38,8 +38,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Operators
             var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Sub));
             
             Assert.True(result.IsSuccess);
-            Assert.IsAssignableFrom<I8Value>(stack.Top);
-            Assert.Equal(4444, ((I8Value) stack.Top).I64);
+            var i8Value = Assert.IsAssignableFrom<I8Value>(stack.Top);
+            Assert.Equal(4444, i8Value.I64);
         }
 
         [Fact]

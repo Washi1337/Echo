@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Miscellaneous
 {
@@ -17,7 +16,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Miscellaneous
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             context.ProgramState.Stack.Pop();
             return base.Execute(context, instruction);

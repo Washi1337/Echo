@@ -2,7 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections;
 using Echo.Core;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Concrete.Values.ValueType
 {

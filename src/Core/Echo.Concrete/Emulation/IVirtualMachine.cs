@@ -26,14 +26,6 @@ namespace Echo.Concrete.Emulation
         }
 
         /// <summary>
-        /// Gets the current state of the stack and memory of the virtual machine.
-        /// </summary>
-        IProgramState<IConcreteValue> CurrentState
-        {
-            get;
-        }
-
-        /// <summary>
         /// Gets the instructions in memory to be executed.
         /// </summary>
         IStaticInstructionProvider<TInstruction> Instructions

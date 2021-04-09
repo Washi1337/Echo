@@ -38,8 +38,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
             var container = new ServiceContainer();
             container.AddService(typeof(ICilRuntimeEnvironment), environment);
             
-            Dispatcher = new DefaultCilDispatcher();
-            ExecutionContext = new ExecutionContext(
+            Dispatcher = new CilDispatcher();
+            ExecutionContext = new CilExecutionContext(
                 container, 
                 new CilProgramState(environment.ValueFactory), 
                 default);
@@ -50,12 +50,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
             get;
         }
 
-        public ExecutionContext ExecutionContext
+        public CilExecutionContext ExecutionContext
         {
             get;
         }
 
-        public DefaultCilDispatcher Dispatcher
+        public CilDispatcher Dispatcher
         {
             get;
         }

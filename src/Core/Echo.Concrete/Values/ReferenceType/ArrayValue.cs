@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.Core;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Concrete.Values.ReferenceType
 {

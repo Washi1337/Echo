@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
@@ -19,14 +18,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
             
             var referencedField = (IFieldDescriptor) instruction.Operand;
             var staticField = environment.StaticFieldFactory.Get(referencedField);
             
-            var value = (ICliValue) context.ProgramState.Stack.Pop();
+            var value = context.ProgramState.Stack.Pop();
             staticField.Value = environment.CliMarshaller.ToCtsValue(value, referencedField.Signature.FieldType);
             
             return base.Execute(context, instruction);

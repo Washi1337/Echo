@@ -1,6 +1,6 @@
 using System;
 using Echo.Core;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Concrete.Values.ValueType
 {

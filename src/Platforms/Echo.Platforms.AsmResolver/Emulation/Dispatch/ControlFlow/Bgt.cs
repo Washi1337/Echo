@@ -20,21 +20,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         };
 
         /// <inheritdoc />
-        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected override Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction,
             IntegerValue left, IntegerValue right)
         {
             return left.IsGreaterThan(right, IsSigned(instruction));
         }
 
         /// <inheritdoc />
-        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction, FValue left,
+        protected override Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction, FValue left,
             FValue right)
         {
             return left.IsGreaterThan(right, IsSigned(instruction));
         }
 
         /// <inheritdoc />
-        protected override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction, OValue left,
+        protected override Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction, OValue left,
             OValue right)
         {
             return left.IsGreaterThan(right);

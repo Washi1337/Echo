@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using Echo.Concrete.Values;
 using Echo.Concrete.Values.ValueType;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
 {

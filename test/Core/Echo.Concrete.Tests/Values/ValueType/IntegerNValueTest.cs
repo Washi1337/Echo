@@ -287,8 +287,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
             var value = new IntegerNValue("00110??0");
             var newValue = value.Extend(8, false);
             
-            Assert.IsAssignableFrom<Integer8Value>(newValue);
-            var int8Value = (Integer8Value) newValue;
+            var int8Value = Assert.IsAssignableFrom<Integer8Value>(newValue);
             Assert.Equal(0b0011_0000, int8Value.U8);
             Assert.Equal(0b1111_1001, int8Value.Mask); 
         }
@@ -304,8 +303,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
             var value = new IntegerNValue(input);
             var newValue = value.Extend(16, signExtend);
                 
-            Assert.IsAssignableFrom<Integer16Value>(newValue);
-            var int16Value = (Integer16Value) newValue;
+            var int16Value = Assert.IsAssignableFrom<Integer16Value>(newValue);
             Assert.Equal(expectedBits, int16Value.U16);
             Assert.Equal(expectedMask, int16Value.Mask);
         }
@@ -320,8 +318,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
             var value = new IntegerNValue(input);
             var newValue = value.Extend(32, signExtend);
                 
-            Assert.IsAssignableFrom<Integer32Value>(newValue);
-            var int32Value = (Integer32Value) newValue;
+            var int32Value = Assert.IsAssignableFrom<Integer32Value>(newValue);
             Assert.Equal(expectedBits, int32Value.U32);
             Assert.Equal(expectedMask, int32Value.Mask);
         }
@@ -344,8 +341,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
             var value = new IntegerNValue(input);
             var newValue = value.Extend(64, signExtend);
                 
-            Assert.IsAssignableFrom<Integer64Value>(newValue);
-            var int64Value = (Integer64Value) newValue;
+            var int64Value = Assert.IsAssignableFrom<Integer64Value>(newValue);
             Assert.Equal(expectedBits, int64Value.U64);
             Assert.Equal(expectedMask, int64Value.Mask);
         }
@@ -358,8 +354,7 @@ namespace Echo.Concrete.Tests.Values.ValueType
             var value = new IntegerNValue(input);
             var newValue = value.Truncate(8);
             
-            Assert.IsAssignableFrom<Integer8Value>(newValue);
-            var int8Value = (Integer8Value) newValue;
+            var int8Value = Assert.IsAssignableFrom<Integer8Value>(newValue);
             Assert.Equal(expectedBits, int8Value.U8);
             Assert.Equal(expectedMask, int8Value.Mask);
         }

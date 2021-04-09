@@ -19,9 +19,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     public class StaticFieldFactory
     {
         private readonly IValueFactory _valueFactory;
-
-        private readonly ConcurrentDictionary<IFieldDescriptor, StaticField> _cache =
-            new ConcurrentDictionary<IFieldDescriptor, StaticField>();
+        private readonly ConcurrentDictionary<IFieldDescriptor, StaticField> _cache = new();
 
         /// <summary>
         /// Creates a new instance of the <see cref="StaticFieldFactory"/> class.
@@ -67,7 +65,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             {
                 // Check if the field has an initial value through a Constant row.
                 var constant = definition.Constant;
-                if (constant?.Value != null)
+                if (constant?.Value is not null)
                 {
                     return ObjectToCtsValue(
                         constant.Value.Data,
@@ -75,8 +73,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 }
 
                 // Check if the field has an initial value through a field RVA row.
-                if (definition.HasFieldRva && definition.FieldRva != null
-                    && definition.FieldRva is IReadableSegment readableSegment)
+                if (definition.HasFieldRva && definition.FieldRva is IReadableSegment readableSegment)
                 {
                     return ObjectToCtsValue(
                         readableSegment.ToArray(),

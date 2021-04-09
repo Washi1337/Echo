@@ -1,7 +1,7 @@
 using System;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Concrete.Values.ReferenceType
 {

@@ -15,7 +15,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         protected override int ArgumentCount => 2;
 
         /// <inheritdoc />
-        public override Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction)
+        public override Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction)
         {
             var (left, right) = BinaryOperationHelper.PeekBinaryOperationArguments(context);
 
@@ -37,7 +37,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         /// <param name="right">The right operand of the comparison.</param>
         /// <returns><c>true</c> if the branch should be taken, <c>false</c> if not, and <see cref="Trilean.Unknown"/>
         /// if the conclusion is unknown.</returns>
-        protected abstract Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected abstract Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction,
             IntegerValue left, IntegerValue right);
         
         /// <summary>
@@ -49,7 +49,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         /// <param name="right">The right operand of the comparison.</param>
         /// <returns><c>true</c> if the branch should be taken, <c>false</c> if not, and <see cref="Trilean.Unknown"/>
         /// if the conclusion is unknown.</returns>
-        protected abstract Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction,
+        protected abstract Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction,
             FValue left, FValue right);
         
         /// <summary>
@@ -61,7 +61,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         /// <param name="right">The right operand of the comparison.</param>
         /// <returns><c>true</c> if the branch should be taken, <c>false</c> if not, and <see cref="Trilean.Unknown"/>
         /// if the conclusion is unknown.</returns>
-        protected abstract Trilean VerifyCondition(ExecutionContext context, CilInstruction instruction, 
+        protected abstract Trilean VerifyCondition(CilExecutionContext context, CilInstruction instruction, 
             OValue left, OValue right);
     }
 }

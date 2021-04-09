@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values;
 using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Values;
@@ -23,13 +22,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         };
 
         /// <inheritdoc />
-        public override DispatchResult Execute(ExecutionContext context, CilInstruction instruction)
+        public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
             var field = ((IFieldDescriptor) instruction.Operand).Resolve();
             var stack = context.ProgramState.Stack;
 
-            var objectValue = (ICliValue) stack.Pop();
+            var objectValue = stack.Pop();
 
             IConcreteValue fieldValue;
             if (field.IsStatic)

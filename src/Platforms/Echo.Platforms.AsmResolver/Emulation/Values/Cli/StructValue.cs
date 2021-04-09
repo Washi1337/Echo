@@ -30,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public NativeIntegerValue InterpretAsI(bool is32Bit)
         {
             return new NativeIntegerValue(is32Bit
-                    ? (IntegerValue) ReadInteger32(0)
+                    ? ReadInteger32(0)
                     : ReadInteger64(0),
                 is32Bit);
         }
@@ -39,7 +39,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values.Cli
         public NativeIntegerValue InterpretAsU(bool is32Bit)
         {
             return new NativeIntegerValue(is32Bit
-                    ? (IntegerValue) ReadInteger32(0)
+                    ? ReadInteger32(0)
                     : ReadInteger64(0),
                 is32Bit);
         }

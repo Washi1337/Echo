@@ -4,7 +4,7 @@ using Echo.Concrete.Values;
 using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
@@ -51,7 +51,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         }
 
         /// <summary>
-        /// The pointer to the raw data of the object.
+        /// Gets the raw data of the object.
         /// </summary>
         public IMemoryAccessValue Contents
         {

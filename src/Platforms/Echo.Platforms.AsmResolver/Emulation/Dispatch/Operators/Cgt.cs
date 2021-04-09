@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -20,7 +19,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         };
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
+        protected override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, 
             FValue left, FValue right)
         {
             bool result = left.IsGreaterThan(right, instruction.OpCode.Code == CilCode.Cgt_Un);
@@ -28,7 +27,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
+        protected override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, 
             IntegerValue left, IntegerValue right)
         {
             var result = left.IsGreaterThan(right, instruction.OpCode.Code == CilCode.Cgt);
@@ -36,7 +35,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, OValue left, OValue right)
+        protected override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, OValue left, OValue right)
         {
             var result = left.IsGreaterThan(right);
             return ConvertToI4AndReturnSuccess(context, result);

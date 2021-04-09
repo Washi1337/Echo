@@ -107,7 +107,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.IsAssignableFrom<NullReferenceException>(result.Exception);
         }
 
-        private void VerifyUndocumentedWriteStatic(IConcreteValue instanceObject, ICliValue stackValue, IConcreteValue expectedValue)
+        private void VerifyUndocumentedWriteStatic(ICliValue instanceObject, ICliValue stackValue, IConcreteValue expectedValue)
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
             var stack = ExecutionContext.ProgramState.Stack;

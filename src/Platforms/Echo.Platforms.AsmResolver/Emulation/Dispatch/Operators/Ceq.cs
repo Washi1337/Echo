@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Emulation;
-using Echo.Concrete.Emulation.Dispatch;
 using Echo.Concrete.Values.ValueType;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
@@ -19,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         };
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
+        protected override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, 
             FValue left, FValue right)
         {
             // ReSharper disable once CompareOfFloatsByEqualityOperator
@@ -29,7 +28,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
+        protected override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, 
             IntegerValue left, IntegerValue right)
         {
             var result = left.IsEqualTo(right);
@@ -37,7 +36,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Operators
         }
 
         /// <inheritdoc />
-        protected override DispatchResult Execute(ExecutionContext context, CilInstruction instruction, 
+        protected override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction, 
             OValue left, OValue right)
         {
             var result = left.IsEqualTo(right);

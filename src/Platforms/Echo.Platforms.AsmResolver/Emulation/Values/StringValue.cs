@@ -1,11 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete.Values;
-using Echo.Concrete.Values.ReferenceType;
 using Echo.Concrete.Values.ValueType;
 using Echo.Core;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values
 {
@@ -44,7 +46,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public int Length => _contents.Size / sizeof(char);
         
         /// <inheritdoc />
-        public bool IsKnown => true;
+        public bool IsKnown => _contents.IsKnown;
 
         /// <inheritdoc />
         public int Size => _contents.Size;
@@ -82,12 +84,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         public string ToString(char unknownChar)
         {
             var builder = new StringBuilder(Length);
-            
+
+            Span<byte> rawData = stackalloc byte[Size];
+            Span<byte> rawMask = stackalloc byte[Size];
+            _contents.ReadBytes(0, rawData, rawMask);
+
+            var chars = MemoryMarshal.Cast<byte, ushort>(rawData);
+            var mask = MemoryMarshal.Cast<byte, ushort>(rawMask);
+
             for (int i = 0; i < Length; i++)
-            {
-                var rawCharValue = GetChar(i);
-                builder.Append(rawCharValue.IsKnown ? (char) rawCharValue.U16 : unknownChar);
-            }
+                builder.Append(mask[i] == 0xFFFF ? (char) chars[i] : unknownChar);
 
             return builder.ToString();
         }

@@ -3,7 +3,7 @@ using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete.Values;
 using Echo.Core;
-using Echo.Core.Values;
+using Echo.Core.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Values

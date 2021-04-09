@@ -17,8 +17,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
     /// </summary>
     public class DefaultValueFactory : IValueFactory
     {
-        private readonly IDictionary<string, StringValue> _cachedStrings = new Dictionary<string, StringValue>();
-        private readonly IDictionary<ITypeDescriptor, TypeMemoryLayout> _memoryLayouts = new Dictionary<ITypeDescriptor, TypeMemoryLayout>();
+        private readonly Dictionary<string, StringValue> _cachedStrings = new();
+        private readonly Dictionary<ITypeDescriptor, TypeMemoryLayout> _memoryLayouts = new();
         private readonly ModuleDefinition _contextModule;
 
         /// <summary>
