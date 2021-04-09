@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Core.Code;
 
@@ -49,8 +50,22 @@ namespace Echo.Platforms.AsmResolver
         public CilStaticSuccessorResolver SuccessorResolver
         {
             get;
-        } = new CilStaticSuccessorResolver();
+        } = new();
 
+        /// <summary>
+        /// Gets the Echo symbol for the provided <see cref="CilLocalVariable"/> instance.
+        /// </summary>
+        /// <param name="variable">The local variable.</param>
+        /// <returns>The Echo symbol representing the local variable.</returns>
+        public CilVariable GetLocalVariable(CilLocalVariable variable) => _variables[variable.Index];
+
+        /// <summary>
+        /// Gets the Echo symbol for the provided <see cref="Parameter"/> instance.
+        /// </summary>
+        /// <param name="variable">The parameter.</param>
+        /// <returns>The Echo symbol representing the parameter.</returns>
+        public CilParameter GetParameterVariable(Parameter variable) => _parameters[variable.MethodSignatureIndex];
+        
         /// <inheritdoc />
         public long GetOffset(in CilInstruction instruction) => instruction.Offset;
 
@@ -99,13 +114,13 @@ namespace Echo.Platforms.AsmResolver
         {
             if (instruction.IsLdloc())
             {
-                variablesBuffer[0] = _variables[instruction.GetLocalVariable(MethodBody.LocalVariables).Index];
+                variablesBuffer[0] = GetLocalVariable(instruction.GetLocalVariable(MethodBody.LocalVariables));
                 return 1;
             }
 
             if (instruction.IsLdarg())
             {
-                variablesBuffer[0] = _parameters[instruction.GetParameter(MethodBody.Owner.Parameters).MethodSignatureIndex];
+                variablesBuffer[0] = GetParameterVariable(instruction.GetParameter(MethodBody.Owner.Parameters));
                 return 1;
             }
 
@@ -123,18 +138,17 @@ namespace Echo.Platforms.AsmResolver
         {   
             if (instruction.IsStloc())
             {
-                variablesBuffer[0] = _variables[instruction.GetLocalVariable(MethodBody.LocalVariables).Index];
+                variablesBuffer[0] = GetLocalVariable(instruction.GetLocalVariable(MethodBody.LocalVariables));
                 return 1;
             }
 
             if (instruction.IsStarg())
             {
-                variablesBuffer[0] = _parameters[instruction.GetParameter(MethodBody.Owner.Parameters).MethodSignatureIndex];
+                variablesBuffer[0] = GetParameterVariable(instruction.GetParameter(MethodBody.Owner.Parameters));
                 return 1;
             }
 
             return 0;
         }
-        
     }
 }
