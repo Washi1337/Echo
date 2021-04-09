@@ -15,7 +15,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets the architecture description of the instructions to execute. 
         /// </summary>
-        IInstructionSetArchitecture<CilInstruction> Architecture
+        CilArchitecture Architecture
         {
             get;
         }

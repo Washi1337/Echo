@@ -6,8 +6,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
 {
     public class MockModuleFixture
     {
-        private readonly ConcurrentDictionary<AssemblyReference, ModuleDefinition> _modules =
-            new ConcurrentDictionary<AssemblyReference, ModuleDefinition>();
+        private readonly ConcurrentDictionary<AssemblyReference, ModuleDefinition> _modules = new();
             
         public ModuleDefinition GetModule() => 
             GetModule(KnownCorLibs.NetStandard_v2_0_0_0);
