@@ -12,6 +12,10 @@ namespace Echo.ControlFlow.Analysis.Domination
     /// </summary>
     public class DominatorTree : IGraph
     {
+        private readonly IDictionary<IIdentifiedNode, DominatorTreeNode> _nodes;
+        private Dictionary<IIdentifiedNode, ISet<IIdentifiedNode>> _frontier;
+        private readonly object _frontierSyncLock = new object();
+        
         /// <summary>
         /// Constructs a dominator tree from a control flow graph.
         /// </summary>
@@ -147,10 +151,6 @@ namespace Echo.ControlFlow.Analysis.Domination
 
             return node;
         }
-        
-        private readonly IDictionary<IIdentifiedNode, DominatorTreeNode> _nodes;
-        private Dictionary<IIdentifiedNode, ISet<IIdentifiedNode>> _frontier;
-        private readonly object _frontierSyncLock = new object();
 
         private DominatorTree(IDictionary<IIdentifiedNode, DominatorTreeNode> nodes, IIdentifiedNode root)
         {

@@ -10,5 +10,25 @@ namespace Mocks
 
         public static string GetConstantString() => "Hello, world!";
         public static string GetIsEvenString(int i) => i % 2 == 0 ? "even" : "odd";
+
+        public static void ExceptionHandler()
+        {
+            try
+            {
+                Console.WriteLine("Password:");
+                if (Console.ReadLine() == "MyPassword")
+                {
+                    Console.WriteLine("Amazing");
+                }
+                else
+                {
+                    Console.WriteLine("Nope");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
     }
 }

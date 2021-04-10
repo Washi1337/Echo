@@ -1,15 +1,28 @@
+using System.IO;
+using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using Echo.ControlFlow.Analysis.Domination;
 using Echo.ControlFlow.Regions;
+using Echo.Core.Graphing.Serialization.Dot;
+using Echo.Platforms.AsmResolver.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests
 {
-    public class StaticFlowGraphTest
+    public class StaticFlowGraphTest : IClassFixture<MockModuleFixture>
     {
+        private MockModuleFixture _fixture;
+
+        public StaticFlowGraphTest(MockModuleFixture fixture)
+        {
+            _fixture = fixture;
+        }
+        
         [Fact]
         public void ExceptionHandlerWithHandlerEndOutsideOfMethod()
         {
@@ -53,5 +66,6 @@ namespace Echo.Platforms.AsmResolver.Tests
             var eh = Assert.IsAssignableFrom<ExceptionHandlerRegion<CilInstruction>>(region);
             Assert.Single(eh.Handlers);
         }
+
     }
 }

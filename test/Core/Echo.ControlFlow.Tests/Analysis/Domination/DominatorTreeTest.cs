@@ -1,4 +1,7 @@
+using System.IO;
 using Echo.ControlFlow.Analysis.Domination;
+using Echo.ControlFlow.Regions;
+using Echo.Platforms.DummyPlatform;
 using Xunit;
 
 namespace Echo.ControlFlow.Tests.Analysis.Domination
@@ -115,6 +118,45 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             Assert.False(dominatorTree.Dominates(n4, n2));
             Assert.False(dominatorTree.Dominates(n4, n3));
             Assert.True(dominatorTree.Dominates(n4, n4));
+        }
+
+        [Fact]
+        public void ExceptionHandler()
+        {
+            var cfg = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            
+            for (int i = 0; i < 7; i++)
+                cfg.Nodes.Add(new ControlFlowNode<int>(i));
+
+            cfg.Entrypoint = cfg.Nodes[0];
+
+            cfg.Nodes[0].ConnectWith(cfg.Nodes[1]);
+            cfg.Nodes[1].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.Conditional);
+            cfg.Nodes[1].ConnectWith(cfg.Nodes[3], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[2].ConnectWith(cfg.Nodes[4], ControlFlowEdgeType.Unconditional);
+            cfg.Nodes[3].ConnectWith(cfg.Nodes[4], ControlFlowEdgeType.FallThrough);
+            cfg.Nodes[4].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.Unconditional);
+            cfg.Nodes[5].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.Unconditional);
+
+            var ehRegion = new ExceptionHandlerRegion<int>();
+            cfg.Regions.Add(ehRegion);
+            
+            ehRegion.ProtectedRegion.Nodes.AddRange(new[]
+            {
+                cfg.Nodes[1],
+                cfg.Nodes[2],
+                cfg.Nodes[3],
+                cfg.Nodes[4],
+            });
+            
+            var handler = new HandlerRegion<int>();
+            ehRegion.Handlers.Add(handler);
+            handler.Contents.Nodes.Add(cfg.Nodes[5]);
+
+            var tree = DominatorTree.FromGraph(cfg);
+            Assert.True(tree.Dominates(cfg.Nodes[1], cfg.Nodes[6]));
+            Assert.False(tree.Dominates(cfg.Nodes[4], cfg.Nodes[6]));
+            Assert.False(tree.Dominates(cfg.Nodes[5], cfg.Nodes[6]));
         }
     }
 }
