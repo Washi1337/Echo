@@ -76,35 +76,10 @@ namespace Echo.ControlFlow.Analysis.Domination
                     var parent = traversalResult.NodeParents[current];
 
                     // Grab all predecessors.
-
-                    // If the current node is the entrypoint of a handler block, then we implicitly have 
-                    // all the nodes in the protected region as predecessor. However, for this algorithm,
-                    // it should be enough to only schedule the entrypoint of the protected region.
-                    bool isHandlerEntrypoint = current.GetParentHandler() is { } parentHandler
-                                               && current == parentHandler.GetEntrypoint();
-
-                    int actualInDegree = current.InDegree;
-                    if (isHandlerEntrypoint)
-                        actualInDegree++;
-
-                    // Ensure we have enough space in the buffer.
-                    if (predecessorBuffer.Length < actualInDegree)
-                    {
-                        pool.Return(predecessorBuffer);
-                        predecessorBuffer = pool.Rent(actualInDegree);
-                    }
-
-                    // Copy over predecessors.
-                    for (int j = 0; j < current.IncomingEdges.Count; j++)
-                        predecessorBuffer[j] = current.IncomingEdges[j].Origin;
-
-                    // Copy over protected entrypoint if we were a handler entrypoint.
-                    if (isHandlerEntrypoint)
-                        predecessorBuffer[actualInDegree - 1] =
-                            current.GetParentExceptionHandler().ProtectedRegion.Entrypoint;
+                    int predecessorCount = GetPredecessors(current);
 
                     // Step 2
-                    for (int j = 0; j < actualInDegree; j++)
+                    for (int j = 0; j < predecessorCount; j++)
                     {
                         var u = Eval(predecessorBuffer[j], ancestor, semi, traversalResult);
                         if (traversalResult.NodeIndices[semi[current]] > traversalResult.NodeIndices[semi[u]])
@@ -140,6 +115,35 @@ namespace Echo.ControlFlow.Analysis.Domination
             finally
             {
                 pool.Return(predecessorBuffer);
+            }
+
+            int GetPredecessors(ControlFlowNode<T> node)
+            {
+                // If the current node is the entrypoint of a handler block, then we implicitly have 
+                // all the nodes in the protected region as predecessor. However, for this algorithm,
+                // it should be enough to only schedule the entrypoint of the protected region.
+                bool isHandlerEntrypoint = node.GetParentHandler() is { } parentHandler
+                                           && node == parentHandler.GetEntrypoint();
+
+                int actualInDegree1 = node.InDegree;
+                if (isHandlerEntrypoint)
+                    actualInDegree1++;
+
+                // Ensure we have enough space in the buffer.
+                if (predecessorBuffer.Length < actualInDegree1)
+                {
+                    pool.Return(predecessorBuffer);
+                    predecessorBuffer = pool.Rent(actualInDegree1);
+                }
+
+                // Copy over predecessors.
+                for (int j = 0; j < node.IncomingEdges.Count; j++)
+                    predecessorBuffer[j] = node.IncomingEdges[j].Origin;
+
+                // Copy over protected entrypoint if we were a handler entrypoint.
+                if (isHandlerEntrypoint)
+                    predecessorBuffer[actualInDegree1 - 1] = node.GetParentExceptionHandler().ProtectedRegion.Entrypoint;
+                return actualInDegree1;
             }
 
             return immediateDominators;
