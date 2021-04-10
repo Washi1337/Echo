@@ -11,12 +11,12 @@ namespace Echo.ControlFlow.Analysis.Domination
     /// It stores the original control flow graph node from which this tree node was inferred, as well a reference to its
     /// immediate dominator, and the node it immediate dominates.
     /// </remarks>
-    public class DominatorTreeNode : TreeNodeBase, IIdentifiedNode
+    public class DominatorTreeNode<T> : TreeNodeBase, IIdentifiedNode
     {
-        internal DominatorTreeNode(IIdentifiedNode node)
+        internal DominatorTreeNode(ControlFlowNode<T> node)
         {
             OriginalNode = node;
-            Children = new TreeNodeCollection<DominatorTreeNode, DominatorTreeNode>(this);
+            Children = new TreeNodeCollection<DominatorTreeNode<T>, DominatorTreeNode<T>>(this);
         }
 
         /// <inheritdoc/>
@@ -33,7 +33,7 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// <summary>
         /// Gets the children of the current node.
         /// </summary>
-        public IList<DominatorTreeNode> Children
+        public IList<DominatorTreeNode<T>> Children
         {
             get;
         }
@@ -46,7 +46,7 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// immediate successor of the original node.
         /// </summary>
         /// <returns>The children, represented by the dominator tree nodes.</returns>
-        public IEnumerable<DominatorTreeNode> GetDirectChildren() =>
+        public IEnumerable<DominatorTreeNode<T>> GetDirectChildren() =>
             Children.Where(c => c.Parent.HasPredecessor(OriginalNode));
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// an immediate successor of the original node.
         /// </summary>
         /// <returns>The children, represented by the dominator tree nodes.</returns>
-        public IEnumerable<DominatorTreeNode> GetIndirectChildren() =>
+        public IEnumerable<DominatorTreeNode<T>> GetIndirectChildren() =>
             Children.Where(c => !c.Parent.HasPredecessor(OriginalNode));
 
         /// <summary>
@@ -64,9 +64,9 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// <remarks>
         /// Because of the nature of dominator analysis, this also includes the current node.
         /// </remarks>
-        public IEnumerable<DominatorTreeNode> GetDominatedNodes()
+        public IEnumerable<DominatorTreeNode<T>> GetDominatedNodes()
         {
-            var stack = new Stack<DominatorTreeNode>();
+            var stack = new Stack<DominatorTreeNode<T>>();
             stack.Push(this);
             
             while (stack.Count > 0)

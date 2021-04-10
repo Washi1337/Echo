@@ -2,6 +2,7 @@ using System.IO;
 using Echo.ControlFlow.Analysis.Domination;
 using Echo.ControlFlow.Regions;
 using Echo.Platforms.DummyPlatform;
+using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
 namespace Echo.ControlFlow.Tests.Analysis.Domination
@@ -13,7 +14,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         {
             var graph = TestGraphs.CreateSingularGraph();
 
-            var dominatorTree = DominatorTree.FromGraph(graph);
+            var dominatorTree = DominatorTree<DummyInstruction>.FromGraph(graph);
             Assert.Equal(graph.Entrypoint, dominatorTree.Root.OriginalNode);
             Assert.True(dominatorTree.Dominates(graph.Entrypoint, graph.Entrypoint));
         }
@@ -28,7 +29,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             var n3 = graph.GetNodeByOffset(2);
             var n4 = graph.GetNodeByOffset(3);
 
-            var dominatorTree = DominatorTree.FromGraph(graph);
+            var dominatorTree = DominatorTree<DummyInstruction>.FromGraph(graph);
             Assert.Equal(graph.Entrypoint, dominatorTree.Root.OriginalNode);
             
             Assert.True(dominatorTree.Dominates(n1, n1));
@@ -62,7 +63,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             var n3 = graph.GetNodeByOffset(3);
             var n4 = graph.GetNodeByOffset(4);
             
-            var dominatorTree = DominatorTree.FromGraph(graph);
+            var dominatorTree = DominatorTree<DummyInstruction>.FromGraph(graph);
             Assert.Equal(graph.Entrypoint, dominatorTree.Root.OriginalNode);
             
             Assert.True(dominatorTree.Dominates(n1, n1));
@@ -96,7 +97,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             var n3 = graph.GetNodeByOffset(2);
             var n4 = graph.GetNodeByOffset(4);
             
-            var dominatorTree = DominatorTree.FromGraph(graph);
+            var dominatorTree = DominatorTree<DummyInstruction>.FromGraph(graph);
             Assert.Equal(graph.Entrypoint, dominatorTree.Root.OriginalNode);
             
             Assert.True(dominatorTree.Dominates(n1, n1));
@@ -140,7 +141,8 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
 
             var ehRegion = new ExceptionHandlerRegion<int>();
             cfg.Regions.Add(ehRegion);
-            
+
+            ehRegion.ProtectedRegion.Entrypoint = cfg.Nodes[1];
             ehRegion.ProtectedRegion.Nodes.AddRange(new[]
             {
                 cfg.Nodes[1],
@@ -152,8 +154,9 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             var handler = new HandlerRegion<int>();
             ehRegion.Handlers.Add(handler);
             handler.Contents.Nodes.Add(cfg.Nodes[5]);
+            handler.Contents.Entrypoint = cfg.Nodes[5];
 
-            var tree = DominatorTree.FromGraph(cfg);
+            var tree = DominatorTree<int>.FromGraph(cfg);
             Assert.True(tree.Dominates(cfg.Nodes[1], cfg.Nodes[6]));
             Assert.False(tree.Dominates(cfg.Nodes[4], cfg.Nodes[6]));
             Assert.False(tree.Dominates(cfg.Nodes[5], cfg.Nodes[6]));
