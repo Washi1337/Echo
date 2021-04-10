@@ -112,6 +112,11 @@ namespace Echo.ControlFlow
         IEnumerable<ControlFlowNode<TInstruction>> IControlFlowRegion<TInstruction>.GetSuccessors() =>
             Enumerable.Empty<ControlFlowNode<TInstruction>>();
 
+        /// <summary>
+        /// Serializes the control flow graph to the provided output stream, in graphviz dot format.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        /// <remarks>To customize the layout of the final graph, use the <see cref="DotWriter"/> class.</remarks>
         public void ToDotGraph(TextWriter writer)
         {
             var dotWriter = new DotWriter(writer)
