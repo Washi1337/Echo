@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Schema;
@@ -45,71 +46,103 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// </remarks> 
         private static IDictionary<ControlFlowNode<T>, ControlFlowNode<T>> GetImmediateDominators(ControlFlowNode<T> entrypoint)
         {
-            var idom = new Dictionary<ControlFlowNode<T>, ControlFlowNode<T>>();
-            var semi = new Dictionary<ControlFlowNode<T>, ControlFlowNode<T>>();
-            var ancestor = new Dictionary<ControlFlowNode<T>, ControlFlowNode<T>>();
-            var bucket = new Dictionary<ControlFlowNode<T>, ISet<ControlFlowNode<T>>>();
-
-            // Traverse graph in depth first manner, and record node indices and parents.
-            var traversalResult = TraverseGraph(entrypoint);
+            var immediateDominators = new Dictionary<ControlFlowNode<T>, ControlFlowNode<T>>();
             
-            // Initialize the intermediate mappings.
-            var orderedNodes = traversalResult.TraversalOrder;
-            foreach (var node in orderedNodes.Cast<ControlFlowNode<T>>())
+            var pool = ArrayPool<ControlFlowNode<T>>.Shared;
+            var predecessorBuffer = pool.Rent(1);
+            
+            try
             {
-                idom[node] = null;
-                semi[node] = node;
-                ancestor[node] = null;
-                bucket[node] = new HashSet<ControlFlowNode<T>>();
-            }
+                var semi = new Dictionary<ControlFlowNode<T>, ControlFlowNode<T>>();
+                var ancestor = new Dictionary<ControlFlowNode<T>, ControlFlowNode<T>>();
+                var bucket = new Dictionary<ControlFlowNode<T>, ISet<ControlFlowNode<T>>>();
 
-            for (int i = orderedNodes.Count - 1; i >= 1; i--)
-            {
-                var current = orderedNodes[i];
-                var parent = traversalResult.NodeParents[current];
+                // Traverse graph in depth first manner, and record node indices and parents.
+                var traversalResult = TraverseGraph(entrypoint);
 
-                // Grab all predecessors.
-                var allPredecessors = current.GetPredecessors().ToList();
-
-                // If the current node is the entrypoint of a handler block, then we implicitly have 
-                // all the nodes in the protected region as predecessor.
-                if (current.GetParentHandler() is { } parentHandler && current == parentHandler.GetEntrypoint())
-                    allPredecessors.Add(current.GetParentExceptionHandler().ProtectedRegion.Entrypoint);
-
-                // Step 2
-                foreach (var predecessor in allPredecessors)
+                // Initialize the intermediate mappings.
+                var orderedNodes = traversalResult.TraversalOrder;
+                foreach (var node in orderedNodes.Cast<ControlFlowNode<T>>())
                 {
-                    var u = Eval(predecessor, ancestor, semi, traversalResult);
-                    if (traversalResult.NodeIndices[semi[current]] > traversalResult.NodeIndices[semi[u]])
-                        semi[current] = semi[u];
+                    immediateDominators[node] = null;
+                    semi[node] = node;
+                    ancestor[node] = null;
+                    bucket[node] = new HashSet<ControlFlowNode<T>>();
                 }
 
-                bucket[semi[current]].Add(current);
-                Link(parent, current, ancestor);
-                
-                // step 3
-                foreach (var bucketNode in bucket[parent])
+                for (int i = orderedNodes.Count - 1; i >= 1; i--)
                 {
-                    var u = Eval(bucketNode, ancestor, semi, traversalResult);
-                    if (traversalResult.NodeIndices[semi[u]] < traversalResult.NodeIndices[semi[bucketNode]])
-                        idom[bucketNode] = u;
-                    else
-                        idom[bucketNode] = parent;
+                    var current = orderedNodes[i];
+                    var parent = traversalResult.NodeParents[current];
+
+                    // Grab all predecessors.
+
+                    // If the current node is the entrypoint of a handler block, then we implicitly have 
+                    // all the nodes in the protected region as predecessor. However, for this algorithm,
+                    // it should be enough to only schedule the entrypoint of the protected region.
+                    bool isHandlerEntrypoint = current.GetParentHandler() is { } parentHandler
+                                               && current == parentHandler.GetEntrypoint();
+
+                    int actualInDegree = current.InDegree;
+                    if (isHandlerEntrypoint)
+                        actualInDegree++;
+
+                    // Ensure we have enough space in the buffer.
+                    if (predecessorBuffer.Length < actualInDegree)
+                    {
+                        pool.Return(predecessorBuffer);
+                        predecessorBuffer = pool.Rent(actualInDegree);
+                    }
+
+                    // Copy over predecessors.
+                    for (int j = 0; j < current.IncomingEdges.Count; j++)
+                        predecessorBuffer[j] = current.IncomingEdges[j].Origin;
+
+                    // Copy over protected entrypoint if we were a handler entrypoint.
+                    if (isHandlerEntrypoint)
+                        predecessorBuffer[actualInDegree - 1] =
+                            current.GetParentExceptionHandler().ProtectedRegion.Entrypoint;
+
+                    // Step 2
+                    for (int j = 0; j < actualInDegree; j++)
+                    {
+                        var u = Eval(predecessorBuffer[j], ancestor, semi, traversalResult);
+                        if (traversalResult.NodeIndices[semi[current]] > traversalResult.NodeIndices[semi[u]])
+                            semi[current] = semi[u];
+                    }
+
+                    bucket[semi[current]].Add(current);
+                    Link(parent, current, ancestor);
+
+                    // step 3
+                    foreach (var bucketNode in bucket[parent])
+                    {
+                        var u = Eval(bucketNode, ancestor, semi, traversalResult);
+                        if (traversalResult.NodeIndices[semi[u]] < traversalResult.NodeIndices[semi[bucketNode]])
+                            immediateDominators[bucketNode] = u;
+                        else
+                            immediateDominators[bucketNode] = parent;
+                    }
+
+                    bucket[parent].Clear();
                 }
 
-                bucket[parent].Clear();
-            }
+                // step 4
+                for (int i = 1; i < orderedNodes.Count; i++)
+                {
+                    var w = orderedNodes[i];
+                    if (immediateDominators[w] != semi[w])
+                        immediateDominators[w] = immediateDominators[immediateDominators[w]];
+                }
 
-            // step 4
-            for (int i = 1; i < orderedNodes.Count; i++)
+                immediateDominators[entrypoint] = entrypoint;
+            }
+            finally
             {
-                var w = orderedNodes[i];
-                if (idom[w] != semi[w])
-                    idom[w] = idom[idom[w]];
+                pool.Return(predecessorBuffer);
             }
 
-            idom[entrypoint] = entrypoint;
-            return idom;
+            return immediateDominators;
         }
 
         private static TraversalResult TraverseGraph(ControlFlowNode<T> entrypoint)
