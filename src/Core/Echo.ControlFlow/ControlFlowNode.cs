@@ -191,7 +191,7 @@ namespace Echo.ControlFlow
         /// This property is automatically updated by the adjacency lists and the fall through edge property associated
         /// to all nodes that might connect themselves to the current node. Do not change it in this class.
         /// </remarks>
-        internal ICollection<ControlFlowEdge<TInstruction>> IncomingEdges
+        internal IList<ControlFlowEdge<TInstruction>> IncomingEdges
         {
             get;
         } = new List<ControlFlowEdge<TInstruction>>();

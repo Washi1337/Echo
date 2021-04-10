@@ -17,7 +17,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             cfg.Nodes.Add(n);
             cfg.Entrypoint = n;
 
-            var tree = DominatorTree.FromGraph(cfg);
+            var tree = DominatorTree<int>.FromGraph(cfg);
             Assert.Empty(tree.GetDominanceFrontier(n));
         }
 
@@ -37,7 +37,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
 
             cfg.Entrypoint = nodes[0];
 
-            var tree = DominatorTree.FromGraph(cfg);
+            var tree = DominatorTree<int>.FromGraph(cfg);
             Assert.All(nodes, n => Assert.Empty(tree.GetDominanceFrontier(n)));
         }
 
@@ -60,7 +60,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
 
             cfg.Entrypoint = nodes[0];
 
-            var tree = DominatorTree.FromGraph(cfg);
+            var tree = DominatorTree<int>.FromGraph(cfg);
             Assert.Equal(new[] {nodes[3]}, tree.GetDominanceFrontier(nodes[1]));
             Assert.Equal(new[] {nodes[3]}, tree.GetDominanceFrontier(nodes[2]));
         }
@@ -84,7 +84,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
 
             cfg.Entrypoint = nodes[0];
 
-            var tree = DominatorTree.FromGraph(cfg);
+            var tree = DominatorTree<int>.FromGraph(cfg);
             Assert.Equal(new HashSet<INode> {nodes[2]}, tree.GetDominanceFrontier(nodes[1]));
             Assert.Equal(new HashSet<INode> {nodes[2]}, tree.GetDominanceFrontier(nodes[2]));
         }
@@ -125,7 +125,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
 
             cfg.Entrypoint = nodes[0];
             
-            var tree = DominatorTree.FromGraph(cfg);
+            var tree = DominatorTree<int>.FromGraph(cfg);
             Assert.Empty(tree.GetDominanceFrontier(nodes[0]));
             Assert.Equal(new HashSet<INode> {nodes[1]}, tree.GetDominanceFrontier(nodes[1]));
             Assert.Equal(new HashSet<INode> {nodes[3]}, tree.GetDominanceFrontier(nodes[2]));
