@@ -107,10 +107,9 @@ namespace Echo.Ast.Construction
             int index = 0;
             var variableDependencies = dataFlowNode.VariableDependencies;
             
-            foreach (var pair in variableDependencies)
+            foreach (var dependency in variableDependencies)
             {
-                var variable = pair.Key;
-                var dependency = pair.Value;
+                var variable = dependency.Variable;
                 
                 if (dependency.Count <= 1)
                 {
@@ -270,7 +269,7 @@ namespace Echo.Ast.Construction
             return new AssignmentStatement<TInstruction>(buffer, expression);
         }
         
-        private IVariable GetStackSlot(DataSource<TInstruction> dataSource)
+        private IVariable GetStackSlot(StackDataSource<TInstruction> dataSource)
         {
             var node = dataSource.Node;
             if (node is ExternalDataSourceNode<TInstruction> external)

@@ -263,7 +263,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             var argument = new ExternalDataSourceNode<DummyInstruction>(-1, "Argument 1");
             dfgBuilder.DataFlowGraph.Nodes.Add(argument);
             dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>(0,
-                ImmutableStack.Create(new SymbolicValue<DummyInstruction>(argument)));
+                ImmutableStack.Create(SymbolicValue<DummyInstruction>.CreateStackValue(argument)));
 
             var cfgBuilder = new SymbolicFlowGraphBuilder<DummyInstruction>(
                 DummyArchitecture.Instance,

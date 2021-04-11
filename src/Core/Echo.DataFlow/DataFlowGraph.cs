@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Echo.Core.Code;
 using Echo.Core.Graphing;
+using Echo.Core.Graphing.Serialization.Dot;
 using Echo.DataFlow.Collections;
+using Echo.DataFlow.Serialization.Dot;
 
 namespace Echo.DataFlow
 {
@@ -51,6 +54,25 @@ namespace Echo.DataFlow
             return Nodes
                 .Cast<INode>()
                 .SelectMany(n => n.GetOutgoingEdges());
+        }
+
+        /// <summary>
+        /// Serializes the data flow graph to the provided output text writer using the dot file format.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        /// <remarks>
+        /// To customize the look of the resulting dot file graph, use the <see cref="DotWriter"/> class
+        /// instead of this function.
+        /// </remarks>
+        public void ToDotGraph(TextWriter writer)
+        {
+            var dotWriter = new DotWriter(writer)
+            {
+                NodeIdentifier = new IdentifiedNodeIdentifier(),
+                NodeAdorner = new DataFlowNodeAdorner<TContents>(),
+                EdgeAdorner = new DataFlowEdgeAdorner<TContents>()
+            };
+            dotWriter.Write(this);
         }
     }
 }

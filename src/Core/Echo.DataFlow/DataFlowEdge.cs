@@ -7,58 +7,37 @@ namespace Echo.DataFlow
     /// and the target of the node represents the dependency.
     /// </summary>
     /// <typeparam name="TContents">The type of information to store in each data flow node.</typeparam>
-    public readonly struct DataFlowEdge<TContents> : IEdge
+    public class DataFlowEdge<TContents> : IEdge
     {
         /// <summary>
         /// Creates a new dependency edge between two nodes.
         /// </summary>
-        /// <param name="origin">The dependent node.</param>
+        /// <param name="dependent">The dependent node.</param>
         /// <param name="target">The dependency node.</param>
-        /// <param name="type">The type of dependency.</param>
-        /// <param name="metadata">The metadata associated to the edge.</param>
-        public DataFlowEdge(DataFlowNode<TContents> origin, DataFlowNode<TContents> target, DataDependencyType type, object metadata)
+        public DataFlowEdge(DataFlowNode<TContents> dependent, DataSource<TContents> target)
         {
-            Origin = origin;
-            Target = target;
-            Type = type;
-            Metadata = metadata;
+            Dependent = dependent;
+            DataSource = target;
         }
         
         /// <summary>
-        /// Gets the node this edge starts at. This represents the dependent node. 
+        /// Gets node that depends on the data source. 
         /// </summary>
-        public DataFlowNode<TContents> Origin
+        public DataFlowNode<TContents> Dependent
         {
             get;
         }
         
-        INode IEdge.Origin => Origin;
+        INode IEdge.Origin => Dependent;
 
         /// <summary>
-        /// Gets the node that this edge points to in the data flow graph. THis represents the dependency node.
+        /// Gets the data source this data flow edge points to.
         /// </summary>
-        public DataFlowNode<TContents> Target
+        public DataSource<TContents> DataSource
         {
             get;
         }
 
-        INode IEdge.Target => Target;
-
-        /// <summary>
-        /// Gets the type of dependency that this edge encodes.
-        /// </summary>
-        public DataDependencyType Type
-        {
-            get;
-        }
-        
-        /// <summary>
-        /// Gets the metadata associated to the edge. For stack dependency edges, this contains the index of the
-        /// stack slot that was referenced. For variable dependency edges, this contains the referenced variable. 
-        /// </summary>
-        public object Metadata
-        {
-            get;
-        }
+        INode IEdge.Target => DataSource.Node;
     }
 }

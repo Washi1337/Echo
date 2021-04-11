@@ -12,7 +12,7 @@ namespace Echo.DataFlow.Collections
     /// </summary>
     /// <typeparam name="TContents">The type of contents to put in each node.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class StackDependencyCollection<TContents> : Collection<DataDependency<TContents>>
+    public class StackDependencyCollection<TContents> : Collection<StackDependency<TContents>>
     {
         private readonly DataFlowNode<TContents> _owner;
 
@@ -28,30 +28,48 @@ namespace Echo.DataFlow.Collections
         /// <summary>
         /// Gets the total number of edges that are stored in this dependency collection.
         /// </summary>
-        public int EdgeCount => Items.Sum(i => i.Count);
+        public int EdgeCount => this.Sum(d => d.Count);
 
-        private void AssertDependencyValidity(DataDependency<TContents> item)
+        private void AssertDependencyValidity(StackDependency<TContents> item)
         {
-            if (item == null)
+            if (item is null)
                 throw new ArgumentNullException(nameof(item));
-            
-            if (item.Dependant != null)
+
+            if (item.Dependent is not null)
                 throw new ArgumentException("Stack dependency was already added to another node.");
             
             if (item.Any(n => n.Node.ParentGraph != _owner.ParentGraph))
                 throw new ArgumentException("Dependency contains data sources from another graph.");
         }
 
-        /// <inheritdoc />
-        protected override void InsertItem(int index, DataDependency<TContents> item)
+        /// <summary>
+        /// Ensures the node has the provided amount of stack dependencies.
+        /// </summary>
+        /// <param name="count">The new amount of dependencies.</param>
+        public void SetCount(int count)
         {
-            AssertDependencyValidity(item);
-            base.InsertItem(index, item);
-            item.Dependant = _owner;
+            if (Count > count)
+            {
+                while(Count != count)
+                    RemoveAt(Count - 1);
+            }
+            else if (count > Count)
+            {
+                while(Count != count)
+                    Add(new StackDependency<TContents>());
+            }
         }
 
         /// <inheritdoc />
-        protected override void SetItem(int index, DataDependency<TContents> item)
+        protected override void InsertItem(int index, StackDependency<TContents> item)
+        {
+            AssertDependencyValidity(item);
+            base.InsertItem(index, item);
+            item.Dependent = _owner;
+        }
+
+        /// <inheritdoc />
+        protected override void SetItem(int index, StackDependency<TContents> item)
         {
             AssertDependencyValidity(item);
             
@@ -64,7 +82,7 @@ namespace Echo.DataFlow.Collections
         {
             var item = Items[index];
             base.RemoveItem(index);
-            item.Dependant = null;
+            item.Dependent = null;
         }
 
         /// <inheritdoc />
@@ -83,10 +101,10 @@ namespace Echo.DataFlow.Collections
         /// <summary>
         /// Represents an enumerator for a stack dependency collection.
         /// </summary>
-        public struct Enumerator : IEnumerator<DataDependency<TContents>>
+        public struct Enumerator : IEnumerator<StackDependency<TContents>>
         {
             private readonly StackDependencyCollection<TContents> _collection;
-            private DataDependency<TContents> _current;
+            private StackDependency<TContents> _current;
             private int _index;
 
             /// <summary>
@@ -102,7 +120,7 @@ namespace Echo.DataFlow.Collections
             }
 
             /// <inheritdoc />
-            public DataDependency<TContents> Current => _current;
+            public StackDependency<TContents> Current => _current;
 
             object IEnumerator.Current => Current;
 

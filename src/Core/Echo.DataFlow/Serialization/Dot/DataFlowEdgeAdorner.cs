@@ -56,10 +56,10 @@ namespace Echo.DataFlow.Serialization.Dot
             {
                 var result = new Dictionary<string, string>();
                 
-                var style = e.Type switch
+                (var style, string label) = e.DataSource switch
                 {
-                    DataDependencyType.Stack => StackDependencyStyle,
-                    DataDependencyType.Variable => VariableDependencyStyle,
+                    StackDataSource<TContents> source => (StackDependencyStyle, source.SlotIndex.ToString()),
+                    VariableDataSource<TContents> source => (VariableDependencyStyle, source.Variable.Name),
                     _ => default
                 };
                 
@@ -67,19 +67,8 @@ namespace Echo.DataFlow.Serialization.Dot
                     result["color"] = style.Color;
                 if (!string.IsNullOrEmpty(style.Style))
                     result["style"] = style.Style;
-
-                if (e.Metadata is {} metadata)
-                {
-                    bool include = e.Type switch
-                    {
-                        DataDependencyType.Stack => IncludeStackEdgeLabels,
-                        DataDependencyType.Variable => IncludeVariableEdgeLabels,
-                        _ => throw new ArgumentOutOfRangeException()
-                    };
-
-                    if (include)
-                        result["label"] = metadata.ToString();
-                }
+                if (!string.IsNullOrEmpty(label))
+                    result["label"] = label;
 
                 return result;
             }

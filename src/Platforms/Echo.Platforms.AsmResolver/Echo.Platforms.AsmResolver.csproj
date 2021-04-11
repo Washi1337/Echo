@@ -31,7 +31,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="AsmResolver.DotNet" Version="4.5.0" />
+      <PackageReference Include="AsmResolver.DotNet" Version="4.5.1" />
     </ItemGroup>
 
 </Project>

@@ -23,6 +23,7 @@ namespace Echo.DataFlow
             Contents = contents;
             StackDependencies = new StackDependencyCollection<TContents>(this);
             VariableDependencies = new VariableDependencyCollection<TContents>(this);
+            IncomingEdges = new List<DataFlowEdge<TContents>>();
         }
 
         /// <summary>
@@ -42,7 +43,7 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public int InDegree => Dependants.Count;
+        public int InDegree => IncomingEdges.Count;
 
         /// <inheritdoc />
         public int OutDegree => StackDependencies.EdgeCount + VariableDependencies.EdgeCount;
@@ -77,48 +78,49 @@ namespace Echo.DataFlow
             get;
         }
 
-        internal IList<DataFlowNode<TContents>> Dependants
+        internal List<DataFlowEdge<TContents>> IncomingEdges
         {
             get;
-        } = new List<DataFlowNode<TContents>>();
+        }
+        
+        /// <summary>
+        /// Obtains a collection of edges that refer to dependent nodes.
+        /// </summary>
+        /// <returns>The edges.</returns>
+        public IEnumerable<DataFlowEdge<TContents>> GetIncomingEdges() => IncomingEdges;
+
+        IEnumerable<IEdge> INode.GetIncomingEdges() => IncomingEdges;
+
+        /// <summary>
+        /// Obtains a collection of edges encoding all the dependencies that this node has.
+        /// </summary>
+        /// <returns>The edges.</returns>
+        public IEnumerable<DataFlowEdge<TContents>> GetOutgoingEdges()
+        {
+            return StackDependencies
+                .SelectMany(d => d.GetEdges())
+                .Concat(VariableDependencies.SelectMany(d => d.GetEdges()));
+        }
+
+        IEnumerable<IEdge> INode.GetOutgoingEdges() => GetOutgoingEdges();
 
         /// <summary>
         /// Obtains a collection of nodes that depend on this node.
         /// </summary>
         /// <returns>The dependant nodes.</returns>
-        public IEnumerable<DataFlowNode<TContents>> GetDependants() => Dependants;
+        public IEnumerable<DataFlowNode<TContents>> GetDependants() => IncomingEdges
+            .Select(e => e.Dependent)
+            .Distinct();
+        
+        IEnumerable<INode> INode.GetPredecessors() => GetDependants();
 
-        IEnumerable<IEdge> INode.GetIncomingEdges()
-        {
-            throw new NotImplementedException();
-        }
+        IEnumerable<INode> INode.GetSuccessors() => GetOutgoingEdges()
+            .Select(e => e.DataSource.Node)
+            .Distinct();
 
-        IEnumerable<IEdge> INode.GetOutgoingEdges()
-        {
-            for (int i = 0; i < StackDependencies.Count; i++)
-            {
-                foreach (var source in StackDependencies[i])
-                    yield return new DataFlowEdge<TContents>(this, source.Node, DataDependencyType.Stack, i);
-            }
+        bool INode.HasPredecessor(INode node) => GetOutgoingEdges().Any(e => e.Dependent == node);
 
-            foreach (var dependency in VariableDependencies)
-            {
-                foreach (var source in dependency.Value)
-                    yield return new DataFlowEdge<TContents>(this, source.Node, DataDependencyType.Variable, dependency.Key);
-            }
-        }
-
-        IEnumerable<INode> INode.GetPredecessors() => Dependants;
-
-        IEnumerable<INode> INode.GetSuccessors() => StackDependencies
-            .SelectMany(
-                dep => dep,
-                (dep, source) => source.Node);
-
-        bool INode.HasPredecessor(INode node) => Dependants.Contains(node);
-
-        bool INode.HasSuccessor(INode node) => StackDependencies.Any(
-            dep => dep.Any(source => source.Node == node));
+        bool INode.HasSuccessor(INode node) => GetOutgoingEdges().Any(e => e.DataSource.Node == node);
 
         /// <summary>
         /// Removes all incident edges (both incoming and outgoing edges) from the node, effectively isolating the node
@@ -126,22 +128,45 @@ namespace Echo.DataFlow
         /// </summary>
         public void Disconnect()
         {
+            // Remove edges from dependent nodes.
+            while (IncomingEdges.Count > 0)
+                RemoveIncomingEdge(IncomingEdges[0]);
+
+            // Clear dependency nodes.
             foreach (var dependency in StackDependencies)
                 dependency.Clear();
-            foreach (var entry in VariableDependencies)
-                entry.Value.Clear();
+            foreach (var dependency in VariableDependencies)
+                dependency.Clear();
+        }
 
-            foreach (var dependant in Dependants.ToArray())
+        private static void RemoveIncomingEdge(DataFlowEdge<TContents> edge)
+        {
+            switch (edge.DataSource.Type)
             {
-                foreach (var dependency in dependant.StackDependencies)
-                    dependency.Remove(this);
+                case DataDependencyType.Stack:
+                    foreach (var dependency in edge.Dependent.StackDependencies)
+                    {
+                        if (dependency.Remove((StackDataSource<TContents>) edge.DataSource))
+                            break;
+                    }
 
-                foreach (var entry in dependant.VariableDependencies)
-                    entry.Value.Remove(this);
+                    break;
+
+                case DataDependencyType.Variable:
+                    foreach (var dependency in edge.Dependent.VariableDependencies)
+                    {
+                        if (dependency.Remove((VariableDataSource<TContents>) edge.DataSource))
+                            break;
+                    }
+
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"{Id} ({Contents})";
+        public override string ToString() => $"{Id:X8} ({Contents})";
     }
 }
