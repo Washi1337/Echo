@@ -17,10 +17,17 @@ Main Features
 - Unified generic API.
     - Serialize any kind of graph to the dot file format.
     - Adding a new platform for flow analysis requires minimal effort
-- Supported platforms:
-    - AsmResolver (CIL)
-    - dnlib (CIL)
-    - Iced (x86 32-bit and 64-bit)
+
+
+Supported platforms:
+
+| Architecture | Back-end                                                | Control Flow | Data Flow | Purity Classification | Emulation |
+|--------------|---------------------------------------------------------|--------------|-----------|-----------------------|-----------|
+| CIL          | [AsmResolver](https://github.com/Washi1337/AsmResolver) | ✓            | ✓         | ✓                     | ✓ (WIP)   |
+| CIL          | [dnlib](https://github.com/0xd4d/dnlib)                 | ✓            | ✓         | ✓                     |           |
+| x86 (32-bit) | [Iced](https://github.com/icedland/iced)                | ✓            | ✓         |                       |           |
+| x86 (64-bit) | [Iced](https://github.com/icedland/iced)                | ✓            | ✓         |                       |           |
+
 
 Compiling
 ---------
