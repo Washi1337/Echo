@@ -40,6 +40,18 @@ namespace Echo.Core.Emulation
         }
 
         /// <inheritdoc />
+        public bool Remove(IVariable variable)
+        {
+            return _variables.Remove(variable);
+        }
+        
+        /// <inheritdoc />
+        public void Clear()
+        {
+            _variables.Clear();
+        }
+
+        /// <inheritdoc />
         public IEnumerable<IVariable> GetAllRecordedVariables() => _variables.Keys;
 
         /// <summary>

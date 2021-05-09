@@ -32,5 +32,17 @@ namespace Echo.Core.Emulation
         /// </summary>
         /// <returns>The copied variable state.</returns>
         IVariableState<TValue> Copy();
+
+        /// <summary>
+        /// Removes recorded variable.
+        /// </summary>
+        /// <param name="variable">The variable.</param>
+        /// <returns><see langword="true" /> if the variable is successfully found and removed; otherwise, <see langword="false" />.</returns>
+        bool Remove(IVariable variable);
+        
+        /// <summary>
+        /// Removes all variables.
+        /// </summary>
+        void Clear();
     }
 }

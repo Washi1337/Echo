@@ -66,5 +66,17 @@ namespace Echo.Platforms.AsmResolver.Emulation
             
             return result;
         }
+
+        /// <inheritdoc />
+        public bool Remove(IVariable variable)
+        {
+            return _variables.Remove(variable);
+        }
+
+        /// <inheritdoc />
+        public void Clear()
+        {
+            _variables.Clear();
+        }
     }
 }

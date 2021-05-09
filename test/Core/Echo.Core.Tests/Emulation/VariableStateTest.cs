@@ -45,5 +45,58 @@ namespace Echo.Core.Tests.Emulation
             Assert.Equal(defaultValue, state[_variables[3]]);
             Assert.Equal(defaultValue, state[_variables[4]]);
         }
+        
+        [Fact]
+        public void Remove()
+        {
+            var defaultValue = new DummyValue(-1);
+            var state = new VariableState<DummyValue>(defaultValue);
+
+            var value1 = new DummyValue(1);
+            var value2 = new DummyValue(2);
+            var value3 = new DummyValue(2);
+            
+            state[_variables[0]] = value1;
+            state[_variables[1]] = value2;
+            state[_variables[2]] = value3;
+            
+            bool result = state.Remove(_variables[0]);
+            Assert.True(result);
+            
+            result = state.Remove(_variables[2]);
+            Assert.True(result);
+            
+            result = state.Remove(_variables[4]);
+            Assert.False(result);
+            
+            Assert.Equal(defaultValue, state[_variables[0]]);
+            Assert.Equal(value2, state[_variables[1]]);
+            Assert.Equal(defaultValue, state[_variables[2]]);
+            Assert.Equal(defaultValue, state[_variables[3]]);
+            Assert.Equal(defaultValue, state[_variables[4]]);
+        }
+        
+        [Fact]
+        public void Clear()
+        {
+            var defaultValue = new DummyValue(-1);
+            var state = new VariableState<DummyValue>(defaultValue);
+
+            var value1 = new DummyValue(1);
+            var value2 = new DummyValue(2);
+            var value3 = new DummyValue(2);
+            
+            state[_variables[0]] = value1;
+            state[_variables[1]] = value2;
+            state[_variables[2]] = value3;
+
+            state.Clear();
+            
+            Assert.Equal(defaultValue, state[_variables[0]]);
+            Assert.Equal(defaultValue, state[_variables[1]]);
+            Assert.Equal(defaultValue, state[_variables[2]]);
+            Assert.Equal(defaultValue, state[_variables[3]]);
+            Assert.Equal(defaultValue, state[_variables[4]]);
+        }
     }
 }
