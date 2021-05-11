@@ -14,8 +14,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
         {
             Is32Bit = is32Bit;
             Module = module ?? throw new ArgumentNullException(nameof(module));
-            CliMarshaller = new DefaultCliMarshaller(this);
             ValueFactory = new DefaultValueFactory(module, is32Bit);
+            CliMarshaller = new DefaultCliMarshaller(ValueFactory);
             StaticFieldFactory = new StaticFieldFactory(ValueFactory);
         }
 
