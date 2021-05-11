@@ -56,7 +56,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Status = VirtualMachineStatus.Idle;
             CurrentState = new CilProgramState(ValueFactory);
             Dispatcher = new CilDispatcher();
-            CliMarshaller = new DefaultCliMarshaller(this);
+            CliMarshaller = new DefaultCliMarshaller(ValueFactory);
             MethodInvoker = new ReturnUnknownMethodInvoker(ValueFactory);
             StaticFieldFactory = new StaticFieldFactory(ValueFactory);
             _services[typeof(ICilRuntimeEnvironment)] = this;

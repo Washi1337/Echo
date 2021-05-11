@@ -17,22 +17,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
         /// <summary>
         /// Creates a new instance of the <see cref="DefaultCliMarshaller"/> class.
         /// </summary>
-        /// <param name="environment">The environment this marshaller is for.</param>
-        public DefaultCliMarshaller(ICilRuntimeEnvironment environment)
+        /// <param name="valueFactory">The factory responsible for constructing concrete values.</param>
+        public DefaultCliMarshaller(IValueFactory valueFactory)
         {
-            Environment = environment ?? throw new ArgumentNullException(nameof(environment));
+            ValueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
         }
         
         /// <summary>
-        /// Gets the environment that the marshaller converts values for.
+        /// Gets the factory responsible for constructing concrete values.
         /// </summary>
-        public ICilRuntimeEnvironment Environment
+        public IValueFactory ValueFactory
         {
             get;
         }
 
         /// <inheritdoc />
-        public bool Is32Bit => Environment.Is32Bit;
+        public bool Is32Bit => ValueFactory.Is32Bit;
 
         /// <inheritdoc />
         public ICliValue ToCliValue(IConcreteValue value, TypeSignature originalType)
@@ -182,7 +182,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                 return ToCliValue(value, enumType.GetEnumUnderlyingType());
             
             if (value is LleStructValue lleObjectValue)
-                return new StructValue(Environment.ValueFactory, lleObjectValue.Type, lleObjectValue.Contents);
+                return new StructValue(ValueFactory, lleObjectValue.Type, lleObjectValue.Contents);
 
             throw new NotSupportedException($"Invalid or unsupported value {value}.");
         }
@@ -299,7 +299,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Values
                         return ToCtsValue(value, enumType.GetEnumUnderlyingType());
 
                     var structValue = (StructValue) value;
-                    return new LleStructValue(Environment.ValueFactory, structValue.Type, structValue.Contents);
+                    return new LleStructValue(ValueFactory, structValue.Type, structValue.Contents);
                 }
 
                 default:
