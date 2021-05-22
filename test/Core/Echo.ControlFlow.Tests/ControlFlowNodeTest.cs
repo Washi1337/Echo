@@ -450,6 +450,7 @@ namespace Echo.ControlFlow.Tests
             var (first, second) = n1.SplitAtIndex(2);
             Assert.Equal(first.ParentRegion, second.ParentRegion);
             Assert.Equal(first.ParentRegion, region.ProtectedRegion);
+            Assert.Equal(2, region.ProtectedRegion.Nodes.Count);
         }
     }
 }
