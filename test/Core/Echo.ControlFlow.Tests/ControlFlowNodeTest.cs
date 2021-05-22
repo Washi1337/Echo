@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Echo.ControlFlow.Regions;
 using Xunit;
 using Echo.Platforms.DummyPlatform;
 
@@ -426,5 +427,30 @@ namespace Echo.ControlFlow.Tests
             Assert.Empty(n2.GetIncomingEdges());
         }
 
+        [Fact]
+        public void SplittingNodeShouldPreserveParentRegion()
+        {
+            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
+            var n1 = new ControlFlowNode<int>(0, 0, 2, 3, 4);
+            var n2 = new ControlFlowNode<int>(5, 5, 6, 7, 8);
+            
+            var region = new ExceptionHandlerRegion<int>();
+            graph.Regions.Add(region);
+            
+            var handler = new HandlerRegion<int>();
+            region.Handlers.Add(handler);
+
+            graph.Nodes.AddRange(new[] { n1, n2 });
+            region.ProtectedRegion.Nodes.Add(n1);
+            handler.Contents.Nodes.Add(n2);
+
+            n1.ConnectWith(n2, ControlFlowEdgeType.Abnormal);
+            graph.Entrypoint = n1;
+
+            var (first, second) = n1.SplitAtIndex(2);
+            Assert.Equal(first.ParentRegion, second.ParentRegion);
+            Assert.Equal(first.ParentRegion, region.ProtectedRegion);
+            Assert.Equal(2, region.ProtectedRegion.Nodes.Count);
+        }
     }
 }
