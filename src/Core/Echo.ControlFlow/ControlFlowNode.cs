@@ -281,6 +281,7 @@ namespace Echo.ControlFlow
             var newBlock = new BasicBlock<TInstruction>(ParentGraph.Architecture.GetOffset(instructions[0]), instructions);
             var newNode = new ControlFlowNode<TInstruction>(newBlock.Offset, newBlock);
             ParentGraph.Nodes.Add(newNode);
+            newNode.ParentRegion = ParentRegion;
 
             // Remove outgoing edges.
             var edges = GetOutgoingEdges().ToArray();
