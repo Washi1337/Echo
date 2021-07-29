@@ -30,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="dnlib" Version="3.3.2" />
+      <PackageReference Include="dnlib" Version="3.3.3" />
     </ItemGroup>
 
 </Project>
