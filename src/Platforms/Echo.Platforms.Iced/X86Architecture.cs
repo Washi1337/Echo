@@ -102,7 +102,7 @@ namespace Echo.Platforms.Iced
             }
 
             // Check for any flag register reads.
-            var readFlags = info.RflagsRead;
+            var readFlags = instruction.RflagsRead;
             if (readFlags != RflagsBits.None)
             {
                 for (int i = 1; i <= (int) RflagsBits.AC; i <<= 1)
@@ -139,7 +139,7 @@ namespace Echo.Platforms.Iced
             }
 
             // Check for any flag register reads.
-            var readFlags = info.RflagsRead;
+            var readFlags = instruction.RflagsRead;
             if (readFlags != RflagsBits.None)
             {
                 for (int i = 1; i <= (int) RflagsBits.AC; i <<= 1)
@@ -178,7 +178,7 @@ namespace Echo.Platforms.Iced
             }
 
             // Check for any flag register writes.
-            var modifiedFlags = info.RflagsModified;
+            var modifiedFlags = instruction.RflagsModified;
             if (modifiedFlags != RflagsBits.None)
             {
                 for (int i = 1; i <= (int) RflagsBits.AC; i <<= 1)
@@ -215,7 +215,7 @@ namespace Echo.Platforms.Iced
             }
 
             // Check for any flag register writes.
-            var modifiedFlags = info.RflagsModified;
+            var modifiedFlags = instruction.RflagsModified;
             if (modifiedFlags != RflagsBits.None)
             {
                 for (int i = 1; i <= (int) RflagsBits.AC; i <<= 1)
