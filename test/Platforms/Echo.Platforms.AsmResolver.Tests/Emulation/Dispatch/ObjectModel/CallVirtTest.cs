@@ -58,6 +58,31 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         }
 
         [Fact]
+        public void CallVirtVirtualMethod()
+        {
+            var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();
+            var stack = ExecutionContext.ProgramState.Stack;
+
+            // Create instance of the derived type.
+            var objectTypeDef = (TypeDefinition) _type.Module.LookupMember(typeof(SimpleClass).MetadataToken);
+            var objectTypeSig = objectTypeDef.ToTypeSignature();
+
+            var objectRef = environment.ValueFactory.CreateObject(objectTypeSig, true);
+
+            // Push object.
+            stack.Push(environment.CliMarshaller.ToCliValue(objectRef, objectTypeSig));
+
+            // Invoke base method using virtual dispatch.
+            var method = _type.Methods.First(m => m.Name == nameof(SimpleClass.VirtualInstanceMethod));
+            var result = Dispatcher.Execute(ExecutionContext, new CilInstruction(CilOpCodes.Callvirt, method));
+
+            Assert.True(result.IsSuccess);
+            Assert.Equal(
+                objectTypeDef.Methods.First(m => m.Name == method.Name),
+                ((HookedMethodInvoker) environment.MethodInvoker).LastInvokedMethod);
+        }
+
+        [Fact]
         public void CallVirtOverrideMethod()
         {
             var environment = ExecutionContext.GetService<ICilRuntimeEnvironment>();

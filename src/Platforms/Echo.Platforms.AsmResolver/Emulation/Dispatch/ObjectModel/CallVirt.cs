@@ -69,7 +69,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 type = type.BaseType?.Resolve();
             }
 
-            return implementation;
+            return implementation ?? baseMethod;
         }
 
         private static MethodDefinition TryFindImplicitImplementationInType(TypeDefinition type, MethodDefinition baseMethod)
