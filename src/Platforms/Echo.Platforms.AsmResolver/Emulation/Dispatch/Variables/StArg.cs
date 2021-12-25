@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             var environment = context.GetService<ICilRuntimeEnvironment>();
             
             var variables = new IVariable[1];
-            if (environment.Architecture.GetReadVariables(instruction, variables) != 1)
+            if (environment.Architecture.GetWrittenVariables(instruction, variables) != 1)
             {
                 throw new DispatchException(
                     $"Architecture returned an incorrect number of variables being written by instruction {instruction}.");
