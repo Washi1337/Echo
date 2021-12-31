@@ -35,5 +35,10 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
         {
             get;
         } = ModuleDefinition.FromFile(typeof(SimpleClass).Assembly.Location);
+
+        public ModuleDefinition CurrentTestModule
+        {
+            get;
+        } = ModuleDefinition.FromFile(typeof(MockModuleFixture).Assembly.Location);
     }
 }
