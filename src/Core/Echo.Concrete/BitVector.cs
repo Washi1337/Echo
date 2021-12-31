@@ -61,6 +61,7 @@ namespace Echo.Concrete
 
             int byteIndex = bitIndex / 8;
             length /= 8;
+            length = Math.Min(Bits.Length, length);
             return new BitVectorSpan(Bits.AsSpan(byteIndex, length), KnownMask.AsSpan(byteIndex, length));
         }
     }
