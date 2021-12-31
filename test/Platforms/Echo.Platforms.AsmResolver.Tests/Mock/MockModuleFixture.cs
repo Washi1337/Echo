@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Linq;
 using AsmResolver.DotNet;
 using Mocks;
 
@@ -40,5 +41,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
         {
             get;
         } = ModuleDefinition.FromFile(typeof(MockModuleFixture).Assembly.Location);
+
+        public MethodDefinition GetTestMethod(string methodName) => MockModule
+            .TopLevelTypes.First(t => t.Name == nameof(TestClass))
+            .Methods.First(m => m.Name == methodName);
     }
 }

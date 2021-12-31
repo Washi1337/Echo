@@ -103,6 +103,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             get;
         }
 
+        public int Size => LocalStorage.Count / 8;
+
         public AddressRange AddressRange => new(0, LocalStorage.Count / 8);
 
         public bool IsValidAddress(long address) => AddressRange.Contains(address);
