@@ -10,10 +10,11 @@
         <RepositoryUrl>https://github.com/Washi1337/Echo</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>program code emulation interpretation</PackageTags>
-        <LangVersion>8</LangVersion>
+        <LangVersion>9</LangVersion>
         <Version>0.9.0-alpha.1</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
