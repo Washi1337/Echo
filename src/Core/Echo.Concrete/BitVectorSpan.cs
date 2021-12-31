@@ -64,6 +64,12 @@ namespace Echo.Concrete
             return new BitVectorSpan(Bits.Slice(byteIndex, length), KnownMask.Slice(byteIndex, length));
         }
 
+        public void CopyTo(BitVectorSpan buffer)
+        {
+            Bits.CopyTo(buffer.Bits);
+            KnownMask.CopyTo(buffer.KnownMask);
+        }
+
         public string ToBitString()
         {
             _builder ??= new StringBuilder();

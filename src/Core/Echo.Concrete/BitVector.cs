@@ -38,6 +38,8 @@ namespace Echo.Concrete
         {
             get;
         }
+        
+        public int Count => Bits.Length * 8;
 
         public BitVectorSpan AsSpan() => new(Bits, KnownMask);
         
