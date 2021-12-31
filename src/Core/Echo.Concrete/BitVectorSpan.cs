@@ -70,6 +70,15 @@ namespace Echo.Concrete
             KnownMask.CopyTo(buffer.KnownMask);
         }
 
+        public void WriteBytes(int bitIndex, ReadOnlySpan<byte> data)
+        {
+            if (bitIndex % 8 != 0)
+                throw new ArgumentOutOfRangeException(nameof(bitIndex), "The bit index into the vector should be a multiple of 8.");
+            
+            data.CopyTo(Bits.Slice(bitIndex / 8));
+            KnownMask.Slice(bitIndex / 8, data.Length).Fill(0xFF);
+        }
+
         public string ToBitString()
         {
             _builder ??= new StringBuilder();

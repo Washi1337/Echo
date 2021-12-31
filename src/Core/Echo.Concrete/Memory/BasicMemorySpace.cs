@@ -4,6 +4,16 @@ namespace Echo.Concrete.Memory
 {
     public class BasicMemorySpace : IMemorySpace
     {
+        public BasicMemorySpace(int size, bool initialize)
+            : this(new BitVector(size * 8, initialize))
+        {
+        }
+        
+        public BasicMemorySpace(byte[] backBuffer)
+        {
+            BackBuffer = new BitVector(backBuffer);
+        }
+        
         public BasicMemorySpace(BitVector backBuffer)
         {
             BackBuffer = backBuffer;
