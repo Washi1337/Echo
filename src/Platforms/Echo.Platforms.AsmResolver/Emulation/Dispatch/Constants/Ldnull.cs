@@ -5,13 +5,18 @@ using Echo.Platforms.AsmResolver.Emulation.Values.Cli;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
 {
+    /// <summary>
+    /// Provides a handler for instructions with the <see cref="CilOpCodes.Ldnull"/> operation code.
+    /// </summary>
     public class Ldnull : FallThroughOpCodeHandler
     {
+        /// <inheritdoc />
         public override IReadOnlyCollection<CilCode> SupportedOpCodes => new[]
         {
             CilCode.Ldnull,
         };
 
+        /// <inheritdoc />
         public override DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
         {
             var environment = context.GetService<ICilRuntimeEnvironment>();
