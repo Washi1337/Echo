@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using AsmResolver;
 using AsmResolver.DotNet;
-using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete;
@@ -11,20 +10,33 @@ using Echo.Core.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Stack
 {
+    /// <summary>
+    /// Represents a single frame in a virtual stack.
+    /// </summary>
     public class VirtualFrame : IMemorySpace
     {
-        /*
-         * local0
-         * local1
-         * local2
-         * <return>
-         * arg0
-         * arg1
-         * arg2
-         */
+        // Stack layout sketch:
+        // 
+        //  offset | field
+        //  -------+-----------------
+        //  0      | local 0
+        //  ...    | ...
+        //  n      | local n
+        //  n+1    | return address
+        //  n+2    | arg 0
+        //  ...    | ...
+        //  n+m+2  | arg m
 
         private readonly List<uint> _offsets = new();
 
+        /// <summary>
+        /// Constructs a new stack frame.
+        /// </summary>
+        /// <param name="method">The method that this frame is associated with.</param>
+        /// <param name="factory">A factory used for measuring the size of the frame.</param>
+        /// <exception cref="ArgumentException">
+        /// Occurs when the provided method is invalid or contains invalid metadata that could not be dealt with.
+        /// </exception>
         public VirtualFrame(IMethodDescriptor method, ValueFactory factory)
         {
             if (method.Signature is null)
@@ -83,53 +95,104 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             }
         }
         
+        /// <summary>
+        /// Gets the method which this frame was associated with.
+        /// </summary>
         public IMethodDescriptor Method
         {
             get;
         }
 
+        /// <summary>
+        /// Obtains the raw storage for frame fields such as local variables, return address and arguments. 
+        /// </summary>
         public BitVector LocalStorage
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the number of locals stored in the frame.
+        /// </summary>
         public int LocalsCount
         {
             get;
         } = 0;
 
+        /// <summary>
+        /// Gets a virtual evaluation stack associated stored the frame.
+        /// </summary>
         public Stack<BitVector> EvaluationStack
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the static size (number of bytes excluding the evaluation stack) of the stack frame.
+        /// </summary>
         public int Size => LocalStorage.Count / 8;
 
+        /// <inheritdoc />
         public AddressRange AddressRange => new(0, LocalStorage.Count / 8);
 
+        /// <inheritdoc />
         public bool IsValidAddress(long address) => AddressRange.Contains(address);
 
+        /// <summary>
+        /// Gets the address (relative to the start of the frame) to a local variable in the frame. 
+        /// </summary>
+        /// <param name="index">The index of the local variable to get the address for.</param>
+        /// <returns>The address</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when the local index is invalid.</exception>
         public long GetLocalAddress(int index) => index < LocalsCount
             ? _offsets[index]
             : throw new ArgumentOutOfRangeException(nameof(index));
         
+        /// <summary>
+        /// Reads the value of a local variable into a buffer. 
+        /// </summary>
+        /// <param name="index">The index of the variable.</param>
+        /// <param name="buffer">The buffer to write the data into.</param>
         public void ReadLocal(int index, BitVectorSpan buffer) => Read(GetLocalAddress(index), buffer);
 
+        /// <summary>
+        /// Assigns a new value to a local variable. 
+        /// </summary>
+        /// <param name="index">The index of the variable.</param>
+        /// <param name="buffer">The buffer containing the new data.</param>
         public void WriteLocal(int index, BitVectorSpan buffer) => Write(GetLocalAddress(index), buffer);
 
+        /// <summary>
+        /// Gets the address (relative to the start of the frame) to an argument in the frame. 
+        /// </summary>
+        /// <param name="index">The index of the argument to get the address for.</param>
+        /// <returns>The address</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when the argument index is invalid.</exception>
         public long GetArgumentAddress(int index) => index < Method.Signature!.GetTotalParameterCount()
             ? _offsets[LocalsCount + 1 + index]
             : throw new ArgumentOutOfRangeException(nameof(index));
 
+        /// <summary>
+        /// Reads the value of an argument into a buffer. 
+        /// </summary>
+        /// <param name="index">The index of the argument to read.</param>
+        /// <param name="buffer">The buffer to write the data into.</param>
         public void ReadArgument(int index, BitVectorSpan buffer) => Read(GetArgumentAddress(index), buffer);
 
+        /// <summary>
+        /// Assigns a new value to an argument. 
+        /// </summary>
+        /// <param name="index">The index of the argument.</param>
+        /// <param name="buffer">The buffer containing the new data.</param>
         public void WriteArgument(int index, BitVectorSpan buffer) => Write(GetArgumentAddress(index), buffer);
 
+        /// <inheritdoc />
         public void Read(long address, BitVectorSpan buffer)
         {
             LocalStorage.AsSpan((int) (address * 8), buffer.Count).CopyTo(buffer);
         }
 
+        /// <inheritdoc />
         public void Write(long address, BitVectorSpan buffer)
         {
             buffer.CopyTo(LocalStorage.AsSpan((int) (address * 8), buffer.Count));

@@ -303,14 +303,19 @@ namespace Echo.Core
         /// the result is unknown.</returns>
         public Trilean Xor(Trilean other) => XorTable[GetLookupTableIndex(Value, other.Value)];
 
-        /// <inheritdoc />
-        public override string ToString() => Value switch
+        /// <summary>
+        /// Returns the raw value of the trilean as a single character (either '0', '1' or '?').
+        /// </summary>
+        /// <returns>The character.</returns>
+        public char ToChar() => Value switch
         {
-            TrileanValue.Unknown => "?",
-            TrileanValue.False => "0",
-            TrileanValue.True => "1",
+            TrileanValue.Unknown => '?',
+            TrileanValue.False => '0',
+            TrileanValue.True => '1',
             _ => throw new ArgumentOutOfRangeException()
         };
-        
+
+        /// <inheritdoc />
+        public override string ToString() => ToChar().ToString();
     }
 }

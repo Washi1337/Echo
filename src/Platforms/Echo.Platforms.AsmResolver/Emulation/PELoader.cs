@@ -1,31 +1,40 @@
 using System;
-using System.IO;
-using System.Runtime.InteropServices;
 using AsmResolver;
 using AsmResolver.IO;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using Echo.Concrete;
 using Echo.Concrete.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
+    /// <summary>
+    /// Provides a mechanism for mapping portable executable files into virtual memory.
+    /// </summary>
     public class PELoader
     {
         private readonly VirtualMemory _memory;
         private long _currentAddress = 0x0040_0000;
         private const ulong _moduleAlignment = 0x0001_0000;
 
+        /// <summary>
+        /// Creates a new instance of a PE loader.
+        /// </summary>
+        /// <param name="memory">The virtual memory to map the executables into.</param>
         public PELoader(VirtualMemory memory)
         {
             _memory = memory;
         }
 
+        /// <summary>
+        /// Maps all sections of the provided PE file into memory.
+        /// </summary>
+        /// <param name="file">The file to map.</param>
+        /// <returns>The new base address of the PE file.</returns>
         public long MapPE(IPEFile file)
         {
             long baseAddress = _currentAddress;
             
-            // HACK: access the original data source of the underlying PE file, so that we can read and copy the 
+            // HACK: Access the original data source of the underlying PE file, so that we can read and copy the 
             // original PE header.
             uint headerLength = (uint) file.Sections[0].Offset;
             var source = file.CreateReaderAtFileOffset((uint) file.Sections[0].Offset).DataSource;
