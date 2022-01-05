@@ -55,7 +55,7 @@ namespace Echo.Concrete
                 else
                 {
                     KnownMask[byteIndex] = (byte) (KnownMask[byteIndex] | (1 << bitIndex));
-                    Bits[byteIndex] = (byte) (Bits[byteIndex] | ((value ? 1 : 0) << bitIndex));
+                    Bits[byteIndex] = (byte) ((Bits[byteIndex] & ~(1 << bitIndex)) | ((value ? 1 : 0) << bitIndex));
                 }
             }
         }
@@ -198,6 +198,7 @@ namespace Echo.Concrete
         {
             _builder ??= new StringBuilder();
             _builder.Clear();
+            _builder.EnsureCapacity(Count);
 
             for (int i = Count - 1; i >= 0; i--)
             {
@@ -219,6 +220,7 @@ namespace Echo.Concrete
         {
             _builder ??= new StringBuilder();
             _builder.Clear();
+            _builder.EnsureCapacity(Count / 4);
 
             // Go over each nibble.
             for (int i = 0; i < Count; i += 4)

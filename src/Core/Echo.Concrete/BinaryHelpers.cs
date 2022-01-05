@@ -14,5 +14,29 @@ namespace Echo.Concrete
 
             return true;
         }
+
+        public static void Not(this Span<byte> span)
+        {
+            for (int i = 0; i < span.Length; i++)
+                span[i] = (byte) ~span[i];
+        }
+        
+        public static void And(this Span<byte> span, ReadOnlySpan<byte> other)
+        {
+            for (int i = 0; i < span.Length; i++)
+                span[i] &= other[i];
+        }
+        
+        public static void Or(this Span<byte> span, ReadOnlySpan<byte> other)
+        {
+            for (int i = 0; i < span.Length; i++)
+                span[i] |= other[i];
+        }
+        
+        public static void Xor(this Span<byte> span, ReadOnlySpan<byte> other)
+        {
+            for (int i = 0; i < span.Length; i++)
+                span[i] ^= other[i];
+        }
     }
 }

@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Echo.Concrete.Tests
 {
-    public class BitVectorSpanTest
+    public partial class BitVectorSpanTest
     {
         [Fact]
         public void AllZeroes()
