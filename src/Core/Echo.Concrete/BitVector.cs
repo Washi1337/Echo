@@ -1,4 +1,5 @@
 using System;
+using Echo.Core;
 
 namespace Echo.Concrete
 {
@@ -109,5 +110,20 @@ namespace Echo.Concrete
             length = Math.Min(Bits.Length, length);
             return new BitVectorSpan(Bits.AsSpan(byteIndex, length), KnownMask.AsSpan(byteIndex, length));
         }
+        
+        /// <summary>
+        /// Parses a binary string, where the least significant bit is at the end of the string, into a bit vector.
+        /// </summary>
+        /// <param name="binaryString">The binary string to parse. This string may contain unknown bits (<c>?</c>).</param>
+        /// <returns>The parsed bit vector.</returns>
+        public static BitVector ParseBinary(string binaryString)
+        {
+            if (binaryString.Length % 8 != 0)
+                throw new ArgumentOutOfRangeException(nameof(binaryString), "The number of bits in the vector should be a multiple of 8.");
+
+            var result = new BitVector(binaryString.Length, false);
+            result.AsSpan().WriteBinaryString(0, binaryString);
+            return result;
+        } 
     }
 }

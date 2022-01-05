@@ -304,6 +304,20 @@ namespace Echo.Core
         public Trilean Xor(Trilean other) => XorTable[GetLookupTableIndex(Value, other.Value)];
 
         /// <summary>
+        /// Obtains the trilean value that is associated to the provided character.
+        /// </summary>
+        /// <param name="c">The character to parse.</param>
+        /// <returns>The trilean value.</returns>
+        /// <exception cref="FormatException">Occurs when the character is not a valid trilean digit.</exception>
+        public static Trilean FromChar(char c) => c switch
+        {
+            '0' => False,
+            '1' => True,
+            '?' => Unknown,
+            _ => throw new FormatException()
+        };
+        
+        /// <summary>
         /// Returns the raw value of the trilean as a single character (either '0', '1' or '?').
         /// </summary>
         /// <returns>The character.</returns>

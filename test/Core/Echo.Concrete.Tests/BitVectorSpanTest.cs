@@ -1,4 +1,5 @@
 using System;
+using Echo.Core;
 using Xunit;
 
 namespace Echo.Concrete.Tests
@@ -77,6 +78,51 @@ namespace Echo.Concrete.Tests
         {
             var vector = new BitVector(new byte[] {0x12, 0x34, 0x56, 0x78});
             Assert.Equal("12345678", vector.AsSpan().ToHexString());
+        }
+
+        [Theory]
+        [InlineData(0, TrileanValue.False, "00000000")]
+        [InlineData(0, TrileanValue.True, "00000001")]
+        [InlineData(0, TrileanValue.Unknown, "0000000?")]
+        [InlineData(3, TrileanValue.False, "00000000")]
+        [InlineData(3, TrileanValue.True, "00001000")]
+        [InlineData(3, TrileanValue.Unknown, "0000?000")]
+        [InlineData(4, TrileanValue.False, "00000000")]
+        [InlineData(4, TrileanValue.True, "00010000")]
+        [InlineData(4, TrileanValue.Unknown, "000?0000")]
+        public void SetSingleBit(int index, TrileanValue value, string expected)
+        {
+            var vector = new BitVector(8, true).AsSpan();
+            vector[index] = value;
+            Assert.Equal(expected, vector.ToBitString());
+        }
+
+        [Fact]
+        public void SetMultipleBits()
+        {
+            var vector = new BitVector(8, true).AsSpan();
+            
+            vector[0] = Trilean.False;
+            vector[1] = Trilean.True;
+            vector[2] = Trilean.Unknown;
+            vector[3] = Trilean.False;
+            vector[4] = Trilean.True;
+            vector[5] = Trilean.Unknown;
+            vector[6] = Trilean.False;
+            vector[7] = Trilean.True;
+            
+            Assert.Equal("10?10?10", vector.ToBitString());
+        }
+
+        [Theory]
+        [InlineData("00000000")]
+        [InlineData("11111111")]
+        [InlineData("????????")]
+        [InlineData("10?10?10")]
+        public void Parse(string binaryString)
+        {
+            var vector = BitVector.ParseBinary(binaryString);
+            Assert.Equal(binaryString, vector.AsSpan().ToBitString());
         }
     }
 }

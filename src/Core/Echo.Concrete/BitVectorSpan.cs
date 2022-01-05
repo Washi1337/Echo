@@ -8,7 +8,7 @@ namespace Echo.Concrete
     /// Represents a slice of an array of bits for which the concrete may be known or unknown, and can be
     /// reinterpreted as different value types, and operated on using the different semantics of these types.
     /// </summary>
-    public readonly ref struct BitVectorSpan
+    public readonly ref partial struct BitVectorSpan
     {
         [ThreadStatic]
         private static StringBuilder? _builder;
@@ -44,6 +44,19 @@ namespace Echo.Concrete
                     return Trilean.Unknown;
 
                 return ((Bits[byteIndex] >> bitIndex) & 1) == 1;
+            }
+            set
+            {
+                int byteIndex = Math.DivRem(index, 8, out int bitIndex);
+                if (!value.IsKnown)
+                {
+                    KnownMask[byteIndex] = (byte) (KnownMask[byteIndex] & ~(1 << bitIndex));
+                }
+                else
+                {
+                    KnownMask[byteIndex] = (byte) (KnownMask[byteIndex] | (1 << bitIndex));
+                    Bits[byteIndex] = (byte) (Bits[byteIndex] | ((value ? 1 : 0) << bitIndex));
+                }
             }
         }
 
@@ -125,6 +138,25 @@ namespace Echo.Concrete
             
             data.CopyTo(Bits.Slice(bitIndex / 8));
             KnownMask.Slice(bitIndex / 8, data.Length).Fill(0xFF);
+        }
+
+        /// <summary>
+        /// Writes a (partially known) bit string, where the least significant bit is at the end of the string, into
+        /// the bit vector at the provided bit index.
+        /// </summary>
+        /// <param name="bitIndex">The bit index to start writing at.</param>
+        /// <param name="binaryString">The binary string to write. This string may contain unknown bits (<c>?</c>).</param>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when the bit index is not a multiple of 8.</exception>
+        public void WriteBinaryString(int bitIndex, string binaryString)
+        {
+            if (binaryString.Length % 8 != 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(binaryString),
+                    "The number of bits in the vector should be a multiple of 8.");
+            }
+
+            for (int i = 0; i < binaryString.Length; i++)
+                this[bitIndex + i] = Trilean.FromChar(binaryString[binaryString.Length - i - 1]);
         }
 
         /// <summary>
