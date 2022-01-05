@@ -124,5 +124,21 @@ namespace Echo.Concrete.Tests
             var vector = BitVector.ParseBinary(binaryString);
             Assert.Equal(binaryString, vector.AsSpan().ToBitString());
         }
+
+        [Theory]
+        [InlineData("0000000000000000", TrileanValue.True)]
+        [InlineData("0000000000000001", TrileanValue.False)]
+        [InlineData("????????????????", TrileanValue.Unknown)]
+        [InlineData("000000000000000?", TrileanValue.Unknown)]
+        [InlineData("?000000000000000", TrileanValue.Unknown)]
+        [InlineData("1???????????????", TrileanValue.False)]
+        [InlineData("???????????????1", TrileanValue.False)]
+        [InlineData("000010000000000?", TrileanValue.False)]
+        [InlineData("000000000000100?", TrileanValue.False)]
+        public void IsZero(string binaryString, TrileanValue expected)
+        {
+            var vector = BitVector.ParseBinary(binaryString).AsSpan();
+            Assert.Equal(expected, vector.IsZero);
+        }
     }
 }

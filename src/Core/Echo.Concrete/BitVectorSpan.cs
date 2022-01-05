@@ -82,6 +82,34 @@ namespace Echo.Concrete
         public int Count => Bits.Length * 8;
         
         /// <summary>
+        /// Gets a value indicating whether all bits in the vector are known. 
+        /// </summary>
+        public bool IsFullyKnown => KnownMask.All(0xFF);
+
+        /// <summary>
+        /// Gets a value indicating whether all bits in the vector are set to zero.
+        /// </summary>
+        public Trilean IsZero
+        {
+            get
+            {
+                var bits = Bits;
+
+                if (IsFullyKnown)
+                    return bits.All(0);
+
+                var mask = KnownMask;
+                for (int i = 0; i < bits.Length; i++)
+                {
+                    if ((bits[i] & mask[i]) != 0)
+                        return Trilean.False;
+                }
+
+                return Trilean.Unknown;
+            }
+        }
+        
+        /// <summary>
         /// Forms a slice of a bit vector that starts at a provided bit index.
         /// </summary>
         /// <param name="bitIndex">The bit index to start the slice at.</param>
