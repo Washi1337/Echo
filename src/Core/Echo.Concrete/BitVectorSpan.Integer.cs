@@ -345,5 +345,102 @@ namespace Echo.Concrete
 
             return borrow;
         }
+
+        /// <summary>
+        /// Interprets the bit vector as an integer and multiplies it by a second integer.
+        /// </summary>
+        /// <param name="other">The integer to multiply the current integer with.</param>
+        /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match in bit length.</exception>
+        /// <returns>A value indicating whether the result was truncated.</returns>
+        public Trilean IntegerMultiply(BitVectorSpan other)
+        {
+            AssertSameBitSize(other);
+
+            if (Count > 64 || !IsFullyKnown || !other.IsFullyKnown)
+                return IntegerMultiplyLle(other);
+
+            switch (Count)
+            {
+                case 8:
+                    byte old8 = U8;
+                    byte new8 = (byte) (old8 * other.U8);
+                    U8 = new8;
+                    return other.U8 != 0 && old8 > byte.MaxValue / other.U8;
+
+                case 16:
+                    ushort old16 = U16;
+                    ushort new16 = (ushort) (old16 * other.U16);
+                    U16 = new16;
+                    return other.U16 != 0 && old16 > ushort.MaxValue / other.U16;
+
+                case 32:
+                    uint old32 = U32;
+                    uint new32 = old32 * other.U32;
+                    U32 = new32;
+                    return other.U32 != 0 && old32 > uint.MaxValue / other.U32;
+                
+                case 64:
+                    ulong old64 = U64;
+                    ulong new64 = old64 * other.U64;
+                    U64 = new64;
+                    return other.U64 != 0 && old64 > ulong.MaxValue / other.U64;
+                
+                default:
+                    return IntegerMultiplyLle(other);
+            }
+        }
+
+        private Trilean IntegerMultiplyLle(BitVectorSpan other)
+        {
+            // We implement the standard long multiplication algo by adding and shifting, but instead of storing all
+            // intermediate results, we can precompute the two possible intermediate results, shift them, and add them
+            // to an end result to preserve time and memory.
+            
+            // Since there are three possible values in a trilean, there are three possible intermediate results.
+
+            // 1) First possible intermediate result is the current value multiplied by 0. Adding zeroes to a number is
+            // equivalent to the identity operation, which means it is redundant to compute this.
+
+            // 2) Second possibility is the current value multiplied by 1.
+            var multipliedByOne = GetTemporaryBitVector(0, Count);
+            CopyTo(multipliedByOne);
+
+            // 3) Third possibility is thee current value multiplied by ?. This is effectively marking all set bits unknown.
+            var multipliedByUnknown = GetTemporaryBitVector(1, Count);
+            CopyTo(multipliedByUnknown);
+
+            var mask = multipliedByUnknown.KnownMask;
+            mask.Not();
+            mask.Or(multipliedByUnknown.Bits);
+            mask.Not();
+
+            // Clear all bits, so we can use ourselves as a result bit vector.
+            Clear();
+            
+            var carry = Trilean.False;
+
+            // Perform addition-shift algorithm.
+            int lastShiftByOne = 0;
+            int lastShiftByUnknown = 0;
+            for (int i = 0; i < Count; i++)
+            {
+                var bit = other[i];
+
+                if (!bit.IsKnown)
+                {
+                    multipliedByUnknown.ShiftLeft(i - lastShiftByUnknown);
+                    carry |= IntegerAdd(multipliedByUnknown);
+                    lastShiftByUnknown = i;
+                }
+                else if (bit.ToBoolean())
+                {
+                    multipliedByOne.ShiftLeft(i - lastShiftByOne);
+                    carry |= IntegerAdd(multipliedByOne);
+                    lastShiftByOne = i;
+                }
+            }
+            
+            return carry;
+        }
     }
 }

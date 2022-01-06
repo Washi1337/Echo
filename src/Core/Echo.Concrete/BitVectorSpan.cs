@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
@@ -15,6 +16,9 @@ namespace Echo.Concrete
     {
         [ThreadStatic]
         private static StringBuilder? _builder;
+        
+        [ThreadStatic]
+        private static List<BitVector?>? _temporaryVectors; 
 
         /// <summary>
         /// Creates a new span around a pair of bits and a known bit mask.
@@ -292,6 +296,22 @@ namespace Echo.Concrete
         {
             if (Count != other.Count)
                 throw new ArgumentException($"Cannot perform a binary operation on a {other.Count} bit vector and a {Count} bit vector.");
+        }
+
+        private static BitVectorSpan GetTemporaryBitVector(int index, int count)
+        {
+            _temporaryVectors ??= new List<BitVector?>();
+            while (_temporaryVectors.Count <= index)
+                _temporaryVectors.Add(null);
+
+            var vector = _temporaryVectors[index];
+            if (vector is null || vector.Count < count)
+            {
+                vector = new BitVector(count, false);
+                _temporaryVectors[index] = vector;
+            }
+
+            return vector.AsSpan(0, count);
         }
     }
 }

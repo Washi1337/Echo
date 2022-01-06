@@ -99,5 +99,24 @@ namespace Echo.Concrete.Tests
             Assert.Equal(borrow, expectedBorrow);
         }
 
+        [Theory]
+        [InlineData("00000000", "00000000", "00000000", TrileanValue.False)]
+        [InlineData("00000001", "00000000", "00000000", TrileanValue.False)]
+        [InlineData("00000001", "0000000?", "0000000?", TrileanValue.False)]
+        [InlineData("0000000?", "00000001", "0000000?", TrileanValue.False)]
+        [InlineData("00000011", "00000010", "00000110", TrileanValue.False)]
+        [InlineData("000000?1", "00000010", "00000?10", TrileanValue.False)]
+        [InlineData("00001001", "00110011", "11001011", TrileanValue.True)]
+        [InlineData("11111111", "00000010", "11111110", TrileanValue.True)]
+        public void IntegerMultiply(string a, string b, string expectedValue, TrileanValue expectedCarry)
+        {
+            var value1 = BitVector.ParseBinary(a).AsSpan();
+            var value2 = BitVector.ParseBinary(b).AsSpan();
+
+            var carry = value1.IntegerMultiply(value2);
+            
+            Assert.Equal(expectedValue, value1.ToBitString());
+            Assert.Equal(expectedCarry, carry);
+        }
     }
 }
