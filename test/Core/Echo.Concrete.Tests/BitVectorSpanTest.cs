@@ -1,6 +1,7 @@
 using System;
 using Echo.Core;
 using Xunit;
+using static Echo.Core.TrileanValue;
 
 namespace Echo.Concrete.Tests
 {
@@ -81,15 +82,15 @@ namespace Echo.Concrete.Tests
         }
 
         [Theory]
-        [InlineData(0, TrileanValue.False, "00000000")]
-        [InlineData(0, TrileanValue.True, "00000001")]
-        [InlineData(0, TrileanValue.Unknown, "0000000?")]
-        [InlineData(3, TrileanValue.False, "00000000")]
-        [InlineData(3, TrileanValue.True, "00001000")]
-        [InlineData(3, TrileanValue.Unknown, "0000?000")]
-        [InlineData(4, TrileanValue.False, "00000000")]
-        [InlineData(4, TrileanValue.True, "00010000")]
-        [InlineData(4, TrileanValue.Unknown, "000?0000")]
+        [InlineData(0, False, "00000000")]
+        [InlineData(0, True, "00000001")]
+        [InlineData(0, Unknown, "0000000?")]
+        [InlineData(3, False, "00000000")]
+        [InlineData(3, True, "00001000")]
+        [InlineData(3, Unknown, "0000?000")]
+        [InlineData(4, False, "00000000")]
+        [InlineData(4, True, "00010000")]
+        [InlineData(4, Unknown, "000?0000")]
         public void SetSingleBit(int index, TrileanValue value, string expected)
         {
             var vector = new BitVector(8, true).AsSpan();
@@ -126,19 +127,32 @@ namespace Echo.Concrete.Tests
         }
 
         [Theory]
-        [InlineData("0000000000000000", TrileanValue.True)]
-        [InlineData("0000000000000001", TrileanValue.False)]
-        [InlineData("????????????????", TrileanValue.Unknown)]
-        [InlineData("000000000000000?", TrileanValue.Unknown)]
-        [InlineData("?000000000000000", TrileanValue.Unknown)]
-        [InlineData("1???????????????", TrileanValue.False)]
-        [InlineData("???????????????1", TrileanValue.False)]
-        [InlineData("000010000000000?", TrileanValue.False)]
-        [InlineData("000000000000100?", TrileanValue.False)]
+        [InlineData("0000000000000000", True)]
+        [InlineData("0000000000000001", False)]
+        [InlineData("????????????????", Unknown)]
+        [InlineData("000000000000000?", Unknown)]
+        [InlineData("?000000000000000", Unknown)]
+        [InlineData("1???????????????", False)]
+        [InlineData("???????????????1", False)]
+        [InlineData("000010000000000?", False)]
+        [InlineData("000000000000100?", False)]
         public void IsZero(string binaryString, TrileanValue expected)
         {
             var vector = BitVector.ParseBinary(binaryString).AsSpan();
             Assert.Equal(expected, vector.IsZero);
+        }
+
+        [Theory]
+        [InlineData("01010101", "01010101", True)]
+        [InlineData("01010101", "10101010", False)]
+        [InlineData("010?0101", "01010101", Unknown)]
+        [InlineData("010?0111", "01010101", False)]
+        public void IsEqualTo(string a, string b, TrileanValue expected)
+        {
+            var value1 = BitVector.ParseBinary(a).AsSpan();
+            var value2 = BitVector.ParseBinary(b).AsSpan();
+
+            Assert.Equal(expected, value1.IsEqualTo(value2));
         }
     }
 }

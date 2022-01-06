@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using Echo.Core;
+using static Echo.Core.TrileanValue;
 
 namespace Echo.Concrete
 {
@@ -84,6 +85,11 @@ namespace Echo.Concrete
             get => BinaryPrimitives.ReadUInt64LittleEndian(Bits);
             set => BinaryPrimitives.WriteUInt64LittleEndian(Bits, value);
         }
+
+        /// <summary>
+        /// Interprets the bit vector as an integer, and obtains the most significant bit (MSB) of the bit vector.
+        /// </summary>
+        public Trilean GetMsb() => this[Count - 1];
 
         /// <summary>
         /// Interprets the bit vector as an integer and adds a second integer to it. 
@@ -419,28 +425,223 @@ namespace Echo.Concrete
             
             var carry = Trilean.False;
 
-            // Perform addition-shift algorithm.
+            // Perform long multiplication.
             int lastShiftByOne = 0;
             int lastShiftByUnknown = 0;
             for (int i = 0; i < Count; i++)
             {
                 var bit = other[i];
 
-                if (!bit.IsKnown)
+                switch (bit.Value)
                 {
-                    multipliedByUnknown.ShiftLeft(i - lastShiftByUnknown);
-                    carry |= IntegerAdd(multipliedByUnknown);
-                    lastShiftByUnknown = i;
-                }
-                else if (bit.ToBoolean())
-                {
-                    multipliedByOne.ShiftLeft(i - lastShiftByOne);
-                    carry |= IntegerAdd(multipliedByOne);
-                    lastShiftByOne = i;
+                    case TrileanValue.False:
+                        // Multiply by 0 (Do nothing).
+                        break;
+
+                    case TrileanValue.True:
+                        // Multiply by 1.
+                        multipliedByOne.ShiftLeft(i - lastShiftByOne);
+                        carry |= IntegerAdd(multipliedByOne);
+                        lastShiftByOne = i;
+                        break;
+                    
+                    case TrileanValue.Unknown:
+                        // Multiply by ?.
+                        multipliedByUnknown.ShiftLeft(i - lastShiftByUnknown);
+                        carry |= IntegerAdd(multipliedByUnknown);
+                        lastShiftByUnknown = i;
+                        break;
                 }
             }
             
             return carry;
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as an integer, and determines whether the integer is greater than another integer.
+        /// </summary>
+        /// <param name="other">The other integer.</param>
+        /// <param name="signed">Indicates the integers should be interpreted as signed or unsigned integers.</param>
+        /// <returns>
+        /// <see cref="Trilean.True"/> if the current integer is greater than the provided integer,
+        /// <see cref="Trilean.False"/> if not, and <see cref="Trilean.Unknown"/> if the conclusion of the comparison
+        /// is not certain.
+        /// </returns>
+        public Trilean IntegerIsGreaterThan(BitVectorSpan other, bool signed)
+        {
+            AssertSameBitSize(other);
+
+            if (Count > 64 || !IsFullyKnown || !other.IsFullyKnown)
+                return IntegerIsGreaterThanLle(other, signed);
+
+            if (signed)
+            {
+                return Count switch
+                {
+                    8 => I8 > other.I8,
+                    16 => I16 > other.I16,
+                    32 => I32 > other.I32,
+                    64 => I64 > other.I64,
+                    _ => IntegerIsGreaterThanLle(other, signed)
+                };
+            }
+
+            return Count switch
+            {
+                8 => U8 > other.U8,
+                16 => U16 > other.U16,
+                32 => U32 > other.U32,
+                64 => U64 > other.U64,
+                _ => IntegerIsGreaterThanLle(other, signed)
+            };
+        }
+        
+        private Trilean IntegerIsGreaterThanLle(BitVectorSpan other, bool signed)
+        {
+            if (signed)
+            {
+                var thisSigned = GetMsb();
+                var otherSigned = other.GetMsb();
+                if (thisSigned.IsUnknown || otherSigned.IsUnknown)
+                    return Trilean.Unknown;
+
+                // If the signs do not match, we know the result
+                if (thisSigned ^ otherSigned)
+                    return otherSigned;
+
+                if (thisSigned)
+                    return IntegerIsLessThan(other, false);
+            }
+
+            // The following implements the "truth" table:
+            // "-" indicates we do not know the answer yet.
+            //
+            //    | 0 | 1 | ?
+            // ---+---+---+---
+            //  0 | - | 0 | 0
+            //  --+---+---+---
+            //  1 | 1 | - | ?
+            //  --+---+---+---
+            //  ? | ? | 0 | ?
+
+            AssertSameBitSize(other);
+
+            for (int i = Count- 1; i >= 0; i--)
+            {
+                var a = this[i];
+                var b = other[i];
+
+                switch (a.Value, b.Value)
+                {
+                    case (False, True):
+                    case (False, Unknown):
+                    case (Unknown, True):
+                        return Trilean.False;
+
+                    case (True, False):
+                        return Trilean.True;
+
+                    case (True, Unknown):
+                    case (Unknown, False):
+                    case (Unknown, Unknown):
+                        return Trilean.Unknown;
+                }
+            }
+
+            return Trilean.False;
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as an integer, and determines whether the integer is less than another integer.
+        /// </summary>
+        /// <param name="other">The other integer.</param>
+        /// <param name="signed">Indicates the integers should be interpreted as signed or unsigned integers.</param>
+        /// <returns>
+        /// <see cref="Trilean.True"/> if the current integer is less than the provided integer,
+        /// <see cref="Trilean.False"/> if not, and <see cref="Trilean.Unknown"/> if the conclusion of the comparison
+        /// is not certain.
+        /// </returns>
+        public Trilean IntegerIsLessThan(BitVectorSpan other, bool signed)
+        {
+            AssertSameBitSize(other);
+
+            if (Count > 64 || !IsFullyKnown || !other.IsFullyKnown)
+                return IntegerIsLessThanLle(other, signed);
+
+            if (signed)
+            {
+                return Count switch
+                {
+                    8 => I8 < other.I8,
+                    16 => I16 < other.I16,
+                    32 => I32 < other.I32,
+                    64 => I64 < other.I64,
+                    _ => IntegerIsLessThanLle(other, signed)
+                };
+            }
+
+            return Count switch
+            {
+                8 => U8 < other.U8,
+                16 => U16 < other.U16,
+                32 => U32 < other.U32,
+                64 => U64 < other.U64,
+                _ => IntegerIsLessThanLle(other, signed)
+            };
+        }
+        
+        private Trilean IntegerIsLessThanLle(BitVectorSpan other, bool signed)
+        {
+            if (signed)
+            {
+                var thisSigned = GetMsb();
+                var otherSigned = other.GetMsb();
+                if (thisSigned.IsUnknown || otherSigned.IsUnknown)
+                    return Trilean.Unknown;
+
+                // If the signs do not match, we know the result
+                if (thisSigned ^ otherSigned)
+                    return thisSigned;
+
+                if (thisSigned)
+                    return IntegerIsGreaterThan(other, false);
+            }
+
+            // The following implements the "truth" table:
+            // "-" indicates we do not know the answer yet.
+            //
+            //    | 0 | 1 | ?
+            // ---+---+---+---
+            //  0 | - | 1 | ?
+            //  --+---+---+---
+            //  1 | 0 | - | 0
+            //  --+---+---+---
+            //  ? | 0 | ? | ?
+
+            AssertSameBitSize(other);
+
+            for (int i = Count - 1; i >= 0; i--)
+            {
+                var a = this[i];
+                var b = other[i];
+
+                switch (a.Value, b.Value)
+                {
+                    case (False, True):
+                        return Trilean.True;
+
+                    case (True, False):
+                    case (True, Unknown):
+                    case (Unknown, False):
+                        return Trilean.False;
+
+                    case (False, Unknown):
+                    case (Unknown, True):
+                        return Trilean.Unknown;
+                }
+            }
+
+            return Trilean.False;
         }
     }
 }

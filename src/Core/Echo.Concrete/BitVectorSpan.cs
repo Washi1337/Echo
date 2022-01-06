@@ -298,6 +298,58 @@ namespace Echo.Concrete
                 throw new ArgumentException($"Cannot perform a binary operation on a {other.Count} bit vector and a {Count} bit vector.");
         }
 
+        /// <summary>
+        /// Determines whether the current bit vector is equal to another bit vector.
+        /// </summary>
+        /// <param name="other">The other bit vector.</param>
+        /// <returns>
+        /// <see cref="Trilean.True"/> if the bit vector are equal, <see cref="Trilean.False"/> if not, and
+        /// <see cref="Trilean.Unknown"/> if the conclusion of the comparison is not certain.
+        /// </returns>
+        public Trilean IsEqualTo(BitVectorSpan other)
+        {
+            AssertSameBitSize(other);
+
+            if (IsFullyKnown && other.IsFullyKnown)
+                return Equals(other);
+
+            // Check if we definitely know this is not equal to the other.
+            for (int i = 0; i < Bits.Length; i++)
+            {
+                (byte bitsA, byte knownA) = (Bits[i], KnownMask[i]);
+                (byte bitsB, byte knownB) = (other.Bits[i], other.KnownMask[i]);
+
+                if ((bitsA & knownA & knownB) != (bitsB & knownA & knownB))
+                    return Trilean.False;
+            }
+
+            return Trilean.Unknown;
+        }
+
+        /// <summary>
+        /// Compares two <see cref="BitVectorSpan"/>'s
+        /// </summary>
+        /// <remarks>
+        /// This overload exists to avoid boxing allocations.
+        /// </remarks>
+        /// <param name="other">The <see cref="BitVectorSpan"/> to compare to</param>
+        /// <returns>Whether the two <see cref="BitVectorSpan"/>'s are equal</returns>
+        public bool Equals(BitVectorSpan other)
+        {
+            return Bits.SequenceEqual(other.Bits) && KnownMask.SequenceEqual(other.KnownMask);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            // Since this is a ref struct, it will
+            // never equal any reference type
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode() => Bits.GetSequenceHashCode() ^ KnownMask.GetSequenceHashCode();
+
         private static BitVectorSpan GetTemporaryBitVector(int index, int count)
         {
             _temporaryVectors ??= new List<BitVector?>();
