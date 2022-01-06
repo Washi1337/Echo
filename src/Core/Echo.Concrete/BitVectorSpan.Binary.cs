@@ -16,6 +16,8 @@ namespace Echo.Concrete
         /// <param name="other">The other bit vector.</param>
         public void And(BitVectorSpan other)
         {
+            AssertSameBitSize(other);
+            
             for (int i = 0; i < KnownMask.Length; i++)
             {
                 (byte bitsA, byte knownA) = (Bits[i], KnownMask[i]);
@@ -33,6 +35,8 @@ namespace Echo.Concrete
         /// <param name="other">The other bit vector.</param>
         public void Or(BitVectorSpan other)
         {
+            AssertSameBitSize(other);
+            
             for (int i = 0; i < KnownMask.Length; i++)
             {
                 (byte bitsA, byte knownA) = (Bits[i], KnownMask[i]);
@@ -50,6 +54,8 @@ namespace Echo.Concrete
         /// <param name="other">The other bit vector.</param>
         public void Xor(BitVectorSpan other)
         {
+            AssertSameBitSize(other);
+            
             Bits.Xor(other.Bits);
             KnownMask.And(other.KnownMask);
         }

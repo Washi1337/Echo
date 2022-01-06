@@ -153,6 +153,12 @@ namespace Echo.Concrete
             KnownMask.CopyTo(buffer.KnownMask);
         }
 
+        public void Clear()
+        {
+            Bits.Fill(0);
+            KnownMask.Fill(0xFF);
+        }
+
         /// <summary>
         /// Writes fully known bytes into the bit vector at the provided bit index. 
         /// </summary>
@@ -252,6 +258,12 @@ namespace Echo.Concrete
             }
 
             return _builder.ToString();
+        }
+        
+        private void AssertSameBitSize(BitVectorSpan other)
+        {
+            if (Count != other.Count)
+                throw new ArgumentException($"Cannot perform a binary operation on a {other.Count} bit vector and a {Count} bit vector.");
         }
     }
 }
