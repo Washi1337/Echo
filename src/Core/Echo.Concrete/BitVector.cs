@@ -6,7 +6,7 @@ namespace Echo.Concrete
     /// Represents an array of bits for which the concrete may be known or unknown, and can be reinterpreted as
     /// different value types, and operated on using the different semantics of these types.
     /// </summary>
-    public class BitVector
+    public class BitVector : ICloneable
     {
         /// <summary>
         /// Creates a new bit vector of the provided size.
@@ -123,6 +123,21 @@ namespace Echo.Concrete
             var result = new BitVector(binaryString.Length, false);
             result.AsSpan().WriteBinaryString(0, binaryString);
             return result;
-        } 
+        }
+
+        /// <summary>
+        /// Deep copies the bit vector.
+        /// </summary>
+        /// <returns>The copied bit vector.</returns>
+        public BitVector Clone()
+        {
+            byte[] bits = new byte[Bits.Length];
+            Buffer.BlockCopy(Bits, 0, bits, 0, bits.Length);
+            byte[] mask = new byte[KnownMask.Length];
+            Buffer.BlockCopy(KnownMask, 0, mask, 0, mask.Length);
+            return new BitVector(bits, mask);
+        }
+
+        object ICloneable.Clone() => Clone();
     }
 }

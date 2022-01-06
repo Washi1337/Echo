@@ -66,6 +66,38 @@ namespace Echo.Concrete
         /// <param name="count">The number of bits to shift with.</param>
         public void ShiftLeft(int count)
         {
+            if (Count > 64 || !IsFullyKnown)
+            {
+                ShiftLeftLle(count);
+                return;
+            }
+
+            switch (Count)
+            {
+                case 8:
+                    U8 <<= count;
+                    break;
+
+                case 16:
+                    U16 <<= count;
+                    break;
+
+                case 32:
+                    U32 <<= count;
+                    break;
+
+                case 64:
+                    U64 <<= count;
+                    break;
+
+                default:
+                    ShiftLeftLle(count);
+                    break;
+            }
+        }
+
+        private void ShiftLeftLle(int count)
+        {
             count = Math.Min(Count, count);
 
             for (int i = Count - count - 1; i >= 0; i--)
@@ -81,6 +113,54 @@ namespace Echo.Concrete
         /// <param name="count">The number of bits to shift with.</param>
         /// <param name="signExtend">Gets a value indicating whether the bits should be sign- or zero-extended.</param>
         public void ShiftRight(int count, bool signExtend)
+        {
+            if (Count > 64 || !IsFullyKnown)
+            {
+                ShiftRightLle(count, signExtend);
+                return;
+            }
+
+            if (signExtend)
+            {
+                switch (Count)
+                {
+                    case 8 :
+                        I8 >>= count;
+                        return;
+                    case 16:
+                        I16 >>= count;
+                        return;
+                    case 32:
+                        I32 >>= count;
+                        return;
+                    case 64:
+                        I64 >>= count;
+                        return;
+                }
+            }
+            else
+            {
+                switch (Count)
+                {
+                    case 8:
+                        U8 >>= count;
+                        return;
+                    case 16:
+                        U16 >>= count;
+                        return;
+                    case 32:
+                        U32 >>= count;
+                        return;
+                    case 64:
+                        U64 >>= count;
+                        return;
+                }
+            }
+
+            ShiftRightLle(count, signExtend);
+        }
+
+        private void ShiftRightLle(int count, bool signExtend)
         {
             count = Math.Min(Count * 8, count);
             var sign = signExtend

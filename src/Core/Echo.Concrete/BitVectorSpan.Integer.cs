@@ -1,10 +1,90 @@
 using System;
+using System.Buffers.Binary;
 using Echo.Core;
 
 namespace Echo.Concrete
 {
     public readonly ref partial struct BitVectorSpan
     {
+        // Note on performance:
+        //
+        // For most operations here, LLE of certain operations is relatively slow. We can often avoid having to do
+        // full LLE however if the values involved are fully known and are of primitive sizes (e.g. a normal int32).
+        // It is computationally cheaper on average to check whether this is the case and then use the native hardware
+        // operations, than to always use full LLE on all operations. Hence, this implementation follows this strategy. 
+
+        /// <summary>
+        /// Interprets the bit vector as a signed 8 bit integer, and gets or sets the immediate value for it.
+        /// </summary>
+        public sbyte I8
+        {
+            get => unchecked((sbyte) Bits[0]);
+            set => Bits[0] = unchecked((byte) value);
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as an unsigned 8 bit integer, and gets or sets the immediate value for it.
+        /// </summary>
+        public byte U8
+        {
+            get => Bits[0];
+            set => Bits[0] = value;
+        }
+        
+        /// <summary>
+        /// Interprets the bit vector as a signed 16 bit integer, and gets or sets the immediate value for it.
+        /// </summary>
+        public short I16
+        {
+            get => BinaryPrimitives.ReadInt16LittleEndian(Bits);
+            set => BinaryPrimitives.WriteInt16LittleEndian(Bits, value);
+        }
+        
+        /// <summary>
+        /// Interprets the bit vector as an unsigned 16 bit integer, and gets or sets the immediate value for it.
+        /// </summary>
+        public ushort U16
+        {
+            get => BinaryPrimitives.ReadUInt16LittleEndian(Bits);
+            set => BinaryPrimitives.WriteUInt16LittleEndian(Bits, value);
+        }
+        
+        /// <summary>
+        /// Interprets the bit vector as a signed 32 bit integer, and gets or sets the immediate value for it.
+        /// </summary>
+        public int I32
+        {
+            get => BinaryPrimitives.ReadInt32LittleEndian(Bits);
+            set => BinaryPrimitives.WriteInt32LittleEndian(Bits, value);
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as an unsigned 32 bit integer, and gets or sets the immediate value for it.
+        /// </summary>
+        public uint U32
+        {
+            get => BinaryPrimitives.ReadUInt32LittleEndian(Bits);
+            set => BinaryPrimitives.WriteUInt32LittleEndian(Bits, value);
+        }
+        
+        /// <summary>
+        /// Interprets the bit vector as a signed 64 bit integer, and gets or sets the immediate value for it.
+        /// </summary>
+        public long I64
+        {
+            get => BinaryPrimitives.ReadInt64LittleEndian(Bits);
+            set => BinaryPrimitives.WriteInt64LittleEndian(Bits, value);
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as an unsigned 64 bit integer, and gets or sets the immediate value for it.
+        /// </summary>
+        public ulong U64
+        {
+            get => BinaryPrimitives.ReadUInt64LittleEndian(Bits);
+            set => BinaryPrimitives.WriteUInt64LittleEndian(Bits, value);
+        }
+
         /// <summary>
         /// Interprets the bit vector as an integer and adds a second integer to it. 
         /// </summary>
@@ -15,6 +95,42 @@ namespace Echo.Concrete
         {
             AssertSameBitSize(other);
 
+            if (Count > 64 || !IsFullyKnown || !other.IsFullyKnown)
+                return IntegerAddLle(other);
+
+            switch (Count)
+            {
+                case 8:
+                    byte old8 = U8;
+                    byte new8 = (byte) (old8 + other.U8);
+                    U8 = new8;
+                    return new8 < old8;
+
+                case 16:
+                    ushort old16 = U16;
+                    ushort new16 = (ushort) (old16 + other.U16);
+                    U16 = new16;
+                    return new16 < old16;
+
+                case 32:
+                    uint old32 = U32;
+                    uint new32 = old32 + other.U32;
+                    U32 = new32;
+                    return new32 < old32;
+                
+                case 64:
+                    ulong old64 = U64;
+                    ulong new64 = old64 + other.U64;
+                    U64 = new64;
+                    return new64 < old64;
+                
+                default:
+                    return IntegerAddLle(other);
+            }
+        }
+        
+        private Trilean IntegerAddLle(BitVectorSpan other)
+        {
             var carry = Trilean.False;
 
             for (int i = 0; i < Count; i++)
@@ -39,9 +155,45 @@ namespace Echo.Concrete
         /// <returns>The value of the carry bit after the increment operation completed.</returns>
         public Trilean IntegerIncrement()
         {
+            if (Count > 64 || !IsFullyKnown)
+                return IntegerIncrementLle();
+
+            switch (Count)
+            {
+                case 8:
+                    byte old8 = U8;
+                    byte new8 = (byte) (old8 + 1);
+                    U8 = new8;
+                    return new8 < old8;
+
+                case 16:
+                    ushort old16 = U16;
+                    ushort new16 = (ushort) (old16 + 1);
+                    U16 = new16;
+                    return new16 < old16;
+
+                case 32:
+                    uint old32 = U32;
+                    uint new32 = old32 + 1;
+                    U32 = new32;
+                    return new32 < old32;
+                
+                case 64:
+                    ulong old64 = U64;
+                    ulong new64 = old64 + 1;
+                    U64 = new64;
+                    return new64 < old64;
+                
+                default:
+                    return IntegerIncrementLle();
+            }
+        }
+
+        private Trilean IntegerIncrementLle()
+        {
             // Optimized version of full-adder that does not require allocation of another vector, and short circuits
             // after carry does not have any effect any more. 
-            
+
             var carry = Trilean.True;
 
             for (int i = 0; i < Count && carry != Trilean.False; i++)
@@ -78,8 +230,44 @@ namespace Echo.Concrete
         {
             AssertSameBitSize(other);
 
+            if (Count > 64 || !IsFullyKnown || !other.IsFullyKnown)
+                return IntegerSubtractLle(other);
+
+            switch (Count)
+            {
+                case 8:
+                    byte old8 = U8;
+                    byte new8 = (byte) (old8 - other.U8);
+                    U8 = new8;
+                    return new8 > old8;
+
+                case 16:
+                    ushort old16 = U16;
+                    ushort new16 = (ushort) (old16 - other.U16);
+                    U16 = new16;
+                    return new16 > old16;
+
+                case 32:
+                    uint old32 = U32;
+                    uint new32 = old32 - other.U32;
+                    U32 = new32;
+                    return new32 > old32;
+                
+                case 64:
+                    ulong old64 = U64;
+                    ulong new64 = old64 - other.U64;
+                    U64 = new64;
+                    return new64 > old64;
+                
+                default:
+                    return IntegerSubtractLle(other);
+            }
+        }
+
+        private Trilean IntegerSubtractLle(BitVectorSpan other)
+        {
             var borrow = Trilean.False;
-            
+
             for (int i = 0; i < Count; i++)
             {
                 var a = this[i];
@@ -95,18 +283,54 @@ namespace Echo.Concrete
 
             return borrow;
         }
-        
+
         /// <summary>
         /// Interprets the bit vector as an integer and decrements it by one. 
         /// </summary>
         /// <returns>The value of the carry bit after the decrement operation completed.</returns>
         public Trilean IntegerDecrement()
         {
+            if (Count > 64 || !IsFullyKnown)
+                return IntegerDecrementLle();
+
+            switch (Count)
+            {
+                case 8:
+                    byte old8 = U8;
+                    byte new8 = (byte) (old8 - 1);
+                    U8 = new8;
+                    return new8 > old8;
+
+                case 16:
+                    ushort old16 = U16;
+                    ushort new16 = (ushort) (old16 -  1);
+                    U16 = new16;
+                    return new16 > old16;
+
+                case 32:
+                    uint old32 = U32;
+                    uint new32 = old32 - 1;
+                    U32 = new32;
+                    return new32 > old32;
+                
+                case 64:
+                    ulong old64 = U64;
+                    ulong new64 = old64 - 1;
+                    U64 = new64;
+                    return new64 > old64;
+                
+                default:
+                    return IntegerDecrementLle();
+            }
+        }
+
+        private Trilean IntegerDecrementLle()
+        {
             // Optimized version of full-subtractor that does not require allocation of another vector, and short
-            // circuits after borrow does not have any effect any more. 
+            // circuits after borrow does not have any effect any more.
             
             var borrow = Trilean.True;
-            
+
             for (int i = 0; i < Count && borrow != Trilean.False; i++)
             {
                 var a = this[i];

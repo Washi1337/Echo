@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Text;
 using Echo.Core;
 
@@ -8,6 +10,7 @@ namespace Echo.Concrete
     /// Represents a slice of an array of bits for which the concrete may be known or unknown, and can be
     /// reinterpreted as different value types, and operated on using the different semantics of these types.
     /// </summary>
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public readonly ref partial struct BitVectorSpan
     {
         [ThreadStatic]
@@ -108,6 +111,28 @@ namespace Echo.Concrete
                 return Trilean.Unknown;
             }
         }
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal string DebuggerDisplay
+        {
+            get
+            {
+                string? suffix;
+                
+                if (Count >= 64)
+                {
+                    suffix = Count < 800 ? ToHexString() : null;
+                }
+                else
+                {
+                    suffix = $"0b{ToBitString()}";
+                }
+
+                return suffix is not null 
+                    ? $"Count = {Count} ({suffix})"
+                    : $"Count = {Count}";
+            }
+        }
         
         /// <summary>
         /// Forms a slice of a bit vector that starts at a provided bit index.
@@ -153,6 +178,9 @@ namespace Echo.Concrete
             KnownMask.CopyTo(buffer.KnownMask);
         }
 
+        /// <summary>
+        /// Clears the bit vector with zeroes.
+        /// </summary>
         public void Clear()
         {
             Bits.Fill(0);
