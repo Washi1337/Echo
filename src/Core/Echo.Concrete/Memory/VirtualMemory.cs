@@ -37,6 +37,7 @@ namespace Echo.Concrete.Memory
         public AddressRange AddressRange
         {
             get;
+            private set;
         }
 
         /// <summary>
@@ -53,7 +54,8 @@ namespace Echo.Concrete.Memory
             if (_mappings.ContainsKey(address))
                 throw new ArgumentException($"Address {address:X8} is already in use.");
 
-            _mappings.Add(address, space);
+            _mappings.Add(address - AddressRange.Start, space);
+            space.Rebase(address);
         }
 
         /// <summary>
@@ -66,14 +68,13 @@ namespace Echo.Concrete.Memory
         /// Gets a collection of all ranges that were mapped into this virtual memory.
         /// </summary>
         /// <returns>The address ranges within the memory.</returns>
-        public IEnumerable<AddressRange> GetMappedRanges() => _mappings.Select(item =>
-            new AddressRange(item.Key, item.Key + item.Value.AddressRange.Length));
+        public IEnumerable<AddressRange> GetMappedRanges() => _mappings.Select(item => item.Value.AddressRange);
 
         private bool TryFindMemoryMapping(long address, out MemoryMapping mapping)
         {
             foreach (var m in _mappings)
             {
-                if (m.Value.AddressRange.Contains(address - m.Key))
+                if (m.Value.AddressRange.Contains(address))
                 {
                     mapping = m;
                     return true;
@@ -87,7 +88,15 @@ namespace Echo.Concrete.Memory
         /// <inheritdoc />
         public bool IsValidAddress(long address)
         {
-            return TryFindMemoryMapping(address, out var space) && space.Value.IsValidAddress(address - space.Key);
+            return TryFindMemoryMapping(address, out var space) && space.Value.IsValidAddress(address);
+        }
+
+        /// <inheritdoc />
+        public void Rebase(long baseAddress)
+        {
+            AddressRange = new AddressRange(baseAddress, baseAddress + AddressRange.Length);
+            foreach (var mapping in _mappings)
+                mapping.Value.Rebase(baseAddress + mapping.Key);
         }
 
         /// <inheritdoc />
@@ -98,7 +107,7 @@ namespace Echo.Concrete.Memory
             if (!TryFindMemoryMapping(address, out var space))
                 throw new AccessViolationException();
 
-            space.Value.Read(address - space.Key, buffer);
+            space.Value.Read(address, buffer);
         }
 
         /// <inheritdoc />
@@ -109,7 +118,7 @@ namespace Echo.Concrete.Memory
             if (!TryFindMemoryMapping(address, out var space))
                 throw new AccessViolationException();
 
-            space.Value.Write(address - space.Key, buffer);
+            space.Value.Write(address, buffer);
         }
 
         /// <inheritdoc />
@@ -118,7 +127,7 @@ namespace Echo.Concrete.Memory
             if (!TryFindMemoryMapping(address, out var space))
                 throw new AccessViolationException();
 
-            space.Value.Write(address - space.Key, buffer);
+            space.Value.Write(address, buffer);
         }
     }
 }

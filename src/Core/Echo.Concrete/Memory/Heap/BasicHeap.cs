@@ -11,7 +11,7 @@ namespace Echo.Concrete.Memory.Heap
     {
         private readonly Dictionary<long, BitVector> _chunks = new();
         private readonly VirtualMemory _backingBuffer;
-        private long _currentAddress = 0;
+        private long _currentOffset = 0;
         
         /// <summary>
         /// Creates a new empty heap.
@@ -28,11 +28,11 @@ namespace Echo.Concrete.Memory.Heap
         /// <inheritdoc />
         public long Allocate(uint size, bool initialize)
         {
-            if (_currentAddress + size >= _backingBuffer.AddressRange.Length)
+            if (_currentOffset + size >= _backingBuffer.AddressRange.Length)
                 throw new OutOfMemoryException();
 
-            long address = _currentAddress;
-            _currentAddress = Align(_currentAddress + size, 8);
+            long address = _backingBuffer.AddressRange.Start + _currentOffset;
+            _currentOffset = Align(_currentOffset + size, 8);
 
             var chunk = new BitVector((int) (size * 8), initialize);
             _backingBuffer.Map(address, new BasicMemorySpace(chunk));
@@ -59,6 +59,9 @@ namespace Echo.Concrete.Memory.Heap
 
         /// <inheritdoc />
         public bool IsValidAddress(long address) => _backingBuffer.IsValidAddress(address);
+
+        /// <inheritdoc />
+        public void Rebase(long baseAddress) => _backingBuffer.Rebase(baseAddress);
 
         /// <inheritdoc />
         public void Read(long address, BitVectorSpan buffer) => _backingBuffer.Read(address, buffer);

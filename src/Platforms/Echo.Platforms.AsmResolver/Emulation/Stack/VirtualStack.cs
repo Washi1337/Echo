@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
     /// </summary>
     public class VirtualStack : IMemorySpace, IReadOnlyList<VirtualFrame>
     {
-        private readonly List<(long BaseAddress, VirtualFrame Frame)> _frames = new();
+        private readonly List<(long RelativeOffset, VirtualFrame Frame)> _frames = new();
 
         private uint _currentOffset = 0;
 
@@ -36,18 +36,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public AddressRange AddressRange
         {
             get;
+            private set;
         }
 
-        private bool TryFindStackFrame(long address, out (long BaseAddress, VirtualFrame Frame) entry)
+        private bool TryFindStackFrame(long address, out (long RelativeOffset, VirtualFrame Frame) entry)
         {
-            entry = _frames.FirstOrDefault(e =>
-            {
-                var actualRange = new AddressRange(
-                    e.Frame.AddressRange.Start + e.BaseAddress,
-                    e.Frame.AddressRange.End + e.BaseAddress);
-                return actualRange.Contains(address);
-            });
-
+            entry = _frames.FirstOrDefault(e => e.Frame.AddressRange.Contains(address));
             return entry.Frame is not null;
         }
 
@@ -56,12 +50,20 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// </summary>
         /// <param name="index">The index of the stack frame.</param>
         /// <returns>The address.</returns>
-        public long GetFrameAddress(int index) => _frames[index].BaseAddress;
+        public long GetFrameAddress(int index) => _frames[index].RelativeOffset;
 
         /// <inheritdoc />
         public bool IsValidAddress(long address)
         {
-            return TryFindStackFrame(address, out var e) && e.Frame.IsValidAddress(e.BaseAddress);
+            return TryFindStackFrame(address, out var e) && e.Frame.IsValidAddress(address);
+        }
+
+        /// <inheritdoc />
+        public void Rebase(long baseAddress)
+        {
+            AddressRange = new AddressRange(baseAddress, baseAddress + AddressRange.Length);
+            foreach (var entry in _frames)
+                entry.Frame.Rebase(baseAddress + entry.RelativeOffset);
         }
 
         /// <inheritdoc />
@@ -70,7 +72,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             if (!TryFindStackFrame(address, out var e))
                 throw new AccessViolationException();
 
-            e.Frame.Read(address - e.BaseAddress, buffer);
+            e.Frame.Read(address, buffer);
         }
 
         /// <inheritdoc />
@@ -79,7 +81,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             if (!TryFindStackFrame(address, out var e))
                 throw new AccessViolationException();
 
-            e.Frame.Write(address - e.BaseAddress, buffer);
+            e.Frame.Write(address, buffer);
         }
 
         /// <inheritdoc />
@@ -88,7 +90,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             if (!TryFindStackFrame(address, out var e))
                 throw new AccessViolationException();
 
-            e.Frame.Write(address - e.BaseAddress, buffer);
+            e.Frame.Write(address, buffer);
         }
 
         /// <summary>
@@ -103,6 +105,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                 throw new StackOverflowException();
 
             _frames.Add((_currentOffset, frame));
+            frame.Rebase(AddressRange.Start + _currentOffset);
             _currentOffset = newOffset;
         }
 

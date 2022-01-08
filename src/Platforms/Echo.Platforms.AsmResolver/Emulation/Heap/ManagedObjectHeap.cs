@@ -159,6 +159,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         public bool IsValidAddress(long address) => _backingHeap.IsValidAddress(address);
 
         /// <inheritdoc />
+        public void Rebase(long baseAddress) => _backingHeap.Rebase(baseAddress);
+
+        /// <inheritdoc />
         public void Read(long address, BitVectorSpan buffer) => _backingHeap.Read(address, buffer);
 
         /// <inheritdoc />

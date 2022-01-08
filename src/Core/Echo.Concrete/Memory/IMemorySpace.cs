@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.InteropServices;
 using Echo.Core.Code;
 
 namespace Echo.Concrete.Memory
@@ -24,6 +23,12 @@ namespace Echo.Concrete.Memory
         /// <param name="address">The address to query.</param>
         /// <returns><c>true</c> if the address was valid, <c>false</c> otherwise.</returns>
         bool IsValidAddress(long address);
+
+        /// <summary>
+        /// Relocates the memory to a new base address.
+        /// </summary>
+        /// <param name="baseAddress">The new base address.</param>
+        void Rebase(long baseAddress);
         
         /// <summary>
         /// Copies data at the provided address into the provided buffer. 

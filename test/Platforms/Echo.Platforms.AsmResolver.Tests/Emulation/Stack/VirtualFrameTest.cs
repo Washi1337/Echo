@@ -36,23 +36,29 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         }
 
         [Theory]
-        [InlineData(nameof(TestClass.MultipleLocals), "00000000000000000000000000000000")]
-        [InlineData(nameof(TestClass.MultipleLocalsNoInit), "????????????????????????????????")]
-        public void ReadLocalTest(string name, string expected)
+        [InlineData(nameof(TestClass.MultipleLocals), 0, "00000000000000000000000000000000")]
+        [InlineData(nameof(TestClass.MultipleLocals), 0x7fff_0000, "00000000000000000000000000000000")]
+        [InlineData(nameof(TestClass.MultipleLocalsNoInit), 0, "????????????????????????????????")]
+        [InlineData(nameof(TestClass.MultipleLocalsNoInit), 0x7fff_0000, "????????????????????????????????")]
+        public void ReadLocalTest(string name, long baseAddress, string expected)
         {
             var method = _fixture.GetTestMethod(name);
             var frame = new VirtualFrame(method, _factory);
+            frame.Rebase(baseAddress);
 
             var buffer = new BitVector(32, false).AsSpan();
             frame.ReadLocal(0, buffer);
             Assert.Equal(expected, buffer.ToBitString());
         } 
 
-        [Fact]
-        public void WriteLocalTest()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(0x7fff_0000)]
+        public void WriteLocalTest(long baseAddress)
         {
             var method = _fixture.GetTestMethod(nameof(TestClass.MultipleLocals));
             var frame = new VirtualFrame(method, _factory);
+            frame.Rebase(baseAddress);
 
             var readBuffer = new BitVector(32, false).AsSpan();
             frame.ReadLocal(0, readBuffer);
@@ -67,22 +73,28 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             Assert.Equal("10101010110011001111000011111111", readBuffer.ToBitString());
         } 
 
-        [Fact]
-        public void ReadArgumentTest()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(0x7fff_0000)]
+        public void ReadArgumentTest(long baseAddress)
         {
             var method = _fixture.GetTestMethod(nameof(TestClass.MultipleArguments));
             var frame = new VirtualFrame(method, _factory);
+            frame.Rebase(baseAddress);
 
             var buffer = new BitVector(32, false).AsSpan();
             frame.ReadArgument(0, buffer);
             Assert.Equal("????????????????????????????????", buffer.ToBitString());
         } 
 
-        [Fact]
-        public void WriteArgumentTest()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(0x7fff_0000)]
+        public void WriteArgumentTest(long baseAddress)
         {
             var method = _fixture.GetTestMethod(nameof(TestClass.MultipleArguments));
             var frame = new VirtualFrame(method, _factory);
+            frame.Rebase(baseAddress);
 
             var readBuffer = new BitVector(32, false).AsSpan();
             frame.ReadArgument(0, readBuffer);

@@ -9,6 +9,8 @@ namespace Echo.Concrete.Memory
     /// </summary>
     public class BasicMemorySpace : IMemorySpace
     {
+        private long _baseAddress;
+        
         /// <summary>
         /// Creates a new memory space.
         /// </summary>
@@ -46,27 +48,30 @@ namespace Echo.Concrete.Memory
         }
 
         /// <inheritdoc />
-        public AddressRange AddressRange => new(0, BackBuffer.Count / 8);
+        public AddressRange AddressRange => new(_baseAddress, _baseAddress + BackBuffer.Count / 8);
 
         /// <inheritdoc />
         public bool IsValidAddress(long address) => AddressRange.Contains(address);
 
         /// <inheritdoc />
+        public void Rebase(long baseAddress) => _baseAddress = baseAddress;
+
+        /// <inheritdoc />
         public void Read(long address, BitVectorSpan buffer)
         {
-            BackBuffer.AsSpan((int) (address * 8), buffer.Count).CopyTo(buffer);
+            BackBuffer.AsSpan((int) (address - _baseAddress) * 8, buffer.Count).CopyTo(buffer);
         }
 
         /// <inheritdoc />
         public void Write(long address, BitVectorSpan buffer)
         {
-            buffer.CopyTo(BackBuffer.AsSpan((int) (address * 8), buffer.Count));
+            buffer.CopyTo(BackBuffer.AsSpan((int) (address - _baseAddress) * 8, buffer.Count));
         }
 
         /// <inheritdoc />
         public void Write(long address, ReadOnlySpan<byte> buffer)
         {
-            BackBuffer.AsSpan().WriteBytes((int) (address * 8), buffer);
+            BackBuffer.AsSpan().WriteBytes((int) (address - _baseAddress) * 8, buffer);
         }
     }
 }

@@ -78,10 +78,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             Assert.Equal(address, stack.GetFrameAddress(1));
         }
 
-        [Fact]
-        public void ReadIntoStackFrame()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(0x7fff_0000)]
+        public void ReadIntoStackFrame(long baseAddress)
         {
             var stack = new VirtualStack(0x1000);
+            stack.Rebase(baseAddress);
             
             var frame1 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
             var frame2 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
@@ -90,17 +93,20 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             
             frame2.WriteLocal(1, new BitVector(BitConverter.GetBytes(0x1337)).AsSpan());
 
-            long address = stack.GetFrameAddress(1) + frame2.GetLocalAddress(1);
+            long address = frame2.GetLocalAddress(1);
             var buffer = new BitVector(32, false).AsSpan();
             stack.Read(address, buffer);
             
             Assert.Equal(0x1337, BitConverter.ToInt32(buffer.Bits));
         }
 
-        [Fact]
-        public void WriteIntoStackFrame()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(0x7fff_0000)]
+        public void WriteIntoStackFrame(long baseAddress)
         {
             var stack = new VirtualStack(0x1000);
+            stack.Rebase(baseAddress);
             
             var frame1 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
             var frame2 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
@@ -111,12 +117,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             frame2.ReadLocal(1, readBuffer);
             Assert.Equal(0, BitConverter.ToInt32(readBuffer.Bits));
 
-            long address = stack.GetFrameAddress(1) + frame2.GetLocalAddress(1);            
+            long address = frame2.GetLocalAddress(1);            
             stack.Write(address, new BitVector(BitConverter.GetBytes(0x1337)).AsSpan());
             
             frame2.ReadLocal(1, readBuffer);
             Assert.Equal(0x1337, BitConverter.ToInt32(readBuffer.Bits));
         }
+        
         
     }
 }

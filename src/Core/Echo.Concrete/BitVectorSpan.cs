@@ -88,6 +88,9 @@ namespace Echo.Concrete
         /// </summary>
         public int Count => Bits.Length * 8;
 
+        /// <summary>
+        /// Gets the number of bytes stored in the bit vector.
+        /// </summary>
         public int ByteCount => Bits.Length;
         
         /// <summary>
