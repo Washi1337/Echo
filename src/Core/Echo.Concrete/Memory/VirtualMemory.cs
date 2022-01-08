@@ -17,8 +17,27 @@ namespace Echo.Concrete.Memory
     {
         private readonly Dictionary<long, IMemorySpace> _mappings = new();
 
+        /// <summary>
+        /// Creates new uninitialized virtual memory.
+        /// </summary>
+        public VirtualMemory()
+            : this(long.MaxValue)
+        {
+        }
+
+        /// <summary>
+        /// Creates new uninitialized virtual memory with the provided size.
+        /// </summary>
+        public VirtualMemory(long size)
+        {
+            AddressRange = new AddressRange(0, size);
+        }
+
         /// <inheritdoc />
-        public AddressRange AddressRange => new(0, long.MaxValue);
+        public AddressRange AddressRange
+        {
+            get;
+        }
 
         /// <summary>
         /// Maps a memory space at the provided virtual memory address.
@@ -28,16 +47,41 @@ namespace Echo.Concrete.Memory
         /// <exception cref="ArgumentException">Occurs when the address was already in use.</exception>
         public void Map(long address, IMemorySpace space)
         {
+            if (!AddressRange.Contains(address))
+                throw new ArgumentException($"Address {address:X8} does not fall within the virtual memory.");
+
             if (_mappings.ContainsKey(address))
                 throw new ArgumentException($"Address {address:X8} is already in use.");
 
             _mappings.Add(address, space);
         }
 
+        /// <summary>
+        /// Unmaps a memory space that was mapped at the provided address.
+        /// </summary>
+        /// <param name="address">The address of the memory space to unmap.</param>
+        public void Unmap(long address) => _mappings.Remove(address);
+
+        /// <summary>
+        /// Gets a collection of all ranges that were mapped into this virtual memory.
+        /// </summary>
+        /// <returns>The address ranges within the memory.</returns>
+        public IEnumerable<AddressRange> GetMappedRanges() => _mappings.Select(item =>
+            new AddressRange(item.Key, item.Key + item.Value.AddressRange.Length));
+
         private bool TryFindMemoryMapping(long address, out MemoryMapping mapping)
         {
-            mapping = _mappings.FirstOrDefault(x => x.Value.AddressRange.Contains(address - x.Key));
-            return mapping.Key != 0;
+            foreach (var m in _mappings)
+            {
+                if (m.Value.AddressRange.Contains(address - m.Key))
+                {
+                    mapping = m;
+                    return true;
+                }
+            }
+
+            mapping = default;
+            return false;
         }
 
         /// <inheritdoc />
@@ -49,6 +93,8 @@ namespace Echo.Concrete.Memory
         /// <inheritdoc />
         public void Read(long address, BitVectorSpan buffer)
         {
+            if (buffer.Count == 0)
+                return;
             if (!TryFindMemoryMapping(address, out var space))
                 throw new AccessViolationException();
 
@@ -57,6 +103,17 @@ namespace Echo.Concrete.Memory
 
         /// <inheritdoc />
         public void Write(long address, BitVectorSpan buffer)
+        {
+            if (buffer.Count == 0)
+                return;
+            if (!TryFindMemoryMapping(address, out var space))
+                throw new AccessViolationException();
+
+            space.Value.Write(address - space.Key, buffer);
+        }
+
+        /// <inheritdoc />
+        public void Write(long address, ReadOnlySpan<byte> buffer)
         {
             if (!TryFindMemoryMapping(address, out var space))
                 throw new AccessViolationException();

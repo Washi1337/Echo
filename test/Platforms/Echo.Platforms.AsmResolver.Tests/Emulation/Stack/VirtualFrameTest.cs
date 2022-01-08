@@ -1,6 +1,4 @@
 using System;
-using System.Linq;
-using AsmResolver.DotNet;
 using Echo.Concrete;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
@@ -28,6 +26,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         [InlineData(nameof(TestClass.SingleLocal), 1 * 8 + 8)]
         [InlineData(nameof(TestClass.MultipleLocals), 3 * 8 + 8)]
         [InlineData(nameof(TestClass.MultipleLocalsMultipleArguments), 3 * 8 + 8 + 3 * 8)]
+        [InlineData(nameof(TestClass.ValueTypeArgument), 8 + 3 * 8)]
+        [InlineData(nameof(TestClass.RefTypeArgument), 8 + 2 * 8)]
         public void FrameShouldAllocateSufficientSize(string name, int expected)
         {
             var method = _fixture.GetTestMethod(name);

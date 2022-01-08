@@ -41,6 +41,18 @@ namespace Mocks
             Console.WriteLine(x);
         }
 
+        public static void ValueTypeArgument(SimpleStruct s, int x)
+        {
+            Console.WriteLine(s);
+            Console.WriteLine(x);
+        }
+
+        public static void RefTypeArgument(object s, int x)
+        {
+            Console.WriteLine(s);
+            Console.WriteLine(x);
+        }
+
         public static void MultipleArguments(int x, int y, int z)
         {
             Console.WriteLine(x);
@@ -90,6 +102,5 @@ namespace Mocks
             );
             IL.Emit.Ret();
         }
-
     }
 }

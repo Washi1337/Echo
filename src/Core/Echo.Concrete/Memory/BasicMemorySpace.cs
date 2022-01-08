@@ -1,3 +1,4 @@
+using System;
 using Echo.Core.Code;
 
 namespace Echo.Concrete.Memory
@@ -60,6 +61,12 @@ namespace Echo.Concrete.Memory
         public void Write(long address, BitVectorSpan buffer)
         {
             buffer.CopyTo(BackBuffer.AsSpan((int) (address * 8), buffer.Count));
+        }
+
+        /// <inheritdoc />
+        public void Write(long address, ReadOnlySpan<byte> buffer)
+        {
+            BackBuffer.AsSpan().WriteBytes((int) (address * 8), buffer);
         }
     }
 }

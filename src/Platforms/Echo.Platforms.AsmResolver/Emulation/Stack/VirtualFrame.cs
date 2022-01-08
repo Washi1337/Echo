@@ -90,7 +90,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             {
                 _offsets.Add(currentOffset);
                 var actualType = type.InstantiateGenericTypes(context);
-                currentOffset += factory.GetTypeMemoryLayout(actualType).Size;
+                currentOffset += factory.GetTypeValueMemoryLayout(actualType).Size;
                 currentOffset = currentOffset.Align(pointerSize);
             }
         }
@@ -196,6 +196,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public void Write(long address, BitVectorSpan buffer)
         {
             buffer.CopyTo(LocalStorage.AsSpan((int) (address * 8), buffer.Count));
+        }
+
+        /// <inheritdoc />
+        public void Write(long address, ReadOnlySpan<byte> buffer)
+        {
+            LocalStorage.AsSpan().WriteBytes((int) (address * 8), buffer);
         }
     }
 }

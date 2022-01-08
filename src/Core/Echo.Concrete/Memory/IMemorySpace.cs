@@ -1,3 +1,5 @@
+using System;
+using System.Runtime.InteropServices;
 using Echo.Core.Code;
 
 namespace Echo.Concrete.Memory
@@ -33,8 +35,15 @@ namespace Echo.Concrete.Memory
         /// <summary>
         /// Writes the provided buffer of data at the provided address. 
         /// </summary>
-        /// <param name="address">The address to start reading at.</param>
+        /// <param name="address">The address to start writing at.</param>
         /// <param name="buffer">The data to write.</param>
         void Write(long address, BitVectorSpan buffer);
+        
+        /// <summary>
+        /// Writes the provided buffer of data at the provided address. 
+        /// </summary>
+        /// <param name="address">The address to start writing at.</param>
+        /// <param name="buffer">The data to write.</param>
+        void Write(long address, ReadOnlySpan<byte> buffer);
     }
 }

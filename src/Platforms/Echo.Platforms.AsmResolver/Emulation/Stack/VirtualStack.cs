@@ -82,6 +82,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             e.Frame.Write(address - e.BaseAddress, buffer);
         }
 
+        /// <inheritdoc />
+        public void Write(long address, ReadOnlySpan<byte> buffer)
+        {
+            if (!TryFindStackFrame(address, out var e))
+                throw new AccessViolationException();
+
+            e.Frame.Write(address - e.BaseAddress, buffer);
+        }
+
         /// <summary>
         /// Pushes a call frame onto the stack.
         /// </summary>

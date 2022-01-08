@@ -87,6 +87,8 @@ namespace Echo.Concrete
         /// Gets the number of bits stored in the bit vector.
         /// </summary>
         public int Count => Bits.Length * 8;
+
+        public int ByteCount => Bits.Length;
         
         /// <summary>
         /// Gets a value indicating whether all bits in the vector are known. 
@@ -121,16 +123,12 @@ namespace Echo.Concrete
         {
             get
             {
-                string? suffix;
-                
-                if (Count >= 64)
+                string? suffix = Count switch
                 {
-                    suffix = Count < 800 ? ToHexString() : null;
-                }
-                else
-                {
-                    suffix = $"0b{ToBitString()}";
-                }
+                    >= 64 => Count < 800 ? $"bytes: {ToHexString()}" : null,
+                    > 0 => $"bits: 0b{ToBitString()}",
+                    _ => null
+                };
 
                 return suffix is not null 
                     ? $"Count = {Count} ({suffix})"
@@ -188,8 +186,24 @@ namespace Echo.Concrete
         public void Clear()
         {
             Bits.Fill(0);
-            KnownMask.Fill(0xFF);
+            MarkFullyKnown();
         }
+
+        /// <summary>
+        /// Marks the entire bit vector fully known, treating all bits in <see cref="Bits"/> as actual data.
+        /// </summary>
+        /// <remarks>
+        /// This is effectively setting all bits in <see cref="KnownMask"/>.
+        /// </remarks>
+        public void MarkFullyKnown() => KnownMask.Fill(0xFF);
+        
+        /// <summary>
+        /// Marks the entire bit vector fully unknown.
+        /// </summary>
+        /// <remarks>
+        /// This is effectively clearing all bits in <see cref="KnownMask"/>. It does not change the value of <see cref="Bits"/>.
+        /// </remarks>
+        public void MarkFullyUnknown() => KnownMask.Fill(0);
 
         /// <summary>
         /// Writes fully known bytes into the bit vector at the provided bit index. 
