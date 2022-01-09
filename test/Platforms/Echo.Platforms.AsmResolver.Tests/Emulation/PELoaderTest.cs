@@ -75,8 +75,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             memory.Read(baseAddress, buffer);
             
             Assert.Equal(0x5a4d, BitConverter.ToUInt16(buffer.Bits));
-            
-            memory.Read(0x7fff_0000, buffer);
+
+            long address = stack.Peek().GetLocalAddress(1);
+            memory.Read(address, buffer);
             Assert.Equal(0, BitConverter.ToUInt16(buffer.Bits));
         }
     }

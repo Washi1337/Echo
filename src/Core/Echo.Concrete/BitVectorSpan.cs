@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using Echo.Core;
 
@@ -223,6 +224,28 @@ namespace Echo.Concrete
             KnownMask.Slice(bitIndex / 8, data.Length).Fill(0xFF);
         }
 
+        /// <summary>
+        /// Writes a fully known native integer into the bit vector at the provided bit index.
+        /// </summary>
+        /// <param name="bitIndex">The bit index to start writing at.</param>
+        /// <param name="value">The native integer to write.</param>
+        /// <param name="is32Bit">A value indicating whether the native integer is 32 or 64 bits wide.</param>
+        public void WriteNativeInteger(int bitIndex, long value, bool is32Bit)
+        {
+            if (is32Bit)
+            {
+                Span<int> x = stackalloc int[1];
+                x[0] = (int) value;
+                WriteBytes(bitIndex, MemoryMarshal.Cast<int, byte>(x));
+            }
+            else
+            {
+                Span<long> x = stackalloc long[1];
+                x[0] = (long) value;
+                WriteBytes(bitIndex, MemoryMarshal.Cast<long, byte>(x));
+            }
+        }
+        
         /// <summary>
         /// Writes a (partially known) bit string, where the least significant bit is at the end of the string, into
         /// the bit vector at the provided bit index.

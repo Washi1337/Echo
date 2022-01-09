@@ -7,6 +7,7 @@ using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using Echo.Platforms.AsmResolver.Emulation.Runtime;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
@@ -37,6 +38,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             ContextModule = contextModule;
             Is32Bit = is32Bit;
             PointerSize = is32Bit ? 4u : 8u;
+            ClrMockMemory = new ClrMockMemory();
         }
 
         /// <summary>
@@ -59,6 +61,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets the size of a pointer in the current environment.
         /// </summary>
         public uint PointerSize
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the CLR mock memory used for managing method tables (types).
+        /// </summary>
+        public ClrMockMemory ClrMockMemory
         {
             get;
         }

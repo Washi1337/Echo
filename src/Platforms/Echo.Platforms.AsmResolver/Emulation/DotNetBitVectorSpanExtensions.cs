@@ -11,6 +11,18 @@ namespace Echo.Platforms.AsmResolver.Emulation
     public static class DotNetBitVectorExtensions
     {
         /// <summary>
+        /// Interprets the bit vector as the contents of a managed object, and carves out the object's method table
+        /// pointer.
+        /// </summary>
+        /// <param name="span">The bit vector representing the entire managed object.</param>
+        /// <param name="factory">The object responsible for managing type layouts.</param>
+        /// <returns>The slice that contains the pointer to the object's method table.</returns>
+        public static BitVectorSpan SliceObjectMethodTable(this BitVectorSpan span, ValueFactory factory)
+        {
+            return span.Slice(0, (int) factory.PointerSize * 8);
+        }
+
+        /// <summary>
         /// Interprets the bit vector as the contents of a managed object, and carves out the actual object data.
         /// </summary>
         /// <param name="span">The bit vector representing the entire managed object.</param>
