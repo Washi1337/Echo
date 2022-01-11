@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet;
 using Echo.Concrete;
 using Echo.Concrete.Memory;
 using Echo.Core.Code;
@@ -11,18 +12,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
     /// <summary>
     /// Represents a call stack consisting of frames, representing the current state of the program.
     /// </summary>
-    public class VirtualStack : IMemorySpace, IReadOnlyList<VirtualFrame>
+    public class CallStack : IMemorySpace, IReadOnlyList<CallFrame>
     {
-        private readonly List<(long RelativeOffset, VirtualFrame Frame)> _frames = new();
+        private readonly List<(long RelativeOffset, CallFrame Frame)> _frames = new();
 
         private uint _currentOffset = 0;
+        private readonly ValueFactory _factory;
 
         /// <summary>
         /// Creates a new virtual call stack.
         /// </summary>
         /// <param name="maxSize">The maximum number of bytes the stack can hold.</param>
-        public VirtualStack(int maxSize)
+        /// <param name="factory">The service responsible for managing types.</param>
+        public CallStack(int maxSize, ValueFactory factory)
         {
+            _factory = factory;
             AddressRange = new AddressRange(0, maxSize);
         }
 
@@ -30,7 +34,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public int Count => _frames.Count;
 
         /// <inheritdoc />
-        public VirtualFrame this[int index] => _frames[index].Frame;
+        public CallFrame this[int index] => _frames[index].Frame;
 
         /// <inheritdoc />
         public AddressRange AddressRange
@@ -39,7 +43,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             private set;
         }
 
-        private bool TryFindStackFrame(long address, out (long RelativeOffset, VirtualFrame Frame) entry)
+        private bool TryFindStackFrame(long address, out (long RelativeOffset, CallFrame Frame) entry)
         {
             entry = _frames.FirstOrDefault(e => e.Frame.AddressRange.Contains(address));
             return entry.Frame is not null;
@@ -94,11 +98,23 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         }
 
         /// <summary>
+        /// Creates a new call stack frame for the provided method and pushes it onto the top of the call stack.
+        /// </summary>
+        /// <param name="method">The method to create a frame for.</param>
+        /// <returns>The created call stack frame.</returns>
+        public CallFrame Push(IMethodDescriptor method)
+        {
+            var frame = new CallFrame(method, _factory);
+            Push(frame);
+            return frame;
+        }
+
+        /// <summary>
         /// Pushes a call frame onto the stack.
         /// </summary>
         /// <param name="frame">The frame to push.</param>
         /// <exception cref="StackOverflowException">Occurs when the stack reached its maximum size.</exception>
-        public void Push(VirtualFrame frame)
+        public void Push(CallFrame frame)
         {
             uint newOffset = _currentOffset + (uint) frame.Size;
             if (newOffset >= AddressRange.Length)
@@ -114,7 +130,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// </summary>
         /// <returns>The frame.</returns>
         /// <exception cref="InvalidOperationException">Occurs when the stack is empty.</exception>
-        public VirtualFrame Peek()
+        public CallFrame Peek()
         {
             if (_frames.Count == 0)
                 throw new InvalidOperationException("Stack is empty.");
@@ -127,7 +143,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// </summary>
         /// <returns>The popped frame.</returns>
         /// <exception cref="InvalidOperationException">Occurs when the stack is empty.</exception>
-        public VirtualFrame Pop()
+        public CallFrame Pop()
         {
             if (_frames.Count == 0)
                 throw new InvalidOperationException("Stack is empty.");
@@ -139,7 +155,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         }
 
         /// <inheritdoc />
-        public IEnumerator<VirtualFrame> GetEnumerator() => _frames.Select(e => e.Frame).GetEnumerator();
+        public IEnumerator<CallFrame> GetEnumerator() => _frames.Select(e => e.Frame).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

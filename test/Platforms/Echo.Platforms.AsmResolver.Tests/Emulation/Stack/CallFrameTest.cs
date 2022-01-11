@@ -8,12 +8,12 @@ using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
 {
-    public class VirtualFrameTest : IClassFixture<MockModuleFixture>
+    public class CallFrameTest : IClassFixture<MockModuleFixture>
     {
         private readonly MockModuleFixture _fixture;
         private readonly ValueFactory _factory;
 
-        public VirtualFrameTest(MockModuleFixture fixture)
+        public CallFrameTest(MockModuleFixture fixture)
         {
             _fixture = fixture;
             _factory = new ValueFactory(fixture.CurrentTestModule, false);
@@ -31,7 +31,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public void FrameShouldAllocateSufficientSize(string name, int expected)
         {
             var method = _fixture.GetTestMethod(name);
-            var frame = new VirtualFrame(method, _factory);
+            var frame = new CallFrame(method, _factory);
             Assert.Equal(expected, frame.AddressRange.Length);
         }
 
@@ -43,7 +43,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public void ReadLocalTest(string name, long baseAddress, string expected)
         {
             var method = _fixture.GetTestMethod(name);
-            var frame = new VirtualFrame(method, _factory);
+            var frame = new CallFrame(method, _factory);
             frame.Rebase(baseAddress);
 
             var buffer = new BitVector(32, false).AsSpan();
@@ -57,7 +57,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public void WriteLocalTest(long baseAddress)
         {
             var method = _fixture.GetTestMethod(nameof(TestClass.MultipleLocals));
-            var frame = new VirtualFrame(method, _factory);
+            var frame = new CallFrame(method, _factory);
             frame.Rebase(baseAddress);
 
             var readBuffer = new BitVector(32, false).AsSpan();
@@ -79,7 +79,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public void ReadArgumentTest(long baseAddress)
         {
             var method = _fixture.GetTestMethod(nameof(TestClass.MultipleArguments));
-            var frame = new VirtualFrame(method, _factory);
+            var frame = new CallFrame(method, _factory);
             frame.Rebase(baseAddress);
 
             var buffer = new BitVector(32, false).AsSpan();
@@ -93,7 +93,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public void WriteArgumentTest(long baseAddress)
         {
             var method = _fixture.GetTestMethod(nameof(TestClass.MultipleArguments));
-            var frame = new VirtualFrame(method, _factory);
+            var frame = new CallFrame(method, _factory);
             frame.Rebase(baseAddress);
 
             var readBuffer = new BitVector(32, false).AsSpan();

@@ -28,7 +28,7 @@ namespace Echo.Concrete.Memory
         public bool IsValidAddress(long address) => AddressRange.Contains(address);
 
         /// <inheritdoc />
-        public void Rebase(long baseAddress) => AddressRange = new AddressRange(baseAddress, AddressRange.Length);
+        public void Rebase(long baseAddress) => AddressRange = new AddressRange(baseAddress, baseAddress + AddressRange.Length);
 
         /// <inheritdoc />
         public void Read(long address, BitVectorSpan buffer)

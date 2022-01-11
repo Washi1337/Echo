@@ -51,6 +51,26 @@ namespace Echo.Concrete
         }
 
         /// <summary>
+        /// Creates a new fully known 32-wide bit vector based on an integer. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public BitVector(uint value)
+        {
+            Bits = BitConverter.GetBytes(value);
+            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF};
+        }
+
+        /// <summary>
+        /// Creates a new fully known 64-wide bit vector based on an integer. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public BitVector(ulong value)
+        {
+            Bits = BitConverter.GetBytes(value);
+            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+        }
+
+        /// <summary>
         /// Gets the raw bits stored in this bit vector.
         /// </summary>
         public byte[] Bits

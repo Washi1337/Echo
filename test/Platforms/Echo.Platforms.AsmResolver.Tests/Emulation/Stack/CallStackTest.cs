@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         [Fact]
         public void EmptyStack()
         {
-            var stack = new VirtualStack(0x1000);
+            var stack = new CallStack(0x1000, _factory);
             Assert.Throws<InvalidOperationException>(() => stack.Peek());
             Assert.Throws<InvalidOperationException>(() => stack.Pop());
         }
@@ -30,9 +30,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         [Fact]
         public void PushPeek()
         {
-            var stack = new VirtualStack(0x1000);
+            var stack = new CallStack(0x1000, _factory);
 
-            var frame = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
+            var frame = new CallFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
             stack.Push(frame);
             
             Assert.Equal(frame, stack.Peek());
@@ -41,11 +41,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         [Fact]
         public void PushMany()
         {
-            var stack = new VirtualStack(0x1000);
+            var stack = new CallStack(0x1000, _factory);
 
-            var frame1 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
-            var frame2 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
-            var frame3 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
+            var frame1 = new CallFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
+            var frame2 = new CallFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
+            var frame3 = new CallFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
             stack.Push(frame1);
             stack.Push(frame2);
             stack.Push(frame3);
@@ -61,10 +61,10 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         [Fact]
         public void PushPopPushShouldGetSameAddressAsPreviousStackFrame()
         {
-            var stack = new VirtualStack(0x1000);
+            var stack = new CallStack(0x1000, _factory);
             
-            var frame1 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
-            var frame2 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
+            var frame1 = new CallFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
+            var frame2 = new CallFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
             stack.Push(frame1);
             stack.Push(frame2);
 
@@ -72,7 +72,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             Assert.NotEqual(0, address);
             stack.Pop();
             
-            var frame3 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
+            var frame3 = new CallFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
             stack.Push(frame3);
             
             Assert.Equal(address, stack.GetFrameAddress(1));
@@ -83,11 +83,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         [InlineData(0x7fff_0000)]
         public void ReadIntoStackFrame(long baseAddress)
         {
-            var stack = new VirtualStack(0x1000);
+            var stack = new CallStack(0x1000, _factory);
             stack.Rebase(baseAddress);
             
-            var frame1 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
-            var frame2 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
+            var frame1 = new CallFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
+            var frame2 = new CallFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
             stack.Push(frame1);
             stack.Push(frame2);
             
@@ -105,11 +105,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         [InlineData(0x7fff_0000)]
         public void WriteIntoStackFrame(long baseAddress)
         {
-            var stack = new VirtualStack(0x1000);
+            var stack = new CallStack(0x1000, _factory);
             stack.Rebase(baseAddress);
             
-            var frame1 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
-            var frame2 = new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
+            var frame1 = new CallFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
+            var frame2 = new CallFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)), _factory);
             stack.Push(frame1);
             stack.Push(frame2);
 

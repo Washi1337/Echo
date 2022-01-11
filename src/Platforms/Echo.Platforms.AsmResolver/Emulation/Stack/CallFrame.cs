@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
     /// <summary>
     /// Represents a single frame in a virtual stack.
     /// </summary>
-    public class VirtualFrame : IMemorySpace
+    public class CallFrame : IMemorySpace
     {
         // Stack layout sketch:
         // 
@@ -31,14 +31,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         private long _baseAddress;
 
         /// <summary>
-        /// Constructs a new stack frame.
+        /// Constructs a new call stack frame.
         /// </summary>
         /// <param name="method">The method that this frame is associated with.</param>
         /// <param name="factory">A factory used for measuring the size of the frame.</param>
         /// <exception cref="ArgumentException">
         /// Occurs when the provided method is invalid or contains invalid metadata that could not be dealt with.
         /// </exception>
-        public VirtualFrame(IMethodDescriptor method, ValueFactory factory)
+        public CallFrame(IMethodDescriptor method, ValueFactory factory)
         {
             if (method.Signature is null)
                 throw new ArgumentException("Method does not have a valid signature.");
@@ -126,7 +126,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public Stack<BitVector> EvaluationStack
         {
             get;
-        }
+        } = new();
 
         /// <summary>
         /// Gets the static size (number of bytes excluding the evaluation stack) of the stack frame.

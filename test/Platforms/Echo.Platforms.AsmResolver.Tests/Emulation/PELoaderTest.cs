@@ -49,36 +49,5 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             Assert.Equal(_fixture.MockModule.Name, module.Name);
         }
 
-        [Fact]
-        public void Test()
-        {
-            var memory = new VirtualMemory();
-            var loader = new PELoader(memory);
-
-            // Grab the underlying PE file.
-            var file = ((SerializedPEImage) ((SerializedModuleDefinition) _fixture.MockModule).ReaderContext.Image)
-                .PEFile;
-            
-            // Map into virtual memory.
-            long baseAddress = loader.MapPE(file);
-
-            // Allocate some stack memory.
-            var stack = new VirtualStack(0x10000);
-            memory.Map(0x7fff_0000, stack);
-            
-            // Push some random frame.
-            stack.Push(new VirtualFrame(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)),
-                new ValueFactory(_fixture.MockModule, false)));
-            
-            // Read from the base address.
-            var buffer = new BitVector(16, false).AsSpan();
-            memory.Read(baseAddress, buffer);
-            
-            Assert.Equal(0x5a4d, BitConverter.ToUInt16(buffer.Bits));
-
-            long address = stack.Peek().GetLocalAddress(1);
-            memory.Read(address, buffer);
-            Assert.Equal(0, BitConverter.ToUInt16(buffer.Bits));
-        }
     }
 }

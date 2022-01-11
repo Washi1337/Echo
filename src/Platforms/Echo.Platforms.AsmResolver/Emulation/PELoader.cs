@@ -1,6 +1,9 @@
 using System;
 using AsmResolver;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.IO;
+using AsmResolver.PE;
 using AsmResolver.PE.File;
 using Echo.Concrete;
 using Echo.Concrete.Memory;
@@ -12,9 +15,10 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public class PELoader
     {
+        private const ulong ModuleAlignment = 0x0001_0000;
+
         private readonly VirtualMemory _memory;
         private long _currentAddress = 0x0040_0000;
-        private const ulong _moduleAlignment = 0x0001_0000;
 
         /// <summary>
         /// Creates a new instance of a PE loader.
@@ -23,6 +27,23 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public PELoader(VirtualMemory memory)
         {
             _memory = memory;
+        }
+
+        /// <summary>
+        /// Maps a module into memory.
+        /// </summary>
+        /// <param name="module">The module to map.</param>
+        /// <returns>The new base address of the PE file.</returns>
+        /// <exception cref="ArgumentException">
+        /// Occurs when the module does not have an underlying PE image or file.
+        /// </exception>
+        public long MapModule(ModuleDefinition module)
+        {
+            if (module is not SerializedModuleDefinition serializedModule)
+                throw new ArgumentException("Module is not a serialized module.");
+            if (serializedModule.ReaderContext.Image is not SerializedPEImage serializedImage)
+                throw new ArgumentException("Module is not a serialized PE image.");
+            return MapPE(serializedImage.PEFile);
         }
 
         /// <summary>
@@ -71,7 +92,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
             // Move to next base address for second PE.
             _currentAddress += file.OptionalHeader.SizeOfImage;
-            _currentAddress = (long) ((ulong) _currentAddress).Align(_moduleAlignment);
+            _currentAddress = (long) ((ulong) _currentAddress).Align(ModuleAlignment);
 
             // TODO: base relocations.
             
