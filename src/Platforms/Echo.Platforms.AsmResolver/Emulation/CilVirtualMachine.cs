@@ -1,5 +1,9 @@
+using System;
+using System.Threading;
 using AsmResolver.DotNet;
+using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Memory;
+using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Heap;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
@@ -10,6 +14,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public class CilVirtualMachine
     {
+        private CilExecutionContext? _singleStepContext;
+
         /// <summary>
         /// Creates a new CIL virtual machine.
         /// </summary>
@@ -33,6 +39,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 Memory.Map(0x0000_7fff_0000_0000, ValueFactory.ClrMockMemory);
                 Memory.Map(0x0000_7fff_8000_0000, CallStack = new CallStack(0x100_0000, ValueFactory));
             }
+
+            Dispatcher = new CilDispatcher();
         }
 
         /// <summary>
@@ -79,6 +87,53 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public PELoader Loader
         {
             get;
+        }
+
+        public CilDispatcher Dispatcher
+        {
+            get;
+        }
+
+        public void Run() => Run(CancellationToken.None);
+        
+        public void Run(CancellationToken cancellationToken)
+        {
+            var context = new CilExecutionContext(this, cancellationToken);
+
+            do
+            {
+                Step(context);
+                cancellationToken.ThrowIfCancellationRequested();
+            } while (CallStack.Count > 0);
+        }
+        
+        public void Step()
+        {
+            _singleStepContext ??= new CilExecutionContext(this, CancellationToken.None);
+            Step(_singleStepContext);
+        }
+
+        public void Step(CancellationToken cancellationToken) => Step(new CilExecutionContext(this, cancellationToken));
+
+        private void Step(CilExecutionContext context)
+        {
+            if (CallStack.Count == 0)
+                throw new CilEmulatorException("No method is currently being executed.");
+
+            var currentFrame = CallStack.Peek();
+            if (currentFrame.Body is not { } body)
+                throw new CilEmulatorException("Emulator only supports managed method bodies.");
+            
+            int pc = currentFrame.ProgramCounter;
+            var instruction = body.Instructions.GetByOffset(pc);
+            if (instruction is null)
+                throw new CilEmulatorException($"Invalid program counter in {currentFrame}.");
+
+            var result = Dispatcher.Dispatch(context, instruction);
+            if (!result.IsSuccess)
+            {
+                // TODO: unwind stack and move to appropriate exception handler if there is any.
+            }
         }
     }
 }

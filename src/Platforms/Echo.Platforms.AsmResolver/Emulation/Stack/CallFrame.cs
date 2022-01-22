@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AsmResolver;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete;
@@ -61,6 +62,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
 
                 foreach (var local in body.LocalVariables)
                     AllocateFrameField(local.VariableType);
+
+                Body = body;
+            }
+            else
+            {
+                Body = null;
             }
 
             // Allocate return address.
@@ -104,6 +111,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             get;
         }
 
+        public CilMethodBody? Body
+        {
+            get;
+        }
+
         /// <summary>
         /// Obtains the raw storage for frame fields such as local variables, return address and arguments. 
         /// </summary>
@@ -120,6 +132,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             get;
         } = 0;
 
+        public int ProgramCounter
+        {
+            get;
+            set;
+        }
+        
         /// <summary>
         /// Gets a virtual evaluation stack associated stored the frame.
         /// </summary>
@@ -207,5 +225,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         {
             LocalStorage.AsSpan().WriteBytes((int) (address - _baseAddress) * 8, buffer);
         }
+
+        public override string ToString() => $"{Method.FullName}+IL_{ProgramCounter:X4}";
     }
 }
