@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using AsmResolver;
 using AsmResolver.DotNet;
@@ -7,6 +8,7 @@ using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using Echo.Concrete;
 using Echo.Platforms.AsmResolver.Emulation.Runtime;
 
 namespace Echo.Platforms.AsmResolver.Emulation
@@ -39,6 +41,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Is32Bit = is32Bit;
             PointerSize = is32Bit ? 4u : 8u;
             ClrMockMemory = new ClrMockMemory();
+            BitVectorPool = new BitVectorPool();
+
+            InvalidProgramExceptionType = new TypeReference(
+                    contextModule, 
+                    contextModule.CorLibTypeFactory.CorLibScope, 
+                    "System",
+                    "InvalidProgramException").Resolve()!;
         }
 
         /// <summary>
@@ -69,6 +78,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets the CLR mock memory used for managing method tables (types).
         /// </summary>
         public ClrMockMemory ClrMockMemory
+        {
+            get;
+        }
+
+        public ITypeDescriptor InvalidProgramExceptionType
+        {
+            get;
+        }
+
+        public BitVectorPool BitVectorPool
         {
             get;
         }
@@ -197,21 +216,26 @@ namespace Echo.Platforms.AsmResolver.Emulation
             var layout = new TypeMemoryLayout(definition, 0,
                 Is32Bit ? MemoryLayoutAttributes.Is32Bit : MemoryLayoutAttributes.Is64Bit);
             
-            uint currentOffset = 0; 
+            uint currentOffset = 0;
 
-            foreach (var field in definition.Fields)
+            while (definition is not null)
             {
-                if (field.IsStatic || field.Signature is null)
-                    continue;
+                foreach (var field in definition.Fields)
+                {
+                    if (field.IsStatic || field.Signature is null)
+                        continue;
 
-                var contentsLayout = field.Signature.FieldType
-                    .InstantiateGenericTypes(context)
-                    .GetImpliedMemoryLayout(Is32Bit);
+                    var contentsLayout = field.Signature.FieldType
+                        .InstantiateGenericTypes(context)
+                        .GetImpliedMemoryLayout(Is32Bit);
 
-                var fieldLayout = new FieldMemoryLayout(field, currentOffset, contentsLayout);
+                    var fieldLayout = new FieldMemoryLayout(field, currentOffset, contentsLayout);
 
-                SetField.Invoke(layout, new object[] {field, fieldLayout});
-                currentOffset = (currentOffset + contentsLayout.Size).Align(PointerSize);
+                    SetField.Invoke(layout, new object[] {field, fieldLayout});
+                    currentOffset = (currentOffset + contentsLayout.Size).Align(PointerSize);
+                }
+
+                definition = definition.BaseType?.Resolve();
             }
 
             SetSize.Invoke(layout, new object[] {currentOffset});

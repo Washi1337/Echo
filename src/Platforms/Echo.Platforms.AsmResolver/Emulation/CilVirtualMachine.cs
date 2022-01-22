@@ -43,6 +43,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Dispatcher = new CilDispatcher();
         }
 
+        public bool Is32Bit => ValueFactory.Is32Bit;
+
         /// <summary>
         /// Gets the main memory interface of the virtual machine.
         /// </summary>
@@ -133,6 +135,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (!result.IsSuccess)
             {
                 // TODO: unwind stack and move to appropriate exception handler if there is any.
+                var exceptionPointer = result.ExceptionPointer.AsSpan();
+                if (!exceptionPointer.IsFullyKnown)
+                {
+                    throw new NotImplementedException("Exception handling is not implemented yet (unknown exception type).");
+                }
+
+                var type = ValueFactory.ClrMockMemory.MethodTables.GetObject(exceptionPointer.ReadNativeInteger(0, Is32Bit)); 
+                throw new NotImplementedException($"Exception handling is not implemented yet. ({type})");
             }
         }
     }

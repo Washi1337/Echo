@@ -141,7 +141,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <summary>
         /// Gets a virtual evaluation stack associated stored the frame.
         /// </summary>
-        public Stack<BitVector> EvaluationStack
+        public Stack<StackSlot> EvaluationStack
         {
             get;
         } = new();

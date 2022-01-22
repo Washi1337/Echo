@@ -10,6 +10,26 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public static class DotNetBitVectorExtensions
     {
+        public static ITypeDescriptor GetObjectType(this BitVectorSpan span, CilVirtualMachine machine)
+        {
+            var pool = machine.ValueFactory.BitVectorPool;
+         
+            // Interpret the span as an object pointer.
+            long objectPointer = span.ReadNativeInteger(0, machine.Is32Bit);
+         
+            // Dereference the object pointer to get the bits for the method table pointer.
+            var methodTableVector = pool.RentNativeInteger(machine.Is32Bit, false);
+            var methodTableSpan = methodTableVector.AsSpan();
+            machine.Memory.Read(objectPointer, methodTableSpan);
+            
+            // Read the method table pointer.
+            long methodTablePointer = methodTableSpan.ReadNativeInteger(0, machine.Is32Bit);
+            pool.Return(methodTableVector);
+            
+            // Get corresponding method table (== type). 
+            return machine.ValueFactory.ClrMockMemory.MethodTables.GetObject(methodTablePointer);
+        }
+        
         /// <summary>
         /// Interprets the bit vector as the contents of a managed object, and carves out the object's method table
         /// pointer.

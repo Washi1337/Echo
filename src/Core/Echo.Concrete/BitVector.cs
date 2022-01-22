@@ -1,4 +1,5 @@
 using System;
+using Echo.Core;
 
 namespace Echo.Concrete
 {
@@ -159,5 +160,61 @@ namespace Echo.Concrete
         }
 
         object ICloneable.Clone() => Clone();
+
+        public BitVector Resize(int newSize, bool signExtend)
+        {
+            var result = new BitVector(newSize, false);
+            CopyDataAndSignExtend(result, signExtend);
+            return result;   
+        }
+        
+        public BitVector Resize(int newSize, bool signExtend, BitVectorPool pool)
+        {
+            var result = pool.Rent(newSize, false);
+            CopyDataAndSignExtend(result, signExtend);
+            return result;
+        }
+
+        private void CopyDataAndSignExtend(BitVector result, bool signExtend)
+        {
+            // Copy over the original data from the current bitvector into the new one.
+            AsSpan(0, Math.Min(result.Count, Count)).CopyTo(result.AsSpan());
+
+            // Sign extend the data if required.
+            if (result.Count > Count)
+            {
+                var bit = AsSpan().GetMsb();
+                var remainder = result.AsSpan(Count);
+
+                if (!signExtend)
+                {
+                    remainder.Bits.Fill(0x00);
+                    remainder.KnownMask.Fill(0xFF);
+                }
+                else
+                {
+                    switch (bit.Value)
+                    {
+                        case TrileanValue.False:
+                            remainder.Bits.Fill(0x00);
+                            remainder.KnownMask.Fill(0xFF);
+                            break;
+
+                        case TrileanValue.True:
+                            remainder.Bits.Fill(0xFF);
+                            remainder.KnownMask.Fill(0xFF);
+                            break;
+
+                        case TrileanValue.Unknown:
+                            remainder.KnownMask.Fill(0x00);
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+            }
+        }
+       
     }
 }

@@ -209,6 +209,8 @@ namespace Echo.Concrete
         /// </remarks>
         public void MarkFullyUnknown() => KnownMask.Fill(0);
 
+        public long ReadNativeInteger(int bitIndex, bool is32Bit) => is32Bit ? U32 : I64;
+
         /// <summary>
         /// Writes fully known bytes into the bit vector at the provided bit index. 
         /// </summary>
