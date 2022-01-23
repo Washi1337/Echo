@@ -32,6 +32,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         public void AddI8ToI8()=> AssertCorrect(CilOpCodes.Add, 0x1000ul, 0x234ul, 0x1234);
 
         [Fact]
+        public void AddR8ToR8()=> AssertCorrect(CilOpCodes.Add, 1.234D, 5.678D, 6.912D);
+
+        [Fact]
         public void AddR4ToI4ShouldThrow()
         {
             var stack = Context.CurrentFrame.EvaluationStack;

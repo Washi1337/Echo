@@ -71,6 +71,18 @@ namespace Echo.Concrete
             KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
         }
 
+        public BitVector(float value)
+        {
+            Bits = BitConverter.GetBytes(value);
+            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF};
+        }
+
+        public BitVector(double value)
+        {
+            Bits = BitConverter.GetBytes(value);
+            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+        }
+        
         /// <summary>
         /// Gets the raw bits stored in this bit vector.
         /// </summary>
@@ -215,6 +227,7 @@ namespace Echo.Concrete
                 }
             }
         }
-       
+
+        public override string ToString() => AsSpan().ToBitString();
     }
 }

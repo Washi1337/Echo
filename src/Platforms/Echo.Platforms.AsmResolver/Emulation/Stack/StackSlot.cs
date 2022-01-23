@@ -19,5 +19,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         {
             get;
         }
+
+        public override string ToString() => $"{Contents} ({TypeHint})";
     }
 }

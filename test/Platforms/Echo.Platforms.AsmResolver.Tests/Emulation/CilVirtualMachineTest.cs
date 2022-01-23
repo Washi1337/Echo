@@ -113,5 +113,33 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
 
             Assert.Throws<OperationCanceledException>(() => _vm.Run(tokenSource.Token));;
         }
+
+        [Fact]
+        public void SimpleExpression()
+        {
+            // Prepare dummy method.
+            var dummyMethod = new MethodDefinition(
+                "DummyMethod", 
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
+            
+            var body = new CilMethodBody(dummyMethod);
+            body.Instructions.Add(CilOpCodes.Ldc_I4_3);
+            body.Instructions.Add(CilOpCodes.Ldc_I4_4);
+            body.Instructions.Add(CilOpCodes.Add);
+            body.Instructions.Add(CilOpCodes.Ldc_I4_5);
+            body.Instructions.Add(CilOpCodes.Mul);
+            body.Instructions.CalculateOffsets();
+            dummyMethod.CilMethodBody = body;
+            
+            // Push frame on stack.
+            var frame = _vm.CallStack.Push(dummyMethod);
+
+            for (int i = 0; i < 5; i++)
+                _vm.Step();
+
+            var result = frame.EvaluationStack.Peek();
+            Assert.Equal((3 + 4) * 5, result.Contents.AsSpan().I32);
+        }
     }
 }

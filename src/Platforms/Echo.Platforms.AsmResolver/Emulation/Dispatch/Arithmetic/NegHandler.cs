@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
             if (argument.TypeHint == StackSlotTypeHint.Integer)
                 argument.Contents.AsSpan().IntegerNegate();
             else
-                throw new NotImplementedException();
+                argument.Contents.AsSpan().FloatNegate();
             
             return CilDispatchResult.Success();
         }

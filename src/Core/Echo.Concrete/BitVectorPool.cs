@@ -17,6 +17,8 @@ namespace Echo.Concrete
             {
                 if (initialize)
                     instance.AsSpan().Clear();
+                else 
+                    instance.AsSpan().MarkFullyUnknown();
                 return instance;
             }
 

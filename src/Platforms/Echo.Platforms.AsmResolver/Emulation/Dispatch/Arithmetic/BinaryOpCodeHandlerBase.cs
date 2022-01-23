@@ -3,13 +3,13 @@ using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
 {
-    public abstract class BinaryOpCodeHandlerBase : ICilOpCodeHandler
+    public abstract class BinaryOpCodeHandlerBase : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
-        public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
+        protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             var argument2 = context.CurrentFrame.EvaluationStack.Pop();
-            var argument1 = context.CurrentFrame.EvaluationStack.Peek();
+            var argument1 = context.CurrentFrame.EvaluationStack.Pop();
 
             // If the types of the stack slots do not match, the CLR throws an InvalidOperationException.
             if (argument1.TypeHint != argument2.TypeHint)
