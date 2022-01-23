@@ -71,12 +71,20 @@ namespace Echo.Concrete
             KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
         }
 
+        /// <summary>
+        /// Creates a new fully known 32-wide bit vector based on a floating point number. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
         public BitVector(float value)
         {
             Bits = BitConverter.GetBytes(value);
             KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF};
         }
 
+        /// <summary>
+        /// Creates a new fully known 64-wide bit vector based on a floating point number. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
         public BitVector(double value)
         {
             Bits = BitConverter.GetBytes(value);
@@ -173,13 +181,28 @@ namespace Echo.Concrete
 
         object ICloneable.Clone() => Clone();
 
+        /// <summary>
+        /// Allocates a new bit vector that contains the same data, but is extended or truncated to a new size.
+        /// </summary>
+        /// <param name="newSize">The new size.</param>
+        /// <param name="signExtend">When <paramref name="newSize"/> is larger than the original size, a value
+        /// indicating whether the vector should be sign extended or not.</param>
+        /// <returns>The new vector.</returns>
         public BitVector Resize(int newSize, bool signExtend)
         {
             var result = new BitVector(newSize, false);
             CopyDataAndSignExtend(result, signExtend);
             return result;   
         }
-        
+
+        /// <summary>
+        /// Rents a bit vector from a pool that contains the same data, but is extended or truncated to a new size.
+        /// </summary>
+        /// <param name="newSize">The new size.</param>
+        /// <param name="signExtend">When <paramref name="newSize"/> is larger than the original size, a value
+        /// indicating whether the vector should be sign extended or not.</param>
+        /// <param name="pool">The pool to rent the new vector from.</param>
+        /// <returns>The new vector.</returns>
         public BitVector Resize(int newSize, bool signExtend, BitVectorPool pool)
         {
             var result = pool.Rent(newSize, false);

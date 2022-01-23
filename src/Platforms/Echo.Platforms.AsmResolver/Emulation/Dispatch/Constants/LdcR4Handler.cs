@@ -3,6 +3,9 @@ using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
 {
+    /// <summary>
+    /// Implements a CIL instruction handler for <c>ldc.r4</c> operations.
+    /// </summary>
     [DispatcherTableEntry(CilCode.Ldc_R4)]
     public class LdcR4Handler : FallThroughOpCodeHandler
     {

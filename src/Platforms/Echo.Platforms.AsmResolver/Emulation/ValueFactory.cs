@@ -82,11 +82,17 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
         }
 
+        /// <summary>
+        /// Gets a reference to the <see cref="InvalidProgramException"/> type. 
+        /// </summary>
         public ITypeDescriptor InvalidProgramExceptionType
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the bitvector pool that this factory uses for creating and reusing bit vectors. 
+        /// </summary>
         public BitVectorPool BitVectorPool
         {
             get;

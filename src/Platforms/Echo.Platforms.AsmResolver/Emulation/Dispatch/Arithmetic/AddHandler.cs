@@ -3,14 +3,19 @@ using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
 {
+    /// <summary>
+    /// Implements a CIL instruction handler for <c>add</c> operations.
+    /// </summary>
     [DispatcherTableEntry(CilCode.Add, CilCode.Add_Ovf, CilCode.Add_Ovf_Un)]
     public class AddHandler : BinaryOpCodeHandlerBase
     {
+        /// <inheritdoc />
         protected override bool IsSignedOperation(CilInstruction instruction)
         {
             return instruction.OpCode.Code is CilCode.Add or CilCode.Add_Ovf;
         }
 
+        /// <inheritdoc />
         protected override CilDispatchResult Evaluate(CilExecutionContext context, CilInstruction instruction, 
             StackSlot argument1, StackSlot argument2)
         {

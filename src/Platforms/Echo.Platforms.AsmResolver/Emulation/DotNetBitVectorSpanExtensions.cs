@@ -10,7 +10,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public static class DotNetBitVectorExtensions
     {
-        public static ITypeDescriptor GetObjectType(this BitVectorSpan span, CilVirtualMachine machine)
+        /// <summary>
+        /// Interprets the span as an object pointer, and obtains the type of the object that it is referencing.
+        /// </summary>
+        /// <param name="span">The bit vector representing the entire managed object.</param>
+        /// <param name="machine">The machine that this vector resides in.</param>
+        /// <returns>The object type.</returns>
+        public static ITypeDescriptor GetObjectPointerType(this BitVectorSpan span, CilVirtualMachine machine)
         {
             var pool = machine.ValueFactory.BitVectorPool;
          

@@ -3,6 +3,9 @@ using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
 {
+    /// <summary>
+    /// Provides a base for binary operator instruction handlers.
+    /// </summary>
     public abstract class BinaryOpCodeHandlerBase : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
@@ -50,8 +53,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
             return result;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the instruction is a signed operation or not.
+        /// </summary>
+        /// <param name="instruction">The instruction to classify.</param>
+        /// <returns><c>true</c> if signed, <c>false</c> otherwise.</returns>
         protected abstract bool IsSignedOperation(CilInstruction instruction);
 
+        /// <summary>
+        /// Evaluates the binary operation on two arguments. 
+        /// </summary>
+        /// <param name="context">The context to evaluate the instruction in.</param>
+        /// <param name="instruction">The instruction to dispatch and evaluate.</param>
+        /// <param name="argument1">The first argument that also receives the output.</param>
+        /// <param name="argument2">The second argument.</param>
+        /// <returns>A value indicating whether the dispatch was successful or caused an error.</returns>
         protected abstract CilDispatchResult Evaluate(CilExecutionContext context, CilInstruction instruction, 
             StackSlot argument1, StackSlot argument2);
     }

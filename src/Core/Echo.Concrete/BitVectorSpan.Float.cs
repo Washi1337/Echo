@@ -5,6 +5,9 @@ namespace Echo.Concrete
 {
     public readonly ref partial struct BitVectorSpan
     {
+        /// <summary>
+        /// Interprets the bit vector as a 32 bit floating point number, and gets or sets the immediate value for it.
+        /// </summary>
         public float F32
         {
             get
@@ -19,6 +22,9 @@ namespace Echo.Concrete
             }
         }
         
+        /// <summary>
+        /// Interprets the bit vector as a 64 bit floating point number, and gets or sets the immediate value for it.
+        /// </summary>
         public double F64
         {
             get
@@ -33,11 +39,17 @@ namespace Echo.Concrete
             }
         }
 
+        /// <summary>
+        /// Interprets the bitvector as a floating point number, and negates it.
+        /// </summary>
         public void FloatNegate()
         {
             this[Count - 1] = !this[Count - 1];
         }
 
+        /// <summary>
+        /// Interprets the bitvector as a floating point number, and adds another floating point number to it.
+        /// </summary>
         public void FloatAdd(BitVectorSpan other)
         {
             AssertSameBitSize(other);
@@ -65,6 +77,9 @@ namespace Echo.Concrete
             }
         }
 
+        /// <summary>
+        /// Interprets the bitvector as a floating point number, and subtracts another floating point number to it.
+        /// </summary>
         public void FloatSubtract(BitVectorSpan other)
         {
             AssertSameBitSize(other);
@@ -92,6 +107,9 @@ namespace Echo.Concrete
             }
         }
 
+        /// <summary>
+        /// Interprets the bitvector as a floating point number, and multiplies it with another floating point number.
+        /// </summary>
         public void FloatMultiply(BitVectorSpan other)
         {
             AssertSameBitSize(other);
@@ -119,6 +137,9 @@ namespace Echo.Concrete
             }
         }
 
+        /// <summary>
+        /// Interprets the bitvector as a floating point number, and divides it with another floating point number.
+        /// </summary>
         public void FloatDivide(BitVectorSpan other)
         {
             AssertSameBitSize(other);
@@ -146,6 +167,10 @@ namespace Echo.Concrete
             }
         }
 
+        /// <summary>
+        /// Interprets the bitvector as a floating point number, divides it with another floating point number and
+        /// stores the remainder of the division.
+        /// </summary>
         public void FloatRemainder(BitVectorSpan other)
         {
             AssertSameBitSize(other);

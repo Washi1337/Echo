@@ -111,6 +111,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             get;
         }
 
+        /// <summary>
+        /// Gets the managed body of the method that this frame is associated with (if available).
+        /// </summary>
         public CilMethodBody? Body
         {
             get;
@@ -130,8 +133,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public int LocalsCount
         {
             get;
-        } = 0;
+        }
 
+        /// <summary>
+        /// Gets the offset within the method body of the next instruction to evaluate.
+        /// </summary>
         public int ProgramCounter
         {
             get;
@@ -226,6 +232,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             LocalStorage.AsSpan().WriteBytes((int) (address - _baseAddress) * 8, buffer);
         }
 
+        /// <inheritdoc />
         public override string ToString() => $"{Method.FullName}+IL_{ProgramCounter:X4}";
     }
 }

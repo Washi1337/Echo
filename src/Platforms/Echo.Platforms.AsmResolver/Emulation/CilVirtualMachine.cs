@@ -43,6 +43,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Dispatcher = new CilDispatcher();
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the environment is a 32-bit or 64-bit system.
+        /// </summary>
         public bool Is32Bit => ValueFactory.Is32Bit;
 
         /// <summary>
@@ -91,13 +94,23 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
         }
 
+        /// <summary>
+        /// Gets the service that is responsible for dispatching individual instructions to their respective handlers.
+        /// </summary>
         public CilDispatcher Dispatcher
         {
             get;
         }
 
+        /// <summary>
+        /// Runs the virtual machine until it halts.
+        /// </summary>
         public void Run() => Run(CancellationToken.None);
         
+        /// <summary>
+        /// Runs the virtual machine until it halts.
+        /// </summary>
+        /// <param name="cancellationToken">A token that can be used for canceling the emulation.</param>
         public void Run(CancellationToken cancellationToken)
         {
             var context = new CilExecutionContext(this, cancellationToken);
@@ -109,12 +122,19 @@ namespace Echo.Platforms.AsmResolver.Emulation
             } while (CallStack.Count > 0);
         }
         
+        /// <summary>
+        /// Performs a single step in the virtual machine.
+        /// </summary>
         public void Step()
         {
             _singleStepContext ??= new CilExecutionContext(this, CancellationToken.None);
             Step(_singleStepContext);
         }
 
+        /// <summary>
+        /// Performs a single step in the virtual machine.
+        /// </summary>
+        /// <param name="cancellationToken">A token that can be used for canceling the emulation.</param>
         public void Step(CancellationToken cancellationToken) => Step(new CilExecutionContext(this, cancellationToken));
 
         private void Step(CilExecutionContext context)

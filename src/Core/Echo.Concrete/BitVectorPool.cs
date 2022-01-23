@@ -1,14 +1,20 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 namespace Echo.Concrete
 {
+    /// <summary>
+    /// Provides a mechanism for reusing instances of <see cref="BitVector"/>.
+    /// </summary>
     public class BitVectorPool
     {
         private readonly ConcurrentDictionary<int, ConcurrentBag<BitVector>> _instancesBySize = new();
 
-        public BitVector RentNativeInteger(bool is32Bit, bool initialize) => Rent(is32Bit ? 32 : 64, initialize);
-
+        /// <summary>
+        /// Rents a single bit vector of the provided size.
+        /// </summary>
+        /// <param name="size">The number of bits in the vector to rent.</param>
+        /// <param name="initialize">A value indicating whether the bits should be cleared out or marked unknown.</param>
+        /// <returns>The bit vector.</returns>
         public BitVector Rent(int size, bool initialize)
         {
             var pool = GetInstancesOfSize(size);
@@ -25,6 +31,18 @@ namespace Echo.Concrete
             return new BitVector(size, initialize);
         }
 
+        /// <summary>
+        /// Rents a native integer bit vector.
+        /// </summary>
+        /// <param name="is32Bit">A value indicating the vector should be 32 or 64 bits long.</param>
+        /// <param name="initialize">A value indicating whether the bits should be cleared out or marked unknown.</param>
+        /// <returns>The bit vector.</returns>
+        public BitVector RentNativeInteger(bool is32Bit, bool initialize) => Rent(is32Bit ? 32 : 64, initialize);
+
+        /// <summary>
+        /// Returns the bit vector to the pool.
+        /// </summary>
+        /// <param name="vector">The vector.</param>
         public void Return(BitVector vector) => GetInstancesOfSize(vector.Count).Add(vector);
 
         private ConcurrentBag<BitVector> GetInstancesOfSize(int size)

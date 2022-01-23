@@ -209,6 +209,12 @@ namespace Echo.Concrete
         /// </remarks>
         public void MarkFullyUnknown() => KnownMask.Fill(0);
 
+        /// <summary>
+        /// Reads a native integer from the vector.
+        /// </summary>
+        /// <param name="bitIndex">The bit index to start reading at.</param>
+        /// <param name="is32Bit">A value indicating whether the native integer is 32 or 64 bits wide.</param>
+        /// <returns>The read integer.</returns>
         public long ReadNativeInteger(int bitIndex, bool is32Bit) => is32Bit ? U32 : I64;
 
         /// <summary>

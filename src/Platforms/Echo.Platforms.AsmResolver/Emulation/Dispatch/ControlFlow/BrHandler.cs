@@ -2,7 +2,10 @@ using AsmResolver.PE.DotNet.Cil;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
 {
-    [DispatcherTableEntry(CilCode.Br)]
+    /// <summary>
+    /// Implements a CIL instruction handler for <c>br</c> operations.
+    /// </summary>
+    [DispatcherTableEntry(CilCode.Br, CilCode.Br_S)]
     public class BrHandler : BranchHandlerBase
     {
         /// <inheritdoc />
