@@ -6,7 +6,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
     /// <summary>
     /// Provides a base for unary operator instruction handlers.
     /// </summary>
-    public abstract class UnaryOpCodeHandlerBase : ICilOpCodeHandler
+    public abstract class UnaryOperatorHandlerBase : ICilOpCodeHandler
     {
         /// <inheritdoc />
         public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)

@@ -6,46 +6,27 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
     /// <summary>
     /// Provides a base for binary operator instruction handlers.
     /// </summary>
-    public abstract class BinaryOpCodeHandlerBase : FallThroughOpCodeHandler
+    public abstract class BinaryOperatorHandlerBase : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
-        {
-            var argument2 = context.CurrentFrame.EvaluationStack.Pop();
-            var argument1 = context.CurrentFrame.EvaluationStack.Pop();
-
-            // If the types of the stack slots do not match, the CLR throws an InvalidOperationException.
-            if (argument1.TypeHint != argument2.TypeHint)
-                return CilDispatchResult.InvalidProgram(context);
-
-            // Resize bitvectors if required.
+        { 
             var pool = context.Machine.ValueFactory.BitVectorPool;
-            if (argument1.Contents.Count != argument2.Contents.Count)
-            {
-                bool signed = IsSignedOperation(instruction);
-
-                if (argument1.Contents.Count < argument2.Contents.Count)
-                {
-                    var newArgument1 = new StackSlot(
-                        argument1.Contents.Resize(argument2.Contents.Count, signed, pool),
-                        StackSlotTypeHint.Integer);
-                    pool.Return(argument1.Contents);
-                    argument1 = newArgument1;
-                }
-                else
-                {
-                    var newArgument2 = new StackSlot(
-                        argument2.Contents.Resize(argument1.Contents.Count, signed, pool),
-                        StackSlotTypeHint.Integer);
-                    pool.Return(argument2.Contents);
-                    argument2 = newArgument2;
-                }
-            }
             
-            // Evaluate the opeartion!
+            var (argument1, argument2) = OperatorHelper.PopBinaryArguments(context, IsSignedOperation(instruction));
+            if (argument1.TypeHint != argument2.TypeHint)
+            {
+                // Return both arguments to the pool, as they won't be used anymore.
+                pool.Return(argument1.Contents);
+                pool.Return(argument2.Contents);
+
+                return CilDispatchResult.InvalidProgram(context);
+            }
+
+            // Evaluate the operation!
             var result = Evaluate(context, instruction, argument1, argument2);
             
-            // Release bitvector for arg 2 because it is not used any more. 
+            // Release bitvector for arg 2 because it is not used any more.
             pool.Return(argument2.Contents);
             
             // Push the result back onto the stack.

@@ -7,7 +7,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
     /// Implements a CIL instruction handler for <c>neg</c> operations.
     /// </summary>
     [DispatcherTableEntry(CilCode.Neg)]
-    public class NegHandler : UnaryOpCodeHandlerBase
+    public class NegHandler : UnaryOperatorHandlerBase
     {
         /// <inheritdoc />
         protected override CilDispatchResult Evaluate(CilExecutionContext context, CilInstruction instruction, StackSlot argument)

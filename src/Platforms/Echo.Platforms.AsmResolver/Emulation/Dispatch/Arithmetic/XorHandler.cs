@@ -7,7 +7,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
     /// Implements a CIL instruction handler for <c>xpr</c> operations.
     /// </summary>
     [DispatcherTableEntry(CilCode.Xor)]
-    public class XorHandler : BinaryOpCodeHandlerBase
+    public class XorHandler : BinaryOperatorHandlerBase
     {
         /// <inheritdoc />
         protected override bool IsSignedOperation(CilInstruction instruction) => false;

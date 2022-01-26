@@ -7,7 +7,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
     /// Implements a CIL instruction handler for <c>mul</c> operations.
     /// </summary>
     [DispatcherTableEntry(CilCode.Mul, CilCode.Mul_Ovf, CilCode.Mul_Ovf_Un)]
-    public class MulHandler : BinaryOpCodeHandlerBase
+    public class MulHandler : BinaryOperatorHandlerBase
     {
         /// <inheritdoc />
         protected override bool IsSignedOperation(CilInstruction instruction)

@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using Echo.Core;
 
 namespace Echo.Concrete
 {
@@ -103,7 +104,7 @@ namespace Echo.Concrete
                 
                 default:
                     throw new NotSupportedException(
-                        "Invalid or unsupported bit length for floating point addition.");
+                        "Invalid or unsupported bit length for floating point subtraction.");
             }
         }
 
@@ -133,7 +134,7 @@ namespace Echo.Concrete
                 
                 default:
                     throw new NotSupportedException(
-                        "Invalid or unsupported bit length for floating point addition.");
+                        "Invalid or unsupported bit length for floating point multiplication.");
             }
         }
 
@@ -163,7 +164,7 @@ namespace Echo.Concrete
                 
                 default:
                     throw new NotSupportedException(
-                        "Invalid or unsupported bit length for floating point addition.");
+                        "Invalid or unsupported bit length for floating point division.");
             }
         }
 
@@ -194,9 +195,66 @@ namespace Echo.Concrete
                 
                 default:
                     throw new NotSupportedException(
-                        "Invalid or unsupported bit length for floating point addition.");
+                        "Invalid or unsupported bit length for floating point remainder.");
             }
         }
-        
+
+        /// <summary>
+        /// interprets the bitvector as a floating point number, and determines whether it is smaller than the provided
+        /// floating point bitvector.
+        /// </summary>
+        /// <param name="other">The other floating point number.</param>
+        /// <param name="ordered">A value indicating whether the comparison should be an ordered comparison or not.</param>
+        /// <returns>
+        /// <see cref="Trilean.True"/> if the current number is less than the provided number,
+        /// <see cref="Trilean.False"/> if not, and <see cref="Trilean.Unknown"/> if the conclusion of the comparison
+        /// is not certain.
+        /// </returns>
+        public Trilean FloatIsLessThan(BitVectorSpan other, bool ordered)
+        {
+            AssertSameBitSize(other);
+
+            if (!IsFullyKnown || !other.IsFullyKnown)
+            {
+                // TODO: more LLE with unknown bits.
+                return Trilean.Unknown;
+            }
+
+            return Count switch
+            {
+                32 => F32 < other.F32,
+                64 => F64 < other.F64,
+                _ => throw new NotSupportedException("Invalid or unsupported bit length for floating point comparisons.")
+            };
+        }
+
+        /// <summary>
+        /// interprets the bitvector as a floating point number, and determines whether it is greater than the provided
+        /// floating point bitvector.
+        /// </summary>
+        /// <param name="other">The other floating point number.</param>
+        /// <param name="ordered">A value indicating whether the comparison should be an ordered comparison or not.</param>
+        /// <returns>
+        /// <see cref="Trilean.True"/> if the current number is greater than the provided number,
+        /// <see cref="Trilean.False"/> if not, and <see cref="Trilean.Unknown"/> if the conclusion of the comparison
+        /// is not certain.
+        /// </returns>
+        public Trilean FloatIsGreaterThan(BitVectorSpan other, bool ordered)
+        {
+            AssertSameBitSize(other);
+
+            if (!IsFullyKnown || !other.IsFullyKnown)
+            {
+                // TODO: more LLE with unknown bits.
+                return Trilean.Unknown;
+            }
+
+            return Count switch
+            {
+                32 => F32 > other.F32,
+                64 => F64 > other.F64,
+                _ => throw new NotSupportedException("Invalid or unsupported bit length for floating point comparisons.")
+            };
+        }
     }
 }

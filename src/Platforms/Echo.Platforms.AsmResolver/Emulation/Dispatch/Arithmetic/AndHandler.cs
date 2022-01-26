@@ -7,7 +7,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
     /// Implements a CIL instruction handler for <c>and</c> operations.
     /// </summary>
     [DispatcherTableEntry(CilCode.And)]
-    public class AndHandler : BinaryOpCodeHandlerBase
+    public class AndHandler : BinaryOperatorHandlerBase
     {
         /// <inheritdoc />
         protected override bool IsSignedOperation(CilInstruction instruction) => false;

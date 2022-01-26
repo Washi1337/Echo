@@ -251,6 +251,7 @@ namespace Echo.Concrete
             }
         }
 
+        /// <inheritdoc />
         public override string ToString() => AsSpan().ToBitString();
     }
 }

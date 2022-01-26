@@ -1,3 +1,4 @@
+using Echo.Core;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
@@ -9,6 +10,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
     public class BrHandler : BranchHandlerBase
     {
         /// <inheritdoc />
-        protected override bool EvaluateCondition(CilExecutionContext context, CilInstruction instruction) => true;
+        protected override Trilean? EvaluateCondition(CilExecutionContext context, CilInstruction instruction) => true;
     }
 }
