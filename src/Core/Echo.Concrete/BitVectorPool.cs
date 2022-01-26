@@ -7,7 +7,8 @@ namespace Echo.Concrete
     /// </summary>
     public class BitVectorPool
     {
-        private readonly ConcurrentDictionary<int, ConcurrentBag<BitVector>> _instancesBySize = new();
+        private readonly ConcurrentDictionary<int, ConcurrentBag<BitVector>> _freeInstancesBySize = new();
+        private readonly ConcurrentDictionary<BitVector, byte> _instances = new();
 
         /// <summary>
         /// Rents a single bit vector of the provided size.
@@ -28,7 +29,13 @@ namespace Echo.Concrete
                 return instance;
             }
 
-            return new BitVector(size, initialize);
+            instance = new BitVector(size, initialize);
+            while (!_instances.TryAdd(instance, 0))
+            {
+                // Repeat until we succeed.
+            }
+
+            return instance;
         }
 
         /// <summary>
@@ -43,14 +50,24 @@ namespace Echo.Concrete
         /// Returns the bit vector to the pool.
         /// </summary>
         /// <param name="vector">The vector.</param>
-        public void Return(BitVector vector) => GetInstancesOfSize(vector.Count).Add(vector);
+        /// <returns><c>true</c> if the bitvector was an instance of the pool, <c>false</c> otherwise.</returns>
+        public bool Return(BitVector vector)
+        {
+            if (_instances.ContainsKey(vector))
+            {
+                GetInstancesOfSize(vector.Count).Add(vector);
+                return true;
+            }
+
+            return false;
+        }
 
         private ConcurrentBag<BitVector> GetInstancesOfSize(int size)
         {
-            if (!_instancesBySize.TryGetValue(size, out var pool))
+            if (!_freeInstancesBySize.TryGetValue(size, out var pool))
             {
                 pool = new ConcurrentBag<BitVector>();
-                while (_instancesBySize.TryAdd(size, pool) || !_instancesBySize.TryGetValue(size, out pool))
+                while (_freeInstancesBySize.TryAdd(size, pool) || !_freeInstancesBySize.TryGetValue(size, out pool))
                 {
                     // ...
                 }
