@@ -21,6 +21,6 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         public void AndI8ToI4() => AssertCorrect(CilOpCodes.And, 0x1234_5678_ff00ff00ul, 0x12345678u, 0x12005600ul);
 
         [Fact]
-        public void AndI8ToI8()=> AssertCorrect(CilOpCodes.And, 0x1234_5678_9abc_def0ul, 0xff00_ff00_ff00_ff00ul, 0x1200_5600_9a00_de00ul);
+        public void AndI8ToI8() => AssertCorrect(CilOpCodes.And, 0x1234_5678_9abc_def0ul, 0xff00_ff00_ff00_ff00ul, 0x1200_5600_9a00_de00ul);
     }
 }
