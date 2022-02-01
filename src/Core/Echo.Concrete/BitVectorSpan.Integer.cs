@@ -457,6 +457,42 @@ namespace Echo.Concrete
             return carry;
         }
 
+        public void IntegerDivide(BitVectorSpan other)
+        {
+            AssertSameBitSize(other);
+
+            if (Count > 64 || !IsFullyKnown || !other.IsFullyKnown)
+            {
+                // TODO: LLE div.
+                MarkFullyUnknown();
+                return;
+            }
+
+            switch (Count)
+            {
+                case 8:
+                    U8 /= other.U8;
+                    return;
+
+                case 16:
+                    U16 /= other.U16;
+                    return;
+
+                case 32:
+                    U32 /= other.U32;
+                    return;
+                
+                case 64:
+                    U64 /= other.U64;
+                    return;
+                
+                default:
+                    // TODO: LLE div.
+                    MarkFullyUnknown();
+                    return;
+            }
+        }
+
         /// <summary>
         /// Interprets the bit vector as an integer, and determines whether the integer is greater than another integer.
         /// </summary>
