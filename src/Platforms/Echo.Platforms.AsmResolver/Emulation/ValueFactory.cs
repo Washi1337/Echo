@@ -49,6 +49,18 @@ namespace Echo.Platforms.AsmResolver.Emulation
                     contextModule.CorLibTypeFactory.CorLibScope, 
                     "System",
                     "InvalidProgramException").Resolve()!;
+            
+            NullReferenceExceptionType = new TypeReference(
+                contextModule, 
+                contextModule.CorLibTypeFactory.CorLibScope, 
+                "System",
+                "NullReferenceException").Resolve()!;
+            
+            MissingMethodExceptionType = new TypeReference(
+                contextModule, 
+                contextModule.CorLibTypeFactory.CorLibScope, 
+                "System",
+                "MissingMethodException").Resolve()!;
         }
 
         /// <summary>
@@ -87,6 +99,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets a reference to the <see cref="InvalidProgramException"/> type. 
         /// </summary>
         public ITypeDescriptor InvalidProgramExceptionType
+        {
+            get;
+        }
+
+        public ITypeDescriptor NullReferenceExceptionType
+        {
+            get;
+        }
+
+        public ITypeDescriptor MissingMethodExceptionType
         {
             get;
         }

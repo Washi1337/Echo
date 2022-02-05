@@ -11,10 +11,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         /// <inheritdoc />
         public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
         {
-            context.Machine.CallStack.Pop();
-            
-            // TODO: Push return value onto the caller's evaluation stack.
-            
+            var frame = context.Machine.CallStack.Pop();
+
+            if (frame.Method.Signature!.ReturnsValue)
+            {
+                var value = context.Machine.ValueFactory.Marshaller.ToCliValue(
+                    frame.EvaluationStack.Pop().Contents,
+                    frame.Method.Signature.ReturnType);
+                context.CurrentFrame.EvaluationStack.Push(value);
+            }
+
             return CilDispatchResult.Success();
         }
     }

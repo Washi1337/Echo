@@ -6,6 +6,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Platforms.AsmResolver.Emulation;
+using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 using MethodDefinition = AsmResolver.DotNet.MethodDefinition;
@@ -140,6 +141,15 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
 
             var result = frame.EvaluationStack.Peek();
             Assert.Equal((3 + 4) * 5, result.Contents.AsSpan().I32);
+        }
+
+        [Fact]
+        public void Test()
+        {
+            _vm.InvocationStrategy = AlwaysInvokeStrategy.Instance;
+            _vm.Invoker = ReturnUnknownInvoker.Instance;
+
+            _vm.Run();
         }
     }
 }

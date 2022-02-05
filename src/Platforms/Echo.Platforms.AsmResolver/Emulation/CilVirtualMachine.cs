@@ -5,6 +5,7 @@ using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Heap;
+using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation
@@ -101,6 +102,18 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             get;
         }
+
+        public IMethodInvoker Invoker
+        {
+            get;
+            set;
+        } = ReturnUnknownInvoker.Instance;
+
+        public IMethodInvocationStrategy InvocationStrategy
+        {
+            get;
+            set;
+        } = AlwaysInvokeStrategy.Instance;
 
         /// <summary>
         /// Runs the virtual machine until it halts.
