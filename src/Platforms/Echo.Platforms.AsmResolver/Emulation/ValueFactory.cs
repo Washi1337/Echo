@@ -42,6 +42,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             PointerSize = is32Bit ? 4u : 8u;
             ClrMockMemory = new ClrMockMemory();
             BitVectorPool = new BitVectorPool();
+            Marshaller = new CliMarshaller(this);
 
             InvalidProgramExceptionType = new TypeReference(
                     contextModule, 
@@ -94,6 +95,11 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets the bitvector pool that this factory uses for creating and reusing bit vectors. 
         /// </summary>
         public BitVectorPool BitVectorPool
+        {
+            get;
+        }
+
+        public CliMarshaller Marshaller
         {
             get;
         }

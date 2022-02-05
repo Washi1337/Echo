@@ -13,11 +13,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
 {
     public abstract class CilOpCodeHandlerTestBase : IClassFixture<MockModuleFixture>
     {
-        private readonly MockModuleFixture _fixture;
-
         protected CilOpCodeHandlerTestBase(MockModuleFixture fixture)
         {
-            _fixture = fixture;
+            ModuleFixture = fixture;
 
             var dummyMethod = new MethodDefinition(
                 "DummyMethod", 
@@ -40,6 +38,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
         }
 
         protected CilExecutionContext Context
+        {
+            get;
+        }
+
+        public MockModuleFixture ModuleFixture
         {
             get;
         }
