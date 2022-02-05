@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using Echo.Core;
 
 namespace Echo.Concrete
@@ -7,6 +9,7 @@ namespace Echo.Concrete
     /// Represents an array of bits for which the concrete may be known or unknown, and can be reinterpreted as
     /// different value types, and operated on using the different semantics of these types.
     /// </summary>
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public class BitVector : ICloneable
     {
         /// <summary>
@@ -106,6 +109,10 @@ namespace Echo.Concrete
         {
             get;
         }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal string DebuggerDisplay => AsSpan().DebuggerDisplay;
         
         /// <summary>
         /// Gets the number of bits stored in the bit vector.
@@ -162,7 +169,7 @@ namespace Echo.Concrete
                 throw new ArgumentOutOfRangeException(nameof(binaryString), "The number of bits in the vector should be a multiple of 8.");
 
             var result = new BitVector(binaryString.Length, false);
-            result.AsSpan().WriteBinaryString(0, binaryString);
+            result.AsSpan().WriteBinaryString(binaryString);
             return result;
         }
 

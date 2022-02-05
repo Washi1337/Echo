@@ -11,16 +11,8 @@ namespace Echo.Concrete
         /// </summary>
         public float F32
         {
-            get
-            {
-                var span = MemoryMarshal.Cast<byte, float>(Bits);
-                return span[0];
-            }
-            set
-            {
-                var span = MemoryMarshal.Cast<byte, float>(Bits);
-                span[0] = value;
-            }
+            get => MemoryMarshal.Read<float>(Bits);
+            set => MemoryMarshal.Write(Bits, ref value);
         }
         
         /// <summary>
@@ -28,16 +20,28 @@ namespace Echo.Concrete
         /// </summary>
         public double F64
         {
-            get
-            {
-                var span = MemoryMarshal.Cast<byte, double>(Bits);
-                return span[0];
-            }
-            set
-            {
-                var span = MemoryMarshal.Cast<byte, double>(Bits);
-                span[0] = value;
-            }
+            get => MemoryMarshal.Read<double>(Bits);
+            set => MemoryMarshal.Write(Bits, ref value);
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as a 32 bit floating point number, and writes a fully known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public void Write(float value)
+        {
+            F32 = value;
+            KnownMask.Slice(0, sizeof(float)).Fill(0xFF);
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as a 64 bit floating point number, and writes a fully known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public void Write(double value)
+        {
+            F64 = value;
+            KnownMask.Slice(0, sizeof(double)).Fill(0xFF);
         }
 
         /// <summary>

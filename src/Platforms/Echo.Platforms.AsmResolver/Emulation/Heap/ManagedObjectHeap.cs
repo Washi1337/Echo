@@ -87,8 +87,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             SetMethodTable(chunkSpan, elementType.MakeSzArrayType());
 
             // Set array length field.
-            var lengthField = chunkSpan.SliceArrayLength(_factory);
-            lengthField.WriteNativeInteger(0, elementCount, _factory.Is32Bit);
+            chunkSpan.SliceArrayLength(_factory).WriteNativeInteger(elementCount, _factory.Is32Bit);
             
             return address;
         }
@@ -105,7 +104,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             if (value.Length > 0)
             {
                 var dataSpan = _backingHeap.GetChunkSpan(address).SliceStringData(_factory);
-                dataSpan.WriteBytes(0, MemoryMarshal.Cast<char, byte>(value.AsSpan()));
+                dataSpan.Write(MemoryMarshal.Cast<char, byte>(value.AsSpan()));
             }
 
             return address;
@@ -126,22 +125,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             SetMethodTable(chunkSpan, _factory.ContextModule.CorLibTypeFactory.String);
             
             // Set string length field.
-            var lengthField = chunkSpan.SliceStringLength(_factory);
-            lengthField.I32 = length;
-            lengthField.MarkFullyKnown();
+            chunkSpan.SliceStringLength(_factory).Write(length);
 
             return address;
         }
 
-        private void SetMethodTable(BitVectorSpan objectSpan, ITypeDescriptor type)
-        {
-            var methodTableSpan = objectSpan.SliceObjectMethodTable(_factory);
-            methodTableSpan.WriteNativeInteger(
-                0,
-                _factory.ClrMockMemory.MethodTables.GetAddress(type),
-                _factory.Is32Bit);
-        }
-        
+        private void SetMethodTable(BitVectorSpan objectSpan, ITypeDescriptor type) => objectSpan
+            .SliceObjectMethodTable(_factory)
+            .WriteNativeInteger(_factory.ClrMockMemory.MethodTables.GetAddress(type), _factory.Is32Bit);
+
         /// <summary>
         /// Gets the size of the object at the provided address.
         /// </summary>

@@ -16,10 +16,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             var value = context.Machine.ValueFactory.BitVectorPool.Rent(32, false);
-            var span = value.AsSpan();
-            span.I32 = instruction.GetLdcI4Constant();
-            span.MarkFullyKnown();
-            
+            value.AsSpan().Write(instruction.GetLdcI4Constant());
+
             context.CurrentFrame.EvaluationStack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
             
             return CilDispatchResult.Success();

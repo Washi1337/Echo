@@ -161,7 +161,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                     throw new NotImplementedException("Exception handling is not implemented yet (unknown exception type).");
                 }
 
-                var type = ValueFactory.ClrMockMemory.MethodTables.GetObject(exceptionPointer.ReadNativeInteger(0, Is32Bit)); 
+                var type = ValueFactory.ClrMockMemory.MethodTables.GetObject(exceptionPointer.ReadNativeInteger(Is32Bit)); 
                 throw new NotImplementedException($"Exception handling is not implemented yet. ({type})");
             }
         }

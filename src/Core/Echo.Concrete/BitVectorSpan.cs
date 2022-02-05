@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Text;
 using Echo.Core;
 
@@ -122,6 +121,7 @@ namespace Echo.Concrete
             }
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal string DebuggerDisplay
         {
@@ -212,65 +212,52 @@ namespace Echo.Concrete
         /// <summary>
         /// Reads a native integer from the vector.
         /// </summary>
-        /// <param name="bitIndex">The bit index to start reading at.</param>
         /// <param name="is32Bit">A value indicating whether the native integer is 32 or 64 bits wide.</param>
         /// <returns>The read integer.</returns>
-        public long ReadNativeInteger(int bitIndex, bool is32Bit) => is32Bit ? U32 : I64;
+        public long ReadNativeInteger(bool is32Bit) => is32Bit ? U32 : I64;
 
         /// <summary>
-        /// Writes fully known bytes into the bit vector at the provided bit index. 
+        /// Writes fully known bytes into the bit vector. 
         /// </summary>
-        /// <param name="bitIndex">The bit index to start writing at.</param>
         /// <param name="data">The data to write.</param>
-        /// <exception cref="ArgumentOutOfRangeException">Occurs when the bit index is not a multiple of 8.</exception>
-        public void WriteBytes(int bitIndex, ReadOnlySpan<byte> data)
+        public void Write(ReadOnlySpan<byte> data)
         {
-            if (bitIndex % 8 != 0)
-                throw new ArgumentOutOfRangeException(nameof(bitIndex), "The bit index into the vector should be a multiple of 8.");
-            
-            data.CopyTo(Bits.Slice(bitIndex / 8));
-            KnownMask.Slice(bitIndex / 8, data.Length).Fill(0xFF);
+            data.CopyTo(Bits);
+            KnownMask.Slice(0, data.Length).Fill(0xFF);
         }
 
         /// <summary>
-        /// Writes a fully known native integer into the bit vector at the provided bit index.
+        /// Writes data into the bit vector. 
         /// </summary>
-        /// <param name="bitIndex">The bit index to start writing at.</param>
-        /// <param name="value">The native integer to write.</param>
-        /// <param name="is32Bit">A value indicating whether the native integer is 32 or 64 bits wide.</param>
-        public void WriteNativeInteger(int bitIndex, long value, bool is32Bit)
+        /// <param name="data">The data to write.</param>
+        /// <param name="knownMask">The mask indicating which bits in <paramref name="data"/> are known.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when the length of <paramref name="data"/> and <paramref name="knownMask"/> do not match.
+        /// </exception>
+        public void Write(ReadOnlySpan<byte> data, ReadOnlySpan<byte> knownMask)
         {
-            if (is32Bit)
-            {
-                Span<int> x = stackalloc int[1];
-                x[0] = (int) value;
-                WriteBytes(bitIndex, MemoryMarshal.Cast<int, byte>(x));
-            }
-            else
-            {
-                Span<long> x = stackalloc long[1];
-                x[0] = (long) value;
-                WriteBytes(bitIndex, MemoryMarshal.Cast<long, byte>(x));
-            }
+            if (data.Length != knownMask.Length)
+                throw new ArgumentException("Provided data and known mask are not of the same length.");
+            data.CopyTo(Bits);
+            knownMask.CopyTo(KnownMask);
         }
-        
+
+        /// <summary>
+        /// Writes data into the bit vector. 
+        /// </summary>
+        /// <param name="data">The data to write.</param>
+        public void Write(BitVectorSpan data) => data.CopyTo(this);
+
         /// <summary>
         /// Writes a (partially known) bit string, where the least significant bit is at the end of the string, into
         /// the bit vector at the provided bit index.
         /// </summary>
-        /// <param name="bitIndex">The bit index to start writing at.</param>
         /// <param name="binaryString">The binary string to write. This string may contain unknown bits (<c>?</c>).</param>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the bit index is not a multiple of 8.</exception>
-        public void WriteBinaryString(int bitIndex, string binaryString)
+        public void WriteBinaryString(string binaryString)
         {
-            if (binaryString.Length % 8 != 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(binaryString),
-                    "The number of bits in the vector should be a multiple of 8.");
-            }
-
             for (int i = 0; i < binaryString.Length; i++)
-                this[bitIndex + i] = Trilean.FromChar(binaryString[binaryString.Length - i - 1]);
+                this[i] = Trilean.FromChar(binaryString[binaryString.Length - i - 1]);
         }
 
         /// <summary>

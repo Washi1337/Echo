@@ -15,9 +15,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
             // CLR pushes a 32-bit float as a 64-bit float on the stack!
 
             var value = context.Machine.ValueFactory.BitVectorPool.Rent(64, false);
-            var span = value.AsSpan();
-            span.F64 = (float) instruction.Operand!;
-            span.MarkFullyKnown();
+            value.AsSpan().Write((double) (float) instruction.Operand!);
             
             context.CurrentFrame.EvaluationStack.Push(new StackSlot(value, StackSlotTypeHint.Float));
             

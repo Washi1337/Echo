@@ -91,7 +91,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                 uint localsSize = _offsets[LocalsCount];
                 LocalStorage
                     .AsSpan(0, (int) localsSize * 8)
-                    .WriteBytes(0, new byte[localsSize]);
+                    .Write(new byte[localsSize]);
             }
 
             void AllocateFrameField(TypeSignature type)
@@ -229,7 +229,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <inheritdoc />
         public void Write(long address, ReadOnlySpan<byte> buffer)
         {
-            LocalStorage.AsSpan().WriteBytes((int) (address - _baseAddress) * 8, buffer);
+            LocalStorage.AsSpan((int) (address - _baseAddress) * 8, buffer.Length).Write(buffer);
         }
 
         /// <inheritdoc />

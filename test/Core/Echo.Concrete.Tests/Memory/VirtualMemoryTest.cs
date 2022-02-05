@@ -33,7 +33,7 @@ namespace Echo.Concrete.Tests.Memory
             Assert.Equal("00000000000000000000000000", readBuffer.ToHexString());
             
             var writeBuffer = new BitVector(13 * 8, false).AsSpan();
-            writeBuffer.WriteBytes(0, Encoding.ASCII.GetBytes("Hello, World!"));
+            writeBuffer.Write(Encoding.ASCII.GetBytes("Hello, World!"));
             memory.Write(0x00400_0000, writeBuffer);
             
             memory.Read(0x00400_0000, readBuffer);

@@ -21,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             var pool = machine.ValueFactory.BitVectorPool;
          
             // Interpret the span as an object pointer.
-            long objectPointer = span.ReadNativeInteger(0, machine.Is32Bit);
+            long objectPointer = span.ReadNativeInteger(machine.Is32Bit);
          
             // Dereference the object pointer to get the bits for the method table pointer.
             var methodTableVector = pool.RentNativeInteger(machine.Is32Bit, false);
@@ -29,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             machine.Memory.Read(objectPointer, methodTableSpan);
             
             // Read the method table pointer.
-            long methodTablePointer = methodTableSpan.ReadNativeInteger(0, machine.Is32Bit);
+            long methodTablePointer = methodTableSpan.ReadNativeInteger(machine.Is32Bit);
             pool.Return(methodTableVector);
             
             // Get corresponding method table (== type). 

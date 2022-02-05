@@ -87,6 +87,155 @@ namespace Echo.Concrete
         }
 
         /// <summary>
+        /// Interprets the bit vector as an unsigned 8 bit integer, and writes a fully known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public void Write(byte value) => Write(value, 0xFF);
+
+        /// <summary>
+        /// Interprets the bit vector as an unsigned 8 bit integer, and writes a partially known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="knownMask">The mask indicating which bits are known.</param>
+        public void Write(byte value, byte knownMask)
+        {
+            U8 = value;
+            KnownMask[0] = knownMask;
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as a signed 8 bit integer, and writes a fully known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public void Write(sbyte value) => Write(value, 0xFF);
+
+        /// <summary>
+        /// Interprets the bit vector as a signed 8 bit integer, and writes a partially known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="knownMask">The mask indicating which bits are known.</param>
+        public void Write(sbyte value, byte knownMask)
+        {
+            I8 = value;
+            KnownMask[0] = knownMask;
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as an unsigned 16 bit integer, and writes a fully known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public void Write(ushort value) => Write(value, 0xFFFF);
+
+        /// <summary>
+        /// Interprets the bit vector as an unsigned 16 bit integer, and writes a partially known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="knownMask">The mask indicating which bits are known.</param>
+        public void Write(ushort value, ushort knownMask)
+        {
+            U16 = value;
+            BinaryPrimitives.WriteUInt16LittleEndian(KnownMask, knownMask);
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as a signed 16 bit integer, and writes a fully known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public void Write(short value) => Write(value, 0xFFFF);
+
+        /// <summary>
+        /// Interprets the bit vector as a signed 16 bit integer, and writes a partially known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="knownMask">The mask indicating which bits are known.</param>
+        public void Write(short value, ushort knownMask)
+        {
+            I16 = value;
+            BinaryPrimitives.WriteUInt16LittleEndian(KnownMask, knownMask);
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as an unsigned 32 bit integer, and writes a fully known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public void Write(uint value) => Write(value, 0xFFFFFFFF);
+
+        /// <summary>
+        /// Interprets the bit vector as an unsigned 32 bit integer, and writes a partially known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="knownMask">The mask indicating which bits are known.</param>
+        public void Write(uint value, uint knownMask)
+        {
+            U32 = value;
+            BinaryPrimitives.WriteUInt32LittleEndian(KnownMask, knownMask);
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as a signed 32 bit integer, and writes a fully known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public void Write(int value) => Write(value, 0xFFFFFFFF);
+
+        /// <summary>
+        /// Interprets the bit vector as a signed 32 bit integer, and writes a partially known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="knownMask">The mask indicating which bits are known.</param>
+        public void Write(int value, uint knownMask)
+        {
+            I32 = value;
+            BinaryPrimitives.WriteUInt32LittleEndian(KnownMask, knownMask);
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as an unsigned 64 bit integer, and writes a fully known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public void Write(ulong value) => Write(value, 0xFFFFFFFF_FFFFFFFF);
+
+        /// <summary>
+        /// Interprets the bit vector as an unsigned 64 bit integer, and writes a partially known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="knownMask">The mask indicating which bits are known.</param>
+        public void Write(ulong value, ulong knownMask)
+        {
+            U64 = value;
+            BinaryPrimitives.WriteUInt64LittleEndian(KnownMask, knownMask);
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as a signed 64 bit integer, and writes a fully known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public void Write(long value) => Write(value, 0xFFFFFFFF_FFFFFFFF);
+
+        /// <summary>
+        /// Interprets the bit vector as an signed 64 bit integer, and writes a partially known immediate value to it. 
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="knownMask">The mask indicating which bits are known.</param>
+        public void Write(long value, ulong knownMask)
+        {
+            I64 = value;
+            BinaryPrimitives.WriteUInt64LittleEndian(KnownMask, knownMask);
+        }
+
+        /// <summary>
+        /// Writes a fully known native integer into the bit vector at the provided bit index.
+        /// </summary>
+        /// <param name="value">The native integer to write.</param>
+        /// <param name="is32Bit">A value indicating whether the native integer is 32 or 64 bits wide.</param>
+        public void WriteNativeInteger(long value, bool is32Bit)
+        {
+            if (is32Bit)
+                Write((int) value);
+            else
+                Write(value);
+        }
+
+        /// <summary>
         /// Interprets the bit vector as an integer, and obtains the most significant bit (MSB) of the bit vector.
         /// </summary>
         public Trilean GetMsb() => this[Count - 1];
@@ -457,6 +606,11 @@ namespace Echo.Concrete
             return carry;
         }
 
+        /// <summary>
+        /// Interprets the bit vector as an integer and divides it by a second integer.
+        /// </summary>
+        /// <param name="other">The integer to divide the current integer by.</param>
+        /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match in bit length.</exception>
         public void IntegerDivide(BitVectorSpan other)
         {
             AssertSameBitSize(other);

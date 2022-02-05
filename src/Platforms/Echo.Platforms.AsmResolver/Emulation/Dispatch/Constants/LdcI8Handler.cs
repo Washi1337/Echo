@@ -13,9 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             var value = context.Machine.ValueFactory.BitVectorPool.Rent(64, false);
-            var span = value.AsSpan();
-            span.I64 = (long) instruction.Operand!;
-            span.MarkFullyKnown();
+            value.AsSpan().Write((long) instruction.Operand!);
             
             context.CurrentFrame.EvaluationStack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
             

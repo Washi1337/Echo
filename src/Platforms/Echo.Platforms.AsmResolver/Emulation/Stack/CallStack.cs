@@ -148,7 +148,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             if (_frames.Count == 0)
                 throw new InvalidOperationException("Stack is empty.");
 
-            var (_, frame) = _frames[_frames.Count - 1];
+            var frame = _frames[_frames.Count - 1].Frame;
             _frames.RemoveAt(_frames.Count - 1);
             _currentOffset -= (uint) frame.Size;
             return frame;
