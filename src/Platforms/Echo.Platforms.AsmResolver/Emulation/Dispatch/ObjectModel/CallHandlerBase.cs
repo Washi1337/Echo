@@ -40,24 +40,25 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         private static IList<BitVector> PopArguments(CilExecutionContext context, IMethodDescriptor method)
         {
             var stack = context.CurrentFrame.EvaluationStack;
-            var marshaller = context.Machine.ValueFactory.Marshaller;
+            var factory = context.Machine.ValueFactory;
+            var marshaller = factory.Marshaller;
 
             var arguments = new List<BitVector>(method.Signature!.GetTotalParameterCount());
-
-            int hasThisDelta = method.Signature.HasThis ? 1 : 0;
-            int sentinelDelta = hasThisDelta + method.Signature.ParameterTypes.Count;
             
             // Pop sentinel arguments.
             for (int i = 0; i < method.Signature.SentinelParameterTypes.Count; i++)
-                arguments.Add(marshaller.FromCliValue(stack.Pop(), method.Signature.SentinelParameterTypes[i - sentinelDelta]));
+                arguments.Add(marshaller.FromCliValue(stack.Pop(), method.Signature.SentinelParameterTypes[i]));
 
             // Pop normal arguments.
             for (int i = 0; i < method.Signature.ParameterTypes.Count; i++)
-                arguments.Add(marshaller.FromCliValue(stack.Pop(), method.Signature.ParameterTypes[i - hasThisDelta]));
+                arguments.Add(marshaller.FromCliValue(stack.Pop(), method.Signature.ParameterTypes[i]));
 
             // Pop instance object.
             if (method.Signature.HasThis)
-                arguments.Add(marshaller.FromCliValue(stack.Pop(), method.DeclaringType!.ToTypeSignature()));
+            {
+                var declaringType = method.DeclaringType?.ToTypeSignature() ?? factory.ContextModule.CorLibTypeFactory.Object;
+                arguments.Add(marshaller.FromCliValue(stack.Pop(), declaringType));
+            }
 
             // Correct for stack order.
             arguments.Reverse();

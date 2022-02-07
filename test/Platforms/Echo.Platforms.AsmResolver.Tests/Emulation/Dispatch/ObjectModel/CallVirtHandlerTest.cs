@@ -2,7 +2,6 @@ using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete;
 using Echo.Platforms.AsmResolver.Emulation;
-using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Mocks;
