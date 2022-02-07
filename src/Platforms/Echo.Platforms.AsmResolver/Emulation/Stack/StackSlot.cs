@@ -1,3 +1,4 @@
+using System;
 using Echo.Concrete;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Stack
@@ -14,6 +15,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <param name="typeHint">A type hint indicating how this value was pushed.</param>
         public StackSlot(BitVector contents, StackSlotTypeHint typeHint)
         {
+            if (typeHint is StackSlotTypeHint.Integer or StackSlotTypeHint.Float && contents.Count is not (32 or 64))
+            {
+                throw new ArgumentException(
+                        $"Stack slots of type {typeHint} should be 32-bits or 64-bits wide.");
+            }
+
             Contents = contents;
             TypeHint = typeHint;
         }

@@ -1,13 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Echo.ControlFlow.Serialization.Blocks
+namespace Echo.Core
 {
     /// <summary>
     /// Provides an implementation of a stack of which the elements can be accessed by index.
     /// </summary>
     /// <typeparam name="T">The type of elements in the stack.</typeparam>
-    internal sealed class IndexableStack<T> : IReadOnlyList<T>
+    public class IndexableStack<T> : IReadOnlyList<T>
     {
         private readonly IList<T> _items = new List<T>();
 

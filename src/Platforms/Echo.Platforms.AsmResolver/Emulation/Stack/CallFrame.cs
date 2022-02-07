@@ -7,6 +7,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete;
 using Echo.Concrete.Memory;
+using Echo.Core;
 using Echo.Core.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Stack
@@ -147,7 +148,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <summary>
         /// Gets a virtual evaluation stack associated stored the frame.
         /// </summary>
-        public Stack<StackSlot> EvaluationStack
+        public IndexableStack<StackSlot> EvaluationStack
         {
             get;
         } = new();
