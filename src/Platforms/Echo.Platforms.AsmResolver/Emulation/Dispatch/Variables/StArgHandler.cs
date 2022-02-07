@@ -7,10 +7,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
     /// Implements a CIL instruction handler for <c>starg</c> operations and its derivatives.
     /// </summary>
     [DispatcherTableEntry(CilCode.Starg, CilCode.Starg_S)]
-    public class StArgHandler : ICilOpCodeHandler
+    public class StArgHandler : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
-        public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
+        protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             var frame = context.CurrentFrame;
             var factory = context.Machine.ValueFactory;

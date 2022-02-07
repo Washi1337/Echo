@@ -47,7 +47,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         }
 
         [Fact]
-        public void CallStaticWithParameters()
+        public void CallStaticWithParametersUsingInvoke()
         {
             var invoker = new InvokerWrapper(ReturnUnknownInvoker.Instance);
             var factory = ModuleFixture.MockModule.CorLibTypeFactory;
@@ -75,7 +75,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         }
 
         [Fact]
-        public void CallInstanceWithParameters()
+        public void CallInstanceWithParametersUsingInvoke()
         {
             var invoker = new InvokerWrapper(ReturnUnknownInvoker.Instance);
             var factory = ModuleFixture.MockModule.CorLibTypeFactory;
@@ -123,6 +123,43 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.NotSame(callerFrame, Context.CurrentFrame);
             Assert.Equal(method, Context.CurrentFrame.Method);
             Assert.Equal(0x0005, callerFrame.ProgramCounter);
+        }
+        
+        [Fact]
+        public void CallStaticWithParametersUsingStepIn()
+        {  
+            var invoker = new InvokerWrapper(ReturnUnknownInvoker.Instance);
+            var factory = ModuleFixture.MockModule.CorLibTypeFactory;
+            var method = new MethodDefinition("Dummy", MethodAttributes.Static, MethodSignature.CreateStatic(
+                factory.Int32,
+                factory.Int32,
+                factory.Int32,
+                factory.Int32));
+
+            Context.Machine.InvocationStrategy = NeverInvokeStrategy.Instance;
+            Context.Machine.Invoker = invoker;
+            
+            var callerFrame = Context.CurrentFrame;
+            callerFrame.EvaluationStack.Push(new StackSlot(0, StackSlotTypeHint.Integer));
+            callerFrame.EvaluationStack.Push(new StackSlot(1, StackSlotTypeHint.Integer));
+            callerFrame.EvaluationStack.Push(new StackSlot(2, StackSlotTypeHint.Integer));
+
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Call, method));
+            
+            Assert.True(result.IsSuccess);
+            Assert.False(invoker.HasInvoked);
+            
+            var calleeFrame = Context.CurrentFrame;
+            Assert.NotSame(callerFrame, calleeFrame);
+            Assert.Equal(method, calleeFrame.Method);
+
+            var buffer = new BitVector(32, false).AsSpan();
+            calleeFrame.ReadArgument(0, buffer);
+            Assert.Equal(0, buffer.I32);
+            calleeFrame.ReadArgument(1, buffer);
+            Assert.Equal(1, buffer.I32);
+            calleeFrame.ReadArgument(2, buffer);
+            Assert.Equal(2, buffer.I32);
         }
 
         [Fact]

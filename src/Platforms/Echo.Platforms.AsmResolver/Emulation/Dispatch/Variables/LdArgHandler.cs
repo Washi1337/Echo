@@ -9,10 +9,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
     [DispatcherTableEntry(
         CilCode.Ldarg, CilCode.Ldarg_0, CilCode.Ldarg_1, 
         CilCode.Ldarg_2, CilCode.Ldarg_3, CilCode.Ldarg_S)]
-    public class LdArgHandler : ICilOpCodeHandler
+    public class LdArgHandler : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
-        public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
+        protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             var frame = context.CurrentFrame;
             var factory = context.Machine.ValueFactory;

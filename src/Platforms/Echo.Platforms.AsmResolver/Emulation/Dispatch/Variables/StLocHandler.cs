@@ -9,10 +9,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
     [DispatcherTableEntry(
         CilCode.Stloc, CilCode.Stloc_0, CilCode.Stloc_1, 
         CilCode.Stloc_2, CilCode.Stloc_3, CilCode.Stloc_S)]
-    public class StLocHandler : ICilOpCodeHandler
+    public class StLocHandler : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
-        public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
+        protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             var frame = context.CurrentFrame;
             var factory = context.Machine.ValueFactory;
