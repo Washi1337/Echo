@@ -53,9 +53,59 @@ namespace Echo.Concrete
             Bits = bits;
             KnownMask = knownMask;
         }
+        
+        /// <summary>
+        /// Creates a new fully known 8-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public BitVector(sbyte value)
+        {
+            Bits = BitConverter.GetBytes(value);
+            KnownMask = new byte[] {0xFF};
+        }
+        
+        /// <summary>
+        /// Creates a new fully known 8-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public BitVector(byte value)
+        {
+            Bits = new[] {value};
+            KnownMask = new byte[] {0xFF};
+        }
+        
+        /// <summary>
+        /// Creates a new fully known 16-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public BitVector(short value)
+        {
+            Bits = BitConverter.GetBytes(value);
+            KnownMask = new byte[] {0xFF, 0xFF};
+        }
 
         /// <summary>
-        /// Creates a new fully known 32-wide bit vector based on an integer. 
+        /// Creates a new fully known 16-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public BitVector(ushort value)
+        {
+            Bits = BitConverter.GetBytes(value);
+            KnownMask = new byte[] {0xFF, 0xFF};
+        }
+
+        /// <summary>
+        /// Creates a new fully known 32-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public BitVector(int value)
+        {
+            Bits = BitConverter.GetBytes(value);
+            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF};
+        }
+        
+        /// <summary>
+        /// Creates a new fully known 32-wide bit vector. 
         /// </summary>
         /// <param name="value">The bits.</param>
         public BitVector(uint value)
@@ -65,7 +115,17 @@ namespace Echo.Concrete
         }
 
         /// <summary>
-        /// Creates a new fully known 64-wide bit vector based on an integer. 
+        /// Creates a new fully known 64-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public BitVector(long value)
+        {
+            Bits = BitConverter.GetBytes(value);
+            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+        }
+        
+        /// <summary>
+        /// Creates a new fully known 64-wide bit vector. 
         /// </summary>
         /// <param name="value">The bits.</param>
         public BitVector(ulong value)
