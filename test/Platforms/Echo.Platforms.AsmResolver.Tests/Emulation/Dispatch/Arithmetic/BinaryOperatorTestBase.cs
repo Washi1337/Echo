@@ -17,8 +17,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new StackSlot(new BitVector(a), StackSlotTypeHint.Integer));
-            stack.Push(new StackSlot(new BitVector(b), StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(a, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(b, StackSlotTypeHint.Integer));
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code));
             
@@ -32,8 +32,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new StackSlot(new BitVector(a), StackSlotTypeHint.Integer));
-            stack.Push(new StackSlot(new BitVector(b), StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(a, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(b, StackSlotTypeHint.Integer));
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code));
             
@@ -47,8 +47,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new StackSlot(new BitVector(a), StackSlotTypeHint.Integer));
-            stack.Push(new StackSlot(new BitVector(b), StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(a, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(b, StackSlotTypeHint.Integer));
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code));
             
@@ -62,8 +62,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new StackSlot(new BitVector(a), StackSlotTypeHint.Integer));
-            stack.Push(new StackSlot(new BitVector(b), StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(a, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(b, StackSlotTypeHint.Integer));
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code));
             
@@ -77,8 +77,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new StackSlot(new BitVector(a), StackSlotTypeHint.Float));
-            stack.Push(new StackSlot(new BitVector(b), StackSlotTypeHint.Float));
+            stack.Push(new StackSlot(a, StackSlotTypeHint.Float));
+            stack.Push(new StackSlot(b, StackSlotTypeHint.Float));
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code));
             

@@ -34,7 +34,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
             var method = new MethodDefinition("Dummy", MethodAttributes.Static,
                 MethodSignature.CreateStatic(ModuleFixture.MockModule.CorLibTypeFactory.Int32));
             var frame = Context.Machine.CallStack.Push(method);
-            frame.EvaluationStack.Push(new StackSlot(new BitVector(0x0123456789abcdef), StackSlotTypeHint.Integer));
+            frame.EvaluationStack.Push(new StackSlot(0x0123456789abcdef, StackSlotTypeHint.Integer));
             
             var calleeFrame = Context.CurrentFrame;
             

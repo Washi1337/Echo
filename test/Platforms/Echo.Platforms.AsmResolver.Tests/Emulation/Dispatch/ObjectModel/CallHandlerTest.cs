@@ -39,6 +39,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             Assert.Same(callerFrame, Context.CurrentFrame);
             Assert.Equal(0x0005, callerFrame.ProgramCounter);
+            Assert.Same(method, invoker.LastMethod);
 
             var returnValue = Context.CurrentFrame.EvaluationStack.Peek();
             Assert.Equal(StackSlotTypeHint.Integer, returnValue.TypeHint);
@@ -60,15 +61,16 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Context.Machine.Invoker = invoker;
 
             var callerFrame = Context.CurrentFrame;
-            callerFrame.EvaluationStack.Push(new StackSlot(new BitVector(0), StackSlotTypeHint.Integer));
-            callerFrame.EvaluationStack.Push(new StackSlot(new BitVector(1), StackSlotTypeHint.Integer));
-            callerFrame.EvaluationStack.Push(new StackSlot(new BitVector(2), StackSlotTypeHint.Integer));
+            callerFrame.EvaluationStack.Push(new StackSlot(0, StackSlotTypeHint.Integer));
+            callerFrame.EvaluationStack.Push(new StackSlot(1, StackSlotTypeHint.Integer));
+            callerFrame.EvaluationStack.Push(new StackSlot(2, StackSlotTypeHint.Integer));
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Call, method));
 
             Assert.True(result.IsSuccess);
             Assert.True(invoker.HasInvoked);
             Assert.Single(callerFrame.EvaluationStack);
+            Assert.Same(method, invoker.LastMethod);
             Assert.Equal(new[] {0, 1, 2}, invoker.LastArguments.Select(x => x.AsSpan().I32));
         }
 
@@ -87,16 +89,17 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Context.Machine.Invoker = invoker;
 
             var callerFrame = Context.CurrentFrame;
-            callerFrame.EvaluationStack.Push(new StackSlot(new BitVector(0x12345678), StackSlotTypeHint.Integer));
-            callerFrame.EvaluationStack.Push(new StackSlot(new BitVector(0), StackSlotTypeHint.Integer));
-            callerFrame.EvaluationStack.Push(new StackSlot(new BitVector(1), StackSlotTypeHint.Integer));
-            callerFrame.EvaluationStack.Push(new StackSlot(new BitVector(2), StackSlotTypeHint.Integer));
+            callerFrame.EvaluationStack.Push(new StackSlot(0x12345678, StackSlotTypeHint.Integer));
+            callerFrame.EvaluationStack.Push(new StackSlot(0, StackSlotTypeHint.Integer));
+            callerFrame.EvaluationStack.Push(new StackSlot(1, StackSlotTypeHint.Integer));
+            callerFrame.EvaluationStack.Push(new StackSlot(2, StackSlotTypeHint.Integer));
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Call, method));
 
             Assert.True(result.IsSuccess);
             Assert.True(invoker.HasInvoked);
             Assert.Single(callerFrame.EvaluationStack);
+            Assert.Same(method, invoker.LastMethod);
             Assert.Equal(new[] {0x12345678, 0, 1, 2}, invoker.LastArguments.Select(x => x.AsSpan().I32));
         }
 
@@ -128,7 +131,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var method = new MethodDefinition("Dummy", MethodAttributes.Static,
                 MethodSignature.CreateStatic(ModuleFixture.MockModule.CorLibTypeFactory.Int32));
             var frame = Context.Machine.CallStack.Push(method);
-            frame.EvaluationStack.Push(new StackSlot(new BitVector(0x1337), StackSlotTypeHint.Integer));
+            frame.EvaluationStack.Push(new StackSlot(0x1337, StackSlotTypeHint.Integer));
             
             var calleeFrame = Context.CurrentFrame;
             
@@ -158,7 +161,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
                 private set;
             }
 
-            public IList<BitVector> LastArguments
+            public IMethodDescriptor? LastMethod
+            {
+                get;
+                private set;
+            }
+
+            public IList<BitVector>? LastArguments
             {
                 get;
                 private set;
@@ -167,6 +176,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             public InvocationResult Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments)
             {
                 HasInvoked = true;
+                LastMethod = method;
                 LastArguments = arguments.Select(x => x.Clone()).ToArray();
                 return _invoker.Invoke(context, method, arguments);
             }

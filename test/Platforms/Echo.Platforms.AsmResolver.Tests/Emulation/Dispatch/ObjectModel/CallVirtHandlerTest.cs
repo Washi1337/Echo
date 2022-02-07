@@ -27,7 +27,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             // Allocate an instance of the class, and push it onto the stack.
             long objectPointer = Context.Machine.Heap.AllocateObject(type, true);
             Context.CurrentFrame.EvaluationStack.Push(new StackSlot(
-                new BitVector((ulong) objectPointer),
+                objectPointer,
                 StackSlotTypeHint.Integer));
 
             // Execute a callvirt.
@@ -51,9 +51,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             // Allocate an instance of the class, and push it onto the stack.
             long objectPointer = Context.Machine.Heap.AllocateObject(derivedType, true);
-            Context.CurrentFrame.EvaluationStack.Push(new StackSlot(
-                new BitVector((ulong) objectPointer),
-                StackSlotTypeHint.Integer));
+            Context.CurrentFrame.EvaluationStack.Push(new StackSlot(objectPointer, StackSlotTypeHint.Integer));
 
             // Execute a callvirt.
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Callvirt, baseMethod));
@@ -71,7 +69,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var baseMethod = type.Methods.First(m => m.Name == nameof(SimpleClass.VirtualInstanceMethod));
 
             // Push "null"
-            Context.CurrentFrame.EvaluationStack.Push(new StackSlot(new BitVector(0ul), StackSlotTypeHint.Integer));
+            Context.CurrentFrame.EvaluationStack.Push(new StackSlot(0ul, StackSlotTypeHint.Integer));
             
             // Execute a callvirt.
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Callvirt, baseMethod));

@@ -39,8 +39,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new StackSlot(new BitVector(0x1234), StackSlotTypeHint.Integer));
-            stack.Push(new StackSlot(new BitVector(0x1234), StackSlotTypeHint.Float));
+            stack.Push(new StackSlot(0x1234, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(0x1234, StackSlotTypeHint.Float));
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Add));
             

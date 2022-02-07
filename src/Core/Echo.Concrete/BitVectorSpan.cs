@@ -400,5 +400,12 @@ namespace Echo.Concrete
 
             return vector.AsSpan(0, count);
         }
+
+        /// <summary>
+        /// Creates a span for the provided bit vector. 
+        /// </summary>
+        /// <param name="vector">The vector.</param>
+        /// <returns>The span.</returns>
+        public static implicit operator BitVectorSpan(BitVector vector) => vector.AsSpan();
     }
 }

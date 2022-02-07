@@ -320,5 +320,65 @@ namespace Echo.Concrete
 
         /// <inheritdoc />
         public override string ToString() => AsSpan().ToBitString();
+
+        /// <summary>
+        /// Creates a new fully known 8-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public static implicit operator BitVector(sbyte value) => new(value);
+        
+        /// <summary>
+        /// Creates a new fully known 8-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public static implicit operator BitVector(byte value) => new(value);
+        
+        /// <summary>
+        /// Creates a new fully known 16-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public static implicit operator BitVector(short value) => new(value);
+        
+        /// <summary>
+        /// Creates a new fully known 16-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public static implicit operator BitVector(ushort value) => new(value);
+        
+        /// <summary>
+        /// Creates a new fully known 32-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public static implicit operator BitVector(int value) => new(value);
+        
+        /// <summary>
+        /// Creates a new fully known 32-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public static implicit operator BitVector(uint value) => new(value);
+
+        /// <summary>
+        /// Creates a new fully known 64-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public static implicit operator BitVector(long value) => new(value);
+        
+        /// <summary>
+        /// Creates a new fully known 64-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public static implicit operator BitVector(ulong value) => new(value);
+
+        /// <summary>
+        /// Creates a new fully known 32-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public static implicit operator BitVector(float value) => new(value);
+        
+        /// <summary>
+        /// Creates a new fully known 64-wide bit vector. 
+        /// </summary>
+        /// <param name="value">The bits.</param>
+        public static implicit operator BitVector(double value) => new(value);
     }
 }
