@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete;
@@ -9,7 +8,7 @@ using Echo.Platforms.AsmResolver.Tests.Mock;
 using Mocks;
 using Xunit;
 
-namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
+namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 {
     public class CallVirtHandlerTest: CilOpCodeHandlerTestBase
     {
@@ -79,8 +78,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Callvirt, baseMethod));
 
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionPointer.AsSpan().GetObjectPointerType(Context.Machine);
-            Assert.Equal("System.NullReferenceException", exceptionType.FullName);
+            var exceptionType = result.ExceptionPointer?.AsSpan().GetObjectPointerType(Context.Machine);
+            Assert.Equal("System.NullReferenceException", exceptionType?.FullName);
         }
     }
 }

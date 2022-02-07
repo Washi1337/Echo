@@ -1,10 +1,8 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet;
-using AsmResolver.DotNet.Signatures;
-using Echo.Concrete;
 
-namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
+namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 {
     /// <summary>
     /// Provides information about the result of a method devirtualization process.

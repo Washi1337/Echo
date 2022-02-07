@@ -5,8 +5,14 @@ using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation
 {
+    /// <summary>
+    /// Provides an implementation for a <see cref="IMethodInvoker"/> that always succeeds and returns an unknown value. 
+    /// </summary>
     public sealed class ReturnUnknownInvoker : IMethodInvoker
     {
+        /// <summary>
+        /// Gets the singleton instance of the <see cref="ReturnUnknownInvoker"/> class.
+        /// </summary>
         public static ReturnUnknownInvoker Instance
         {
             get;
@@ -15,16 +21,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         private ReturnUnknownInvoker()
         {
         }
-        
-        public BitVector? Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments)
+
+        /// <inheritdoc />
+        public InvocationResult Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments)
         {
-            if (method.Signature!.ReturnsValue)
+            BitVector? returnValue;
+            if (!method.Signature!.ReturnsValue)
+            {
+                returnValue = null;
+            }
+            else
             {
                 uint size = context.Machine.ValueFactory.GetTypeValueMemoryLayout(method.Signature.ReturnType).Size;
-                return context.Machine.ValueFactory.BitVectorPool.Rent((int) (size*8), false);
+                returnValue = context.Machine.ValueFactory.BitVectorPool.Rent((int) size * 8, false);
             }
 
-            return null;
+            return InvocationResult.Success(returnValue);
         }
     }
 }

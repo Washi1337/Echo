@@ -80,7 +80,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
-        /// Provides the service that is responsible for managing types in the virtual machine.
+        /// Gets the service that is responsible for managing types in the virtual machine.
         /// </summary>
         public ValueFactory ValueFactory
         {
@@ -88,7 +88,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
-        /// Provides the service that is responsible for mapping executable files in memory.
+        /// Gets the service that is responsible for mapping executable files in memory.
         /// </summary>
         public PELoader Loader
         {
@@ -103,12 +103,19 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
         }
 
+        /// <summary>
+        /// Gets the service that is responsible for invoking external functions or methods.
+        /// </summary>
         public IMethodInvoker Invoker
         {
             get;
             set;
         } = ReturnUnknownInvoker.Instance;
 
+        /// <summary>
+        /// Gets the service that is responsible for deciding whether a call should be invoked by the <see cref="Invoker"/>,
+        /// or whether it should be emulated by the virtual machine.
+        /// </summary>
         public IMethodInvocationStrategy InvocationStrategy
         {
             get;

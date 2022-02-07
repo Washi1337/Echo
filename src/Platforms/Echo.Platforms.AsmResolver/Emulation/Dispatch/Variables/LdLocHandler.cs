@@ -3,6 +3,9 @@ using AsmResolver.PE.DotNet.Cil;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
 {
+    /// <summary>
+    /// Implements a CIL instruction handler for <c>ldloc</c> operations and its derivatives.
+    /// </summary>
     [DispatcherTableEntry(
         CilCode.Ldloc, CilCode.Ldloc_0, CilCode.Ldloc_1, 
         CilCode.Ldloc_2, CilCode.Ldloc_3, CilCode.Ldloc_S)]

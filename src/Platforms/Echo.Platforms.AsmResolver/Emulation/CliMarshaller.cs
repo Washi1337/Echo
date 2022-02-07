@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;

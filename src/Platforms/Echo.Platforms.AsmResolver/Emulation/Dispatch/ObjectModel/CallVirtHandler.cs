@@ -5,14 +5,21 @@ using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete;
 using Echo.Core;
 
-namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
+namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 {
+    /// <summary>
+    /// Implements a CIL instruction handler for <c>callvirt</c> operations.
+    /// </summary>
     [DispatcherTableEntry(CilCode.Callvirt)]
     public class CallVirtHandler : CallHandlerBase
     {
         private static readonly SignatureComparer Comparer = new();
-        
-        protected override MethodDevirtualizationResult DevirtualizeMethod(CilExecutionContext context, CilInstruction instruction, IList<BitVector> arguments)
+
+        /// <inheritdoc />
+        protected override MethodDevirtualizationResult DevirtualizeMethod(
+            CilExecutionContext context,
+            CilInstruction instruction, 
+            IList<BitVector> arguments)
         {
             var method = ((IMethodDescriptor) instruction.Operand!).Resolve();
 
@@ -22,22 +29,28 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
                     return new MethodDevirtualizationResult(); 
                 
                 case { IsZero: { Value: TrileanValue.True } }:
-                    return new MethodDevirtualizationResult(context.Machine.Heap.AllocateObject(context.Machine.ValueFactory.NullReferenceExceptionType, true));
+                    return new MethodDevirtualizationResult(context.Machine.Heap.AllocateObject(
+                        context.Machine.ValueFactory.NullReferenceExceptionType, 
+                        true));
                 
                 case var objectPointer:
-                    var type = objectPointer.GetObjectPointerType(context.Machine);
+                    var objectType = objectPointer.GetObjectPointerType(context.Machine);
+                    var implementation = FindMethodImplementationInType(objectType.Resolve(), method);
+
+                    if (implementation is null)
+                    {
+                        return new MethodDevirtualizationResult(context.Machine.Heap.AllocateObject(
+                            context.Machine.ValueFactory.MissingMethodExceptionType,
+                            true));
+                    }
                     
-                    var implementation = FindMethodImplementationInType(type.Resolve(), method);
-                    return implementation is null
-                        ? new MethodDevirtualizationResult(context.Machine.Heap
-                            .AllocateObject(context.Machine.ValueFactory.MissingMethodExceptionType, true))
-                        : new MethodDevirtualizationResult(implementation);
+                    return new MethodDevirtualizationResult(implementation);
             }
         }
 
-        private static MethodDefinition? FindMethodImplementationInType(TypeDefinition? type, MethodDefinition baseMethod)
+        private static MethodDefinition? FindMethodImplementationInType(TypeDefinition? type, MethodDefinition? baseMethod)
         {
-            if (!baseMethod.IsVirtual)
+            if (type is null || baseMethod is null || !baseMethod.IsVirtual)
                 return baseMethod;
 
             var implementation = default(MethodDefinition);

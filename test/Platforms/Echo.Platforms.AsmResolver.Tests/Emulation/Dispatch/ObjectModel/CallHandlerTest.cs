@@ -10,7 +10,7 @@ using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 
-namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
+namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 {
     public class CallHandlerTest : CilOpCodeHandlerTestBase
     {
@@ -103,7 +103,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
                 private set;
             }
 
-            public BitVector? Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments)
+            public InvocationResult Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments)
             {
                 HasInvoked = true;
                 return _invoker.Invoke(context, method, arguments);

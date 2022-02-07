@@ -103,11 +103,17 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
         }
 
+        /// <summary>
+        /// Gets a reference to the <see cref="NullReferenceException"/> type. 
+        /// </summary>
         public ITypeDescriptor NullReferenceExceptionType
         {
             get;
         }
 
+        /// <summary>
+        /// Gets a reference to the <see cref="MissingMethodException"/> type. 
+        /// </summary>
         public ITypeDescriptor MissingMethodExceptionType
         {
             get;

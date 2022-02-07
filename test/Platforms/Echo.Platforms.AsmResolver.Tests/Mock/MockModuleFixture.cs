@@ -14,7 +14,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Mock
 
         public ModuleDefinition GetModule(AssemblyReference corlibScope)
         {
-            ModuleDefinition module = null;
+            ModuleDefinition? module = null;
 
             while (module is null)
             {

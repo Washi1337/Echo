@@ -2,12 +2,21 @@ using System.Collections.Generic;
 using AsmResolver.DotNet;
 using Echo.Concrete;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
-using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation
 {
+    /// <summary>
+    /// Provides members for emulating invocations of external methods.
+    /// </summary>
     public interface IMethodInvoker
     {
-        BitVector? Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments);
+        /// <summary>
+        /// Invokes or emulates an external method.
+        /// </summary>
+        /// <param name="context">The execution context the call originates from.</param>
+        /// <param name="method">The method to invoke.</param>
+        /// <param name="arguments">The arguments to invoke the method with.</param>
+        /// <returns>The result</returns>
+        InvocationResult Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments);
     }
 }
