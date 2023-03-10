@@ -25,7 +25,7 @@ namespace Echo.Core
         
         // The following implements the following truth table:
         //
-        //    | 0 | 1 | ?
+        //    | 0 | 1 | ?   
         // ---+---+---+---
         //  0 | 0 | 0 | 0
         //  --+---+---+---
