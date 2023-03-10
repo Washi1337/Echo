@@ -648,6 +648,47 @@ namespace Echo.Concrete
         }
 
         /// <summary>
+        /// Interprets the bit vector as an integer, divides it by a second integer and produces the remainder.
+        /// </summary>
+        /// <param name="other">The integer to divide the current integer by.</param>
+        /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match in bit length.</exception>
+        public void IntegerRemainder(BitVectorSpan other)
+        {
+            AssertSameBitSize(other);
+
+            if (Count > 64 || !IsFullyKnown || !other.IsFullyKnown)
+            {
+                // TODO: LLE remainder.
+                MarkFullyUnknown();
+                return;
+            }
+
+            switch (Count)
+            {
+                case 8:
+                    U8 %= other.U8;
+                    return;
+
+                case 16:
+                    U16 %= other.U16;
+                    return;
+
+                case 32:
+                    U32 %= other.U32;
+                    return;
+                
+                case 64:
+                    U64 %= other.U64;
+                    return;
+                
+                default:
+                    // TODO: LLE remainder.
+                    MarkFullyUnknown();
+                    return;
+            }
+        }
+
+        /// <summary>
         /// Interprets the bit vector as an integer, and determines whether the integer is greater than another integer.
         /// </summary>
         /// <param name="other">The other integer.</param>

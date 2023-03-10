@@ -48,4 +48,5 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
             Assert.Equal(typeof(InvalidProgramException).FullName, type.FullName);
         }
     }
+
 }

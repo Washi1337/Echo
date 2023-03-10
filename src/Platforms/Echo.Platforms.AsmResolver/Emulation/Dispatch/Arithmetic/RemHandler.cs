@@ -4,33 +4,32 @@ using Echo.Platforms.AsmResolver.Emulation.Stack;
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
 {
     /// <summary>
-    /// Implements a CIL instruction handler for <c>div</c> operations.
+    /// Implements a CIL instruction handler for <c>rem</c> operations and it derivatives.
     /// </summary>
-    [DispatcherTableEntry(CilCode.Div, CilCode.Div_Un)]
-    public class DivHandler : BinaryOperatorHandlerBase
+    [DispatcherTableEntry(CilCode.Rem, CilCode.Rem_Un)]
+    public class RemHandler : BinaryOperatorHandlerBase
     {
         /// <inheritdoc />
-        protected override bool IsSignedOperation(CilInstruction instruction)
-        {
-            return instruction.OpCode.Code == CilCode.Div;
-        }
+        protected override bool IsSignedOperation(CilInstruction instruction) => instruction.OpCode.Code == CilCode.Rem;
 
         /// <inheritdoc />
-        protected override CilDispatchResult Evaluate(CilExecutionContext context, CilInstruction instruction, StackSlot argument1,
+        protected override CilDispatchResult Evaluate(
+            CilExecutionContext context,
+            CilInstruction instruction, 
+            StackSlot argument1,
             StackSlot argument2)
         {
             var argument1Value = argument1.Contents.AsSpan();
             var argument2Value = argument2.Contents.AsSpan();
             
             if (argument1.TypeHint == StackSlotTypeHint.Integer)
-                argument1Value.IntegerDivide(argument2Value);
+                argument1Value.IntegerRemainder(argument2Value);
             else
-                argument1Value.FloatDivide(argument2Value);
+                argument1Value.FloatRemainder(argument2Value);
             
             // TODO: overflow check.
             
             return CilDispatchResult.Success();
         }
     }
-
 }
