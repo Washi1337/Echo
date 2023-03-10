@@ -41,6 +41,19 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var exceptionType = result.ExceptionPointer?.AsSpan().GetObjectPointerType(Context.Machine);
             Assert.Equal("System.IndexOutOfRangeException", exceptionType?.FullName);
         }
+        
+        [Fact]
+        public void ReadFromUnknownArrayShouldPushUnknown()
+        {
+            var stack = Context.CurrentFrame.EvaluationStack;
+            stack.Push(new StackSlot(Context.Machine.ValueFactory.RentNativeInteger(false), StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(1, StackSlotTypeHint.Integer));
+            
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldelem_I4));
+            Assert.True(result.IsSuccess);
+            Assert.Single(stack);
+            Assert.False(stack.Pop().Contents.AsSpan().IsFullyKnown);
+        }
 
         [Fact]
         public void ReadInt32Element()

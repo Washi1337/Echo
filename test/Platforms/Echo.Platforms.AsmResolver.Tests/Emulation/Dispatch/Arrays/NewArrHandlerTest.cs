@@ -9,7 +9,6 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
 {
     public class NewArrHandlerTest : CilOpCodeHandlerTestBase
     {
-
         public NewArrHandlerTest(MockModuleFixture fixture)
             : base(fixture)
         {

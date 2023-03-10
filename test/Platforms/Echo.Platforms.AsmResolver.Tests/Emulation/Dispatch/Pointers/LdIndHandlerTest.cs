@@ -27,6 +27,19 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             Assert.Equal("System.NullReferenceException", exceptionType?.FullName);
         }
 
+        [Fact]
+        public void ReadFromUnknownShouldThrow()
+        {
+            var stack = Context.CurrentFrame.EvaluationStack;
+            stack.Push(new StackSlot(Context.Machine.ValueFactory.RentNativeInteger(false), StackSlotTypeHint.Integer));
+            
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldind_I4));
+
+            Assert.True(result.IsSuccess);
+            Assert.Single(stack);
+            Assert.False(stack.Pop().Contents.AsSpan().IsFullyKnown);
+        }
+
         [Theory]
         [InlineData(CilCode.Ldind_I1, 0x00)]
         [InlineData(CilCode.Ldind_I2, 0x0100)]
