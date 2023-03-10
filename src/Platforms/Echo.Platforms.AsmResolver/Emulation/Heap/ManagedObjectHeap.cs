@@ -16,6 +16,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
     /// </summary>
     public class ManagedObjectHeap : IMemorySpace
     {
+        private readonly Dictionary<string, long> _internedStrings = new();
         private readonly IHeap _backingHeap;
         private readonly ValueFactory _factory;
 
@@ -130,6 +131,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             return address;
         }
 
+        /// <summary>
+        /// Gets the address to an interned string in the virtual managed heap.
+        /// </summary>
+        /// <param name="value">The string.</param>
+        /// <returns>The address of the interned string.</returns>
+        public long GetInternedString(string value)
+        {
+            if (!_internedStrings.TryGetValue(value, out long address))
+            {
+                address = AllocateString(value);
+                _internedStrings.Add(value, address);
+            }
+
+            return address;
+        }
+        
         private void SetMethodTable(BitVectorSpan objectSpan, ITypeDescriptor type) => objectSpan
             .SliceObjectMethodTable(_factory)
             .WriteNativeInteger(_factory.ClrMockMemory.MethodTables.GetAddress(type), _factory.Is32Bit);
@@ -146,6 +163,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// </summary>
         /// <param name="address">The address of the object.</param>
         /// <returns>The object slice.</returns>
+        public BitVectorSpan GetObjectSpan(BitVectorSpan address)
+        {
+            if (!address.IsFullyKnown)
+                throw new ArgumentException("Provided address is not fully known.");
+            if (address.ByteCount != _factory.PointerSize)
+                throw new ArgumentException("Provided address does not have the size of a pointer.");
+
+            return GetObjectSpan(address.ReadNativeInteger(_factory.Is32Bit));
+        }
+
+        /// <summary>
+        /// Gets a bit vector slice that spans the contents of the object at the provided address. 
+        /// </summary>
+        /// <param name="address">The address of the object.</param>
+        /// <returns>The object slice.</returns>
         public BitVectorSpan GetObjectSpan(long address) => _backingHeap.GetChunkSpan(address);
         
         /// <summary>
@@ -153,7 +185,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// </summary>
         /// <returns>The ranges.</returns>
         public IEnumerable<AddressRange> GetObjectRanges() => _backingHeap.GetAllocatedChunks();
-
+        
         /// <summary>
         /// Releases an object from the heap.
         /// </summary>

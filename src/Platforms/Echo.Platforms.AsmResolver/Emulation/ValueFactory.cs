@@ -80,7 +80,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
-        /// Gets the size of a pointer in the current environment.
+        /// Gets the size in bytes of a pointer in the current environment.
         /// </summary>
         public uint PointerSize
         {
