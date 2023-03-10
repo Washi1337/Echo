@@ -51,8 +51,11 @@ namespace Echo.Concrete
         /// </summary>
         /// <param name="vector">The vector.</param>
         /// <returns><c>true</c> if the bitvector was an instance of the pool, <c>false</c> otherwise.</returns>
-        public bool Return(BitVector vector)
+        public bool Return(BitVector? vector)
         {
+            if (vector is null)
+                return false;
+
             if (_instances.ContainsKey(vector))
             {
                 GetInstancesOfSize(vector.Count).Add(vector);
