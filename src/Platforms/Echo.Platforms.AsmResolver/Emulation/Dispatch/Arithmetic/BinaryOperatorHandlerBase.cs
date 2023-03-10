@@ -29,10 +29,25 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
             // Release bitvector for arg 2 because it is not used any more.
             pool.Return(argument2.Contents);
             
+            // Resize to 32bit if necessary.
+            if (Force32BitResult(instruction) && argument1.Contents.Count != 32)
+            {
+                var resized = new StackSlot(argument1.Contents.Resize(32, false, pool), argument1.TypeHint);
+                pool.Return(argument1.Contents);
+                argument1 = resized;
+            }
+            
             // Push the result back onto the stack.
             context.CurrentFrame.EvaluationStack.Push(argument1);
             return result;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the instruction always pushes a 32-bit value.
+        /// </summary>
+        /// <param name="instruction">The instruction to classify.</param>
+        /// <returns><c>true</c> if a 32-bit value is always pushed, <c>false</c> otherwise.</returns>
+        protected abstract bool Force32BitResult(CilInstruction instruction);
 
         /// <summary>
         /// Gets a value indicating whether the instruction is a signed operation or not.

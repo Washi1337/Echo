@@ -10,10 +10,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
     public class DivHandler : BinaryOperatorHandlerBase
     {
         /// <inheritdoc />
-        protected override bool IsSignedOperation(CilInstruction instruction)
-        {
-            return instruction.OpCode.Code == CilCode.Div;
-        }
+        protected override bool Force32BitResult(CilInstruction instruction) => false;
+        
+        /// <inheritdoc />
+        protected override bool IsSignedOperation(CilInstruction instruction) => instruction.OpCode.Code == CilCode.Div;
 
         /// <inheritdoc />
         protected override CilDispatchResult Evaluate(CilExecutionContext context, CilInstruction instruction, StackSlot argument1,

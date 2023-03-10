@@ -10,6 +10,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
     public class AddHandler : BinaryOperatorHandlerBase
     {
         /// <inheritdoc />
+        protected override bool Force32BitResult(CilInstruction instruction) => false;
+
+        /// <inheritdoc />
         protected override bool IsSignedOperation(CilInstruction instruction)
         {
             return instruction.OpCode.Code is CilCode.Add or CilCode.Add_Ovf;

@@ -11,6 +11,66 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
             : base(fixture)
         {
         }
+        
+        protected void AssertCorrect(CilOpCode code, uint a, uint b, bool expected)
+        {
+            var stack = Context.CurrentFrame.EvaluationStack;
+
+            stack.Push(new StackSlot(a, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(b, StackSlotTypeHint.Integer));
+
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(code));
+            
+            Assert.True(result.IsSuccess);
+            var slot = Context.CurrentFrame.EvaluationStack.Peek();
+            Assert.Equal(32, slot.Contents.Count);
+            Assert.Equal(expected, !slot.Contents.AsSpan().IsZero);
+        }
+        
+        protected void AssertCorrect(CilOpCode code, uint a, ulong b, bool expected)
+        {
+            var stack = Context.CurrentFrame.EvaluationStack;
+
+            stack.Push(new StackSlot(a, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(b, StackSlotTypeHint.Integer));
+
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(code));
+            
+            Assert.True(result.IsSuccess);
+            var slot = Context.CurrentFrame.EvaluationStack.Peek();
+            Assert.Equal(32, slot.Contents.Count);
+            Assert.Equal(expected, !slot.Contents.AsSpan().IsZero);
+        }
+        
+        protected void AssertCorrect(CilOpCode code, ulong a, uint b, bool expected)
+        {
+            var stack = Context.CurrentFrame.EvaluationStack;
+
+            stack.Push(new StackSlot(a, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(b, StackSlotTypeHint.Integer));
+
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(code));
+            
+            Assert.True(result.IsSuccess);
+            var slot = Context.CurrentFrame.EvaluationStack.Peek();
+            Assert.Equal(32, slot.Contents.Count);
+            Assert.Equal(expected, !slot.Contents.AsSpan().IsZero);
+        }
+        
+        protected void AssertCorrect(CilOpCode code, ulong a, ulong b, bool expected)
+        {
+            var stack = Context.CurrentFrame.EvaluationStack;
+
+            stack.Push(new StackSlot(a, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(b, StackSlotTypeHint.Integer));
+
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(code));
+            
+            Assert.True(result.IsSuccess);
+            var slot = Context.CurrentFrame.EvaluationStack.Peek();
+            Assert.Equal(32, slot.Contents.Count);
+            Assert.Equal(expected, !slot.Contents.AsSpan().IsZero);
+        }
 
         protected void AssertCorrect(CilOpCode code, uint a, uint b, uint expected)
         {
