@@ -1,5 +1,6 @@
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Memory;
+using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
@@ -11,6 +12,19 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
         public LdIndHandlerTest(MockModuleFixture fixture)
             : base(fixture)
         {
+        }
+
+        [Fact]
+        public void ReadFromNullShouldThrow()
+        {
+            var stack = Context.CurrentFrame.EvaluationStack;
+            stack.Push(new StackSlot(0, StackSlotTypeHint.Integer));
+            
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldind_I4));
+
+            Assert.False(result.IsSuccess);
+            var exceptionType = result.ExceptionPointer?.AsSpan().GetObjectPointerType(Context.Machine);
+            Assert.Equal("System.NullReferenceException", exceptionType?.FullName);
         }
 
         [Theory]

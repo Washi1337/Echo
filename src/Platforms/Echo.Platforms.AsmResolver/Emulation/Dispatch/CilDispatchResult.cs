@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using AsmResolver.DotNet;
 using Echo.Concrete;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
@@ -40,15 +41,43 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         public static CilDispatchResult Exception(BitVector exceptionPointer) => new(exceptionPointer);
 
         /// <summary>
+        /// Creates a new dispatch result indicating the dispatch failed with an exception.
+        /// </summary>
+        /// <param name="machine">The machine to allocate the exception in.</param>
+        /// <param name="type">The type of exception to allocate.</param>
+        public static CilDispatchResult Exception(CilVirtualMachine machine, ITypeDescriptor type)
+        {
+            long exceptionPointer = machine.Heap.AllocateObject(type, true);
+            var pointerVector = machine.ValueFactory.BitVectorPool.Rent(machine.Is32Bit ? 32 : 64, false);
+            pointerVector.AsSpan().WriteNativeInteger(exceptionPointer, machine.Is32Bit);
+            return new CilDispatchResult(pointerVector);
+        }
+
+        /// <summary>
         /// Creates a new dispatch result indicating the dispatch failed due to an invalid program.
         /// </summary>
         /// <param name="context">The context the instruction was evaluated in.</param>
         public static CilDispatchResult InvalidProgram(CilExecutionContext context)
         {
-            long exceptionPointer = context.Machine.Heap.AllocateObject(context.Machine.ValueFactory.InvalidProgramExceptionType, true);
-            var pointerVector = context.Machine.ValueFactory.BitVectorPool.Rent(context.Machine.Is32Bit ? 32 : 64, false);
-            pointerVector.AsSpan().WriteNativeInteger(exceptionPointer, context.Machine.Is32Bit);
-            return new CilDispatchResult(pointerVector);
+            return Exception(context.Machine, context.Machine.ValueFactory.InvalidProgramExceptionType);
+        }
+
+        /// <summary>
+        /// Creates a new dispatch result indicating the dispatch failed due to a null reference.
+        /// </summary>
+        /// <param name="context">The context the instruction was evaluated in.</param>
+        public static CilDispatchResult NullReference(CilExecutionContext context)
+        {
+            return Exception(context.Machine, context.Machine.ValueFactory.NullReferenceExceptionType);
+        }
+
+        /// <summary>
+        /// Creates a new dispatch result indicating the dispatch failed due to an index being out of range.
+        /// </summary>
+        /// <param name="context">The context the instruction was evaluated in.</param>
+        public static CilDispatchResult IndexOutOfRange(CilExecutionContext context)
+        {
+            return Exception(context.Machine, context.Machine.ValueFactory.IndexOutOfRangeExceptionType);
         }
     }
 }

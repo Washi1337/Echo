@@ -56,6 +56,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 "System",
                 "NullReferenceException").Resolve()!;
             
+            IndexOutOfRangeExceptionType = new TypeReference(
+                contextModule, 
+                contextModule.CorLibTypeFactory.CorLibScope, 
+                "System",
+                "IndexOutOfRangeException").Resolve()!;
+            
             MissingMethodExceptionType = new TypeReference(
                 contextModule, 
                 contextModule.CorLibTypeFactory.CorLibScope, 
@@ -107,6 +113,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets a reference to the <see cref="NullReferenceException"/> type. 
         /// </summary>
         public ITypeDescriptor NullReferenceExceptionType
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a reference to the <see cref="IndexOutOfRangeException"/> type. 
+        /// </summary>
+        public ITypeDescriptor IndexOutOfRangeExceptionType
         {
             get;
         }

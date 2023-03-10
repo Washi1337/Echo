@@ -2,6 +2,7 @@ using System;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Core;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
 {
@@ -40,8 +41,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             {
                 // Read memory if fully known address, else leave result unknown.
                 var addressSpan = address.AsSpan();
-                if (addressSpan.IsFullyKnown)
-                    context.Machine.Memory.Read(addressSpan.ReadNativeInteger(context.Machine.Is32Bit), result);
+                switch (addressSpan)
+                {
+                    case { IsFullyKnown: false }:
+                        break;
+
+                    case { IsZero.Value: TrileanValue.True }:
+                        return CilDispatchResult.NullReference(context);
+
+                    default:
+                        context.Machine.Memory.Read(addressSpan.ReadNativeInteger(context.Machine.Is32Bit), result);
+                        break;
+                }
 
                 // Push.
                 stack.Push(factory.Marshaller.ToCliValue(result, elementType));
@@ -50,8 +61,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             finally
             {
                 // Return rented values.
-                factory.BitVectorPool.Return(result);
                 factory.BitVectorPool.Return(address);
+                factory.BitVectorPool.Return(result);
             }
         }
 
