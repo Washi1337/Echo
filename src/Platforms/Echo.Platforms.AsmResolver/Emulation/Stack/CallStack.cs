@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using Echo.Concrete;
 using Echo.Concrete.Memory;
 using Echo.Core.Code;
@@ -28,6 +29,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         {
             _factory = factory;
             AddressRange = new AddressRange(0, maxSize);
+
+            var rootMethod = new MethodDefinition("<<root>>", 0, 
+                MethodSignature.CreateStatic(factory.ContextModule.CorLibTypeFactory.Void));
+            Push(new CallFrame(rootMethod, factory, true));
         }
 
         /// <inheritdoc />
@@ -145,8 +150,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <exception cref="InvalidOperationException">Occurs when the stack is empty.</exception>
         public CallFrame Pop()
         {
-            if (_frames.Count == 0)
-                throw new InvalidOperationException("Stack is empty.");
+            if (_frames.Count == 1)
+                throw new InvalidOperationException("Cannot pop the root stack-frame.");
 
             var frame = _frames[_frames.Count - 1].Frame;
             _frames.RemoveAt(_frames.Count - 1);

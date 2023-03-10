@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
@@ -139,7 +140,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             {
                 Step(context);
                 cancellationToken.ThrowIfCancellationRequested();
-            } while (CallStack.Count > 0);
+            } while (!CallStack.Peek().IsRoot);
         }
         
         /// <summary>
@@ -159,7 +160,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
         private void Step(CilExecutionContext context)
         {
-            if (CallStack.Count == 0)
+            if (CallStack.Peek().IsRoot)
                 throw new CilEmulatorException("No method is currently being executed.");
 
             var currentFrame = CallStack.Peek();

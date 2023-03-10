@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public void EmptyStack()
         {
             var stack = new CallStack(0x1000, _factory);
-            Assert.Throws<InvalidOperationException>(() => stack.Peek());
+            Assert.True(stack.Peek().IsRoot);
             Assert.Throws<InvalidOperationException>(() => stack.Pop());
         }
 

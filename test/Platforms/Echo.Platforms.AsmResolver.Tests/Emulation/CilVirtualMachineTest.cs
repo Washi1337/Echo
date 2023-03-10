@@ -1,14 +1,11 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using Echo.Concrete;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
-using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 using MethodDefinition = AsmResolver.DotNet.MethodDefinition;
@@ -50,13 +47,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 _vm.Step();
 
             // Check if we're still in the dummy method.
-            Assert.NotEmpty(_vm.CallStack);
+            Assert.Equal(2, _vm.CallStack.Count);
             
             // Execute return.
             _vm.Step();
             
             // Check if we exited.
-            Assert.Empty(_vm.CallStack);
+            Assert.True(Assert.Single(_vm.CallStack).IsRoot);
         }
 
         [Fact(Timeout = 5000)]
@@ -81,7 +78,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             _vm.Run();
             
             // Check if we exited.
-            Assert.Empty(_vm.CallStack);
+            Assert.True(Assert.Single(_vm.CallStack).IsRoot);
         }
 
         [Fact(Timeout = 5000)]
@@ -183,21 +180,14 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             // Ensure VM is stepping into calls.
             _vm.InvocationStrategy = InvokeExternalStrategy.Instance;
 
-            // Capture return values.
-            StackSlot result = default;
-            _vm.Dispatcher.BeforeInstructionDispatch += (sender, args) =>
-            {
-                if (args.Instruction.OpCode.Code == CilCode.Ret)
-                    result = args.Context.CurrentFrame.EvaluationStack.Peek();
-            };
-
             // Call Foo.
             _vm.CallStack.Push(foo);
             
             // Run.
             _vm.Run();
-            
-            Assert.Equal((3 + 4) * 5, result.Contents.AsSpan().I32);
+
+            var returnValue = _vm.CallStack.Peek().EvaluationStack.Peek();
+            Assert.Equal((3 + 4) * 5, returnValue.Contents.AsSpan().I32);
         }
     }
 }

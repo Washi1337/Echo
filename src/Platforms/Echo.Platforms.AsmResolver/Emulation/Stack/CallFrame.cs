@@ -41,13 +41,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// Occurs when the provided method is invalid or contains invalid metadata that could not be dealt with.
         /// </exception>
         public CallFrame(IMethodDescriptor method, ValueFactory factory)
+            : this(method, factory, false)
         {
+        }
+        
+        internal CallFrame(IMethodDescriptor method, ValueFactory factory, bool isRoot)
+        {
+            IsRoot = isRoot;
+            
             if (method.Signature is null)
                 throw new ArgumentException("Method does not have a valid signature.");
             
-            uint pointerSize = factory.Is32Bit 
-                ? (uint) sizeof(uint) 
-                : sizeof(ulong);
+            uint pointerSize = factory.PointerSize;
             
             var context = GenericContext.FromMethod(method);
             Method = method;
@@ -56,7 +61,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             bool initializeLocals = false;
             
             // Allocate local variables. 
-            if (method.Resolve()?.CilMethodBody is { } body)
+            if (method.Resolve()?.CilMethodBody is not { } body)
+            {
+                Body = null;
+            }
+            else
             {
                 initializeLocals = body.InitializeLocals;
                 LocalsCount = body.LocalVariables.Count;
@@ -65,10 +74,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                     AllocateFrameField(local.VariableType);
 
                 Body = body;
-            }
-            else
-            {
-                Body = null;
             }
 
             // Allocate return address.
@@ -102,6 +107,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                 currentOffset += factory.GetTypeValueMemoryLayout(actualType).Size;
                 currentOffset = currentOffset.Align(pointerSize);
             }
+        }
+
+        /// <summary>
+        /// Gets a value indicating the frame is the root frame of the call stack.
+        /// </summary>
+        public bool IsRoot
+        {
+            get;
         }
         
         /// <summary>
