@@ -188,6 +188,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
         public BitVector RentNativeInteger(bool initialize) => BitVectorPool.RentNativeInteger(Is32Bit, initialize);
 
+        public BitVector RentNativeInteger(long value)
+        {
+            var vector = BitVectorPool.RentNativeInteger(Is32Bit, false);
+            vector.AsSpan().WriteNativeInteger(value, Is32Bit);
+            return vector;
+        }
+
         /// <summary>
         /// Obtains the memory layout of a type in the current environment. If the provided type is a reference type,
         /// then it will measure the object reference itself, and not the contents behind the reference.

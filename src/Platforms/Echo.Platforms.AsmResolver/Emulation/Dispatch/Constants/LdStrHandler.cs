@@ -13,10 +13,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             string value = instruction.Operand!.ToString();
-            
-            var address = context.Machine.ValueFactory.RentNativeInteger(false);
-            address.AsSpan().WriteNativeInteger(context.Machine.Heap.GetInternedString(value), context.Machine.Is32Bit);
-            context.CurrentFrame.EvaluationStack.Push(new StackSlot(address, StackSlotTypeHint.Integer));
+
+            long stringAddress = context.Machine.Heap.GetInternedString(value);
+            var vector = context.Machine.ValueFactory.RentNativeInteger(stringAddress);
+            context.CurrentFrame.EvaluationStack.Push(new StackSlot(vector, StackSlotTypeHint.Integer));
             
             return CilDispatchResult.Success();
         }
