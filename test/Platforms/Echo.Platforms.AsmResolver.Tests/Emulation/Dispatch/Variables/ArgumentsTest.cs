@@ -146,5 +146,27 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
             
             Assert.Equal(0x01234567, value.I32);
         }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        [InlineData(4)]
+        public void PushArgumentAddress(int argIndex)
+        {
+            PrepareMethodWithArgument(argIndex, ModuleFixture.MockModule.CorLibTypeFactory.Int32);
+            
+            var result = Dispatcher.Dispatch(Context, 
+                new CilInstruction(CilOpCodes.Ldarga, Context.CurrentFrame.Body!.Owner.Parameters[argIndex]));
+            
+            Assert.True(result.IsSuccess);
+
+            var slot = Context.CurrentFrame.EvaluationStack.Peek();
+            Assert.Equal(StackSlotTypeHint.Integer, slot.TypeHint);
+            Assert.Equal(
+                Context.CurrentFrame.GetArgumentAddress(argIndex),
+                slot.Contents.AsSpan().ReadNativeInteger(Context.Machine.Is32Bit));
+        }
     }
 }
