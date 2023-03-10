@@ -88,6 +88,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
         }
 
+        public ModuleDefinition ContextModule => ValueFactory.ContextModule;
+
         /// <summary>
         /// Gets the service that is responsible for mapping executable files in memory.
         /// </summary>
