@@ -31,4 +31,5 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         [InlineData(1000ul, 2000ul)]
         public void I8ToI8(ulong a, ulong b) => AssertCorrect(CilOpCodes.Ceq, a, b, a == b);
     }
+
 }
