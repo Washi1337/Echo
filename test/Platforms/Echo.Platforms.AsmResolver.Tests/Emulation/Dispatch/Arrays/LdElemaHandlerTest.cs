@@ -1,5 +1,5 @@
-using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Concrete;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
@@ -7,9 +7,9 @@ using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
 {
-    public class LdElemHandlerTest : CilOpCodeHandlerTestBase
+    public class LdElemaHandlerTest : CilOpCodeHandlerTestBase
     {
-        public LdElemHandlerTest(MockModuleFixture fixture)
+        public LdElemaHandlerTest(MockModuleFixture fixture)
             : base(fixture)
         {
         }
@@ -28,20 +28,23 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         }
 
         [Fact]
-        public void ReadFromNullArrayShouldThrow()
+        public void GetFromNullArrayShouldThrow()
         {
             var stack = Context.CurrentFrame.EvaluationStack;
             stack.Push(new StackSlot(0, StackSlotTypeHint.Integer));
             stack.Push(new StackSlot(10, StackSlotTypeHint.Integer));
             
-            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldelem_I4));
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(
+                CilOpCodes.Ldelema, 
+                Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
+            
             Assert.False(result.IsSuccess);
             var exceptionType = result.ExceptionPointer?.AsSpan().GetObjectPointerType(Context.Machine);
             Assert.Equal("System.NullReferenceException", exceptionType?.FullName);
         }
-
+        
         [Fact]
-        public void ReadOutOfRangeShouldThrow()
+        public void GetOutOfRangeShouldThrow()
         {
             long array = CreateArray(10);
             
@@ -49,43 +52,51 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             stack.Push(new StackSlot(array, StackSlotTypeHint.Integer));
             stack.Push(new StackSlot(10, StackSlotTypeHint.Integer));
             
-            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldelem_I4));
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(
+                CilOpCodes.Ldelema, 
+                Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
+            
             Assert.False(result.IsSuccess);
             var exceptionType = result.ExceptionPointer?.AsSpan().GetObjectPointerType(Context.Machine);
             Assert.Equal("System.IndexOutOfRangeException", exceptionType?.FullName);
         }
         
         [Fact]
-        public void ReadFromUnknownArrayShouldPushUnknown()
+        public void GetFromUnknownArrayShouldPushUnknown()
         {
             var stack = Context.CurrentFrame.EvaluationStack;
             stack.Push(new StackSlot(Context.Machine.ValueFactory.RentNativeInteger(false), StackSlotTypeHint.Integer));
             stack.Push(new StackSlot(1, StackSlotTypeHint.Integer));
             
-            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldelem_I4));
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(
+                CilOpCodes.Ldelema, 
+                Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
+
             Assert.True(result.IsSuccess);
             Assert.Single(stack);
             Assert.False(stack.Pop().Contents.AsSpan().IsFullyKnown);
         }
-
+        
         [Fact]
-        public void ReadInt32Element()
+        public void GetFromKnownArrayShouldPushUnknown()
         {
-            var stack = Context.CurrentFrame.EvaluationStack;
             long array = CreateArray(10);
+            
+            var stack = Context.CurrentFrame.EvaluationStack;
+            stack.Push(new StackSlot(array, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(4, StackSlotTypeHint.Integer));
+            
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(
+                CilOpCodes.Ldelema, 
+                Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
 
-            Assert.All(Enumerable.Range(0, 10), i =>
-            {
-                stack.Push(new StackSlot(array, StackSlotTypeHint.Integer));
-                stack.Push(new StackSlot(i, StackSlotTypeHint.Integer));
-                var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldelem_I4));
-                
-                Assert.True(result.IsSuccess);
-                Assert.Single(stack);
-                var value = stack.Pop();
-                Assert.Equal(100 + i, value.Contents.AsSpan().I32);
-            });
+            Assert.True(result.IsSuccess);
+            Assert.Single(stack);
+
+            long address = stack.Pop().Contents.AsSpan().ReadNativeInteger(Context.Machine.Is32Bit);
+            var buffer = new BitVector(32);
+            Context.Machine.Memory.Read(address, buffer);
+            Assert.Equal(104, buffer.AsSpan().I32);
         }
-
     }
 }
