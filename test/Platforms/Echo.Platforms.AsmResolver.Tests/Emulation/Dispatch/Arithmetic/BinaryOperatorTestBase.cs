@@ -6,9 +6,9 @@ using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
 {
-    public class BinaryOperatorTestBase : CilOpCodeHandlerTestBase
+    public abstract class BinaryOperatorTestBase : CilOpCodeHandlerTestBase
     {
-        public BinaryOperatorTestBase(MockModuleFixture fixture)
+        protected BinaryOperatorTestBase(MockModuleFixture fixture)
             : base(fixture)
         {
         }
