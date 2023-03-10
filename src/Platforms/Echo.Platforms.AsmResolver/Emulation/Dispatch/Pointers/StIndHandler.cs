@@ -45,6 +45,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
                 switch (addressSpan)
                 {
                     case { IsFullyKnown: false }:
+                        throw new CilEmulatorException("Attempted to write to an unknown memory pointer.");
                         break;
 
                     case { IsZero.Value: TrileanValue.True }:
