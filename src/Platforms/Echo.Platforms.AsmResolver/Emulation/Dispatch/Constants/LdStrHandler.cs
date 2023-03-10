@@ -14,7 +14,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
         {
             string value = instruction.Operand!.ToString();
             
-            var address = context.Machine.ValueFactory.BitVectorPool.RentNativeInteger(context.Machine.Is32Bit, false);
+            var address = context.Machine.ValueFactory.RentNativeInteger(false);
             address.AsSpan().WriteNativeInteger(context.Machine.Heap.GetInternedString(value), context.Machine.Is32Bit);
             context.CurrentFrame.EvaluationStack.Push(new StackSlot(address, StackSlotTypeHint.Integer));
             

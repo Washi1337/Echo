@@ -185,7 +185,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="type">The type of object to measure.</param>
         /// <returns>The total size in bytes.</returns>
         public uint GetObjectSize(ITypeDescriptor type) => ObjectHeaderSize + GetTypeContentsMemoryLayout(type).Size;
-        
+
+        public BitVector RentNativeInteger(bool initialize) => BitVectorPool.RentNativeInteger(Is32Bit, initialize);
+
         /// <summary>
         /// Obtains the memory layout of a type in the current environment. If the provided type is a reference type,
         /// then it will measure the object reference itself, and not the contents behind the reference.

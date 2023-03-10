@@ -12,7 +12,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
         /// <inheritdoc />
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
-            var value = context.Machine.ValueFactory.BitVectorPool.RentNativeInteger(context.Machine.Is32Bit, true);
+            var value = context.Machine.ValueFactory.RentNativeInteger(true);
             context.CurrentFrame.EvaluationStack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
             return CilDispatchResult.Success();   
         }
