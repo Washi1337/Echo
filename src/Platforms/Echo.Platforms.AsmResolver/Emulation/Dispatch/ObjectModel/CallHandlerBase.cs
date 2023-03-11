@@ -11,10 +11,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     public abstract class CallHandlerBase : ICilOpCodeHandler
     {
         /// <inheritdoc />
-        public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
+        public virtual CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
         {
             var method = (IMethodDescriptor) instruction.Operand!;
-            var arguments = PopArguments(context, method);
+            var arguments = GetArguments(context, method);
 
             var callerFrame = context.CurrentFrame;
 
@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             
             // If that resulted in any error, throw it.
             if (!devirtualization.IsSuccess)
-                return CilDispatchResult.Exception(new BitVector((ulong) devirtualization.ExceptionPointer));
+                return CilDispatchResult.Exception(new BitVector(devirtualization.ExceptionPointer.Value));
             
             // Invoke it otherwise.
             var result = Invoke(context, devirtualization.ResultingMethod, arguments);
@@ -37,32 +37,36 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             return result;
         }
 
-        private static IList<BitVector> PopArguments(CilExecutionContext context, IMethodDescriptor method)
+        private IList<BitVector> GetArguments(CilExecutionContext context, IMethodDescriptor method)
         {
             var stack = context.CurrentFrame.EvaluationStack;
-            var factory = context.Machine.ValueFactory;
-
-            var arguments = new List<BitVector>(method.Signature!.GetTotalParameterCount());
+            var result = new List<BitVector>(method.Signature!.GetTotalParameterCount());
             
             // Pop sentinel arguments.
             for (int i = 0; i < method.Signature.SentinelParameterTypes.Count; i++)
-                arguments.Add(stack.Pop(method.Signature.SentinelParameterTypes[i]));
+                result.Add(stack.Pop(method.Signature.SentinelParameterTypes[i]));
 
             // Pop normal arguments.
             for (int i = 0; i < method.Signature.ParameterTypes.Count; i++)
-                arguments.Add(stack.Pop(method.Signature.ParameterTypes[i]));
+                result.Add(stack.Pop(method.Signature.ParameterTypes[i]));
 
             // Pop instance object.
             if (method.Signature.HasThis)
-            {
-                var declaringType = method.DeclaringType?.ToTypeSignature() ?? factory.ContextModule.CorLibTypeFactory.Object;
-                arguments.Add(stack.Pop(declaringType));
-            }
+                result.Add(GetInstancePointer(context, method));
 
             // Correct for stack order.
-            arguments.Reverse();
+            result.Reverse();
 
-            return arguments;
+            return result;
+        }
+
+        private BitVector GetInstancePointer(CilExecutionContext context, IMethodDescriptor method)
+        {
+            var factory = context.Machine.ValueFactory;
+            var stack = context.CurrentFrame.EvaluationStack;
+            
+            var declaringType = method.DeclaringType?.ToTypeSignature() ?? factory.ContextModule.CorLibTypeFactory.Object;
+            return stack.Pop(declaringType);
         }
 
         /// <summary>
@@ -84,9 +88,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             {
                 // Invoke the method, and push the result if it produced a value.
                 var result = context.Machine.Invoker.Invoke(context, method, arguments);
+                
                 if (!result.IsSuccess)
                     return CilDispatchResult.Exception(result.Value);
-                
                 if (result.Value is not null)
                     context.CurrentFrame.EvaluationStack.Push(result.Value, method.Signature!.ReturnType);
 
@@ -96,7 +100,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             // We are stepping into this method, push new call frame with the arguments that were pushed onto the stack.
             var frame = context.Machine.CallStack.Push(method);
             for (int i = 0; i < arguments.Count; i++)
-                frame.WriteArgument(i, arguments[i].AsSpan());
+                frame.WriteArgument(i, arguments[i]);
 
             return CilDispatchResult.Success();
         }
