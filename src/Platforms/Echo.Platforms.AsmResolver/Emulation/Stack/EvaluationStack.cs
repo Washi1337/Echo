@@ -25,6 +25,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// </summary>
         /// <param name="value">The value to push.</param>
         /// <param name="originalType">The type of the value to push.</param>
+        /// <returns>The stack slot that was created.</returns>
+        public StackSlot Push(BitVectorSpan value, TypeSignature originalType)
+        {
+            var vector = _factory.BitVectorPool.Rent(value.Count, false);
+            vector.AsSpan().Write(value);
+            return Push(vector, originalType);
+        }
+        
+        /// <summary>
+        /// Marshals the provided bitvector into a stack slot, and pushes it onto the stack.
+        /// </summary>
+        /// <param name="value">The value to push.</param>
+        /// <param name="originalType">The type of the value to push.</param>
         /// <param name="releaseBitVector">
         /// <c>true</c> if <paramref name="value"/> should be returned to the bit vector pool, <c>false</c> if the caller
         /// should remain the owner of the bit vector.
