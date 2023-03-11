@@ -249,6 +249,27 @@ namespace Echo.Concrete
         public void Write(BitVectorSpan data) => data.CopyTo(this);
 
         /// <summary>
+        /// Fills the bit vector with the repetition of a byte.
+        /// </summary>
+        /// <param name="value">The value to fill the bit vector with.</param>
+        public void Fill(byte value)
+        {
+            Bits.Fill(value);
+            MarkFullyKnown();
+        }
+        
+        /// <summary>
+        /// Fills the bit vector with the repetition of a partially known byte.
+        /// </summary>
+        /// <param name="value">The value to fill the bit vector with.</param>
+        /// <param name="knownMask">The mask indicating which bits in <paramref name="data"/> are known.</param>
+        public void Fill(byte value, byte knownMask)
+        {
+            Bits.Fill(value);
+            KnownMask.Fill(knownMask);
+        }
+
+        /// <summary>
         /// Writes a (partially known) bit string, where the least significant bit is at the end of the string, into
         /// the bit vector at the provided bit index.
         /// </summary>
