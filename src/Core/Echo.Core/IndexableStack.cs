@@ -46,6 +46,7 @@ namespace Echo.Core
         /// <param name="value"></param>
         public void Push(T value) => _items.Add(value);
 
+        /// <inheritdoc />
         public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

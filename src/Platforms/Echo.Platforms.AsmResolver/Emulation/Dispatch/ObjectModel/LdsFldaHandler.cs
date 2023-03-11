@@ -15,7 +15,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         {
             var field = (IFieldDescriptor) instruction.Operand!;
             var address = context.Machine.ValueFactory.RentNativeInteger(
-                context.Machine.StaticFieldStorage.GetFieldAddress(field));
+                context.Machine.StaticFields.GetFieldAddress(field));
             context.CurrentFrame.EvaluationStack.Push(new StackSlot(address, StackSlotTypeHint.Integer));
             return CilDispatchResult.Success();
         }

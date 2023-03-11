@@ -39,7 +39,7 @@ public class StFldHandlerTest : CilOpCodeHandlerTestBase
         // Verify.
         Assert.True(result.IsSuccess);
         Assert.Empty(stack);
-        Assert.Equal(1337, Context.Machine.StaticFieldStorage.GetFieldSpan(field).I32);
+        Assert.Equal(1337, Context.Machine.StaticFields.GetFieldSpan(field).I32);
     }
     
     [Fact]

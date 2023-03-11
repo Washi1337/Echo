@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             var field = (IFieldDescriptor) instruction.Operand!;
-            var fieldSpan = context.Machine.StaticFieldStorage.GetFieldSpan(field);
+            var fieldSpan = context.Machine.StaticFields.GetFieldSpan(field);
             context.CurrentFrame.EvaluationStack.Push(fieldSpan, field.Signature!.FieldType);
             return CilDispatchResult.Success();
         }

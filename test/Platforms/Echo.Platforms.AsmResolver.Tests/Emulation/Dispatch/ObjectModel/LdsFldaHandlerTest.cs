@@ -21,7 +21,7 @@ public class LdsFldaHandlerTest : CilOpCodeHandlerTestBase
         var field = new FieldDefinition("StaticInt32", FieldAttributes.Static,
             ModuleFixture.MockModule.CorLibTypeFactory.Int32);
 
-        long address = Context.Machine.StaticFieldStorage.GetFieldAddress(field);
+        long address = Context.Machine.StaticFields.GetFieldAddress(field);
 
         var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldsflda, field));
 

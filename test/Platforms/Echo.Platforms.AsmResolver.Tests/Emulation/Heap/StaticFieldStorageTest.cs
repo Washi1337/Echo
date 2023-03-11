@@ -2,6 +2,7 @@ using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Heap;
+using Echo.Platforms.AsmResolver.Emulation.Runtime;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 

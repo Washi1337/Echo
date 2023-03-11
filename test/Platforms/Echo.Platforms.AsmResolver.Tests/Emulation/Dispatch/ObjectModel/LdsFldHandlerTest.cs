@@ -21,7 +21,7 @@ public class LdsFldHandlerTest : CilOpCodeHandlerTestBase
         var field = new FieldDefinition("StaticInt32", FieldAttributes.Static,
             ModuleFixture.MockModule.CorLibTypeFactory.Int32);
 
-        Context.Machine.StaticFieldStorage.GetFieldSpan(field).Write(1337);
+        Context.Machine.StaticFields.GetFieldSpan(field).Write(1337);
 
         var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldsfld, field));
 
@@ -38,7 +38,7 @@ public class LdsFldHandlerTest : CilOpCodeHandlerTestBase
         var field = new FieldDefinition("StaticFloat64", FieldAttributes.Static,
             ModuleFixture.MockModule.CorLibTypeFactory.Double);
 
-        Context.Machine.StaticFieldStorage.GetFieldSpan(field).Write(1337.0);
+        Context.Machine.StaticFields.GetFieldSpan(field).Write(1337.0);
 
         var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldsfld, field));
 

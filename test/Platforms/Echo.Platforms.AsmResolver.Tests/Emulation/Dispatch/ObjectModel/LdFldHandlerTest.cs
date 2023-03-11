@@ -29,7 +29,7 @@ public class LdFldHandlerTest : CilOpCodeHandlerTestBase
             .TopLevelTypes.First(t => t.Name == nameof(SimpleClass))
             .Fields.First(f => f.Name == nameof(SimpleClass.StaticIntField));
         
-        Context.Machine.StaticFieldStorage.GetFieldSpan(field).Write(1337);
+        Context.Machine.StaticFields.GetFieldSpan(field).Write(1337);
         
         // Push null.
         stack.Push(new StackSlot(0, StackSlotTypeHint.Integer));

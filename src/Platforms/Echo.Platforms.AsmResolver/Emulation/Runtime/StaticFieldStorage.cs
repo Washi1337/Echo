@@ -7,7 +7,7 @@ using Echo.Concrete.Memory;
 using Echo.Concrete.Memory.Heap;
 using Echo.Core.Code;
 
-namespace Echo.Platforms.AsmResolver.Emulation.Heap
+namespace Echo.Platforms.AsmResolver.Emulation.Runtime
 {
     /// <summary>
     /// Represents a chunk of memory designated for storing static fields in a .NET process.

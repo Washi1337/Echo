@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             {
                 // We can actually reference static fields with ldfld. The instance is then just ignored.
                 if (field.Resolve() is {IsStatic: true})
-                    result.AsSpan().Write(context.Machine.StaticFieldStorage.GetFieldAddress(field));
+                    result.AsSpan().Write(context.Machine.StaticFields.GetFieldAddress(field));
                 else
                     GetInstanceFieldAddress(context, instance, field, result);
 

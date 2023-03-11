@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             
             try
             {
-                var fieldSpan = context.Machine.StaticFieldStorage.GetFieldSpan(field);
+                var fieldSpan = context.Machine.StaticFields.GetFieldSpan(field);
                 fieldSpan.Write(value);
 
                 return CilDispatchResult.Success();

@@ -27,7 +27,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 if (field.Resolve() is {IsStatic: true})
                 {
                     // Referenced field is static, we can ignore the instance object that was pushed.
-                    fieldAddress = context.Machine.StaticFieldStorage.GetFieldAddress(field);
+                    fieldAddress = context.Machine.StaticFields.GetFieldAddress(field);
                 }
                 else if (instance.TypeHint != StackSlotTypeHint.Integer)
                 {

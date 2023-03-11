@@ -141,6 +141,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
         }
 
+        /// <summary>
+        /// Gets the service responsible for marshalling values into stack slots and back. 
+        /// </summary>
         public CliMarshaller Marshaller
         {
             get;
@@ -200,12 +203,36 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The total size in bytes.</returns>
         public uint GetObjectSize(ITypeDescriptor type) => ObjectHeaderSize + GetTypeContentsMemoryLayout(type).Size;
 
+        /// <summary>
+        /// Creates a new native integer bit vector.
+        /// </summary>
+        /// <param name="initialize">
+        /// <c>true</c> if the value should be set to 0, <c>false</c> if the integer should remain unknown.
+        /// </param>
+        /// <returns>The constructed bit vector.</returns>
         public BitVector CreateNativeInteger(bool initialize) => new((int) PointerSize * 8, initialize);
-
+        
+        /// <summary>
+        /// Creates a new native integer bit vector.
+        /// </summary>
+        /// <param name="value">The value to initialize the integer with.</param>
+        /// <returns>The constructed bit vector.</returns>
         public BitVector CreateNativeInteger(long value) => new(value);
         
+        /// <summary>
+        /// Rents a native integer bit vector from the bit vector pool.
+        /// </summary>
+        /// <param name="initialize">
+        /// <c>true</c> if the value should be set to 0, <c>false</c> if the integer should remain unknown.
+        /// </param>
+        /// <returns>The rented bit vector.</returns>
         public BitVector RentNativeInteger(bool initialize) => BitVectorPool.RentNativeInteger(Is32Bit, initialize);
 
+        /// <summary>
+        /// Rents a native integer bit vector from the bit vector pool.
+        /// </summary>
+        /// <param name="value">The value to initialize the integer with.</param>
+        /// <returns>The rented bit vector.</returns>
         public BitVector RentNativeInteger(long value)
         {
             var vector = BitVectorPool.RentNativeInteger(Is32Bit, false);
@@ -213,12 +240,28 @@ namespace Echo.Platforms.AsmResolver.Emulation
             return vector;
         }
         
+        /// <summary>
+        /// Creates a new bit vector that can be used to represent an instance of the provided type.
+        /// </summary>
+        /// <param name="type">The type to represent.</param>
+        /// <param name="initialize">
+        /// <c>true</c> if the value should be set to 0, <c>false</c> if the value should remain unknown.
+        /// </param>
+        /// <returns>The constructed bit vector.</returns>
         public BitVector CreateValue(TypeSignature type, bool initialize)
         {
             uint size = GetTypeValueMemoryLayout(type).Size;
             return new BitVector((int) size * 8, initialize);
         }
         
+        /// <summary>
+        /// Rents a bit vector from the pool that can be used to represent an instance of the provided type.
+        /// </summary>
+        /// <param name="type">The type to represent.</param>
+        /// <param name="initialize">
+        /// <c>true</c> if the value should be set to 0, <c>false</c> if the value should remain unknown.
+        /// </param>
+        /// <returns>The rented bit vector.</returns>
         public BitVector RentValue(TypeSignature type, bool initialize)
         {
             uint size = GetTypeValueMemoryLayout(type).Size;
@@ -275,6 +318,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
             return memoryLayout;
         }
 
+        /// <summary>
+        /// Obtains memory layout information of a field.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <returns>The memory layout information.</returns>
+        /// <exception cref="ArgumentException">Occurs when the field could not be resolved.</exception>
         public FieldMemoryLayout GetFieldMemoryLayout(IFieldDescriptor field)
         {
             if (field.DeclaringType is null)
@@ -288,6 +337,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
             return layout[resolvedField];
         }
 
+        /// <summary>
+        /// Obtains the address to a field within an object.
+        /// </summary>
+        /// <param name="instanceAddress">The object address.</param>
+        /// <param name="field">The field within the object to reference.</param>
+        /// <returns>The address to the field.</returns>
         public long GetFieldAddress(long instanceAddress, IFieldDescriptor field)
         {
             var layout = GetFieldMemoryLayout(field);

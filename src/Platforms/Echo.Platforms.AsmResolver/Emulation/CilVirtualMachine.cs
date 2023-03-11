@@ -7,6 +7,7 @@ using Echo.Concrete.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Heap;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
+using Echo.Platforms.AsmResolver.Emulation.Runtime;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation
@@ -32,14 +33,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (is32Bit)
             {
                 Memory.Map(0x1000_0000, Heap = new ManagedObjectHeap(0x0100_0000, ValueFactory));
-                Memory.Map(0x7d00_0000, StaticFieldStorage = new StaticFieldStorage(ValueFactory, 0x0100_0000));
+                Memory.Map(0x7d00_0000, StaticFields = new StaticFieldStorage(ValueFactory, 0x0100_0000));
                 Memory.Map(0x7e00_0000, ValueFactory.ClrMockMemory);
                 Memory.Map(0x7fe0_0000, CallStack = new CallStack(0x10_0000, ValueFactory));
             }
             else
             {
                 Memory.Map(0x0000_0100_0000_0000, Heap = new ManagedObjectHeap(0x01000_0000, ValueFactory));
-                Memory.Map(0x0000_7fff_0000_0000, StaticFieldStorage = new StaticFieldStorage(ValueFactory, 0x1000_0000));
+                Memory.Map(0x0000_7fff_0000_0000, StaticFields = new StaticFieldStorage(ValueFactory, 0x1000_0000));
                 Memory.Map(0x0000_7fff_1000_0000, ValueFactory.ClrMockMemory);
                 Memory.Map(0x0000_7fff_8000_0000, CallStack = new CallStack(0x100_0000, ValueFactory));
             }
@@ -74,7 +75,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets the memory chunk responsible for storing static fields.
         /// </summary>
-        public StaticFieldStorage StaticFieldStorage
+        public StaticFieldStorage StaticFields
         {
             get;
         }
@@ -98,6 +99,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
         }
 
+        /// <summary>
+        /// Gets the main module the emulator is executing instructions for.
+        /// </summary>
         public ModuleDefinition ContextModule => ValueFactory.ContextModule;
 
         /// <summary>

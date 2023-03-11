@@ -29,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             Assert.True(result.IsSuccess);
             Assert.Empty(stack);
-            Assert.Equal(1337, Context.Machine.StaticFieldStorage.GetFieldSpan(field).I32);
+            Assert.Equal(1337, Context.Machine.StaticFields.GetFieldSpan(field).I32);
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             Assert.True(result.IsSuccess);
             Assert.Empty(stack);
-            Assert.Equal(1337.0, Context.Machine.StaticFieldStorage.GetFieldSpan(field).F64);
+            Assert.Equal(1337.0, Context.Machine.StaticFields.GetFieldSpan(field).F64);
         }
     }
 }

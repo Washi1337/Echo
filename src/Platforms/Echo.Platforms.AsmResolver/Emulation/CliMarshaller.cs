@@ -7,11 +7,18 @@ using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
+    /// <summary>
+    /// Provides a mechanism for marshalling values in and out of the evaluation stack.
+    /// </summary>
     public class CliMarshaller
     {
         private readonly ValueFactory _valueFactory;
         private readonly Dictionary<TypeSignature, TypeDefinition> _resolvedTypes = new();
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="CliMarshaller"/> class.
+        /// </summary>
+        /// <param name="valueFactory">The factory that is used to create new objects with.</param>
         public CliMarshaller(ValueFactory valueFactory)
         {
             _valueFactory = valueFactory;
@@ -74,6 +81,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
             }
         }
 
+        /// <summary>
+        /// Marshals the provided value to a value that can be pushed onto the stack. 
+        /// </summary>
+        /// <param name="value">The value to marshal.</param>
+        /// <param name="originalType">The type to push the value as.</param>
+        /// <returns>The marshalled stack slot.</returns>
         public StackSlot ToCliValue(BitVector value, TypeSignature originalType)
         {
             // Resolve the "underlying" element type, if there is any.
@@ -106,6 +119,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
             return new StackSlot(result, typeHint);
         }
 
+        /// <summary>
+        /// Marshals the provided stack slot back to a normal bit vector that is to be used outside of the stack.
+        /// </summary>
+        /// <param name="value">The stack value.</param>
+        /// <param name="targetType">The type to marshal to.</param>
+        /// <returns>The marshalled value.</returns>
         public BitVector FromCliValue(StackSlot value, TypeSignature targetType)
         {
             // Resolve the "underlying" element type, if there is any.
