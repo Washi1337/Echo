@@ -18,22 +18,28 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The object type.</returns>
         public static ITypeDescriptor GetObjectPointerType(this BitVectorSpan span, CilVirtualMachine machine)
         {
+            if (!span.IsFullyKnown)
+                throw new ArgumentException("Cannot dereference a partially unknown pointer.");
+            
             var pool = machine.ValueFactory.BitVectorPool;
-         
-            // Interpret the span as an object pointer.
-            long objectPointer = span.ReadNativeInteger(machine.Is32Bit);
-         
-            // Dereference the object pointer to get the bits for the method table pointer.
+            
             var methodTableVector = pool.RentNativeInteger(machine.Is32Bit, false);
-            var methodTableSpan = methodTableVector.AsSpan();
-            machine.Memory.Read(objectPointer, methodTableSpan);
-            
-            // Read the method table pointer.
-            long methodTablePointer = methodTableSpan.ReadNativeInteger(machine.Is32Bit);
-            pool.Return(methodTableVector);
-            
-            // Get corresponding method table (== type). 
-            return machine.ValueFactory.ClrMockMemory.MethodTables.GetObject(methodTablePointer);
+            try
+            {
+                // Dereference the object pointer to get the bits for the method table pointer.
+                var methodTableSpan = methodTableVector.AsSpan();
+                machine.Memory.Read(span.ReadNativeInteger(machine.Is32Bit), methodTableSpan);
+
+                // Read the method table pointer.
+                long methodTablePointer = methodTableSpan.ReadNativeInteger(machine.Is32Bit);
+
+                // Get corresponding method table (== type). 
+                return machine.ValueFactory.ClrMockMemory.MethodTables.GetObject(methodTablePointer);
+            }
+            finally
+            {
+                pool.Return(methodTableVector);
+            }
         }
         
         /// <summary>
@@ -60,6 +66,24 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public static BitVectorSpan SliceObjectData(this BitVectorSpan span, ValueFactory factory)
         {
             return span.Slice((int) (factory.ObjectHeaderSize * 8));
+        }
+
+        /// <summary>
+        /// Interprets the bit vector as object data (including the object header), and carves out a single field from it.
+        /// </summary>
+        /// <param name="span">The bit vector representing the entire object.</param>
+        /// <param name="factory">The object responsible for managing type layouts.</param>
+        /// <param name="field">The field to carve out.</param>
+        /// <returns>The slice that contains the raw data of the field.</returns>
+        /// <exception cref="ArgumentException">
+        /// Occurs when the provided field has no valid declaring type or could not be resolved.
+        /// </exception>
+        public static BitVectorSpan SliceObjectField(
+            this BitVectorSpan span, 
+            ValueFactory factory,
+            IFieldDescriptor field)
+        {
+            return span.SliceObjectData(factory).SliceStructField(factory, field);
         }
         
         /// <summary>
@@ -132,16 +156,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// the input bit vector does <strong>not</strong> contain the object header. This header can be stripped away
         /// by using e.g. <see cref="SliceObjectData"/> first.
         /// </remarks>
-        /// <exception cref="InvalidOperationException">
-        /// Occurs when the provided field has no valid declaring type.
+        /// <exception cref="ArgumentException">
+        /// Occurs when the provided field has no valid declaring type or could not be resolved.
         /// </exception>
-        public static BitVectorSpan SliceStructField(this BitVectorSpan span, ValueFactory factory, FieldDefinition field)
+        public static BitVectorSpan SliceStructField(this BitVectorSpan span, ValueFactory factory, IFieldDescriptor field)
         {
-            if (field.DeclaringType is null)
-                throw new InvalidOperationException("Field declaring type is unknown.");
-
-            var layout = factory.GetTypeContentsMemoryLayout(field.DeclaringType);
-            var fieldMemoryLayout = layout[field];
+            var fieldMemoryLayout = factory.GetFieldMemoryLayout(field);
             return span.Slice((int) (fieldMemoryLayout.Offset * 8), (int) (fieldMemoryLayout.ContentsLayout.Size * 8));
         }
     }

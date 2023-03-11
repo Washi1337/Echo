@@ -212,7 +212,19 @@ namespace Echo.Platforms.AsmResolver.Emulation
             vector.AsSpan().WriteNativeInteger(value, Is32Bit);
             return vector;
         }
-
+        
+        public BitVector CreateValue(TypeSignature type, bool initialize)
+        {
+            uint size = GetTypeValueMemoryLayout(type).Size;
+            return new BitVector((int) size * 8, initialize);
+        }
+        
+        public BitVector RentValue(TypeSignature type, bool initialize)
+        {
+            uint size = GetTypeValueMemoryLayout(type).Size;
+            return BitVectorPool.Rent((int) size * 8, initialize);
+        }
+        
         /// <summary>
         /// Obtains the memory layout of a type in the current environment. If the provided type is a reference type,
         /// then it will measure the object reference itself, and not the contents behind the reference.
@@ -261,6 +273,19 @@ namespace Echo.Platforms.AsmResolver.Emulation
             }
 
             return memoryLayout;
+        }
+
+        public FieldMemoryLayout GetFieldMemoryLayout(IFieldDescriptor field)
+        {
+            if (field.DeclaringType is null)
+                throw new ArgumentException("Field declaring type is unknown.");
+
+            var layout = GetTypeContentsMemoryLayout(field.DeclaringType);
+
+            if (field.Resolve() is not { } resolvedField)
+                throw new ArgumentException($"Could not resolve field '{field}'");
+            
+            return layout[resolvedField];
         }
         
         private TypeMemoryLayout GetTypeDefOrRefContentsLayout(ITypeDefOrRef type, GenericContext context)
