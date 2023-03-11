@@ -287,6 +287,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
             
             return layout[resolvedField];
         }
+
+        public long GetFieldAddress(long instanceAddress, IFieldDescriptor field)
+        {
+            var layout = GetFieldMemoryLayout(field);
+            long fieldAddress = instanceAddress + layout.Offset;
+            if (!field.DeclaringType!.IsValueType)
+                fieldAddress += ObjectHeaderSize;
+            return fieldAddress;
+        }
         
         private TypeMemoryLayout GetTypeDefOrRefContentsLayout(ITypeDefOrRef type, GenericContext context)
         {

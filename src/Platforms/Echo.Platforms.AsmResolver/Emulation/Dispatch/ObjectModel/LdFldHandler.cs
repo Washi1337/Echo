@@ -72,11 +72,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     {
                         // Calculate field address.
                         long objectAddress = addressSpan.ReadNativeInteger(context.Machine.Is32Bit);
-                        long fieldAddress = objectAddress + factory.GetFieldMemoryLayout(field).Offset;
-
-                        // Skip also the object header for fields defined within objects.
-                        if (!field.DeclaringType!.IsValueType)
-                            fieldAddress += factory.ObjectHeaderSize;
+                        long fieldAddress = factory.GetFieldAddress(objectAddress, field);
 
                         // Read field value.
                         context.Machine.Memory.Read(fieldAddress, result);
