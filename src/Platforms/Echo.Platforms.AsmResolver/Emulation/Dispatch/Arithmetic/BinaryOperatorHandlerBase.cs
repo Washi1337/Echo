@@ -23,23 +23,36 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
                 return CilDispatchResult.InvalidProgram(context);
             }
 
-            // Evaluate the operation!
-            var result = Evaluate(context, instruction, argument1, argument2);
-            
-            // Release bitvector for arg 2 because it is not used any more.
-            pool.Return(argument2.Contents);
-            
-            // Resize to 32bit if necessary.
-            if (Force32BitResult(instruction) && argument1.Contents.Count != 32)
+            try
             {
-                var resized = new StackSlot(argument1.Contents.Resize(32, false, pool), argument1.TypeHint);
-                pool.Return(argument1.Contents);
-                argument1 = resized;
+                // Evaluate the operation.
+                var result = Evaluate(context, instruction, argument1, argument2);
+
+                // Resize to 32bit if necessary.
+                if (Force32BitResult(instruction) && argument1.Contents.Count != 32)
+                {
+                    var resized = new StackSlot(argument1.Contents.Resize(32, false, pool), argument1.TypeHint);
+                    pool.Return(argument1.Contents);
+                    argument1 = resized;
+                }
+
+                // Push the result back onto the stack.
+                context.CurrentFrame.EvaluationStack.Push(argument1);
+                
+                return result;
             }
-            
-            // Push the result back onto the stack.
-            context.CurrentFrame.EvaluationStack.Push(argument1);
-            return result;
+            catch
+            {
+                // Make sure the argument1/result value is returned to the pool on error, as it isn't consumed anymore
+                // by the evaluation stack.
+                pool.Return(argument1.Contents);
+                throw;
+            }
+            finally
+            {
+                // We only need to return argument2 as argument1 is reused for the result as well. 
+                pool.Return(argument2.Contents);
+            }
         }
 
         /// <summary>

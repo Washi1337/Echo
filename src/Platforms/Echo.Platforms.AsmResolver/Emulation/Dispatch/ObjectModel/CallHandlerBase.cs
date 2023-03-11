@@ -41,23 +41,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
-            var marshaller = factory.Marshaller;
 
             var arguments = new List<BitVector>(method.Signature!.GetTotalParameterCount());
             
             // Pop sentinel arguments.
             for (int i = 0; i < method.Signature.SentinelParameterTypes.Count; i++)
-                arguments.Add(marshaller.FromCliValue(stack.Pop(), method.Signature.SentinelParameterTypes[i]));
+                arguments.Add(stack.Pop(method.Signature.SentinelParameterTypes[i]));
 
             // Pop normal arguments.
             for (int i = 0; i < method.Signature.ParameterTypes.Count; i++)
-                arguments.Add(marshaller.FromCliValue(stack.Pop(), method.Signature.ParameterTypes[i]));
+                arguments.Add(stack.Pop(method.Signature.ParameterTypes[i]));
 
             // Pop instance object.
             if (method.Signature.HasThis)
             {
                 var declaringType = method.DeclaringType?.ToTypeSignature() ?? factory.ContextModule.CorLibTypeFactory.Object;
-                arguments.Add(marshaller.FromCliValue(stack.Pop(), declaringType));
+                arguments.Add(stack.Pop(declaringType));
             }
 
             // Correct for stack order.
@@ -89,10 +88,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     return CilDispatchResult.Exception(result.Value);
                 
                 if (result.Value is not null)
-                {
-                    var stackSlot = context.Machine.ValueFactory.Marshaller.ToCliValue(result.Value, method.Signature!.ReturnType);
-                    context.CurrentFrame.EvaluationStack.Push(stackSlot);
-                }
+                    context.CurrentFrame.EvaluationStack.Push(result.Value, method.Signature!.ReturnType);
 
                 return CilDispatchResult.Success();
             }

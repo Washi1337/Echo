@@ -30,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         public void UnknownArrayShouldPushUnknown()
         {
             var stack = Context.CurrentFrame.EvaluationStack;
-            stack.Push(new StackSlot(Context.Machine.ValueFactory.RentNativeInteger(false), StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(Context.Machine.ValueFactory.CreateNativeInteger(false), StackSlotTypeHint.Integer));
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldlen));
             Assert.True(result.IsSuccess);

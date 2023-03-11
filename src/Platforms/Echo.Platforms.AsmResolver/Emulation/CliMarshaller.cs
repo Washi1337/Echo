@@ -81,10 +81,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
             // Measure the new size on the stack.
             uint size = _valueFactory.GetTypeValueMemoryLayout(originalType).Size;
-            if (size <= 4)
-                size = 4;
-            else if (size <= 8)
-                size = 8;
+            size = size switch
+            {
+                <= 4 => 4,
+                <= 8 => 8,
+                _ => size
+            };
 
             // Create the new bit vector.
             bool signExtend = IsSignedIntegerType(originalType);

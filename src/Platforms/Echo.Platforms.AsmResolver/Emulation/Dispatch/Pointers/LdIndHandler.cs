@@ -55,7 +55,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
                 }
 
                 // Push.
-                stack.Push(factory.Marshaller.ToCliValue(result, elementType));
+                stack.Push(result, elementType);
                 return CilDispatchResult.Success();
             }
             finally

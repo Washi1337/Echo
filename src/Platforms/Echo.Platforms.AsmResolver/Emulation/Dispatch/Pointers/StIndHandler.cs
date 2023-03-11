@@ -30,14 +30,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
 
             // Determine parameters.
             var elementType = GetElementType(context, instruction);
-            var value = stack.Pop();
+            var value = stack.Pop(elementType);
             var address = stack.Pop().Contents;
             var result = factory.BitVectorPool.Rent(
                 (int) factory.GetTypeValueMemoryLayout(elementType).Size * 8, 
                 false);
             
-            BitVector? marshalledValue = null;
-
             try
             {
                 // Write memory if fully known address, else leave result unknown.
@@ -52,8 +50,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
                         return CilDispatchResult.NullReference(context);
 
                     default:
-                        marshalledValue = context.Machine.ValueFactory.Marshaller.FromCliValue(value, elementType);
-                        context.Machine.Memory.Write(addressSpan.ReadNativeInteger(context.Machine.Is32Bit), marshalledValue);
+                        context.Machine.Memory.Write(addressSpan.ReadNativeInteger(context.Machine.Is32Bit), value);
                         break;
                 }
 
@@ -63,9 +60,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             {
                 // Return rented values.
                 factory.BitVectorPool.Return(address);
-                factory.BitVectorPool.Return(value.Contents);
+                factory.BitVectorPool.Return(value);
                 factory.BitVectorPool.Return(result);
-                factory.BitVectorPool.Return(marshalledValue);
             }
         }
         

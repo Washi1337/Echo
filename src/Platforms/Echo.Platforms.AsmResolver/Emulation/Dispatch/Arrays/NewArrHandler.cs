@@ -14,14 +14,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             var stack = context.CurrentFrame.EvaluationStack;
+            var factory = context.Machine.ValueFactory;
             
             var elementType = (ITypeDefOrRef) instruction.Operand!;
             var elementCount = stack.Pop();
-            
+
             try
             {
-                var address = context.Machine.ValueFactory.RentNativeInteger(false); 
+                var address = factory.RentNativeInteger(false); 
                 
+                // Only actually allocate the array if the element count is known, otherwise, we can leave the 
+                // pointer unknown as we don't know the total size of the object.
                 var countSpan = elementCount.Contents.AsSpan();
                 if (countSpan.IsFullyKnown)
                 {
@@ -33,7 +36,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             }
             finally
             {
-                context.Machine.ValueFactory.BitVectorPool.Return(elementCount.Contents);
+                factory.BitVectorPool.Return(elementCount.Contents);
             }
             
             return CilDispatchResult.Success();

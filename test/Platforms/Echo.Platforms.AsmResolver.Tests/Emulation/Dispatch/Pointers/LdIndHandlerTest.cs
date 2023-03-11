@@ -31,7 +31,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
         public void ReadFromUnknownShouldThrow()
         {
             var stack = Context.CurrentFrame.EvaluationStack;
-            stack.Push(new StackSlot(Context.Machine.ValueFactory.RentNativeInteger(false), StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(Context.Machine.ValueFactory.CreateNativeInteger(false), StackSlotTypeHint.Integer));
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldind_I4));
 

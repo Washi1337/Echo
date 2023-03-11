@@ -15,10 +15,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
 
             if (frame.Method.Signature!.ReturnsValue)
             {
-                var value = context.Machine.ValueFactory.Marshaller.ToCliValue(
-                    frame.EvaluationStack.Pop().Contents,
-                    frame.Method.Signature.ReturnType);
-                context.CurrentFrame.EvaluationStack.Push(value);
+                var returnType = frame.Method.Signature.ReturnType;
+                var value = frame.EvaluationStack.Pop(returnType);
+                context.CurrentFrame.EvaluationStack.Push(value, returnType);
             }
 
             return CilDispatchResult.Success();

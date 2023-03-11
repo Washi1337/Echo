@@ -200,6 +200,10 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The total size in bytes.</returns>
         public uint GetObjectSize(ITypeDescriptor type) => ObjectHeaderSize + GetTypeContentsMemoryLayout(type).Size;
 
+        public BitVector CreateNativeInteger(bool initialize) => new((int) PointerSize * 8, initialize);
+
+        public BitVector CreateNativeInteger(long value) => new(value);
+        
         public BitVector RentNativeInteger(bool initialize) => BitVectorPool.RentNativeInteger(Is32Bit, initialize);
 
         public BitVector RentNativeInteger(long value)

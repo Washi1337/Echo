@@ -30,12 +30,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
 
             // Determine parameters.
             var elementType = GetElementType(context, instruction);
-            var value = stack.Pop();
+            var value = stack.Pop(elementType);
             var arrayIndex = stack.Pop().Contents;
             var arrayAddress = stack.Pop().Contents;
             
-            BitVector? marshalledValue = null;
-
             try
             {
                 // Write memory if fully known address, else leave result unknown.
@@ -64,8 +62,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                             if (index >= length)
                                 return CilDispatchResult.IndexOutOfRange(context);
 
-                            marshalledValue = context.Machine.ValueFactory.Marshaller.FromCliValue(value, elementType);
-                            arraySpan.SliceArrayElement(factory, elementType, index).Write(marshalledValue);
+                            arraySpan.SliceArrayElement(factory, elementType, index).Write(value);
                         }
                         
                         break;
@@ -78,8 +75,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                 // Return rented values.
                 factory.BitVectorPool.Return(arrayAddress);
                 factory.BitVectorPool.Return(arrayIndex);
-                factory.BitVectorPool.Return(value.Contents);
-                factory.BitVectorPool.Return(marshalledValue);
+                factory.BitVectorPool.Return(value);
             }
         }
         

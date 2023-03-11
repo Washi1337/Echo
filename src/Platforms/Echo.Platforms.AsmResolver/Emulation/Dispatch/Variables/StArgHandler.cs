@@ -19,13 +19,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             var parameter = instruction.GetParameter(frame.Body!.Owner.Parameters);
 
             // Pop top of stack into the parameter.
-            var value = frame.EvaluationStack.Pop();
-            var marshalled = factory.Marshaller.FromCliValue(value, parameter.ParameterType);
-            frame.WriteArgument(parameter.Index, marshalled.AsSpan());
+            var value = frame.EvaluationStack.Pop(parameter.ParameterType);
+            frame.WriteArgument(parameter.Index, value.AsSpan());
             
             // Return rented bit vectors.
-            factory.BitVectorPool.Return(marshalled);
-            factory.BitVectorPool.Return(value.Contents);
+            factory.BitVectorPool.Return(value);
             
             return CilDispatchResult.Success();
         }

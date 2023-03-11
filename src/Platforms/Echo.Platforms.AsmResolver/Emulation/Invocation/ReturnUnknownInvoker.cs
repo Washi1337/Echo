@@ -32,8 +32,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
             }
             else
             {
-                uint size = context.Machine.ValueFactory.GetTypeValueMemoryLayout(method.Signature.ReturnType).Size;
-                returnValue = context.Machine.ValueFactory.BitVectorPool.Rent((int) size * 8, false);
+                var factory = context.Machine.ValueFactory;
+                uint size = factory.GetTypeValueMemoryLayout(method.Signature.ReturnType).Size;
+                returnValue = factory.BitVectorPool.Rent((int) size * 8, false);
             }
 
             return InvocationResult.Success(returnValue);

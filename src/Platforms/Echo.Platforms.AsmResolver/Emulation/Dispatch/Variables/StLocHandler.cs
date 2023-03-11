@@ -21,13 +21,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             var local = instruction.GetLocalVariable(frame.Body!.LocalVariables);
 
             // Pop top of stack into the variable.
-            var value = frame.EvaluationStack.Pop();
-            var marshalled = factory.Marshaller.FromCliValue(value, local.VariableType);
-            frame.WriteLocal(local.Index, marshalled.AsSpan());
+            var value = frame.EvaluationStack.Pop(local.VariableType);
+            frame.WriteLocal(local.Index, value.AsSpan());
             
             // Return rented bit vectors.
-            factory.BitVectorPool.Return(marshalled);
-            factory.BitVectorPool.Return(value.Contents);
+            factory.BitVectorPool.Return(value);
             
             return CilDispatchResult.Success();
         }

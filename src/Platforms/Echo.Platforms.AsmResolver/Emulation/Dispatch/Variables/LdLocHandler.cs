@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             frame.ReadLocal(local.Index, result.AsSpan());
              
             // Marshal and push.
-            context.CurrentFrame.EvaluationStack.Push(factory.Marshaller.ToCliValue(result, local.VariableType));
+            context.CurrentFrame.EvaluationStack.Push(result, local.VariableType);
             
             return CilDispatchResult.Success();
         }

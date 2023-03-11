@@ -48,6 +48,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         internal CallFrame(IMethodDescriptor method, ValueFactory factory, bool isRoot)
         {
             IsRoot = isRoot;
+            EvaluationStack = new EvaluationStack(factory);
             
             if (method.Signature is null)
                 throw new ArgumentException("Method does not have a valid signature.");
@@ -161,10 +162,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <summary>
         /// Gets a virtual evaluation stack associated stored the frame.
         /// </summary>
-        public IndexableStack<StackSlot> EvaluationStack
+        public EvaluationStack EvaluationStack
         {
             get;
-        } = new();
+        }
 
         /// <summary>
         /// Gets the static size (number of bytes excluding the evaluation stack) of the stack frame.

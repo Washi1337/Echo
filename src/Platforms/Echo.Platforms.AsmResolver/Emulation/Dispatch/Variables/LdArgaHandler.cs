@@ -21,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
 
             // Push address on top of stack.
             long address = frame.GetArgumentAddress(parameter.Index);
-            var vector = context.Machine.ValueFactory.RentNativeInteger(address);
+            var vector = factory.RentNativeInteger(address);
             context.CurrentFrame.EvaluationStack.Push(new StackSlot(vector, StackSlotTypeHint.Integer));
             
             return CilDispatchResult.Success();
