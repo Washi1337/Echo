@@ -91,7 +91,7 @@ namespace Echo.Platforms.AsmResolver
         private static int GetUnconditionalBranchTransitions(CilInstruction instruction, Span<SuccessorInfo> successorsBuffer)
         {
             // Unconditional branches always move to the instruction referenced in the operand.
-            var label = (ICilLabel) instruction.Operand;
+            var label = (ICilLabel) instruction.Operand!;
             successorsBuffer[0] = new SuccessorInfo(label.Offset, ControlFlowEdgeType.Unconditional);
             return 1;
         }

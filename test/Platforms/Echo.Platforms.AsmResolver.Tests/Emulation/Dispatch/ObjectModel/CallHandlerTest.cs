@@ -71,7 +71,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.True(invoker.HasInvoked);
             Assert.Single(callerFrame.EvaluationStack);
             Assert.Same(method, invoker.LastMethod);
-            Assert.Equal(new[] {0, 1, 2}, invoker.LastArguments.Select(x => x.AsSpan().I32));
+            Assert.Equal(new[] {0, 1, 2}, invoker.LastArguments!.Select(x => x.AsSpan().I32));
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.True(invoker.HasInvoked);
             Assert.Single(callerFrame.EvaluationStack);
             Assert.Same(method, invoker.LastMethod);
-            Assert.Equal(new[] {0x12345678, 0, 1, 2}, invoker.LastArguments.Select(x => x.AsSpan().I32));
+            Assert.Equal(new[] {0x12345678, 0, 1, 2}, invoker.LastArguments!.Select(x => x.AsSpan().I32));
         }
 
         [Fact]

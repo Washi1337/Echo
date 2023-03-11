@@ -281,7 +281,7 @@ namespace Echo.Platforms.AsmResolver
 
         private Trilean ClassifyInlineToken(in CilInstruction instruction)
         {
-            var token = ((IMetadataMember) instruction.Operand).MetadataToken; 
+            var token = ((IMetadataMember) instruction.Operand!).MetadataToken; 
             switch (token.Table)
             {
                 case TableIndex.TypeDef:

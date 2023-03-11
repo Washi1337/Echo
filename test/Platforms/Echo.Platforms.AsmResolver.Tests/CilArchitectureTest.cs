@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var method = type.Methods
                 .First(m => m.Name == nameof(TestClass.StaticMethod));
             
-            var architecture = new CilArchitecture(method.CilMethodBody);
+            var architecture = new CilArchitecture(method.CilMethodBody!);
 
             var readVariables = new IVariable[1];
             architecture.GetReadVariables(new CilInstruction(CilOpCodes.Ldarg_0), readVariables);
@@ -35,7 +35,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var method = type.Methods
                 .First(m => m.Name == nameof(TestClass.InstanceMethod));
             
-            var architecture = new CilArchitecture(method.CilMethodBody);
+            var architecture = new CilArchitecture(method.CilMethodBody!);
 
             var readVariables = new IVariable[1];
             architecture.GetReadVariables(new CilInstruction(CilOpCodes.Ldarg_0), readVariables);

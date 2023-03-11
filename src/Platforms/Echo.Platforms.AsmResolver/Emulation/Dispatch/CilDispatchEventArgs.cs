@@ -10,6 +10,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
     {
         internal CilDispatchEventArgs()
         {
+            // These properties are set by the VM.
+            Instruction = null!;
+            Context = null!;
         }
 
         /// <summary>
