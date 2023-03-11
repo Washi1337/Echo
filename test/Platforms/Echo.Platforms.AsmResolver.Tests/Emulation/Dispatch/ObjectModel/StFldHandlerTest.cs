@@ -12,15 +12,15 @@ using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel;
 
-public class LdFldHandlerTest : CilOpCodeHandlerTestBase
+public class StFldHandlerTest : CilOpCodeHandlerTestBase
 {
-    public LdFldHandlerTest(MockModuleFixture fixture)
+    public StFldHandlerTest(MockModuleFixture fixture)
         : base(fixture)
     {
     }
 
     [Fact]
-    public void ReadStaticField()
+    public void WriteStaticField()
     {
         var stack = Context.CurrentFrame.EvaluationStack;
         
@@ -29,22 +29,21 @@ public class LdFldHandlerTest : CilOpCodeHandlerTestBase
             .TopLevelTypes.First(t => t.Name == nameof(SimpleClass))
             .Fields.First(f => f.Name == nameof(SimpleClass.StaticIntField));
         
-        Context.Machine.StaticFieldStorage.GetFieldSpan(field).Write(1337);
-        
-        // Push null.
+        // Push null and value.
         stack.Push(new StackSlot(0, StackSlotTypeHint.Integer));
+        stack.Push(new StackSlot(1337, StackSlotTypeHint.Integer));
         
         // Dispatch.
-        var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldfld, field));
+        var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Stfld, field));
         
         // Verify.
         Assert.True(result.IsSuccess);
-        Assert.Single(stack);
-        Assert.Equal(1337, stack.Pop().Contents.AsSpan().I32);
+        Assert.Empty(stack);
+        Assert.Equal(1337, Context.Machine.StaticFieldStorage.GetFieldSpan(field).I32);
     }
-
+    
     [Fact]
-    public void ReadInstanceFieldFromClass()
+    public void WriteInstanceFieldFromClass()
     {
         var stack = Context.CurrentFrame.EvaluationStack;
         var factory = Context.Machine.ValueFactory;
@@ -53,51 +52,25 @@ public class LdFldHandlerTest : CilOpCodeHandlerTestBase
         var classType = ModuleFixture.MockModule.TopLevelTypes.First(t => t.Name == nameof(SimpleClass));
         var field = classType.Fields.First(f => f.Name == nameof(SimpleClass.IntField));
 
-        // Allocate object of the class, and set the field to 1337.
+        // Allocate object of the class.
         long address = Context.Machine.Heap.AllocateObject(classType, true);
         var objectSpan = Context.Machine.Heap.GetObjectSpan(address);
-        objectSpan.SliceObjectField(factory, field).Write(1337);
         
         // Push address of object onto stack.
         stack.Push(new StackSlot(address, StackSlotTypeHint.Integer));
+        stack.Push(new StackSlot(1337, StackSlotTypeHint.Integer));
 
         // Dispatch
-        var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldfld, field));
+        var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Stfld, field));
 
         // Verify.
         Assert.True(result.IsSuccess);
-        Assert.Single(stack);
-        Assert.Equal(1337, stack.Pop().Contents.AsSpan().I32);
+        Assert.Empty(stack);
+        Assert.Equal(1337, objectSpan.SliceObjectField(factory, field).I32);
     }
-
+    
     [Fact]
-    public void ReadInstanceFieldFromStructureByValue()
-    {
-        var stack = Context.CurrentFrame.EvaluationStack;
-        var factory = Context.Machine.ValueFactory;
-
-        // Obtain struct type and field.
-        var structType = ModuleFixture.MockModule.TopLevelTypes.First(t => t.Name == nameof(SimpleStruct));
-        var field = structType.Fields.First(f => f.Name == nameof(SimpleStruct.Y));
-        
-        // Create instance of struct, and set field to 1337.
-        var objectSpan = factory.CreateValue(structType.ToTypeSignature(), true);
-        objectSpan.AsSpan().SliceStructField(factory, field).Write(1337);
-        
-        // Push struct onto stack
-        stack.Push(new StackSlot(objectSpan, StackSlotTypeHint.Structure));
-
-        // Dispatch
-        var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldfld, field));
-
-        // Verify.
-        Assert.True(result.IsSuccess);
-        Assert.Single(stack);
-        Assert.Equal(1337, stack.Pop().Contents.AsSpan().I32);
-    }
-
-    [Fact]
-    public void ReadInstanceFieldFromStructureByReference()
+    public void WriteInstanceFieldFromStructureByReference()
     {
         var factory = Context.Machine.ValueFactory;
         
@@ -115,23 +88,22 @@ public class LdFldHandlerTest : CilOpCodeHandlerTestBase
         };
 
         Context.Machine.CallStack.Push(method);
-
-        // Initialize variable with field set to 1337. 
-        var instance = factory.CreateValue(structType.ToTypeSignature(), true);
-        instance.AsSpan().SliceStructField(factory, field).Write(1337);
-        Context.CurrentFrame.WriteLocal(0, instance);
         
         // Push address to struct.
         var stack = Context.CurrentFrame.EvaluationStack;
         long address = Context.CurrentFrame.GetLocalAddress(0);
         stack.Push(new StackSlot(address, StackSlotTypeHint.Integer));
+        stack.Push(new StackSlot(1337, StackSlotTypeHint.Integer));
 
         // Dispatch.
-        var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldfld, field));
+        var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Stfld, field));
 
         // Evaluate.
         Assert.True(result.IsSuccess);
-        Assert.Single(stack);
-        Assert.Equal(1337, stack.Pop().Contents.AsSpan().I32);
+        Assert.Empty(stack);
+        
+        var instance = factory.CreateValue(structType.ToTypeSignature(), true);
+        Context.CurrentFrame.ReadLocal(0, instance);
+        Assert.Equal(1337, instance.AsSpan().SliceStructField(factory, field).I32);
     }
 }
