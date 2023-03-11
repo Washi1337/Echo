@@ -21,8 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             var parameter = instruction.GetParameter(frame.Body!.Owner.Parameters);
 
             // Read argument from stack frame.
-            var layout = factory.GetTypeValueMemoryLayout(parameter.ParameterType);
-            var result = factory.BitVectorPool.Rent((int) (layout.Size * 8), false);
+            var result = factory.RentValue(parameter.ParameterType, false);
             frame.ReadArgument(parameter.Index, result.AsSpan());
 
             // Marshal and push.

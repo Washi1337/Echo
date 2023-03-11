@@ -21,8 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             var local = instruction.GetLocalVariable(frame.Body!.LocalVariables);
 
             // Read local from stack frame.
-            var layout = factory.GetTypeValueMemoryLayout(local.VariableType);
-            var result = factory.BitVectorPool.Rent((int) (layout.Size * 8), false);
+            var result = factory.RentValue(local.VariableType, false);
             frame.ReadLocal(local.Index, result.AsSpan());
              
             // Marshal and push.
