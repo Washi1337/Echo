@@ -123,7 +123,46 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             frame2.ReadLocal(1, readBuffer);
             Assert.Equal(0x1337, BitConverter.ToInt32(readBuffer.Bits));
         }
-        
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(0x7fff_0000)]
+        public void AllocateShouldUpdateStackPointer(long baseAddress)
+        {
+            var stack = new CallStack(0x1000, _factory);
+            stack.Rebase(baseAddress);
+            long originalStackPointer = stack.StackPointer;
+            
+            // Push one frame.
+            var frame = stack.Push(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)));
+            int frameSize = frame.Size;
+            Assert.Equal(originalStackPointer + frameSize, stack.StackPointer);
+            
+            // Allocate extra memory in the frame.
+            frame.Allocate(100);
+            Assert.Equal(originalStackPointer + frameSize + 100, stack.StackPointer);
+
+            // Remove frame.
+            stack.Pop();
+            Assert.Equal(originalStackPointer, stack.StackPointer);
+        }
+
+        [Fact]
+        public void AllocateShouldOnlyBeAllowedForTopFrame()
+        {
+            var stack = new CallStack(0x1000, _factory);
+            
+            var frame1 = stack.Push(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)));
+            frame1.Allocate(10);
+            
+            var frame2 = stack.Push(_fixture.GetTestMethod(nameof(TestClass.MultipleLocalsMultipleArguments)));
+            Assert.ThrowsAny<InvalidOperationException>(() => frame1.Allocate(10));
+            frame2.Allocate(10);
+
+            stack.Pop();
+            
+            frame1.Allocate(10);
+        }
         
     }
 }

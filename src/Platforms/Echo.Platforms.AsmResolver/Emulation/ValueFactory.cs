@@ -62,6 +62,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 "System",
                 "IndexOutOfRangeException").Resolve()!;
             
+            StackOverflowExceptionType = new TypeReference(
+                contextModule, 
+                contextModule.CorLibTypeFactory.CorLibScope, 
+                "System",
+                "StackOverflowException").Resolve()!;
+            
             MissingMethodExceptionType = new TypeReference(
                 contextModule, 
                 contextModule.CorLibTypeFactory.CorLibScope, 
@@ -121,6 +127,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets a reference to the <see cref="IndexOutOfRangeException"/> type. 
         /// </summary>
         public ITypeDescriptor IndexOutOfRangeExceptionType
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a reference to the <see cref="StackOverflowException"/> type. 
+        /// </summary>
+        public ITypeDescriptor StackOverflowExceptionType
         {
             get;
         }

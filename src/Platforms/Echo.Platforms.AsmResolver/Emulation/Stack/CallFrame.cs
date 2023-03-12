@@ -140,6 +140,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public BitVector LocalStorage
         {
             get;
+            private set;
         }
 
         /// <summary>
@@ -168,15 +169,41 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         }
 
         /// <summary>
-        /// Gets the static size (number of bytes excluding the evaluation stack) of the stack frame.
+        /// Gets the number of bytes (excluding the evaluation stack) the stack frame spans.
         /// </summary>
         public int Size => LocalStorage.Count / 8;
+
+        /// <summary>
+        /// Gets a value indicating whether the frame can be extended with extra stack memory.
+        /// </summary>
+        public bool CanAllocateMemory
+        {
+            get;
+            internal set;
+        }
 
         /// <inheritdoc />
         public AddressRange AddressRange => new(_baseAddress, _baseAddress + LocalStorage.Count / 8);
 
         /// <inheritdoc />
         public bool IsValidAddress(long address) => AddressRange.Contains(address);
+
+        /// <summary>
+        /// Allocates local stack memory in the stack frame.
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public long Allocate(int size)
+        {
+            if (!CanAllocateMemory)
+                throw new InvalidOperationException("Stack frame cannot be resized in the current state.");
+            if (size < 0)
+                throw new ArgumentOutOfRangeException(nameof(size));
+
+            long address = AddressRange.End;
+            LocalStorage = LocalStorage.Resize(LocalStorage.Count + size * 8, false);
+            return address;
+        }
 
         /// <inheritdoc />
         public void Rebase(long baseAddress) => _baseAddress = baseAddress;

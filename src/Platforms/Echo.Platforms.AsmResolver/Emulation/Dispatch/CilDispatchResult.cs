@@ -79,5 +79,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         {
             return Exception(context.Machine, context.Machine.ValueFactory.IndexOutOfRangeExceptionType);
         }
+
+        /// <summary>
+        /// Creates a new dispatch result indicating the dispatch failed due to a stack overflow.
+        /// </summary>
+        /// <param name="context">The context the instruction was evaluated in.</param>
+        public static CilDispatchResult StackOverflow(CilExecutionContext context)
+        {
+            return Exception(context.Machine, context.Machine.ValueFactory.StackOverflowExceptionType);
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
@@ -15,9 +16,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
     /// </summary>
     public class CallStack : IMemorySpace, IReadOnlyList<CallFrame>
     {
-        private readonly List<(long RelativeOffset, CallFrame Frame)> _frames = new();
+        private readonly List<CallFrame> _frames = new();
 
-        private uint _currentOffset = 0;
         private readonly ValueFactory _factory;
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public int Count => _frames.Count;
 
         /// <inheritdoc />
-        public CallFrame this[int index] => _frames[index].Frame;
+        public CallFrame this[int index] => _frames[index];
 
         /// <inheritdoc />
         public AddressRange AddressRange
@@ -48,10 +48,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             private set;
         }
 
-        private bool TryFindStackFrame(long address, out (long RelativeOffset, CallFrame Frame) entry)
+        /// <summary>
+        /// Gets the current value of the stack pointer.
+        /// </summary>
+        public long StackPointer => _frames.Count > 0 
+            ? _frames[_frames.Count - 1].AddressRange.End 
+            : AddressRange.Start;
+
+        private bool TryFindStackFrame(long address, [NotNullWhen(true)] out CallFrame? entry)
         {
-            entry = _frames.FirstOrDefault(e => e.Frame.AddressRange.Contains(address));
-            return entry.Frame is not null;
+            entry = _frames.FirstOrDefault(e => e.AddressRange.Contains(address));
+            return entry is not null;
         }
 
         /// <summary>
@@ -59,20 +66,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// </summary>
         /// <param name="index">The index of the stack frame.</param>
         /// <returns>The address.</returns>
-        public long GetFrameAddress(int index) => _frames[index].RelativeOffset;
+        public long GetFrameAddress(int index) => _frames[index].AddressRange.Start;
 
         /// <inheritdoc />
         public bool IsValidAddress(long address)
         {
-            return TryFindStackFrame(address, out var e) && e.Frame.IsValidAddress(address);
+            return TryFindStackFrame(address, out var e) && e.IsValidAddress(address);
         }
 
         /// <inheritdoc />
         public void Rebase(long baseAddress)
         {
+            long oldBase = AddressRange.Start;
             AddressRange = new AddressRange(baseAddress, baseAddress + AddressRange.Length);
             foreach (var entry in _frames)
-                entry.Frame.Rebase(baseAddress + entry.RelativeOffset);
+                entry.Rebase(entry.AddressRange.Start - oldBase + AddressRange.Start);
         }
 
         /// <inheritdoc />
@@ -81,7 +89,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             if (!TryFindStackFrame(address, out var e))
                 throw new AccessViolationException();
 
-            e.Frame.Read(address, buffer);
+            e.Read(address, buffer);
         }
 
         /// <inheritdoc />
@@ -90,7 +98,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             if (!TryFindStackFrame(address, out var e))
                 throw new AccessViolationException();
 
-            e.Frame.Write(address, buffer);
+            e.Write(address, buffer);
         }
 
         /// <inheritdoc />
@@ -99,7 +107,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             if (!TryFindStackFrame(address, out var e))
                 throw new AccessViolationException();
 
-            e.Frame.Write(address, buffer);
+            e.Write(address, buffer);
         }
 
         /// <summary>
@@ -121,13 +129,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <exception cref="StackOverflowException">Occurs when the stack reached its maximum size.</exception>
         public void Push(CallFrame frame)
         {
-            uint newOffset = _currentOffset + (uint) frame.Size;
-            if (newOffset >= AddressRange.Length)
+            long newStackPointer = StackPointer + (uint) frame.Size;
+            if (newStackPointer >= AddressRange.End)
                 throw new StackOverflowException();
 
-            _frames.Add((_currentOffset, frame));
-            frame.Rebase(AddressRange.Start + _currentOffset);
-            _currentOffset = newOffset;
+            if (_frames.Count > 0)
+                Peek().CanAllocateMemory = false;
+            
+            frame.Rebase(StackPointer);
+            _frames.Add(frame);
+
+            frame.CanAllocateMemory = true;
         }
 
         /// <summary>
@@ -140,7 +152,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             if (_frames.Count == 0)
                 throw new InvalidOperationException("Stack is empty.");
 
-            return _frames[_frames.Count - 1].Frame;
+            return _frames[_frames.Count - 1];
         }
 
         /// <summary>
@@ -153,14 +165,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             if (_frames.Count == 1)
                 throw new InvalidOperationException("Cannot pop the root stack-frame.");
 
-            var frame = _frames[_frames.Count - 1].Frame;
+            var frame = _frames[_frames.Count - 1];
             _frames.RemoveAt(_frames.Count - 1);
-            _currentOffset -= (uint) frame.Size;
+
+            frame.CanAllocateMemory = false;
+            Peek().CanAllocateMemory = true;
+
             return frame;
         }
 
         /// <inheritdoc />
-        public IEnumerator<CallFrame> GetEnumerator() => _frames.Select(e => e.Frame).GetEnumerator();
+        public IEnumerator<CallFrame> GetEnumerator() => _frames.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

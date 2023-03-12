@@ -107,9 +107,24 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             
             frame.ReadArgument(0, readBuffer);
             Assert.Equal("10101010110011001111000011111111", readBuffer.ToBitString());
-        } 
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(0x7fff_0000)]
+        public void AllocateShouldResizeLocalStorage(long baseAddress)
+        {
+            var method = _fixture.GetTestMethod(nameof(TestClass.MultipleArguments));
+            var frame = new CallFrame(method, _factory);
+            frame.Rebase(baseAddress);
+
+            long originalSize = frame.Size;
+            long pointer = frame.AddressRange.End;
             
+            long address = frame.Allocate(100);
+
+            Assert.Equal(pointer , address);
+            Assert.Equal(originalSize + 100, frame.Size);
+        }
     }
-    
-    
 }
