@@ -28,7 +28,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             switch (type.ElementType)
             {
-                case ElementType.ValueType:
                 case ElementType.Enum:
                     if (!_resolvedTypes.TryGetValue(type, out var definition))
                     {

@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Interprets the span as an object pointer, and obtains the type of the object that it is referencing.
         /// </summary>
-        /// <param name="span">The bit vector representing the entire managed object.</param>
+        /// <param name="span">The bit vector representing the pointer to the managed object.</param>
         /// <param name="machine">The machine that this vector resides in.</param>
         /// <returns>The object type.</returns>
         public static ITypeDescriptor GetObjectPointerType(this BitVectorSpan span, CilVirtualMachine machine)
@@ -21,14 +21,18 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (!span.IsFullyKnown)
                 throw new ArgumentException("Cannot dereference a partially unknown pointer.");
             
+            return GetObjectPointerType(span.ReadNativeInteger(machine.Is32Bit), machine);
+        }
+
+        public static ITypeDescriptor GetObjectPointerType(this long objectPointer, CilVirtualMachine machine)
+        {
             var pool = machine.ValueFactory.BitVectorPool;
-            
             var methodTableVector = pool.RentNativeInteger(machine.Is32Bit, false);
             try
             {
                 // Dereference the object pointer to get the bits for the method table pointer.
                 var methodTableSpan = methodTableVector.AsSpan();
-                machine.Memory.Read(span.ReadNativeInteger(machine.Is32Bit), methodTableSpan);
+                machine.Memory.Read(objectPointer, methodTableSpan);
 
                 // Read the method table pointer.
                 long methodTablePointer = methodTableSpan.ReadNativeInteger(machine.Is32Bit);
@@ -41,7 +45,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 pool.Return(methodTableVector);
             }
         }
-        
+
         /// <summary>
         /// Interprets the bit vector as the contents of a managed object, and carves out the object's method table
         /// pointer.
