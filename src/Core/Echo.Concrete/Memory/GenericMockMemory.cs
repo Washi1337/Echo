@@ -49,6 +49,17 @@ namespace Echo.Concrete.Memory
         }
 
         /// <summary>
+        /// Attempts to get the object at the provided address.
+        /// </summary>
+        /// <param name="address">The address.</param>
+        /// <param name="value">The object.</param>
+        /// <returns><c>true</c> if the address maps to an object, <c>false</c> otherwise.</returns>
+        public bool TryGetObject(long address, out T? value)
+        {
+            return _offsetToItem.TryGetValue(address - AddressRange.Start, out value);
+        }
+
+        /// <summary>
         /// Gets the object at the provided address.
         /// </summary>
         /// <param name="address">The address.</param>

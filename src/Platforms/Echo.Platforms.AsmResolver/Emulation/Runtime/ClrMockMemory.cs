@@ -19,11 +19,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
         /// </summary>
         public ClrMockMemory()
         {
-            _backingBuffer = new VirtualMemory(0x100_0000);
-            var comparer = new SignatureComparer();
-            _backingBuffer.Map(0, MethodTables = new GenericMockMemory<ITypeDescriptor>(0x100_0000, 0x100, comparer));
+            _backingBuffer = new VirtualMemory(0x0300_0000);
+
+            MethodTables = new GenericMockMemory<ITypeDescriptor>(0x0100_0000, 0x100, SignatureComparer.Default);
+            Methods = new GenericMockMemory<IMethodDescriptor>(0x0100_0000, 0x20, SignatureComparer.Default);
+            Fields = new GenericMockMemory<IFieldDescriptor>(0x0100_0000, 0x20, SignatureComparer.Default);
+
+            _backingBuffer.Map(0x0000_0000, MethodTables);
+            _backingBuffer.Map(0x0100_0000, Methods);
+            _backingBuffer.Map(0x0200_0000, Fields);
         }
-        
+
         /// <inheritdoc />
         public AddressRange AddressRange => _backingBuffer.AddressRange;
 
@@ -31,6 +37,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
         /// Gets the memory assigned for method table structures (types).
         /// </summary>
         public GenericMockMemory<ITypeDescriptor> MethodTables
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the memory assigned for method descriptor structures.
+        /// </summary>
+        public GenericMockMemory<IMethodDescriptor> Methods
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the memory assigned for field descriptor structures.
+        /// </summary>
+        public GenericMockMemory<IFieldDescriptor> Fields
         {
             get;
         }

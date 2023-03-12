@@ -35,8 +35,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (is32Bit)
             {
                 Memory.Map(0x1000_0000, Heap = new ManagedObjectHeap(0x0100_0000, ValueFactory));
-                Memory.Map(0x7d00_0000, StaticFields = new StaticFieldStorage(ValueFactory, 0x0100_0000));
-                Memory.Map(0x7e00_0000, ValueFactory.ClrMockMemory);
+                Memory.Map(0x7000_0000, StaticFields = new StaticFieldStorage(ValueFactory, 0x0100_0000));
+                Memory.Map(0x7100_0000, ValueFactory.ClrMockMemory);
                 Memory.Map(0x7fe0_0000, CallStack = new CallStack(0x10_0000, ValueFactory));
             }
             else
