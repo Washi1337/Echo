@@ -9,6 +9,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
+using Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 using Xunit.Abstractions;
@@ -120,7 +121,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         }
 
         [Fact]
-        public void SimpleExpression()
+        public void StepMultiple()
         {
             // Prepare dummy method.
             var dummyMethod = new MethodDefinition(
@@ -154,7 +155,161 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         }
 
         [Fact]
-        public void SummationOverArray()
+        public void StepOverNonCallsShouldStepOnce()
+        {
+            // Prepare dummy method.
+            var dummyMethod = new MethodDefinition(
+                "DummyMethod", 
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
+
+            dummyMethod.CilMethodBody = new CilMethodBody(dummyMethod)
+            {
+                Instructions =
+                {
+                    {Ldc_I4, 1337},
+                    Ret
+                }
+            };
+            dummyMethod.CilMethodBody.Instructions.CalculateOffsets();
+            
+            // Step into method.
+            _vm.CallStack.Push(dummyMethod);
+            
+            // Step over first instruction.
+            _vm.StepOver();
+            
+            // We expect to just have moved to the second instruction.
+            Assert.Equal(dummyMethod.CilMethodBody.Instructions[1].Offset, _vm.CallStack.Peek().ProgramCounter);
+        }
+
+        [Fact]
+        public void StepCallShouldContinueInFunction()
+        {
+            // Prepare dummy methods.
+            var foo = new MethodDefinition(
+                "Foo", 
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
+            
+            var bar = new MethodDefinition(
+                "Bar", 
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
+
+            foo.CilMethodBody = new CilMethodBody(foo)
+            {
+                Instructions =
+                {
+                    {Call, bar},
+                    Ret
+                }
+            };
+            foo.CilMethodBody.Instructions.CalculateOffsets();
+            
+            bar.CilMethodBody = new CilMethodBody(foo)
+            {
+                Instructions =
+                {
+                    {Ldc_I4, 1337},
+                    Ret
+                }
+            };
+            bar.CilMethodBody.Instructions.CalculateOffsets();
+            
+            // Step into method.
+            _vm.CallStack.Push(foo);
+            
+            // Single-step instruction.
+            _vm.InvocationStrategy = NeverInvokeStrategy.Instance;
+            _vm.Step();
+            
+            // We expect to have completed "Bar" in its entirety, and moved to the second instruction.
+            Assert.Equal(bar, _vm.CallStack.Peek().Method);
+            Assert.Equal(bar.CilMethodBody.Instructions[0].Offset, _vm.CallStack.Peek().ProgramCounter);
+        }
+        
+        [Fact]
+        public void StepOverCallShouldContinueUntilInstructionAfter()
+        {
+            // Prepare dummy methods.
+            var foo = new MethodDefinition(
+                "Foo", 
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
+            
+            var bar = new MethodDefinition(
+                "Bar", 
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
+
+            foo.CilMethodBody = new CilMethodBody(foo)
+            {
+                Instructions =
+                {
+                    {Call, bar},
+                    Ret
+                }
+            };
+            foo.CilMethodBody.Instructions.CalculateOffsets();
+            
+            bar.CilMethodBody = new CilMethodBody(foo)
+            {
+                Instructions =
+                {
+                    {Ldc_I4, 1337},
+                    Ret
+                }
+            };
+            bar.CilMethodBody.Instructions.CalculateOffsets();
+            
+            // Step into method.
+            _vm.CallStack.Push(foo);
+            
+            // Step over first instruction.
+            _vm.StepOver();
+            
+            // We expect to have completed "Bar" in its entirety, and moved to the second instruction.
+            Assert.Equal(foo, _vm.CallStack.Peek().Method);
+            Assert.Equal(foo.CilMethodBody.Instructions[1].Offset, _vm.CallStack.Peek().ProgramCounter);
+        }
+        
+        [Fact]
+        public void StepOverBranchShouldContinueAtBranchTarget()
+        {
+            // Prepare dummy methods.
+            var foo = new MethodDefinition(
+                "Foo", 
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
+
+            var label = new CilInstructionLabel();
+            foo.CilMethodBody = new CilMethodBody(foo)
+            {
+                Instructions =
+                {
+                    {Br, label},
+                    Nop,
+                    Nop,
+                    Ret
+                }
+            };
+            foo.CilMethodBody.Instructions.CalculateOffsets();
+            label.Instruction = foo.CilMethodBody.Instructions[^1];
+            
+            // Step into method.
+            _vm.CallStack.Push(foo);
+            
+            // Step over first instruction.
+            _vm.StepOver();
+            
+            // We expect to have jumped.
+            Assert.Equal(foo, _vm.CallStack.Peek().Method);
+            Assert.Equal(label.Offset, _vm.CallStack.Peek().ProgramCounter);
+        }
+
+        [Fact]
+        public void CallFunctionWithLoop()
         {
             // Prepare dummy method.
             var factory = _fixture.MockModule.CorLibTypeFactory;
@@ -217,16 +372,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 arraySpan.SliceArrayElement(_vm.ValueFactory, factory.Int32, i).Write(100 + i);
             
             // Call Sum.
-            var frame = _vm.CallStack.Push(sum);
-            frame.WriteArgument(0, new BitVector(arrayAddress));
-            _vm.Run();
-            
-            var returnValue = _vm.CallStack.Peek().EvaluationStack.Peek();
-            Assert.Equal(Enumerable.Range(100, 10).Sum(), returnValue.Contents.AsSpan().I32);
+            var returnValue = _vm.Call(sum, arrayAddress);
+            Assert.NotNull(returnValue);
+            Assert.Equal(Enumerable.Range(100, 10).Sum(), returnValue!.AsSpan().I32);
         }
 
         [Fact]
-        public void CallFunction()
+        public void CallNestedFunction()
         {
             // Prepare dummy methods.
             var factory = _fixture.MockModule.CorLibTypeFactory;
@@ -274,11 +426,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             _vm.InvocationStrategy = InvokeExternalStrategy.Instance;
 
             // Call Foo.
-            _vm.CallStack.Push(foo);
-            _vm.Run();
-
-            var returnValue = _vm.CallStack.Peek().EvaluationStack.Peek();
-            Assert.Equal((3 + 4) * 5, returnValue.Contents.AsSpan().I32);
+            var returnValue = _vm.Call(foo);
+            Assert.NotNull(returnValue);
+            Assert.Equal((3 + 4) * 5, returnValue!.AsSpan().I32);
         }
     }
 }
