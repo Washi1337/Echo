@@ -115,8 +115,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public void AllocateShouldResizeLocalStorage(long baseAddress)
         {
             var method = _fixture.GetTestMethod(nameof(TestClass.MultipleArguments));
-            var frame = new CallFrame(method, _factory);
-            frame.Rebase(baseAddress);
+            var stack = new CallStack(1000, _factory);
+            stack.Rebase(baseAddress);
+            var frame = stack.Push(method);
 
             long originalSize = frame.Size;
             long pointer = frame.AddressRange.End;
