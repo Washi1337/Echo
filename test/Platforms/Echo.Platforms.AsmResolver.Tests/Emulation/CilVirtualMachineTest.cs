@@ -221,7 +221,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             _vm.CallStack.Push(foo);
             
             // Single-step instruction.
-            _vm.InvocationStrategy = NeverInvokeStrategy.Instance;
+            _vm.Invoker = DefaultInvokers.StepIn;
             _vm.Step();
             
             // We expect to have completed "Bar" in its entirety, and moved to the second instruction.
@@ -423,7 +423,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             bar.CilMethodBody = barBody;
             
             // Ensure VM is stepping into calls.
-            _vm.InvocationStrategy = InvokeExternalStrategy.Instance;
+            _vm.Invoker = DefaultInvokers.StepIn;
 
             // Call Foo.
             var returnValue = _vm.Call(foo);

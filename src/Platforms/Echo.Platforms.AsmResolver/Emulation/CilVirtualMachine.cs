@@ -129,18 +129,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             get;
             set;
-        } = ReturnUnknownInvoker.Instance;
-
-        /// <summary>
-        /// Gets the service that is responsible for deciding whether a call should be invoked by the <see cref="Invoker"/>,
-        /// or whether it should be emulated by the virtual machine.
-        /// </summary>
-        public IMethodInvocationStrategy InvocationStrategy
-        {
-            get;
-            set;
-        } = AlwaysInvokeStrategy.Instance;
-
+        } = DefaultInvokers.ReturnUnknown;
+        
         /// <summary>
         /// Runs the virtual machine until it halts.
         /// </summary>

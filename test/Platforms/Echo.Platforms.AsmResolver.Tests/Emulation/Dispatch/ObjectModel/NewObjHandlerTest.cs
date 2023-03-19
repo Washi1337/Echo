@@ -13,13 +13,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public NewObjHandlerTest(MockModuleFixture fixture)
             : base(fixture)
         {
+            Context.Machine.Invoker = DefaultInvokers.ReturnUnknown;
         }
 
         [Fact]
         public void NewObject()
         {
-            Context.Machine.InvocationStrategy = AlwaysInvokeStrategy.Instance;
-            
             // Find SimpleClass and a virtual method to call.
             var type = ModuleFixture.MockModule.CorLibTypeFactory.Object.Resolve()!;
             var constructor = type.Methods.First(m => m is {IsConstructor: true, Parameters.Count: 0});

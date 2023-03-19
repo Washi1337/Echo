@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete;
+using Echo.Platforms.AsmResolver.Emulation.Invocation;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 {
@@ -83,26 +85,37 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
         private static CilDispatchResult Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments)
         {
-            // Check if we should invoke this call, or whether we should step in.
-            if (context.Machine.InvocationStrategy.ShouldInvoke(context, method, arguments))
+            var result = context.Machine.Invoker.Invoke(context, method, arguments);
+
+            switch (result.ResultType)
             {
-                // Invoke the method, and push the result if it produced a value.
-                var result = context.Machine.Invoker.Invoke(context, method, arguments);
-                
-                if (!result.IsSuccess)
-                    return CilDispatchResult.Exception(result.Value);
-                if (result.Value is not null)
-                    context.CurrentFrame.EvaluationStack.Push(result.Value, method.Signature!.ReturnType);
+                case InvocationResultType.StepIn:
+                    // We are stepping into this method, push new call frame with the arguments that were pushed onto the stack.
+                    var frame = context.Machine.CallStack.Push(method);
+                    
+                    for (int i = 0; i < arguments.Count; i++)
+                        frame.WriteArgument(i, arguments[i]);
 
-                return CilDispatchResult.Success();
+                    return CilDispatchResult.Success();
+
+                case InvocationResultType.StepOver:
+                    // Method was fully handled by the invoker, push result if it produced any.
+                    if (result.Value is not null)
+                        context.CurrentFrame.EvaluationStack.Push(result.Value, method.Signature!.ReturnType);
+
+                    return CilDispatchResult.Success();
+
+                case InvocationResultType.Exception:
+                    // There was an exception during the invocation. Throw it.
+                    return CilDispatchResult.Exception(result.Value!);
+
+                case InvocationResultType.Inconclusive:
+                    // Method invoker was not able to handle the method call.
+                    throw new CilEmulatorException($"Invocation of method {method} was inconclusive.");
+
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-
-            // We are stepping into this method, push new call frame with the arguments that were pushed onto the stack.
-            var frame = context.Machine.CallStack.Push(method);
-            for (int i = 0; i < arguments.Count; i++)
-                frame.WriteArgument(i, arguments[i]);
-
-            return CilDispatchResult.Success();
         }
     }
 }

@@ -5,21 +5,19 @@ using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation
 {
-    /// <summary>
-    /// Provides an implementation for a <see cref="IMethodInvoker"/> that always succeeds and returns an unknown value. 
-    /// </summary>
-    public sealed class ReturnUnknownInvoker : IMethodInvoker
+    internal class ReturnDefaultInvoker : IMethodInvoker
     {
-        /// <summary>
-        /// Gets the singleton instance of the <see cref="ReturnUnknownInvoker"/> class.
-        /// </summary>
-        public static ReturnUnknownInvoker Instance
+        internal static readonly ReturnDefaultInvoker ReturnUnknown = new(false);
+        internal static readonly ReturnDefaultInvoker ReturnDefault = new(true);
+
+        public ReturnDefaultInvoker(bool initialize)
+        {
+            Initialize = initialize;
+        }
+
+        public bool Initialize
         {
             get;
-        } = new();
-
-        private ReturnUnknownInvoker()
-        {
         }
 
         /// <inheritdoc />
@@ -34,10 +32,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
             {
                 var factory = context.Machine.ValueFactory;
                 uint size = factory.GetTypeValueMemoryLayout(method.Signature.ReturnType).Size;
-                returnValue = factory.BitVectorPool.Rent((int) size * 8, false);
+                returnValue = factory.BitVectorPool.Rent((int) size * 8, Initialize);
             }
 
-            return InvocationResult.Success(returnValue);
+            return InvocationResult.StepOver(returnValue);
         }
     }
 }
