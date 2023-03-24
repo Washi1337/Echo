@@ -246,6 +246,21 @@ namespace Echo.Concrete
             return new BitVector(bits, mask);
         }
 
+        /// <summary>
+        /// Deep copies the bit vector.
+        /// </summary>
+        /// <param name="pool">The pool to rent the cloned bitvector from.</param>
+        /// <returns>The copied bit vector.</returns>
+        public BitVector Clone(BitVectorPool pool)
+        {
+            var result = pool.Rent(Count, false);
+            
+            Buffer.BlockCopy(Bits, 0, result.Bits, 0, Bits.Length);
+            Buffer.BlockCopy(KnownMask, 0, result.KnownMask, 0, KnownMask.Length);
+
+            return result;
+        }
+
         object ICloneable.Clone() => Clone();
 
         /// <summary>

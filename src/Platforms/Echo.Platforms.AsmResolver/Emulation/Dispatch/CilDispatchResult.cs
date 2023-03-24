@@ -49,8 +49,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         public static CilDispatchResult Exception(CilVirtualMachine machine, ITypeDescriptor type)
         {
             long exceptionPointer = machine.Heap.AllocateObject(type, true);
-            var pointerVector = machine.ValueFactory.BitVectorPool.Rent(machine.Is32Bit ? 32 : 64, false);
-            pointerVector.AsSpan().WriteNativeInteger(exceptionPointer, machine.Is32Bit);
+            var pointerVector = machine.ValueFactory.RentNativeInteger(exceptionPointer);
             return new CilDispatchResult(pointerVector);
         }
 

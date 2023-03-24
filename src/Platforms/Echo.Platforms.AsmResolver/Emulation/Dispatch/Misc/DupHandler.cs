@@ -14,10 +14,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Misc
         {
             var value = context.CurrentFrame.EvaluationStack.Peek();
 
-            var copy = context.Machine.ValueFactory.BitVectorPool.Rent(value.Contents.Count, false);
-            copy.AsSpan().Write(value.Contents);
-            
-            context.CurrentFrame.EvaluationStack.Push(new StackSlot(copy, value.TypeHint));
+            var copy = new StackSlot(value.Contents.Clone(context.Machine.ValueFactory.BitVectorPool), value.TypeHint);
+            context.CurrentFrame.EvaluationStack.Push(copy);
             
             return CilDispatchResult.Success();
         }
