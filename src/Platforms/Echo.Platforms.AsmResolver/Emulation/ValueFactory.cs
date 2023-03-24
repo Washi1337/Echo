@@ -79,6 +79,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 contextModule.CorLibTypeFactory.CorLibScope, 
                 "System",
                 "InvalidCastException").Resolve()!;
+            
+            OverflowExceptionType = new TypeReference(
+                contextModule, 
+                contextModule.CorLibTypeFactory.CorLibScope, 
+                "System",
+                "OverflowException").Resolve()!;
         }
 
         /// <summary>
@@ -157,6 +163,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets a reference to the <see cref="InvalidCastException"/> type. 
         /// </summary>
         public ITypeDescriptor InvalidCastExceptionType
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a reference to the <see cref="OverflowException"/> type. 
+        /// </summary>
+        public ITypeDescriptor OverflowExceptionType
         {
             get;
         }

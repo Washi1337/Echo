@@ -91,6 +91,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         }
 
         /// <summary>
+        /// Creates a new dispatch result indicating the dispatch failed due to an integer overflow.
+        /// </summary>
+        /// <param name="context">The context the instruction was evaluated in.</param>
+        public static CilDispatchResult Overflow(CilExecutionContext context)
+        {
+            return Exception(context.Machine, context.Machine.ValueFactory.OverflowExceptionType);
+        }
+
+        /// <summary>
         /// Creates a new dispatch result indicating the dispatch failed due to a stack overflow.
         /// </summary>
         /// <param name="context">The context the instruction was evaluated in.</param>

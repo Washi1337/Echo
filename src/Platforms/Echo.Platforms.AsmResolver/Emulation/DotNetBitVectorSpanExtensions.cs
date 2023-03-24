@@ -24,6 +24,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
             return GetObjectPointerType(span.ReadNativeInteger(machine.Is32Bit), machine);
         }
 
+        /// <summary>
+        /// Interprets the integer as an object pointer, and obtains the type of the object that it is referencing.
+        /// </summary>
+        /// <param name="objectPointer">The integer representing the pointer to the managed object.</param>
+        /// <param name="machine">The machine that this vector resides in.</param>
+        /// <returns>The object type.</returns>
         public static ITypeDescriptor GetObjectPointerType(this long objectPointer, CilVirtualMachine machine)
         {
             var pool = machine.ValueFactory.BitVectorPool;
