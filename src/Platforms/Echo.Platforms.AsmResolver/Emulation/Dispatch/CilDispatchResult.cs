@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures.Types;
 using Echo.Concrete;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
@@ -87,6 +88,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         public static CilDispatchResult StackOverflow(CilExecutionContext context)
         {
             return Exception(context.Machine, context.Machine.ValueFactory.StackOverflowExceptionType);
+        }
+
+        /// <summary>
+        /// Creates a new dispatch result indicating the dispatch failed due to a stack overflow.
+        /// </summary>
+        /// <param name="context">The context the instruction was evaluated in.</param>
+        /// <param name="originalType">The original object type.</param>
+        /// <param name="targetType">The type that the object was attempted to be casted to.</param>
+        public static CilDispatchResult InvalidCast(CilExecutionContext context, TypeSignature originalType, TypeSignature targetType)
+        {
+            // TODO: include originalType and targetType in exception object.
+
+            return Exception(context.Machine, context.Machine.ValueFactory.InvalidCastExceptionType);
         }
     }
 }

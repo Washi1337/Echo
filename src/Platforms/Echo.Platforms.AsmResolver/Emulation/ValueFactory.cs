@@ -73,6 +73,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 contextModule.CorLibTypeFactory.CorLibScope, 
                 "System",
                 "MissingMethodException").Resolve()!;
+            
+            InvalidCastExceptionType = new TypeReference(
+                contextModule, 
+                contextModule.CorLibTypeFactory.CorLibScope, 
+                "System",
+                "InvalidCastException").Resolve()!;
         }
 
         /// <summary>
@@ -143,6 +149,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets a reference to the <see cref="MissingMethodException"/> type. 
         /// </summary>
         public ITypeDescriptor MissingMethodExceptionType
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a reference to the <see cref="InvalidCastException"/> type. 
+        /// </summary>
+        public ITypeDescriptor InvalidCastExceptionType
         {
             get;
         }

@@ -1,4 +1,4 @@
-using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
@@ -11,7 +11,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     public class UnboxHandler : UnboxHandlerBase
     {
         /// <inheritdoc />
-        protected override StackSlot GetReturnValue(CilExecutionContext context, ITypeDefOrRef type, long dataAddress)
+        protected override StackSlot GetReturnValue(CilExecutionContext context, long dataAddress, TypeSignature targetType)
         {
             return new StackSlot(dataAddress, StackSlotTypeHint.Integer);
         }
