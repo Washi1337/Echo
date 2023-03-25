@@ -131,7 +131,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
             set;
         } = DefaultInvokers.ReturnUnknown;
 
-        public IUnknownResolver UnknownResolver { get; set; } = ThrowUnknownResolver.Instance;
+        /// <summary>
+        /// Gets or sets the service that is responsible for resolving unknown values on the stack in critical moments.
+        /// </summary>
+        public IUnknownResolver UnknownResolver
+        {
+            get; 
+            set;
+        } = ThrowUnknownResolver.Instance;
         
         /// <summary>
         /// Runs the virtual machine until it halts.
