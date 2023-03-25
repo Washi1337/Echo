@@ -32,38 +32,48 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
 
             // Determine parameters.
             var elementType = GetElementType(context, instruction);
-            var arrayIndex = stack.Pop().Contents;
-            var arrayAddress = stack.Pop().Contents;
-            var result = factory.BitVectorPool.Rent(
-                (int) factory.GetTypeValueMemoryLayout(elementType).Size * 8, 
-                false);
-
+            var arrayIndex = stack.Pop();
+            var arrayAddress = stack.Pop();
+            var result = factory.RentValue(elementType, false);
+            var arrayLength = factory.RentNativeInteger(false);
+            
             try
             {
-                // Read element if fully known address and index, else leave result unknown.
-                var arrayAddressSpan = arrayAddress.AsSpan();
-                var arrayIndexSpan = arrayIndex.AsSpan();
+                // Concretize pushed address.
+                var arrayAddressSpan = arrayAddress.Contents.AsSpan();
+                long? resolvedAddress = arrayAddressSpan.IsFullyKnown
+                    ? arrayAddressSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                    : context.Machine.UnknownResolver.ResolveSourcePointer(context, instruction, arrayAddress);
 
-                switch (arrayAddressSpan)
+                switch (resolvedAddress)
                 {
-                    case { IsFullyKnown: false }:
+                    case null:
+                        // If address is unknown even after resolution, assume it reads from "somewhere" successfully.
                         break;
 
-                    case { IsZero.Value: TrileanValue.True }:
+                    case 0:
+                        // A null reference was passed.
                         return CilDispatchResult.NullReference(context);
 
-                    default:
-                        var arraySpan = context.Machine.Heap.GetObjectSpan(arrayAddressSpan.ReadNativeInteger(context.Machine.Is32Bit));
-                        long length = arraySpan.SliceArrayLength(factory).ReadNativeInteger(context.Machine.Is32Bit);
+                    case { } actualAddress:
+                        // A non-null reference was passed.
+                        context.Machine.Memory.Read(actualAddress + factory.ArrayLengthOffset, arrayLength);
+                        
+                        // Concretize pushed index.
+                        var arrayIndexSpan = arrayIndex.Contents.AsSpan();
+                        long? resolvedIndex = arrayIndexSpan.IsFullyKnown
+                            ? arrayIndexSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                            : context.Machine.UnknownResolver.ResolveArrayIndex(context, instruction, actualAddress, arrayIndex);
 
                         // Leave result unknown if index is not fully known.
-                        if (arrayIndexSpan.IsFullyKnown)
+                        if (resolvedIndex.HasValue && arrayLength.AsSpan().IsFullyKnown)
                         {
-                            int index = arrayIndexSpan.I32;
-                            if (index >= length)
+                            // Bounds check.
+                            if (resolvedIndex >= arrayLength.AsSpan().ReadNativeInteger(context.Machine.Is32Bit))
                                 return CilDispatchResult.IndexOutOfRange(context);
-
-                            result.AsSpan().Write(arraySpan.SliceArrayElement(factory, elementType, index));
+                            
+                            long elementAddress = factory.GetArrayElementAddress(actualAddress, elementType, resolvedIndex.Value);
+                            context.Machine.Memory.Read(elementAddress, result);
                         }
 
                         break;
@@ -76,8 +86,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             finally
             {
                 // Return rented values.
-                factory.BitVectorPool.Return(arrayIndex);
-                factory.BitVectorPool.Return(arrayAddress);
+                factory.BitVectorPool.Return(arrayLength);
+                factory.BitVectorPool.Return(arrayIndex.Contents);
+                factory.BitVectorPool.Return(arrayAddress.Contents);
                 factory.BitVectorPool.Return(result);
             }
         }

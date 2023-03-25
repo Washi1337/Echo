@@ -10,6 +10,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
     public class BrHandler : BranchHandlerBase
     {
         /// <inheritdoc />
-        protected override Trilean? EvaluateCondition(CilExecutionContext context, CilInstruction instruction) => true;
+        protected override bool EvaluateCondition(CilExecutionContext context, CilInstruction instruction) => true;
     }
 }

@@ -1,6 +1,7 @@
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Concrete;
 using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
@@ -25,18 +26,24 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 if (value.TypeHint != StackSlotTypeHint.Integer)
                     return CilDispatchResult.InvalidProgram(context);
 
-                var objectAddress = value.Contents.AsSpan();
+                var valueSpan = value.Contents.AsSpan();
+                long? objectAddress = valueSpan.IsFullyKnown 
+                    ? valueSpan.ReadNativeInteger(context.Machine.Is32Bit) 
+                    : context.Machine.UnknownResolver.ResolveSourcePointer(context, instruction, value);
+
                 switch (objectAddress)
                 {
-                    case { IsFullyKnown: false }:
-                        // TODO: Make configurable.
-                        throw new CilEmulatorException("Attempted to type-cast an unknown pointer");
-                    
-                    case { IsZero.Value: TrileanValue.True }:
+                    case null:
+                        // If address is unknown even after resolution, assume casting works but keep pointer unknown.
+                        stack.Push(new StackSlot(value.Contents.Clone(factory.BitVectorPool), StackSlotTypeHint.Integer));
+                        return CilDispatchResult.Success();
+
+                    case 0:
+                        // A null reference was passed.
                         return HandleNull(context, targetType);
-                    
-                    default:
-                        long actualAddress = objectAddress.ReadNativeInteger(context.Machine.Is32Bit);
+
+                    case { } actualAddress:
+                        // A non-null reference was passed.
                         var objectType = actualAddress.GetObjectPointerType(context.Machine).ToTypeSignature();
 
                         // TODO: handle full verifier-assignable-to operation.

@@ -32,25 +32,30 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
 
             // Determine parameters.
             var elementType = GetElementType(context, instruction);
-            var address = stack.Pop().Contents;
-            var result = factory.BitVectorPool.Rent(
-                (int) factory.GetTypeValueMemoryLayout(elementType).Size * 8, 
-                false);
+            var address = stack.Pop();
+            var result = factory.RentValue(elementType, false);
 
             try
             {
-                // Read memory if fully known address, else leave result unknown.
-                var addressSpan = address.AsSpan();
-                switch (addressSpan)
+                // Concretize pushed address.
+                var addressSpan = address.Contents.AsSpan();
+                long? resolvedAddress = addressSpan.IsFullyKnown
+                    ? addressSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                    : context.Machine.UnknownResolver.ResolveSourcePointer(context, instruction, address);
+
+                switch (resolvedAddress)
                 {
-                    case { IsFullyKnown: false }:
+                    case null:
+                        // If address is unknown even after resolution, assume it reads from "somewhere" successfully.
                         break;
 
-                    case { IsZero.Value: TrileanValue.True }:
+                    case 0:
+                        // A null reference was passed.
                         return CilDispatchResult.NullReference(context);
 
-                    default:
-                        context.Machine.Memory.Read(addressSpan.ReadNativeInteger(context.Machine.Is32Bit), result);
+                    case { } actualAddress:
+                        // A non-null reference was passed.
+                        context.Machine.Memory.Read(actualAddress, result);
                         break;
                 }
 
@@ -61,7 +66,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             finally
             {
                 // Return rented values.
-                factory.BitVectorPool.Return(address);
+                factory.BitVectorPool.Return(address.Contents);
                 factory.BitVectorPool.Return(result);
             }
         }

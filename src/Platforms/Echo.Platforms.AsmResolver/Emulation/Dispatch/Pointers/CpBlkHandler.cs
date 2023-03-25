@@ -25,26 +25,33 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
                 var destinationSpan = destination.Contents.AsSpan();
                 var sizeSpan = size.Contents.AsSpan();
 
-                // TODO: make configurable.
-                if (!sourceSpan.IsFullyKnown)
-                    throw new CilEmulatorException("Attempted to read memory at an unknown pointer.");
-                if (!destinationSpan.IsFullyKnown)
-                    throw new CilEmulatorException("Attempted to write memory at an unknown pointer.");
-                if (!sizeSpan.IsFullyKnown)
-                    throw new CilEmulatorException("Attempted to copy an unknown amount of bytes.");
+                // Get concrete addresses and size.
+                long? sourceAddress = sourceSpan.IsFullyKnown
+                    ? sourceSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                    : context.Machine.UnknownResolver.ResolveSourcePointer(context, instruction, source);
+                
+                long? destinationAddress = destinationSpan.IsFullyKnown
+                    ? destinationSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                    : context.Machine.UnknownResolver.ResolveDestinationPointer(context, instruction, destination);
+                
+                uint actualSize = sizeSpan.IsFullyKnown
+                    ? sizeSpan.U32
+                    : context.Machine.UnknownResolver.ResolveBlockSize(context, instruction, size);
                 
                 // Check for null addresses.
-                if (destinationSpan.IsZero || sourceSpan.IsZero)
+                if (sourceAddress == 0 || destinationAddress == 0)
                     return CilDispatchResult.NullReference(context);
 
-                // Get addresses.
-                long sourceAddress = sourceSpan.ReadNativeInteger(context.Machine.Is32Bit);
-                long destinationAddress = destinationSpan.ReadNativeInteger(context.Machine.Is32Bit);
-
                 // Perform the copy.
-                var buffer = new BitVector(size.Contents.AsSpan().I32 * 8, false);
-                context.Machine.Memory.Read(sourceAddress, buffer);
-                context.Machine.Memory.Write(destinationAddress, buffer);
+                var buffer = new BitVector((int) (actualSize * 8), false);
+                
+                // If source address is unknown, leave the buffer with unknown bits.
+                if (sourceAddress.HasValue)
+                    context.Machine.Memory.Read(sourceAddress.Value, buffer);
+
+                // If we don't know where we are writing to, assume it is writing to "somewhere" successfully.
+                if (destinationAddress.HasValue)
+                    context.Machine.Memory.Write(destinationAddress.Value, buffer);
             }
             finally
             {

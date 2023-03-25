@@ -11,6 +11,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
     public class BrFalseHandler : UnaryBranchHandlerBase
     {
         /// <inheritdoc />
-        protected override Trilean? EvaluateCondition(StackSlot argument) => argument.Contents.AsSpan().IsZero;
+        protected override Trilean EvaluateCondition(StackSlot argument) => argument.Contents.AsSpan().IsZero;
     }
 }

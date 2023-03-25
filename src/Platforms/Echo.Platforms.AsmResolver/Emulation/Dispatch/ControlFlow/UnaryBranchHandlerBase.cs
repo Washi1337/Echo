@@ -10,12 +10,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
     public abstract class UnaryBranchHandlerBase : BranchHandlerBase
     {
         /// <inheritdoc />
-        protected override Trilean? EvaluateCondition(CilExecutionContext context, CilInstruction instruction)
+        protected override bool EvaluateCondition(CilExecutionContext context, CilInstruction instruction)
         {
             var value = context.CurrentFrame.EvaluationStack.Pop();
             var result = EvaluateCondition(value);
+
+            if (result.IsUnknown)
+                result = context.Machine.UnknownResolver.ResolveBranchCondition(context, instruction, value);
+            
             context.Machine.ValueFactory.BitVectorPool.Return(value.Contents);
-            return result;
+            
+            return result.ToBoolean();
         }
 
         /// <summary>
@@ -23,6 +28,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         /// </summary>
         /// <param name="argument">The stack slot.</param>
         /// <returns>The result of the evaluation, or <c>null</c> if the evaluation failed due to an invalid program.</returns>
-        protected abstract Trilean? EvaluateCondition(StackSlot argument);
+        protected abstract Trilean EvaluateCondition(StackSlot argument);
     }
 }

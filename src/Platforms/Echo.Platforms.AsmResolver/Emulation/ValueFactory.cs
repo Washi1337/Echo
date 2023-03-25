@@ -199,7 +199,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets the number of bytes prepended to the data of the array.
         /// </summary>
-        public uint ArrayHeaderSize => ObjectHeaderSize * 2;
+        public uint ArrayHeaderSize => ObjectHeaderSize + PointerSize;
 
         /// <summary>
         /// Gets the offset within an array object that indexes the start of the Length field.
@@ -392,6 +392,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (!field.DeclaringType!.IsValueType)
                 fieldAddress += ObjectHeaderSize;
             return fieldAddress;
+        }
+
+        public long GetArrayElementOffset(TypeSignature elementType, long index)
+        {
+            return ArrayHeaderSize + index * GetTypeValueMemoryLayout(elementType).Size;
+        }
+
+        public long GetArrayElementAddress(long arrayAddress, TypeSignature elementType, long index)
+        {
+            return arrayAddress + GetArrayElementOffset(elementType, index);
         }
         
         private TypeMemoryLayout GetTypeDefOrRefContentsLayout(ITypeDefOrRef type, GenericContext context)

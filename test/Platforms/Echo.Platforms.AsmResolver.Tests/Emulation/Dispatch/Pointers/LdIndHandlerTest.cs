@@ -28,8 +28,10 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
         }
 
         [Fact]
-        public void ReadFromUnknownShouldThrow()
+        public void ReadFromUnknownShouldPushUnknown()
         {
+            Context.Machine.UnknownResolver = EmptyUnknownResolver.Instance;
+            
             var stack = Context.CurrentFrame.EvaluationStack;
             stack.Push(new StackSlot(Context.Machine.ValueFactory.CreateNativeInteger(false), StackSlotTypeHint.Integer));
             
@@ -37,7 +39,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 
             Assert.True(result.IsSuccess);
             Assert.Single(stack);
-            Assert.False(stack.Pop().Contents.AsSpan().IsFullyKnown);
+            Assert.False(stack.Peek().Contents.AsSpan().IsFullyKnown);
         }
 
         [Theory]

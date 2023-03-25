@@ -36,21 +36,28 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 else
                 {
                     // Object/structure was pushed by reference onto the stack. Dereference it.
-                    var addressSpan = instance.Contents.AsSpan();
+                    var instanceSpan = instance.Contents.AsSpan();
+                    long? objectAddress = instanceSpan.IsFullyKnown
+                        ? instanceSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                        : context.Machine.UnknownResolver.ResolveDestinationPointer(context, instruction, instance);
 
-                    // We can only dereference fully known pointers.
-                    if (!addressSpan.IsFullyKnown)
+                    switch (objectAddress)
                     {
-                        // TODO: Make configurable.
-                        throw new CilEmulatorException("Attempted to write to an unknown object pointer.");
-                    }
+                        case null:
+                            // If address is unknown even after resolution, assume it writes to "somewhere" successfully.
+                            return CilDispatchResult.Success();
 
-                    // Calculate field address.
-                    long objectAddress = addressSpan.ReadNativeInteger(context.Machine.Is32Bit);
-                    fieldAddress = factory.GetFieldAddress(objectAddress, field);
+                        case 0:
+                            // A null reference was passed.
+                            return CilDispatchResult.NullReference(context);
+
+                        case { } actualAddress:
+                            // A non-null reference was passed.
+                            fieldAddress = factory.GetFieldAddress(actualAddress, field);
+                            break;
+                    }
                 }
 
-                // Write field value.
                 context.Machine.Memory.Write(fieldAddress, value);
             }
             finally

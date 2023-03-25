@@ -10,7 +10,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
     public abstract class BinaryBranchHandlerBase : BranchHandlerBase
     {
         /// <inheritdoc />
-        protected override Trilean? EvaluateCondition(CilExecutionContext context, CilInstruction instruction)
+        protected override bool EvaluateCondition(CilExecutionContext context, CilInstruction instruction)
         {
             var pool = context.Machine.ValueFactory.BitVectorPool;
             
@@ -18,15 +18,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
             var (argument1, argument2) = OperatorHelper.PopBinaryArguments(context, IsSignedCondition(instruction));
 
             // Evaluate.
-            Trilean? result = argument1.TypeHint == argument2.TypeHint
+            var result = argument1.TypeHint == argument2.TypeHint
                 ? EvaluateCondition(instruction, argument1, argument2)
-                : null;
+                : Trilean.Unknown;
 
+            if (result.IsUnknown)
+                result = context.Machine.UnknownResolver.ResolveBranchCondition(context, instruction, argument1, argument2);
+            
             // Reuse stack bitvectors.
             pool.Return(argument1.Contents);
             pool.Return(argument2.Contents);
 
-            return result;
+            return result.ToBoolean();
         }
 
         /// <summary>

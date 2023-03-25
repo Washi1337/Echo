@@ -18,16 +18,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
             {
                 var indexSpan = index.Contents.AsSpan();
 
-                if (!indexSpan.IsFullyKnown)
-                {
-                    // TODO: Dispatch to a branch resolver.
-                    throw new CilEmulatorException($"Switch index for {instruction} evaluated in an unknown index value.");
-                }
+                uint? selectedIndex = indexSpan.IsFullyKnown 
+                    ? indexSpan.U32 
+                    : context.Machine.UnknownResolver.ResolveSwitchCondition(context, instruction, index);
 
                 var labels = (IList<ICilLabel>) instruction.Operand!;
-                
-                uint selectedIndex = indexSpan.U32;
-                if (selectedIndex >= labels.Count)
+                if (selectedIndex is null || selectedIndex >= labels.Count)
                     context.CurrentFrame.ProgramCounter += instruction.Size;
                 else
                     context.CurrentFrame.ProgramCounter = labels[(int) selectedIndex].Offset;

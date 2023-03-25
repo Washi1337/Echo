@@ -64,6 +64,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         [Fact]
         public void GetFromUnknownArrayShouldPushUnknown()
         {
+            Context.Machine.UnknownResolver = EmptyUnknownResolver.Instance;
+            
             var stack = Context.CurrentFrame.EvaluationStack;
             stack.Push(new StackSlot(Context.Machine.ValueFactory.CreateNativeInteger(false), StackSlotTypeHint.Integer));
             stack.Push(new StackSlot(1, StackSlotTypeHint.Integer));

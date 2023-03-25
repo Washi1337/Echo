@@ -214,7 +214,10 @@ namespace Echo.Concrete
         /// </summary>
         /// <param name="is32Bit">A value indicating whether the native integer is 32 or 64 bits wide.</param>
         /// <returns>The read integer.</returns>
-        public long ReadNativeInteger(bool is32Bit) => is32Bit ? U32 : I64;
+        public long ReadNativeInteger(bool is32Bit)
+        {
+            return Count == 32 || is32Bit ? U32 : I64;
+        }
 
         /// <summary>
         /// Writes fully known bytes into the bit vector. 

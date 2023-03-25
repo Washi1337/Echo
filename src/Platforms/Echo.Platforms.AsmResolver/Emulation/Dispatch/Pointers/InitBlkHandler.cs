@@ -22,29 +22,36 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             
             try
             {
+                // Object/structure was pushed by reference onto the stack. Concretize address and size.
                 var addressSpan = address.Contents.AsSpan();
-                switch (addressSpan)
+                long? resolvedAddress = addressSpan.IsFullyKnown
+                    ? addressSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                    : context.Machine.UnknownResolver.ResolveDestinationPointer(context, instruction, address);
+
+                var sizeSpan = size.Contents.AsSpan();
+                uint resolvedSize = sizeSpan.IsFullyKnown
+                    ? sizeSpan.U32
+                    : context.Machine.UnknownResolver.ResolveBlockSize(context, instruction, size);
+
+                switch (resolvedAddress)
                 {
-                    case { IsFullyKnown: false }:
-                        // TODO: make configurable
-                        throw new CilEmulatorException("Attempted to initialize memory at an unknown pointer.");
-                    
-                    case { IsZero.Value: TrileanValue.True }:
+                    case null:
+                        // If address is unknown even after resolution, assume it writes to "somewhere" successfully.
+                        return CilDispatchResult.Success();
+
+                    case 0:
+                        // A null reference was passed.
                         return CilDispatchResult.NullReference(context);
-                    
-                    default:
-                        var sizeSpan = size.Contents.AsSpan();
-                        if (!sizeSpan.IsFullyKnown)
-                            throw new CilEmulatorException("Attempted to initialize memory with an unknown size.");
+
+                    case { } actualAddress:
+                        // A non-null reference was passed.
 
                         // Allocate a temporary buffer to write into memory.
-                        var buffer = new BitVector(sizeSpan.I32 * 8, false);
+                        var buffer = new BitVector((int) (resolvedSize * 8), false);
                         buffer.AsSpan().Fill(value.Bits[0], value.KnownMask[0]);
 
                         // Write it.
-                        context.Machine.Memory.Write(
-                            addressSpan.ReadNativeInteger(context.Machine.Is32Bit),
-                            buffer);
+                        context.Machine.Memory.Write(actualAddress, buffer);
                         break;
                 }
             }

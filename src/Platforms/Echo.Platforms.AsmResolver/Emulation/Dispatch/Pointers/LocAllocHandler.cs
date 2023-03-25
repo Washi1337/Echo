@@ -21,13 +21,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             try
             {
                 var sizeSpan = size.Contents.AsSpan();
-                if (!sizeSpan.IsFullyKnown)
-                {
-                    // TODO: make configurable.
-                    throw new CilEmulatorException("Attempted to allocate stack memory with an unknown size.");
-                }
-
-                var address = factory.RentNativeInteger(context.CurrentFrame.Allocate(sizeSpan.I32));
+                uint resolvedSize = sizeSpan.IsFullyKnown
+                    ? sizeSpan.U32
+                    : context.Machine.UnknownResolver.ResolveBlockSize(context, instruction, size);
+                
+                var address = factory.RentNativeInteger(context.CurrentFrame.Allocate((int) resolvedSize));
                 stack.Push(new StackSlot(address, StackSlotTypeHint.Integer));
 
                 return CilDispatchResult.Success();

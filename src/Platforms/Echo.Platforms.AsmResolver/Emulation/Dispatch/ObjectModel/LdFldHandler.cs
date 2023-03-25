@@ -20,68 +20,89 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             
             var field = (IFieldDescriptor) instruction.Operand!;
             var instance = stack.Pop();
-            var result = context.Machine.ValueFactory.RentValue(field.Signature!.FieldType, false);
 
             try
             {
-                // We can actually reference static fields with ldfld. The instance is then just ignored.
-                if (field.Resolve() is {IsStatic: true})
-                    result.AsSpan().Write(context.Machine.StaticFields.GetFieldSpan(field));
-                else
-                    ReadInstanceField(context, instance, field, result);
-
-                // Push.
-                stack.Push(result, field.Signature!.FieldType);
+                return field.Resolve() is { IsStatic: true }
+                    ? ReadStaticField(context, field) 
+                    : ReadInstanceField(context, instruction, instance);
             }
             finally
             {
                 factory.BitVectorPool.Return(instance.Contents);
-                factory.BitVectorPool.Return(result);
             }
-
+        }
+        
+        private static CilDispatchResult ReadStaticField(CilExecutionContext context, IFieldDescriptor field)
+        {
+            // We can actually reference static fields with ldfld. The instance is then just ignored.
+            
+            var result = context.Machine.ValueFactory.RentValue(field.Signature!.FieldType, false);
+            result.AsSpan().Write(context.Machine.StaticFields.GetFieldSpan(field));
+            context.CurrentFrame.EvaluationStack.Push(result, field.Signature!.FieldType);
+            
             return CilDispatchResult.Success();
         }
 
-        private static void ReadInstanceField(
-            CilExecutionContext context, 
-            StackSlot instance,
-            IFieldDescriptor field,
-            BitVector result)
+        private static CilDispatchResult ReadInstanceField(
+            CilExecutionContext context,
+            CilInstruction instruction,
+            StackSlot instance)
         {
+            var field = (IFieldDescriptor) instruction.Operand!;
+            var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
             
-            switch (instance.TypeHint)
+            var result = context.Machine.ValueFactory.RentValue(field.Signature!.FieldType, false);
+
+            try
             {
-                case StackSlotTypeHint.Structure:
-                    // Structure was pushed onto the stack directly. Read the field directly from the structure.
-                    result.AsSpan().Write(instance.Contents.AsSpan().SliceStructField(factory, field));
-                    break;
+                switch (instance.TypeHint)
+                {
+                    case StackSlotTypeHint.Structure:
+                        // Structure was pushed onto the stack directly. Read the field directly from the structure.
+                        result.AsSpan().Write(instance.Contents.AsSpan().SliceStructField(factory, field));
+                        stack.Push(result, field.Signature.FieldType);
+                        return CilDispatchResult.Success();
 
-                case StackSlotTypeHint.Float:
-                    // Floats should not be able to contain a pointer to an object or a structure with fields.
-                    throw new CilEmulatorException("Attempted to dereference a floating point number.");
+                    case StackSlotTypeHint.Float:
+                        // Floats should not be able to contain a pointer to an object or a structure with fields.
+                        return CilDispatchResult.InvalidProgram(context);
 
-                case StackSlotTypeHint.Integer:
-                    // Object/structure was pushed by reference onto the stack. Dereference it.
-                    var addressSpan = instance.Contents.AsSpan();
-                    if (!addressSpan.IsFullyKnown)
-                    {
-                        // We can only dereference fully known pointers. Leave the result unknown.
-                    }
-                    else
-                    {
-                        // Calculate field address.
-                        long objectAddress = addressSpan.ReadNativeInteger(context.Machine.Is32Bit);
-                        long fieldAddress = factory.GetFieldAddress(objectAddress, field);
+                    case StackSlotTypeHint.Integer:
+                        // Object/structure was pushed by reference onto the stack. Dereference it.
+                        var instanceSpan = instance.Contents.AsSpan();
+                        long? objectAddress = instanceSpan.IsFullyKnown
+                            ? instanceSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                            : context.Machine.UnknownResolver.ResolveSourcePointer(context, instruction, instance);
 
-                        // Read field value.
-                        context.Machine.Memory.Read(fieldAddress, result);
-                    }
+                        switch (objectAddress)
+                        {
+                            case null:
+                                // If address is unknown even after resolution, assume it reads it from "somewhere" successfully.
+                                break;
 
-                    break;
+                            case 0:
+                                // A null reference was passed.
+                                return CilDispatchResult.NullReference(context);
 
-                default:
-                    throw new ArgumentOutOfRangeException();
+                            case { } actualAddress:
+                                // A non-null reference was passed.
+                                long fieldAddress = factory.GetFieldAddress(actualAddress, field);
+                                context.Machine.Memory.Read(fieldAddress, result);
+                                break;
+                        }
+
+                        stack.Push(result, field.Signature.FieldType);
+                        return CilDispatchResult.Success();
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            finally
+            {
+                factory.BitVectorPool.Return(result);
             }
         }
     }

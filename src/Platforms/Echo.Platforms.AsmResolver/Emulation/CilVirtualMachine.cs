@@ -130,6 +130,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
             set;
         } = DefaultInvokers.ReturnUnknown;
+
+        public IUnknownResolver UnknownResolver { get; set; } = ThrowUnknownResolver.Instance;
         
         /// <summary>
         /// Runs the virtual machine until it halts.

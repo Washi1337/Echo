@@ -31,26 +31,30 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             // Determine parameters.
             var elementType = GetElementType(context, instruction);
             var value = stack.Pop(elementType);
-            var address = stack.Pop().Contents;
-            var result = factory.BitVectorPool.Rent(
-                (int) factory.GetTypeValueMemoryLayout(elementType).Size * 8, 
-                false);
+            var address = stack.Pop();
+            var result = factory.RentValue(elementType, false);
             
             try
             {
-                // Write memory if fully known address, else leave result unknown.
-                var addressSpan = address.AsSpan();
-                switch (addressSpan)
-                {
-                    case { IsFullyKnown: false }:
-                        // TODO: Make configurable.
-                        throw new CilEmulatorException("Attempted to write to an unknown memory pointer.");
+                // Concretize pushed address.
+                var addressSpan = address.Contents.AsSpan();
+                long? resolvedAddress = addressSpan.IsFullyKnown
+                    ? addressSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                    : context.Machine.UnknownResolver.ResolveDestinationPointer(context, instruction, address);
 
-                    case { IsZero.Value: TrileanValue.True }:
+                switch (resolvedAddress)
+                {
+                    case null:
+                        // If address is unknown even after resolution, assume it writes to "somewhere" successfully.
+                        return CilDispatchResult.Success();
+
+                    case 0:
+                        // A null reference was passed.
                         return CilDispatchResult.NullReference(context);
 
-                    default:
-                        context.Machine.Memory.Write(addressSpan.ReadNativeInteger(context.Machine.Is32Bit), value);
+                    case { } actualAddress:
+                        // A non-null reference was passed.
+                        context.Machine.Memory.Write(actualAddress, value);
                         break;
                 }
 
@@ -59,7 +63,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             finally
             {
                 // Return rented values.
-                factory.BitVectorPool.Return(address);
+                factory.BitVectorPool.Return(address.Contents);
                 factory.BitVectorPool.Return(value);
                 factory.BitVectorPool.Return(result);
             }

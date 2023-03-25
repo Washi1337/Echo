@@ -56,19 +56,6 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         }
         
         [Fact]
-        public void ReadFromUnknownArrayShouldPushUnknown()
-        {
-            var stack = Context.CurrentFrame.EvaluationStack;
-            stack.Push(new StackSlot(Context.Machine.ValueFactory.CreateNativeInteger(false), StackSlotTypeHint.Integer));
-            stack.Push(new StackSlot(1, StackSlotTypeHint.Integer));
-            
-            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldelem_I4));
-            Assert.True(result.IsSuccess);
-            Assert.Single(stack);
-            Assert.False(stack.Pop().Contents.AsSpan().IsFullyKnown);
-        }
-
-        [Fact]
         public void ReadInt32Element()
         {
             var stack = Context.CurrentFrame.EvaluationStack;
@@ -85,6 +72,20 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
                 var value = stack.Pop();
                 Assert.Equal(100 + i, value.Contents.AsSpan().I32);
             });
+        }
+        
+        [Fact]
+        public void ReadInt32ElementFromUnknownArray()
+        {
+            Context.Machine.UnknownResolver = EmptyUnknownResolver.Instance;
+            
+            var stack = Context.CurrentFrame.EvaluationStack;
+            stack.Push(new StackSlot(Context.Machine.ValueFactory.CreateNativeInteger(false), StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(10, StackSlotTypeHint.Integer));
+        
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldelem_I4));
+            Assert.True(result.IsSuccess);
+            Assert.False(stack.Peek().Contents.AsSpan().IsFullyKnown);
         }
 
     }

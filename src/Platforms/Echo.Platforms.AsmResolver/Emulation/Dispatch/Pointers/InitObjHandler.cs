@@ -16,32 +16,40 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             var factory = context.Machine.ValueFactory;
             
             var type = (ITypeDefOrRef) instruction.Operand!;
-            
-            var addressSlot = context.CurrentFrame.EvaluationStack.Pop().Contents;
-            var initializedObject = factory.RentValue(type.ToTypeSignature(), true);
+            var address = context.CurrentFrame.EvaluationStack.Pop();
 
             try
             {
-                var addressSpan = addressSlot.AsSpan();
-                switch (addressSpan)
+                // Object/structure was pushed by reference onto the stack. Concretize address.
+                var addressSpan = address.Contents.AsSpan();
+                long? resolvedAddress = addressSpan.IsFullyKnown
+                    ? addressSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                    : context.Machine.UnknownResolver.ResolveDestinationPointer(context, instruction, address);
+
+                switch (resolvedAddress)
                 {
-                    case { IsFullyKnown: false }:
-                        // TODO: Make configurable.
-                        throw new CilEmulatorException("Attempted to initialize an object at an unknown pointer.");
-                    
-                    case { IsZero.Value: TrileanValue.True }:
+                    case null:
+                        // If address is unknown even after resolution, assume it writes to "somewhere" successfully.
+                        return CilDispatchResult.Success();
+
+                    case 0:
+                        // A null reference was passed.
                         return CilDispatchResult.NullReference(context);
-                    
-                    default:
-                        long address = addressSpan.ReadNativeInteger(context.Machine.Is32Bit);
-                        context.Machine.Memory.Write(address, initializedObject);
+
+                    case { } actualAddress:
+                        // A non-null reference was passed.
+
+                        // Allocate a temporary buffer to write into memory.
+                        var buffer = factory.CreateValue(type.ToTypeSignature(), true);;
+
+                        // Write it.
+                        context.Machine.Memory.Write(actualAddress, buffer);
                         break;
                 }
             }
             finally
             {
-                factory.BitVectorPool.Return(addressSlot);
-                factory.BitVectorPool.Return(initializedObject);
+                factory.BitVectorPool.Return(address.Contents);
             }
             
             return CilDispatchResult.Success();
