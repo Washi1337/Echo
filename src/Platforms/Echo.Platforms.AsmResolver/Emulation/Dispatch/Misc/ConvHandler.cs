@@ -23,43 +23,23 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Misc
         )]
     public class ConvHandler : FallThroughOpCodeHandler
     {
-        private static readonly BitVector Int8Min = new(64, true);
-        private static readonly BitVector Int8Max = new(64, true);
-        private static readonly BitVector Int16Min = new(64, true);
-        private static readonly BitVector Int16Max = new(64, true); 
-        private static readonly BitVector Int32Min = new(64, true);
-        private static readonly BitVector Int32Max = new(64, true); 
-        private static readonly BitVector Int64Min = new(64, true);
-        private static readonly BitVector Int64Max = new(64, true); 
-        private static readonly BitVector UInt8Min = new(64, true);
-        private static readonly BitVector UInt8Max = new(64, true);
-        private static readonly BitVector UInt16Min = new(64, true);
-        private static readonly BitVector UInt16Max = new(64, true); 
-        private static readonly BitVector UInt32Min = new(64, true);
-        private static readonly BitVector UInt32Max = new(64, true); 
-        private static readonly BitVector UInt64Min = new(64, true);
-        private static readonly BitVector UInt64Max = new(64, true);
+        private static readonly BitVector Int8Min = (long) sbyte.MinValue;
+        private static readonly BitVector Int8Max = (long) sbyte.MaxValue;
+        private static readonly BitVector Int16Min = (long) short.MinValue;
+        private static readonly BitVector Int16Max = (long) short.MaxValue; 
+        private static readonly BitVector Int32Min = (long) int.MinValue;
+        private static readonly BitVector Int32Max = (long) int.MaxValue; 
+        private static readonly BitVector Int64Min = long.MinValue;
+        private static readonly BitVector Int64Max = long.MaxValue; 
+        private static readonly BitVector UInt8Min = (long) byte.MinValue;
+        private static readonly BitVector UInt8Max = (long) byte.MaxValue;
+        private static readonly BitVector UInt16Min = (long) ushort.MinValue;
+        private static readonly BitVector UInt16Max = (long) ushort.MaxValue; 
+        private static readonly BitVector UInt32Min = (long) uint.MinValue;
+        private static readonly BitVector UInt32Max = (long) uint.MaxValue;
+        private static readonly BitVector UInt64Min = unchecked((long) ulong.MinValue);
+        private static readonly BitVector UInt64Max = unchecked((long) ulong.MaxValue);
 
-        static ConvHandler()
-        {
-            Int8Min.AsSpan().Write((long) sbyte.MinValue);
-            Int8Max.AsSpan().Write((long) sbyte.MaxValue);
-            Int16Min.AsSpan().Write((long) short.MinValue);
-            Int16Max.AsSpan().Write((long) short.MaxValue);
-            Int32Min.AsSpan().Write((long) int.MinValue);
-            Int32Max.AsSpan().Write((long) int.MaxValue);
-            Int64Min.AsSpan().Write(long.MinValue);
-            Int64Max.AsSpan().Write(long.MaxValue);
-            UInt8Min.AsSpan().Write((long) byte.MinValue);
-            UInt8Max.AsSpan().Write((long) byte.MaxValue);
-            UInt16Min.AsSpan().Write((long) ushort.MinValue);
-            UInt16Max.AsSpan().Write((long) ushort.MaxValue);
-            UInt32Min.AsSpan().Write((long) uint.MinValue);
-            UInt32Max.AsSpan().Write((long) uint.MaxValue);
-            UInt64Min.AsSpan().Write(unchecked((long) ulong.MinValue));
-            UInt64Max.AsSpan().Write(unchecked((long) ulong.MaxValue));
-        }
-            
         /// <inheritdoc />
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
