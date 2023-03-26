@@ -35,7 +35,7 @@ namespace Echo.Core
         /// Pops a single element from the stack.
         /// </summary>
         /// <returns>The popped element.</returns>
-        public T Pop()
+        public virtual T Pop()
         {
             var result = Peek();
             _items.RemoveAt(_items.Count - 1);
@@ -46,7 +46,7 @@ namespace Echo.Core
         /// Pushes a single element onto the stack.
         /// </summary>
         /// <param name="value"></param>
-        public void Push(T value) => _items.Add(value);
+        public virtual void Push(T value) => _items.Add(value);
 
         /// <inheritdoc />
         public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();

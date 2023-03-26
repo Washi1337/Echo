@@ -63,6 +63,17 @@ namespace Echo.Concrete
             Bits = BitConverter.GetBytes(value);
             KnownMask = new byte[] {0xFF};
         }
+
+        /// <summary>
+        /// Creates a new partially known 8-wide bit vector. 
+        /// </summary>
+        /// <param name="bits">The bits.</param>
+        /// <param name="knownMask">The bitmask indicating which bits in <paramref name="bits"/> are known.</param>
+        public BitVector(sbyte bits, byte knownMask)
+        {
+            Bits = BitConverter.GetBytes(bits);
+            KnownMask = BitConverter.GetBytes(knownMask);
+        }
         
         /// <summary>
         /// Creates a new fully known 8-wide bit vector. 
@@ -72,6 +83,17 @@ namespace Echo.Concrete
         {
             Bits = new[] {value};
             KnownMask = new byte[] {0xFF};
+        }
+
+        /// <summary>
+        /// Creates a new partially known 8-wide bit vector. 
+        /// </summary>
+        /// <param name="bits">The bits.</param>
+        /// <param name="knownMask">The bitmask indicating which bits in <paramref name="bits"/> are known.</param>
+        public BitVector(byte bits, byte knownMask)
+        {
+            Bits = BitConverter.GetBytes(bits);
+            KnownMask = BitConverter.GetBytes(knownMask);
         }
         
         /// <summary>
@@ -85,6 +107,17 @@ namespace Echo.Concrete
         }
 
         /// <summary>
+        /// Creates a new partially known 16-wide bit vector. 
+        /// </summary>
+        /// <param name="bits">The bits.</param>
+        /// <param name="knownMask">The bitmask indicating which bits in <paramref name="bits"/> are known.</param>
+        public BitVector(short bits, ushort knownMask)
+        {
+            Bits = BitConverter.GetBytes(bits);
+            KnownMask = BitConverter.GetBytes(knownMask);
+        }
+
+        /// <summary>
         /// Creates a new fully known 16-wide bit vector. 
         /// </summary>
         /// <param name="value">The bits.</param>
@@ -94,6 +127,17 @@ namespace Echo.Concrete
             KnownMask = new byte[] {0xFF, 0xFF};
         }
 
+        /// <summary>
+        /// Creates a new partially known 16-wide bit vector. 
+        /// </summary>
+        /// <param name="bits">The bits.</param>
+        /// <param name="knownMask">The bitmask indicating which bits in <paramref name="bits"/> are known.</param>
+        public BitVector(ushort bits, ushort knownMask)
+        {
+            Bits = BitConverter.GetBytes(bits);
+            KnownMask = BitConverter.GetBytes(knownMask);
+        }
+        
         /// <summary>
         /// Creates a new fully known 32-wide bit vector. 
         /// </summary>
@@ -105,6 +149,17 @@ namespace Echo.Concrete
         }
         
         /// <summary>
+        /// Creates a new partially known 32-wide bit vector. 
+        /// </summary>
+        /// <param name="bits">The bits.</param>
+        /// <param name="knownMask">The bitmask indicating which bits in <paramref name="bits"/> are known.</param>
+        public BitVector(int bits, uint knownMask)
+        {
+            Bits = BitConverter.GetBytes(bits);
+            KnownMask = BitConverter.GetBytes(knownMask);
+        }
+        
+        /// <summary>
         /// Creates a new fully known 32-wide bit vector. 
         /// </summary>
         /// <param name="value">The bits.</param>
@@ -112,6 +167,17 @@ namespace Echo.Concrete
         {
             Bits = BitConverter.GetBytes(value);
             KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF};
+        }
+        
+        /// <summary>
+        /// Creates a new partially known 32-wide bit vector. 
+        /// </summary>
+        /// <param name="bits">The bits.</param>
+        /// <param name="knownMask">The bitmask indicating which bits in <paramref name="bits"/> are known.</param>
+        public BitVector(uint bits, uint knownMask)
+        {
+            Bits = BitConverter.GetBytes(bits);
+            KnownMask = BitConverter.GetBytes(knownMask);
         }
 
         /// <summary>
@@ -125,6 +191,17 @@ namespace Echo.Concrete
         }
         
         /// <summary>
+        /// Creates a new partially known 64-wide bit vector. 
+        /// </summary>
+        /// <param name="bits">The bits.</param>
+        /// <param name="knownMask">The bitmask indicating which bits in <paramref name="bits"/> are known.</param>
+        public BitVector(long bits, ulong knownMask)
+        {
+            Bits = BitConverter.GetBytes(bits);
+            KnownMask = BitConverter.GetBytes(knownMask);
+        }
+        
+        /// <summary>
         /// Creates a new fully known 64-wide bit vector. 
         /// </summary>
         /// <param name="value">The bits.</param>
@@ -132,6 +209,17 @@ namespace Echo.Concrete
         {
             Bits = BitConverter.GetBytes(value);
             KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+        }
+        
+        /// <summary>
+        /// Creates a new partially known 64-wide bit vector. 
+        /// </summary>
+        /// <param name="bits">The bits.</param>
+        /// <param name="knownMask">The bitmask indicating which bits in <paramref name="bits"/> are known.</param>
+        public BitVector(ulong bits, ulong knownMask)
+        {
+            Bits = BitConverter.GetBytes(bits);
+            KnownMask = BitConverter.GetBytes(knownMask);
         }
 
         /// <summary>
@@ -178,6 +266,11 @@ namespace Echo.Concrete
         /// Gets the number of bits stored in the bit vector.
         /// </summary>
         public int Count => Bits.Length * 8;
+
+        /// <summary>
+        /// Gets the number of bytes stored in the bit vector.
+        /// </summary>
+        public int ByteCount => Bits.Length;
 
         /// <summary>
         /// Creates a new span of the entire bit vector.

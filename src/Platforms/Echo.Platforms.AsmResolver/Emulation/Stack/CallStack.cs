@@ -7,6 +7,7 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using Echo.Concrete;
 using Echo.Concrete.Memory;
+using Echo.Core;
 using Echo.Core.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Stack
@@ -14,10 +15,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
     /// <summary>
     /// Represents a call stack consisting of frames, representing the current state of the program.
     /// </summary>
-    public class CallStack : IMemorySpace, IReadOnlyList<CallFrame>
+    public class CallStack : IndexableStack<CallFrame>, IMemorySpace
     {
-        private readonly List<CallFrame> _frames = new();
-
+        /// <summary>
+        /// Occurs when a new call frame is pushed onto the stack.
+        /// </summary>
+        public event EventHandler<CallEventArgs>? Called;
+        
+        /// <summary>
+        /// Occurs when a call frame was popped from the stack. 
+        /// </summary>
+        public event EventHandler<CallEventArgs>? Returned;
+        
+        private readonly CallEventArgs _eventArgs = new();
         private readonly ValueFactory _factory;
 
         /// <summary>
@@ -36,12 +46,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         }
 
         /// <inheritdoc />
-        public int Count => _frames.Count;
-
-        /// <inheritdoc />
-        public CallFrame this[int index] => _frames[index];
-
-        /// <inheritdoc />
         public AddressRange AddressRange
         {
             get;
@@ -51,13 +55,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <summary>
         /// Gets the current value of the stack pointer.
         /// </summary>
-        public long StackPointer => _frames.Count > 0 
-            ? _frames[_frames.Count - 1].AddressRange.End 
+        public long StackPointer => Count > 0 
+            ? this[Count - 1].AddressRange.End 
             : AddressRange.Start;
 
         private bool TryFindStackFrame(long address, [NotNullWhen(true)] out CallFrame? entry)
         {
-            entry = _frames.FirstOrDefault(e => e.AddressRange.Contains(address));
+            entry = this.FirstOrDefault(e => e.AddressRange.Contains(address));
             return entry is not null;
         }
 
@@ -66,7 +70,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// </summary>
         /// <param name="index">The index of the stack frame.</param>
         /// <returns>The address.</returns>
-        public long GetFrameAddress(int index) => _frames[index].AddressRange.Start;
+        public long GetFrameAddress(int index) => this[index].AddressRange.Start;
 
         /// <inheritdoc />
         public bool IsValidAddress(long address)
@@ -79,7 +83,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         {
             long oldBase = AddressRange.Start;
             AddressRange = new AddressRange(baseAddress, baseAddress + AddressRange.Length);
-            foreach (var entry in _frames)
+            foreach (var entry in this)
                 entry.Rebase(entry.AddressRange.Start - oldBase + AddressRange.Start);
         }
 
@@ -127,32 +131,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// </summary>
         /// <param name="frame">The frame to push.</param>
         /// <exception cref="StackOverflowException">Occurs when the stack reached its maximum size.</exception>
-        public void Push(CallFrame frame)
+        public override void Push(CallFrame frame)
         {
             long newStackPointer = StackPointer + (uint) frame.Size;
             if (newStackPointer >= AddressRange.End)
                 throw new StackOverflowException();
 
-            if (_frames.Count > 0)
+            if (Count > 0)
                 Peek().CanAllocateMemory = false;
             
             frame.Rebase(StackPointer);
-            _frames.Add(frame);
+            base.Push(frame);
 
             frame.CanAllocateMemory = true;
-        }
 
-        /// <summary>
-        /// Gets the top-most frame on the stack.
-        /// </summary>
-        /// <returns>The frame.</returns>
-        /// <exception cref="InvalidOperationException">Occurs when the stack is empty.</exception>
-        public CallFrame Peek()
-        {
-            if (_frames.Count == 0)
-                throw new InvalidOperationException("Stack is empty.");
-
-            return _frames[_frames.Count - 1];
+            OnCalled(frame);
         }
 
         /// <summary>
@@ -160,24 +153,39 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// </summary>
         /// <returns>The popped frame.</returns>
         /// <exception cref="InvalidOperationException">Occurs when the stack is empty.</exception>
-        public CallFrame Pop()
+        public override CallFrame Pop()
         {
-            if (_frames.Count == 1)
+            if (Count == 1)
                 throw new InvalidOperationException("Cannot pop the root stack-frame.");
 
-            var frame = _frames[_frames.Count - 1];
-            _frames.RemoveAt(_frames.Count - 1);
+            var frame = base.Pop();
 
             frame.CanAllocateMemory = false;
             Peek().CanAllocateMemory = true;
 
+            OnReturned(frame);
+            
             return frame;
         }
 
-        /// <inheritdoc />
-        public IEnumerator<CallFrame> GetEnumerator() => _frames.GetEnumerator();
+        /// <summary>
+        /// Fires the <see cref="Called"/> event.
+        /// </summary>
+        /// <param name="frame">The frame that was pushed.</param>
+        protected virtual void OnCalled(CallFrame frame)
+        {
+            _eventArgs.Frame = frame;
+            Called?.Invoke(this, _eventArgs);
+        }
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
+        /// <summary>
+        /// Fires the <see cref="Returned"/> event.
+        /// </summary>
+        /// <param name="frame">The frame that was popped.</param>
+        protected virtual void OnReturned(CallFrame frame)
+        {
+            _eventArgs.Frame = frame;
+            Returned?.Invoke(this, _eventArgs);
+        }
     }
 }

@@ -4,6 +4,7 @@ using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Concrete;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
+using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 {
@@ -91,11 +92,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             {
                 case InvocationResultType.StepIn:
                     // We are stepping into this method, push new call frame with the arguments that were pushed onto the stack.
-                    var frame = context.Machine.CallStack.Push(method);
-                    
+                    var frame = new CallFrame(method, context.Machine.ValueFactory);
                     for (int i = 0; i < arguments.Count; i++)
                         frame.WriteArgument(i, arguments[i]);
 
+                    context.Machine.CallStack.Push(frame);
                     return CilDispatchResult.Success();
 
                 case InvocationResultType.StepOver:

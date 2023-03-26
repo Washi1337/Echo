@@ -102,5 +102,19 @@ namespace Mocks
             );
             IL.Emit.Ret();
         }
+
+        public static int SimpleTest()
+        {
+            int x = 0x1337; 
+            x += DangerousMethod(10);
+            x &= 0xFF00;
+            Console.WriteLine(x >= 0x1000 ? "x >= 0x1000" : "x < 0x1000");
+            return x;
+        }
+
+        public static int DangerousMethod(int y)
+        {
+            return y + 100;
+        }
     }
 }

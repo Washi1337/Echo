@@ -29,8 +29,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         //  ...    | ...
         //  n+m+2  | arg m
 
-        private BitVector _localStorage;
+        private readonly bool _initializeLocals;
         private readonly List<uint> _offsets = new();
+        private BitVector _localStorage;
         private long _baseAddress;
 
         /// <summary>
@@ -60,7 +61,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             Method = method;
 
             uint currentOffset = 0;
-            bool initializeLocals = false;
+            _initializeLocals = false;
             
             // Allocate local variables. 
             if (method.Resolve()?.CilMethodBody is not { } body)
@@ -69,7 +70,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             }
             else
             {
-                initializeLocals = body.InitializeLocals;
+                _initializeLocals = body.InitializeLocals;
                 LocalsCount = body.LocalVariables.Count;
 
                 foreach (var local in body.LocalVariables)
@@ -94,7 +95,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             _localStorage = new BitVector((int) (currentOffset * pointerSize), false);
             
             // Initialize locals to zero when method body says we should.
-            if (initializeLocals)
+            if (_initializeLocals)
             {
                 uint localsSize = _offsets[LocalsCount];
                 _localStorage
@@ -175,7 +176,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         }
 
         /// <inheritdoc />
-        public AddressRange AddressRange => new(_baseAddress, _baseAddress + _localStorage.Count / 8);
+        public AddressRange AddressRange => new(_baseAddress, _baseAddress + _localStorage.ByteCount);
 
         /// <inheritdoc />
         public bool IsValidAddress(long address) => AddressRange.Contains(address);
@@ -194,6 +195,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
 
             long address = AddressRange.End;
             _localStorage = _localStorage.Resize(_localStorage.Count + size * 8, false);
+            if (!_initializeLocals)
+                _localStorage.AsSpan((int) (address - _baseAddress)).MarkFullyUnknown();
+            
             return address;
         }
 
