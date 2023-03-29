@@ -175,7 +175,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="cancellationToken">A token that can be used for canceling the emulation.</param>
         public void Run(CancellationToken cancellationToken)
         {
-            StepWhile(cancellationToken, context => !CallStack.Peek().IsRoot);
+            StepWhile(cancellationToken, context => !context.CurrentFrame.IsRoot);
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="arguments">The arguments.</param>
         /// <returns>The return value, or <c>null</c> if the provided method does not return a value.</returns>
         /// <remarks>
-        /// This method is blocking until the emulation completes.
+        /// This method is blocking until the emulation of the call completes.
         /// </remarks>
         public BitVector? Call(IMethodDescriptor method, IEnumerable<object> arguments)
         {
@@ -200,7 +200,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="arguments">The arguments.</param>
         /// <returns>The return value, or <c>null</c> if the provided method does not return a value.</returns>
         /// <remarks>
-        /// This method is blocking until the emulation completes.
+        /// This method is blocking until the emulation of the call completes.
         /// </remarks>
         public BitVector? Call(IMethodDescriptor method, params BitVector[] arguments)
         {
@@ -215,7 +215,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="arguments">The arguments.</param>
         /// <returns>The return value, or <c>null</c> if the provided method does not return a value.</returns>
         /// <remarks>
-        /// This method is blocking until the emulation completes or the emulation is canceled.
+        /// This method is blocking until the emulation of the call completes or the emulation is canceled.
         /// </remarks>
         public BitVector? Call(IMethodDescriptor method, CancellationToken cancellationToken, params BitVector[] arguments)
         {
@@ -338,11 +338,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 // TODO: unwind stack and move to appropriate exception handler if there is any.
                 var exceptionPointer = result.ExceptionPointer.AsSpan();
                 if (!exceptionPointer.IsFullyKnown)
-                {
                     throw new NotImplementedException("Exception handling is not implemented yet (unknown exception type).");
-                }
 
-                var type = ValueFactory.ClrMockMemory.MethodTables.GetObject(exceptionPointer.ReadNativeInteger(Is32Bit)); 
+                var type = exceptionPointer.AsObjectHandle(this).GetObjectType(); 
                 throw new NotImplementedException($"Exception handling is not implemented yet. ({type})");
             }
         }
