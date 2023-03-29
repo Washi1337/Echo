@@ -31,9 +31,7 @@ namespace Echo.Concrete.Memory
         public void Rebase(long baseAddress) => AddressRange = new AddressRange(baseAddress, baseAddress + AddressRange.Length);
 
         /// <inheritdoc />
-        public void Read(long address, BitVectorSpan buffer)
-        {
-        }
+        public void Read(long address, BitVectorSpan buffer) => buffer.MarkFullyUnknown();
 
         /// <inheritdoc />
         public void Write(long address, BitVectorSpan buffer)
