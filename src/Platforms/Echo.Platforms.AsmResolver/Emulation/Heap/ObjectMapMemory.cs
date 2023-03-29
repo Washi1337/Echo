@@ -89,6 +89,36 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             var descriptor = _machine.ContextModule.DefaultImporter.ImportType(type);
             return _machine.ValueFactory.GetTypeContentsMemoryLayout(descriptor);
         }
+
+        /// <summary>
+        /// Unmaps a registered object from the host memory.
+        /// </summary>
+        /// <param name="value">The object to unmap.</param>
+        public void Unmap(object value)
+        {
+            if (!_mappedObjects.TryGetValue(value, out var mapping))
+                return;
+            
+            _backingBuffer.Unmap(mapping.AddressRange.Start);
+            _mappedObjects.Remove(value);
+            _objectsByAddress.Remove(mapping.AddressRange.Start);
+
+            if (_objectsByAddress.Count == 0)
+                _currentOffset = 0;
+        }
+
+        /// <summary>
+        /// Unmaps all registered objects from the host memory.
+        /// </summary>
+        public void Clear()
+        {
+            foreach (long address in _objectsByAddress.Keys)
+                _backingBuffer.Unmap(address);
+
+            _mappedObjects.Clear();
+            _objectsByAddress.Clear();
+            _currentOffset = 0;
+        }
     }
 
 }
