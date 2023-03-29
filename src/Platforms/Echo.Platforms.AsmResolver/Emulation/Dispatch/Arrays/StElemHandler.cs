@@ -55,7 +55,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
 
                     case { } actualAddress:
                         // A non-null reference was passed.
-                        context.Machine.Memory.Read(actualAddress + factory.ArrayLengthOffset, arrayLength);
+                        var handle = actualAddress.AsObjectHandle(context.Machine);
                         
                         // Concretize pushed index.
                         var arrayIndexSpan = arrayIndex.Contents.AsSpan();
@@ -64,6 +64,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                             : context.Machine.UnknownResolver.ResolveArrayIndex(context, instruction, actualAddress, arrayIndex);
                         
                         // If index is unknown even after resolution, assume it writes to "somewhere" successfully.
+                        handle.ReadArrayLength(arrayLength);
                         if (resolvedIndex.HasValue && arrayLength.AsSpan().IsFullyKnown)
                         {
                             // Bounds check.
@@ -71,9 +72,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                                 return CilDispatchResult.IndexOutOfRange(context);
                             
                             //Write
-                            actualAddress
-                                .AsObjectHandle(context.Machine)
-                                .WriteArrayElement(elementType, resolvedIndex.Value, value);
+                            handle.WriteArrayElement(elementType, resolvedIndex.Value, value);
                         }
 
                         break;

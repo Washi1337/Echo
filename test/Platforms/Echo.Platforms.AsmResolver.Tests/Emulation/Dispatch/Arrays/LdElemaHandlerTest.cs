@@ -80,7 +80,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         }
         
         [Fact]
-        public void GetFromKnownArrayShouldPushUnknown()
+        public void GetFromKnownArrayShouldPushElement()
         {
             long array = CreateArray(10);
             
