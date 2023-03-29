@@ -373,7 +373,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 arraySpan.SliceArrayElement(_vm.ValueFactory, factory.Int32, i).Write(100 + i);
             
             // Call Sum.
-            var returnValue = _vm.Call(sum, arrayAddress);
+            var returnValue = _vm.Call(sum, new BitVector[] { arrayAddress });
             Assert.NotNull(returnValue);
             Assert.Equal(Enumerable.Range(100, 10).Sum(), returnValue!.AsSpan().I32);
         }
@@ -427,7 +427,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             _vm.Invoker = DefaultInvokers.StepIn;
 
             // Call Foo.
-            var returnValue = _vm.Call(foo);
+            var returnValue = _vm.Call(foo, Array.Empty<BitVector>());
             Assert.NotNull(returnValue);
             Assert.Equal((3 + 4) * 5, returnValue!.AsSpan().I32);
         }

@@ -187,8 +187,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <remarks>
         /// This method is blocking until the emulation of the call completes.
         /// </remarks>
-        public BitVector? Call(IMethodDescriptor method, IEnumerable<object> arguments)
+        public BitVector? Call(IMethodDescriptor method, object[] arguments)
         {
+            // Short circuit before we do expensive marshalling...
+            if (arguments.Length != method.Signature!.GetTotalParameterCount())
+                throw new TargetParameterCountException();
+            
             var marshalled = arguments.Select(x => ObjectMarshaller.ToBitVector(x)).ToArray();
             return Call(method, CancellationToken.None, marshalled);
         }
@@ -202,7 +206,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <remarks>
         /// This method is blocking until the emulation of the call completes.
         /// </remarks>
-        public BitVector? Call(IMethodDescriptor method, params BitVector[] arguments)
+        public BitVector? Call(IMethodDescriptor method, BitVector[] arguments)
         {
             return Call(method, CancellationToken.None, arguments);
         }
@@ -217,7 +221,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <remarks>
         /// This method is blocking until the emulation of the call completes or the emulation is canceled.
         /// </remarks>
-        public BitVector? Call(IMethodDescriptor method, CancellationToken cancellationToken, params BitVector[] arguments)
+        public BitVector? Call(IMethodDescriptor method, CancellationToken cancellationToken, BitVector[] arguments)
         {
             if (arguments.Length != method.Signature!.GetTotalParameterCount())
                 throw new TargetParameterCountException();
