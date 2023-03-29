@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using AsmResolver.DotNet;
@@ -176,6 +178,21 @@ namespace Echo.Platforms.AsmResolver.Emulation
             StepWhile(cancellationToken, context => !CallStack.Peek().IsRoot);
         }
 
+        /// <summary>
+        /// Calls the provided method in the context of the virtual machine.
+        /// </summary>
+        /// <param name="method">The method to call.</param>
+        /// <param name="arguments">The arguments.</param>
+        /// <returns>The return value, or <c>null</c> if the provided method does not return a value.</returns>
+        /// <remarks>
+        /// This method is blocking until the emulation completes.
+        /// </remarks>
+        public BitVector? Call(IMethodDescriptor method, IEnumerable<object> arguments)
+        {
+            var marshalled = arguments.Select(x => ObjectMarshaller.ToBitVector(x)).ToArray();
+            return Call(method, CancellationToken.None, marshalled);
+        }
+        
         /// <summary>
         /// Calls the provided method in the context of the virtual machine.
         /// </summary>

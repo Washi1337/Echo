@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
@@ -429,6 +430,62 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             var returnValue = _vm.Call(foo);
             Assert.NotNull(returnValue);
             Assert.Equal((3 + 4) * 5, returnValue!.AsSpan().I32);
+        }
+
+        [Fact]
+        public void CallWithReflection()
+        {
+            var factory = _fixture.MockModule.CorLibTypeFactory;
+
+            // Look up StringBuilder::Append(string)
+            var stringBuilderType = _fixture.MockModule.CorLibTypeFactory.CorLibScope
+                .CreateTypeReference("System.Text", "StringBuilder")
+                .ImportWith(_fixture.MockModule.DefaultImporter);
+
+            var appendMethod = stringBuilderType
+                .CreateMemberReference("Append", MethodSignature.CreateInstance(
+                    stringBuilderType.ToTypeSignature(false), factory.String))
+                .ImportWith(_fixture.MockModule.DefaultImporter);
+
+            // Prepare dummy method.
+            var foo = new MethodDefinition(
+                "Foo", 
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(
+                    factory.Void, 
+                    stringBuilderType.ToTypeSignature(false),
+                    factory.String));
+            
+            var fooBody = new CilMethodBody(foo)
+            {
+                Instructions =
+                {
+                    Ldarg_0,
+                    {Ldstr, "Hello, "},
+                    { Callvirt, appendMethod },
+                    Ldarg_1,
+                    { Callvirt, appendMethod },
+                    {Ldstr, ". How are you?"},
+                    { Callvirt, appendMethod },
+                    Pop,
+                    Ret,
+                }
+            };
+            fooBody.Instructions.CalculateOffsets();
+            foo.CilMethodBody = fooBody;
+
+            // Set up invoker to reflection invoke StringBuilder::Append(string), and return unknown for everything else. 
+            _vm.Invoker = DefaultInvokers.CreateShim()
+                .Map((IMethodDescriptor) appendMethod.Resolve()!, DefaultInvokers.ReflectionInvoke)
+                .WithFallback(DefaultInvokers.ReturnUnknown);
+
+            // Call it with a real string builder.
+            var builder = new StringBuilder();
+            var returnValue = _vm.Call(foo, new object[] { builder, "John Doe" });
+
+            // Check result.
+            Assert.Null(returnValue);
+            Assert.Equal("Hello, John Doe. How are you?", builder.ToString());
         }
     }
 }

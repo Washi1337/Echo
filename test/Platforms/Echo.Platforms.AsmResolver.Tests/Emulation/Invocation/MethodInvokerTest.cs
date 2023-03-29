@@ -160,5 +160,47 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
             Assert.Equal(InvocationResultType.StepOver, result.ResultType);
             Assert.Equal(InvocationResultType.Inconclusive, dummyInvoker.LastInvocationResult.ResultType);
         }
+
+        [Fact]
+        public void ReflectionInvokeStatic()
+        {
+            var invoker = DefaultInvokers.ReflectionInvoke;
+
+            var method = _fixture.MockModule
+                .TopLevelTypes.First(t => t.Name == nameof(RecordClass))
+                .Methods.First(m => m.Name == nameof(RecordClass.StaticMethod));
+
+            var result = invoker.Invoke(_context, method, new[]
+            {
+                new BitVector(1337),
+                new BitVector(1338),
+            });
+            
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal(1337 + 1338, result.Value!.AsSpan().I32);
+        }
+        
+        [Fact]
+        public void ReflectionInvokeInstance()
+        {
+            var invoker = DefaultInvokers.ReflectionInvoke;
+
+            var method = _fixture.MockModule
+                .TopLevelTypes.First(t => t.Name == nameof(RecordClass))
+                .Methods.First(m => m.Name == nameof(RecordClass.InstanceMethod));
+
+            var instance = new RecordClass(1337, 1338);
+
+            var result = invoker.Invoke(_context, method, new[]
+            {
+                _context.Machine.ObjectMarshaller.ToBitVector(instance),
+                new BitVector(1339)
+            });
+            
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
+            Assert.Equal(1337 + 1338 + 1339, result.Value!.AsSpan().I32);
+        }
     }
 }

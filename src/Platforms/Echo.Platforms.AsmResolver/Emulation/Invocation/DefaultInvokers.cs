@@ -33,6 +33,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         public static ExternalMethodInvoker ReturnUnknownForExternal { get; } = new(ReturnUnknown, SignatureComparer.Default);
         
         /// <summary>
+        /// Gets the method invoker that steps over any method by invoking it via System.Reflection. 
+        /// </summary>
+        public static ReflectionInvoker ReflectionInvoke => ReflectionInvoker.Instance;
+        
+        /// <summary>
         /// Gets the method invoker that forwards any method that is not within the resolution scope of the current
         /// stack frame to the provided method invoker, and otherwise leaves the invocation result inconclusive.
         /// </summary>
