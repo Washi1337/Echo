@@ -11,9 +11,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     public class UnboxHandler : UnboxHandlerBase
     {
         /// <inheritdoc />
-        protected override StackSlot GetReturnValue(CilExecutionContext context, long dataAddress, TypeSignature targetType)
+        protected override StackSlot GetReturnValue(
+            CilExecutionContext context, 
+            ObjectHandle handle,
+            TypeSignature targetType)
         {
-            return new StackSlot(dataAddress, StackSlotTypeHint.Integer);
+            return new StackSlot(handle.Contents.Address, StackSlotTypeHint.Integer);
         }
     }
 }

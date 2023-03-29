@@ -26,7 +26,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         }
 
         /// <inheritdoc />
-        protected override StackSlot GetReturnValue(CilExecutionContext context, long dataAddress, TypeSignature targetType)
+        protected override StackSlot GetReturnValue(
+            CilExecutionContext context, 
+            ObjectHandle handle, 
+            TypeSignature targetType)
         {
             // TODO: Handle Nullable<T>
 
@@ -34,13 +37,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             {
                 // If it is a value type, read the structure in the boxed object.
                 var value = context.Machine.ValueFactory.RentValue(targetType, false);
-                context.Machine.Memory.Read(dataAddress, value);
+                handle.ReadObjectData(value);
                 return new StackSlot(value, StackSlotTypeHint.Structure);
             }
             else
             {
                 // If it is a reference type, unbox.any == castclass, i.e., just push the object pointer.
-                var value = context.Machine.ValueFactory.RentNativeInteger(dataAddress - context.Machine.ValueFactory.ObjectHeaderSize);
+                var value = context.Machine.ValueFactory.RentNativeInteger(handle.Address);
                 return new StackSlot(value, StackSlotTypeHint.Integer);
             }
         }

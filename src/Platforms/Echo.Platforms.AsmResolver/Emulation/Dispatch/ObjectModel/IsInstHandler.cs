@@ -11,7 +11,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     public class IsInstHandler : CastOpCodeHandlerBase
     {
         /// <inheritdoc />
-        protected override CilDispatchResult HandleFailedCast(CilExecutionContext context, TypeSignature originalType, TypeSignature targetType)
+        protected override CilDispatchResult HandleFailedCast(
+            CilExecutionContext context, 
+            TypeSignature originalType, 
+            TypeSignature targetType)
         {
             var value = context.Machine.ValueFactory.RentNativeInteger(0);
             context.CurrentFrame.EvaluationStack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
@@ -19,9 +22,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         }
 
         /// <inheritdoc />
-        protected override CilDispatchResult HandleSuccessfulCast(CilExecutionContext context, long objectAddress, TypeSignature targetType)
+        protected override CilDispatchResult HandleSuccessfulCast(
+            CilExecutionContext context,
+            ObjectHandle handle,
+            TypeSignature targetType)
         {
-            var value = context.Machine.ValueFactory.RentNativeInteger(objectAddress);
+            var value = context.Machine.ValueFactory.RentNativeInteger(handle.Address);
             context.CurrentFrame.EvaluationStack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
             return CilDispatchResult.Success();
         }

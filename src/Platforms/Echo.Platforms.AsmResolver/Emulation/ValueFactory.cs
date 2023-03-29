@@ -378,30 +378,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
             
             return layout[resolvedField];
         }
-
+        
         /// <summary>
-        /// Obtains the address to a field within an object.
+        /// Calculates the offset to the element within an array. 
         /// </summary>
-        /// <param name="instanceAddress">The object address.</param>
-        /// <param name="field">The field within the object to reference.</param>
-        /// <returns>The address to the field.</returns>
-        public long GetFieldAddress(long instanceAddress, IFieldDescriptor field)
-        {
-            var layout = GetFieldMemoryLayout(field);
-            long fieldAddress = instanceAddress + layout.Offset;
-            if (!field.DeclaringType!.IsValueType)
-                fieldAddress += ObjectHeaderSize;
-            return fieldAddress;
-        }
-
+        /// <param name="elementType">The element type.</param>
+        /// <param name="index">The element's index.</param>
+        /// <returns>The offset, relative to the start of an array object.</returns>
         public long GetArrayElementOffset(TypeSignature elementType, long index)
         {
             return ArrayHeaderSize + index * GetTypeValueMemoryLayout(elementType).Size;
-        }
-
-        public long GetArrayElementAddress(long arrayAddress, TypeSignature elementType, long index)
-        {
-            return arrayAddress + GetArrayElementOffset(elementType, index);
         }
         
         private TypeMemoryLayout GetTypeDefOrRefContentsLayout(ITypeDefOrRef type, GenericContext context)

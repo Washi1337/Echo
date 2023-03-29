@@ -22,12 +22,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
             try
             {
-                long fieldAddress;
-
                 if (field.Resolve() is {IsStatic: true})
                 {
                     // Referenced field is static, we can ignore the instance object that was pushed.
-                    fieldAddress = context.Machine.StaticFields.GetFieldAddress(field);
+                    long fieldAddress = context.Machine.StaticFields.GetFieldAddress(field);
+                    context.Machine.Memory.Write(fieldAddress, value);
                 }
                 else if (instance.TypeHint != StackSlotTypeHint.Integer)
                 {
@@ -53,12 +52,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
                         case { } actualAddress:
                             // A non-null reference was passed.
-                            fieldAddress = factory.GetFieldAddress(actualAddress, field);
+                            var handle = field.DeclaringType!.IsValueType
+                                ? actualAddress.ToStructHandle(context.Machine)
+                                : actualAddress.ToObjectHandle(context.Machine).Contents;
+
+                            handle.WriteField(field, value);
                             break;
                     }
                 }
 
-                context.Machine.Memory.Write(fieldAddress, value);
             }
             finally
             {

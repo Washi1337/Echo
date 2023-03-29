@@ -4,6 +4,7 @@ using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Mocks;
@@ -28,11 +29,11 @@ public class LdFldaHandlerTest : CilOpCodeHandlerTestBase
         var field = classType.Fields.First(f => f.Name == nameof(SimpleClass.IntField));
 
         // Allocate object of the class, and set the field to 1337.
-        long objectAddress = Context.Machine.Heap.AllocateObject(classType, true);
-        long fieldAddress = Context.Machine.ValueFactory.GetFieldAddress(objectAddress, field);
+        var handle = Context.Machine.Heap.AllocateObject(classType, true).ToObjectHandle(Context.Machine);
+        long fieldAddress = handle.GetFieldAddress(field);
         
         // Push address of object onto stack.
-        stack.Push(new StackSlot(objectAddress, StackSlotTypeHint.Integer));
+        stack.Push(new StackSlot(handle.Address, StackSlotTypeHint.Integer));
 
         // Dispatch
         var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldflda, field));
@@ -63,10 +64,10 @@ public class LdFldaHandlerTest : CilOpCodeHandlerTestBase
         
         // Push address to struct.
         var stack = Context.CurrentFrame.EvaluationStack;
-        long objectAddress = Context.CurrentFrame.GetLocalAddress(0);
-        long fieldAddress = Context.Machine.ValueFactory.GetFieldAddress(objectAddress, field);
+        var handle = Context.CurrentFrame.GetLocalAddress(0).ToStructHandle(Context.Machine);
+        long fieldAddress = handle.GetFieldAddress(field);
         
-        stack.Push(new StackSlot(objectAddress, StackSlotTypeHint.Integer));
+        stack.Push(new StackSlot(handle.Address, StackSlotTypeHint.Integer));
 
         // Dispatch.
         var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldflda, field));

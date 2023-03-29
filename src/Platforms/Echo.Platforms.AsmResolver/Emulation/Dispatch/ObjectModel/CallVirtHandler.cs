@@ -34,7 +34,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                         true));
                 
                 case var objectPointer:
-                    var objectType = objectPointer.GetObjectPointerType(context.Machine);
+                    var objectType = objectPointer.ToObjectHandle(context.Machine).GetObjectType();
                     var implementation = FindMethodImplementationInType(objectType.Resolve(), method);
 
                     if (implementation is null)

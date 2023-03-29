@@ -29,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.True(result.IsSuccess);
             var slot = Context.CurrentFrame.EvaluationStack.Peek();
             Assert.Equal(StackSlotTypeHint.Integer, slot.TypeHint);
-            var instanceType = slot.Contents.AsSpan().GetObjectPointerType(Context.Machine);
+            var instanceType = slot.Contents.ToObjectHandle(Context.Machine).GetObjectType();
             Assert.Equal("System.Object", instanceType.FullName);
         }
     }

@@ -31,8 +31,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                         return CilDispatchResult.NullReference(context);
 
                     default:
-                        var arraySpan = context.Machine.Heap.GetObjectSpan(arrayAddressSpan.ReadNativeInteger(context.Machine.Is32Bit));
-                        result.AsSpan().Write(arraySpan.SliceArrayLength(factory));
+                        arrayAddressSpan.ToObjectHandle(context.Machine).ReadArrayLength(result);
                         break;
                 }
 

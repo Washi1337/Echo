@@ -75,7 +75,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Callvirt, baseMethod));
 
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionPointer?.AsSpan().GetObjectPointerType(Context.Machine);
+            var exceptionType = result.ExceptionPointer?.ToObjectHandle(Context.Machine).GetObjectType();
             Assert.Equal("System.NullReferenceException", exceptionType?.FullName);
         }
     }

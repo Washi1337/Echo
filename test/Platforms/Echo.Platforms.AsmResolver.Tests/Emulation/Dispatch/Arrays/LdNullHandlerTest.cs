@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldlen));
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionPointer?.AsSpan().GetObjectPointerType(Context.Machine);
+            var exceptionType = result.ExceptionPointer!.ToObjectHandle(Context.Machine).GetObjectType();
             Assert.Equal("System.NullReferenceException", exceptionType?.FullName);
         }
         

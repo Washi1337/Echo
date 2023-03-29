@@ -88,8 +88,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
                             case { } actualAddress:
                                 // A non-null reference was passed.
-                                long fieldAddress = factory.GetFieldAddress(actualAddress, field);
-                                context.Machine.Memory.Read(fieldAddress, result);
+
+                                var handle = field.DeclaringType!.IsValueType
+                                    ? actualAddress.ToStructHandle(context.Machine)
+                                    : actualAddress.ToObjectHandle(context.Machine).Contents;
+
+                                handle.ReadField(field, result);
                                 break;
                         }
 

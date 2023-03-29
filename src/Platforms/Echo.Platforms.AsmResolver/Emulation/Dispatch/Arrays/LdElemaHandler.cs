@@ -59,7 +59,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                             if (resolvedIndex >= arrayLength.AsSpan().ReadNativeInteger(context.Machine.Is32Bit))
                                 return CilDispatchResult.IndexOutOfRange(context);
                             
-                            long elementAddress = factory.GetArrayElementAddress(actualAddress, elementType, resolvedIndex.Value);
+                            long elementAddress = actualAddress
+                                .ToObjectHandle(context.Machine)
+                                .GetArrayElementAddress(elementType, resolvedIndex.Value);
+
                             result.AsSpan().WriteNativeInteger(elementAddress, context.Machine.Is32Bit);
                         }
 

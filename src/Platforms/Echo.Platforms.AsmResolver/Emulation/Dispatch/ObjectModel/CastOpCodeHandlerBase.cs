@@ -1,8 +1,6 @@
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete;
-using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
@@ -44,11 +42,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
                     case { } actualAddress:
                         // A non-null reference was passed.
-                        var objectType = actualAddress.GetObjectPointerType(context.Machine).ToTypeSignature();
+                        var handle = actualAddress.ToObjectHandle(context.Machine);
+                        var objectType = handle.GetObjectType().ToTypeSignature();
 
                         // TODO: handle full verifier-assignable-to operation.
                         return objectType.IsAssignableTo(targetType)
-                            ? HandleSuccessfulCast(context, actualAddress, targetType)
+                            ? HandleSuccessfulCast(context, handle, targetType)
                             : HandleFailedCast(context, objectType, targetType);
                 }
             }
@@ -76,7 +75,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// <param name="originalType">The type of the pushed object.</param>
         /// <param name="targetType">The type that the object was attempted to be converted to.</param>
         /// <returns>The final dispatcher result.</returns>
-        protected virtual CilDispatchResult HandleFailedCast(CilExecutionContext context, TypeSignature originalType, TypeSignature targetType)
+        protected virtual CilDispatchResult HandleFailedCast(
+            CilExecutionContext context,
+            TypeSignature originalType,
+            TypeSignature targetType)
         {
             return CilDispatchResult.InvalidCast(context, originalType, targetType);
         }
@@ -85,10 +87,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// Handles the case when the pushed value is compatible with the type specified in the instruction.
         /// </summary>
         /// <param name="context">The context to evaluate the instruction in.</param>
-        /// <param name="objectAddress">The address of the object.</param>
+        /// <param name="handle">The address of the object.</param>
         /// <param name="targetType">The type to convert the object to to.</param>
         /// <returns>The final dispatcher result.</returns>
-        protected abstract CilDispatchResult HandleSuccessfulCast(CilExecutionContext context, long objectAddress, TypeSignature targetType);
+        protected abstract CilDispatchResult HandleSuccessfulCast(
+            CilExecutionContext context,
+            ObjectHandle handle, 
+            TypeSignature targetType);
 
     }
 }

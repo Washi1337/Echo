@@ -11,45 +11,77 @@ namespace Echo.Platforms.AsmResolver.Emulation
     public static class DotNetBitVectorExtensions
     {
         /// <summary>
-        /// Interprets the span as an object pointer, and obtains the type of the object that it is referencing.
+        /// Interprets a bit vector as a reference to an object.
         /// </summary>
-        /// <param name="span">The bit vector representing the pointer to the managed object.</param>
-        /// <param name="machine">The machine that this vector resides in.</param>
-        /// <returns>The object type.</returns>
-        public static ITypeDescriptor GetObjectPointerType(this BitVectorSpan span, CilVirtualMachine machine)
+        /// <param name="objectPointer">The bit vector containing the reference.</param>
+        /// <param name="machine">The machine the address is valid in.</param>
+        /// <returns>The object handle.</returns>
+        /// <exception cref="ArgumentException">Occurs when the bit vector does not contain a fully known address.</exception>
+        public static ObjectHandle ToObjectHandle(this BitVector objectPointer, CilVirtualMachine machine)
         {
-            if (!span.IsFullyKnown)
-                throw new ArgumentException("Cannot dereference a partially unknown pointer.");
-            
-            return GetObjectPointerType(span.ReadNativeInteger(machine.Is32Bit), machine);
+            return objectPointer.AsSpan().ToObjectHandle(machine);
         }
-
+        
         /// <summary>
-        /// Interprets the integer as an object pointer, and obtains the type of the object that it is referencing.
+        /// Interprets a bit vector as a reference to an object.
         /// </summary>
-        /// <param name="objectPointer">The integer representing the pointer to the managed object.</param>
-        /// <param name="machine">The machine that this vector resides in.</param>
-        /// <returns>The object type.</returns>
-        public static ITypeDescriptor GetObjectPointerType(this long objectPointer, CilVirtualMachine machine)
+        /// <param name="objectPointer">The bit vector containing the reference.</param>
+        /// <param name="machine">The machine the address is valid in.</param>
+        /// <returns>The object handle.</returns>
+        /// <exception cref="ArgumentException">Occurs when the bit vector does not contain a fully known address.</exception>
+        public static ObjectHandle ToObjectHandle(this BitVectorSpan objectPointer, CilVirtualMachine machine)
         {
-            var pool = machine.ValueFactory.BitVectorPool;
-            var methodTableVector = pool.RentNativeInteger(machine.Is32Bit, false);
-            try
-            {
-                // Dereference the object pointer to get the bits for the method table pointer.
-                var methodTableSpan = methodTableVector.AsSpan();
-                machine.Memory.Read(objectPointer, methodTableSpan);
-
-                // Read the method table pointer.
-                long methodTablePointer = methodTableSpan.ReadNativeInteger(machine.Is32Bit);
-
-                // Get corresponding method table (== type). 
-                return machine.ValueFactory.ClrMockMemory.MethodTables.GetObject(methodTablePointer);
-            }
-            finally
-            {
-                pool.Return(methodTableVector);
-            }
+            if (!objectPointer.IsFullyKnown)
+                throw new ArgumentException("Cannot create an object handle from a partially unknown bit vector");
+            return new ObjectHandle(machine, objectPointer.ReadNativeInteger(machine.Is32Bit));
+        }
+        
+        /// <summary>
+        /// Interprets an integer as a reference to an object.
+        /// </summary>
+        /// <param name="objectPointer">The integer containing the reference.</param>
+        /// <param name="machine">The machine the address is valid in.</param>
+        /// <returns>The object handle.</returns>
+        public static ObjectHandle ToObjectHandle(this long objectPointer, CilVirtualMachine machine)
+        {
+            return new ObjectHandle(machine, objectPointer);
+        }
+        
+        /// <summary>
+        /// Interprets a bit vector as a reference to a structure.
+        /// </summary>
+        /// <param name="objectPointer">The integer containing the reference.</param>
+        /// <param name="machine">The machine the address is valid in.</param>
+        /// <returns>The structure handle.</returns>
+        /// <exception cref="ArgumentException">Occurs when the bit vector does not contain a fully known address.</exception>
+        public static StructHandle ToStructHandle(this BitVector objectPointer, CilVirtualMachine machine)
+        {
+            return objectPointer.AsSpan().ToStructHandle(machine);
+        }
+        
+        /// <summary>
+        /// Interprets a bit vector as a reference to a structure.
+        /// </summary>
+        /// <param name="objectPointer">The integer containing the reference.</param>
+        /// <param name="machine">The machine the address is valid in.</param>
+        /// <returns>The structure handle.</returns>
+        /// <exception cref="ArgumentException">Occurs when the bit vector does not contain a fully known address.</exception>
+        public static StructHandle ToStructHandle(this BitVectorSpan objectPointer, CilVirtualMachine machine)
+        {
+            if (!objectPointer.IsFullyKnown)
+                throw new ArgumentException("Cannot create an object handle from a partially unknown bit vector");
+            return new StructHandle(machine, objectPointer.ReadNativeInteger(machine.Is32Bit));
+        }
+        
+        /// <summary>
+        /// Interprets an integer as a reference to a structure.
+        /// </summary>
+        /// <param name="objectPointer">The integer containing the reference.</param>
+        /// <param name="machine">The machine the address is valid in.</param>
+        /// <returns>The structure handle.</returns>=
+        public static StructHandle ToStructHandle(this long objectPointer, CilVirtualMachine machine)
+        {
+            return new StructHandle(machine, objectPointer);
         }
 
         /// <summary>

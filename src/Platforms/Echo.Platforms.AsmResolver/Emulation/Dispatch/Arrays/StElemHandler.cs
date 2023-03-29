@@ -71,8 +71,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                                 return CilDispatchResult.IndexOutOfRange(context);
                             
                             //Write
-                            long elementAddress = factory.GetArrayElementAddress(actualAddress, elementType, resolvedIndex.Value);
-                            context.Machine.Memory.Write(elementAddress, value);
+                            actualAddress
+                                .ToObjectHandle(context.Machine)
+                                .WriteArrayElement(elementType, resolvedIndex.Value, value);
                         }
 
                         break;

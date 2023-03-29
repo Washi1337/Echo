@@ -50,10 +50,10 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
 
         // Read box object.
         Assert.True(result.IsSuccess);
-        long address = Assert.Single(stack).Contents.AsSpan().ReadNativeInteger(Context.Machine.Is32Bit);
+        var handle = Assert.Single(stack).Contents.ToObjectHandle(Context.Machine);
         
-        Assert.Equal(type, address.GetObjectPointerType(Context.Machine));
-        Assert.Equal(1337, Context.Machine.Heap.GetObjectSpan(address).SliceObjectData(factory).I32);
+        Assert.Equal(type, handle.GetObjectType());
+        Assert.Equal(1337, Context.Machine.Heap.GetObjectSpan(handle.Address).SliceObjectData(factory).I32);
     }
 
     [Fact]
@@ -82,10 +82,10 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
 
         // Read box object.
         Assert.True(result.IsSuccess);
-        long address = Assert.Single(stack).Contents.AsSpan().ReadNativeInteger(Context.Machine.Is32Bit);
+        var handle = Assert.Single(stack).Contents.ToObjectHandle(Context.Machine);
         
-        Assert.Equal(type, address.GetObjectPointerType(Context.Machine));
-        var boxObjectSpan = Context.Machine.Heap.GetObjectSpan(address);
+        Assert.Equal(type, handle.GetObjectType());
+        var boxObjectSpan = Context.Machine.Heap.GetObjectSpan(handle.Address);
         Assert.Equal(1337, boxObjectSpan.SliceObjectField(factory, fieldX).I32);
         Assert.Equal(1338, boxObjectSpan.SliceObjectField(factory, fieldY).I32);
         Assert.Equal(1339, boxObjectSpan.SliceObjectField(factory, fieldZ).I32);
