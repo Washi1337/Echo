@@ -90,8 +90,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                                 // A non-null reference was passed.
 
                                 var handle = field.DeclaringType!.IsValueType
-                                    ? actualAddress.ToStructHandle(context.Machine)
-                                    : actualAddress.ToObjectHandle(context.Machine).Contents;
+                                    ? actualAddress.AsStructHandle(context.Machine)
+                                    : actualAddress.AsObjectHandle(context.Machine).Contents;
 
                                 handle.ReadField(field, result);
                                 break;

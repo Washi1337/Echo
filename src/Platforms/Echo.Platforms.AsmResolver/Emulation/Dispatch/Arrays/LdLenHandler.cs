@@ -31,7 +31,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                         return CilDispatchResult.NullReference(context);
 
                     default:
-                        arrayAddressSpan.ToObjectHandle(context.Machine).ReadArrayLength(result);
+                        arrayAddressSpan.AsObjectHandle(context.Machine).ReadArrayLength(result);
                         break;
                 }
 

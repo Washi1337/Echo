@@ -72,7 +72,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                             
                             //Write
                             actualAddress
-                                .ToObjectHandle(context.Machine)
+                                .AsObjectHandle(context.Machine)
                                 .WriteArrayElement(elementType, resolvedIndex.Value, value);
                         }
 

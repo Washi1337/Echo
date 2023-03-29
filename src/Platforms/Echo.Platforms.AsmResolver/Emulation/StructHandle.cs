@@ -98,5 +98,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 return (Machine.GetHashCode() * 397) ^ Address.GetHashCode();
             }
         }
+        
+        /// <inheritdoc />
+        public override string ToString() => Address.ToString(Machine.Is32Bit ? "X8" : "X16");
     }
 }

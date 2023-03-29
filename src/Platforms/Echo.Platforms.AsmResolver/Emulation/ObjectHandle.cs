@@ -269,5 +269,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             }
         }
 
+        /// <inheritdoc />
+        public override string ToString() => Address.ToString(Machine.Is32Bit ? "X8" : "X16");
     }
 }

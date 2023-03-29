@@ -27,7 +27,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Constants
             var value = Assert.Single(Context.CurrentFrame.EvaluationStack);
             Assert.Equal(StackSlotTypeHint.Integer, value.TypeHint);
 
-            var stringObject = value.Contents.ToObjectHandle(Context.Machine);
+            var stringObject = value.Contents.AsObjectHandle(Context.Machine);
             var stringData = stringObject.ReadStringData();
             Assert.Equal(operand, new string(MemoryMarshal.Cast<byte, char>(stringData.Bits)));
         }

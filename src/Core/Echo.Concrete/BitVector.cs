@@ -60,7 +60,7 @@ namespace Echo.Concrete
         /// <param name="value">The bits.</param>
         public BitVector(sbyte value)
         {
-            Bits = BitConverter.GetBytes(value);
+            Bits = new byte[] {unchecked((byte) value)};
             KnownMask = new byte[] {0xFF};
         }
 

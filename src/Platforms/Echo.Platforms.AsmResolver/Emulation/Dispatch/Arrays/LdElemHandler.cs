@@ -73,7 +73,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                                 return CilDispatchResult.IndexOutOfRange(context);
 
                             actualAddress
-                                .ToObjectHandle(context.Machine)
+                                .AsObjectHandle(context.Machine)
                                 .ReadArrayElement(elementType, resolvedIndex.Value, result);
                         }
 

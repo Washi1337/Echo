@@ -17,9 +17,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="machine">The machine the address is valid in.</param>
         /// <returns>The object handle.</returns>
         /// <exception cref="ArgumentException">Occurs when the bit vector does not contain a fully known address.</exception>
-        public static ObjectHandle ToObjectHandle(this BitVector objectPointer, CilVirtualMachine machine)
+        public static ObjectHandle AsObjectHandle(this BitVector objectPointer, CilVirtualMachine machine)
         {
-            return objectPointer.AsSpan().ToObjectHandle(machine);
+            return objectPointer.AsSpan().AsObjectHandle(machine);
         }
         
         /// <summary>
@@ -29,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="machine">The machine the address is valid in.</param>
         /// <returns>The object handle.</returns>
         /// <exception cref="ArgumentException">Occurs when the bit vector does not contain a fully known address.</exception>
-        public static ObjectHandle ToObjectHandle(this BitVectorSpan objectPointer, CilVirtualMachine machine)
+        public static ObjectHandle AsObjectHandle(this BitVectorSpan objectPointer, CilVirtualMachine machine)
         {
             if (!objectPointer.IsFullyKnown)
                 throw new ArgumentException("Cannot create an object handle from a partially unknown bit vector");
@@ -42,7 +42,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="objectPointer">The integer containing the reference.</param>
         /// <param name="machine">The machine the address is valid in.</param>
         /// <returns>The object handle.</returns>
-        public static ObjectHandle ToObjectHandle(this long objectPointer, CilVirtualMachine machine)
+        public static ObjectHandle AsObjectHandle(this long objectPointer, CilVirtualMachine machine)
         {
             return new ObjectHandle(machine, objectPointer);
         }
@@ -54,9 +54,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="machine">The machine the address is valid in.</param>
         /// <returns>The structure handle.</returns>
         /// <exception cref="ArgumentException">Occurs when the bit vector does not contain a fully known address.</exception>
-        public static StructHandle ToStructHandle(this BitVector objectPointer, CilVirtualMachine machine)
+        public static StructHandle AsStructHandle(this BitVector objectPointer, CilVirtualMachine machine)
         {
-            return objectPointer.AsSpan().ToStructHandle(machine);
+            return objectPointer.AsSpan().AsStructHandle(machine);
         }
         
         /// <summary>
@@ -66,7 +66,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="machine">The machine the address is valid in.</param>
         /// <returns>The structure handle.</returns>
         /// <exception cref="ArgumentException">Occurs when the bit vector does not contain a fully known address.</exception>
-        public static StructHandle ToStructHandle(this BitVectorSpan objectPointer, CilVirtualMachine machine)
+        public static StructHandle AsStructHandle(this BitVectorSpan objectPointer, CilVirtualMachine machine)
         {
             if (!objectPointer.IsFullyKnown)
                 throw new ArgumentException("Cannot create an object handle from a partially unknown bit vector");
@@ -79,7 +79,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="objectPointer">The integer containing the reference.</param>
         /// <param name="machine">The machine the address is valid in.</param>
         /// <returns>The structure handle.</returns>=
-        public static StructHandle ToStructHandle(this long objectPointer, CilVirtualMachine machine)
+        public static StructHandle AsStructHandle(this long objectPointer, CilVirtualMachine machine)
         {
             return new StructHandle(machine, objectPointer);
         }

@@ -50,7 +50,7 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
 
         // Read box object.
         Assert.True(result.IsSuccess);
-        var handle = Assert.Single(stack).Contents.ToObjectHandle(Context.Machine);
+        var handle = Assert.Single(stack).Contents.AsObjectHandle(Context.Machine);
         
         Assert.Equal(type, handle.GetObjectType());
         Assert.Equal(1337, Context.Machine.Heap.GetObjectSpan(handle.Address).SliceObjectData(factory).I32);
@@ -82,7 +82,7 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
 
         // Read box object.
         Assert.True(result.IsSuccess);
-        var handle = Assert.Single(stack).Contents.ToObjectHandle(Context.Machine);
+        var handle = Assert.Single(stack).Contents.AsObjectHandle(Context.Machine);
         
         Assert.Equal(type, handle.GetObjectType());
         var boxObjectSpan = Context.Machine.Heap.GetObjectSpan(handle.Address);

@@ -29,12 +29,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public CilVirtualMachine(ModuleDefinition contextModule, bool is32Bit)
         {
             Memory = new VirtualMemory(is32Bit ? uint.MaxValue : long.MaxValue);
-            ValueFactory = new ValueFactory(contextModule, is32Bit);
             Loader = new PELoader(Memory);
+            
+            ValueFactory = new ValueFactory(contextModule, is32Bit);
+            ObjectMapMemory = new ObjectMapMemory(this, 0x1000_1000);
+            ObjectMarshaller = new ObjectMarshaller(this);
 
             if (is32Bit)
             {
                 Memory.Map(0x1000_0000, Heap = new ManagedObjectHeap(0x0100_0000, ValueFactory));
+                Memory.Map(0x6000_0000, ObjectMapMemory);
                 Memory.Map(0x7000_0000, StaticFields = new StaticFieldStorage(ValueFactory, 0x0100_0000));
                 Memory.Map(0x7100_0000, ValueFactory.ClrMockMemory);
                 Memory.Map(0x7fe0_0000, CallStack = new CallStack(0x10_0000, ValueFactory));
@@ -42,6 +46,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             else
             {
                 Memory.Map(0x0000_0100_0000_0000, Heap = new ManagedObjectHeap(0x01000_0000, ValueFactory));
+                Memory.Map(0x0000_7ffe_0000_0000, ObjectMapMemory);
                 Memory.Map(0x0000_7fff_0000_0000, StaticFields = new StaticFieldStorage(ValueFactory, 0x1000_0000));
                 Memory.Map(0x0000_7fff_1000_0000, ValueFactory.ClrMockMemory);
                 Memory.Map(0x0000_7fff_8000_0000, CallStack = new CallStack(0x100_0000, ValueFactory));
@@ -94,6 +99,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
+        /// Gets the memory manager that embeds managed objects into virtual memory.
+        /// </summary>
+        public ObjectMapMemory ObjectMapMemory
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the service that is responsible for managing types in the virtual machine.
         /// </summary>
         public ValueFactory ValueFactory
@@ -139,6 +152,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get; 
             set;
         } = ThrowUnknownResolver.Instance;
+
+        /// <summary>
+        /// Gets or sets the service for marshalling managed objects into bitvectors and back.
+        /// </summary>
+        public IObjectMarshaller ObjectMarshaller
+        {
+            get;
+            set;
+        }
         
         /// <summary>
         /// Runs the virtual machine until it halts.

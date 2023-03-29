@@ -29,7 +29,7 @@ public class LdFldaHandlerTest : CilOpCodeHandlerTestBase
         var field = classType.Fields.First(f => f.Name == nameof(SimpleClass.IntField));
 
         // Allocate object of the class, and set the field to 1337.
-        var handle = Context.Machine.Heap.AllocateObject(classType, true).ToObjectHandle(Context.Machine);
+        var handle = Context.Machine.Heap.AllocateObject(classType, true).AsObjectHandle(Context.Machine);
         long fieldAddress = handle.GetFieldAddress(field);
         
         // Push address of object onto stack.
@@ -64,7 +64,7 @@ public class LdFldaHandlerTest : CilOpCodeHandlerTestBase
         
         // Push address to struct.
         var stack = Context.CurrentFrame.EvaluationStack;
-        var handle = Context.CurrentFrame.GetLocalAddress(0).ToStructHandle(Context.Machine);
+        var handle = Context.CurrentFrame.GetLocalAddress(0).AsStructHandle(Context.Machine);
         long fieldAddress = handle.GetFieldAddress(field);
         
         stack.Push(new StackSlot(handle.Address, StackSlotTypeHint.Integer));
