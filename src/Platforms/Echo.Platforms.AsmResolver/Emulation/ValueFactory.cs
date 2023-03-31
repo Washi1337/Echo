@@ -260,8 +260,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <param name="value">The value to initialize the integer with.</param>
         /// <returns>The constructed bit vector.</returns>
-        public BitVector CreateNativeInteger(long value) => new(value);
-        
+        public BitVector CreateNativeInteger(long value)
+        {
+            var vector = new BitVector((int) (PointerSize * 8), false);
+            vector.AsSpan().WriteNativeInteger(value, Is32Bit);
+            return vector;
+        }
+
         /// <summary>
         /// Rents a native integer bit vector from the bit vector pool.
         /// </summary>
