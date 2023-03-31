@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using AsmResolver.DotNet;
 using Echo.Concrete;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
@@ -38,6 +39,23 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
             Assert.Equal(InvocationResultType.StepOver, result.ResultType);
             Assert.NotNull(result.Value);
             Assert.False(result.Value!.AsSpan().IsFullyKnown);
+        }
+
+        [Fact]
+        public void ReturnUnknownBoolean()
+        {
+            var invoker = DefaultInvokers.ReturnUnknown;
+
+            var type = _fixture.MockModule.TopLevelTypes.First(t => t.Name == nameof(TestClass));
+            var method = type.Methods.First(m => m.Name == nameof(TestClass.GetBoolean));
+
+            var result = invoker.Invoke(_context, method, Array.Empty<BitVector>());
+            Assert.Equal(InvocationResultType.StepOver, result.ResultType);
+            Assert.NotNull(result.Value);
+            Assert.False(result.Value!.AsSpan().IsFullyKnown);
+
+            Assert.Equal(Trilean.Unknown, result.Value.AsSpan()[0]);
+            Assert.All(Enumerable.Range(1, result.Value.Count - 1), i => Assert.Equal(Trilean.False, result.Value.AsSpan()[i]));
         }
 
         [Fact]

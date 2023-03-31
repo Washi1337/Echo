@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using AsmResolver.DotNet;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation
@@ -9,15 +11,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
     {
         internal static readonly ReturnDefaultInvoker ReturnUnknown = new(false);
         internal static readonly ReturnDefaultInvoker ReturnDefault = new(true);
+        private readonly bool _initialize;
 
-        public ReturnDefaultInvoker(bool initialize)
+        private ReturnDefaultInvoker(bool initialize)
         {
-            Initialize = initialize;
-        }
-
-        public bool Initialize
-        {
-            get;
+            _initialize = initialize;
         }
 
         /// <inheritdoc />
@@ -31,8 +29,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
             else
             {
                 var factory = context.Machine.ValueFactory;
-                uint size = factory.GetTypeValueMemoryLayout(method.Signature.ReturnType).Size;
-                returnValue = factory.BitVectorPool.Rent((int) size * 8, Initialize);
+                if (method.Signature.ReturnType.StripModifiers().ElementType != ElementType.Boolean)
+                {
+                    // Fully initialize or fully mark unknown.
+                    returnValue = factory.RentValue(method.Signature.ReturnType, _initialize);
+                }
+                else
+                {
+                    // For booleans, we only set the LSB to unknown if necessary.
+                    returnValue = factory.RentValue(method.Signature.ReturnType, true);
+                    if (!_initialize)
+                    {
+                        var span = returnValue.AsSpan();
+                        span[0] = Trilean.Unknown;
+                    }
+                }
             }
 
             return InvocationResult.StepOver(returnValue);
