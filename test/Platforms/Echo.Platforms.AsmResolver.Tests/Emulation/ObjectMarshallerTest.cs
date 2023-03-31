@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using Echo.Concrete;
@@ -95,6 +96,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             Assert.True(embedded.ReadField(simpleClassField).AsSpan().IsZero.ToBoolean());
         }
 
+        [SuppressMessage("Usage", "xUnit1025:InlineData should be unique within the Theory it belongs to")]
         [Theory]
         [InlineData(new byte[] {0x01}, true)]
         [InlineData(new byte[] {0x00}, false)]

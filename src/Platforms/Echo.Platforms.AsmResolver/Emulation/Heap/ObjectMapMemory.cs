@@ -53,7 +53,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// </summary>
         /// <param name="value">The object to embed into the machine.</param>
         /// <returns>The mapped object.</returns>
-        [return: NotNullIfNotNull(nameof(value))]
+        [return: NotNullIfNotNull("value")]
         public MappedObject? GetOrCreateMapping(object? value)
         {
             if (value is null)

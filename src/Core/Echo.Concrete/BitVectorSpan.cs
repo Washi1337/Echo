@@ -265,7 +265,7 @@ namespace Echo.Concrete
         /// Fills the bit vector with the repetition of a partially known byte.
         /// </summary>
         /// <param name="value">The value to fill the bit vector with.</param>
-        /// <param name="knownMask">The mask indicating which bits in <paramref name="data"/> are known.</param>
+        /// <param name="knownMask">The mask indicating which bits in <paramref name="value"/> are known.</param>
         public void Fill(byte value, byte knownMask)
         {
             Bits.Fill(value);
