@@ -29,21 +29,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
             else
             {
                 var factory = context.Machine.ValueFactory;
-                if (method.Signature.ReturnType.StripModifiers().ElementType != ElementType.Boolean)
-                {
-                    // Fully initialize or fully mark unknown.
-                    returnValue = factory.RentValue(method.Signature.ReturnType, _initialize);
-                }
-                else
-                {
-                    // For booleans, we only set the LSB to unknown if necessary.
-                    returnValue = factory.RentValue(method.Signature.ReturnType, true);
-                    if (!_initialize)
-                    {
-                        var span = returnValue.AsSpan();
-                        span[0] = Trilean.Unknown;
-                    }
-                }
+                returnValue = factory.RentValue(method.Signature.ReturnType, _initialize);
             }
 
             return InvocationResult.StepOver(returnValue);

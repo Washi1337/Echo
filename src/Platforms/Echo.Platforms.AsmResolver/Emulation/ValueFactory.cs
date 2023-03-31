@@ -9,6 +9,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Concrete;
+using Echo.Core;
 using Echo.Platforms.AsmResolver.Emulation.Runtime;
 
 namespace Echo.Platforms.AsmResolver.Emulation
@@ -292,8 +293,21 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The constructed bit vector.</returns>
         public BitVector CreateValue(TypeSignature type, bool initialize)
         {
+            type = type.StripModifiers();
             uint size = GetTypeValueMemoryLayout(type).Size;
-            return new BitVector((int) size * 8, initialize);
+            if (type.ElementType != ElementType.Boolean)
+                return new BitVector((int) size * 8, initialize);
+            
+            // For booleans, we only set the LSB to unknown if necessary.
+            var result = new BitVector((int) size * 8, true);
+            
+            if (!initialize)
+            {
+                var span = result.AsSpan();
+                span[0] = Trilean.Unknown;
+            }
+
+            return result;
         }
         
         /// <summary>
@@ -306,8 +320,21 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The rented bit vector.</returns>
         public BitVector RentValue(TypeSignature type, bool initialize)
         {
+            type = type.StripModifiers();
             uint size = GetTypeValueMemoryLayout(type).Size;
-            return BitVectorPool.Rent((int) size * 8, initialize);
+            if (type.ElementType != ElementType.Boolean)
+                return BitVectorPool.Rent((int) size * 8, initialize);
+
+            // For booleans, we only set the LSB to unknown if necessary.
+            var result = BitVectorPool.Rent((int) size * 8, true);
+            
+            if (!initialize)
+            {
+                var span = result.AsSpan();
+                span[0] = Trilean.Unknown;
+            }
+
+            return result;
         }
         
         /// <summary>
