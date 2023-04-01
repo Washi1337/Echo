@@ -10,7 +10,6 @@ namespace Echo.Platforms.Iced
     /// </summary>
     public class X86Architecture : IInstructionSetArchitecture<Instruction>
     {
-        private readonly Formatter _formatter = new NasmFormatter();
         private readonly InstructionInfoFactory _infoFactory = new InstructionInfoFactory();
         private readonly IDictionary<Register, X86GeneralRegister> _gpr = new Dictionary<Register, X86GeneralRegister>();
         private readonly IDictionary<RflagsBits, X86FlagsRegister> _flags = new Dictionary<RflagsBits, X86FlagsRegister>();
