@@ -39,7 +39,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             
             var result = context.Machine.ValueFactory.RentValue(field.Signature!.FieldType, false);
             result.AsSpan().Write(context.Machine.StaticFields.GetFieldSpan(field));
-            context.CurrentFrame.EvaluationStack.Push(result, field.Signature!.FieldType);
+            context.CurrentFrame.EvaluationStack.Push(result, field.Signature!.FieldType, true);
             
             return CilDispatchResult.Success();
         }

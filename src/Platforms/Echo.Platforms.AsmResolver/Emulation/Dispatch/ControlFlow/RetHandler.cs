@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
             {
                 var returnType = frame.Method.Signature.ReturnType;
                 var value = frame.EvaluationStack.Pop(returnType);
-                context.CurrentFrame.EvaluationStack.Push(value, returnType);
+                context.CurrentFrame.EvaluationStack.Push(value, returnType, true);
             }
 
             return CilDispatchResult.Success();

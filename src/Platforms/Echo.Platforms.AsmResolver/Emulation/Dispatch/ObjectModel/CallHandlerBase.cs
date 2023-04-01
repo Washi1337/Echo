@@ -19,25 +19,33 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var method = (IMethodDescriptor) instruction.Operand!;
             var arguments = GetArguments(context, method);
 
-            var callerFrame = context.CurrentFrame;
+            try
+            {
+                var callerFrame = context.CurrentFrame;
 
-            // Devirtualize the method in the operand.
-            var devirtualization = DevirtualizeMethod(context, instruction, arguments);
-            if (devirtualization.IsUnknown)
-                throw new CilEmulatorException($"Could not devirtualize method call {instruction}.");
-            
-            // If that resulted in any error, throw it.
-            if (!devirtualization.IsSuccess)
-                return CilDispatchResult.Exception(new BitVector(devirtualization.ExceptionPointer.Value));
-            
-            // Invoke it otherwise.
-            var result = Invoke(context, devirtualization.ResultingMethod, arguments);
+                // Devirtualize the method in the operand.
+                var devirtualization = DevirtualizeMethod(context, instruction, arguments);
+                if (devirtualization.IsUnknown)
+                    throw new CilEmulatorException($"Could not devirtualize method call {instruction}.");
 
-            // Move to the next instruction if call succeeded.
-            if (result.IsSuccess)
-                callerFrame.ProgramCounter += instruction.Size;
+                // If that resulted in any error, throw it.
+                if (!devirtualization.IsSuccess)
+                    return CilDispatchResult.Exception(new BitVector(devirtualization.ExceptionPointer.Value));
+
+                // Invoke it otherwise.
+                var result = Invoke(context, devirtualization.ResultingMethod, arguments);
+
+                // Move to the next instruction if call succeeded.
+                if (result.IsSuccess)
+                    callerFrame.ProgramCounter += instruction.Size;
                 
-            return result;
+                return result;
+            }
+            finally
+            {
+                for (int i = 0; i < arguments.Count; i++)
+                    context.Machine.ValueFactory.BitVectorPool.Return(arguments[i]);
+            }
         }
 
         private IList<BitVector> GetArguments(CilExecutionContext context, IMethodDescriptor method)
@@ -102,7 +110,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 case InvocationResultType.StepOver:
                     // Method was fully handled by the invoker, push result if it produced any.
                     if (result.Value is not null)
-                        context.CurrentFrame.EvaluationStack.Push(result.Value, method.Signature!.ReturnType);
+                        context.CurrentFrame.EvaluationStack.Push(result.Value, method.Signature!.ReturnType, true);
 
                     return CilDispatchResult.Success();
 

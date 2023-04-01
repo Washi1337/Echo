@@ -19,13 +19,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
 
             // Extract parameter in opcode or operand.
             var parameter = instruction.GetParameter(frame.Body!.Owner.Parameters);
-
-            // Read argument from stack frame.
+            
             var result = factory.RentValue(parameter.ParameterType, false);
-            frame.ReadArgument(parameter.Index, result.AsSpan());
-
-            // Marshal and push.
-            context.CurrentFrame.EvaluationStack.Push(result, parameter.ParameterType);
+            try
+            {
+                // Marshal and push.
+                frame.ReadArgument(parameter.Index, result.AsSpan());
+                context.CurrentFrame.EvaluationStack.Push(result, parameter.ParameterType);
+            }
+            finally
+            {
+                factory.BitVectorPool.Return(result);
+            }
 
             return CilDispatchResult.Success();
         }

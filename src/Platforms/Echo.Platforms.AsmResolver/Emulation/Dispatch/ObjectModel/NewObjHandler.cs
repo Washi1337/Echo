@@ -14,22 +14,32 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// <inheritdoc />
         public override CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
         {
+            var stack = context.CurrentFrame.EvaluationStack;
+            var factory = context.Machine.ValueFactory;
+
             // Allocate the new object.
             var instanceType = ((IMethodDescriptor) instruction.Operand!).DeclaringType!.ToTypeSignature();
-            var address = context.Machine.ValueFactory.RentNativeInteger(false);
-            address.AsSpan().Write(context.Machine.Heap.AllocateObject(instanceType, false));
-            
-            // Push onto stack.
-            var stackSlot = context.CurrentFrame.EvaluationStack.Push(address, instanceType);
-            
-            // Invoke constructor.
-            var result = base.Dispatch(context, instruction);
+            var address = factory.RentNativeInteger(false);
+            try
+            {
+                address.AsSpan().Write(context.Machine.Heap.AllocateObject(instanceType, false));
 
-            // If successful, push the resulting object onto the stack.
-            if (result.IsSuccess)
-                context.CurrentFrame.EvaluationStack.Push(stackSlot);
+                // Push onto stack.
+                stack.Push(address, instanceType);
 
-            return result;
+                // Invoke constructor.
+                var result = base.Dispatch(context, instruction);
+
+                // If successful, push the resulting object onto the stack.
+                if (result.IsSuccess)
+                    stack.Push(address, instanceType);
+
+                return result;
+            }
+            finally
+            {
+                factory.BitVectorPool.Return(address);
+            }
         }
 
         /// <inheritdoc />

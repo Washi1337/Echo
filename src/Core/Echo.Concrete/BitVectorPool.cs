@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Echo.Concrete
 {
@@ -26,6 +28,7 @@ namespace Echo.Concrete
                     instance.AsSpan().Clear();
                 else 
                     instance.AsSpan().MarkFullyUnknown();
+                
                 return instance;
             }
 
