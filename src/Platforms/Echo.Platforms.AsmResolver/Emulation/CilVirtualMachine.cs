@@ -34,7 +34,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Loader = new PELoader(Memory);
             
             ValueFactory = new ValueFactory(contextModule, is32Bit);
-            ObjectMapMemory = new ObjectMapMemory(this, 0x1000_1000);
+            ObjectMapMemory = new ObjectMapMemory(this, 0x1000_0000);
             ObjectMarshaller = new ObjectMarshaller(this);
 
             if (is32Bit)
