@@ -274,6 +274,9 @@ namespace Echo.DataFlow.Emulation
         /// <inheritdoc />
         public bool SetEquals(IEnumerable<DataSource<T>> other)
         {
+            if (other is SymbolicValue<T> otherSymbolicValue)
+                return SetEqualsFast(otherSymbolicValue);
+            
             switch (_listObject)
             {
                 case null:
@@ -287,6 +290,24 @@ namespace Echo.DataFlow.Emulation
 
                 case ISet<DataSource<T>> nodes:
                     return nodes.SetEquals(other);
+
+                default:
+                    return ThrowInvalidStateException();
+            }
+        }
+        
+        private bool SetEqualsFast(SymbolicValue<T> other)
+        {
+            switch (_listObject)
+            {
+                case null:
+                    return other._listObject is null;
+                
+                case DataSource<T> node:
+                    return other._listObject is DataSource<T> otherSource && node == otherSource;
+
+                case ISet<DataSource<T>> nodes:
+                    return other._listObject is ISet<DataSource<T>> otherSet && nodes.SetEquals(otherSet);
 
                 default:
                     return ThrowInvalidStateException();
