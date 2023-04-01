@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
@@ -31,7 +33,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 case TableIndex.MethodSpec:
                     address = clrMemory.Methods.GetAddress((IMethodDescriptor) member);
                     break;
-                
                 case TableIndex.Field:
                     address = clrMemory.Fields.GetAddress((IFieldDescriptor) member);
                     break;

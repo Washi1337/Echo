@@ -14,7 +14,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
     /// builders, such as the <see cref="SymbolicFlowGraphBuilder{TInstruction}"/> class.
     /// </para>
     /// </remarks>
-    public interface IStateTransitionResolver<TInstruction>
+    public interface IStateTransitioner<TInstruction>
     {
         /// <summary>
         /// Gets the initial state of the program at a provided entry point address.

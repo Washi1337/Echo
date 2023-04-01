@@ -12,7 +12,7 @@ namespace Echo.ControlFlow.Construction
     public abstract class FlowGraphBuilderBase<TInstruction> : IFlowGraphBuilder<TInstruction>
     {
         /// <inheritdoc />
-        public abstract IInstructionSetArchitecture<TInstruction> Architecture
+        public abstract IArchitecture<TInstruction> Architecture
         {
             get;
         }

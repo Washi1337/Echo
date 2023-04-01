@@ -15,7 +15,7 @@ namespace Echo.ControlFlow.Construction
         /// <summary>
         /// Gets the architecture of the instructions to graph.
         /// </summary>
-        IInstructionSetArchitecture<TInstruction> Architecture
+        IArchitecture<TInstruction> Architecture
         {
             get;
         }

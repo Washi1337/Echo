@@ -9,7 +9,7 @@ namespace Echo.Code
         /// <summary>
         /// Gets the architecture describing the instructions exposed by this instruction provider.
         /// </summary>
-        IInstructionSetArchitecture<TInstruction> Architecture
+        IArchitecture<TInstruction> Architecture
         {
             get;
         }

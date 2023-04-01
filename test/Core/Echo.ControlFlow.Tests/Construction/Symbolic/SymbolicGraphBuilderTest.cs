@@ -22,7 +22,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             long entrypoint = 0,
             IEnumerable<long> knownBlockHeaders = null)
         {
-            var dfgBuilder = new DummyTransitionResolver();
+            var dfgBuilder = new DummyTransitioner();
             var cfgBuilder = new SymbolicFlowGraphBuilder<DummyInstruction>(
                 DummyArchitecture.Instance,
                 instructions,
@@ -237,7 +237,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 DummyInstruction.Ret(1),
             };
             
-            var dfgBuilder = new DummyTransitionResolver
+            var dfgBuilder = new DummyTransitioner
             {
                 InitialState = SymbolicProgramState<DummyInstruction>.Empty
             };
@@ -259,7 +259,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 DummyInstruction.Ret(1),
             };
 
-            var dfgBuilder = new DummyTransitionResolver();
+            var dfgBuilder = new DummyTransitioner();
             var argument = new ExternalDataSourceNode<DummyInstruction>(-1, "Argument 1");
             dfgBuilder.DataFlowGraph.Nodes.Add(argument);
             dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>(0,

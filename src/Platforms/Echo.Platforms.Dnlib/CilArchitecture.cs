@@ -11,7 +11,7 @@ namespace Echo.Platforms.Dnlib
     /// <summary>
     /// Provides a description of the CIL instruction set architecture (ISA) that is modelled by dnlib.   
     /// </summary>
-    public class CilArchitecture : IInstructionSetArchitecture<Instruction>
+    public class CilArchitecture : IArchitecture<Instruction>
     {
         private readonly IList<CilVariable> _variables;
         private readonly IList<CilParameter> _parameters;

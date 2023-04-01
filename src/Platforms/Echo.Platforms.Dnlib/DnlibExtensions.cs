@@ -89,7 +89,7 @@ namespace Echo.Platforms.Dnlib
             var body = self.Body;
 
             var architecture = new CilArchitecture(self);
-            var dfgBuilder = new CilStateTransitionResolver(architecture);
+            var dfgBuilder = new CilStateTransitioner(architecture);
             var cfgBuilder = new SymbolicFlowGraphBuilder<Instruction>(
                 architecture,
                 body.Instructions,

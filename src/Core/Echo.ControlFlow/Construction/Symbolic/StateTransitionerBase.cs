@@ -12,7 +12,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
     /// resolving each program state transition an instruction might apply.  
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to evaluate.</typeparam>
-    public abstract class StateTransitionResolverBase<TInstruction> : IStateTransitionResolver<TInstruction>
+    public abstract class StateTransitionerBase<TInstruction> : IStateTransitioner<TInstruction>
     {
         private IVariable[] _variablesBuffer = new IVariable[1];
         
@@ -20,7 +20,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// Initializes the base implementation of the state state transition resolver.
         /// </summary>
         /// <param name="architecture">The architecture that describes the instruction set.</param>
-        public StateTransitionResolverBase(IInstructionSetArchitecture<TInstruction> architecture)
+        public StateTransitionerBase(IArchitecture<TInstruction> architecture)
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
             DataFlowGraph = new DataFlowGraph<TInstruction>(architecture);
@@ -29,7 +29,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <summary>
         /// Gets the architecture for which this transition resolver is built.
         /// </summary>
-        public IInstructionSetArchitecture<TInstruction> Architecture
+        public IArchitecture<TInstruction> Architecture
         {
             get;
         }
@@ -43,8 +43,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         }
 
         /// <inheritdoc />
-        public virtual SymbolicProgramState<TInstruction> GetInitialState(long entrypointAddress) => 
-            new SymbolicProgramState<TInstruction>(entrypointAddress);
+        public virtual SymbolicProgramState<TInstruction> GetInitialState(long entrypointAddress) => new(entrypointAddress);
 
         /// <inheritdoc />
         public abstract int GetTransitionCount(

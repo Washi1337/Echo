@@ -18,7 +18,7 @@ namespace Echo.Code
         /// <param name="instructions">The instructions to put into the wrapper.</param>
         /// <exception cref="ArgumentException">Occurs when there are multiple instructions with the same offset.</exception>
         /// <exception cref="ArgumentNullException">Occurs when the provided instruction sequence is <c>null</c>.</exception>
-        public ListInstructionProvider(IInstructionSetArchitecture<TInstruction> architecture, IEnumerable<TInstruction> instructions)
+        public ListInstructionProvider(IArchitecture<TInstruction> architecture, IEnumerable<TInstruction> instructions)
         {
             if (instructions == null)
                 throw new ArgumentNullException(nameof(instructions));
@@ -34,7 +34,7 @@ namespace Echo.Code
         }
 
         /// <inheritdoc />
-        public IInstructionSetArchitecture<TInstruction> Architecture
+        public IArchitecture<TInstruction> Architecture
         {
             get;
         }

@@ -8,16 +8,16 @@ using Iced.Intel;
 namespace Echo.Platforms.Iced
 {
     /// <summary>
-    /// Provides an implementation of the <see cref="IStateTransitionResolver{TInstruction}"/> interface, that
+    /// Provides an implementation of the <see cref="IStateTransitioner{TInstruction}"/> interface, that
     /// implements the state transitioning for the x86 instruction set.
     /// </summary>
-    public class X86StateTransitionResolver : StateTransitionResolverBase<Instruction>
+    public class X86StateTransitioner : StateTransitionerBase<Instruction>
     {
         /// <summary>
-        /// Creates a new instance of <see cref="X86StateTransitionResolver"/>.
+        /// Creates a new instance of <see cref="X86StateTransitioner"/>.
         /// </summary>
         /// <param name="architecture">The x86 architecture instance.</param>
-        public X86StateTransitionResolver(IInstructionSetArchitecture<Instruction> architecture)
+        public X86StateTransitioner(IArchitecture<Instruction> architecture)
             : base(architecture)
         {
         }

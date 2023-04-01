@@ -27,7 +27,7 @@ namespace Echo.ControlFlow.Construction.Static
         /// <param name="successorResolver">The object used to determine the successors of a single instruction.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments is <c>null</c>.</exception>
         public StaticFlowGraphBuilder(
-            IInstructionSetArchitecture<TInstruction> architecture,
+            IArchitecture<TInstruction> architecture,
             IEnumerable<TInstruction> instructions,
             IStaticSuccessorResolver<TInstruction> successorResolver)
         {
@@ -58,7 +58,7 @@ namespace Echo.ControlFlow.Construction.Static
         }
 
         /// <inheritdoc />
-        public override IInstructionSetArchitecture<TInstruction> Architecture => Instructions.Architecture;
+        public override IArchitecture<TInstruction> Architecture => Instructions.Architecture;
 
         /// <summary>
         /// Gets the object used to determine the successors of a single instruction.

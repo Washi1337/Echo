@@ -11,15 +11,15 @@ namespace Echo.Platforms.Dnlib
     /// <summary>
     /// Provides an implementation of a state transition resolver for the CIL instruction set.
     /// </summary>
-    public class CilStateTransitionResolver : StateTransitionResolverBase<Instruction>
+    public class CilStateTransitioner : StateTransitionerBase<Instruction>
     {
         private readonly CilArchitecture _architecture;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="CilStateTransitionResolver"/> class.
+        /// Creates a new instance of the <see cref="CilStateTransitioner"/> class.
         /// </summary>
         /// <param name="architecture">The CIL architecture variant to compute state transitions for.</param>
-        public CilStateTransitionResolver(CilArchitecture architecture) : base(architecture)
+        public CilStateTransitioner(CilArchitecture architecture) : base(architecture)
         {
             _architecture = architecture;
         }

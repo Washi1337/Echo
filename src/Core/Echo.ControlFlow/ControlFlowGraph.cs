@@ -24,7 +24,7 @@ namespace Echo.ControlFlow
         /// Creates a new empty graph.
         /// </summary>
         /// <param name="architecture">The architecture description of the instructions stored in the control flow graph.</param>
-        public ControlFlowGraph(IInstructionSetArchitecture<TInstruction> architecture)
+        public ControlFlowGraph(IArchitecture<TInstruction> architecture)
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
             Nodes = new NodeCollection<TInstruction>(this);
@@ -51,7 +51,7 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the architecture of the instructions that are stored in the control flow graph.
         /// </summary>
-        public IInstructionSetArchitecture<TInstruction> Architecture
+        public IArchitecture<TInstruction> Architecture
         {
             get;
         }

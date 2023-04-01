@@ -17,7 +17,7 @@ namespace Echo.Ast.Construction
             DataFlowGraph = dataFlowGraph;
         }
 
-        internal IInstructionSetArchitecture<TInstruction> Architecture => _controlFlowGraph.Architecture;
+        internal IArchitecture<TInstruction> Architecture => _controlFlowGraph.Architecture;
 
         internal Dictionary<TInstruction, AstVariable[]> StackSlots
         {

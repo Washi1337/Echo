@@ -19,41 +19,41 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// </summary>
         /// <param name="architecture">The architecture of the instructions.</param>
         /// <param name="instructions">The instructions to traverse.</param>
-        /// <param name="transitionResolver">The transition resolver to use for inferring branch targets.</param>
+        /// <param name="transitioner">The transition resolver to use for inferring branch targets.</param>
         public SymbolicFlowGraphBuilder(
-            IInstructionSetArchitecture<TInstruction> architecture,
+            IArchitecture<TInstruction> architecture,
             IEnumerable<TInstruction> instructions, 
-            IStateTransitionResolver<TInstruction> transitionResolver)
+            IStateTransitioner<TInstruction> transitioner)
         {
             Instructions = new StaticToSymbolicAdapter<TInstruction>(architecture, instructions);
-            TransitionResolver = transitionResolver ?? throw new ArgumentNullException(nameof(transitionResolver));
+            StateTransitioner = transitioner ?? throw new ArgumentNullException(nameof(transitioner));
         }
         
         /// <summary>
         /// Creates a new symbolic control flow graph builder using the provided program state transition resolver.  
         /// </summary>
         /// <param name="instructions">The instructions to traverse.</param>
-        /// <param name="transitionResolver">The transition resolver to use for inferring branch targets.</param>
+        /// <param name="transitioner">The transition resolver to use for inferring branch targets.</param>
         public SymbolicFlowGraphBuilder(
             IStaticInstructionProvider<TInstruction> instructions, 
-            IStateTransitionResolver<TInstruction> transitionResolver)
+            IStateTransitioner<TInstruction> transitioner)
         {
             Instructions = new StaticToSymbolicAdapter<TInstruction>(
                 instructions ?? throw new ArgumentNullException(nameof(instructions)));
-            TransitionResolver = transitionResolver ?? throw new ArgumentNullException(nameof(transitionResolver));
+            StateTransitioner = transitioner ?? throw new ArgumentNullException(nameof(transitioner));
         }
         
         /// <summary>
         /// Creates a new symbolic control flow graph builder using the provided program state transition resolver.  
         /// </summary>
         /// <param name="instructions">The instructions to traverse.</param>
-        /// <param name="transitionResolver">The transition resolver to use for inferring branch targets.</param>
+        /// <param name="transitioner">The transition resolver to use for inferring branch targets.</param>
         public SymbolicFlowGraphBuilder(
             ISymbolicInstructionProvider<TInstruction> instructions, 
-            IStateTransitionResolver<TInstruction> transitionResolver)
+            IStateTransitioner<TInstruction> transitioner)
         {
             Instructions = instructions ?? throw new ArgumentNullException(nameof(instructions));
-            TransitionResolver = transitionResolver ?? throw new ArgumentNullException(nameof(transitionResolver));
+            StateTransitioner = transitioner ?? throw new ArgumentNullException(nameof(transitioner));
         }
 
         /// <summary>
@@ -65,12 +65,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
         }
 
         /// <inheritdoc />
-        public override IInstructionSetArchitecture<TInstruction> Architecture => Instructions.Architecture;
+        public override IArchitecture<TInstruction> Architecture => Instructions.Architecture;
 
         /// <summary>
         /// Gets the object responsible for resolving every transition in the program state that an instruction might introduce. 
         /// </summary>
-        public IStateTransitionResolver<TInstruction> TransitionResolver
+        public IStateTransitioner<TInstruction> StateTransitioner
         {
             get;
         }
@@ -99,8 +99,8 @@ namespace Echo.ControlFlow.Construction.Symbolic
         {
             var agenda = new Stack<SymbolicProgramState<TInstruction>>();
             foreach (var header in knownBlockHeaders)
-                agenda.Push(TransitionResolver.GetInitialState(header));
-            agenda.Push(TransitionResolver.GetInitialState(entrypoint));
+                agenda.Push(StateTransitioner.GetInitialState(header));
+            agenda.Push(StateTransitioner.GetInitialState(entrypoint));
 
             while (agenda.Count > 0)
             {
@@ -156,12 +156,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
             var result = context.Result;
             
             // Get a buffer to write to.
-            int transitionCount = TransitionResolver.GetTransitionCount(currentState, instruction);
+            int transitionCount = StateTransitioner.GetTransitionCount(currentState, instruction);
             var transitionsBuffer = context.GetTransitionsBuffer(transitionCount);
 
             // Read transitions.
             var transitionsBufferSlice = transitionsBuffer.AsSpan(0, transitionCount);
-            int actualTransitionCount = TransitionResolver.GetTransitions(currentState, instruction, transitionsBufferSlice);
+            int actualTransitionCount = StateTransitioner.GetTransitions(currentState, instruction, transitionsBufferSlice);
             if (actualTransitionCount > transitionCount)
             {
                 // Sanity check: This should only happen if the transition resolver contains a bug.
@@ -247,7 +247,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
             private readonly ArrayPool<StateTransition<TInstruction>> _transitionsBufferPool;
             private StateTransition<TInstruction>[] _transitionsBuffer;
 
-            internal GraphBuilderContext(IInstructionSetArchitecture<TInstruction> architecture)
+            internal GraphBuilderContext(IArchitecture<TInstruction> architecture)
             {
                 Result = new InstructionTraversalResult<TInstruction>(architecture);
                 RecordedStates = new Dictionary<long, SymbolicProgramState<TInstruction>>();

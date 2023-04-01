@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Echo.Code
 {
@@ -7,7 +6,7 @@ namespace Echo.Code
     /// Provides members for describing an instruction set.
     /// </summary>
     /// <typeparam name="TInstruction">The type of the instruction model this architecture describes.</typeparam>
-    public interface IInstructionSetArchitecture<TInstruction>
+    public interface IArchitecture<TInstruction>
     {
         /// <summary>
         /// Gets the offset of an instruction.

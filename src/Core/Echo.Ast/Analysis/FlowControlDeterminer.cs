@@ -5,9 +5,9 @@ namespace Echo.Ast.Analysis
     internal sealed class FlowControlDeterminer<TInstruction>
         : IAstNodeVisitor<TInstruction, object, InstructionFlowControl>
     {
-        private readonly IInstructionSetArchitecture<TInstruction> _isa;
+        private readonly IArchitecture<TInstruction> _isa;
         
-        internal FlowControlDeterminer(IInstructionSetArchitecture<TInstruction> isa) =>
+        internal FlowControlDeterminer(IArchitecture<TInstruction> isa) =>
             _isa = isa;
 
         public InstructionFlowControl Visit(AssignmentStatement<TInstruction> assignmentStatement, object state) =>

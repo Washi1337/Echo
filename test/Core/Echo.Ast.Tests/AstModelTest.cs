@@ -18,7 +18,7 @@ namespace Echo.Ast.Tests
         {
             var architecture = DummyArchitecture.Instance;
 
-            var dfgBuilder = new DummyTransitionResolver();
+            var dfgBuilder = new DummyTransitioner();
             var cfgBuilder = new SymbolicFlowGraphBuilder<DummyInstruction>(architecture, instructions, dfgBuilder);
 
             var cfg = cfgBuilder.ConstructFlowGraph(0);

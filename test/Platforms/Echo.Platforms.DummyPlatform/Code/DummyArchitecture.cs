@@ -7,7 +7,7 @@ using Echo.Platforms.DummyPlatform.ControlFlow;
 
 namespace Echo.Platforms.DummyPlatform.Code
 {
-    public class DummyArchitecture : IInstructionSetArchitecture<DummyInstruction>
+    public class DummyArchitecture : IArchitecture<DummyInstruction>
     {
         public static DummyArchitecture Instance
         {

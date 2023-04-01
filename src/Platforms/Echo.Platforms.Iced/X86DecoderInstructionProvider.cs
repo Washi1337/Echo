@@ -22,7 +22,7 @@ namespace Echo.Platforms.Iced
         /// <param name="inputCode">The raw code stream.</param>
         /// <param name="bitness">The bitness of the x86 code. This value must be either 16, 32 or 64.</param>
         public X86DecoderInstructionProvider(
-            IInstructionSetArchitecture<Instruction> architecture,
+            IArchitecture<Instruction> architecture,
             byte[] inputCode,
             int bitness)
             : this(architecture, new MemoryStream(inputCode), bitness, 0, DecoderOptions.None)
@@ -36,7 +36,7 @@ namespace Echo.Platforms.Iced
         /// <param name="inputStream">The raw code stream.</param>
         /// <param name="bitness">The bitness of the x86 code. This value must be either 16, 32 or 64.</param>
         public X86DecoderInstructionProvider(
-            IInstructionSetArchitecture<Instruction> architecture,
+            IArchitecture<Instruction> architecture,
             Stream inputStream,
             int bitness)
             : this(architecture, inputStream, bitness, 0, DecoderOptions.None)
@@ -52,7 +52,7 @@ namespace Echo.Platforms.Iced
         /// <param name="baseAddress">The base address of the code stream.</param>
         /// <param name="decoderOptions">Additional decoder options that need to be passed onto the Iced decoder.</param>
         public X86DecoderInstructionProvider(
-            IInstructionSetArchitecture<Instruction> architecture,
+            IArchitecture<Instruction> architecture,
             Stream inputStream, 
             int bitness,
             ulong baseAddress,
@@ -70,7 +70,7 @@ namespace Echo.Platforms.Iced
         }
 
         /// <inheritdoc />
-        public IInstructionSetArchitecture<Instruction> Architecture
+        public IArchitecture<Instruction> Architecture
         {
             get;
         }

@@ -9,15 +9,15 @@ namespace Echo.Ast
     /// </summary>
     /// <typeparam name="TInstruction">The instruction</typeparam>
     public class AstArchitecture<TInstruction>
-        : IInstructionSetArchitecture<Statement<TInstruction>>
+        : IArchitecture<Statement<TInstruction>>
     {
         private readonly FlowControlDeterminer<TInstruction> _flowControlDeterminer;
 
         /// <summary>
         /// Create a new decorator around the <paramref name="isa"/>
         /// </summary>
-        /// <param name="isa">The <see cref="IInstructionSetArchitecture{TInstruction}"/> to decorate</param>
-        public AstArchitecture(IInstructionSetArchitecture<TInstruction> isa) =>
+        /// <param name="isa">The <see cref="IArchitecture{TInstruction}"/> to decorate</param>
+        public AstArchitecture(IArchitecture<TInstruction> isa) =>
             _flowControlDeterminer = new FlowControlDeterminer<TInstruction>(isa);
 
         /// <inheritdoc />

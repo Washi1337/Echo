@@ -9,9 +9,9 @@ using Echo.Platforms.DummyPlatform.Code;
 
 namespace Echo.Platforms.DummyPlatform.ControlFlow
 {
-    public class DummyTransitionResolver : StateTransitionResolverBase<DummyInstruction>
+    public class DummyTransitioner : StateTransitionerBase<DummyInstruction>
     {
-        public DummyTransitionResolver()
+        public DummyTransitioner()
             : base(DummyArchitecture.Instance)
         {
         }

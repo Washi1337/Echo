@@ -81,7 +81,7 @@ namespace Echo.Platforms.AsmResolver
             out DataFlowGraph<CilInstruction> dataFlowGraph)
         {
             var architecture = new CilArchitecture(self);
-            var dfgBuilder = new CilStateTransitionResolver(architecture);
+            var dfgBuilder = new CilStateTransitioner(architecture);
             var cfgBuilder = new SymbolicFlowGraphBuilder<CilInstruction>(
                 architecture,
                 self.Instructions,

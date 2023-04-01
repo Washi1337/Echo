@@ -11,7 +11,7 @@ namespace Echo.Platforms.AsmResolver
     /// <summary>
     /// Provides a description of the CIL instruction set architecture (ISA) that is modelled by AsmResolver.   
     /// </summary>
-    public class CilArchitecture : IInstructionSetArchitecture<CilInstruction>
+    public class CilArchitecture : IArchitecture<CilInstruction>
     {
         private readonly IList<CilVariable> _variables;
         private readonly IList<CilParameter> _parameters;
