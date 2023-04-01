@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Echo.Core.Graphing;
-using Echo.Core.Graphing.Serialization.Dot;
+using Echo.Graphing;
+using Echo.Graphing.Serialization.Dot;
 
 namespace Echo.DataFlow.Serialization.Dot
 {

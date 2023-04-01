@@ -4,7 +4,7 @@ using System.Linq;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Core.Code;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver
 {

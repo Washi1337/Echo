@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Echo.Core.Code;
+using Echo.Code;
 using Echo.DataFlow.Emulation;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;

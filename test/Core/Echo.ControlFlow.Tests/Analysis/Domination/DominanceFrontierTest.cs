@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Echo.ControlFlow.Analysis.Domination;
-using Echo.Core.Graphing;
+using Echo.Graphing;
 using Echo.Platforms.DummyPlatform;
 using Xunit;
 

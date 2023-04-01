@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Echo.Core.Code;
+using Echo.Code;
 using Iced.Intel;
 
 namespace Echo.Platforms.Iced

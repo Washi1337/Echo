@@ -2,7 +2,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.Core.Code;
+using Echo.Code;
 using Echo.DataFlow.Emulation;
 
 namespace Echo.ControlFlow.Construction.Symbolic

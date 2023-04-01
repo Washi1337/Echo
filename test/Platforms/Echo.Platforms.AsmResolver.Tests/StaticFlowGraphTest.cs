@@ -7,7 +7,7 @@ using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.ControlFlow.Analysis.Domination;
 using Echo.ControlFlow.Regions;
-using Echo.Core.Graphing.Serialization.Dot;
+using Echo.Graphing.Serialization.Dot;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Mocks;
 using Xunit;

@@ -3,8 +3,8 @@ using System.IO;
 using System.Linq;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
-using Echo.Core;
 using Xunit;
+using DnlibCode = dnlib.DotNet.Emit.Code;
 
 namespace Echo.Platforms.Dnlib.Tests 
 {
@@ -13,24 +13,24 @@ namespace Echo.Platforms.Dnlib.Tests
         private readonly CilPurityClassifier _classifier = new CilPurityClassifier();
 
         [Theory]
-        [InlineData(Code.Ldc_I4_0, null)]
-        [InlineData(Code.Ldc_R4, 1.0f)]
-        [InlineData(Code.Ldc_I4, 123)]
-        [InlineData(Code.Ldstr, "Hello, world!")]
-        public void PushingConstantsShouldBePure(Code code, object operand) 
+        [InlineData(DnlibCode.Ldc_I4_0, null)]
+        [InlineData(DnlibCode.Ldc_R4, 1.0f)]
+        [InlineData(DnlibCode.Ldc_I4, 123)]
+        [InlineData(DnlibCode.Ldstr, "Hello, world!")]
+        public void PushingConstantsShouldBePure(DnlibCode code, object operand) 
         {
             var instruction = new Instruction(code.ToOpCode(), operand);
             Assert.Equal(Trilean.True, _classifier.IsPure(instruction));
         }
 
         [Theory]
-        [InlineData(Code.Add)]
-        [InlineData(Code.Sub)]
-        [InlineData(Code.Mul)]
-        [InlineData(Code.Div)]
-        [InlineData(Code.Shr)]
-        [InlineData(Code.Shl)]
-        public void ArithmeticShouldBePure(Code code) 
+        [InlineData(DnlibCode.Add)]
+        [InlineData(DnlibCode.Sub)]
+        [InlineData(DnlibCode.Mul)]
+        [InlineData(DnlibCode.Div)]
+        [InlineData(DnlibCode.Shr)]
+        [InlineData(DnlibCode.Shl)]
+        public void ArithmeticShouldBePure(DnlibCode code) 
         {
             var instruction = new Instruction(code.ToOpCode());
             Assert.Equal(Trilean.True, _classifier.IsPure(instruction));

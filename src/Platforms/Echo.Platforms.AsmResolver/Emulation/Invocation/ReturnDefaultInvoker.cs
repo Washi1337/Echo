@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using Echo.Concrete;
-using Echo.Core;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation

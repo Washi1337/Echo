@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Echo.Core.Emulation;
+using Echo.Emulation;
 using Echo.DataFlow.Emulation;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;

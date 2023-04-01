@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
-using Echo.Concrete.Memory.Heap;
-using Echo.Core.Code;
+using Echo.Memory;
+using Echo.Memory.Heap;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Runtime
 {
@@ -64,7 +63,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
         /// </summary>
         /// <param name="field">The field.</param>
         /// <returns>The slice.</returns>
-        public BitVectorSpan GetFieldSpan(IFieldDescriptor field) => _heap.GetChunkSpan(GetFieldAddress(field));
+        public Memory.BitVectorSpan GetFieldSpan(IFieldDescriptor field) => _heap.GetChunkSpan(GetFieldAddress(field));
 
         /// <inheritdoc />
         public bool IsValidAddress(long address) => _heap.IsValidAddress(address);
@@ -73,10 +72,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
         public void Rebase(long baseAddress) => _heap.Rebase(baseAddress);
 
         /// <inheritdoc />
-        public void Read(long address, BitVectorSpan buffer) => _heap.Read(address, buffer);
+        public void Read(long address, Memory.BitVectorSpan buffer) => _heap.Read(address, buffer);
 
         /// <inheritdoc />
-        public void Write(long address, BitVectorSpan buffer) => _heap.Write(address, buffer);
+        public void Write(long address, Memory.BitVectorSpan buffer) => _heap.Write(address, buffer);
 
         /// <inheritdoc />
         public void Write(long address, ReadOnlySpan<byte> buffer) => _heap.Write(address, buffer);

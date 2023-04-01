@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Echo.ControlFlow.Blocks;
-using Echo.Core.Code;
+using Echo.Code;
 using Echo.DataFlow;
 
 namespace Echo.Ast.Construction

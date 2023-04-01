@@ -1,6 +1,5 @@
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Core;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using dnlib.DotNet;
-using IVariable = Echo.Core.Code.IVariable;
+using IVariable = Echo.Code.IVariable;
 
 namespace Echo.Platforms.Dnlib
 {

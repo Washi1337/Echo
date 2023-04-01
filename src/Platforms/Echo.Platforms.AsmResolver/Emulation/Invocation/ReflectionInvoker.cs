@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet;
-using Echo.Concrete;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation

@@ -1,5 +1,5 @@
 using System;
-using Echo.Concrete;
+using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
@@ -21,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="vector">The vector.</param>
         /// <param name="targetType">The type to marshal to.</param>
         /// <returns>The marshalled object.</returns>
-        object? ToObject(BitVectorSpan vector, Type targetType);
+        object? ToObject(Memory.BitVectorSpan vector, Type targetType);
     }
 
 }

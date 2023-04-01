@@ -1,5 +1,5 @@
-using Echo.Core.Code;
-using Echo.Core.Emulation;
+using Echo.Code;
+using Echo.Emulation;
 using Echo.DataFlow.Emulation;
 
 namespace Echo.ControlFlow.Construction.Symbolic

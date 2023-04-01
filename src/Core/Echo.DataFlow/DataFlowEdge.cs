@@ -1,4 +1,4 @@
-﻿using Echo.Core.Graphing;
+﻿using Echo.Graphing;
 
 namespace Echo.DataFlow
 {

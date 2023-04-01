@@ -5,7 +5,7 @@ using System.Linq;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Blocks;
 using Echo.ControlFlow.Serialization.Dot;
-using Echo.Core.Graphing.Serialization.Dot;
+using Echo.Graphing.Serialization.Dot;
 using Echo.Platforms.DummyPlatform;
 using Xunit;
 

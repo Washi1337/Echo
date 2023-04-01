@@ -1,7 +1,7 @@
 using System;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction.Symbolic;
-using Echo.Core.Code;
+using Echo.Code;
 using Echo.DataFlow.Emulation;
 using Iced.Intel;
 

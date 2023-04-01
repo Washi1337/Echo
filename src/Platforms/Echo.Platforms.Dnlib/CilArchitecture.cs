@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
-using Echo.Core.Code;
-using IVariable = Echo.Core.Code.IVariable;
+using Echo.Code;
+using IVariable = Echo.Code.IVariable;
 
 namespace Echo.Platforms.Dnlib
 {

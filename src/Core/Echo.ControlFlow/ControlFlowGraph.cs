@@ -5,9 +5,9 @@ using System.Linq;
 using Echo.ControlFlow.Collections;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Dot;
-using Echo.Core.Code;
-using Echo.Core.Graphing;
-using Echo.Core.Graphing.Serialization.Dot;
+using Echo.Code;
+using Echo.Graphing;
+using Echo.Graphing.Serialization.Dot;
 
 namespace Echo.ControlFlow
 {

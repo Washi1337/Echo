@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet;
-using Echo.Concrete;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
 

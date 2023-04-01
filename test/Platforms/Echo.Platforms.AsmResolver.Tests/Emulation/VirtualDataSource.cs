@@ -1,8 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
+using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation
 {

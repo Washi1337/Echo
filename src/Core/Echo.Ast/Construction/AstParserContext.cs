@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Echo.ControlFlow;
-using Echo.Core.Code;
+using Echo.Code;
 using Echo.DataFlow;
 
 namespace Echo.Ast.Construction

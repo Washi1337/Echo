@@ -2,8 +2,7 @@ using System;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using Echo.Concrete;
-using Echo.Core;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using static AsmResolver.PE.DotNet.Cil.CilCode;
 
@@ -178,7 +177,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Misc
         private static (StackSlot Result, Trilean Overflow) HandleUnknownFloatConversion(
             CilExecutionContext context,
             TypeSignature targetType, 
-            BitVectorSpan span)
+            Memory.BitVectorSpan span)
         {
             var pool = context.Machine.ValueFactory.BitVectorPool;
             
@@ -216,7 +215,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Misc
         private static (StackSlot Result, Trilean Overflow) HandleKnownFloatConversion(
             CilExecutionContext context,
             TypeSignature targetType, 
-            BitVectorSpan span)
+            Memory.BitVectorSpan span)
         {
             var factory = context.Machine.ValueFactory;
             var pool = factory.BitVectorPool;

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
-using Echo.Core;
-using Echo.Core.Code;
+using Echo.Code;
+using DnlibCode = dnlib.DotNet.Emit.Code;
 
 namespace Echo.Platforms.Dnlib 
 {
@@ -172,28 +172,28 @@ namespace Echo.Platforms.Dnlib
         {
             switch (instruction.OpCode.Code) 
             {
-                case Code.Stloc_0:
-                case Code.Stloc_1:
-                case Code.Stloc_2:
-                case Code.Stloc_3:
+                case DnlibCode.Stloc_0:
+                case DnlibCode.Stloc_1:
+                case DnlibCode.Stloc_2:
+                case DnlibCode.Stloc_3:
                     return LocalWritePurity;
 
-                case Code.Stelem_I:
-                case Code.Stelem_I1:
-                case Code.Stelem_I2:
-                case Code.Stelem_I4:
-                case Code.Stelem_I8:
-                case Code.Stelem_R4:
-                case Code.Stelem_R8:
-                case Code.Stelem_Ref:
+                case DnlibCode.Stelem_I:
+                case DnlibCode.Stelem_I1:
+                case DnlibCode.Stelem_I2:
+                case DnlibCode.Stelem_I4:
+                case DnlibCode.Stelem_I8:
+                case DnlibCode.Stelem_R4:
+                case DnlibCode.Stelem_R8:
+                case DnlibCode.Stelem_Ref:
                     return ArrayWritePurity;
 
-                case Code.Stind_I:
-                case Code.Stind_I1:
-                case Code.Stind_I2:
-                case Code.Stind_I4:
-                case Code.Stind_I8:
-                case Code.Stind_R8:
+                case DnlibCode.Stind_I:
+                case DnlibCode.Stind_I1:
+                case DnlibCode.Stind_I2:
+                case DnlibCode.Stind_I4:
+                case DnlibCode.Stind_I8:
+                case DnlibCode.Stind_R8:
                     return PointerWritePurity;
 
                 default:
@@ -205,10 +205,10 @@ namespace Echo.Platforms.Dnlib
         {
             switch (instruction.OpCode.Code)
             {
-                case Code.Stloc:
-                case Code.Stloc_S:
-                case Code.Starg:
-                case Code.Starg_S:
+                case DnlibCode.Stloc:
+                case DnlibCode.Stloc_S:
+                case DnlibCode.Starg:
+                case DnlibCode.Starg_S:
                     return LocalWritePurity;
 
                 default:
@@ -220,14 +220,14 @@ namespace Echo.Platforms.Dnlib
         {
             switch (instruction.OpCode.Code) 
             {
-                case Code.Ldfld:
-                case Code.Ldsfld:
-                case Code.Ldflda:
-                case Code.Ldsflda:
+                case DnlibCode.Ldfld:
+                case DnlibCode.Ldsfld:
+                case DnlibCode.Ldflda:
+                case DnlibCode.Ldsflda:
                     return DefaultFieldAccessPurity;
 
-                case Code.Stfld:
-                case Code.Stsfld:
+                case DnlibCode.Stfld:
+                case DnlibCode.Stsfld:
                     return DefaultFieldWritePurity;
 
                 default:
@@ -239,10 +239,10 @@ namespace Echo.Platforms.Dnlib
         {
             switch (instruction.OpCode.Code) 
             {
-                case Code.Call:
-                case Code.Callvirt:
-                case Code.Newobj:
-                case Code.Jmp:
+                case DnlibCode.Call:
+                case DnlibCode.Callvirt:
+                case DnlibCode.Newobj:
+                case DnlibCode.Jmp:
                     if (instruction.Operand is IMethod method) {
                         if (KnownPureMethods.Contains(method))
                             return true;
@@ -252,8 +252,8 @@ namespace Echo.Platforms.Dnlib
 
                     return DefaultMethodCallPurity;
 
-                case Code.Ldftn:
-                case Code.Ldvirtftn:
+                case DnlibCode.Ldftn:
+                case DnlibCode.Ldvirtftn:
                     return DefaultMethodAccessPurity;
 
                 default:
@@ -265,7 +265,7 @@ namespace Echo.Platforms.Dnlib
         {
             switch (instruction.OpCode.Code) 
             {
-                case Code.Stelem:
+                case DnlibCode.Stelem:
                     return ArrayWritePurity | DefaultTypeAccessPurity;
 
                 default:

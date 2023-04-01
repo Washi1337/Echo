@@ -2,7 +2,6 @@ using System;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Core;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
 {

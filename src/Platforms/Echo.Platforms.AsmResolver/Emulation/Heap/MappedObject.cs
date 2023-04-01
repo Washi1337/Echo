@@ -4,9 +4,8 @@ using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
-using Echo.Core.Code;
+using Echo.Memory;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Heap
 {
@@ -84,7 +83,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         }
 
         /// <inheritdoc />
-        public void Read(long address, BitVectorSpan buffer)
+        public void Read(long address, Memory.BitVectorSpan buffer)
         {
             buffer.MarkFullyUnknown();
             
@@ -109,7 +108,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         }
 
         /// <inheritdoc />
-        public void Write(long address, BitVectorSpan buffer)
+        public void Write(long address, Memory.BitVectorSpan buffer)
         {
             uint offset = (uint) (address - _baseAddress);
             

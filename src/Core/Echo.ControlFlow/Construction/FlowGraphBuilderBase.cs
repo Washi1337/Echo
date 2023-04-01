@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
-using Echo.Core.Code;
+using Echo.Code;
 
 namespace Echo.ControlFlow.Construction
 {

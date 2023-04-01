@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction.Symbolic;
-using Echo.Core.Code;
+using Echo.Code;
 using Echo.DataFlow.Emulation;
 using Echo.Platforms.DummyPlatform.Code;
 

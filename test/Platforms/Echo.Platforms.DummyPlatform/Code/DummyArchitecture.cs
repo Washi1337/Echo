@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Construction.Static;
-using Echo.Core.Code;
+using Echo.Code;
 using Echo.Platforms.DummyPlatform.ControlFlow;
 
 namespace Echo.Platforms.DummyPlatform.Code

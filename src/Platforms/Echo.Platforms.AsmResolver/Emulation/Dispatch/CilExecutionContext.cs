@@ -1,5 +1,4 @@
 using System.Threading;
-using Echo.Concrete;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch

@@ -4,6 +4,7 @@ using Echo.ControlFlow;
 using Echo.ControlFlow.Construction.Symbolic;
 using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
+using DnlibCode = dnlib.DotNet.Emit.Code;
 
 namespace Echo.Platforms.Dnlib
 {
@@ -76,7 +77,7 @@ namespace Echo.Platforms.Dnlib
                 case FlowControl.Branch:
                     return 1;
                 
-                case FlowControl.Cond_Branch when instruction.OpCode.Code == Code.Switch:
+                case FlowControl.Cond_Branch when instruction.OpCode.Code == DnlibCode.Switch:
                     var targets = (Instruction[]) instruction.Operand;
                     return targets.Length + 1;
                 
@@ -116,7 +117,7 @@ namespace Echo.Platforms.Dnlib
                     transitionBuffer[0] = Branch(false, currentState, instruction);
                     return 1;
 
-                case FlowControl.Cond_Branch when instruction.OpCode.Code == Code.Switch:
+                case FlowControl.Cond_Branch when instruction.OpCode.Code == DnlibCode.Switch:
                     var targets = (Instruction[]) instruction.Operand;
                     for (int i = 0; i < targets.Length; i++)
                     {

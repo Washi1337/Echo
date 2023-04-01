@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Schema;
 using Echo.ControlFlow.Regions;
-using Echo.Core.Graphing.Analysis.Traversal;
-using Echo.Core.Graphing;
+using Echo.Graphing.Analysis.Traversal;
+using Echo.Graphing;
 
 namespace Echo.ControlFlow.Analysis.Domination
 {

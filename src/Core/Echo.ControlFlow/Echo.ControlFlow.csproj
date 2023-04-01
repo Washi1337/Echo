@@ -18,12 +18,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Echo.Core\Echo.Core.csproj" />
+      <ProjectReference Include="..\Echo\Echo.csproj" />
       <ProjectReference Include="..\Echo.DataFlow\Echo.DataFlow.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="System.Memory" Version="4.5.4" />
+      <PackageReference Include="System.Memory" Version="4.5.5" />
     </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 using System;
 using AsmResolver.DotNet;
-using Echo.Concrete;
+using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
@@ -63,7 +63,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <param name="field">The field to obtain the value for.</param>
         /// <param name="buffer">The buffer to copy the value into.</param>
-        public void ReadField(IFieldDescriptor field, BitVectorSpan buffer)
+        public void ReadField(IFieldDescriptor field, Memory.BitVectorSpan buffer)
         {
             Machine.Memory.Read(GetFieldAddress(field), buffer);
         }
@@ -73,7 +73,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <param name="field">The field to write to.</param>
         /// <param name="buffer">The bits to write.</param>
-        public void WriteField(IFieldDescriptor field, BitVectorSpan buffer)
+        public void WriteField(IFieldDescriptor field, Memory.BitVectorSpan buffer)
         {
             Machine.Memory.Write(GetFieldAddress(field), buffer);
         }

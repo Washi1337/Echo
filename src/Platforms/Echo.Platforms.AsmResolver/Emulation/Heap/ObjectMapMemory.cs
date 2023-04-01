@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.Memory;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
-using Echo.Core.Code;
+using Echo.Memory;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Heap
 {
@@ -40,10 +39,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         public void Rebase(long baseAddress) => _backingBuffer.Rebase(baseAddress);
 
         /// <inheritdoc />
-        public void Read(long address, BitVectorSpan buffer) => _backingBuffer.Read(address, buffer);
+        public void Read(long address, Memory.BitVectorSpan buffer) => _backingBuffer.Read(address, buffer);
 
         /// <inheritdoc />
-        public void Write(long address, BitVectorSpan buffer) => _backingBuffer.Write(address, buffer);
+        public void Write(long address, Memory.BitVectorSpan buffer) => _backingBuffer.Write(address, buffer);
 
         /// <inheritdoc />
         public void Write(long address, ReadOnlySpan<byte> buffer) => _backingBuffer.Write(address, buffer);

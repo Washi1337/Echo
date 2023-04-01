@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Echo.Core.Code;
+using Echo.Code;
 
 namespace Echo.Ast.Analysis
 {

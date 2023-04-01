@@ -4,8 +4,7 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using Echo.Core;
-using Echo.Core.Code;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver
 {

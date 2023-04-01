@@ -1,8 +1,7 @@
-using System;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Core.Code;
+using Echo.Code;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests

@@ -4,6 +4,7 @@ using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using Mocks;
 using Xunit;
+using DnlibCode = dnlib.DotNet.Emit.Code;
 
 namespace Echo.Platforms.Dnlib.Tests
 {
@@ -45,7 +46,7 @@ namespace Echo.Platforms.Dnlib.Tests
             Instruction FindLdstr(string value)
             {
                 return method.Body.Instructions
-                    .First(i => i.OpCode.Code == Code.Ldstr && (string) i.Operand == value);
+                    .First(i => i.OpCode.Code == DnlibCode.Ldstr && (string) i.Operand == value);
             }
 
             bool ValueReachesOffset(uint sourceOffset, uint targetOffset)

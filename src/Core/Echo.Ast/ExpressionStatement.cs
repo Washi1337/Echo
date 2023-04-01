@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Echo.ControlFlow.Serialization.Dot;
-using Echo.Core.Graphing;
+using Echo.Graphing;
 
 namespace Echo.Ast
 {

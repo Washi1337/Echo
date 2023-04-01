@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Echo.Core.Code;
-using Echo.Core.Graphing;
-using Echo.Core.Graphing.Serialization.Dot;
+using Echo.Code;
+using Echo.Graphing;
+using Echo.Graphing.Serialization.Dot;
 using Echo.DataFlow.Collections;
 using Echo.DataFlow.Serialization.Dot;
 

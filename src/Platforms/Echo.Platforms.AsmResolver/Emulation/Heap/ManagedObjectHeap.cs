@@ -4,10 +4,9 @@ using System.Runtime.InteropServices;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
-using Echo.Concrete.Memory.Heap;
-using Echo.Core.Code;
+using Echo.Memory;
+using Echo.Memory.Heap;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Heap
 {
@@ -147,7 +146,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             return address;
         }
         
-        private void SetMethodTable(BitVectorSpan objectSpan, ITypeDescriptor type) => objectSpan
+        private void SetMethodTable(Memory.BitVectorSpan objectSpan, ITypeDescriptor type) => objectSpan
             .SliceObjectMethodTable(_factory)
             .WriteNativeInteger(_factory.ClrMockMemory.MethodTables.GetAddress(type), _factory.Is32Bit);
 
@@ -163,7 +162,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// </summary>
         /// <param name="address">The address of the object.</param>
         /// <returns>The object slice.</returns>
-        public BitVectorSpan GetObjectSpan(BitVectorSpan address)
+        public Memory.BitVectorSpan GetObjectSpan(Memory.BitVectorSpan address)
         {
             if (!address.IsFullyKnown)
                 throw new ArgumentException("Provided address is not fully known.");
@@ -178,7 +177,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// </summary>
         /// <param name="address">The address of the object.</param>
         /// <returns>The object slice.</returns>
-        public BitVectorSpan GetObjectSpan(long address) => _backingHeap.GetChunkSpan(address);
+        public Memory.BitVectorSpan GetObjectSpan(long address) => _backingHeap.GetChunkSpan(address);
         
         /// <summary>
         /// Obtains a collection of address ranges of all managed objects currently in the heap.
@@ -199,10 +198,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         public void Rebase(long baseAddress) => _backingHeap.Rebase(baseAddress);
 
         /// <inheritdoc />
-        public void Read(long address, BitVectorSpan buffer) => _backingHeap.Read(address, buffer);
+        public void Read(long address, Memory.BitVectorSpan buffer) => _backingHeap.Read(address, buffer);
 
         /// <inheritdoc />
-        public void Write(long address, BitVectorSpan buffer) => _backingHeap.Write(address, buffer);
+        public void Write(long address, Memory.BitVectorSpan buffer) => _backingHeap.Write(address, buffer);
         
         /// <inheritdoc />
         public void Write(long address, ReadOnlySpan<byte> buffer) => _backingHeap.Write(address, buffer);
