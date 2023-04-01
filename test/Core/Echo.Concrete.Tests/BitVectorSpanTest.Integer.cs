@@ -151,5 +151,67 @@ namespace Echo.Concrete.Tests
 
             Assert.Equal(expected, value1.IntegerIsGreaterThan(value2, signed));
         }
+        
+        [Theory]
+        [InlineData("00000000", "00000000", false, True)]
+        [InlineData("00000001", "00000000", false, True)]
+        [InlineData("0000000?", "00000000", false, True)]
+        [InlineData("00000000", "00000001", false, False)]
+        [InlineData("00000001", "00000001", false, True)]
+        [InlineData("0000000?", "00000001", false, Unknown)]
+        [InlineData("00000000", "0000000?", false, Unknown)]
+        [InlineData("00000001", "0000000?", false, True)]
+        [InlineData("0000000?", "0000000?", false, Unknown)]
+        [InlineData("00000010", "00000010", false, True)]
+        [InlineData("00000010", "00000011", false, False)]
+        [InlineData("00000010", "0000001?", false, Unknown)]
+        [InlineData("00000010", "000000?0", false, True)]
+        [InlineData("00000010", "000000?1", false, Unknown)]
+        [InlineData("00000010", "000000??", false, Unknown)]
+        [InlineData("00000011", "000000?0", false, True)]
+        [InlineData("00000011", "000000?1", false, True)]
+        [InlineData("00000011", "000000??", false, True)]
+        [InlineData("000000?0", "00000000", false, True)]
+        [InlineData("000000?0", "00000001", false, Unknown)]
+        [InlineData("000000?0", "0000000?", false, Unknown)]
+        [InlineData("00001000", "00001???", false, Unknown)]
+        public void IntegerIsGreaterThanOrEqual(string a, string b, bool signed, TrileanValue expected)
+        {
+            var value1 = BitVector.ParseBinary(a).AsSpan();
+            var value2 = BitVector.ParseBinary(b).AsSpan();
+
+            Assert.Equal(expected, value1.IntegerIsGreaterThanOrEqual(value2, signed));
+        }
+        
+        [Theory]
+        [InlineData("00000000", "00000000", false, True)]
+        [InlineData("00000000", "00000001", false, True)]
+        [InlineData("00000000", "0000000?", false, True)]
+        [InlineData("00000001", "00000000", false, False)]
+        [InlineData("00000001", "00000001", false, True)]
+        [InlineData("00000001", "0000000?", false, Unknown)]
+        [InlineData("0000000?", "00000000", false, Unknown)]
+        [InlineData("0000000?", "00000001", false, True)]
+        [InlineData("0000000?", "0000000?", false, Unknown)]
+        [InlineData("00000010", "00000010", false, True)]
+        [InlineData("00000011", "00000010", false, False)]
+        [InlineData("0000001?", "00000010", false, Unknown)]
+        [InlineData("000000?0", "00000010", false, True)]
+        [InlineData("000000?1", "00000010", false, Unknown)]
+        [InlineData("000000??", "00000010", false, Unknown)]
+        [InlineData("000000?0", "00000011", false, True)]
+        [InlineData("000000?1", "00000011", false, True)]
+        [InlineData("000000??", "00000011", false, True)]
+        [InlineData("00000000", "000000?0", false, True)]
+        [InlineData("00000001", "000000?0", false, Unknown)]
+        [InlineData("0000000?", "000000?0", false, Unknown)]
+        [InlineData("00001000", "00001???", false, True)]
+        public void IntegerIsLessThanOrEqual(string a, string b, bool signed, TrileanValue expected)
+        {
+            var value1 = BitVector.ParseBinary(a).AsSpan();
+            var value2 = BitVector.ParseBinary(b).AsSpan();
+
+            Assert.Equal(expected, value1.IntegerIsLessThanOrEqual(value2, signed));
+        }
     }
 }

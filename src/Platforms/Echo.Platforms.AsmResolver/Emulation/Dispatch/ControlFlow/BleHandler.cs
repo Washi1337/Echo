@@ -22,13 +22,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
             var contents1 = argument1.Contents.AsSpan();
             var contents2 = argument2.Contents.AsSpan();
 
-            if (contents1.IsEqualTo(contents2))
-                return true;
-            
             bool isSigned = IsSignedCondition(instruction);
-            return argument1.TypeHint == StackSlotTypeHint.Integer
-                ? contents1.IntegerIsLessThan(contents2, isSigned)
-                : contents1.FloatIsLessThan(contents2, isSigned);
+            if (argument1.TypeHint == StackSlotTypeHint.Integer)
+                return contents1.IntegerIsLessThanOrEqual(contents2, isSigned);
+
+            return contents1.IsEqualTo(contents2) || contents1.FloatIsLessThan(contents2, isSigned);
         }
     }
 }
