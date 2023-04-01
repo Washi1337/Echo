@@ -1,6 +1,6 @@
 using System;
 
-namespace Echo.Emulation
+namespace Echo.DataFlow.Emulation
 {
     /// <summary>
     /// The exception that is thrown when an inconsistency in the size of the stack was detected. Typically this

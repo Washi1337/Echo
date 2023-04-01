@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
 using Echo.Code;
-using Echo.Emulation;
 using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
 

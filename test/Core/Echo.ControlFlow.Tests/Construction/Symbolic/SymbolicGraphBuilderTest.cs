@@ -5,7 +5,6 @@ using System.Linq;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Symbolic;
 using Echo.ControlFlow.Serialization.Dot;
-using Echo.Emulation;
 using Echo.Graphing.Serialization.Dot;
 using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
