@@ -1,4 +1,6 @@
 
+using Echo.Memory;
+
 namespace Echo.Platforms.AsmResolver.Emulation
 {
     /// <summary>
@@ -13,7 +15,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="vector">The vector.</param>
         /// <typeparam name="T">The type to marshal to.</typeparam>
         /// <returns>The marshalled object.</returns>
-        public static T? ToObject<T>(this IObjectMarshaller self, Memory.BitVectorSpan vector)
+        public static T? ToObject<T>(this IObjectMarshaller self, BitVectorSpan vector)
         {
             return (T?) self.ToObject(vector, typeof(T));
         }

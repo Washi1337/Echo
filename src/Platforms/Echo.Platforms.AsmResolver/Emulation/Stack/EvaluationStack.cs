@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <param name="value">The value to push.</param>
         /// <param name="originalType">The type of the value to push.</param>
         /// <returns>The stack slot that was created.</returns>
-        public StackSlot Push(Memory.BitVectorSpan value, TypeSignature originalType)
+        public StackSlot Push(BitVectorSpan value, TypeSignature originalType)
         {
             var vector = _factory.BitVectorPool.Rent(value.Count, false);
             vector.AsSpan().Write(value);

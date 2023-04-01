@@ -63,10 +63,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
         public void Rebase(long baseAddress) => _backingBuffer.Rebase(baseAddress);
 
         /// <inheritdoc />
-        public void Read(long address, Memory.BitVectorSpan buffer) => _backingBuffer.Read(address, buffer);
+        public void Read(long address, BitVectorSpan buffer) => _backingBuffer.Read(address, buffer);
 
         /// <inheritdoc />
-        public void Write(long address, Memory.BitVectorSpan buffer) => _backingBuffer.Write(address, buffer);
+        public void Write(long address, BitVectorSpan buffer) => _backingBuffer.Write(address, buffer);
 
         /// <inheritdoc />
         public void Write(long address, ReadOnlySpan<byte> buffer) => _backingBuffer.Write(address, buffer);

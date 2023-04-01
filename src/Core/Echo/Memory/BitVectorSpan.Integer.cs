@@ -245,7 +245,7 @@ namespace Echo.Memory
         /// <param name="other">The integer to add.</param>
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match in bit length.</exception>
         /// <returns>The value of the carry bit after the addition completed.</returns>
-        public Trilean IntegerAdd(Memory.BitVectorSpan other)
+        public Trilean IntegerAdd(BitVectorSpan other)
         {
             AssertSameBitSize(other);
 
@@ -283,7 +283,7 @@ namespace Echo.Memory
             }
         }
         
-        private Trilean IntegerAddLle(Memory.BitVectorSpan other)
+        private Trilean IntegerAddLle(BitVectorSpan other)
         {
             var carry = Trilean.False;
 
@@ -380,7 +380,7 @@ namespace Echo.Memory
         /// <param name="other">The integer to subtract.</param>
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match in bit length.</exception>
         /// <returns>The value of the borrow bit after the subtraction completed.</returns>
-        public Trilean IntegerSubtract(Memory.BitVectorSpan other)
+        public Trilean IntegerSubtract(BitVectorSpan other)
         {
             AssertSameBitSize(other);
 
@@ -418,7 +418,7 @@ namespace Echo.Memory
             }
         }
 
-        private Trilean IntegerSubtractLle(Memory.BitVectorSpan other)
+        private Trilean IntegerSubtractLle(BitVectorSpan other)
         {
             var borrow = Trilean.False;
 
@@ -506,7 +506,7 @@ namespace Echo.Memory
         /// <param name="other">The integer to multiply the current integer with.</param>
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match in bit length.</exception>
         /// <returns>A value indicating whether the result was truncated.</returns>
-        public Trilean IntegerMultiply(Memory.BitVectorSpan other)
+        public Trilean IntegerMultiply(BitVectorSpan other)
         {
             AssertSameBitSize(other);
 
@@ -544,7 +544,7 @@ namespace Echo.Memory
             }
         }
 
-        private Trilean IntegerMultiplyLle(Memory.BitVectorSpan other)
+        private Trilean IntegerMultiplyLle(BitVectorSpan other)
         {
             // We implement the standard long multiplication algo by adding and shifting, but instead of storing all
             // intermediate results, we can precompute the two possible intermediate results, shift them, and add them
@@ -610,7 +610,7 @@ namespace Echo.Memory
         /// </summary>
         /// <param name="other">The integer to divide the current integer by.</param>
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match in bit length.</exception>
-        public void IntegerDivide(Memory.BitVectorSpan other)
+        public void IntegerDivide(BitVectorSpan other)
         {
             AssertSameBitSize(other);
 
@@ -651,7 +651,7 @@ namespace Echo.Memory
         /// </summary>
         /// <param name="other">The integer to divide the current integer by.</param>
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match in bit length.</exception>
-        public void IntegerRemainder(Memory.BitVectorSpan other)
+        public void IntegerRemainder(BitVectorSpan other)
         {
             AssertSameBitSize(other);
 
@@ -697,7 +697,7 @@ namespace Echo.Memory
         /// <see cref="Trilean.False"/> if not, and <see cref="Trilean.Unknown"/> if the conclusion of the comparison
         /// is not certain.
         /// </returns>
-        public Trilean IntegerIsGreaterThan(Memory.BitVectorSpan other, bool signed)
+        public Trilean IntegerIsGreaterThan(BitVectorSpan other, bool signed)
         {
             AssertSameBitSize(other);
 
@@ -726,7 +726,7 @@ namespace Echo.Memory
             };
         }
         
-        private Trilean IntegerIsGreaterThanLle(Memory.BitVectorSpan other, bool signed)
+        private Trilean IntegerIsGreaterThanLle(BitVectorSpan other, bool signed)
         {
             if (signed)
             {
@@ -792,7 +792,7 @@ namespace Echo.Memory
         /// <see cref="Trilean.False"/> if not, and <see cref="Trilean.Unknown"/> if the conclusion of the comparison
         /// is not certain.
         /// </returns>
-        public Trilean IntegerIsGreaterThanOrEqual(Memory.BitVectorSpan other, bool signed)
+        public Trilean IntegerIsGreaterThanOrEqual(BitVectorSpan other, bool signed)
         {
             AssertSameBitSize(other);
 
@@ -821,7 +821,7 @@ namespace Echo.Memory
             };
         }
         
-        private Trilean IntegerIsGreaterThanOrEqualLle(Memory.BitVectorSpan other, bool signed)
+        private Trilean IntegerIsGreaterThanOrEqualLle(BitVectorSpan other, bool signed)
         {
             if (signed)
             {
@@ -889,7 +889,7 @@ namespace Echo.Memory
         /// <see cref="Trilean.False"/> if not, and <see cref="Trilean.Unknown"/> if the conclusion of the comparison
         /// is not certain.
         /// </returns>
-        public Trilean IntegerIsLessThan(Memory.BitVectorSpan other, bool signed)
+        public Trilean IntegerIsLessThan(BitVectorSpan other, bool signed)
         {
             AssertSameBitSize(other);
 
@@ -918,7 +918,7 @@ namespace Echo.Memory
             };
         }
         
-        private Trilean IntegerIsLessThanLle(Memory.BitVectorSpan other, bool signed)
+        private Trilean IntegerIsLessThanLle(BitVectorSpan other, bool signed)
         {
             if (signed)
             {
@@ -983,7 +983,7 @@ namespace Echo.Memory
         /// <see cref="Trilean.False"/> if not, and <see cref="Trilean.Unknown"/> if the conclusion of the comparison
         /// is not certain.
         /// </returns>
-        public Trilean IntegerIsLessThanOrEqual(Memory.BitVectorSpan other, bool signed)
+        public Trilean IntegerIsLessThanOrEqual(BitVectorSpan other, bool signed)
         {
             AssertSameBitSize(other);
 
@@ -1012,7 +1012,7 @@ namespace Echo.Memory
             };
         }
         
-        private Trilean IntegerIsLessThanOrEqualLle(Memory.BitVectorSpan other, bool signed)
+        private Trilean IntegerIsLessThanOrEqualLle(BitVectorSpan other, bool signed)
         {
             if (signed)
             {

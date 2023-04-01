@@ -20,7 +20,7 @@ namespace Echo.Tests.Memory
 
             Span<byte> bits = stackalloc byte[5];
             Span<byte> known = stackalloc byte[5];
-            var buffer = new Echo.Memory.BitVectorSpan(bits, known);
+            var buffer = new BitVectorSpan(bits, known);
 
             space.Read(baseAddress + 1, buffer);
 
@@ -40,7 +40,7 @@ namespace Echo.Tests.Memory
 
             Span<byte> bits = stackalloc byte[5];
             Span<byte> known = stackalloc byte[5];
-            var readBuffer = new Echo.Memory.BitVectorSpan(bits, known);
+            var readBuffer = new BitVectorSpan(bits, known);
             
             space.Read(baseAddress + 1, readBuffer);
 

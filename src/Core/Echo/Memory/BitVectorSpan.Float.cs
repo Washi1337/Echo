@@ -54,7 +54,7 @@ namespace Echo.Memory
         /// <summary>
         /// Interprets the bitvector as a floating point number, and adds another floating point number to it.
         /// </summary>
-        public void FloatAdd(Memory.BitVectorSpan other)
+        public void FloatAdd(BitVectorSpan other)
         {
             AssertSameBitSize(other);
 
@@ -84,7 +84,7 @@ namespace Echo.Memory
         /// <summary>
         /// Interprets the bitvector as a floating point number, and subtracts another floating point number to it.
         /// </summary>
-        public void FloatSubtract(Memory.BitVectorSpan other)
+        public void FloatSubtract(BitVectorSpan other)
         {
             AssertSameBitSize(other);
 
@@ -114,7 +114,7 @@ namespace Echo.Memory
         /// <summary>
         /// Interprets the bitvector as a floating point number, and multiplies it with another floating point number.
         /// </summary>
-        public void FloatMultiply(Memory.BitVectorSpan other)
+        public void FloatMultiply(BitVectorSpan other)
         {
             AssertSameBitSize(other);
 
@@ -144,7 +144,7 @@ namespace Echo.Memory
         /// <summary>
         /// Interprets the bitvector as a floating point number, and divides it with another floating point number.
         /// </summary>
-        public void FloatDivide(Memory.BitVectorSpan other)
+        public void FloatDivide(BitVectorSpan other)
         {
             AssertSameBitSize(other);
 
@@ -175,7 +175,7 @@ namespace Echo.Memory
         /// Interprets the bitvector as a floating point number, divides it with another floating point number and
         /// stores the remainder of the division.
         /// </summary>
-        public void FloatRemainder(Memory.BitVectorSpan other)
+        public void FloatRemainder(BitVectorSpan other)
         {
             AssertSameBitSize(other);
 
@@ -213,7 +213,7 @@ namespace Echo.Memory
         /// <see cref="Trilean.False"/> if not, and <see cref="Trilean.Unknown"/> if the conclusion of the comparison
         /// is not certain.
         /// </returns>
-        public Trilean FloatIsLessThan(Memory.BitVectorSpan other, bool ordered)
+        public Trilean FloatIsLessThan(BitVectorSpan other, bool ordered)
         {
             AssertSameBitSize(other);
 
@@ -242,7 +242,7 @@ namespace Echo.Memory
         /// <see cref="Trilean.False"/> if not, and <see cref="Trilean.Unknown"/> if the conclusion of the comparison
         /// is not certain.
         /// </returns>
-        public Trilean FloatIsGreaterThan(Memory.BitVectorSpan other, bool ordered)
+        public Trilean FloatIsGreaterThan(BitVectorSpan other, bool ordered)
         {
             AssertSameBitSize(other);
 

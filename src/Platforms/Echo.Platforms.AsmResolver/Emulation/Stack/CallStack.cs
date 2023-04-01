@@ -86,7 +86,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         }
 
         /// <inheritdoc />
-        public void Read(long address, Memory.BitVectorSpan buffer)
+        public void Read(long address, BitVectorSpan buffer)
         {
             if (!TryFindStackFrame(address, out var e))
                 throw new AccessViolationException();
@@ -95,7 +95,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         }
 
         /// <inheritdoc />
-        public void Write(long address, Memory.BitVectorSpan buffer)
+        public void Write(long address, BitVectorSpan buffer)
         {
             if (!TryFindStackFrame(address, out var e))
                 throw new AccessViolationException();

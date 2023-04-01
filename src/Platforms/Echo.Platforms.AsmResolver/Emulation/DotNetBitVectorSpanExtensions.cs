@@ -29,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="machine">The machine the address is valid in.</param>
         /// <returns>The object handle.</returns>
         /// <exception cref="ArgumentException">Occurs when the bit vector does not contain a fully known address.</exception>
-        public static ObjectHandle AsObjectHandle(this Memory.BitVectorSpan objectPointer, CilVirtualMachine machine)
+        public static ObjectHandle AsObjectHandle(this BitVectorSpan objectPointer, CilVirtualMachine machine)
         {
             if (!objectPointer.IsFullyKnown)
                 throw new ArgumentException("Cannot create an object handle from a partially unknown bit vector");
@@ -66,7 +66,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="machine">The machine the address is valid in.</param>
         /// <returns>The structure handle.</returns>
         /// <exception cref="ArgumentException">Occurs when the bit vector does not contain a fully known address.</exception>
-        public static StructHandle AsStructHandle(this Memory.BitVectorSpan objectPointer, CilVirtualMachine machine)
+        public static StructHandle AsStructHandle(this BitVectorSpan objectPointer, CilVirtualMachine machine)
         {
             if (!objectPointer.IsFullyKnown)
                 throw new ArgumentException("Cannot create an object handle from a partially unknown bit vector");
@@ -91,7 +91,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="span">The bit vector representing the entire managed object.</param>
         /// <param name="factory">The object responsible for managing type layouts.</param>
         /// <returns>The slice that contains the pointer to the object's method table.</returns>
-        public static Memory.BitVectorSpan SliceObjectMethodTable(this Memory.BitVectorSpan span, ValueFactory factory)
+        public static BitVectorSpan SliceObjectMethodTable(this BitVectorSpan span, ValueFactory factory)
         {
             return span.Slice(0, (int) factory.PointerSize * 8);
         }
@@ -105,7 +105,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <remarks>
         /// This method effectively strips away the header of an object.
         /// </remarks>
-        public static Memory.BitVectorSpan SliceObjectData(this Memory.BitVectorSpan span, ValueFactory factory)
+        public static BitVectorSpan SliceObjectData(this BitVectorSpan span, ValueFactory factory)
         {
             return span.Slice((int) (factory.ObjectHeaderSize * 8));
         }
@@ -120,8 +120,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <exception cref="ArgumentException">
         /// Occurs when the provided field has no valid declaring type or could not be resolved.
         /// </exception>
-        public static Memory.BitVectorSpan SliceObjectField(
-            this Memory.BitVectorSpan span, 
+        public static BitVectorSpan SliceObjectField(
+            this BitVectorSpan span, 
             ValueFactory factory,
             IFieldDescriptor field)
         {
@@ -134,7 +134,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="span">The bit vector representing the entire managed array.</param>
         /// <param name="factory">The object responsible for managing type layouts.</param>
         /// <returns>The slice that contains the length of the array.</returns>
-        public static Memory.BitVectorSpan SliceArrayLength(this Memory.BitVectorSpan span, ValueFactory factory)
+        public static BitVectorSpan SliceArrayLength(this BitVectorSpan span, ValueFactory factory)
         {
             return span.Slice((int) (factory.ArrayLengthOffset * 8), (int) (factory.PointerSize * 8));
         }
@@ -145,7 +145,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="span">The bit vector representing the entire managed array.</param>
         /// <param name="factory">The object responsible for managing type layouts.</param>
         /// <returns>The slice that contains the raw data of the elements of the array.</returns>
-        public static Memory.BitVectorSpan SliceArrayData(this Memory.BitVectorSpan span, ValueFactory factory)
+        public static BitVectorSpan SliceArrayData(this BitVectorSpan span, ValueFactory factory)
         {
             return span.Slice((int) (factory.ArrayHeaderSize * 8));
         }
@@ -158,7 +158,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="elementType">The type of elements stored in the array.</param>
         /// <param name="index">The index of the element to carve out.</param>
         /// <returns>The slice that contains the raw data of the requested element.</returns>
-        public static Memory.BitVectorSpan SliceArrayElement(this Memory.BitVectorSpan span, ValueFactory factory, TypeSignature elementType, int index)
+        public static BitVectorSpan SliceArrayElement(this BitVectorSpan span, ValueFactory factory, TypeSignature elementType, int index)
         {
             uint size = factory.GetTypeValueMemoryLayout(elementType).Size;
             return span.Slice((int) (factory.ArrayHeaderSize + size * index) * 8, (int) (size * 8));
@@ -170,7 +170,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="span">The bit vector representing the entire managed string object.</param>
         /// <param name="factory">The object responsible for managing type layouts.</param>
         /// <returns>The slice that contains the length of the string.</returns>
-        public static Memory.BitVectorSpan SliceStringLength(this Memory.BitVectorSpan span, ValueFactory factory)
+        public static BitVectorSpan SliceStringLength(this BitVectorSpan span, ValueFactory factory)
         {
             return span.Slice((int) (factory.StringLengthOffset * 8), sizeof(uint) * 8);
         }
@@ -181,7 +181,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="span">The bit vector representing the entire managed string object.</param>
         /// <param name="factory">The object responsible for managing type layouts.</param>
         /// <returns>The slice that contains the raw characters of the string.</returns>
-        public static Memory.BitVectorSpan SliceStringData(this Memory.BitVectorSpan span, ValueFactory factory)
+        public static BitVectorSpan SliceStringData(this BitVectorSpan span, ValueFactory factory)
         {
             return span.Slice((int) (factory.StringHeaderSize * 8));
         }
@@ -201,7 +201,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <exception cref="ArgumentException">
         /// Occurs when the provided field has no valid declaring type or could not be resolved.
         /// </exception>
-        public static Memory.BitVectorSpan SliceStructField(this Memory.BitVectorSpan span, ValueFactory factory, IFieldDescriptor field)
+        public static BitVectorSpan SliceStructField(this BitVectorSpan span, ValueFactory factory, IFieldDescriptor field)
         {
             var fieldMemoryLayout = factory.GetFieldMemoryLayout(field);
             return span.Slice((int) (fieldMemoryLayout.Offset * 8), (int) (fieldMemoryLayout.ContentsLayout.Size * 8));

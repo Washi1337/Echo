@@ -83,7 +83,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <inheritdoc />
-        public virtual object? ToObject(Memory.BitVectorSpan vector, Type targetType)
+        public virtual object? ToObject(BitVectorSpan vector, Type targetType)
         {
             if (!vector.IsFullyKnown)
                 throw new ArgumentException($"Attempted to deserialize a vector to {targetType} with unknown bits.");
@@ -109,12 +109,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
             };
         }
 
-        private static DateTime ReadDateTimeVector(Memory.BitVectorSpan vector)
+        private static DateTime ReadDateTimeVector(BitVectorSpan vector)
         {
             return new DateTime(vector.I64);
         }
 
-        private static decimal ReadDecimalVector(Memory.BitVectorSpan vector)
+        private static decimal ReadDecimalVector(BitVectorSpan vector)
         {
             using var stream = new MemoryStream(vector.Bits.ToArray());
             using var reader = new BinaryReader(stream);
@@ -122,7 +122,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             return reader.ReadDecimal();
         }
 
-        private string? ReadStringReferenceVector(Memory.BitVectorSpan vector)
+        private string? ReadStringReferenceVector(BitVectorSpan vector)
         {
             var data = vector.AsObjectHandle(Machine).ReadStringData();
             if (!data.AsSpan().IsFullyKnown)
@@ -131,7 +131,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             return Encoding.Unicode.GetString(data.Bits);
         }
 
-        private object? ReadObjectReferenceVector(Memory.BitVectorSpan vector, Type targetType)
+        private object? ReadObjectReferenceVector(BitVectorSpan vector, Type targetType)
         {
             long pointer = vector.ReadNativeInteger(Machine.Is32Bit);
             if (pointer == 0)

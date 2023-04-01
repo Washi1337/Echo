@@ -217,14 +217,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// </summary>
         /// <param name="index">The index of the variable.</param>
         /// <param name="buffer">The buffer to write the data into.</param>
-        public void ReadLocal(int index, Memory.BitVectorSpan buffer) => Read(GetLocalAddress(index), buffer);
+        public void ReadLocal(int index, BitVectorSpan buffer) => Read(GetLocalAddress(index), buffer);
 
         /// <summary>
         /// Assigns a new value to a local variable. 
         /// </summary>
         /// <param name="index">The index of the variable.</param>
         /// <param name="buffer">The buffer containing the new data.</param>
-        public void WriteLocal(int index, Memory.BitVectorSpan buffer) => Write(GetLocalAddress(index), buffer);
+        public void WriteLocal(int index, BitVectorSpan buffer) => Write(GetLocalAddress(index), buffer);
 
         /// <summary>
         /// Gets the address (relative to the start of the frame) to an argument in the frame. 
@@ -241,23 +241,23 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// </summary>
         /// <param name="index">The index of the argument to read.</param>
         /// <param name="buffer">The buffer to write the data into.</param>
-        public void ReadArgument(int index, Memory.BitVectorSpan buffer) => Read(GetArgumentAddress(index), buffer);
+        public void ReadArgument(int index, BitVectorSpan buffer) => Read(GetArgumentAddress(index), buffer);
 
         /// <summary>
         /// Assigns a new value to an argument. 
         /// </summary>
         /// <param name="index">The index of the argument.</param>
         /// <param name="buffer">The buffer containing the new data.</param>
-        public void WriteArgument(int index, Memory.BitVectorSpan buffer) => Write(GetArgumentAddress(index), buffer);
+        public void WriteArgument(int index, BitVectorSpan buffer) => Write(GetArgumentAddress(index), buffer);
 
         /// <inheritdoc />
-        public void Read(long address, Memory.BitVectorSpan buffer)
+        public void Read(long address, BitVectorSpan buffer)
         {
             _localStorage.AsSpan((int) (address - _baseAddress) * 8, buffer.Count).CopyTo(buffer);
         }
 
         /// <inheritdoc />
-        public void Write(long address, Memory.BitVectorSpan buffer)
+        public void Write(long address, BitVectorSpan buffer)
         {
             buffer.CopyTo(_localStorage.AsSpan((int) (address - _baseAddress) * 8, buffer.Count));
         }

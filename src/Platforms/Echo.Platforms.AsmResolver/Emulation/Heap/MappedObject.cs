@@ -83,7 +83,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         }
 
         /// <inheritdoc />
-        public void Read(long address, Memory.BitVectorSpan buffer)
+        public void Read(long address, BitVectorSpan buffer)
         {
             buffer.MarkFullyUnknown();
             
@@ -108,7 +108,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         }
 
         /// <inheritdoc />
-        public void Write(long address, Memory.BitVectorSpan buffer)
+        public void Write(long address, BitVectorSpan buffer)
         {
             uint offset = (uint) (address - _baseAddress);
             

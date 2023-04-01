@@ -21,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="vector">The vector.</param>
         /// <param name="targetType">The type to marshal to.</param>
         /// <returns>The marshalled object.</returns>
-        object? ToObject(Memory.BitVectorSpan vector, Type targetType);
+        object? ToObject(BitVectorSpan vector, Type targetType);
     }
 
 }

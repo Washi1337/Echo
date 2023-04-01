@@ -177,7 +177,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Misc
         private static (StackSlot Result, Trilean Overflow) HandleUnknownFloatConversion(
             CilExecutionContext context,
             TypeSignature targetType, 
-            Memory.BitVectorSpan span)
+            BitVectorSpan span)
         {
             var pool = context.Machine.ValueFactory.BitVectorPool;
             
@@ -215,7 +215,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Misc
         private static (StackSlot Result, Trilean Overflow) HandleKnownFloatConversion(
             CilExecutionContext context,
             TypeSignature targetType, 
-            Memory.BitVectorSpan span)
+            BitVectorSpan span)
         {
             var factory = context.Machine.ValueFactory;
             var pool = factory.BitVectorPool;

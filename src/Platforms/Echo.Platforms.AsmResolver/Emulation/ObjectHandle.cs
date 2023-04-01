@@ -97,14 +97,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <param name="field">The field to obtain the value for.</param>
         /// <param name="buffer">The buffer to copy the value into.</param>
-        public void ReadField(IFieldDescriptor field, Memory.BitVectorSpan buffer) => Contents.ReadField(field, buffer);
+        public void ReadField(IFieldDescriptor field, BitVectorSpan buffer) => Contents.ReadField(field, buffer);
 
         /// <summary>
         /// Copies the provided bit vector into a field of the object. 
         /// </summary>
         /// <param name="field">The field to write to.</param>
         /// <param name="buffer">The bits to write.</param>
-        public void WriteField(IFieldDescriptor field, Memory.BitVectorSpan buffer) => Contents.WriteField(field, buffer);
+        public void WriteField(IFieldDescriptor field, BitVectorSpan buffer) => Contents.WriteField(field, buffer);
 
         /// <summary>
         /// Interprets the handle as a string handle, and obtains the length of the contained string.
@@ -121,7 +121,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Interprets the handle as a string handle, and obtains the length of the contained string.
         /// </summary>
         /// <param name="buffer">The buffer to copy the length bits into.</param>
-        public void ReadStringLength(Memory.BitVectorSpan buffer)
+        public void ReadStringLength(BitVectorSpan buffer)
         {
             Machine.Memory.Read(Address + Machine.ValueFactory.StringLengthOffset, buffer);
         }
@@ -165,7 +165,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Interprets the handle as an array reference, and obtains the length of the contained array.
         /// </summary>
         /// <param name="buffer">The buffer to copy the length bits into.</param>
-        public void ReadArrayLength(Memory.BitVectorSpan buffer)
+        public void ReadArrayLength(BitVectorSpan buffer)
         {
             Machine.Memory.Read(Address + Machine.ValueFactory.ArrayLengthOffset, buffer);
         }
@@ -200,7 +200,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="elementType">The type of elements the array stores.</param>
         /// <param name="index">The index of the element.</param>
         /// <param name="buffer">The buffer to write the bits of the element into.</param>
-        public void ReadArrayElement(TypeSignature elementType, long index, Memory.BitVectorSpan buffer)
+        public void ReadArrayElement(TypeSignature elementType, long index, BitVectorSpan buffer)
         {
             Machine.Memory.Read(GetArrayElementAddress(elementType, index), buffer);
         }
@@ -211,7 +211,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="elementType">The type of elements the array stores.</param>
         /// <param name="index">The index of the element.</param>
         /// <param name="buffer">The bits of the element to write to the element.</param>
-        public void WriteArrayElement(TypeSignature elementType, long index, Memory.BitVectorSpan buffer)
+        public void WriteArrayElement(TypeSignature elementType, long index, BitVectorSpan buffer)
         {
             Machine.Memory.Write(GetArrayElementAddress(elementType, index), buffer);
         }
@@ -243,7 +243,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Reads the data stored in the object (excluding the object header), and stores it in a bit vector.
         /// </summary>
         /// <param name="buffer">The buffer to write the data to.</param>
-        public void ReadObjectData(Memory.BitVectorSpan buffer)
+        public void ReadObjectData(BitVectorSpan buffer)
         {
             Machine.Memory.Read(Contents.Address, buffer);
         }

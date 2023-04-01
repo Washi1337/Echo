@@ -13,7 +13,7 @@ namespace Echo.Memory
         /// Performs a bitwise AND operation with another bit vector.
         /// </summary>
         /// <param name="other">The other bit vector.</param>
-        public void And(Memory.BitVectorSpan other)
+        public void And(BitVectorSpan other)
         {
             AssertSameBitSize(other);
             
@@ -32,7 +32,7 @@ namespace Echo.Memory
         /// Performs a bitwise OR operation with another bit vector.
         /// </summary>
         /// <param name="other">The other bit vector.</param>
-        public void Or(Memory.BitVectorSpan other)
+        public void Or(BitVectorSpan other)
         {
             AssertSameBitSize(other);
             
@@ -51,7 +51,7 @@ namespace Echo.Memory
         /// Performs a bitwise XOR operation with another bit vector.
         /// </summary>
         /// <param name="other">The other bit vector.</param>
-        public void Xor(Memory.BitVectorSpan other)
+        public void Xor(BitVectorSpan other)
         {
             AssertSameBitSize(other);
             
