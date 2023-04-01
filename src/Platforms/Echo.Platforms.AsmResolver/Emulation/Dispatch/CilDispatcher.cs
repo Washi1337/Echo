@@ -2,124 +2,96 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete.Emulation;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
 {
     /// <summary>
-    /// Provides a default implementation for a CIL operation code handler dispatcher.
+    /// Provides a mechanism for dispatching instructions to their respective handlers.
     /// </summary>
-    public class CilDispatcher : ICilDispatcher
+    public class CilDispatcher
     {
-        /// <inheritdoc />
-        public event EventHandler<BeforeInstructionDispatchEventArgs> BeforeInstructionDispatch;
+        private static readonly Dictionary<CilCode, ICilOpCodeHandler> DefaultDispatcherTable = new();
+
+        /// <summary>
+        /// Fires before an instruction gets dispatched.
+        /// </summary>
+        public event EventHandler<CilDispatchEventArgs>? BeforeInstructionDispatch;
         
-        /// <inheritdoc />
-        public event EventHandler<InstructionDispatchEventArgs> AfterInstructionDispatch;
-        
-        private static readonly Dictionary<Module, ICollection<ICilOpCodeHandler>> HandlerInstances = new();
+        /// <summary>
+        /// Fires after an instruction gets dispatched.
+        /// </summary> 
+        public event EventHandler<CilDispatchEventArgs>? AfterInstructionDispatch;
+
+        private readonly CilDispatchEventArgs _dispatchEventArgs = new();
+
+        static CilDispatcher() => InitializeDefaultDispatcherTable();
 
         /// <summary>
-        /// Creates a new CIL dispatcher using the handlers defined in the current module. 
+        /// Gets the table that is used for dispatching instructions by their mnemonic. 
         /// </summary>
-        public CilDispatcher()
-            : this(typeof(CilDispatcher).Module)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new CIL dispatcher using the handlers defined in the provided module. 
-        /// </summary>
-        public CilDispatcher(Module handlerModule)
-        {
-            var table = new Dictionary<CilCode, ICilOpCodeHandler>();
-            foreach (var handler in GetOrCreateHandlersInModule(handlerModule))
-            {
-                foreach (var code in handler.SupportedOpCodes)
-                    table.Add(code, handler);
-            }
-
-            DispatcherTable = table;
-        }
-
-        /// <summary>
-        /// Gets the used dispatcher table.
-        /// </summary>
-        public IDictionary<CilCode, ICilOpCodeHandler> DispatcherTable
+        public Dictionary<CilCode, ICilOpCodeHandler> DispatcherTable
         {
             get;
-        }
+        } = new(DefaultDispatcherTable);
 
-        private static IEnumerable<ICilOpCodeHandler> GetOrCreateHandlersInModule(Module module)
+        private static void InitializeDefaultDispatcherTable()
         {
-            lock (HandlerInstances)
+            foreach (var type in typeof(ICilOpCodeHandler).Module.GetTypes())
             {
-                if (!HandlerInstances.TryGetValue(module, out var handlers))
+                if (!type.IsAbstract && typeof(ICilOpCodeHandler).IsAssignableFrom(type))
                 {
-                    handlers = new List<ICilOpCodeHandler>();
+                    var attribute = type.GetCustomAttribute<DispatcherTableEntryAttribute>();
 
-                    foreach (var type in module.GetTypes())
-                    {
-                        if (!type.IsAbstract && typeof(ICilOpCodeHandler).IsAssignableFrom(type))
-                            handlers.Add((ICilOpCodeHandler) Activator.CreateInstance(type));
-                    }
-
-                    HandlerInstances.Add(module, handlers);
+                    var instance = (ICilOpCodeHandler) Activator.CreateInstance(type);
+                    foreach (var opCode in attribute.OpCodes)
+                        DefaultDispatcherTable[opCode] = instance;
                 }
-
-                return handlers;
             }
-        }
-        
-        /// <inheritdoc />
-        public DispatchResult Execute(CilExecutionContext context, CilInstruction instruction)
-        {
-            var eventArgs = new BeforeInstructionDispatchEventArgs(context, instruction);
-            OnBeforeInstructionDispatch(eventArgs);
-
-            DispatchResult result;
-            if (eventArgs.Handled)
-            {
-                result = eventArgs.ResultOverride;
-            }
-            else
-            {
-                var handler = GetOpCodeHandler(instruction);
-                result = handler.Execute(context, instruction);
-            }
- 
-            OnAfterInstructionDispatch(new AfterInstructionDispatchEventArgs(context, instruction, result));
-            return result;
-        }
-
-        /// <summary>
-        /// Obtains the operation code handler for the provided instruction. 
-        /// </summary>
-        /// <param name="instruction">The instruction to get the handler for.</param>
-        /// <returns>The operation code handler.</returns>
-        /// <exception cref="UndefinedInstructionException">Occurs when the instruction is invalid or unsupported.</exception>
-        protected virtual ICilOpCodeHandler GetOpCodeHandler(CilInstruction instruction)
-        {
-            if (!DispatcherTable.TryGetValue(instruction.OpCode.Code, out var handler))
-                throw new UndefinedInstructionException(instruction.Offset);
-            
-            return handler;
         } 
+        
+        /// <summary>
+        /// Dispatches and evaluates a single instruction.
+        /// </summary>
+        /// <param name="context">The context to evaluate the instruction in.</param>
+        /// <param name="instruction">The instruction to dispatch and evaluate.</param>
+        /// <returns>A value indicating whether the dispatch was successful or caused an error.</returns>
+        /// <exception cref="NotSupportedException">Occurs when an operation was not supported by the dispatcher.</exception>
+        public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
+        {
+            _dispatchEventArgs.Context = context;
+            _dispatchEventArgs.Instruction = instruction;
+            _dispatchEventArgs.IsHandled = false;
+            _dispatchEventArgs.Result = default;
+
+            OnBeforeInstructionDispatch(_dispatchEventArgs);
+
+            if (!_dispatchEventArgs.IsHandled)
+            {
+                if (!DispatcherTable.TryGetValue(instruction.OpCode.Code, out var handler))
+                    throw new NotSupportedException($"OpCode {instruction.OpCode.Mnemonic} is not supported.");
+                _dispatchEventArgs.Result = handler.Dispatch(context, instruction);
+            }
+
+            _dispatchEventArgs.IsHandled = true;
+            OnAfterInstructionDispatch(_dispatchEventArgs);
+
+            return _dispatchEventArgs.Result;
+        }
 
         /// <summary>
-        /// Invoked when an instruction is about to be dispatched. 
+        /// Fires the <see cref="BeforeInstructionDispatch" /> event.
         /// </summary>
-        /// <param name="e">The arguments describing the event.</param>
-        protected virtual void OnBeforeInstructionDispatch(BeforeInstructionDispatchEventArgs e)
+        /// <param name="e">The event arguments.</param>
+        protected virtual void OnBeforeInstructionDispatch(CilDispatchEventArgs e)
         {
             BeforeInstructionDispatch?.Invoke(this, e);
         }
 
         /// <summary>
-        /// Invoked when an instruction is about to be dispatched. 
+        /// Fires the <see cref="AfterInstructionDispatch" /> event.
         /// </summary>
-        /// <param name="e">The arguments describing the event.</param>
-        protected virtual void OnAfterInstructionDispatch(InstructionDispatchEventArgs e)
+        /// <param name="e">The event arguments.</param>
+        protected virtual void OnAfterInstructionDispatch(CilDispatchEventArgs e)
         {
             AfterInstructionDispatch?.Invoke(this, e);
         }

@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         {
             var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.HelloWorld));
-            var body = method.CilMethodBody;
+            var body = method.CilMethodBody!;
             var cfg = body.ConstructSymbolicFlowGraph(out _);
             
             Assert.Single(cfg.Nodes);
@@ -34,7 +34,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         {
             var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.If));
-            var body = method.CilMethodBody;
+            var body = method.CilMethodBody!;
             var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
             
             Assert.Single(cfg.Entrypoint.ConditionalEdges);
@@ -48,7 +48,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             CilInstruction FindLdstr(string value)
             {
                 return body.Instructions
-                    .First(i => i.OpCode.Code == CilCode.Ldstr && (string) i.Operand == value);
+                    .First(i => i.OpCode.Code == CilCode.Ldstr && i.Operand?.ToString() == value);
             }
 
             bool ValueReachesOffset(int sourceOffset, int targetOffset)
@@ -80,7 +80,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         {
             var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.SwitchColor));
-            var body = method.CilMethodBody;
+            var body = method.CilMethodBody!;
             var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
             
             Assert.Equal(3, cfg.Entrypoint.ConditionalEdges.Count);
@@ -93,7 +93,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         {
             var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.Loop));
-            var body = method.CilMethodBody;
+            var body = method.CilMethodBody!;
             var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
             
             Assert.Equal(2, dfg.Nodes[body.Instructions[6].Offset].VariableDependencies.First().Count);

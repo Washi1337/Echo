@@ -13,14 +13,14 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: recursive
       
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v1.7.2
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 5.0.104
+        dotnet-version: 6.0.308
         
     - name: Install dependencies
       run: dotnet restore

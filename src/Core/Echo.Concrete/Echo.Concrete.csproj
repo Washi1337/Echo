@@ -4,16 +4,10 @@
         <TargetFramework>netstandard2.0</TargetFramework>        
         <Title>Echo.Concrete</Title>
         <Description>Concrete emulation base for the Echo program analysis toolsuite.</Description>
-        <Copyright>Copyright © Washi 2019-2020</Copyright>
-        <PackageProjectUrl>https://github.com/Washi1337/Echo</PackageProjectUrl>
-        <PackageLicense>https://github.com/Washi1337/Echo/LICENSE.md</PackageLicense>
-        <RepositoryUrl>https://github.com/Washi1337/Echo</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
         <PackageTags>program code emulation interpretation</PackageTags>
-        <LangVersion>8</LangVersion>
-        <Version>0.9.0-alpha.1</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -29,6 +23,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Nullable" Version="1.3.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="System.Memory" Version="4.5.4" />
       <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0-preview.2.20160.6" />
     </ItemGroup>

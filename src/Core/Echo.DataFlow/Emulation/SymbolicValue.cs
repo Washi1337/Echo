@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.Core.Emulation;
 using Echo.Core.Code;
 
 namespace Echo.DataFlow.Emulation
@@ -10,7 +9,7 @@ namespace Echo.DataFlow.Emulation
     /// <summary>
     /// Represents a symbolic value that resides in memory. 
     /// </summary>
-    public sealed class SymbolicValue<T> : ISet<DataSource<T>>, IValue
+    public sealed class SymbolicValue<T> : ISet<DataSource<T>>
     {
         // -------------------------
         // Implementation rationale:
@@ -91,12 +90,6 @@ namespace Echo.DataFlow.Emulation
         /// <inheritdoc />
         public bool IsReadOnly => true;
         
-        /// <inheritdoc />
-        public bool IsKnown => HasKnownDataSources;
-
-        /// <inheritdoc />
-        public int Size => 0;
-        
         /// <summary>
         /// Gets a value indicating whether the data dependency has any known data sources. 
         /// </summary>
@@ -139,14 +132,6 @@ namespace Echo.DataFlow.Emulation
         /// </summary>
         /// <returns>The variable data sources.</returns>
         public IEnumerable<VariableDataSource<T>> AsVariableValue() => this.Cast<VariableDataSource<T>>();
-
-        /// <summary>
-        /// Creates an exact copy of the value.
-        /// </summary>
-        /// <returns>The copied value.</returns>
-        public SymbolicValue<T> Copy() => new(this);
-
-        IValue IValue.Copy() => Copy();
 
         private static bool ThrowInvalidStateException() => 
             throw new InvalidOperationException("Data dependency is in an invalid state.");

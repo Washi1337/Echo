@@ -42,7 +42,7 @@ namespace Echo.Platforms.AsmResolver
 
                 var exceptionSource = default(ExternalDataSourceNode<CilInstruction>);
                 
-                if (handler.HandlerStart.Offset == entrypointAddress)
+                if (handler.HandlerStart!.Offset == entrypointAddress)
                 {
                     exceptionSource = new ExternalDataSourceNode<CilInstruction>(
                         -(long) handler.HandlerStart.Offset,
@@ -82,7 +82,7 @@ namespace Echo.Platforms.AsmResolver
                     return 1;
 
                 case CilFlowControl.ConditionalBranch when instruction.OpCode.Code == CilCode.Switch:
-                    return ((ICollection<ICilLabel>) instruction.Operand).Count + 1;
+                    return ((ICollection<ICilLabel>) instruction.Operand!).Count + 1;
                 
                 case CilFlowControl.ConditionalBranch:
                     return 2;
@@ -158,7 +158,7 @@ namespace Echo.Platforms.AsmResolver
         {           
             // Unconditional branches are similar to normal fallthrough, except they change the program counter.
             var nextState = ApplyDefaultBehaviour(currentState, instruction)
-                .WithProgramCounter(((ICilLabel) instruction.Operand).Offset);
+                .WithProgramCounter(((ICilLabel) instruction.Operand!).Offset);
 
             successorBuffer[0] = new StateTransition<CilInstruction>(nextState, ControlFlowEdgeType.Unconditional);
             return 1;

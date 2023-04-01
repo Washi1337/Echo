@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         {
             var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.HelloWorld));
-            var body = method.CilMethodBody;
+            var body = method.CilMethodBody!;
             var cfg = body.ConstructStaticFlowGraph();
             
             Assert.Single(cfg.Nodes);
@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         {
             var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.If));
-            var body = method.CilMethodBody;
+            var body = method.CilMethodBody!;
             var cfg = body.ConstructStaticFlowGraph();
             
             Assert.Single(cfg.Entrypoint.ConditionalEdges);
@@ -43,7 +43,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         {
             var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.SwitchColor));
-            var body = method.CilMethodBody;
+            var body = method.CilMethodBody!;
             var cfg = body.ConstructStaticFlowGraph();
             
             Assert.Equal(3, cfg.Entrypoint.ConditionalEdges.Count);

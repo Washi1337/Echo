@@ -25,7 +25,7 @@ namespace Echo.Core
         
         // The following implements the following truth table:
         //
-        //    | 0 | 1 | ?
+        //    | 0 | 1 | ?   
         // ---+---+---+---
         //  0 | 0 | 0 | 0
         //  --+---+---+---
@@ -303,14 +303,33 @@ namespace Echo.Core
         /// the result is unknown.</returns>
         public Trilean Xor(Trilean other) => XorTable[GetLookupTableIndex(Value, other.Value)];
 
-        /// <inheritdoc />
-        public override string ToString() => Value switch
+        /// <summary>
+        /// Obtains the trilean value that is associated to the provided character.
+        /// </summary>
+        /// <param name="c">The character to parse.</param>
+        /// <returns>The trilean value.</returns>
+        /// <exception cref="FormatException">Occurs when the character is not a valid trilean digit.</exception>
+        public static Trilean FromChar(char c) => c switch
         {
-            TrileanValue.Unknown => "?",
-            TrileanValue.False => "0",
-            TrileanValue.True => "1",
-            _ => throw new ArgumentOutOfRangeException()
+            '0' => False,
+            '1' => True,
+            '?' => Unknown,
+            _ => throw new FormatException()
         };
         
+        /// <summary>
+        /// Returns the raw value of the trilean as a single character (either '0', '1' or '?').
+        /// </summary>
+        /// <returns>The character.</returns>
+        public char ToChar() => Value switch
+        {
+            TrileanValue.Unknown => '?',
+            TrileanValue.False => '0',
+            TrileanValue.True => '1',
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        /// <inheritdoc />
+        public override string ToString() => ToChar().ToString();
     }
 }

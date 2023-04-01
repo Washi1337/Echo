@@ -33,7 +33,7 @@ namespace Echo.Platforms.AsmResolver
                     return 1;
                 
                 case CilFlowControl.ConditionalBranch when instruction.OpCode.Code == CilCode.Switch:
-                    return ((ICollection<ICilLabel>) instruction.Operand).Count + 1;
+                    return ((ICollection<ICilLabel>) instruction.Operand!).Count + 1;
                 
                 case CilFlowControl.ConditionalBranch:
                     return 2;
@@ -91,7 +91,7 @@ namespace Echo.Platforms.AsmResolver
         private static int GetUnconditionalBranchTransitions(CilInstruction instruction, Span<SuccessorInfo> successorsBuffer)
         {
             // Unconditional branches always move to the instruction referenced in the operand.
-            var label = (ICilLabel) instruction.Operand;
+            var label = (ICilLabel) instruction.Operand!;
             successorsBuffer[0] = new SuccessorInfo(label.Offset, ControlFlowEdgeType.Unconditional);
             return 1;
         }

@@ -32,8 +32,8 @@ namespace Echo.Platforms.AsmResolver
                 .Select(p => new CilParameter(p))
                 .ToList();
 
-            if (parentBody.Owner.Signature.HasThis)
-                _parameters.Insert(0, new CilParameter(parentBody.Owner.Parameters.ThisParameter));
+            if (parentBody.Owner.Signature!.HasThis)
+                _parameters.Insert(0, new CilParameter(parentBody.Owner.Parameters.ThisParameter!));
         }
 
         /// <summary>
