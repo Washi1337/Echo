@@ -22,11 +22,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
 
             // Read local from stack frame.
             var result = factory.RentValue(local.VariableType, false);
-            frame.ReadLocal(local.Index, result.AsSpan());
-             
-            // Marshal and push.
-            context.CurrentFrame.EvaluationStack.Push(result, local.VariableType);
-            
+            try
+            {
+                // Marshal and push.
+                frame.ReadLocal(local.Index, result.AsSpan());
+                context.CurrentFrame.EvaluationStack.Push(result, local.VariableType);
+            }
+            finally
+            {
+                factory.BitVectorPool.Return(result);
+            }
+
             return CilDispatchResult.Success();
         }
     }

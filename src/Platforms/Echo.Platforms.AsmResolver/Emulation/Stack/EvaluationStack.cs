@@ -25,11 +25,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <param name="value">The value to push.</param>
         /// <param name="originalType">The type of the value to push.</param>
         /// <returns>The stack slot that was created.</returns>
-        public StackSlot Push(BitVectorSpan value, TypeSignature originalType)
+        public void Push(BitVectorSpan value, TypeSignature originalType)
         {
             var vector = _factory.BitVectorPool.Rent(value.Count, false);
             vector.AsSpan().Write(value);
-            return Push(vector, originalType);
+            Push(vector, originalType, true);
+        }
+
+        /// <summary>
+        /// Marshals the provided bitvector into a stack slot, and pushes it onto the stack.
+        /// </summary>
+        /// <param name="value">The value to push.</param>
+        /// <param name="originalType">The type of the value to push.</param>
+        /// <returns>The stack slot that was created.</returns>
+        public void Push(BitVector value, TypeSignature originalType)
+        {
+            Push(value, originalType, false);
         }
         
         /// <summary>
@@ -42,7 +53,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// should remain the owner of the bit vector.
         /// </param>
         /// <returns>The stack slot that was created.</returns>
-        public StackSlot Push(BitVector value, TypeSignature originalType, bool releaseBitVector = true)
+        public void Push(BitVector value, TypeSignature originalType, bool releaseBitVector)
         {
             var marshalled = _factory.Marshaller.ToCliValue(value, originalType);
             
@@ -50,8 +61,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                 _factory.BitVectorPool.Return(value);
             
             Push(marshalled);
-
-            return marshalled;
         }
 
         /// <summary>

@@ -78,6 +78,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
 
                 // Check all parameters.
                 var parameters = candidate.GetParameters();
+                if (parameters.Length != method.Signature.ParameterTypes.Count)
+                    continue;
                 
                 bool fullMatch = true;
                 for (int i = 0; fullMatch && i < parameters.Length; i++)
