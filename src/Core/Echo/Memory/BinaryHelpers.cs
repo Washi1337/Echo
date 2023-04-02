@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Echo
+namespace Echo.Memory
 {
     internal static class BinaryHelpers
     {
