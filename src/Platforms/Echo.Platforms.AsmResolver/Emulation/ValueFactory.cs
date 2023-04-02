@@ -44,6 +44,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
             BitVectorPool = new BitVectorPool();
             Marshaller = new CliMarshaller(this);
 
+            DecimalType = new TypeReference(
+                contextModule, 
+                contextModule.CorLibTypeFactory.CorLibScope, 
+                "System",
+                "Decimal").Resolve()!;
+            
             InvalidProgramExceptionType = new TypeReference(
                     contextModule, 
                     contextModule.CorLibTypeFactory.CorLibScope, 
@@ -119,6 +125,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
         }
 
+        /// <summary>
+        /// Gets a reference to the <see cref="Decimal"/> type. 
+        /// </summary>
+        public ITypeDescriptor DecimalType
+        {
+            get;
+        }
+        
         /// <summary>
         /// Gets a reference to the <see cref="InvalidProgramException"/> type. 
         /// </summary>

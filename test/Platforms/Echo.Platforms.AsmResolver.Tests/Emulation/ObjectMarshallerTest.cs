@@ -1,6 +1,9 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Tests.Mock;
@@ -96,6 +99,23 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             Assert.True(embedded.ReadField(simpleClassField).AsSpan().IsZero.ToBoolean());
         }
 
+        [Fact]
+        public void SerializeInt32Array()
+        {
+            int[] array = Enumerable.Range(100, 10).ToArray();
+
+            var result = _machine.ObjectMarshaller.ToBitVector(array).AsObjectHandle(_machine);
+            
+            var elementType = _machine.ContextModule.CorLibTypeFactory.Int32;
+            
+            Assert.Equal(elementType.MakeSzArrayType(), result.GetObjectType().ToTypeSignature(), SignatureComparer.Default);
+            Assert.Equal(array.Length, result.ReadArrayLength().AsSpan().I32);
+            Assert.All(Enumerable.Range(0, array.Length), i =>
+            {
+                Assert.Equal(array[i], result.ReadArrayElement(elementType, i).AsSpan().I32);   
+            });
+        }
+
         [SuppressMessage("Usage", "xUnit1025:InlineData should be unique within the Theory it belongs to")]
         [Theory]
         [InlineData(new byte[] {0x01}, true)]
@@ -129,6 +149,19 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             
             object? result = _machine.ObjectMarshaller.ToObject<object?>(_machine.ValueFactory.CreateNativeInteger(address));
             Assert.Same(dummy, result);
+        }
+
+        [Fact]
+        public void DeserializeInt32Array()
+        {
+            var elementType = _machine.ContextModule.CorLibTypeFactory.Int32;
+            var handle = _machine.Heap.AllocateSzArray(elementType, 10, true).AsObjectHandle(_machine);
+            
+            for (int i = 0; i < 10; i++)
+                handle.WriteArrayElement(elementType, i, new BitVector(100 + i));
+
+            int[]? deserialized = _machine.ObjectMarshaller.ToObject<int[]>(new BitVector(handle.Address));
+            Assert.Equal(Enumerable.Range(100, 10), deserialized);
         }
     }
 }

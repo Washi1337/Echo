@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
+using AsmResolver.DotNet.Signatures.Types;
 using Echo.Memory;
 using Echo.Code;
 
@@ -60,7 +62,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             
             if (!_mappedObjects.TryGetValue(value, out var map))
             {
-                map = new MappedObject(value, GetLayout(value.GetType()), _machine);
+                map = new MappedObject(value, GetLayout(value), _machine);
                 
                 _backingBuffer.Map(_backingBuffer.AddressRange.Start + _currentOffset, map);
                 _mappedObjects[value] = map;
@@ -83,9 +85,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             return _objectsByAddress.TryGetValue(address - AddressRange.Start, out map);
         }
 
-        private TypeMemoryLayout GetLayout(Type type)
+        private TypeMemoryLayout GetLayout(object value)
         {
+            var type = value.GetType();
             var descriptor = _machine.ContextModule.DefaultImporter.ImportType(type);
+
+            // Special treatment for array types.
+            if (descriptor is TypeSpecification { Signature: SzArrayTypeSignature arrayType })
+            {
+                uint totalSize = _machine.ValueFactory.GetArrayObjectSize(arrayType.BaseType, ((Array) value).Length);
+                uint dataSize = totalSize - _machine.ValueFactory.ObjectHeaderSize;
+                return new TypeMemoryLayout(
+                    descriptor, 
+                    dataSize,
+                    _machine.Is32Bit ? MemoryLayoutAttributes.Is32Bit : MemoryLayoutAttributes.Is64Bit);
+            }
+
             return _machine.ValueFactory.GetTypeContentsMemoryLayout(descriptor);
         }
 

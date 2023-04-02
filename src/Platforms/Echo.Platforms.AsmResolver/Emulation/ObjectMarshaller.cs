@@ -105,6 +105,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 TypeCode.UInt16 => vector.U16,
                 TypeCode.UInt32 => vector.U32,
                 TypeCode.UInt64 => vector.U64,
+                _ when targetType.IsValueType => DeserializeStructure(vector, targetType),
                 _ => ReadObjectReferenceVector(vector, targetType)
             };
         }
@@ -139,8 +140,63 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
             if (Machine.ObjectMapMemory.TryGetObject(pointer, out var map))
                 return map.Object;
+
+            if (targetType.IsArray && targetType.GetArrayRank() == 1)
+                return DeserializeArray(pointer, targetType.GetElementType()!);
             
             return DeserializeObject(pointer, targetType);
+        }
+
+        private object? DeserializeArray(long pointer, Type elementType)
+        {
+            var factory = Machine.ContextModule.CorLibTypeFactory;
+            var representative = Type.GetTypeCode(elementType) switch
+            {
+                TypeCode.Boolean => factory.Boolean,
+                TypeCode.Byte => factory.Byte,
+                TypeCode.Char => factory.Char,
+                TypeCode.DateTime => factory.Int64,
+                TypeCode.Decimal => Machine.ValueFactory.DecimalType.ToTypeSignature(),
+                TypeCode.Double => factory.Double,
+                TypeCode.Int16 => factory.Int16,
+                TypeCode.Int32 => factory.Int32,
+                TypeCode.Int64 => factory.Int64,
+                TypeCode.SByte => factory.SByte,
+                TypeCode.Single => factory.Single,
+                TypeCode.UInt16 => factory.UInt16,
+                TypeCode.UInt32 => factory.UInt32,
+                TypeCode.UInt64 => factory.UInt64,
+                _ when !elementType.IsValueType => factory.Object,
+                _ => throw new NotSupportedException($"Could not deserialize an array with element type {elementType}.")
+            };
+            
+            var arrayHandle = pointer.AsObjectHandle(Machine);
+            var length = arrayHandle.ReadArrayLength().AsSpan();
+            if (!length.IsFullyKnown)
+                throw new ArgumentException("Array has an unknown length.");
+
+            int lengthI32 = length.I32;
+            var array = Array.CreateInstance(elementType, lengthI32);
+            
+            var buffer = Machine.ValueFactory.CreateValue(representative, false);
+            for (int i = 0; i < lengthI32; i++)
+            {
+                arrayHandle.ReadArrayElement(representative, i, buffer);
+                array.SetValue(ToObject(buffer, elementType), i);
+            }
+
+            return array;
+        }
+
+        /// <summary>
+        /// Deserialize the provided bit vector to a structure of the provided type.
+        /// </summary>
+        /// <param name="data">The raw data of the structure</param>
+        /// <param name="targetType">The type of object to deserialize.</param>
+        /// <returns>The deserialized object.</returns>
+        protected virtual object DeserializeStructure(BitVectorSpan data, Type targetType)
+        {
+            throw new NotSupportedException($"Could not deserialize structure of type {targetType}.");
         }
 
         /// <summary>
