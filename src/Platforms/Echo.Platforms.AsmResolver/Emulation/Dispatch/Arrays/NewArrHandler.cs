@@ -1,5 +1,6 @@
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
@@ -25,10 +26,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                 
                 // Only actually allocate the array if the element count is known, otherwise, we can leave the 
                 // pointer unknown as we don't know the total size of the object.
-                var countSpan = elementCount.Contents.AsSpan();
-                if (countSpan.IsFullyKnown)
+                if (elementCount.Contents.IsFullyKnown)
                 {
-                    long actual = context.Machine.Heap.AllocateSzArray(elementType.ToTypeSignature(), countSpan.I32, true);
+                    long actual = context.Machine.Heap.AllocateSzArray(
+                        elementType.ToTypeSignature(),
+                        elementCount.Contents.AsSpan().I32, 
+                        true);
+
                     address.AsSpan().WriteNativeInteger(actual, context.Machine.Is32Bit);
                 }
 

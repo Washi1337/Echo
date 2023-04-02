@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
             StackSlot argument1, 
             StackSlot argument2)
         {
-            if (!argument2.Contents.AsSpan().IsFullyKnown)
+            if (!argument2.Contents.IsFullyKnown)
                 argument1.Contents.AsSpan().MarkFullyUnknown();
             else
                 argument1.Contents.AsSpan().ShiftRight(argument2.Contents.AsSpan().I32, IsSignedOperation(instruction));

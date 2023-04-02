@@ -1,6 +1,7 @@
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
@@ -24,9 +25,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 if (value.TypeHint != StackSlotTypeHint.Integer)
                     return CilDispatchResult.InvalidProgram(context);
 
-                var valueSpan = value.Contents.AsSpan();
-                long? objectAddress = valueSpan.IsFullyKnown 
-                    ? valueSpan.ReadNativeInteger(context.Machine.Is32Bit) 
+                long? objectAddress = value.Contents.IsFullyKnown 
+                    ? value.Contents.AsSpan().ReadNativeInteger(context.Machine.Is32Bit) 
                     : context.Machine.UnknownResolver.ResolveSourcePointer(context, instruction, value);
 
                 switch (objectAddress)

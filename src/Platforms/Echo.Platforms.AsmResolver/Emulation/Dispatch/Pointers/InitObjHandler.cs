@@ -1,5 +1,6 @@
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
 {
@@ -20,9 +21,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             try
             {
                 // Object/structure was pushed by reference onto the stack. Concretize address.
-                var addressSpan = address.Contents.AsSpan();
-                long? resolvedAddress = addressSpan.IsFullyKnown
-                    ? addressSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                long? resolvedAddress = address.Contents.IsFullyKnown
+                    ? address.Contents.AsSpan().ReadNativeInteger(context.Machine.Is32Bit)
                     : context.Machine.UnknownResolver.ResolveDestinationPointer(context, instruction, address);
 
                 switch (resolvedAddress)

@@ -21,21 +21,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
 
             try
             {
-                var sourceSpan = source.Contents.AsSpan();
-                var destinationSpan = destination.Contents.AsSpan();
-                var sizeSpan = size.Contents.AsSpan();
-
                 // Get concrete addresses and size.
-                long? sourceAddress = sourceSpan.IsFullyKnown
-                    ? sourceSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                long? sourceAddress = source.Contents.IsFullyKnown
+                    ? source.Contents.AsSpan().ReadNativeInteger(context.Machine.Is32Bit)
                     : context.Machine.UnknownResolver.ResolveSourcePointer(context, instruction, source);
                 
-                long? destinationAddress = destinationSpan.IsFullyKnown
-                    ? destinationSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                long? destinationAddress = destination.Contents.IsFullyKnown
+                    ? destination.Contents.AsSpan().ReadNativeInteger(context.Machine.Is32Bit)
                     : context.Machine.UnknownResolver.ResolveDestinationPointer(context, instruction, destination);
                 
-                uint actualSize = sizeSpan.IsFullyKnown
-                    ? sizeSpan.U32
+                uint actualSize = size.Contents.IsFullyKnown
+                    ? size.Contents.AsSpan().U32
                     : context.Machine.UnknownResolver.ResolveBlockSize(context, instruction, size);
                 
                 // Check for null addresses.

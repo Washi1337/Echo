@@ -272,6 +272,11 @@ namespace Echo.Memory
         public int ByteCount => Bits.Length;
 
         /// <summary>
+        /// Gets a value indicating whether all bits in the vector are known. 
+        /// </summary>
+        public bool IsFullyKnown => AsSpan().IsFullyKnown;
+
+        /// <summary>
         /// Creates a new span of the entire bit vector.
         /// </summary>
         /// <returns>The constructed span.</returns>

@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
@@ -20,9 +21,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
 
             try
             {
-                var sizeSpan = size.Contents.AsSpan();
-                uint resolvedSize = sizeSpan.IsFullyKnown
-                    ? sizeSpan.U32
+                uint resolvedSize = size.Contents.IsFullyKnown
+                    ? size.Contents.AsSpan().U32
                     : context.Machine.UnknownResolver.ResolveBlockSize(context, instruction, size);
                 
                 var address = factory.RentNativeInteger(context.CurrentFrame.Allocate((int) resolvedSize));
