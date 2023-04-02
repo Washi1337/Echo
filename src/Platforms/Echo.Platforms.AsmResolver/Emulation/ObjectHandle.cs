@@ -169,6 +169,62 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             Machine.Memory.Read(Address + Machine.ValueFactory.ArrayLengthOffset, buffer);
         }
+
+        /// <summary>
+        /// Interprets the handle as an array reference, and obtains all elements of the array as one continuous buffer
+        /// of bytes.
+        /// </summary>
+        /// <returns>The raw array data.</returns>
+        /// <exception cref="ArgumentException">Occurs when the array has an unknown length.</exception>
+        public BitVector ReadArrayData()
+        {
+            var length = Machine.ValueFactory.BitVectorPool.Rent(32, false);
+            try
+            {
+                ReadArrayLength(length);
+                if (!length.AsSpan().IsFullyKnown)
+                    throw new ArgumentException("The array has an unknown length.");
+
+                var result = new BitVector(length.AsSpan().I32 * 8, false);
+                ReadArrayData(result);
+                return result;
+            }
+            finally
+            {
+                Machine.ValueFactory.BitVectorPool.Return(length);
+            }
+        }
+
+        /// <summary>
+        /// Interprets the handle as an array reference, and obtains all elements of the array as one continuous buffer
+        /// of bytes.
+        /// </summary>
+        /// <param name="buffer">The buffer to copy the array data into.</param>
+        /// <returns>The raw array data.</returns>
+        public void ReadArrayData(BitVectorSpan buffer)
+        {
+            Machine.Memory.Read(Address + Machine.ValueFactory.ArrayHeaderSize, buffer);
+        }
+
+        /// <summary>
+        /// Interprets the handle as an array reference, and writes elements to the array's data as one continuous buffer
+        /// of bytes.
+        /// </summary>
+        /// <param name="buffer">The buffer to copy the array data from.</param>
+        public void WriteArrayData(BitVectorSpan buffer)
+        {
+            Machine.Memory.Write(Address + Machine.ValueFactory.ArrayHeaderSize, buffer);
+        }
+
+        /// <summary>
+        /// Interprets the handle as an array reference, and writes elements to the array's data as one continuous buffer
+        /// of bytes.
+        /// </summary>
+        /// <param name="buffer">The buffer to copy the array data from.</param>
+        public void WriteArrayData(byte[] buffer)
+        {
+            Machine.Memory.Write(Address + Machine.ValueFactory.ArrayHeaderSize, buffer);
+        }
         
         /// <summary>
         /// Interprets the handle as an array reference, and obtains the address of the provided element by its index.
