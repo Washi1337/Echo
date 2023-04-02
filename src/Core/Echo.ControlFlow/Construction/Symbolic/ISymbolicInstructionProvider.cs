@@ -1,5 +1,4 @@
-using Echo.Core.Code;
-using Echo.Core.Emulation;
+using Echo.Code;
 using Echo.DataFlow.Emulation;
 
 namespace Echo.ControlFlow.Construction.Symbolic
@@ -13,7 +12,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// <summary>
         /// Gets the architecture describing the instructions exposed by this instruction provider.
         /// </summary>
-        IInstructionSetArchitecture<TInstruction> Architecture
+        IArchitecture<TInstruction> Architecture
         {
             get;
         }

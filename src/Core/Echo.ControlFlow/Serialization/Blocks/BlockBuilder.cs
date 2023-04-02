@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Blocks;
 using Echo.ControlFlow.Regions;
-using Echo.Core;
 
 namespace Echo.ControlFlow.Serialization.Blocks
 {

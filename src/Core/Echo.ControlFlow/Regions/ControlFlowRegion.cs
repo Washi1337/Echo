@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Echo.Core.Graphing;
+using Echo.Graphing;
 
 namespace Echo.ControlFlow.Regions
 {

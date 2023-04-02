@@ -1,6 +1,6 @@
 ﻿using System;
 using dnlib.DotNet.Emit;
-using Echo.Core.Code;
+using Echo.Code;
 
 namespace Echo.Platforms.Dnlib
 {

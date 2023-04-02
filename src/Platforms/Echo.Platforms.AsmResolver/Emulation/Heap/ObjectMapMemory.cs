@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.Memory;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
-using Echo.Core.Code;
+using Echo.Memory;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Heap
 {

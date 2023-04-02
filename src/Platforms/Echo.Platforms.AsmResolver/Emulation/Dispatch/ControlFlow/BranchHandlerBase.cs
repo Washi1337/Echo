@@ -1,6 +1,4 @@
-using System;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Core;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
 {

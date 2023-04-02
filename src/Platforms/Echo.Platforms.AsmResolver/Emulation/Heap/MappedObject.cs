@@ -4,9 +4,8 @@ using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
-using Echo.Core.Code;
+using Echo.Memory;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Heap
 {

@@ -5,10 +5,8 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
-using Echo.Core;
-using Echo.Core.Code;
+using Echo.Memory;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Stack
 {

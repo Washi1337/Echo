@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Echo.Core.Graphing;
+using Echo.Graphing;
 
 namespace Echo.ControlFlow.Analysis.Domination
 {

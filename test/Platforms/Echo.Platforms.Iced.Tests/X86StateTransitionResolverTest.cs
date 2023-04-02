@@ -21,7 +21,7 @@ namespace Echo.Platforms.Iced.Tests
             byte[] rawCode, long entrypoint)
         {
             var instructionProvider = new X86DecoderInstructionProvider(_architecture, rawCode, 32);
-            var dfgBuilder = new X86StateTransitionResolver(_architecture);
+            var dfgBuilder = new X86StateTransitioner(_architecture);
             
             var cfgBuilder = new SymbolicFlowGraphBuilder<Instruction>(
                 instructionProvider,

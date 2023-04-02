@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Echo.Core.Code;
-using Echo.Core.Emulation;
+using Echo.Code;
 using Echo.DataFlow.Emulation;
 
 namespace Echo.ControlFlow.Construction.Symbolic
@@ -19,7 +18,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         /// </summary>
         /// <param name="architecture">The architecture of the instructions.</param>
         /// <param name="instructions">The instructions.</param>
-        public StaticToSymbolicAdapter(IInstructionSetArchitecture<TInstruction> architecture, IEnumerable<TInstruction> instructions)
+        public StaticToSymbolicAdapter(IArchitecture<TInstruction> architecture, IEnumerable<TInstruction> instructions)
             : this(new ListInstructionProvider<TInstruction>(architecture, instructions))
         {
         }
@@ -42,7 +41,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         }
 
         /// <inheritdoc />
-        public IInstructionSetArchitecture<TInstruction> Architecture => Instructions.Architecture;
+        public IArchitecture<TInstruction> Architecture => Instructions.Architecture;
 
         /// <inheritdoc />
         public TInstruction GetCurrentInstruction(in SymbolicProgramState<TInstruction> currentState) =>

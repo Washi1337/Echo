@@ -5,9 +5,9 @@ using System.Linq;
 using Echo.ControlFlow.Collections;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Dot;
-using Echo.Core.Code;
-using Echo.Core.Graphing;
-using Echo.Core.Graphing.Serialization.Dot;
+using Echo.Code;
+using Echo.Graphing;
+using Echo.Graphing.Serialization.Dot;
 
 namespace Echo.ControlFlow
 {
@@ -24,7 +24,7 @@ namespace Echo.ControlFlow
         /// Creates a new empty graph.
         /// </summary>
         /// <param name="architecture">The architecture description of the instructions stored in the control flow graph.</param>
-        public ControlFlowGraph(IInstructionSetArchitecture<TInstruction> architecture)
+        public ControlFlowGraph(IArchitecture<TInstruction> architecture)
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
             Nodes = new NodeCollection<TInstruction>(this);
@@ -51,7 +51,7 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the architecture of the instructions that are stored in the control flow graph.
         /// </summary>
-        public IInstructionSetArchitecture<TInstruction> Architecture
+        public IArchitecture<TInstruction> Architecture
         {
             get;
         }

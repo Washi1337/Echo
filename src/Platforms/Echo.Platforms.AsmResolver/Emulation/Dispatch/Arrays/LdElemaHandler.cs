@@ -1,6 +1,6 @@
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Core;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
@@ -27,9 +27,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             try
             {
                 // Concretize pushed address.
-                var arrayAddressSpan = arrayAddress.Contents.AsSpan();
-                long? resolvedAddress = arrayAddressSpan.IsFullyKnown
-                    ? arrayAddressSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                long? resolvedAddress = arrayAddress.Contents.IsFullyKnown
+                    ? arrayAddress.Contents.AsSpan().ReadNativeInteger(context.Machine.Is32Bit)
                     : context.Machine.UnknownResolver.ResolveSourcePointer(context, instruction, arrayAddress);
 
                 switch (resolvedAddress)
@@ -47,14 +46,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                         var handle = actualAddress.AsObjectHandle(context.Machine);
                         
                         // Concretize pushed index.
-                        var arrayIndexSpan = arrayIndex.Contents.AsSpan();
-                        long? resolvedIndex = arrayIndexSpan.IsFullyKnown
-                            ? arrayIndexSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                        long? resolvedIndex = arrayIndex.Contents.IsFullyKnown
+                            ? arrayIndex.Contents.AsSpan().ReadNativeInteger(context.Machine.Is32Bit)
                             : context.Machine.UnknownResolver.ResolveArrayIndex(context, instruction, actualAddress, arrayIndex);
 
                         // Leave result unknown if index is not fully known.
                         handle.ReadArrayLength(arrayLength);
-                        if (resolvedIndex.HasValue && arrayLength.AsSpan().IsFullyKnown)
+                        if (resolvedIndex.HasValue && arrayLength.IsFullyKnown)
                         {
                             // Bounds check.
                             if (resolvedIndex >= arrayLength.AsSpan().ReadNativeInteger(context.Machine.Is32Bit))

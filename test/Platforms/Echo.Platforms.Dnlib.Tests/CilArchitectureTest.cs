@@ -1,7 +1,7 @@
 ﻿using dnlib.DotNet.Emit;
 using Mocks;
 using Xunit;
-using IVariable = Echo.Core.Code.IVariable;
+using IVariable = Echo.Code.IVariable;
 
 namespace Echo.Platforms.Dnlib.Tests
 {

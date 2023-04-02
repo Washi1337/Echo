@@ -1,6 +1,5 @@
 using AsmResolver.DotNet.Signatures.Types;
-using Echo.Concrete;
-using Echo.Core;
+using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Stack
 {

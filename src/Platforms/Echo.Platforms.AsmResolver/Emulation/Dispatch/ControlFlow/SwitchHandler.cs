@@ -16,10 +16,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
 
             try
             {
-                var indexSpan = index.Contents.AsSpan();
-
-                uint? selectedIndex = indexSpan.IsFullyKnown 
-                    ? indexSpan.U32 
+                uint? selectedIndex = index.Contents.IsFullyKnown 
+                    ? index.Contents.AsSpan().U32 
                     : context.Machine.UnknownResolver.ResolveSwitchCondition(context, instruction, index);
 
                 var labels = (IList<ICilLabel>) instruction.Operand!;

@@ -1,11 +1,11 @@
 using System;
-using Echo.Core.Code;
+using Echo.Code;
 
 namespace Echo.Platforms.DummyPlatform
 {
-    public class IntArchitecture : IInstructionSetArchitecture<int>
+    public class IntArchitecture : IArchitecture<int>
     {
-        public static IInstructionSetArchitecture<int> Instance
+        public static IArchitecture<int> Instance
         {
             get;
         } = new IntArchitecture();

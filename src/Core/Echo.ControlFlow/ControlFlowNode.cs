@@ -4,8 +4,8 @@ using System.Linq;
 using Echo.ControlFlow.Blocks;
 using Echo.ControlFlow.Collections;
 using Echo.ControlFlow.Regions;
-using Echo.Core.Code;
-using Echo.Core.Graphing;
+using Echo.Code;
+using Echo.Graphing;
 
 namespace Echo.ControlFlow
 {

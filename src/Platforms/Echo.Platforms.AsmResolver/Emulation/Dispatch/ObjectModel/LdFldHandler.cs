@@ -1,7 +1,7 @@
 using System;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
@@ -71,9 +71,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
                     case StackSlotTypeHint.Integer:
                         // Object/structure was pushed by reference onto the stack. Dereference it.
-                        var instanceSpan = instance.Contents.AsSpan();
-                        long? objectAddress = instanceSpan.IsFullyKnown
-                            ? instanceSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                        long? objectAddress = instance.Contents.IsFullyKnown
+                            ? instance.Contents.AsSpan().ReadNativeInteger(context.Machine.Is32Bit)
                             : context.Machine.UnknownResolver.ResolveSourcePointer(context, instruction, instance);
 
                         switch (objectAddress)

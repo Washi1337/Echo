@@ -4,7 +4,7 @@ using System.Linq;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Regions.Detection;
-using Echo.Core.Code;
+using Echo.Code;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 

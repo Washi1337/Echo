@@ -16,7 +16,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var method = Helpers.GetTestMethod(typeof(TestClass), nameof(TestClass.GetConstantString));
 
             var arch = new CilArchitecture(method);
-            var resolver = new CilStateTransitionResolver(arch);
+            var resolver = new CilStateTransitioner(arch);
             var graphBuilder = new SymbolicFlowGraphBuilder<Instruction>(arch, arch.Method.Body.Instructions, resolver);
 
             var graph = graphBuilder.ConstructFlowGraph(0);
@@ -31,7 +31,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var method = Helpers.GetTestMethod(typeof(TestClass), nameof(TestClass.GetIsEvenString));
 
             var arch = new CilArchitecture(method);
-            var resolver = new CilStateTransitionResolver(arch);
+            var resolver = new CilStateTransitioner(arch);
             var graphBuilder = new SymbolicFlowGraphBuilder<Instruction>(arch, arch.Method.Body.Instructions, resolver);
 
             var graph = graphBuilder.ConstructFlowGraph(0);
@@ -44,7 +44,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var method = Helpers.GetTestMethod(typeof(TestClass), nameof(TestClass.GetIsEvenString));
 
             var arch = new CilArchitecture(method);
-            var resolver = new CilStateTransitionResolver(arch);
+            var resolver = new CilStateTransitioner(arch);
             var graphBuilder = new SymbolicFlowGraphBuilder<Instruction>(arch, arch.Method.Body.Instructions, resolver);
             _ = graphBuilder.ConstructFlowGraph(0);
 

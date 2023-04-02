@@ -5,7 +5,7 @@ using System.Linq;
 using Echo.ControlFlow.Collections;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
-using Echo.Core.Code;
+using Echo.Code;
 
 namespace Echo.ControlFlow.Editing.Synchronization
 {

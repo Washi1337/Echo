@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Echo.Core.Code;
+using Echo.Code;
 using Iced.Intel;
 
 namespace Echo.Platforms.Iced
@@ -8,7 +8,7 @@ namespace Echo.Platforms.Iced
     /// <summary>
     /// Provides a description of the x86 instruction set architecture (ISA) that is modelled by Iced.   
     /// </summary>
-    public class X86Architecture : IInstructionSetArchitecture<Instruction>
+    public class X86Architecture : IArchitecture<Instruction>
     {
         private readonly InstructionInfoFactory _infoFactory = new InstructionInfoFactory();
         private readonly IDictionary<Register, X86GeneralRegister> _gpr = new Dictionary<Register, X86GeneralRegister>();

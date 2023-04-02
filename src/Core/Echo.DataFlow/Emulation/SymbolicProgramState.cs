@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using Echo.Core.Code;
-using Echo.Core.Emulation;
+using Echo.Code;
 
 namespace Echo.DataFlow.Emulation
 {

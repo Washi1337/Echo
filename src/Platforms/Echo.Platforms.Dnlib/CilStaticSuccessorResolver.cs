@@ -4,6 +4,7 @@ using dnlib.DotNet.Emit;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
+using DnlibCode = dnlib.DotNet.Emit.Code;
 
 namespace Echo.Platforms.Dnlib
 {
@@ -32,7 +33,7 @@ namespace Echo.Platforms.Dnlib
                 case FlowControl.Branch:
                     return 1;
 
-                case FlowControl.Cond_Branch when instruction.OpCode.Code == Code.Switch:
+                case FlowControl.Cond_Branch when instruction.OpCode.Code == DnlibCode.Switch:
                     return ((ICollection<Instruction>) instruction.Operand).Count + 1;
 
                 case FlowControl.Cond_Branch:
@@ -66,7 +67,7 @@ namespace Echo.Platforms.Dnlib
                     successorsBuffer[0] = Branch(false, instruction);
                     return 1;
 
-                case FlowControl.Cond_Branch when instruction.OpCode.Code == Code.Switch:
+                case FlowControl.Cond_Branch when instruction.OpCode.Code == DnlibCode.Switch:
                     var multipleTargets = (Instruction[]) instruction.Operand;
                     for (int i = 0; i < multipleTargets.Length; i++)
                         successorsBuffer[i] = new SuccessorInfo(multipleTargets[i].Offset, ControlFlowEdgeType.Conditional);

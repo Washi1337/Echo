@@ -2,8 +2,7 @@ using System;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using Echo.Concrete;
-using Echo.Core;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using static AsmResolver.PE.DotNet.Cil.CilCode;
 

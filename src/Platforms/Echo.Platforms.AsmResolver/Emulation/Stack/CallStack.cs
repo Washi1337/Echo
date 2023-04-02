@@ -5,10 +5,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
-using Echo.Core;
-using Echo.Core.Code;
+using Echo.Memory;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Stack
 {

@@ -1,6 +1,6 @@
 using System;
 using AsmResolver.DotNet;
-using Echo.Concrete;
+using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {

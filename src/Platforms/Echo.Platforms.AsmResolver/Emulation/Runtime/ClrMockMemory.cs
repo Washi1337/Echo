@@ -1,9 +1,8 @@
 using System;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
-using Echo.Core.Code;
+using Echo.Memory;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Runtime
 {

@@ -2,8 +2,7 @@ using System;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Concrete;
-using Echo.Core;
+using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
 {
@@ -37,9 +36,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             try
             {
                 // Concretize pushed address.
-                var addressSpan = address.Contents.AsSpan();
-                long? resolvedAddress = addressSpan.IsFullyKnown
-                    ? addressSpan.ReadNativeInteger(context.Machine.Is32Bit)
+                long? resolvedAddress = address.Contents.IsFullyKnown
+                    ? address.Contents.AsSpan().ReadNativeInteger(context.Machine.Is32Bit)
                     : context.Machine.UnknownResolver.ResolveDestinationPointer(context, instruction, address);
 
                 switch (resolvedAddress)

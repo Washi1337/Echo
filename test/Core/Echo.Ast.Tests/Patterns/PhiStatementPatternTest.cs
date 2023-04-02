@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Echo.Ast.Patterns;
-using Echo.Core.Code;
+using Echo.Code;
 using Xunit;
 
 namespace Echo.Ast.Tests.Patterns

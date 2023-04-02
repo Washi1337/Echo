@@ -6,7 +6,7 @@ using Echo.Ast.Tests.Patterns;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Symbolic;
-using Echo.Core.Code;
+using Echo.Code;
 using Echo.Platforms.DummyPlatform.Code;
 using Echo.Platforms.DummyPlatform.ControlFlow;
 using Xunit;
@@ -20,7 +20,7 @@ namespace Echo.Ast.Tests
         {
             var architecture = DummyArchitecture.Instance;
             
-            var dfgBuilder = new DummyTransitionResolver();
+            var dfgBuilder = new DummyTransitioner();
             var cfgBuilder = new SymbolicFlowGraphBuilder<DummyInstruction>(architecture, instructions, dfgBuilder);
 
             var cfg = cfgBuilder.ConstructFlowGraph(0);

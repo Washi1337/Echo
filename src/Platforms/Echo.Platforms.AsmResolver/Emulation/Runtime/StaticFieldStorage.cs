@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
-using Echo.Concrete.Memory.Heap;
-using Echo.Core.Code;
+using Echo.Memory;
+using Echo.Memory.Heap;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Runtime
 {

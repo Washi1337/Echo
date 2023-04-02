@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using Echo.Concrete;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation

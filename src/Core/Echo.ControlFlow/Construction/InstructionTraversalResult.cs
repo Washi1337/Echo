@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.Core.Code;
+using Echo.Code;
 
 namespace Echo.ControlFlow.Construction
 {
@@ -12,21 +12,21 @@ namespace Echo.ControlFlow.Construction
     /// <typeparam name="TInstruction">The type of instructions that were traversed.</typeparam>
     public class InstructionTraversalResult<TInstruction> : IInstructionTraversalResult<TInstruction>
     {
-        private readonly IDictionary<long, TInstruction> _instructions = new Dictionary<long, TInstruction>();
-        private readonly ISet<long> _fallThroughOffsets = new HashSet<long>();
-        private readonly IDictionary<long, IList<SuccessorInfo>> _nonTrivialEdges = new Dictionary<long, IList<SuccessorInfo>>();
+        private readonly Dictionary<long, TInstruction> _instructions = new();
+        private readonly HashSet<long> _fallThroughOffsets = new();
+        private readonly Dictionary<long, IList<SuccessorInfo>> _nonTrivialEdges = new();
         
         /// <summary>
         /// Creates a new instance of the <see cref="InstructionTraversalResult{TInstruction}"/> class.
         /// </summary>
         /// <param name="architecture">The architecture.</param>
-        public InstructionTraversalResult(IInstructionSetArchitecture<TInstruction> architecture)
+        public InstructionTraversalResult(IArchitecture<TInstruction> architecture)
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
         }
 
         /// <inheritdoc />
-        public IInstructionSetArchitecture<TInstruction> Architecture
+        public IArchitecture<TInstruction> Architecture
         {
             get;
         }

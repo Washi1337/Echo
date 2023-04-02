@@ -1,6 +1,6 @@
 ﻿using System;
 using AsmResolver.DotNet.Collections;
-using Echo.Core.Code;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver
 {

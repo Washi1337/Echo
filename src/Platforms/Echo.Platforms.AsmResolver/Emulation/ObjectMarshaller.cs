@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
-using Echo.Concrete;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Heap;
 
 namespace Echo.Platforms.AsmResolver.Emulation

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Echo.ControlFlow;
-using Echo.Core.Code;
+using Echo.Code;
 using Echo.DataFlow;
 
 namespace Echo.Ast.Construction
@@ -17,7 +17,7 @@ namespace Echo.Ast.Construction
             DataFlowGraph = dataFlowGraph;
         }
 
-        internal IInstructionSetArchitecture<TInstruction> Architecture => _controlFlowGraph.Architecture;
+        internal IArchitecture<TInstruction> Architecture => _controlFlowGraph.Architecture;
 
         internal Dictionary<TInstruction, AstVariable[]> StackSlots
         {

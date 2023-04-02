@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Regions.Detection;
-using Echo.Core.Code;
+using Echo.Code;
 
 namespace Echo.ControlFlow.Construction
 {
@@ -15,7 +15,7 @@ namespace Echo.ControlFlow.Construction
         /// <summary>
         /// Gets the architecture of the instructions to graph.
         /// </summary>
-        IInstructionSetArchitecture<TInstruction> Architecture
+        IArchitecture<TInstruction> Architecture
         {
             get;
         }

@@ -7,7 +7,7 @@ using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Construction.Symbolic;
 using Echo.ControlFlow.Regions.Detection;
-using Echo.Core.Code;
+using Echo.Code;
 using Echo.DataFlow;
 
 namespace Echo.Platforms.AsmResolver
@@ -81,7 +81,7 @@ namespace Echo.Platforms.AsmResolver
             out DataFlowGraph<CilInstruction> dataFlowGraph)
         {
             var architecture = new CilArchitecture(self);
-            var dfgBuilder = new CilStateTransitionResolver(architecture);
+            var dfgBuilder = new CilStateTransitioner(architecture);
             var cfgBuilder = new SymbolicFlowGraphBuilder<CilInstruction>(
                 architecture,
                 self.Instructions,

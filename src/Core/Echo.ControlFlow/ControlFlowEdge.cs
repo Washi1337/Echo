@@ -1,5 +1,5 @@
-using Echo.Core.Code;
-using Echo.Core.Graphing;
+using Echo.Code;
+using Echo.Graphing;
 
 namespace Echo.ControlFlow
 {

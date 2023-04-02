@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Core;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests

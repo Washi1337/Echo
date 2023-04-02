@@ -4,10 +4,9 @@ using System.Runtime.InteropServices;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using Echo.Concrete;
-using Echo.Concrete.Memory;
-using Echo.Concrete.Memory.Heap;
-using Echo.Core.Code;
+using Echo.Memory;
+using Echo.Memory.Heap;
+using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Heap
 {
