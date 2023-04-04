@@ -22,11 +22,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
     public class CilVirtualMachineTest : IClassFixture<MockModuleFixture>
     {
         private readonly MockModuleFixture _fixture;
+        private readonly ITestOutputHelper _testOutputHelper;
         private readonly CilVirtualMachine _vm;
 
         public CilVirtualMachineTest(MockModuleFixture fixture, ITestOutputHelper testOutputHelper)
         {
             _fixture = fixture;
+            _testOutputHelper = testOutputHelper;
             _vm = new CilVirtualMachine(fixture.MockModule, false);
         }
 

@@ -16,7 +16,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             var factory = context.Machine.ValueFactory;
             
             var arrayAddress = stack.Pop().Contents;
-            var result = factory.BitVectorPool.Rent(32, false);
+            var result = factory.RentNativeInteger(true);
             
             try
             {
@@ -24,13 +24,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                 switch (arrayAddressSpan)
                 {
                     case { IsFullyKnown: false }:
+                        result.AsSpan().MarkFullyUnknown();
                         break;
 
                     case { IsZero.Value: TrileanValue.True }:
                         return CilDispatchResult.NullReference(context);
 
                     default:
-                        arrayAddressSpan.AsObjectHandle(context.Machine).ReadArrayLength(result);
+                        arrayAddressSpan.AsObjectHandle(context.Machine).ReadArrayLength(result.AsSpan(0, 32));
                         break;
                 }
 
@@ -40,7 +41,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             finally
             {
                 factory.BitVectorPool.Return(arrayAddress);
-                factory.BitVectorPool.Return(result);
             }
         }
     }
