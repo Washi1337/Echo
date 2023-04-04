@@ -16,7 +16,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             var factory = context.Machine.ValueFactory;
             
             var arrayAddress = stack.Pop().Contents;
-            var result = factory.RentNativeInteger(false);
+            var result = factory.BitVectorPool.Rent(32, false);
             
             try
             {
@@ -40,6 +40,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             finally
             {
                 factory.BitVectorPool.Return(arrayAddress);
+                factory.BitVectorPool.Return(result);
             }
         }
     }

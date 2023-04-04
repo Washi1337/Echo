@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             var value = stack.Pop(elementType);
             var arrayIndex = stack.Pop();
             var arrayAddress = stack.Pop();
-            var arrayLength = factory.RentNativeInteger(false);
+            var arrayLength = factory.BitVectorPool.Rent(32, false);
             
             try
             {

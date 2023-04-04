@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             var arrayIndex = stack.Pop();
             var arrayAddress = stack.Pop();
             var result = factory.RentNativeInteger(false);
-            var arrayLength = factory.RentNativeInteger(false);
+            var arrayLength = factory.BitVectorPool.Rent(32, false);
 
             try
             {
