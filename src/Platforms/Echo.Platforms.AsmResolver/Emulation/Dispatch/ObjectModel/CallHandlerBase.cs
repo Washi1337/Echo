@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 // Devirtualize the method in the operand.
                 var devirtualization = DevirtualizeMethod(context, instruction, arguments);
                 if (devirtualization.IsUnknown)
-                    throw new CilEmulatorException($"Could not devirtualize method call {instruction}.");
+                    throw new CilEmulatorException($"Devirtualization of method call {instruction} was inconclusive.");
 
                 // If that resulted in any error, throw it.
                 if (!devirtualization.IsSuccess)
@@ -80,6 +80,24 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             return stack.Pop(declaringType);
         }
 
+        private MethodDevirtualizationResult DevirtualizeMethod(
+            CilExecutionContext context,
+            CilInstruction instruction, 
+            IList<BitVector> arguments)
+        {
+            var result = DevirtualizeMethodInternal(context, instruction, arguments);
+            if (!result.IsUnknown)
+                return result;
+            
+            var method = context.Machine.UnknownResolver.ResolveMethod(context, instruction, arguments)
+                         ?? instruction.Operand as IMethodDescriptor;
+
+            if (method is not null)
+                result = MethodDevirtualizationResult.Success(method);
+
+            return result;
+        }
+
         /// <summary>
         /// Devirtualizes and resolves the method that is referenced by the provided instruction.
         /// </summary>
@@ -87,7 +105,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// <param name="instruction">The instruction that is being evaluated.</param>
         /// <param name="arguments">The arguments pushed onto the stack.</param>
         /// <returns>The result of the devirtualization.</returns>
-        protected abstract MethodDevirtualizationResult DevirtualizeMethod(
+        protected abstract MethodDevirtualizationResult DevirtualizeMethodInternal(
             CilExecutionContext context,
             CilInstruction instruction,
             IList<BitVector> arguments);

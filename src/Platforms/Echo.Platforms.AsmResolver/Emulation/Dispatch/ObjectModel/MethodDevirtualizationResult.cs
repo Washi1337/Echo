@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet;
 
@@ -9,24 +8,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     /// </summary>
     public readonly struct MethodDevirtualizationResult 
     {
-        /// <summary>
-        /// Creates a new successful method devirtualization result. 
-        /// </summary>
-        /// <param name="method">The resolved method.</param>
-        public MethodDevirtualizationResult(IMethodDescriptor method)
+        private MethodDevirtualizationResult(IMethodDescriptor? method, long? exception)
         {
-            ResultingMethod = method ?? throw new ArgumentNullException(nameof(method));
-            ExceptionPointer = null;
-        }
-
-        /// <summary>
-        /// Creates a new unsuccessful method devirtualization result.
-        /// </summary>
-        /// <param name="exception">The exception that occurred during the method devirtualization.</param>
-        public MethodDevirtualizationResult(long? exception)
-        {
-            ResultingMethod = null;
-            ExceptionPointer = exception ?? throw new ArgumentNullException(nameof(exception));
+            ResultingMethod = method;
+            ExceptionPointer = exception;
         }
         
         /// <summary>
@@ -58,5 +43,22 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// object that was dereferenced.
         /// </summary>
         public bool IsUnknown => !IsSuccess && ExceptionPointer is null;
+
+        /// <summary>
+        /// Creates a new successful method devirtualization result. 
+        /// </summary>
+        /// <param name="method">The resolved method.</param>
+        public static MethodDevirtualizationResult Success(IMethodDescriptor method) => new(method, null);
+
+        /// <summary>
+        /// Creates a new unsuccessful method devirtualization result.
+        /// </summary>
+        /// <param name="exception">The exception that occurred during the method devirtualization.</param>
+        public static MethodDevirtualizationResult Exception(long exceptionPointer) => new(null, exceptionPointer);
+
+        /// <summary>
+        /// Creates a new unknown method devirtualization result.
+        /// </summary>
+        public static MethodDevirtualizationResult Unknown() => new(null, null);
     }
 }

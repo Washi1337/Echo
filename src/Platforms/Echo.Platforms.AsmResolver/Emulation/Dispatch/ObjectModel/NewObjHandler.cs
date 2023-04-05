@@ -19,11 +19,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
             // Allocate the new object.
             var instanceType = ((IMethodDescriptor) instruction.Operand!).DeclaringType!.ToTypeSignature();
-            var address = factory.RentNativeInteger(false);
+            var address = factory.RentNativeInteger(context.Machine.Heap.AllocateObject(instanceType, false));
             try
             {
-                address.AsSpan().Write(context.Machine.Heap.AllocateObject(instanceType, false));
-
                 // Push onto stack.
                 stack.Push(address, instanceType);
 
@@ -43,12 +41,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         }
 
         /// <inheritdoc />
-        protected override MethodDevirtualizationResult DevirtualizeMethod(
+        protected override MethodDevirtualizationResult DevirtualizeMethodInternal(
             CilExecutionContext context,
             CilInstruction instruction,
             IList<BitVector> arguments)
         {
-            return new MethodDevirtualizationResult((IMethodDescriptor) instruction.Operand!);
+            return MethodDevirtualizationResult.Success((IMethodDescriptor) instruction.Operand!);
         }
     }
 }

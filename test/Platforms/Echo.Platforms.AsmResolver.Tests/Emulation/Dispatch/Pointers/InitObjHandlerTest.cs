@@ -23,7 +23,7 @@ public class InitObjHandlerTest : CilOpCodeHandlerTestBase
         var type = ModuleFixture.MockModule.TopLevelTypes.First(t => t.Name == nameof(SimpleStruct));
         
         // Push null.
-        stack.Push(new StackSlot(0ul, StackSlotTypeHint.Integer));
+        stack.Push(new StackSlot(Context.Machine.ValueFactory.CreateNull(), StackSlotTypeHint.Integer));
 
         // Dispatch.
         var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Initobj, type));

@@ -25,7 +25,7 @@ public class CpBlkHandlerTest : CilOpCodeHandlerTestBase
         
         // Push null, a value, and a size.
         stack.Push(new StackSlot(destinationAddress, StackSlotTypeHint.Integer));
-        stack.Push(new StackSlot(0ul, StackSlotTypeHint.Integer));
+        stack.Push(new StackSlot(Context.Machine.ValueFactory.CreateNull(), StackSlotTypeHint.Integer));
         stack.Push(new StackSlot(10, StackSlotTypeHint.Integer));
 
         // Dispatch.
@@ -47,7 +47,7 @@ public class CpBlkHandlerTest : CilOpCodeHandlerTestBase
         Context.Machine.Memory.Map(sourceAddress, new BasicMemorySpace(10, false));
         
         // Push null, a value, and a size.
-        stack.Push(new StackSlot(0ul, StackSlotTypeHint.Integer));
+        stack.Push(new StackSlot(Context.Machine.ValueFactory.CreateNull(), StackSlotTypeHint.Integer));
         stack.Push(new StackSlot(sourceAddress, StackSlotTypeHint.Integer));
         stack.Push(new StackSlot(10, StackSlotTypeHint.Integer));
 

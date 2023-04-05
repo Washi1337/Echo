@@ -17,12 +17,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
             // Null references cannot be unboxed if the type is a structure.
             if (targetType.IsValueType)
-                return base.HandleNull(context, targetType);
+                return CilDispatchResult.NullReference(context);
             
             // If it is a reference type, unbox.any == castclass which allows for null to be casted.
-            var value = context.Machine.ValueFactory.RentNativeInteger(0);
-            context.CurrentFrame.EvaluationStack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
-            return CilDispatchResult.Success();
+            return base.HandleNull(context, targetType);
         }
 
         /// <inheritdoc />

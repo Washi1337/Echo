@@ -2,7 +2,6 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
@@ -67,7 +66,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// <returns>The final dispatcher result.</returns>
         protected virtual CilDispatchResult HandleNull(CilExecutionContext context, TypeSignature targetType)
         {
-            return CilDispatchResult.NullReference(context);
+            var value = context.Machine.ValueFactory.RentNull();
+            context.CurrentFrame.EvaluationStack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
+            return CilDispatchResult.Success();
         }
 
         /// <summary>

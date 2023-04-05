@@ -260,6 +260,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public uint GetObjectSize(ITypeDescriptor type) => ObjectHeaderSize + GetTypeContentsMemoryLayout(type).Size;
 
         /// <summary>
+        /// Creates a new native integer bit vector containing the null reference.
+        /// </summary>
+        /// <returns>The constructed bit vector.</returns>
+        public BitVector CreateNull() => CreateNativeInteger(true);
+
+        /// <summary>
         /// Creates a new native integer bit vector.
         /// </summary>
         /// <param name="initialize">
@@ -279,6 +285,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
             vector.AsSpan().WriteNativeInteger(value, Is32Bit);
             return vector;
         }
+
+        /// <summary>
+        /// Rents a new native integer bit vector containing the null reference.
+        /// </summary>
+        /// <returns>The constructed bit vector.</returns>
+        public BitVector RentNull() => RentNativeInteger(true);
 
         /// <summary>
         /// Rents a native integer bit vector from the bit vector pool.

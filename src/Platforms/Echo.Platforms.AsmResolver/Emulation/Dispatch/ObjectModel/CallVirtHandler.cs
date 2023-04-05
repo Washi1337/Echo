@@ -15,7 +15,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         private static readonly SignatureComparer Comparer = new();
 
         /// <inheritdoc />
-        protected override MethodDevirtualizationResult DevirtualizeMethod(
+        protected override MethodDevirtualizationResult DevirtualizeMethodInternal(
             CilExecutionContext context,
             CilInstruction instruction, 
             IList<BitVector> arguments)
@@ -25,10 +25,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             switch (arguments[0].AsSpan())
             {
                 case { IsFullyKnown: false }:
-                    return new MethodDevirtualizationResult(); 
+                    return MethodDevirtualizationResult.Unknown(); 
                 
-                case { IsZero: { Value: TrileanValue.True } }:
-                    return new MethodDevirtualizationResult(context.Machine.Heap.AllocateObject(
+                case { IsZero.Value: TrileanValue.True }:
+                    return MethodDevirtualizationResult.Exception(context.Machine.Heap.AllocateObject(
                         context.Machine.ValueFactory.NullReferenceExceptionType, 
                         true));
                 
@@ -38,12 +38,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
                     if (implementation is null)
                     {
-                        return new MethodDevirtualizationResult(context.Machine.Heap.AllocateObject(
+                        return MethodDevirtualizationResult.Exception(context.Machine.Heap.AllocateObject(
                             context.Machine.ValueFactory.MissingMethodExceptionType,
                             true));
                     }
                     
-                    return new MethodDevirtualizationResult(implementation);
+                    return MethodDevirtualizationResult.Success(implementation);
             }
         }
 
