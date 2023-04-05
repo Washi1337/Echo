@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
@@ -80,6 +83,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
             StackSlot index)
         {
             throw new CilEmulatorException("Attempted to access an array element with an unknown index.");
+        }
+
+        /// <inheritdoc />
+        public virtual IMethodDescriptor? ResolveMethod(
+            CilExecutionContext context, 
+            CilInstruction instruction, 
+            IList<BitVector> arguments)
+        {
+            throw new CilEmulatorException($"Attempted to devirtualize method call {instruction} on an unknown object instance.");
         }
     }
 }

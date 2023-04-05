@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
@@ -79,6 +82,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
             CilInstruction instruction, 
             long arrayAddress, 
             StackSlot index)
+        {
+            return null;
+        }
+
+        /// <inheritdoc />
+        public virtual IMethodDescriptor? ResolveMethod(
+            CilExecutionContext context, 
+            CilInstruction instruction, 
+            IList<BitVector> arguments)
         {
             return null;
         }

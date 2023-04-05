@@ -16,7 +16,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             TypeSignature originalType, 
             TypeSignature targetType)
         {
-            var value = context.Machine.ValueFactory.RentNativeInteger(0);
+            var value = context.Machine.ValueFactory.RentNull();
             context.CurrentFrame.EvaluationStack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
             return CilDispatchResult.Success();
         }

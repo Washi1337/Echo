@@ -68,8 +68,29 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.Equal("System.InvalidCastException", exceptionType.FullName);
         }
 
-        [Fact]
-        public void CastClassUnmatchedTypeShouldThrow()
+        [Theory]
+        [InlineData(CilCode.Castclass)]
+        [InlineData(CilCode.Isinst)]
+        [InlineData(CilCode.Unbox_Any)]
+        public void CastRefTypeOnNullShouldPushNull(CilCode code)
+        {
+            var stack = Context.CurrentFrame.EvaluationStack;
+            var factory = Context.Machine.ValueFactory;
+            var targetType = ModuleFixture.MockModule.TopLevelTypes.First(t => t.Name == nameof(TestClass));
+            
+            stack.Push(new StackSlot(factory.CreateNull(), StackSlotTypeHint.Integer));
+            
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode(), targetType));
+            
+            Assert.True(result.IsSuccess);
+            var value = Assert.Single(stack);
+            Assert.True(value.Contents.AsSpan().IsZero.ToBoolean());
+        }
+        
+        [Theory]
+        [InlineData(CilCode.Castclass)]
+        [InlineData(CilCode.Unbox_Any)]
+        public void CastOnUnmatchedRefTypeShouldThrow(CilCode code)
         {
             var stack = Context.CurrentFrame.EvaluationStack;
             var factory = Context.Machine.ValueFactory;
@@ -80,7 +101,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             stack.Push(new StackSlot(factory.CreateNativeInteger(address), StackSlotTypeHint.Integer));
             
-            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Castclass, targetType));
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode(), targetType));
             
             Assert.False(result.IsSuccess);
             var exceptionType = result.ExceptionPointer!.AsObjectHandle(Context.Machine).GetObjectType();
@@ -88,7 +109,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         }
 
         [Fact]
-        public void IsInstUnmatchedTypeShouldPushNull()
+        public void IsInstOnUnmatchedRefTypeShouldPushNull()
         {
             var stack = Context.CurrentFrame.EvaluationStack;
             var factory = Context.Machine.ValueFactory;
@@ -141,7 +162,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         [InlineData(CilCode.Castclass, typeof(DerivedSimpleClass), typeof(SimpleClass))]
         [InlineData(CilCode.Isinst, typeof(DerivedSimpleClass), typeof(SimpleClass))]
         [InlineData(CilCode.Unbox_Any, typeof(DerivedSimpleClass), typeof(SimpleClass))]
-        public void CastMatchedTypeShouldPushSameObject(CilCode code, Type t1, Type t2)
+        public void CastMatchedRefTypeShouldPushSameObject(CilCode code, Type t1, Type t2)
         {
             var stack = Context.CurrentFrame.EvaluationStack;
             var factory = Context.Machine.ValueFactory;
