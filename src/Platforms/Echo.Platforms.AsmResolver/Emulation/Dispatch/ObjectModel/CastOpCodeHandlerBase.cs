@@ -1,4 +1,5 @@
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
@@ -19,6 +20,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
             var value = stack.Pop();
             var targetType = ((ITypeDefOrRef) instruction.Operand!).ToTypeSignature();
+
+            if (targetType is GenericParameterSignature parameterSignature) {
+                var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
+                targetType = genericContext.Method!.TypeArguments[parameterSignature.Index];
+            }
 
             try
             {

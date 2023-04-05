@@ -1,4 +1,6 @@
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
 
@@ -17,6 +19,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             
             var type = (ITypeDefOrRef) instruction.Operand!;
             var address = context.CurrentFrame.EvaluationStack.Pop();
+
+            if (type is TypeSpecification { Signature: GenericParameterSignature parameterSignature }) {
+                var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
+                type = genericContext.Method!.TypeArguments[parameterSignature.Index].ToTypeDefOrRef();
+            }
 
             try
             {

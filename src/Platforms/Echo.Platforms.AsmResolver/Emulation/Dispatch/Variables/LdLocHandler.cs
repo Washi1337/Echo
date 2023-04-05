@@ -1,4 +1,6 @@
 using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
@@ -20,13 +22,20 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             // Extract local variable in opcode or operand.
             var local = instruction.GetLocalVariable(frame.Body!.LocalVariables);
 
+            var localType = local.VariableType;
+
+            if (localType is GenericParameterSignature parameterSignature) {
+                var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
+                localType = genericContext.Method!.TypeArguments[parameterSignature.Index];
+            }
+
             // Read local from stack frame.
-            var result = factory.RentValue(local.VariableType, false);
+            var result = factory.RentValue(localType, false);
             try
             {
                 // Marshal and push.
                 frame.ReadLocal(local.Index, result.AsSpan());
-                context.CurrentFrame.EvaluationStack.Push(result, local.VariableType);
+                context.CurrentFrame.EvaluationStack.Push(result, localType);
             }
             finally
             {

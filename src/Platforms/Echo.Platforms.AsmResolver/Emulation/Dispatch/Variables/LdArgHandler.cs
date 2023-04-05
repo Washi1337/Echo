@@ -1,4 +1,6 @@
 using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
@@ -19,13 +21,20 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
 
             // Extract parameter in opcode or operand.
             var parameter = instruction.GetParameter(frame.Body!.Owner.Parameters);
-            
-            var result = factory.RentValue(parameter.ParameterType, false);
+
+            var parameterType = parameter.ParameterType;
+
+            if (parameterType is GenericParameterSignature parameterSignature) {
+                var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
+                parameterType = genericContext.Method!.TypeArguments[parameterSignature.Index];
+            }
+
+            var result = factory.RentValue(parameterType, false);
             try
             {
                 // Marshal and push.
                 frame.ReadArgument(parameter.Index, result.AsSpan());
-                context.CurrentFrame.EvaluationStack.Push(result, parameter.ParameterType);
+                context.CurrentFrame.EvaluationStack.Push(result, parameterType);
             }
             finally
             {
