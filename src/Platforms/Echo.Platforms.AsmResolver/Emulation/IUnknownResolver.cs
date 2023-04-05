@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
+using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
@@ -41,7 +44,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Resolves an unknown source address to a memory block or object to read data from.
         /// </summary>
         /// <param name="context">The context in which the instruction is executed in.</param>
-        /// <param name="instruction">The switch instruction that is being executed.</param>
+        /// <param name="instruction">The instruction that is being executed.</param>
         /// <param name="address">The address to resolve.</param>
         /// <returns>The resolved address, or <c>null</c> to treat it as an unknown value that is processed successfully.</returns>
         long? ResolveSourcePointer(CilExecutionContext context, CilInstruction instruction, StackSlot address);
@@ -50,7 +53,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Resolves an unknown destination address to a memory block or object to write data to.
         /// </summary>
         /// <param name="context">The context in which the instruction is executed in.</param>
-        /// <param name="instruction">The switch instruction that is being executed.</param>
+        /// <param name="instruction">The instruction that is being executed.</param>
         /// <param name="address">The address to resolve.</param>
         /// <returns>The resolved address, or <c>null</c> to treat it as an unknown value that is processed successfully.</returns>
         long? ResolveDestinationPointer(CilExecutionContext context, CilInstruction instruction, StackSlot address);
@@ -59,7 +62,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Resolves an unknown size for a memory block.
         /// </summary>
         /// <param name="context">The context in which the instruction is executed in.</param>
-        /// <param name="instruction">The switch instruction that is being executed.</param>
+        /// <param name="instruction">The instruction that is being executed.</param>
         /// <param name="size">The size to resolve.</param>
         /// <returns>The resolved size, or <c>null</c> to treat it as an unknown value that is processed successfully.</returns>
         uint ResolveBlockSize(CilExecutionContext context, CilInstruction instruction, StackSlot size);
@@ -73,5 +76,17 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="index">The index to resolve.</param>
         /// <returns>The resolved index, or <c>null</c> to treat it as an unknown value that is processed successfully.</returns>
         long? ResolveArrayIndex(CilExecutionContext context, CilInstruction instruction, long arrayAddress, StackSlot index);
+
+        /// <summary>
+        /// Resolves a method devirtualization on an unknown object instance.
+        /// </summary>
+        /// <param name="context">The context in which the instruction is executed in.</param>
+        /// <param name="instruction">The instruction that is being executed.</param>
+        /// <param name="arguments"></param>
+        /// <returns>
+        /// The resolved method, or <c>null</c> if devirtualization should be ignored and the default implementation of
+        /// the method should be used.
+        /// </returns>
+        IMethodDescriptor? ResolveMethod(CilExecutionContext context, CilInstruction instruction, IList<BitVector> arguments);
     }
 }

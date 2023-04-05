@@ -18,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
         public void WriteToNullShouldThrow()
         {
             var stack = Context.CurrentFrame.EvaluationStack;
-            stack.Push(new StackSlot(0L, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(Context.Machine.ValueFactory.CreateNull(), StackSlotTypeHint.Integer));
             stack.Push(new StackSlot(0, StackSlotTypeHint.Integer));
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Stind_I4));
