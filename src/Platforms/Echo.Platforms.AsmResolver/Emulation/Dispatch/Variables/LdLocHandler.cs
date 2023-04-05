@@ -18,16 +18,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
         {
             var frame = context.CurrentFrame;
             var factory = context.Machine.ValueFactory;
-         
+            var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
+
             // Extract local variable in opcode or operand.
             var local = instruction.GetLocalVariable(frame.Body!.LocalVariables);
 
-            var localType = local.VariableType;
-
-            if (localType is GenericParameterSignature parameterSignature) {
-                var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
-                localType = genericContext.Method!.TypeArguments[parameterSignature.Index];
-            }
+            var localType = local.VariableType.InstantiateGenericTypes(genericContext);
 
             // Read local from stack frame.
             var result = factory.RentValue(localType, false);

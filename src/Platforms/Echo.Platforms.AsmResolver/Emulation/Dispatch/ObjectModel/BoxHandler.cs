@@ -1,4 +1,6 @@
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
@@ -13,8 +15,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// <inheritdoc />
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
-            var type = (ITypeDefOrRef) instruction.Operand!;
-            
+            var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
+            var type = ((ITypeDefOrRef)instruction.Operand!).ToTypeSignature();
+
+            type = type.InstantiateGenericTypes(genericContext);
+
             // For reference types, a box instruction is equivalent to a NOP.
             if (!type.IsValueType)
                 return CilDispatchResult.Success();
@@ -23,7 +28,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var factory = context.Machine.ValueFactory;
 
             // Pop structure / value type.
-            var value = stack.Pop(type.ToTypeSignature(true));
+            var value = stack.Pop(type);
 
             try
             {

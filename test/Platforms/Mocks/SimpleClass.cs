@@ -3,6 +3,7 @@ using static InlineIL.IL.Emit;
 
 using System;
 using InlineIL;
+using System.Collections.Generic;
 
 namespace Mocks
 {

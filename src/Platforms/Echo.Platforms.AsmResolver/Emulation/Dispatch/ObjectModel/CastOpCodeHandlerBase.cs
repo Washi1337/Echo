@@ -17,14 +17,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
+            var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
 
             var value = stack.Pop();
-            var targetType = ((ITypeDefOrRef) instruction.Operand!).ToTypeSignature();
-
-            if (targetType is GenericParameterSignature parameterSignature) {
-                var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
-                targetType = genericContext.Method!.TypeArguments[parameterSignature.Index];
-            }
+            var targetType = ((ITypeDefOrRef) instruction.Operand!).ToTypeSignature().InstantiateGenericTypes(genericContext);
 
             try
             {

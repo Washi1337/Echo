@@ -1,4 +1,5 @@
 using System.Linq;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
@@ -52,7 +53,7 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
         Assert.True(result.IsSuccess);
         var handle = Assert.Single(stack).Contents.AsObjectHandle(Context.Machine);
         
-        Assert.Equal(type, handle.GetObjectType());
+        Assert.Equal(type, handle.GetObjectType(), SignatureComparer.Default);
         Assert.Equal(1337, Context.Machine.Heap.GetObjectSpan(handle.Address).SliceObjectData(factory).I32);
     }
 
@@ -84,7 +85,7 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
         Assert.True(result.IsSuccess);
         var handle = Assert.Single(stack).Contents.AsObjectHandle(Context.Machine);
         
-        Assert.Equal(type, handle.GetObjectType());
+        Assert.Equal(type, handle.GetObjectType(), SignatureComparer.Default);
         var boxObjectSpan = Context.Machine.Heap.GetObjectSpan(handle.Address);
         Assert.Equal(1337, boxObjectSpan.SliceObjectField(factory, fieldX).I32);
         Assert.Equal(1338, boxObjectSpan.SliceObjectField(factory, fieldY).I32);

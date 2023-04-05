@@ -14,15 +14,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
         {
             var frame = context.Machine.CallStack.Pop();
-
+            var genericContext = GenericContext.FromMethod(frame.Method);
             if (frame.Method.Signature!.ReturnsValue)
             {
-                var returnType = frame.Method.Signature.ReturnType;
-
-                if (returnType is GenericParameterSignature parameterSignature) {
-                    var genericContext = GenericContext.FromMethod(frame.Method);
-                    returnType = genericContext.Method!.TypeArguments[parameterSignature.Index];
-                }
+                var returnType = frame.Method.Signature.ReturnType.InstantiateGenericTypes(genericContext);
 
                 var value = frame.EvaluationStack.Pop(returnType);
                 context.CurrentFrame.EvaluationStack.Push(value, returnType, true);

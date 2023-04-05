@@ -18,16 +18,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
         {
             var frame = context.CurrentFrame;
             var factory = context.Machine.ValueFactory;
+            var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
 
             // Extract parameter in opcode or operand.
             var parameter = instruction.GetParameter(frame.Body!.Owner.Parameters);
 
-            var parameterType = parameter.ParameterType;
-
-            if (parameterType is GenericParameterSignature parameterSignature) {
-                var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
-                parameterType = genericContext.Method!.TypeArguments[parameterSignature.Index];
-            }
+            var parameterType = parameter.ParameterType.InstantiateGenericTypes(genericContext);
 
             var result = factory.RentValue(parameterType, false);
             try
