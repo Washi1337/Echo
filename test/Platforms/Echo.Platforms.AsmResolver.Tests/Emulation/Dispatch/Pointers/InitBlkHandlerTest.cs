@@ -20,7 +20,7 @@ public class InitBlkHandlerTest : CilOpCodeHandlerTestBase
         var stack = Context.CurrentFrame.EvaluationStack;
         
         // Push null, a value, and a size.
-        stack.Push(new StackSlot(0ul, StackSlotTypeHint.Integer));
+        stack.Push(new StackSlot(Context.Machine.ValueFactory.CreateNull(), StackSlotTypeHint.Integer));
         stack.Push(new StackSlot(0xab, StackSlotTypeHint.Integer));
         stack.Push(new StackSlot(10, StackSlotTypeHint.Integer));
 
