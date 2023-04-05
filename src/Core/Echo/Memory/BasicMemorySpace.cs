@@ -71,7 +71,7 @@ namespace Echo.Memory
         /// <inheritdoc />
         public void Write(long address, ReadOnlySpan<byte> buffer)
         {
-            BackBuffer.AsSpan((int) (address * 8)).Write(buffer);
+            BackBuffer.AsSpan((int) ((address - _baseAddress) * 8)).Write(buffer);
         }
     }
 }

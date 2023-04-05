@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 using Echo.Memory;
 using Echo.Code;
@@ -85,6 +86,125 @@ namespace Echo.Tests.Memory
             Assert.Equal(new AddressRange(0x0040_0000, 0x0040_5000), memory.AddressRange);
             Assert.Equal(new AddressRange(0x0040_1000, 0x0040_2000), block1.AddressRange);
             Assert.Equal(new AddressRange(0x0040_3000, 0x0040_5000), block2.AddressRange);
+        }
+
+        [Fact]
+        public void ReadFromUnmappedShouldThrow()
+        {
+            var memory = new VirtualMemory();
+
+            memory.Map(0x1000_0000, new BasicMemorySpace(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}));
+
+            Assert.Throws<AccessViolationException>(() => memory.Read(0x2000_0000, new BitVector(32, false)));
+        }
+
+        [Fact]
+        public void WriteToUnmappedShouldThrow()
+        {
+            var memory = new VirtualMemory();
+
+            memory.Map(0x1000_0000, new BasicMemorySpace(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}));
+
+            Assert.Throws<AccessViolationException>(() => memory.Write(0x2000_0000, new BitVector(32, false)));
+            Assert.Throws<AccessViolationException>(() => memory.Write(0x2000_0000, new byte[4]));
+        }
+        
+        [Fact]
+        public void ReadFromSingleSpace()
+        {
+            var memory = new VirtualMemory();
+
+            memory.Map(0x1000_0000, new BasicMemorySpace(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}));
+            memory.Map(0x2000_0000, new BasicMemorySpace(new byte[] {11, 22, 33, 44, 55, 66, 77, 88}));
+
+            var buffer = new BitVector(32, false);
+
+            memory.Read(0x1000_0002, buffer);
+            Assert.Equal(new byte[] {3, 4, 5, 6}, buffer.Bits);
+            
+            memory.Read(0x2000_0002, buffer);
+            Assert.Equal(new byte[] {33, 44, 55, 66}, buffer.Bits);
+        }
+
+        [Fact]
+        public void WriteToSingleSpace()
+        {
+            var memory = new VirtualMemory();
+
+            var space1 = new BasicMemorySpace(new byte[8]);
+            var space2 = new BasicMemorySpace(new byte[8]);
+            memory.Map(0x1000_0000, space1);
+            memory.Map(0x2000_0000, space2);
+
+            memory.Write(0x1000_0002, new BitVector(new byte[] {1, 2, 3, 4}));
+            Assert.Equal(new byte[] {0, 0, 1, 2, 3, 4, 0, 0}, space1.BackBuffer.Bits);
+            Assert.Equal(new byte[] {0, 0, 0, 0, 0, 0, 0, 0}, space2.BackBuffer.Bits);
+            
+            memory.Write(0x2000_0002, new BitVector(new byte[] {11, 22, 33, 44}));
+            Assert.Equal(new byte[] {0, 0, 1, 2, 3, 4, 0, 0}, space1.BackBuffer.Bits);
+            Assert.Equal(new byte[] {0, 0, 11, 22, 33, 44, 0, 0}, space2.BackBuffer.Bits);
+            
+            memory.Write(0x1000_0004, new byte[] {11, 22, 33, 44});
+            Assert.Equal(new byte[] {0, 0, 1, 2, 11, 22, 33, 44}, space1.BackBuffer.Bits);
+            Assert.Equal(new byte[] {0, 0, 11, 22, 33, 44, 0, 0}, space2.BackBuffer.Bits);
+            
+            memory.Write(0x2000_0004, new byte[] {1, 2, 3, 4});
+            Assert.Equal(new byte[] {0, 0, 1, 2, 11, 22, 33, 44}, space1.BackBuffer.Bits);
+            Assert.Equal(new byte[] {0, 0, 11, 22, 1, 2, 3, 4}, space2.BackBuffer.Bits);
+        }
+
+        [Fact]
+        public void ReadFromMultipleSpaces()
+        {
+            var memory = new VirtualMemory();
+
+            memory.Map(0x1000_0000, new BasicMemorySpace(new byte[] {1, 2, 3, 4, 5, 6, 7, 8}));
+            memory.Map(0x1000_0008, new BasicMemorySpace(new byte[] {9, 10, 11, 12, 13, 14, 15, 16}));
+            memory.Map(0x1000_0010, new BasicMemorySpace(new byte[] {17, 18, 19, 20, 21, 22, 23, 24}));
+
+            var buffer = new BitVector(16 * 8, false);
+
+            memory.Read(0x1000_0004, buffer);
+
+            Assert.Equal(new byte[]
+            {
+                5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+            }, buffer.Bits);
+        }
+
+        [Fact]
+        public void WriteToMultipleSpaces()
+        {
+            var memory = new VirtualMemory();
+
+            var space1 = new BasicMemorySpace(new byte[8]);
+            var space2 = new BasicMemorySpace(new byte[8]);
+            var space3 = new BasicMemorySpace(new byte[8]);
+
+            memory.Map(0x1000_0000, space1);
+            memory.Map(0x1000_0008, space2);
+            memory.Map(0x1000_0010, space3);
+
+            var buffer = new BitVector(new byte[]
+            {
+                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+            });
+
+            memory.Write(0x1000_0004, buffer);
+
+            Assert.Equal(new byte[] {0, 0, 0, 0, 1, 2, 3, 4}, space1.BackBuffer.Bits);
+            Assert.Equal(new byte[] {5, 6, 7, 8, 9, 10, 11, 12}, space2.BackBuffer.Bits);
+            Assert.Equal(new byte[] {13, 14, 15, 16, 0, 0, 0, 0}, space3.BackBuffer.Bits);
+
+            byte[] buffer2 = {
+                16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+            };
+
+            memory.Write(0x1000_0004, buffer2);
+
+            Assert.Equal(new byte[] {0, 0, 0, 0, 16, 15, 14, 13}, space1.BackBuffer.Bits);
+            Assert.Equal(new byte[] {12, 11, 10, 9, 8, 7, 6, 5}, space2.BackBuffer.Bits);
+            Assert.Equal(new byte[] {4, 3, 2, 1, 0, 0, 0, 0}, space3.BackBuffer.Bits);
         }
     }
 }

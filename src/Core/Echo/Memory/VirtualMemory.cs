@@ -1,6 +1,6 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Echo.Code;
 
@@ -129,40 +129,107 @@ namespace Echo.Memory
         /// <inheritdoc />
         public void Read(long address, BitVectorSpan buffer)
         {
-            if (buffer.Count == 0)
-                return;
-
-            int index = GetMemorySpaceIndex(address); 
-            if (index == -1)
-                throw new AccessViolationException();
-
-            _spaces[index].Read(address, buffer);
+            var view = new MemoryView(this, address, buffer.ByteCount);
+            foreach (var slice in view)
+            {
+                var span = buffer.Slice(slice.ByteOffset * 8, slice.ChunkLength * 8);
+                slice.Space.Read(address + slice.ByteOffset, span);
+            }
         }
 
         /// <inheritdoc />
         public void Write(long address, BitVectorSpan buffer)
         {
-            if (buffer.Count == 0)
-                return;
-            
-            int index = GetMemorySpaceIndex(address); 
-            if (index == -1)
-                throw new AccessViolationException();
-
-            _spaces[index].Write(address, buffer);
+            var view = new MemoryView(this, address, buffer.ByteCount);
+            foreach (var slice in view)
+            {
+                var span = buffer.Slice(slice.ByteOffset * 8, slice.ChunkLength * 8);
+                slice.Space.Write(address + slice.ByteOffset, span);
+            }
         }
 
         /// <inheritdoc />
         public void Write(long address, ReadOnlySpan<byte> buffer)
         {
-            if (buffer.Length == 0)
-                return;
-            
-            int index = GetMemorySpaceIndex(address); 
-            if (index == -1)
-                throw new AccessViolationException();
+            var view = new MemoryView(this, address, buffer.Length);
+            foreach (var slice in view)
+            {
+                var span = buffer.Slice(slice.ByteOffset, slice.ChunkLength);
+                slice.Space.Write(address + slice.ByteOffset, span);
+            }
+        }
 
-            _spaces[index].Write(address, buffer);
+        private record struct MemoryView(VirtualMemory Instance, long Address, int TotalLength)
+        {
+            public MemorySliceEnumerator GetEnumerator() => new(this);
+        }
+
+        private record struct MemorySlice(IMemorySpace Space, int ByteOffset, int ChunkLength);
+
+        private struct MemorySliceEnumerator : IEnumerator<MemorySlice>
+        {
+            private readonly MemoryView _memoryView;
+            private int _spaceIndex;
+            private int _byteOffset;
+            private int _chunkLength;
+
+            public MemorySliceEnumerator(MemoryView memoryView)
+            {
+                _memoryView = memoryView;
+                
+                _spaceIndex = memoryView.Instance.GetMemorySpaceIndex(memoryView.Address);
+                if (_spaceIndex == -1)
+                    throw new AccessViolationException();
+                
+                _spaceIndex--;
+                _byteOffset = 0;
+                _chunkLength = 0;
+            }
+            
+            public bool MoveNext()
+            {
+                // Move to next chunk.
+                _byteOffset += _chunkLength;
+                _spaceIndex++;
+
+                // Did we reach the end of the buffer to read.
+                if (_byteOffset >= _memoryView.TotalLength)
+                    return false;
+                
+                long address = _memoryView.Address + _byteOffset;
+                
+                // Did we reach the end of all mapped memory?
+                if (_spaceIndex >= _memoryView.Instance._spaces.Count)
+                    ThrowAccessViolation(address);
+                
+                // Is the next mapped space not in the range we want to write in?
+                var memorySpace = _memoryView.Instance._spaces[_spaceIndex];
+                if (!memorySpace.AddressRange.Contains(address))
+                    ThrowAccessViolation(address);
+                
+                // Calculate chunk length.
+                long spaceOffset = address - memorySpace.AddressRange.Start;
+                _chunkLength = (int) Math.Min(
+                    _memoryView.TotalLength - _byteOffset, 
+                    memorySpace.AddressRange.Length - spaceOffset);
+               
+                return true;
+            }
+
+            public MemorySlice Current => new(_memoryView.Instance._spaces[_spaceIndex], _byteOffset, _chunkLength);
+
+            object IEnumerator.Current => Current;
+
+            public void Reset() => throw new InvalidOperationException();
+
+            public void Dispose()
+            {
+            }
+
+            private static void ThrowAccessViolation(long address)
+            {
+                throw new AccessViolationException($"Attempted to access unmapped memory at 0x{address:X8}.");
+            }
         }
     }
 }
