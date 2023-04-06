@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
@@ -26,9 +27,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
+            var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
 
             // Determine parameters.
-            var elementType = GetElementType(context, instruction);
+            var elementType = GetElementType(context, instruction).InstantiateGenericTypes(genericContext);
             var value = stack.Pop(elementType);
             var address = stack.Pop();
             var result = factory.RentValue(elementType, false);

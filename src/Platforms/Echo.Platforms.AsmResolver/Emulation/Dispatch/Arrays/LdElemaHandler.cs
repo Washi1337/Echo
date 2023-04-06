@@ -1,4 +1,5 @@
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
@@ -16,9 +17,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
+            var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
 
             // Determine parameters.
-            var elementType = ((ITypeDefOrRef) instruction.Operand!).ToTypeSignature();
+            var elementType = ((ITypeDefOrRef) instruction.Operand!).ToTypeSignature().InstantiateGenericTypes(genericContext);
             var arrayIndex = stack.Pop();
             var arrayAddress = stack.Pop();
             var result = factory.RentNativeInteger(false);
