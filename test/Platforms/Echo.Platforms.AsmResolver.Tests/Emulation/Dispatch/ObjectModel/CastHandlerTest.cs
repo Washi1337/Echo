@@ -183,7 +183,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         }
 
         [Fact]
-        public void CastGenericTypeReturnsInt16() {
+        public void CastGenericTypeReturnsInt16()
+        {
             var vm = Context.Machine;
 
             var genericMethod = ModuleFixture.MockModule.TopLevelTypes
@@ -191,8 +192,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
                 .Methods
                 .First(m => m.Name == nameof(SimpleClass.GenericMethod));
 
-            var methodSpecification = new MethodSpecification(genericMethod,
-                new GenericInstanceMethodSignature(ModuleFixture.MockModule.CorLibTypeFactory.Int16));
+
+            var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int16);
 
             short value = 32000;
 
@@ -200,14 +201,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             Assert.NotNull(returnValue);
 
-            var result = vm.ObjectMarshaller.ToObject<short>(returnValue!);
-
-            Assert.Equal(value, result);
+            Assert.Equal(value, returnValue!.AsSpan().I16);
 
         }
 
         [Fact]
-        public void CastGenericTypeReturnsInt32() {
+        public void CastGenericTypeReturnsInt32()
+        {
             var vm = Context.Machine;
 
             var genericMethod = ModuleFixture.MockModule.TopLevelTypes
@@ -215,8 +215,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
                 .Methods
                 .First(m => m.Name == nameof(SimpleClass.GenericMethod));
 
-            var methodSpecification = new MethodSpecification(genericMethod,
-                new GenericInstanceMethodSignature(ModuleFixture.MockModule.CorLibTypeFactory.Int32));
+            var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int32);
 
             int value = 214000000;
 
@@ -224,14 +223,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             Assert.NotNull(returnValue);
 
-            var result = vm.ObjectMarshaller.ToObject<int>(returnValue!);
-
-            Assert.Equal(value, result);
+            Assert.Equal(value, returnValue!.AsSpan().I32);
 
         }
 
         [Fact]
-        public void CastGenericTypeReturnsInt64() {
+        public void CastGenericTypeReturnsInt64()
+        {
             var vm = Context.Machine;
 
             var genericMethod = ModuleFixture.MockModule.TopLevelTypes
@@ -239,18 +237,15 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
                 .Methods
                 .First(m => m.Name == nameof(SimpleClass.GenericMethod));
 
-            var methodSpecification = new MethodSpecification(genericMethod,
-                new GenericInstanceMethodSignature(ModuleFixture.MockModule.CorLibTypeFactory.Int64));
+            var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int64);
 
             long value = 922000000000000000L;
-
+            
             var returnValue = vm.Call(methodSpecification, new object[] { value });
 
             Assert.NotNull(returnValue);
 
-            var result = vm.ObjectMarshaller.ToObject<long>(returnValue!);
-
-            Assert.Equal(value, result);
+            Assert.Equal(value, returnValue!.AsSpan().I64);
 
         }
     }

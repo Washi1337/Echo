@@ -119,16 +119,20 @@ namespace Mocks
             return IL.Return<int>();
         }
 
-        public static T GenericMethod<T>(T value) {
+        public static T GenericMethod<T>(T value)
+        {
             T ret = default(T);
 
-            if (value is short) {
+            if (value is short)
+            {
                 ret = (T)(object)value;
             }
-            else if (value is int) {
+            else if (value is int)
+            {
                 ret = (T)(object)value;
             }
-            else if (value is long) {
+            else if (value is long)    
+            {
                 ret = (T)(object)value;
             }
 
