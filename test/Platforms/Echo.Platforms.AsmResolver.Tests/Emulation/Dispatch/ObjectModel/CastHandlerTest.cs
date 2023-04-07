@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
@@ -192,16 +193,23 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
                 .Methods
                 .First(m => m.Name == nameof(SimpleClass.GenericMethod));
 
-
             var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int16);
 
-            short value = 32000;
+            Context.Machine.CallStack.Push(methodSpecification);
 
-            var returnValue = vm.Call(methodSpecification, new object[] { value });
+            var value = 32000;
 
-            Assert.NotNull(returnValue);
+            var stack = Context.CurrentFrame.EvaluationStack;
 
-            Assert.Equal(value, returnValue!.AsSpan().I16);
+            stack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
+
+            var returnValue = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Box,
+                new GenericParameterSignature(GenericParameterType.Type, 0).ToTypeDefOrRef()));
+
+            Assert.True(returnValue.IsSuccess);
+            var result = Assert.Single(stack);
+
+            Assert.Equal(value, result.Contents.AsSpan().I16);
 
         }
 
@@ -217,14 +225,21 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int32);
 
-            int value = 214000000;
+            Context.Machine.CallStack.Push(methodSpecification);
 
-            var returnValue = vm.Call(methodSpecification, new object[] { value });
+            var value = 214000000;
 
-            Assert.NotNull(returnValue);
+            var stack = Context.CurrentFrame.EvaluationStack;
 
-            Assert.Equal(value, returnValue!.AsSpan().I32);
+            stack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
 
+            var returnValue = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Box,
+                new GenericParameterSignature(GenericParameterType.Type, 0).ToTypeDefOrRef()));
+
+            Assert.True(returnValue.IsSuccess);
+            var result = Assert.Single(stack);
+
+            Assert.Equal(value, result.Contents.AsSpan().I32);
         }
 
         [Fact]
@@ -239,14 +254,21 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int64);
 
-            long value = 922000000000000000L;
-            
-            var returnValue = vm.Call(methodSpecification, new object[] { value });
+            Context.Machine.CallStack.Push(methodSpecification);
 
-            Assert.NotNull(returnValue);
+            var value = 922000000000000000L;
 
-            Assert.Equal(value, returnValue!.AsSpan().I64);
+            var stack = Context.CurrentFrame.EvaluationStack;
 
+            stack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
+
+            var returnValue = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Box,
+                new GenericParameterSignature(GenericParameterType.Type, 0).ToTypeDefOrRef()));
+
+            Assert.True(returnValue.IsSuccess);
+            var result = Assert.Single(stack);
+
+            Assert.Equal(value, result.Contents.AsSpan().I64);
         }
     }
-}
+} 
