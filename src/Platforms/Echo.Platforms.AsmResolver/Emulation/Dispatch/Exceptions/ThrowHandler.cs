@@ -1,7 +1,7 @@
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
-namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
+namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Exceptions
 {
     /// <summary>
     /// Implements a CIL instruction handler for <c>throw</c> operations.
