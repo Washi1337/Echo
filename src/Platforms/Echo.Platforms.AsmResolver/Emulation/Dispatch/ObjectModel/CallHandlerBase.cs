@@ -30,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
                 // If that resulted in any error, throw it.
                 if (!devirtualization.IsSuccess)
-                    return CilDispatchResult.Exception(new BitVector(devirtualization.ExceptionPointer.Value));
+                    return CilDispatchResult.Exception(devirtualization.ExceptionObject);
 
                 // Invoke it otherwise.
                 var result = Invoke(context, devirtualization.ResultingMethod, arguments);
@@ -134,7 +134,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
                 case InvocationResultType.Exception:
                     // There was an exception during the invocation. Throw it.
-                    return CilDispatchResult.Exception(result.Value!);
+                    return CilDispatchResult.Exception(result.ExceptionObject);
 
                 case InvocationResultType.Inconclusive:
                     // Method invoker was not able to handle the method call.

@@ -39,6 +39,11 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
+        /// Gets a value indicating whether this handle represents the <c>null</c> reference.
+        /// </summary>
+        public bool IsNull => Address == 0;
+
+        /// <summary>
         /// Gets the address to the beginning of the object's data.
         /// </summary>
         public StructHandle Contents => new(Machine, Address + Machine.ValueFactory.ObjectHeaderSize);

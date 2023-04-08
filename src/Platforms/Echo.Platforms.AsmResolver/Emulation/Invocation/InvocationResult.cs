@@ -8,10 +8,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
     /// </summary>
     public readonly struct InvocationResult
     {
-        private InvocationResult(InvocationResultType resultType, BitVector? value)
+        private InvocationResult(InvocationResultType resultType, BitVector? value, ObjectHandle exceptionObject)
         {
             ResultType = resultType;
             Value = value;
+            ExceptionObject = exceptionObject;
         }
 
         /// <summary>
@@ -33,10 +34,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         public bool IsSuccess => ResultType is InvocationResultType.StepIn or InvocationResultType.StepOver;
 
         /// <summary>
-        /// When <see cref="IsSuccess"/> is <c>false</c>, contains the pointer to the exception that was thrown.
-        /// Otherwise, contains the value that the method returned (if available).
+        /// When <see cref="ResultType"/> is <see cref="InvocationResultType.StepOver"/>, gets the value that the
+        /// method returned (if available).
         /// </summary>
         public BitVector? Value
+        {
+            get;
+        }
+
+        /// <summary>
+        /// When <see cref="ResultType"/> is <see cref="InvocationResultType.Exception"/>, gets the handle to the
+        /// exception object that was thrown.
+        /// </summary>
+        public ObjectHandle ExceptionObject
         {
             get;
         }
@@ -44,12 +54,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// <summary>
         /// Constructs a new inconclusive invocation result, where the invocation was not handled yet.
         /// </summary>
-        public static InvocationResult Inconclusive() => new(InvocationResultType.Inconclusive, null);
+        public static InvocationResult Inconclusive() => new(InvocationResultType.Inconclusive, null, default);
         
         /// <summary>
         /// Constructs a new inconclusive invocation result, where the invocation was handled as a step-in action.
         /// </summary>
-        public static InvocationResult StepIn() => new(InvocationResultType.StepIn, null);
+        public static InvocationResult StepIn() => new(InvocationResultType.StepIn, null, default);
         
         /// <summary>
         /// Constructs a new inconclusive invocation result, where the invocation was fully handled by the invoker and
@@ -58,15 +68,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// <param name="value">
         /// The result that was produced by the method, or <c>null</c> if the method does not return a value.
         /// </param>
-        public static InvocationResult StepOver(BitVector? value) => new(InvocationResultType.StepOver, value);
+        public static InvocationResult StepOver(BitVector? value) => new(InvocationResultType.StepOver, value, default);
         
         /// <summary>
         /// Constructs a new failed invocation result with the provided pointer to an exception object describing the
         /// error that occurred.
         /// </summary>
-        /// <param name="value">The pointer to the exception object that was thrown.</param>
+        /// <param name="exceptionObject">The handle to the exception object that was thrown.</param>
         /// <returns>The result.</returns>
-        public static InvocationResult Exception(BitVector value) => new(InvocationResultType.Exception, value);
+        public static InvocationResult Exception(ObjectHandle exceptionObject) => new(
+            InvocationResultType.Exception,
+         null, 
+            exceptionObject);
     }
 
 }

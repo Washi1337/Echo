@@ -30,8 +30,8 @@ public class InitObjHandlerTest : CilOpCodeHandlerTestBase
 
         // Verify
         Assert.False(result.IsSuccess);
-        var exceptionType = result.ExceptionPointer!.AsObjectHandle(Context.Machine).GetObjectType();
-        Assert.Equal("System.NullReferenceException", exceptionType?.FullName);
+        var exceptionType = result.ExceptionObject.GetObjectType();
+        Assert.Equal("System.NullReferenceException", exceptionType.FullName);
     }
 
     [Fact]

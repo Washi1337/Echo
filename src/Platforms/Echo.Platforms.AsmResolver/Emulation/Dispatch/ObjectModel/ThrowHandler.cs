@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 if (value.Contents.AsSpan().IsZero)
                     return CilDispatchResult.NullReference(context);
 
-                return CilDispatchResult.Exception(value.Contents.Clone(pool));
+                return CilDispatchResult.Exception(value.Contents.AsObjectHandle(context.Machine));
             }
             finally
             {

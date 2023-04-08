@@ -8,6 +8,11 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public static class ObjectMarshallerExtensions
     {
+        public static ObjectHandle ToObjectHandle(this IObjectMarshaller self, object? value)
+        {
+            return self.ToBitVector(value).AsObjectHandle(self.Machine);
+        }
+        
         /// <summary>
         /// Interprets the provided bit vector as an object of the provided type.
         /// </summary>

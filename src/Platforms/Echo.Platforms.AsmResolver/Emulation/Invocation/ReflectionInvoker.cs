@@ -42,7 +42,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
             }
             catch (Exception ex)
             {
-                return InvocationResult.Exception(marshaller.ToBitVector(ex));
+                return InvocationResult.Exception(marshaller.ToObjectHandle(ex));
             }
         }
 

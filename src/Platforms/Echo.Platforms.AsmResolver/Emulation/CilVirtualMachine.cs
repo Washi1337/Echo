@@ -339,11 +339,11 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (!result.IsSuccess)
             {
                 // TODO: unwind stack and move to appropriate exception handler if there is any.
-                var exceptionPointer = result.ExceptionPointer.AsSpan();
-                if (!exceptionPointer.IsFullyKnown)
-                    throw new NotImplementedException("Exception handling is not implemented yet (unknown exception type).");
-
-                var type = exceptionPointer.AsObjectHandle(this).GetObjectType(); 
+                var exceptionObject = result.ExceptionObject;
+                if (exceptionObject.IsNull)
+                    throw new CilEmulatorException("A null exception object was thrown.");
+                
+                var type = exceptionObject.GetObjectType();
                 throw new NotImplementedException($"Exception handling is not implemented yet. ({type})");
             }
         }
