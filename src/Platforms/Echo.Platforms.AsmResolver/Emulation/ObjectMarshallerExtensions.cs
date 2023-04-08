@@ -8,9 +8,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public static class ObjectMarshallerExtensions
     {
-        public static ObjectHandle ToObjectHandle(this IObjectMarshaller self, object? value)
+        /// <summary>
+        /// Constructs an object handle that represents the provided object.
+        /// </summary>
+        /// <param name="self">The marshaller service.</param>
+        /// <param name="obj">The object.</param>
+        /// <returns>The bitvector containing the address to the object.</returns>
+        public static ObjectHandle ToObjectHandle(this IObjectMarshaller self, object? obj)
         {
-            return self.ToBitVector(value).AsObjectHandle(self.Machine);
+            return self.ToBitVector(obj).AsObjectHandle(self.Machine);
         }
         
         /// <summary>

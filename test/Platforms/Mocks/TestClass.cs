@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Net;
 using InlineIL;
 
 namespace Mocks
@@ -11,26 +13,6 @@ namespace Mocks
         public static string GetConstantString() => "Hello, world!";
         public static string GetIsEvenString(int i) => i % 2 == 0 ? "even" : "odd";
         public static bool GetBoolean() => true;
-
-        public static void ExceptionHandler()
-        {
-            try
-            {
-                Console.WriteLine("Password:");
-                if (Console.ReadLine() == "MyPassword")
-                {
-                    Console.WriteLine("Amazing");
-                }
-                else
-                {
-                    Console.WriteLine("Nope");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
 
         public static void NoLocalsNoArguments()
         {
@@ -115,6 +97,175 @@ namespace Mocks
         public static int DangerousMethod(int y)
         {
             return y + 100;
+        }
+        
+        public int UnhandledException() => throw new Exception("This is an unhandled exception.");
+
+        public int TryFinally(bool @throw)
+        {
+            int result = 0;
+            
+            try
+            {
+                if (@throw)
+                    throw new Exception("This is an unhandled exception.");
+                result++;
+            }
+            finally
+            {
+                result += 100;
+            }
+
+            return result;
+        }
+
+        public int TryCatch(bool @throw)
+        {
+            int result;
+            
+            try
+            {
+                if (@throw)
+                    throw new Exception("This is an handled exception.");
+                result = 1;
+            }
+            catch (Exception ex)
+            {
+                result = 2;
+            }
+
+            return result;   
+        }
+
+        public int TryCatchFinally(bool @throw)
+        {
+            int result = 0;
+
+            try
+            {
+                if (@throw)
+                    throw new Exception("This is an handled exception.");
+                result = 1;
+            }
+            catch (Exception ex)
+            {
+                result = 2;
+            }
+            finally
+            {
+                result += 100;
+            }
+
+            return result;   
+        }
+
+        public int TryCatchCatch(int exceptionType)
+        {
+            int result = 0;
+
+            try
+            {
+                result = exceptionType switch
+                {
+                    0 => throw new IOException("This is a handled IOException."),
+                    1 => throw new WebException("This is a handled WebException."),
+                    2 => throw new ArgumentException("This is an unhandled ArgumentException"),
+                    _ => 1
+                };
+            }
+            catch (IOException ex)
+            {
+                result = 2;
+            }
+            catch (WebException ex)
+            {
+                result = 3;
+            }
+
+            return result;   
+        }
+        
+        public int TryCatchSpecificAndGeneral(int exceptionType)
+        {
+            int result = 0;
+
+            try
+            {
+                result = exceptionType switch
+                {
+                    0 => throw new EndOfStreamException("This is a handled EndOfStreamException."),
+                    1 => throw new IOException("This is a handled IOException."),
+                    2 => throw new ArgumentException("This is an unhandled ArgumentException"),
+                    _ => 1
+                };
+            }
+            catch (EndOfStreamException ex)
+            {
+                result = 2;
+            }
+            catch (IOException ex)
+            {
+                result = 3;
+            }
+
+            return result;   
+        }
+
+        public int TryCatchCatchFinally(int exceptionType)
+        {
+            int result = 0;
+
+            try
+            {
+                result = exceptionType switch
+                {
+                    0 => throw new IOException("This is a handled IOException."),
+                    1 => throw new WebException("This is a handled WebException."),
+                    2 => throw new ArgumentException("This is an unhandled ArgumentException"),
+                    _ => 1
+                };
+            }
+            catch (IOException ex)
+            {
+                result = 2;
+            }
+            catch (WebException ex)
+            {
+                result = 3;
+            }
+            finally
+            {
+                result += 100;
+            }
+            
+            return result;
+        }
+
+        public int TryCatchFilters(int exceptionType)
+        {
+            int result = 0;
+
+            try
+            {
+                result = exceptionType switch
+                {
+                    0 => throw new IOException("This is handled exception 0"),
+                    1 => throw new IOException("This is handled exception 1"),
+                    2 => throw new IOException("This is unhandled exception 2"),
+                    3 => throw new ArgumentException("This is unhandled other exception"),
+                    _ => 1
+                };
+            }
+            catch (IOException ex) when (ex.Message.Contains("0"))
+            {
+                result = 2;
+            }
+            catch (IOException ex) when (ex.Message.Contains("1"))
+            {
+                result = 3;
+            }
+
+            return result;
         }
     }
 }
