@@ -1,5 +1,8 @@
 using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.DotNet;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
 {
@@ -16,12 +19,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
         {
             var frame = context.CurrentFrame;
             var factory = context.Machine.ValueFactory;
-            
+            var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
+
             // Extract local variable in opcode or operand.
             var local = instruction.GetLocalVariable(frame.Body!.LocalVariables);
 
+            var localType = local.VariableType.InstantiateGenericTypes(genericContext);
+
             // Pop top of stack into the variable.
-            var value = frame.EvaluationStack.Pop(local.VariableType);
+            var value = frame.EvaluationStack.Pop(localType);
             frame.WriteLocal(local.Index, value.AsSpan());
             
             // Return rented bit vectors.

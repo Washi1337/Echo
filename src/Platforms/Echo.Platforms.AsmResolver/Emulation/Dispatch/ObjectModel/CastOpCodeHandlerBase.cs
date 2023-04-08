@@ -1,4 +1,5 @@
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
@@ -15,9 +16,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
+            var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
 
             var value = stack.Pop();
-            var targetType = ((ITypeDefOrRef) instruction.Operand!).ToTypeSignature();
+            var targetType = ((ITypeDefOrRef) instruction.Operand!).ToTypeSignature().InstantiateGenericTypes(genericContext);
 
             try
             {

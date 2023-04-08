@@ -3,6 +3,7 @@ using static InlineIL.IL.Emit;
 
 using System;
 using InlineIL;
+using System.Collections.Generic;
 
 namespace Mocks
 {
@@ -116,6 +117,26 @@ namespace Mocks
 
             Ldloc_1();
             return IL.Return<int>();
+        }
+
+        public static T GenericMethod<T>(T value)
+        {
+            T ret = default(T);
+
+            if (value is short)
+            {
+                ret = (T)(object)value;
+            }
+            else if (value is int)
+            {
+                ret = (T)(object)value;
+            }
+            else if (value is long)    
+            {
+                ret = (T)(object)value;
+            }
+
+            return ret;
         }
     }
 }

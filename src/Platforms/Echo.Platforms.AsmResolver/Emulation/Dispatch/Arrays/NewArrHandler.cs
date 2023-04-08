@@ -1,4 +1,5 @@
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
@@ -16,8 +17,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
-            
-            var elementType = (ITypeDefOrRef) instruction.Operand!;
+            var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
+
+            var elementType = ((ITypeDefOrRef)instruction.Operand!).ToTypeSignature().InstantiateGenericTypes(genericContext);
             var elementCount = stack.Pop();
 
             try
@@ -29,7 +31,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
                 if (elementCount.Contents.IsFullyKnown)
                 {
                     long actual = context.Machine.Heap.AllocateSzArray(
-                        elementType.ToTypeSignature(),
+                        elementType,
                         elementCount.Contents.AsSpan().I32, 
                         true);
 

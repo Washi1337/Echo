@@ -1,4 +1,6 @@
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
 
@@ -14,9 +16,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             var factory = context.Machine.ValueFactory;
+            var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
             
-            var type = (ITypeDefOrRef) instruction.Operand!;
+            var type = ((ITypeDefOrRef)instruction.Operand!).ToTypeSignature().InstantiateGenericTypes(genericContext);
             var address = context.CurrentFrame.EvaluationStack.Pop();
+
 
             try
             {
@@ -39,7 +43,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
                         // A non-null reference was passed.
 
                         // Allocate a temporary buffer to write into memory.
-                        var buffer = factory.CreateValue(type.ToTypeSignature(), true);;
+                        var buffer = factory.CreateValue(type, true);;
 
                         // Write it.
                         context.Machine.Memory.Write(actualAddress, buffer);
