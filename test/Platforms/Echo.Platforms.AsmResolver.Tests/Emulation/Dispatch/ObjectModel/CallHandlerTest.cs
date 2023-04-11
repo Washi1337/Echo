@@ -177,6 +177,38 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.Equal(32, value.Contents.Count);
         }
 
+        [Fact]
+        public void CallShouldMarshalArgumentsUsingCorrectTypes()
+        {
+            var invoker = new InvokerWrapper(DefaultInvokers.ReturnUnknown);
+            var factory = ModuleFixture.MockModule.CorLibTypeFactory;
+            var method = new MethodDefinition("Dummy", MethodAttributes.Static, MethodSignature.CreateStatic(
+                factory.Int32, 
+                factory.Int32,
+                factory.Double,
+                factory.Double));
+
+            Context.Machine.Invoker = invoker;
+
+            var callerFrame = Context.CurrentFrame;
+            callerFrame.EvaluationStack.Push(new StackSlot(0, StackSlotTypeHint.Integer));
+            callerFrame.EvaluationStack.Push(new StackSlot(1D, StackSlotTypeHint.Float));
+            callerFrame.EvaluationStack.Push(new StackSlot(2D, StackSlotTypeHint.Float));
+            
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Call, method));
+
+            Assert.True(result.IsSuccess);
+            Assert.Equal(InvocationResultType.StepOver, invoker.LastInvocationResult.ResultType);
+            Assert.Single(callerFrame.EvaluationStack);
+            Assert.Same(method, invoker.LastMethod);
+
+            var arguments = invoker.LastArguments;
+            Assert.Equal(3, arguments!.Count);
+            
+            Assert.Equal(0, arguments[0].AsSpan().I32);
+            Assert.Equal(1D, arguments[1].AsSpan().F64);
+            Assert.Equal(2D, arguments[2].AsSpan().F64);
+        }
     }
 
 }
