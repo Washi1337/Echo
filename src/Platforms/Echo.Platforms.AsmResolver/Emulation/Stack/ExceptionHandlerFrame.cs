@@ -92,6 +92,31 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
 
             _handlers.Add(handler);
         }
+
+        /// <summary>
+        /// Determines whether the provided offset falls within the protected offset range or any of the handlers. 
+        /// </summary>
+        /// <param name="offset">The offset.</param>
+        /// <returns><c>true</c> if the offset is within the frame, <c>false</c> otherwise.</returns>
+        public bool ContainsOffset(int offset)
+        {
+            if (ProtectedRange.Contains(offset))
+                return true;
+
+            foreach (var handler in _handlers)
+            {
+                // As per ecma-335, the filter start must be right before the handler start. Thus we can assume that any
+                // exception handler for which the type is a filter, the full handler spans [filter start, handler end).
+                int startOffset = handler.HandlerType == CilExceptionHandlerType.Filter
+                    ? handler.FilterStart!.Offset
+                    : handler.HandlerStart!.Offset;
+
+                if (offset >= startOffset && offset < handler.HandlerEnd!.Offset)
+                    return true;
+            }
+            
+            return false;
+        }
         
         /// <summary>
         /// Resets the exception handler to its initial state.

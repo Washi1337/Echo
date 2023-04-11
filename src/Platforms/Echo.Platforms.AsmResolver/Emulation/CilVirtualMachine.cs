@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -330,22 +329,62 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (currentFrame.Body is not { } body)
                 throw new CilEmulatorException("Emulator only supports managed method bodies.");
             
+            // Determine the next instruction to dispatch.
             int pc = currentFrame.ProgramCounter;
             var instruction = body.Instructions.GetByOffset(pc);
             if (instruction is null)
                 throw new CilEmulatorException($"Invalid program counter in {currentFrame}.");
 
+            // Are we entering any protected regions?
+            foreach (var handler in currentFrame.ExceptionHandlers)
+            {
+                if (handler.ProtectedRange.Contains(pc))
+                {
+                    handler.Reset();
+                    
+                    // Do not enter the frame twice.
+                    if (!currentFrame.ExceptionHandlerStack.Contains(handler))
+                        currentFrame.ExceptionHandlerStack.Push(handler);
+                }
+            }
+
+            // Dispatch the instruction.
             var result = Dispatcher.Dispatch(context, instruction);
+
             if (!result.IsSuccess)
             {
-                // TODO: unwind stack and move to appropriate exception handler if there is any.
                 var exceptionObject = result.ExceptionObject;
                 if (exceptionObject.IsNull)
                     throw new CilEmulatorException("A null exception object was thrown.");
-                
-                var type = exceptionObject.GetObjectType();
-                throw new NotImplementedException($"Exception handling is not implemented yet. ({type})");
+
+                // If there were any errors thrown after dispatching, it may trigger the execution of one of the
+                // exception handlers in the entire call stack.
+                if (!UnwindCallStack(exceptionObject))
+                {
+                    // TODO: pass virtual exception object handle to real exception.
+                    var type = exceptionObject.GetObjectType();
+                    throw new CilEmulatorException($"An unhandled exception of type {type} occurred.");
+                }
             }
         }
+
+        private bool UnwindCallStack(ObjectHandle exceptionObject)
+        {
+            while (!CallStack.Peek().IsRoot)
+            {
+                var parentFrame = CallStack.Pop();
+
+                var result = parentFrame.ExceptionHandlerStack.RegisterException(exceptionObject);
+                if (result.IsSuccess)
+                {
+                    // We found a handler that needs to be called. Jump to it.
+                    parentFrame.ProgramCounter = result.NextOffset;
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
     }
 }

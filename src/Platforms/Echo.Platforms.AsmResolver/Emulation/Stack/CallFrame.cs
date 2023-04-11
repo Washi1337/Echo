@@ -167,6 +167,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public IReadOnlyList<ExceptionHandlerFrame> ExceptionHandlers => _exceptionHandlers;
 
         /// <summary>
+        /// Gets the stack of currently active exception handler frames in the method.
+        /// </summary>
+        public ExceptionHandlerStack ExceptionHandlerStack
+        {
+            get;
+        } = new();
+
+        /// <summary>
         /// Gets the number of bytes (excluding the evaluation stack) the stack frame spans.
         /// </summary>
         public int Size => _localStorage.Count / 8;

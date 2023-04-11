@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <param name="self">The marshaller service.</param>
         /// <param name="obj">The object.</param>
-        /// <returns>The bitvector containing the address to the object.</returns>
+        /// <returns>The handle containing the address to the marshalled object.</returns>
         public static ObjectHandle ToObjectHandle(this IObjectMarshaller self, object? obj)
         {
             return self.ToBitVector(obj).AsObjectHandle(self.Machine);
