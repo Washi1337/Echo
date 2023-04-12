@@ -88,5 +88,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// the method should be used.
         /// </returns>
         IMethodDescriptor? ResolveMethod(CilExecutionContext context, CilInstruction instruction, IList<BitVector> arguments);
+
+        /// <summary>
+        /// Resolves an unknown conclusion for an exception filter.
+        /// </summary>
+        /// <param name="context">The context in which the instruction is executed in.</param>
+        /// <param name="instruction">The instruction that is being executed.</param>
+        /// <param name="conclusion">The unknown conclusion value.</param>
+        /// <returns><c>true</c> if the exception should be handled, <c>false</c> otherwise.</returns>
+        bool ResolveExceptionFilter(CilExecutionContext context, CilInstruction instruction, StackSlot conclusion);
     }
 }

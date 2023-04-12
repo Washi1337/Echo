@@ -14,13 +14,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Exceptions
             var evalStack = context.CurrentFrame.EvaluationStack;
             var ehStack = context.CurrentFrame.ExceptionHandlerStack;
 
-            var filterResult = evalStack.Pop().Contents;
+            var filterResult = evalStack.Pop();
             try
             {
                 var exception = ehStack.Peek().ExceptionObject;
                 
+                // Concretize the filter conclusion.
+                bool conclusion = filterResult.Contents.IsFullyKnown
+                    ? !filterResult.Contents.AsSpan().IsZero.ToBoolean()
+                    : context.Machine.UnknownResolver.ResolveExceptionFilter(context, instruction, filterResult);
+                
                 // Attempt to handle the filter.
-                var result = ehStack.EndFilter(!filterResult.AsSpan().IsZero.ToBoolean());
+                var result = ehStack.EndFilter(conclusion);
                 if (!result.IsSuccess)
                     return CilDispatchResult.Exception(result.ExceptionObject);
 
@@ -32,7 +37,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Exceptions
             }
             finally
             {
-                context.Machine.ValueFactory.BitVectorPool.Return(filterResult);
+                context.Machine.ValueFactory.BitVectorPool.Return(filterResult.Contents);
             }
         }
     }

@@ -94,5 +94,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             return null;
         }
+
+        /// <inheritdoc />
+        public bool ResolveExceptionFilter(
+            CilExecutionContext context, 
+            CilInstruction instruction,
+            StackSlot conclusion)
+        {
+            return false;
+        }
     }
 }
