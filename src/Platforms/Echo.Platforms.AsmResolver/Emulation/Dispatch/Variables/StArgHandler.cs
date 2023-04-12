@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
 
             // Pop top of stack into the parameter.
             var value = frame.EvaluationStack.Pop(parameterType);
-            frame.WriteArgument(parameter.Index, value.AsSpan());
+            frame.WriteArgument(parameter.MethodSignatureIndex, value.AsSpan());
             
             // Return rented bit vectors.
             factory.BitVectorPool.Return(value);
