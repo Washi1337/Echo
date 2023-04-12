@@ -54,15 +54,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var result = new List<BitVector>(method.Signature!.GetTotalParameterCount());
             
             // Pop sentinel arguments.
-            for (int i = 0; i < method.Signature.SentinelParameterTypes.Count; i++)
+            for (int i = method.Signature.SentinelParameterTypes.Count - 1; i >= 0; i--)
                 result.Add(stack.Pop(method.Signature.SentinelParameterTypes[i]));
 
             // Pop normal arguments.
-            for (int i = 0; i < method.Signature.ParameterTypes.Count; i++)
+            for (int i = method.Signature.ParameterTypes.Count - 1; i >= 0; i--)
                 result.Add(stack.Pop(method.Signature.ParameterTypes[i]));
 
             // Pop instance object.
-            if (method.Signature.HasThis)
+            if (method.Signature.HasThis && !method.Signature.ExplicitThis)
                 result.Add(GetInstancePointer(context, method));
 
             // Correct for stack order.
