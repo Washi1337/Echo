@@ -21,25 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
             try
             {
-                var callerFrame = context.CurrentFrame;
-
-                // Devirtualize the method in the operand.
-                var devirtualization = DevirtualizeMethod(context, instruction, arguments);
-                if (devirtualization.IsUnknown)
-                    throw new CilEmulatorException($"Devirtualization of method call {instruction} was inconclusive.");
-
-                // If that resulted in any error, throw it.
-                if (!devirtualization.IsSuccess)
-                    return CilDispatchResult.Exception(devirtualization.ExceptionObject);
-
-                // Invoke it otherwise.
-                var result = Invoke(context, devirtualization.ResultingMethod, arguments);
-
-                // Move to the next instruction if call succeeded.
-                if (result.IsSuccess)
-                    callerFrame.ProgramCounter += instruction.Size;
-                
-                return result;
+                return HandleCall(context, instruction, arguments);
             }
             finally
             {
@@ -48,7 +30,56 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             }
         }
 
-        private IList<BitVector> GetArguments(CilExecutionContext context, IMethodDescriptor method)
+        /// <summary>
+        /// Determines whether the instance object should be popped from the stack for the provided method.
+        /// </summary>
+        /// <param name="method">The method to test.</param>
+        /// <returns><c>true</c> if the instance object should be popped, <c>false</c> otherwise.</returns>
+        protected virtual bool ShouldPopInstanceObject(IMethodDescriptor method)
+        {
+            return method.Signature!.HasThis && !method.Signature.ExplicitThis;
+        }
+
+        /// <summary>
+        /// Handles the actual calling mechanism of the instruction.
+        /// </summary>
+        /// <param name="context">The context to evaluate the instruction in.</param>
+        /// <param name="instruction">The instruction to dispatch and evaluate.</param>
+        /// <param name="arguments">The arguments to call the method with.</param>
+        /// <returns>The dispatching result.</returns>
+        protected CilDispatchResult HandleCall(
+            CilExecutionContext context, 
+            CilInstruction instruction, 
+            IList<BitVector> arguments)
+        {
+            var callerFrame = context.CurrentFrame;
+
+            // Devirtualize the method in the operand.
+            var devirtualization = DevirtualizeMethod(context, instruction, arguments);
+            if (devirtualization.IsUnknown)
+                throw new CilEmulatorException($"Devirtualization of method call {instruction} was inconclusive.");
+
+            // If that resulted in any error, throw it.
+            if (!devirtualization.IsSuccess)
+                return CilDispatchResult.Exception(devirtualization.ExceptionObject);
+
+            // Invoke it otherwise.
+            var result = Invoke(context, devirtualization.ResultingMethod, arguments);
+
+            // Move to the next instruction if call succeeded.
+            if (result.IsSuccess)
+                callerFrame.ProgramCounter += instruction.Size;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Pops the required arguments for a method call from the stack.
+        /// </summary>
+        /// <param name="context">The context to evaluate the method call in.</param>
+        /// <param name="method">The method to pop arguments for.</param>
+        /// <returns>The list of marshalled arguments.</returns>
+        protected IList<BitVector> GetArguments(CilExecutionContext context, IMethodDescriptor method)
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var result = new List<BitVector>(method.Signature!.GetTotalParameterCount());
@@ -62,7 +93,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 result.Add(stack.Pop(method.Signature.ParameterTypes[i]));
 
             // Pop instance object.
-            if (method.Signature.HasThis && !method.Signature.ExplicitThis)
+            if (ShouldPopInstanceObject(method))
                 result.Add(GetInstancePointer(context, method));
 
             // Correct for stack order.
