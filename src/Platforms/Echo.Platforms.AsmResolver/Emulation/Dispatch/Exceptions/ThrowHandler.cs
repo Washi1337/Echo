@@ -7,15 +7,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Exceptions
     /// Implements a CIL instruction handler for <c>throw</c> operations.
     /// </summary>
     [DispatcherTableEntry(CilCode.Throw)]
-    public class ThrowHandler : FallThroughOpCodeHandler
+    public class ThrowHandler : ICilOpCodeHandler
     {
         /// <inheritdoc />
-        protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
+        public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var pool = context.Machine.ValueFactory.BitVectorPool;
 
             var value = stack.Pop();
+            stack.Clear();
 
             try
             {
@@ -25,7 +26,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Exceptions
                 if (value.Contents.AsSpan().IsZero)
                     return CilDispatchResult.NullReference(context);
 
-                return CilDispatchResult.Exception(value.Contents.AsObjectHandle(context.Machine));
+                var exceptionObject = value.Contents.AsObjectHandle(context.Machine);
+                
+                // TODO: set stack trace.
+                
+                return CilDispatchResult.Exception(exceptionObject);
             }
             finally
             {
