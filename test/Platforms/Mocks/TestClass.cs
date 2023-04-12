@@ -99,9 +99,9 @@ namespace Mocks
             return y + 100;
         }
         
-        public int UnhandledException() => throw new Exception("This is an unhandled exception.");
+        public static int UnhandledException() => throw new Exception("This is an unhandled exception.");
 
-        public int TryFinally(bool @throw)
+        public static int TryFinally(bool @throw)
         {
             int result = 0;
             
@@ -119,7 +119,7 @@ namespace Mocks
             return result;
         }
 
-        public int TryCatch(bool @throw)
+        public static int TryCatch(bool @throw)
         {
             int result;
             
@@ -137,7 +137,7 @@ namespace Mocks
             return result;   
         }
 
-        public int TryCatchFinally(bool @throw)
+        public static int TryCatchFinally(bool @throw)
         {
             int result = 0;
 
@@ -156,10 +156,10 @@ namespace Mocks
                 result += 100;
             }
 
-            return result;   
+            return result;
         }
 
-        public int TryCatchCatch(int exceptionType)
+        public static int TryCatchCatch(int exceptionType)
         {
             int result = 0;
 
@@ -185,7 +185,7 @@ namespace Mocks
             return result;   
         }
         
-        public int TryCatchSpecificAndGeneral(int exceptionType)
+        public static int TryCatchSpecificAndGeneral(int exceptionType)
         {
             int result = 0;
 
@@ -194,7 +194,7 @@ namespace Mocks
                 result = exceptionType switch
                 {
                     0 => throw new EndOfStreamException("This is a handled EndOfStreamException."),
-                    1 => throw new IOException("This is a handled IOException."),
+                    1 => throw new FileNotFoundException("This is a handled IOException."),
                     2 => throw new ArgumentException("This is an unhandled ArgumentException"),
                     _ => 1
                 };
@@ -211,7 +211,7 @@ namespace Mocks
             return result;   
         }
 
-        public int TryCatchCatchFinally(int exceptionType)
+        public static int TryCatchCatchFinally(int exceptionType)
         {
             int result = 0;
 
@@ -241,7 +241,7 @@ namespace Mocks
             return result;
         }
 
-        public int TryCatchFilters(int exceptionType)
+        public static int TryCatchFilters(int exceptionType)
         {
             int result = 0;
 
@@ -249,20 +249,38 @@ namespace Mocks
             {
                 result = exceptionType switch
                 {
-                    0 => throw new IOException("This is handled exception 0"),
-                    1 => throw new IOException("This is handled exception 1"),
-                    2 => throw new IOException("This is unhandled exception 2"),
-                    3 => throw new ArgumentException("This is unhandled other exception"),
+                    0 => throw new IOException("0"),
+                    1 => throw new IOException("11"),
+                    2 => throw new IOException("222"),
+                    3 => throw new ArgumentException("3333"),
                     _ => 1
                 };
             }
-            catch (IOException ex) when (ex.Message.Contains("0"))
+            catch (IOException ex) when (ex.Message.Length == 1)
             {
                 result = 2;
             }
-            catch (IOException ex) when (ex.Message.Contains("1"))
+            catch (IOException ex) when (ex.Message.Length == 2)
             {
                 result = 3;
+            }
+
+            return result;
+        }
+
+        public static int CatchExceptionInChildMethod(bool @throw)
+        {
+            int result = 0;
+            
+            try
+            {
+                if (@throw)
+                    UnhandledException();
+                result = 1;
+            }
+            catch (Exception ex)
+            {
+                result = 2;
             }
 
             return result;

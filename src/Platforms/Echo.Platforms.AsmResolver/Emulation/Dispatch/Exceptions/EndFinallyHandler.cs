@@ -8,15 +8,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Exceptions
     [DispatcherTableEntry(CilCode.Endfinally)]
     public class EndFinallyHandler : ICilOpCodeHandler
     {
-         /// <inheritdoc />
-         public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction) 
-         {
-             var result = context.CurrentFrame.ExceptionHandlerStack.EndFinally();
-             if (!result.IsSuccess)
-                 return CilDispatchResult.Exception(result.ExceptionObject);
+        /// <inheritdoc />
+        public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction) 
+        {
+            // Attempt to handle the finally clause.
+            context.CurrentFrame.EvaluationStack.Clear();
+            var result = context.CurrentFrame.ExceptionHandlerStack.EndFinally();
+            if (!result.IsSuccess)
+                return CilDispatchResult.Exception(result.ExceptionObject);
              
-             context.CurrentFrame.ProgramCounter = result.NextOffset;
-             return CilDispatchResult.Success();
-         }
+            // We exited the finally without exceptions, jump to the leaving offset.
+            context.CurrentFrame.ProgramCounter = result.NextOffset;
+
+            return CilDispatchResult.Success();
+        }
     }
 }

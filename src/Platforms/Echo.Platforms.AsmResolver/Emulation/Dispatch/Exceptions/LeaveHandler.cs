@@ -12,7 +12,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Exceptions
         public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
         {
             int targetOffset = ((ICilLabel) instruction.Operand!).Offset;
+            
+            // Leave the EH, and jump to the next offset.
+            context.CurrentFrame.EvaluationStack.Clear();
             context.CurrentFrame.ProgramCounter = context.CurrentFrame.ExceptionHandlerStack.Leave(targetOffset);
+
             return CilDispatchResult.Success();
         }
     }

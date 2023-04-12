@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
@@ -14,8 +14,11 @@ using Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 using static AsmResolver.PE.DotNet.Cil.CilOpCodes;
+using MethodAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.MethodAttributes;
 using MethodDefinition = AsmResolver.DotNet.MethodDefinition;
+using TestClass = Mocks.TestClass;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation
 {
@@ -489,5 +492,83 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             Assert.Null(returnValue);
             Assert.Equal("Hello, John Doe. How are you?", builder.ToString());
         }
+
+        [Fact]
+        public void CallTryFinallyNoException()
+        {
+            var method = _fixture.GetTestMethod(nameof(TestClass.TryFinally));
+
+            var result = _vm.Call(method, new object[] { false });
+            Assert.NotNull(result);
+            Assert.Equal(101, result!.AsSpan().I32);
+        }
+        
+        [Fact]
+        public void CallTryFinallyException()
+        {
+            var method = _fixture.GetTestMethod(nameof(TestClass.TryFinally));
+
+            var result = Assert.Throws<EmulatedException>(() => _vm.Call(method, new object[] {true}));
+            Assert.Equal("System.Exception", result.ExceptionObject.GetObjectType().FullName);
+        }
+        
+        [Theory]
+        [InlineData( nameof(TestClass.TryCatch), false)]
+        [InlineData(nameof(TestClass.TryCatch), true)]
+        [InlineData( nameof(TestClass.TryCatchFinally), false)]
+        [InlineData(nameof(TestClass.TryCatchFinally), true)]
+        [InlineData(nameof(TestClass.TryCatchCatch), 0)]
+        [InlineData(nameof(TestClass.TryCatchCatch), 1)]
+        [InlineData(nameof(TestClass.TryCatchCatch), 3)]
+        [InlineData(nameof(TestClass.TryCatchSpecificAndGeneral), 0)]
+        [InlineData(nameof(TestClass.TryCatchSpecificAndGeneral), 1)]
+        [InlineData(nameof(TestClass.TryCatchSpecificAndGeneral), 3)]
+        [InlineData(nameof(TestClass.TryCatchFilters), 0)]
+        [InlineData(nameof(TestClass.TryCatchFilters), 1)]
+        [InlineData(nameof(TestClass.TryCatchFilters), 4)]
+        [InlineData( nameof(TestClass.CatchExceptionInChildMethod), false)]
+        [InlineData(nameof(TestClass.CatchExceptionInChildMethod), true)]
+        public void CallAndThrowHandledException(string methodName, object parameter)
+        {
+            _vm.Invoker = DefaultInvokers.ReturnUnknownForNative.WithFallback(DefaultInvokers.StepIn);
+            
+            var method = _fixture.GetTestMethod(methodName);
+            
+            var reflectionMethod = typeof(TestClass).GetMethod(methodName);
+            int expectedResult = (int) reflectionMethod!.Invoke(null, new[] {parameter})!;
+
+            var result = _vm.Call(method, new[] {parameter});
+            
+            Assert.NotNull(result);
+            Assert.Equal(expectedResult, result!.AsSpan().I32);
+        }
+
+        [Theory]
+        [InlineData( nameof(TestClass.TryCatchCatch), 2)]
+        [InlineData( nameof(TestClass.TryCatchSpecificAndGeneral), 2)]
+        public void CallAndThrowUnhandledException(string methodName, object parameter)
+        {
+            _vm.Invoker = DefaultInvokers.ReturnUnknownForExternal.WithFallback(DefaultInvokers.StepIn);
+            
+            var method = _fixture.GetTestMethod(methodName);
+            
+            var reflectionMethod = typeof(TestClass).GetMethod(methodName);
+            
+            Exception? expectedException;
+            try
+            {
+                reflectionMethod!.Invoke(null, new[] {parameter});
+                throw new XunitException(
+                    $"Test method {methodName} does not throw an exception with argument {parameter}.");
+            }
+            catch (TargetInvocationException ex)
+            {
+                expectedException = ex.InnerException!;
+            }
+
+            var result = Assert.Throws<EmulatedException>(() => _vm.Call(method, new[] {parameter}));
+            Assert.Equal(expectedException.GetType().FullName, result.ExceptionObject.GetObjectType().FullName);
+        }
+
     }
 }

@@ -360,11 +360,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 // If there were any errors thrown after dispatching, it may trigger the execution of one of the
                 // exception handlers in the entire call stack.
                 if (!UnwindCallStack(exceptionObject))
-                {
-                    // TODO: pass virtual exception object handle to real exception.
-                    var type = exceptionObject.GetObjectType();
-                    throw new CilEmulatorException($"An unhandled exception of type {type} occurred.");
-                }
+                    throw new EmulatedException(exceptionObject);
             }
         }
 
@@ -372,15 +368,22 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             while (!CallStack.Peek().IsRoot)
             {
-                var parentFrame = CallStack.Pop();
+                var currentFrame = CallStack.Peek();
 
-                var result = parentFrame.ExceptionHandlerStack.RegisterException(exceptionObject);
+                var result = currentFrame.ExceptionHandlerStack.RegisterException(exceptionObject);
                 if (result.IsSuccess)
                 {
                     // We found a handler that needs to be called. Jump to it.
-                    parentFrame.ProgramCounter = result.NextOffset;
+                    currentFrame.ProgramCounter = result.NextOffset;
+                    
+                    // Push the exception on the stack.
+                    currentFrame.EvaluationStack.Clear();
+                    currentFrame.EvaluationStack.Push(exceptionObject);
+
                     return true;
                 }
+
+                CallStack.Pop();
             }
             
             return false;
