@@ -33,6 +33,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         public static ExternalMethodInvoker ReturnUnknownForExternal { get; } = new(ReturnUnknown, SignatureComparer.Default);
         
         /// <summary>
+        /// Gets the method invoker that steps over any method that does not have a CIL method body assigned by
+        /// returning an unknown result, and otherwise leaves the invocation result inconclusive.
+        /// </summary>
+        public static NativeMethodInvoker ReturnUnknownForNative { get; } = new(ReturnUnknown);
+        
+        /// <summary>
         /// Gets the method invoker that steps over any method by invoking it via System.Reflection. 
         /// </summary>
         public static ReflectionInvoker ReflectionInvoke => ReflectionInvoker.Instance;
@@ -43,6 +49,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// </summary>
         /// <param name="baseInvoker">The invoker to use for producing a result when stepping over a method.</param>
         public static ExternalMethodInvoker HandleExternalWith(IMethodInvoker baseInvoker) => new(baseInvoker, SignatureComparer.Default);
+        
+        /// <summary>
+        /// Gets the method invoker that forwards any method that does not have a CIL method body assigned to the
+        /// provided method invoker, and otherwise leaves the invocation result inconclusive.
+        /// </summary>
+        /// <param name="baseInvoker">The invoker to use for producing a result when stepping over a method.</param>
+        public static NativeMethodInvoker HandleNativeWith(IMethodInvoker baseInvoker) => new(baseInvoker);
         
         /// <summary>
         /// Creates a new method shim invoker that multiplexes a set of methods to individual handlers.  
