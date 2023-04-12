@@ -68,6 +68,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             switch (type.ElementType)
             {
+                case ElementType.Boolean:
                 case ElementType.U1:
                 case ElementType.U2:
                 case ElementType.U4:

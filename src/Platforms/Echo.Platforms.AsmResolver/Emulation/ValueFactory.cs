@@ -407,7 +407,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 memoryLayout = type switch
                 {
                     ITypeDefOrRef typeDefOrRef => GetTypeDefOrRefContentsLayout(typeDefOrRef, default),
-                    TypeSignature signature => signature.GetImpliedMemoryLayout(Is32Bit),
+                    // TypeSignature {IsValueType: false} signature => GetTypeDefOrRefContentsLayout(signature.GetUnderlyingTypeDefOrRef(), default),
+                    TypeSignature signature => GetTypeSignatureContentsLayout(signature),
                     _ => throw new ArgumentOutOfRangeException(nameof(type))
                 };
 
@@ -469,9 +470,18 @@ namespace Echo.Platforms.AsmResolver.Emulation
             
             uint currentOffset = 0;
 
+            var hierarchy = new Stack<TypeDefinition>();
             while (definition is not null)
             {
-                foreach (var field in definition.Fields)
+                hierarchy.Push(definition);
+                definition = definition.BaseType?.Resolve();
+            } 
+
+            while (hierarchy.Count > 0)
+            {
+                var currentType = hierarchy.Pop();
+
+                foreach (var field in currentType.Fields)
                 {
                     if (field.IsStatic || field.Signature is null)
                         continue;
@@ -485,8 +495,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
                     SetField.Invoke(layout, new object[] {field, fieldLayout});
                     currentOffset = (currentOffset + contentsLayout.Size).Align(PointerSize);
                 }
-
-                definition = definition.BaseType?.Resolve();
             }
 
             SetSize.Invoke(layout, new object[] {currentOffset});
@@ -497,6 +505,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             switch (type.ElementType)
             {
+                case ElementType.String:
                 case ElementType.Class:
                 case ElementType.GenericInst:
                     return GetTypeDefOrRefContentsLayout(type.GetUnderlyingTypeDefOrRef()!, GenericContext.FromType(type));
