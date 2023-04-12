@@ -19,6 +19,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             _factory = factory;
         }
 
+        /// <summary>
+        /// Puts the address of the provided object handle into a pointer-sized bit vector, and pushes it onto the stack.
+        /// </summary>
+        /// <param name="value">The handle to push.</param>
         public void Push(ObjectHandle value)
         {
             var vector = _factory.RentNativeInteger(value.Address);

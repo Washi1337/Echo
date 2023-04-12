@@ -129,7 +129,7 @@ namespace Mocks
                     throw new Exception("This is an handled exception.");
                 result = 1;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result = 2;
             }
@@ -147,7 +147,7 @@ namespace Mocks
                     throw new Exception("This is an handled exception.");
                 result = 1;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result = 2;
             }
@@ -173,11 +173,11 @@ namespace Mocks
                     _ => 1
                 };
             }
-            catch (IOException ex)
+            catch (IOException)
             {
                 result = 2;
             }
-            catch (WebException ex)
+            catch (WebException)
             {
                 result = 3;
             }
@@ -199,11 +199,11 @@ namespace Mocks
                     _ => 1
                 };
             }
-            catch (EndOfStreamException ex)
+            catch (EndOfStreamException)
             {
                 result = 2;
             }
-            catch (IOException ex)
+            catch (IOException)
             {
                 result = 3;
             }
@@ -225,11 +225,11 @@ namespace Mocks
                     _ => 1
                 };
             }
-            catch (IOException ex)
+            catch (IOException)
             {
                 result = 2;
             }
-            catch (WebException ex)
+            catch (WebException)
             {
                 result = 3;
             }
@@ -278,7 +278,7 @@ namespace Mocks
                     UnhandledException();
                 result = 1;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result = 2;
             }
