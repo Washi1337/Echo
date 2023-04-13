@@ -44,17 +44,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         {
             // Leaving an EH implies that we are leaving the EH safely without any unhandled exceptions.
             // We thus just need to find the next address to jump to.
-            
-            // Try let the current frame determine where to jump to.
-            var currentFrame = Peek();
-            int offset = currentFrame.Leave(targetOffset);
-            
-            // If the target offset falls within the current frame, we are jumping to one of our handlers.
-            if (currentFrame.ContainsOffset(offset))
-                return offset;
 
-            // If the target offset falls outside the frame, we are actually leaving this frame.
-            Pop();
+            while (Count > 0)
+            {
+                // Try let the current frame determine where to jump to.
+                var currentFrame = Peek();
+                int offset = currentFrame.Leave(targetOffset);
+
+                // If the target offset falls within the current frame, we are jumping to one of our handlers.
+                if (currentFrame.ContainsOffset(offset))
+                    return offset;
+
+                // If the target offset falls outside the frame, we are actually leaving this frame.
+                Pop();
+            }
+
             return targetOffset;
         }
 
