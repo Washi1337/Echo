@@ -106,7 +106,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         {
             var factory = _fixture.MockModule.CorLibTypeFactory;
             var method = new MethodDefinition("dummy", MethodAttributes.Static,
-                MethodSignature.CreateStatic(factory.Void));
+                MethodSignature.CreateStatic(factory.Int32));
 
             var tryStart = new CilInstructionLabel();
             var handler1Start = new CilInstructionLabel();
@@ -155,7 +155,6 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
                     new CilExceptionHandler
                     {
                         HandlerType = CilExceptionHandlerType.Finally,
-                        ExceptionType = factory.Object.Type,
                         TryStart = tryStart,
                         TryEnd = handler2Start,
                         HandlerStart = handler2Start,
@@ -189,6 +188,183 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             Assert.Equal(handler2End.Offset, result.NextOffset);
         }
 
+
+        [Fact]
+        public void NestedFinallyHandlers()
+        {
+            var factory = _fixture.MockModule.CorLibTypeFactory;
+            var method = new MethodDefinition("dummy", MethodAttributes.Static,
+                MethodSignature.CreateStatic(factory.Void));
+
+            var outerTryStart = new CilInstructionLabel();
+            var outerHandlerStart = new CilInstructionLabel();
+            var outerHandlerEnd = new CilInstructionLabel();
+            var innerTryStart = new CilInstructionLabel();
+            var innerHandlerStart = new CilInstructionLabel();
+            var innerHandlerEnd = new CilInstructionLabel();
+
+            method.CilMethodBody = new CilMethodBody(method)
+            {
+                Instructions =
+                {
+                    Nop,
+                    
+                    // try {
+                    //  try {
+                    {Leave, outerHandlerEnd},
+                    //  } finally {
+                    Endfinally,
+                    //  }
+                    // } finally {
+                    Endfinally,
+                    // }
+                    
+                    Ret
+                },
+                ExceptionHandlers =
+                {
+                    new CilExceptionHandler
+                    {
+                        HandlerType = CilExceptionHandlerType.Finally,
+                        TryStart = outerTryStart,
+                        TryEnd = outerHandlerStart,
+                        HandlerStart = outerHandlerStart,
+                        HandlerEnd = outerHandlerEnd,
+                    },
+                    new CilExceptionHandler
+                    {
+                        HandlerType = CilExceptionHandlerType.Finally,
+                        TryStart = innerTryStart,
+                        TryEnd = innerHandlerStart,
+                        HandlerStart = innerHandlerStart,
+                        HandlerEnd = innerHandlerEnd,
+                    },
+                }
+            };
+
+            outerTryStart.Instruction = method.CilMethodBody.Instructions[1];
+            outerHandlerStart.Instruction = method.CilMethodBody.Instructions[3];
+            outerHandlerEnd.Instruction = method.CilMethodBody.Instructions[4];
+            innerTryStart.Instruction = method.CilMethodBody.Instructions[1];
+            innerHandlerStart.Instruction = method.CilMethodBody.Instructions[2];
+            innerHandlerEnd.Instruction = method.CilMethodBody.Instructions[3];
+            
+            method.CilMethodBody.Instructions.CalculateOffsets();
+
+            var frame = new CallFrame(method, _vm.ValueFactory);
+            frame.ExceptionHandlerStack.Push(frame.ExceptionHandlers[0]);
+            frame.ExceptionHandlerStack.Push(frame.ExceptionHandlers[1]);
+
+            int nextOffset = frame.ExceptionHandlerStack.Leave(outerHandlerEnd.Offset);
+            Assert.Equal(innerHandlerStart.Offset, nextOffset);
+            var result = frame.ExceptionHandlerStack.EndFinally();
+            Assert.Equal(outerHandlerStart.Offset, result.NextOffset);
+            result = frame.ExceptionHandlerStack.EndFinally();
+            Assert.Equal(outerHandlerEnd.Offset, result.NextOffset);
+        }
+
+
+        [Fact]
+        public void FinallyInCatchHandler()
+        {
+            var factory = _fixture.MockModule.CorLibTypeFactory;
+            var method = new MethodDefinition("dummy", MethodAttributes.Static,
+                MethodSignature.CreateStatic(factory.Void));
+
+            var outerTryStart = new CilInstructionLabel();
+            var outerHandlerStart = new CilInstructionLabel();
+            var outerHandlerEnd = new CilInstructionLabel();
+            var innerTryStart = new CilInstructionLabel();
+            var innerHandlerStart = new CilInstructionLabel();
+            var innerHandlerEnd = new CilInstructionLabel();
+            var inner2TryStart = new CilInstructionLabel();
+            var inner2HandlerStart = new CilInstructionLabel();
+            var inner2HandlerEnd = new CilInstructionLabel();
+
+            method.CilMethodBody = new CilMethodBody(method)
+            {
+                Instructions =
+                {
+                    Nop,
+                    
+                    // try {
+                    //  try {
+                    {Leave, outerHandlerEnd},
+                    //  } catch {
+                    Pop,
+                    //    try {
+                    {Leave, outerHandlerEnd},
+                    //    } finally {
+                    Endfinally,
+                    //    }
+                    //  }
+                    // } finally {
+                    Endfinally,
+                    // }
+                    
+                    Ret
+                },
+                ExceptionHandlers =
+                {
+                    new CilExceptionHandler
+                    {
+                        HandlerType = CilExceptionHandlerType.Finally,
+                        TryStart = outerTryStart,
+                        TryEnd = outerHandlerStart,
+                        HandlerStart = outerHandlerStart,
+                        HandlerEnd = outerHandlerEnd,
+                    },
+                    new CilExceptionHandler
+                    {
+                        HandlerType = CilExceptionHandlerType.Exception,
+                        ExceptionType = factory.Object.Type,
+                        TryStart = innerTryStart,
+                        TryEnd = innerHandlerStart,
+                        HandlerStart = innerHandlerStart,
+                        HandlerEnd = innerHandlerEnd,
+                    },
+                    new CilExceptionHandler
+                    {
+                        HandlerType = CilExceptionHandlerType.Finally,
+                        TryStart = inner2TryStart,
+                        TryEnd = inner2HandlerStart,
+                        HandlerStart = inner2HandlerStart,
+                        HandlerEnd = inner2HandlerEnd,
+                    },
+                }
+            };
+
+            outerTryStart.Instruction = method.CilMethodBody.Instructions[1];
+            outerHandlerStart.Instruction = method.CilMethodBody.Instructions[5];
+            outerHandlerEnd.Instruction = method.CilMethodBody.Instructions[6];
+
+            innerTryStart.Instruction = method.CilMethodBody.Instructions[1];
+            innerHandlerStart.Instruction = method.CilMethodBody.Instructions[2];
+            innerHandlerEnd.Instruction = method.CilMethodBody.Instructions[5];
+
+            inner2TryStart.Instruction = method.CilMethodBody.Instructions[3];
+            inner2HandlerStart.Instruction = method.CilMethodBody.Instructions[4];
+            inner2HandlerEnd.Instruction = method.CilMethodBody.Instructions[5];
+            
+            method.CilMethodBody.Instructions.CalculateOffsets();
+
+            var frame = new CallFrame(method, _vm.ValueFactory);
+            frame.ExceptionHandlerStack.Push(frame.ExceptionHandlers[0]); // outer try-finally
+            frame.ExceptionHandlerStack.Push(frame.ExceptionHandlers[1]); // try-catch
+
+            var result = frame.ExceptionHandlerStack.RegisterException(_vm.ObjectMarshaller.ToObjectHandle(new Exception()));
+            Assert.Equal(innerHandlerStart.Offset, result.NextOffset);
+            
+            frame.ExceptionHandlerStack.Push(frame.ExceptionHandlers[2]); // inner try-finally
+
+            int nextOffset = frame.ExceptionHandlerStack.Leave(outerHandlerEnd.Offset);
+            Assert.Equal(inner2HandlerStart.Offset, nextOffset);
+            result = frame.ExceptionHandlerStack.EndFinally();
+            Assert.Equal(outerHandlerStart.Offset, result.NextOffset);
+            result = frame.ExceptionHandlerStack.EndFinally();
+            Assert.Equal(outerHandlerEnd.Offset, result.NextOffset);
+        }
+        
         [Fact]
         public void EndFinallyAfterUnhandledExceptionShouldExposeException()
         {

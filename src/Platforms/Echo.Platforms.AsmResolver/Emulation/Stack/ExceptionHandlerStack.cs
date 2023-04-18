@@ -102,8 +102,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             int? offset = currentFrame.EndFinally();
             if (offset.HasValue)
             {
-                // We are safely leaving the frame.
-                return ExceptionHandlerResult.Success(offset.Value);
+                // We are leaving the frame.
+                return ExceptionHandlerResult.Success(Leave(offset.Value));
             }
 
             // If the frame could not decide where to jump to, it means we left the protected region unexpectedly with
