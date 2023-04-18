@@ -1,13 +1,13 @@
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
-using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
 {
     /// <summary>
     /// Provides information about the result of an instruction dispatch.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay}")]
     public readonly struct CilDispatchResult
     {
         private CilDispatchResult(ObjectHandle exceptionObject)
@@ -28,6 +28,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         {
             get;
         }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal object DebuggerDisplay => IsSuccess ? "Success" : ExceptionObject;
 
         /// <summary>
         /// Creates a new dispatch result indicating the dispatch was successful.

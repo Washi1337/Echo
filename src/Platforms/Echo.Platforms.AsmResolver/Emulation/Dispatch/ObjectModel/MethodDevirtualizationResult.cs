@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet;
 
@@ -6,6 +7,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     /// <summary>
     /// Provides information about the result of a method devirtualization process.
     /// </summary>
+    [DebuggerDisplay("{Tag,nq}({DebuggerDisplay})")]
     public readonly struct MethodDevirtualizationResult 
     {
         private MethodDevirtualizationResult(IMethodDescriptor? method, ObjectHandle exceptionObject)
@@ -42,6 +44,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// object that was dereferenced.
         /// </summary>
         public bool IsUnknown => !IsSuccess && ExceptionObject.IsNull;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal string Tag => IsUnknown ? "Unknown" : IsSuccess ? "Success" : "Exception";
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal object? DebuggerDisplay => IsSuccess ? ResultingMethod : ExceptionObject;
 
         /// <summary>
         /// Creates a new successful method devirtualization result. 

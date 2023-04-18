@@ -1,4 +1,5 @@
 
+using System.Diagnostics;
 using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation
@@ -6,6 +7,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
     /// <summary>
     /// Describes the result of an invocation of an external method. 
     /// </summary>
+    [DebuggerDisplay("{Tag,nq}({DebuggerDisplay})")]
     public readonly struct InvocationResult
     {
         private InvocationResult(InvocationResultType resultType, BitVector? value, ObjectHandle exceptionObject)
@@ -50,6 +52,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         {
             get;
         }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal string Tag => ResultType.ToString();
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal object? DebuggerDisplay => IsSuccess ? Value : ExceptionObject;
         
         /// <summary>
         /// Constructs a new inconclusive invocation result, where the invocation was not handled yet.

@@ -1,9 +1,12 @@
+using System.Diagnostics;
+
 namespace Echo.Platforms.AsmResolver.Emulation.Stack
 {
     /// <summary>
     /// Provides a discriminated union describing the result of an exception handler operation, containing either the
     /// next offset to jump to, or a handle to an unhandled exception object.
     /// </summary>
+    [DebuggerDisplay("{Tag,nq}({DebuggerDisplay})")]
     public readonly struct ExceptionHandlerResult
     {
         private ExceptionHandlerResult(int nextOffset, ObjectHandle exceptionObject)
@@ -32,6 +35,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// Gets a value indicating whether the handler operation was successful.
         /// </summary>
         public bool IsSuccess => ExceptionObject.IsNull;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal object Tag => IsSuccess ? "Success" : "Exception";
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal object DebuggerDisplay => IsSuccess ? NextOffset : ExceptionObject;
 
         /// <summary>
         /// Constructs a new successful exception handler result.

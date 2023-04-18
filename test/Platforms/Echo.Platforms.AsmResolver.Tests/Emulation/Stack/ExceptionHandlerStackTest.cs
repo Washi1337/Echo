@@ -173,7 +173,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
 
             if (@throw)
             {
-                var result = frame.ExceptionHandlerStack.RegisterException(_vm.ObjectMarshaller.ToObjectHandle(new Exception()));
+                var result = frame.ExceptionHandlerStack.RegisterException(GetMockException<Exception>());
                 Assert.Equal(innerHandlerStart.Offset, result.NextOffset);
             }
             
@@ -265,7 +265,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             
             if (@throw)
             {
-                result = frame.ExceptionHandlerStack.RegisterException(_vm.ObjectMarshaller.ToObjectHandle(new Exception()));
+                result = frame.ExceptionHandlerStack.RegisterException(GetMockException<Exception>());
                 Assert.Equal(handler1Start.Offset, result.NextOffset);
             }
             
@@ -440,7 +440,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             frame.ExceptionHandlerStack.Push(frame.ExceptionHandlers[0]); // outer try-finally
             frame.ExceptionHandlerStack.Push(frame.ExceptionHandlers[1]); // try-catch
 
-            var result = frame.ExceptionHandlerStack.RegisterException(_vm.ObjectMarshaller.ToObjectHandle(new Exception()));
+            var result = frame.ExceptionHandlerStack.RegisterException(GetMockException<Exception>());
             Assert.Equal(innerHandlerStart.Offset, result.NextOffset);
             
             frame.ExceptionHandlerStack.Push(frame.ExceptionHandlers[2]); // inner try-finally

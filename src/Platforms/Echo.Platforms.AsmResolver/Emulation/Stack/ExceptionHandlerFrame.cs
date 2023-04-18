@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AsmResolver.DotNet.Code.Cil;
 using Echo.Code;
@@ -9,6 +10,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
     /// <summary>
     /// Provides a mechanism for implementing exception handling for a single protected range within a single method body.
     /// </summary>
+    [DebuggerDisplay("Range = {ProtectedRange}, Handler Count = {Handlers.Count}, Next Offset = {NextOffset}")]
     public class ExceptionHandlerFrame
     {
         private readonly List<CilExceptionHandler> _handlers;

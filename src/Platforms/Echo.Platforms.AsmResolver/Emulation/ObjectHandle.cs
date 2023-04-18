@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
@@ -9,6 +10,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// <summary>
     /// Represents an address to an object (including its object header) within a CIL virtual machine. 
     /// </summary>
+    [DebuggerDisplay("{Address} ({Tag})")]
     public readonly struct ObjectHandle : IEquatable<ObjectHandle>
     {
         /// <summary>
@@ -47,6 +49,25 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets the address to the beginning of the object's data.
         /// </summary>
         public StructHandle Contents => new(Machine, Address + Machine.ValueFactory.ObjectHeaderSize);
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal string Tag
+        {
+            get
+            {
+                if (IsNull)
+                    return "null";
+
+                try
+                {
+                    return GetObjectType().FullName;
+                }
+                catch
+                {
+                    return "<invalid>";
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the object's type (or method table).
@@ -331,6 +352,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <inheritdoc />
-        public override string ToString() => Address.ToString(Machine.Is32Bit ? "X8" : "X16");
+        public override string ToString() => $"0x{Address.ToString(Machine.Is32Bit ? "X8" : "X16")}";
     }
 }
