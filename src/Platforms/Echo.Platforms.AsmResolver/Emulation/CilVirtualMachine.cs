@@ -336,17 +336,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 throw new CilEmulatorException($"Invalid program counter in {currentFrame}.");
 
             // Are we entering any protected regions?
-            foreach (var handler in currentFrame.ExceptionHandlers)
-            {
-                if (handler.ProtectedRange.Contains(pc))
-                {
-                    handler.Reset();
-                    
-                    // Do not enter the frame twice.
-                    if (!currentFrame.ExceptionHandlerStack.Contains(handler))
-                        currentFrame.ExceptionHandlerStack.Push(handler);
-                }
-            }
+            UpdateExceptionHandlerStack();
 
             // Dispatch the instruction.
             var result = Dispatcher.Dispatch(context, instruction);
@@ -361,6 +351,22 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 // exception handlers in the entire call stack.
                 if (!UnwindCallStack(exceptionObject))
                     throw new EmulatedException(exceptionObject);
+            }
+        }
+
+        private void UpdateExceptionHandlerStack()
+        {
+            var currentFrame = CallStack.Peek();
+
+            int pc = currentFrame.ProgramCounter;
+            var availableHandlers = currentFrame.ExceptionHandlers;
+            var activeHandlers = currentFrame.ExceptionHandlerStack;
+
+            for (int i = 0; i < availableHandlers.Count; i++)
+            {
+                var handler = availableHandlers[i];
+                if (handler.ProtectedRange.Contains(pc) && handler.Enter() && !activeHandlers.Contains(handler))
+                    activeHandlers.Push(handler);
             }
         }
 

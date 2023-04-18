@@ -78,6 +78,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         }
 
         /// <summary>
+        /// Gets a value indicating whether the frame is currently protecting the current instruction pointer.
+        /// </summary>
+        public bool IsProtecting
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the exception handler is currently handling the exception referenced
         /// by <see cref="ExceptionObject"/>.
         /// </summary>
@@ -128,6 +137,23 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             _currentHandlerIndex = -1;
             NextOffset = null;
             ExceptionObject = default;
+            IsHandlingException = false;
+            IsProtecting = false;
+        }
+
+        /// <summary>
+        /// Attempts to enter the protected range.
+        /// </summary>
+        /// <returns><c>true</c> if the frame was entered, <c>false</c> if the frame was already entered before.</returns>
+        public bool Enter()
+        {
+            // Don't enter the frame twice.
+            if (IsProtecting)
+                return false;
+            
+            Reset();
+            IsProtecting = true;
+            return true;
         }
 
         /// <summary>
@@ -150,7 +176,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             // also throw exceptions, which are silently consumed by the runtime.
             if (ExceptionObject.IsNull)
                 ExceptionObject = exceptionObject;
-            
+
+            IsProtecting = false;
             return MoveToNextCompatibleHandler();
         }
 
@@ -167,6 +194,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             // Mark any exception as handled.  
             ExceptionObject = default;
             IsHandlingException = false;
+            IsProtecting = false;
             
             // TODO: support fault handlers.
             return MoveToFinalizer() ?? leaveTargetOffset;
