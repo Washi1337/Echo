@@ -102,6 +102,94 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        public void LeaveMultipleHandlersOneByOne(bool @throw)
+        {
+            var factory = _fixture.MockModule.CorLibTypeFactory;
+            var method = new MethodDefinition("dummy", MethodAttributes.Static,
+                MethodSignature.CreateStatic(factory.Void));
+
+            var outerTryStart = new CilInstructionLabel();
+            var outerHandlerStart = new CilInstructionLabel();
+            var outerHandlerEnd = new CilInstructionLabel();
+            var innerTryStart = new CilInstructionLabel();
+            var innerHandlerStart = new CilInstructionLabel();
+            var innerHandlerEnd = new CilInstructionLabel();
+
+            method.CilMethodBody = new CilMethodBody(method)
+            {
+                Instructions =
+                {
+                    Nop,
+                    
+                    // try {
+                    //  try {
+                    {Leave, innerHandlerEnd},
+                    //  } catch {
+                    Pop,
+                    {Leave, innerHandlerEnd},
+                    //  }
+                    {Leave, outerHandlerEnd},
+                    // } finally {
+                    Endfinally,
+                    // }
+                    
+                    Ret
+                },
+                ExceptionHandlers =
+                {
+                    new CilExceptionHandler
+                    {
+                        HandlerType = CilExceptionHandlerType.Finally,
+                        TryStart = outerTryStart,
+                        TryEnd = outerHandlerStart,
+                        HandlerStart = outerHandlerStart,
+                        HandlerEnd = outerHandlerEnd,
+                    },
+                    new CilExceptionHandler
+                    {
+                        HandlerType = CilExceptionHandlerType.Exception,
+                        ExceptionType = factory.Object.Type,
+                        TryStart = innerTryStart,
+                        TryEnd = innerHandlerStart,
+                        HandlerStart = innerHandlerStart,
+                        HandlerEnd = innerHandlerEnd,
+                    },
+                }
+            };
+            
+            outerTryStart.Instruction = method.CilMethodBody.Instructions[1];
+            outerHandlerStart.Instruction = method.CilMethodBody.Instructions[5];
+            outerHandlerEnd.Instruction = method.CilMethodBody.Instructions[6];
+            
+            innerTryStart.Instruction = method.CilMethodBody.Instructions[1];
+            innerHandlerStart.Instruction = method.CilMethodBody.Instructions[2];
+            innerHandlerEnd.Instruction = method.CilMethodBody.Instructions[4];
+            
+            method.CilMethodBody.Instructions.CalculateOffsets();
+            
+            var frame = new CallFrame(method, _vm.ValueFactory);
+            frame.ExceptionHandlerStack.Push(frame.ExceptionHandlers[0]); // try-finally
+            frame.ExceptionHandlerStack.Push(frame.ExceptionHandlers[1]); // try-catch
+
+            if (@throw)
+            {
+                var result = frame.ExceptionHandlerStack.RegisterException(_vm.ObjectMarshaller.ToObjectHandle(new Exception()));
+                Assert.Equal(innerHandlerStart.Offset, result.NextOffset);
+            }
+            
+            int nextOffset = frame.ExceptionHandlerStack.Leave(innerHandlerEnd.Offset);
+            Assert.Equal(innerHandlerEnd.Offset, nextOffset);
+
+            nextOffset = frame.ExceptionHandlerStack.Leave(outerHandlerEnd.Offset);
+            Assert.Equal(outerHandlerStart.Offset, nextOffset);
+            
+            var finalResult = frame.ExceptionHandlerStack.EndFinally();
+            Assert.Equal(outerHandlerEnd.Offset, finalResult.NextOffset);
+        }
+        
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         public void LeaveMultipleHandlers(bool @throw)
         {
             var factory = _fixture.MockModule.CorLibTypeFactory;

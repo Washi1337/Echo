@@ -47,13 +47,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
 
             while (Count > 0)
             {
-                // Try let the current frame determine where to jump to.
-                var currentFrame = Peek();
-                int offset = currentFrame.Leave(targetOffset);
+                // See if we are indeed leaving the current frame.
+                var currentFrame = Peek(); 
+                if (currentFrame.ContainsOffset(targetOffset))
+                    return targetOffset;
+                
+                // Let the frame determine where to jump to.
+                targetOffset = currentFrame.Leave(targetOffset);
 
-                // If the target offset falls within the current frame, we are jumping to one of our handlers.
-                if (currentFrame.ContainsOffset(offset))
-                    return offset;
+                // If the target offset still falls within the current frame, we are jumping to one of our handlers.
+                if (currentFrame.ContainsOffset(targetOffset))
+                    return targetOffset;
 
                 // If the target offset falls outside the frame, we are actually leaving this frame.
                 Pop();
