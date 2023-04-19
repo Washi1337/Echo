@@ -20,6 +20,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         }
 
         /// <summary>
+        /// Puts the address of the provided object handle into a pointer-sized bit vector, and pushes it onto the stack.
+        /// </summary>
+        /// <param name="value">The handle to push.</param>
+        public void Push(ObjectHandle value)
+        {
+            var vector = _factory.RentNativeInteger(value.Address);
+            Push(vector, _factory.ContextModule.CorLibTypeFactory.Object, true);
+        }
+        
+        /// <summary>
         /// Marshals the provided bitvector into a stack slot, and pushes it onto the stack.
         /// </summary>
         /// <param name="value">The value to push.</param>
@@ -38,11 +48,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <param name="value">The value to push.</param>
         /// <param name="originalType">The type of the value to push.</param>
         /// <returns>The stack slot that was created.</returns>
-        public void Push(BitVector value, TypeSignature originalType)
-        {
-            Push(value, originalType, false);
-        }
-        
+        public void Push(BitVector value, TypeSignature originalType) => Push(value, originalType, false);
+
         /// <summary>
         /// Marshals the provided bitvector into a stack slot, and pushes it onto the stack.
         /// </summary>
@@ -76,6 +83,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             _factory.BitVectorPool.Return(slot.Contents);
             
             return marshalled;
+        }
+
+        /// <inheritdoc />
+        public override void Clear()
+        {
+            for (int i = 0; i < Count; i++)
+                _factory.BitVectorPool.Return(this[i].Contents);
+
+            base.Clear();
         }
     }
 }

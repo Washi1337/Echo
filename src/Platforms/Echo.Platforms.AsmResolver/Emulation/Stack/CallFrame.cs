@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
@@ -29,6 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
 
         private readonly bool _initializeLocals;
         private readonly List<uint> _offsets = new();
+        private readonly List<ExceptionHandlerFrame> _exceptionHandlers = new();
         private BitVector _localStorage;
         private long _baseAddress;
 
@@ -52,9 +54,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             
             if (method.Signature is null)
                 throw new ArgumentException("Method does not have a valid signature.");
-            
-            uint pointerSize = factory.PointerSize;
-            
+
             var context = GenericContext.FromMethod(method);
             Method = method;
 
@@ -73,13 +73,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
 
                 foreach (var local in body.LocalVariables)
                     AllocateFrameField(local.VariableType);
-
+                
                 Body = body;
             }
 
             // Allocate return address.
             _offsets.Add(currentOffset);
-            currentOffset += pointerSize;
+            currentOffset += factory.PointerSize;
 
             // Allocate this parameter if required.
             if (method.Signature.HasThis)
@@ -90,7 +90,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                 AllocateFrameField(parameterType);
 
             // Actually reserve space for the entire frame.
-            _localStorage = new BitVector((int) (currentOffset * pointerSize), false);
+            _localStorage = new BitVector((int) (currentOffset * factory.PointerSize), false);
             
             // Initialize locals to zero when method body says we should.
             if (_initializeLocals)
@@ -101,12 +101,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                     .Write(new byte[localsSize]);
             }
 
+            InitializeExceptionHandlerFrames();
+            
             void AllocateFrameField(TypeSignature type)
             {
                 _offsets.Add(currentOffset);
                 var actualType = type.InstantiateGenericTypes(context);
                 currentOffset += factory.GetTypeValueMemoryLayout(actualType).Size;
-                currentOffset = currentOffset.Align(pointerSize);
+                currentOffset = currentOffset.Align(factory.PointerSize);
             }
         }
 
@@ -117,7 +119,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets the method which this frame was associated with.
         /// </summary>
@@ -150,7 +152,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets a virtual evaluation stack associated stored the frame.
         /// </summary>
@@ -158,6 +160,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         {
             get;
         }
+
+        /// <summary>
+        /// Gets a collection of exception handler frames present in the method body.
+        /// </summary>
+        public IReadOnlyList<ExceptionHandlerFrame> ExceptionHandlers => _exceptionHandlers;
+
+        /// <summary>
+        /// Gets the stack of currently active exception handler frames in the method.
+        /// </summary>
+        public ExceptionHandlerStack ExceptionHandlerStack
+        {
+            get;
+        } = new();
 
         /// <summary>
         /// Gets the number of bytes (excluding the evaluation stack) the stack frame spans.
@@ -211,7 +226,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public long GetLocalAddress(int index) => index < LocalsCount
             ? _baseAddress + _offsets[index]
             : throw new ArgumentOutOfRangeException(nameof(index));
-        
+
         /// <summary>
         /// Reads the value of a local variable into a buffer. 
         /// </summary>
@@ -266,6 +281,25 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public void Write(long address, ReadOnlySpan<byte> buffer)
         {
             _localStorage.AsSpan((int) (address - _baseAddress) * 8, buffer.Length).Write(buffer);
+        }
+
+        private void InitializeExceptionHandlerFrames()
+        {
+            if (Body is null)
+                return;
+
+            var merged = new Dictionary<AddressRange, ExceptionHandlerFrame>();
+            foreach (var range in Body.ExceptionHandlers.ToEchoRanges().OrderBy(x => x))
+            {
+                if (!merged.TryGetValue(range.ProtectedRange, out var frame))
+                {
+                    frame = new ExceptionHandlerFrame(range.ProtectedRange);
+                    merged.Add(range.ProtectedRange, frame);
+                    _exceptionHandlers.Add(frame);
+                }
+
+                frame.AddHandler((CilExceptionHandler) range.UserData);
+            }
         }
 
         /// <inheritdoc />

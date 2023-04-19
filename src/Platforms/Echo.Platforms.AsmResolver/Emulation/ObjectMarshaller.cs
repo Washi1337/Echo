@@ -21,9 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Machine = machine;
         }
 
-        /// <summary>
-        /// Gets the machine the marshaller is targeting.
-        /// </summary>
+        /// <inheritdoc />
         public CilVirtualMachine Machine
         {
             get;

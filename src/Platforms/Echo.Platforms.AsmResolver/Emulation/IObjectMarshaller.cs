@@ -9,6 +9,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
     public interface IObjectMarshaller
     {
         /// <summary>
+        /// Gets the machine the marshaller is targeting.
+        /// </summary>
+        CilVirtualMachine Machine
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Constructs a bit vector that represents the provided object.
         /// </summary>
         /// <param name="obj">The object.</param>

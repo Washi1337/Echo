@@ -43,7 +43,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
             
             Assert.False(result.IsSuccess);
 
-            var type = result.ExceptionPointer!.AsObjectHandle(Context.Machine).GetObjectType();
+            var type = result.ExceptionObject.GetObjectType();
             Assert.Equal(typeof(InvalidProgramException).FullName, type.FullName);
         }
     }

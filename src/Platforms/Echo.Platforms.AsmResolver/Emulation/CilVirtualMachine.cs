@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -330,22 +329,71 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (currentFrame.Body is not { } body)
                 throw new CilEmulatorException("Emulator only supports managed method bodies.");
             
+            // Determine the next instruction to dispatch.
             int pc = currentFrame.ProgramCounter;
             var instruction = body.Instructions.GetByOffset(pc);
             if (instruction is null)
                 throw new CilEmulatorException($"Invalid program counter in {currentFrame}.");
 
+            // Are we entering any protected regions?
+            UpdateExceptionHandlerStack();
+
+            // Dispatch the instruction.
             var result = Dispatcher.Dispatch(context, instruction);
+
             if (!result.IsSuccess)
             {
-                // TODO: unwind stack and move to appropriate exception handler if there is any.
-                var exceptionPointer = result.ExceptionPointer.AsSpan();
-                if (!exceptionPointer.IsFullyKnown)
-                    throw new NotImplementedException("Exception handling is not implemented yet (unknown exception type).");
+                var exceptionObject = result.ExceptionObject;
+                if (exceptionObject.IsNull)
+                    throw new CilEmulatorException("A null exception object was thrown.");
 
-                var type = exceptionPointer.AsObjectHandle(this).GetObjectType(); 
-                throw new NotImplementedException($"Exception handling is not implemented yet. ({type})");
+                // If there were any errors thrown after dispatching, it may trigger the execution of one of the
+                // exception handlers in the entire call stack.
+                if (!UnwindCallStack(exceptionObject))
+                    throw new EmulatedException(exceptionObject);
             }
         }
+
+        private void UpdateExceptionHandlerStack()
+        {
+            var currentFrame = CallStack.Peek();
+
+            int pc = currentFrame.ProgramCounter;
+            var availableHandlers = currentFrame.ExceptionHandlers;
+            var activeHandlers = currentFrame.ExceptionHandlerStack;
+
+            for (int i = 0; i < availableHandlers.Count; i++)
+            {
+                var handler = availableHandlers[i];
+                if (handler.ProtectedRange.Contains(pc) && handler.Enter() && !activeHandlers.Contains(handler))
+                    activeHandlers.Push(handler);
+            }
+        }
+
+        private bool UnwindCallStack(ObjectHandle exceptionObject)
+        {
+            while (!CallStack.Peek().IsRoot)
+            {
+                var currentFrame = CallStack.Peek();
+
+                var result = currentFrame.ExceptionHandlerStack.RegisterException(exceptionObject);
+                if (result.IsSuccess)
+                {
+                    // We found a handler that needs to be called. Jump to it.
+                    currentFrame.ProgramCounter = result.NextOffset;
+                    
+                    // Push the exception on the stack.
+                    currentFrame.EvaluationStack.Clear();
+                    currentFrame.EvaluationStack.Push(exceptionObject);
+
+                    return true;
+                }
+
+                CallStack.Pop();
+            }
+            
+            return false;
+        }
+
     }
 }

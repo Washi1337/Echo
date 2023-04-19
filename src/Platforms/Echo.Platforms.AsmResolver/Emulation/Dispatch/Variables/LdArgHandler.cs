@@ -29,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             try
             {
                 // Marshal and push.
-                frame.ReadArgument(parameter.Index, result.AsSpan());
+                frame.ReadArgument(parameter.MethodSignatureIndex, result.AsSpan());
                 context.CurrentFrame.EvaluationStack.Push(result, parameterType);
             }
             finally

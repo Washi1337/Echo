@@ -47,6 +47,11 @@ namespace Echo
         /// </summary>
         /// <param name="value"></param>
         public virtual void Push(T value) => _items.Add(value);
+        
+        /// <summary>
+        /// Removes all elements from the stack.
+        /// </summary>
+        public virtual void Clear() => _items.Clear();
 
         /// <inheritdoc />
         public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();

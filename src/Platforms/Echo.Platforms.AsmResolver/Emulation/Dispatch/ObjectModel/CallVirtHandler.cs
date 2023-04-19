@@ -28,9 +28,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     return MethodDevirtualizationResult.Unknown(); 
                 
                 case { IsZero.Value: TrileanValue.True }:
-                    return MethodDevirtualizationResult.Exception(context.Machine.Heap.AllocateObject(
-                        context.Machine.ValueFactory.NullReferenceExceptionType, 
-                        true));
+                    return MethodDevirtualizationResult.Exception(context.Machine
+                        .Heap.AllocateObject(
+                            context.Machine.ValueFactory.NullReferenceExceptionType,
+                            true)
+                        .AsObjectHandle(context.Machine));
                 
                 case var objectPointer:
                     var objectType = objectPointer.AsObjectHandle(context.Machine).GetObjectType();
@@ -38,9 +40,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
                     if (implementation is null)
                     {
-                        return MethodDevirtualizationResult.Exception(context.Machine.Heap.AllocateObject(
-                            context.Machine.ValueFactory.MissingMethodExceptionType,
-                            true));
+                        return MethodDevirtualizationResult.Exception(context.Machine
+                            .Heap.AllocateObject(
+                                context.Machine.ValueFactory.MissingMethodExceptionType,
+                                true)
+                            .AsObjectHandle(context.Machine));
                     }
                     
                     return MethodDevirtualizationResult.Success(implementation);

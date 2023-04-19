@@ -93,5 +93,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             throw new CilEmulatorException($"Attempted to devirtualize method call {instruction} on an unknown object instance.");
         }
+
+        /// <inheritdoc />
+        public bool ResolveExceptionFilter(
+            CilExecutionContext context, 
+            CilInstruction instruction,
+            StackSlot conclusion)
+        {
+            throw new CilEmulatorException($"Attempted to execute {instruction} with an unknown resolution on the stack.");
+        }
     }
 }

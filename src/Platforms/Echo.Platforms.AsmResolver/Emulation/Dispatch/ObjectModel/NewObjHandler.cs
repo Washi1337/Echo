@@ -16,18 +16,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
-
+            
             // Allocate the new object.
-            var instanceType = ((IMethodDescriptor) instruction.Operand!).DeclaringType!.ToTypeSignature();
-            var address = factory.RentNativeInteger(context.Machine.Heap.AllocateObject(instanceType, false));
+            var constructor = (IMethodDescriptor) instruction.Operand!;
+            var instanceType = constructor.DeclaringType!.ToTypeSignature();
+            var address = factory.CreateNativeInteger(context.Machine.Heap.AllocateObject(instanceType, false));
+
+            var arguments = GetArguments(context, constructor);
             try
             {
-                // Push onto stack.
-                stack.Push(address, instanceType);
-
-                // Invoke constructor.
-                var result = base.Dispatch(context, instruction);
-
+                // Insert the allocated "this" pointer into the arguments.
+                arguments.Insert(0, address);
+                
+                // Call the constructor.
+                var result = HandleCall(context, instruction, arguments);
+                
                 // If successful, push the resulting object onto the stack.
                 if (result.IsSuccess)
                     stack.Push(address, instanceType);
@@ -36,9 +39,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             }
             finally
             {
-                factory.BitVectorPool.Return(address);
+                for (int i = 0; i < arguments.Count; i++)
+                    context.Machine.ValueFactory.BitVectorPool.Return(arguments[i]);
             }
         }
+
+        /// <inheritdoc />
+        protected override bool ShouldPopInstanceObject(IMethodDescriptor method) => false;
 
         /// <inheritdoc />
         protected override MethodDevirtualizationResult DevirtualizeMethodInternal(

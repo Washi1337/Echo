@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Net;
 using InlineIL;
 
 namespace Mocks
@@ -11,26 +13,6 @@ namespace Mocks
         public static string GetConstantString() => "Hello, world!";
         public static string GetIsEvenString(int i) => i % 2 == 0 ? "even" : "odd";
         public static bool GetBoolean() => true;
-
-        public static void ExceptionHandler()
-        {
-            try
-            {
-                Console.WriteLine("Password:");
-                if (Console.ReadLine() == "MyPassword")
-                {
-                    Console.WriteLine("Amazing");
-                }
-                else
-                {
-                    Console.WriteLine("Nope");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
 
         public static void NoLocalsNoArguments()
         {
@@ -115,6 +97,193 @@ namespace Mocks
         public static int DangerousMethod(int y)
         {
             return y + 100;
+        }
+        
+        public static int UnhandledException() => throw new Exception("This is an unhandled exception.");
+
+        public static int TryFinally(bool @throw)
+        {
+            int result = 0;
+            
+            try
+            {
+                if (@throw)
+                    throw new Exception("This is an unhandled exception.");
+                result++;
+            }
+            finally
+            {
+                result += 100;
+            }
+
+            return result;
+        }
+
+        public static int TryCatch(bool @throw)
+        {
+            int result;
+            
+            try
+            {
+                if (@throw)
+                    throw new Exception("This is an handled exception.");
+                result = 1;
+            }
+            catch (Exception)
+            {
+                result = 2;
+            }
+
+            return result;   
+        }
+
+        public static int TryCatchFinally(bool @throw)
+        {
+            int result = 0;
+
+            try
+            {
+                if (@throw)
+                    throw new Exception("This is an handled exception.");
+                result = 1;
+            }
+            catch (Exception)
+            {
+                result = 2;
+            }
+            finally
+            {
+                result += 100;
+            }
+
+            return result;
+        }
+
+        public static int TryCatchCatch(int exceptionType)
+        {
+            int result = 0;
+
+            try
+            {
+                result = exceptionType switch
+                {
+                    0 => throw new IOException("This is a handled IOException."),
+                    1 => throw new WebException("This is a handled WebException."),
+                    2 => throw new ArgumentException("This is an unhandled ArgumentException"),
+                    _ => 1
+                };
+            }
+            catch (IOException)
+            {
+                result = 2;
+            }
+            catch (WebException)
+            {
+                result = 3;
+            }
+
+            return result;   
+        }
+        
+        public static int TryCatchSpecificAndGeneral(int exceptionType)
+        {
+            int result = 0;
+
+            try
+            {
+                result = exceptionType switch
+                {
+                    0 => throw new EndOfStreamException("This is a handled EndOfStreamException."),
+                    1 => throw new FileNotFoundException("This is a handled IOException."),
+                    2 => throw new ArgumentException("This is an unhandled ArgumentException"),
+                    _ => 1
+                };
+            }
+            catch (EndOfStreamException)
+            {
+                result = 2;
+            }
+            catch (IOException)
+            {
+                result = 3;
+            }
+
+            return result;   
+        }
+
+        public static int TryCatchCatchFinally(int exceptionType)
+        {
+            int result = 0;
+
+            try
+            {
+                result = exceptionType switch
+                {
+                    0 => throw new IOException("This is a handled IOException."),
+                    1 => throw new WebException("This is a handled WebException."),
+                    2 => throw new ArgumentException("This is an unhandled ArgumentException"),
+                    _ => 1
+                };
+            }
+            catch (IOException)
+            {
+                result = 2;
+            }
+            catch (WebException)
+            {
+                result = 3;
+            }
+            finally
+            {
+                result += 100;
+            }
+            
+            return result;
+        }
+
+        public static int TryCatchFilters(int exceptionType)
+        {
+            int result = 0;
+
+            try
+            {
+                result = exceptionType switch
+                {
+                    0 => throw new IOException("0"),
+                    1 => throw new IOException("11"),
+                    2 => throw new IOException("222"),
+                    3 => throw new ArgumentException("3333"),
+                    _ => 1
+                };
+            }
+            catch (IOException ex) when (ex.Message.Length == 1)
+            {
+                result = 2;
+            }
+            catch (IOException ex) when (ex.Message.Length == 2)
+            {
+                result = 3;
+            }
+
+            return result;
+        }
+
+        public static int CatchExceptionInChildMethod(bool @throw)
+        {
+            int result = 0;
+            
+            try
+            {
+                if (@throw)
+                    UnhandledException();
+                result = 1;
+            }
+            catch (Exception)
+            {
+                result = 2;
+            }
+
+            return result;
         }
     }
 }

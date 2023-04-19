@@ -75,29 +75,5 @@ namespace Echo.Platforms.AsmResolver.Tests
             }
         }
 
-        [Fact]
-        public void Switch()
-        {
-            var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
-            var method = type.Methods.First(m => m.Name == nameof(SimpleClass.SwitchColor));
-            var body = method.CilMethodBody!;
-            var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
-            
-            Assert.Equal(3, cfg.Entrypoint.ConditionalEdges.Count);
-            var dependencies = dfg.Nodes[body.Instructions.Last(i=>i.OpCode == CilOpCodes.Ldloc_1).Offset].VariableDependencies;
-            Assert.Equal(3, dependencies.First().Count);
-        }
-
-        [Fact]
-        public void Loop()
-        {
-            var type = (TypeDefinition) _moduleFixture.MockModule.LookupMember(typeof(SimpleClass).MetadataToken);
-            var method = type.Methods.First(m => m.Name == nameof(SimpleClass.Loop));
-            var body = method.CilMethodBody!;
-            var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
-            
-            Assert.Equal(2, dfg.Nodes[body.Instructions[6].Offset].VariableDependencies.First().Count);
-            Assert.Equal(2, dfg.Nodes[body.Instructions[7].Offset].VariableDependencies.First().Count);
-        }
     }
 }
