@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Echo.Graphing;
 
 namespace Echo.Graphing.Analysis.Traversal
 {
@@ -10,10 +9,10 @@ namespace Echo.Graphing.Analysis.Traversal
     public class DepthFirstTraversal : ITraversal
     {
         /// <inheritdoc />
-        public event EventHandler<NodeDiscoveryEventArgs> NodeDiscovered;
+        public event EventHandler<NodeDiscoveryEventArgs>? NodeDiscovered;
         
         /// <inheritdoc />
-        public event EventHandler TraversalCompleted;
+        public event EventHandler? TraversalCompleted;
 
         /// <summary>
         /// Creates a new depth first traversal.
@@ -50,7 +49,7 @@ namespace Echo.Graphing.Analysis.Traversal
                 throw new ArgumentNullException(nameof(entrypoint));
             
             var visited = new HashSet<INode>();
-            var stack = new Stack<(INode node, IEdge edge)>();
+            var stack = new Stack<(INode node, IEdge? edge)>();
             stack.Push((entrypoint, null));
             
             while (stack.Count > 0)

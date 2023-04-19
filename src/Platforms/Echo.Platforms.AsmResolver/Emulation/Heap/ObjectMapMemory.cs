@@ -5,7 +5,6 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Memory;
-using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Heap
 {

@@ -14,15 +14,13 @@ namespace Echo.Platforms.AsmResolver
     /// </summary>
     public class CilPurityClassifier : IPurityClassifier<CilInstruction>
     {
-        private readonly SignatureComparer _comparer = new SignatureComparer();
-
         /// <summary>
         /// Creates a new instance of the <see cref="CilPurityClassifier"/> class.
         /// </summary>
         public CilPurityClassifier()
         {
-            KnownPureMethods = new HashSet<IMethodDescriptor>(_comparer);
-            KnownImpureMethods = new HashSet<IMethodDescriptor>(_comparer);
+            KnownPureMethods = new HashSet<IMethodDescriptor>(SignatureComparer.Default);
+            KnownImpureMethods = new HashSet<IMethodDescriptor>(SignatureComparer.Default);
         }
         
         /// <summary>

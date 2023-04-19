@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Echo.Graphing;
 
 namespace Echo.Graphing.Analysis.Traversal
 {
@@ -9,8 +8,8 @@ namespace Echo.Graphing.Analysis.Traversal
     /// </summary>
     public class PostOrderRecorder
     {
-        private readonly Stack<INode> _stack = new Stack<INode>();
-        private readonly List<INode> _order = new List<INode>();
+        private readonly Stack<INode> _stack = new();
+        private readonly List<INode> _order = new();
 
         /// <summary>
         /// Creates a new post traversal order and hooks into the provided traversal object.

@@ -6,7 +6,6 @@ using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Memory;
 using Echo.Memory.Heap;
-using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Heap
 {

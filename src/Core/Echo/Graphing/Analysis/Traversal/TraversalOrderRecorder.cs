@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Echo.Graphing;
 
 namespace Echo.Graphing.Analysis.Traversal
 {
@@ -9,8 +8,8 @@ namespace Echo.Graphing.Analysis.Traversal
     /// </summary>
     public class TraversalOrderRecorder
     {
-        private readonly IDictionary<INode, int> _indices = new Dictionary<INode, int>();
-        private readonly List<INode> _order = new List<INode>();
+        private readonly Dictionary<INode, int> _indices = new();
+        private readonly List<INode> _order = new();
 
         /// <summary>
         /// Creates a new traversal order recorder and hooks into the provided traversal object.

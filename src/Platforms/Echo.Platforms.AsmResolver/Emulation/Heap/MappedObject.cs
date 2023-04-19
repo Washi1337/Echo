@@ -5,7 +5,6 @@ using System.Reflection;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
 using Echo.Memory;
-using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Heap
 {

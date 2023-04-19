@@ -12,7 +12,7 @@
         public static HashCodeNodeIdentifier Instance
         {
             get;
-        } = new HashCodeNodeIdentifier();
+        } = new();
         
         /// <inheritdoc />
         public long GetIdentifier(INode node) => node.GetHashCode();

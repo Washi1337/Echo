@@ -8,7 +8,7 @@ namespace Echo.Graphing.Serialization.Dot
     /// </summary>
     public class IncrementingNodeIdentifier : INodeIdentifier
     {
-        private readonly IDictionary<INode, long> _identifiers = new Dictionary<INode, long>();
+        private readonly Dictionary<INode, long> _identifiers = new();
         
         /// <inheritdoc />
         public long GetIdentifier(INode node)

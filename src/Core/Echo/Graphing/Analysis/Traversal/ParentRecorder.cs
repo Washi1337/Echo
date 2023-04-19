@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Echo.Graphing;
 
 namespace Echo.Graphing.Analysis.Traversal
 {
@@ -12,7 +11,7 @@ namespace Echo.Graphing.Analysis.Traversal
     /// </remarks>
     public class ParentRecorder
     {
-        private readonly IDictionary<INode, IEdge> _parents = new Dictionary<INode, IEdge>();
+        private readonly Dictionary<INode, IEdge> _parents = new();
 
         /// <summary>
         /// Creates a new parent recorder.
@@ -25,7 +24,7 @@ namespace Echo.Graphing.Analysis.Traversal
                 throw new ArgumentNullException(nameof(traversal));
             traversal.NodeDiscovered += (sender, args) =>
             {
-                if (!_parents.ContainsKey(args.NewNode))
+                if (!_parents.ContainsKey(args.NewNode) && args.Origin is not null)
                     _parents[args.NewNode] = args.Origin;
             };
         }
@@ -35,7 +34,7 @@ namespace Echo.Graphing.Analysis.Traversal
         /// </summary>
         /// <param name="node">The node to get the edge to its parent from.</param>
         /// <returns>The edge originating from the parent node, or <c>null</c> if the node was the first node to be discovered.</returns>
-        public IEdge GetParentEdge(INode node)
+        public IEdge? GetParentEdge(INode node)
         {
             _parents.TryGetValue(node, out var edge);
             return edge;
@@ -46,9 +45,6 @@ namespace Echo.Graphing.Analysis.Traversal
         /// </summary>
         /// <param name="node">The node to get the parent node from.</param>
         /// <returns>The parent node in the search tree, or <c>null</c> if the node was the first node to be discovered.</returns>
-        public INode GetParent(INode node)
-        {
-            return GetParentEdge(node)?.Origin;
-        }
+        public INode? GetParent(INode node) => GetParentEdge(node)?.Origin;
     }
 }

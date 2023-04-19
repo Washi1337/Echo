@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using AsmResolver.DotNet.Code.Cil;
-using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Stack
 {

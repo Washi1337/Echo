@@ -1,5 +1,4 @@
 using System;
-using Echo.Graphing;
 
 namespace Echo.Graphing.Analysis.Traversal
 {

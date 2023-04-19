@@ -1,5 +1,3 @@
-using Echo.Graphing;
-
 namespace Echo.Graphing.Analysis.Traversal
 {
     /// <summary>
@@ -12,7 +10,7 @@ namespace Echo.Graphing.Analysis.Traversal
         /// </summary>
         /// <param name="newNode">The node that was discovered.</param>
         /// <param name="origin">The edge that was traversed to discover the node.</param>
-        public NodeDiscoveryEventArgs(INode newNode, IEdge origin)
+        public NodeDiscoveryEventArgs(INode newNode, IEdge? origin)
         {
             NewNode = newNode;
             Origin = origin;
@@ -29,7 +27,7 @@ namespace Echo.Graphing.Analysis.Traversal
         /// <summary>
         /// Gets the edge that was traversed that resulted in the node to be discovered.
         /// </summary>
-        public IEdge Origin
+        public IEdge? Origin
         {
             get;
         }

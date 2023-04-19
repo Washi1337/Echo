@@ -70,7 +70,7 @@ namespace Echo.Graphing.Serialization.Dot
         /// <remarks>
         /// When this property is set to <c>null</c>, no adornments will be added.
         /// </remarks>
-        public IDotNodeAdorner NodeAdorner
+        public IDotNodeAdorner? NodeAdorner
         {
             get;
             set;
@@ -82,7 +82,7 @@ namespace Echo.Graphing.Serialization.Dot
         /// <remarks>
         /// When this property is set to <c>null</c>, no adornments will be added.
         /// </remarks>
-        public IDotEdgeAdorner EdgeAdorner
+        public IDotEdgeAdorner? EdgeAdorner
         {
             get;
             set;
@@ -94,7 +94,7 @@ namespace Echo.Graphing.Serialization.Dot
         /// <remarks>
         /// When this property is set to <c>null</c>, no adornments will be added.
         /// </remarks>
-        public IDotSubGraphAdorner SubGraphAdorner
+        public IDotSubGraphAdorner? SubGraphAdorner
         {
             get;
             set;
@@ -148,12 +148,12 @@ namespace Echo.Graphing.Serialization.Dot
                 var attributes = SubGraphAdorner.GetSubGraphAttributes(subGraph);
                 if (attributes?.Count > 0)
                 {
-                    string delimeter = IncludeSemicolons
+                    string delimiter = IncludeSemicolons
                         ? ";"
                         : string.Empty;
                     
-                    WriteAttributes(attributes, delimeter, true);
-                    Writer.WriteLine(delimeter);
+                    WriteAttributes(attributes, delimiter, true);
+                    Writer.WriteLine(delimiter);
                     Writer.WriteLine();
                 }
             }
@@ -176,13 +176,13 @@ namespace Echo.Graphing.Serialization.Dot
         /// <summary>
         /// Appends the header of a new graph to the output stream.
         /// </summary>
-        protected virtual void WriteHeader(string graphType, string graphName)
+        protected virtual void WriteHeader(string graphType, string? graphName)
         {
             Writer.Write(graphType);
             if (!string.IsNullOrEmpty(graphName))
             {
                 Writer.Write(' ');
-                WriteIdentifier(graphName);
+                WriteIdentifier(graphName!);
             }
             
             Writer.WriteLine(" {");
@@ -246,7 +246,7 @@ namespace Echo.Graphing.Serialization.Dot
             }
         }
 
-        private void WriteAttributes(IEnumerable<KeyValuePair<string, string>> attributes, string delimeter, bool newLines)
+        private void WriteAttributes(IEnumerable<KeyValuePair<string, string>> attributes, string delimiter, bool newLines)
         {
             var array = attributes as KeyValuePair<string, string>[] ?? attributes.ToArray();
             for (int i = 0; i < array.Length; i++)
@@ -257,7 +257,7 @@ namespace Echo.Graphing.Serialization.Dot
 
                 if (i < array.Length - 1)
                 {
-                    Writer.Write(delimeter);
+                    Writer.Write(delimiter);
                     if (newLines)
                         Writer.WriteLine();
                 }

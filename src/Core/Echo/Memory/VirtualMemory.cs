@@ -2,9 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.Code;
-
-using MemoryMapping = System.Collections.Generic.KeyValuePair<long, Echo.Memory.IMemorySpace>;
 
 namespace Echo.Memory
 {

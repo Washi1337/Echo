@@ -11,7 +11,7 @@ namespace Echo.Graphing.Serialization.Dot
         /// <summary>
         /// Gets or sets the string to prepend to the identifier of the node.  
         /// </summary>
-        public string Prefix
+        public string? Prefix
         {
             get;
             set;
@@ -20,7 +20,7 @@ namespace Echo.Graphing.Serialization.Dot
         /// <summary>
         /// Gets or sets the string to append to the identifier of the node.
         /// </summary>
-        public string Suffix
+        public string? Suffix
         {
             get;
             set;

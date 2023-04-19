@@ -1,5 +1,4 @@
-﻿using AsmResolver.DotNet.Code.Cil;
-using AsmResolver.PE.DotNet.Cil;
+﻿using AsmResolver.PE.DotNet.Cil;
 using Echo.ControlFlow.Serialization.Dot;
 
 namespace Echo.Platforms.AsmResolver

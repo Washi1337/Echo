@@ -9,12 +9,12 @@ namespace Echo.Graphing
     /// </summary>
     public abstract class TreeNodeBase : INode
     {
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
         
         /// <summary>
         /// The parent of this <see cref="TreeNodeBase"/>
         /// </summary>
-        public TreeNodeBase Parent
+        public TreeNodeBase? Parent
         {
             get;
             internal set;
@@ -35,7 +35,8 @@ namespace Echo.Graphing
         /// <inheritdoc />
         public IEnumerable<IEdge> GetIncomingEdges()
         {
-            yield return new Edge(Parent, this);
+            if (Parent is not null)
+                yield return new Edge(Parent, this);
         }
 
         /// <inheritdoc />
@@ -45,7 +46,8 @@ namespace Echo.Graphing
         /// <inheritdoc />
         public IEnumerable<INode> GetPredecessors()
         {
-            yield return Parent;
+            if (Parent is not null)
+                yield return Parent;
         }
 
         /// <inheritdoc />
@@ -63,17 +65,17 @@ namespace Echo.Graphing
         /// <param name="child">The child element to update.</param>
         /// <param name="value">The new value to assign to the <paramref name="child"/>.</param>
         /// <exception cref="InvalidOperationException">When the node already has a parent.</exception>
-        protected void UpdateChild<T>(ref T child, T value)
+        protected void UpdateChild<T>(ref T? child, T? value)
             where T : TreeNodeBase
         {
             lock (_lock)
             {
-                if (value?.Parent is {})
+                if (value?.Parent is not null)
                     throw new InvalidOperationException("Node already has a parent.");
-                if (child is {})
+                if (child is not null)
                     child.Parent = null;
                 child = value;
-                if (child is {})
+                if (child is not null)
                     child.Parent = this;
             }
         }

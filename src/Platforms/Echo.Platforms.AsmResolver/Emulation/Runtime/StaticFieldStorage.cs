@@ -4,7 +4,6 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using Echo.Memory;
 using Echo.Memory.Heap;
-using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Runtime
 {

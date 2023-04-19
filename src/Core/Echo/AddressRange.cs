@@ -1,6 +1,6 @@
 using System;
 
-namespace Echo.Code
+namespace Echo
 {
     /// <summary>
     /// Represents an address range in memory.

@@ -14,7 +14,7 @@ namespace Echo.Graphing.Serialization.Dot
         public static IdentifiedNodeIdentifier Instance
         {
             get;
-        } = new IdentifiedNodeIdentifier();
+        } = new();
         
         /// <inheritdoc />
         public long GetIdentifier(INode node) => node is IIdentifiedNode identifiedNode

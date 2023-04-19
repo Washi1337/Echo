@@ -1,12 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using Echo.Memory;
-using Echo.Code;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Stack
 {
