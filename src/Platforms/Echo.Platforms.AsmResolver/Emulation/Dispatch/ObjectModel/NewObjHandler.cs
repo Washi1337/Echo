@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             // Allocate the new object.
             var constructor = (IMethodDescriptor) instruction.Operand!;
             var instanceType = constructor.DeclaringType!.ToTypeSignature();
-            var address = factory.CreateNativeInteger(context.Machine.Heap.AllocateObject(instanceType, false));
+            var address = factory.CreateNativeInteger(context.Machine.Heap.AllocateObject(instanceType, true));
 
             var arguments = GetArguments(context, constructor);
             try
