@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
@@ -89,21 +88,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             
             // Pop sentinel arguments.
             for (int i = method.Signature.SentinelParameterTypes.Count - 1; i >= 0; i--)
-            {
-                var sentinelParameter = method.Signature.SentinelParameterTypes[i];
-                result.Add(stack.Pop(sentinelParameter is GenericParameterSignature genericSentinelParameter
-                    ? genericContext.GetTypeArgument(genericSentinelParameter)
-                    : sentinelParameter));
-            }
+                result.Add(stack.Pop(method.Signature.SentinelParameterTypes[i].InstantiateGenericTypes(genericContext)));
 
             // Pop normal arguments.
             for (int i = method.Signature.ParameterTypes.Count - 1; i >= 0; i--)
-            {
-                var parameter = method.Signature.ParameterTypes[i];
-                result.Add(stack.Pop(parameter is GenericParameterSignature genericParameter
-                    ? genericContext.GetTypeArgument(genericParameter)
-                    : parameter));
-            }
+                result.Add(stack.Pop(method.Signature.ParameterTypes[i].InstantiateGenericTypes(genericContext)));
 
             // Pop instance object.
             if (ShouldPopInstanceObject(method))
