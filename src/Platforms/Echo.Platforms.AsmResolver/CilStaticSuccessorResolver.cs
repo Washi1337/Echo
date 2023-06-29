@@ -18,20 +18,23 @@ namespace Echo.Platforms.AsmResolver
         public static CilStaticSuccessorResolver Instance
         {
             get;
-        } = new CilStaticSuccessorResolver();
+        } = new();
 
         /// <inheritdoc />
         public int GetSuccessorsCount(in CilInstruction instruction)
         {
             switch (instruction.OpCode.FlowControl)
             {
+                case CilFlowControl.Call when instruction.OpCode.Code == CilCode.Jmp:
+                    return 0;
+                
                 case CilFlowControl.Break:
-                case CilFlowControl.Call:
                 case CilFlowControl.Meta:
                 case CilFlowControl.Next:
                 case CilFlowControl.Branch:
+                case CilFlowControl.Call:
                     return 1;
-                
+
                 case CilFlowControl.ConditionalBranch when instruction.OpCode.Code == CilCode.Switch:
                     return ((ICollection<ICilLabel>) instruction.Operand!).Count + 1;
                 
@@ -58,10 +61,14 @@ namespace Echo.Platforms.AsmResolver
             switch (instruction.OpCode.FlowControl)
             {
                 case CilFlowControl.Break:
-                case CilFlowControl.Call:
                 case CilFlowControl.Meta:
                 case CilFlowControl.Next:
                     return GetFallThroughTransitions(instruction, successorsBuffer);
+
+                case CilFlowControl.Call:
+                    return instruction.OpCode.Code != CilCode.Jmp
+                        ? GetFallThroughTransitions(instruction, successorsBuffer)
+                        : 0;
                 
                 case CilFlowControl.Branch:
                     return GetUnconditionalBranchTransitions(instruction, successorsBuffer);
