@@ -82,5 +82,28 @@ namespace Echo.Platforms.Dnlib.Tests
             
             Assert.Equal(3, cfg.Entrypoint.ConditionalEdges.Count);
         }
+        
+        [Fact]
+        public void JmpShouldTerminate()
+        {
+            var method = new MethodDefUser("Dummy", MethodSig.CreateStatic(_moduleFixture.MockModule.CorLibTypes.Void), MethodAttributes.Static);
+
+            method.Body = new CilBody
+            {
+                Instructions =
+                {
+                    Instruction.Create(OpCodes.Ldc_I4_1),
+                    Instruction.Create(OpCodes.Pop),
+                    Instruction.Create(OpCodes.Jmp, method),
+                    Instruction.Create(OpCodes.Ldc_I4_2)
+                }
+            };
+            method.Body.UpdateInstructionOffsets();
+
+            var cfg = method.ConstructSymbolicFlowGraph(out _);
+
+            var node = Assert.Single(cfg.Nodes);
+            Assert.Equal(OpCodes.Jmp, node.Contents.Footer.OpCode);
+        }
     }
 }
