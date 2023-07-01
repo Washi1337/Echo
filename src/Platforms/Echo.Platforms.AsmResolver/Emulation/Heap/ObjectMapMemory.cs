@@ -125,8 +125,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// </summary>
         public void Clear()
         {
-            foreach (long address in _objectsByAddress.Keys)
-                _backingBuffer.Unmap(address);
+            foreach (var map in _objectsByAddress.Values)
+                _backingBuffer.Unmap(map.AddressRange.Start);
 
             _mappedObjects.Clear();
             _objectsByAddress.Clear();
