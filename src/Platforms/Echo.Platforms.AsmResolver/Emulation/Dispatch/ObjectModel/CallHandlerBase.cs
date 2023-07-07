@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
@@ -83,14 +84,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var result = new List<BitVector>(method.Signature!.GetTotalParameterCount());
+            var genericContext = GenericContext.FromMethod(method);
             
             // Pop sentinel arguments.
             for (int i = method.Signature.SentinelParameterTypes.Count - 1; i >= 0; i--)
-                result.Add(stack.Pop(method.Signature.SentinelParameterTypes[i]));
+                result.Add(stack.Pop(method.Signature.SentinelParameterTypes[i].InstantiateGenericTypes(genericContext)));
 
             // Pop normal arguments.
             for (int i = method.Signature.ParameterTypes.Count - 1; i >= 0; i--)
-                result.Add(stack.Pop(method.Signature.ParameterTypes[i]));
+                result.Add(stack.Pop(method.Signature.ParameterTypes[i].InstantiateGenericTypes(genericContext)));
 
             // Pop instance object.
             if (ShouldPopInstanceObject(method))

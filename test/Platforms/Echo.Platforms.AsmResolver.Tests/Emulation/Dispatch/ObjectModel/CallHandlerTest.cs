@@ -1,6 +1,7 @@
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Memory;
@@ -208,6 +209,32 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.Equal(0, arguments[0].AsSpan().I32);
             Assert.Equal(1D, arguments[1].AsSpan().F64);
             Assert.Equal(2D, arguments[2].AsSpan().F64);
+        }
+
+        [Fact]
+        public void CallMethodWithGenericArguments()
+        {
+            var invoker = new InvokerWrapper(DefaultInvokers.ReturnUnknown);
+            var factory = ModuleFixture.MockModule.CorLibTypeFactory;
+            var method = new MethodDefinition("Dummy", MethodAttributes.Static, MethodSignature.CreateStatic(
+                    factory.Int32,
+                    1,
+                    new GenericParameterSignature(GenericParameterType.Method, 0)))
+                .MakeGenericInstanceMethod(factory.Int32);
+
+            Context.Machine.Invoker = invoker;
+
+            var callerFrame = Context.CurrentFrame;
+            callerFrame.EvaluationStack.Push(new StackSlot(1, StackSlotTypeHint.Integer));
+
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Call, method));
+
+            Assert.True(result.IsSuccess);
+            Assert.Single(callerFrame.EvaluationStack);
+            Assert.Same(method, invoker.LastMethod);
+            
+            Assert.Single(invoker.LastArguments!);
+            Assert.Equal(1, invoker.LastArguments![0].AsSpan().I32);
         }
     }
 
