@@ -19,20 +19,23 @@ namespace Echo.Platforms.Dnlib
         public static CilStaticSuccessorResolver Instance
         {
             get;
-        } = new CilStaticSuccessorResolver();
+        } = new();
 
         /// <inheritdoc />
         public int GetSuccessorsCount(in Instruction instruction)
         {
             switch (instruction.OpCode.FlowControl)
             {
+                case FlowControl.Call when instruction.OpCode.Code == DnlibCode.Jmp:
+                    return 0;
+                    
                 case FlowControl.Break:
-                case FlowControl.Call:
                 case FlowControl.Meta:
                 case FlowControl.Next:
                 case FlowControl.Branch:
+                case FlowControl.Call:
                     return 1;
-
+                
                 case FlowControl.Cond_Branch when instruction.OpCode.Code == DnlibCode.Switch:
                     return ((ICollection<Instruction>) instruction.Operand).Count + 1;
 
@@ -57,9 +60,15 @@ namespace Echo.Platforms.Dnlib
             switch (instruction.OpCode.FlowControl)
             {
                 case FlowControl.Break:
-                case FlowControl.Call:
                 case FlowControl.Meta:
                 case FlowControl.Next:
+                    successorsBuffer[0] = FallThrough(instruction);
+                    return 1;
+
+                case FlowControl.Call:
+                    if (instruction.OpCode.Code == DnlibCode.Jmp)
+                        return 0;
+                    
                     successorsBuffer[0] = FallThrough(instruction);
                     return 1;
 

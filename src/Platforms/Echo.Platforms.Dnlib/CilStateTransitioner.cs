@@ -70,6 +70,9 @@ namespace Echo.Platforms.Dnlib
         {
             switch (instruction.OpCode.FlowControl)
             {
+                case FlowControl.Call when instruction.OpCode.Code == DnlibCode.Jmp:
+                    return 0;
+                
                 case FlowControl.Call:
                 case FlowControl.Meta:
                 case FlowControl.Next:
@@ -106,6 +109,12 @@ namespace Echo.Platforms.Dnlib
 
             switch (instruction.OpCode.FlowControl)
             {
+                case FlowControl.Call when instruction.OpCode.Code == DnlibCode.Jmp:
+                case FlowControl.Return:
+                case FlowControl.Throw:
+                    ApplyDefaultBehaviour(currentState, instruction);
+                    return 0;
+                
                 case FlowControl.Call:
                 case FlowControl.Meta:
                 case FlowControl.Next:
@@ -133,11 +142,6 @@ namespace Echo.Platforms.Dnlib
                     transitionBuffer[0] = Branch(true, currentState, instruction);
                     transitionBuffer[1] = FallThrough(currentState, instruction);
                     return 2;
-
-                case FlowControl.Return:
-                case FlowControl.Throw:
-                    ApplyDefaultBehaviour(currentState, instruction);
-                    return 0;
 
                 case FlowControl.Phi:
                     throw new NotSupportedException("There are no known instructions with Phi control flow");

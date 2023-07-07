@@ -66,6 +66,5 @@ namespace Echo.Platforms.AsmResolver.Tests
             var eh = Assert.IsAssignableFrom<ExceptionHandlerRegion<CilInstruction>>(region);
             Assert.Single(eh.Handlers);
         }
-
     }
 }

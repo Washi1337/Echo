@@ -74,6 +74,9 @@ namespace Echo.Platforms.AsmResolver
         {
             switch (instruction.OpCode.FlowControl)
             {
+                case CilFlowControl.Call when instruction.OpCode.Code == CilCode.Jmp:
+                    return 0;
+                
                 case CilFlowControl.Call:
                 case CilFlowControl.Meta:
                 case CilFlowControl.Next:
@@ -109,6 +112,11 @@ namespace Echo.Platforms.AsmResolver
             
             switch (instruction.OpCode.FlowControl)
             {
+                case CilFlowControl.Call when instruction.OpCode.Code == CilCode.Jmp:
+                case CilFlowControl.Return:
+                case CilFlowControl.Throw:
+                    return ProcessTerminatingTransition(currentState, instruction);
+                
                 case CilFlowControl.Branch:
                     return GetUnconditionalBranchTransitions(currentState, instruction, transitionBuffer);
 
@@ -121,10 +129,6 @@ namespace Echo.Platforms.AsmResolver
                 case CilFlowControl.Break:
                     return GetFallthroughTransitions(currentState, instruction, transitionBuffer);
                 
-                case CilFlowControl.Return:
-                case CilFlowControl.Throw:
-                    return ProcessTerminatingTransition(currentState, instruction);
-
                 case CilFlowControl.Phi:
                     throw new NotSupportedException();
                 
