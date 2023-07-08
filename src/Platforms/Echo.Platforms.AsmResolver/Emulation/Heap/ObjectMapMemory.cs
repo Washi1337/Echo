@@ -14,7 +14,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
     public class ObjectMapMemory : IMemorySpace
     {
         private readonly Dictionary<object, MappedObject> _mappedObjects = new();
-        private readonly Dictionary<long, MappedObject> _objectsByAddress = new();
+        private readonly Dictionary<long, MappedObject> _objectsByOffset = new();
         private readonly VirtualMemory _backingBuffer;
         private readonly CilVirtualMachine _machine;
         private long _currentOffset;
@@ -65,7 +65,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
                 
                 _backingBuffer.Map(_backingBuffer.AddressRange.Start + _currentOffset, map);
                 _mappedObjects[value] = map;
-                _objectsByAddress[_currentOffset] = map;
+                _objectsByOffset[_currentOffset] = map;
                 
                 _currentOffset += map.AddressRange.Length;
             }
@@ -81,7 +81,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// <returns><c>true</c> if the object was found, <c>false</c> otherwise.</returns>
         public bool TryGetObject(long address, [NotNullWhen(true)] out MappedObject? map)
         {
-            return _objectsByAddress.TryGetValue(address - AddressRange.Start, out map);
+            return _objectsByOffset.TryGetValue(address - AddressRange.Start, out map);
         }
 
         private TypeMemoryLayout GetLayout(object value)
@@ -114,9 +114,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             
             _backingBuffer.Unmap(mapping.AddressRange.Start);
             _mappedObjects.Remove(value);
-            _objectsByAddress.Remove(mapping.AddressRange.Start);
+            _objectsByOffset.Remove(mapping.AddressRange.Start);
 
-            if (_objectsByAddress.Count == 0)
+            if (_objectsByOffset.Count == 0)
                 _currentOffset = 0;
         }
 
@@ -125,11 +125,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// </summary>
         public void Clear()
         {
-            foreach (long address in _objectsByAddress.Keys)
-                _backingBuffer.Unmap(address);
+            foreach (var map in _objectsByOffset.Values)
+                _backingBuffer.Unmap(map.AddressRange.Start);
 
             _mappedObjects.Clear();
-            _objectsByAddress.Clear();
+            _objectsByOffset.Clear();
             _currentOffset = 0;
         }
     }
