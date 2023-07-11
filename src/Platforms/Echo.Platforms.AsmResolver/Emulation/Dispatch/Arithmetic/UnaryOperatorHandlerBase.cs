@@ -6,10 +6,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
     /// <summary>
     /// Provides a base for unary operator instruction handlers.
     /// </summary>
-    public abstract class UnaryOperatorHandlerBase : ICilOpCodeHandler
+    public abstract class UnaryOperatorHandlerBase : FallThroughOpCodeHandler
     {
         /// <inheritdoc />
-        public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
+        protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             var value = context.CurrentFrame.EvaluationStack.Pop();
             var result = Evaluate(context, instruction, value);
@@ -18,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
         }
 
         /// <summary>
-        /// Evaluates the unary operation on an arguments. 
+        /// Evaluates the unary operation on an argument.
         /// </summary>
         /// <param name="context">The context to evaluate the instruction in.</param>
         /// <param name="instruction">The instruction to dispatch and evaluate.</param>
