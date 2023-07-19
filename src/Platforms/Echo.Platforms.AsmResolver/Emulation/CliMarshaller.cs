@@ -36,7 +36,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                             _resolvedTypes.Add(type, definition);
                     }
 
-                    if (!definition?.IsEnum ?? true)
+                    if (definition is null || !definition.IsEnum)
                         return type;
                     
                     if (definition.GetEnumUnderlyingType() is not { } enumUnderlyingType)
