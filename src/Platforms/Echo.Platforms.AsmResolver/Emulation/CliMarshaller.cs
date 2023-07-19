@@ -28,7 +28,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             switch (type.ElementType)
             {
-                case ElementType.Enum:
+                case ElementType.ValueType:
                     if (!_resolvedTypes.TryGetValue(type, out var definition))
                     {
                         definition = type.Resolve();
@@ -36,10 +36,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
                             _resolvedTypes.Add(type, definition);
                     }
 
-                    if (definition?.GetEnumUnderlyingType() is not { } enumUnderlyingType)
+                    if (definition is null || !definition.IsEnum)
+                        return type;
+                    
+                    if (definition.GetEnumUnderlyingType() is not { } enumUnderlyingType)
                         throw new CilEmulatorException($"Could not resolve enum type {type.FullName}.");
                     
-                    return GetElementType(enumUnderlyingType);
+                    return enumUnderlyingType;
                 
                 default:
                     return type;
