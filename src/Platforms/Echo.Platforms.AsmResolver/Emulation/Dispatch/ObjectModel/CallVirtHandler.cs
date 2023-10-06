@@ -60,11 +60,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var declaringType = baseMethod.DeclaringType!;
             while (type is not null && !Comparer.Equals(type, declaringType))
             {
-                // Prioritize explicit interface implementations.
+                // Prioritize interface implementations.
                 if (declaringType.IsInterface)
-                    implementation = TryFindExplicitInterfaceImplementationInType(type, baseMethod);
+                    implementation = TryFindExplicitInterfaceImplementationInType(type, baseMethod)
+                                     ?? TryFindImplicitInterfaceImplementationInType(type, baseMethod);
 
-                // Try find any implicit implementations.
+                // Try to find other implicit implementations.
                 implementation ??= TryFindImplicitImplementationInType(type, baseMethod);
                 
                 if (implementation is not null)
@@ -92,6 +93,37 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 {
                     return method;
                 }
+            }
+
+            return null;
+        }
+
+        private static MethodDefinition? TryFindImplicitInterfaceImplementationInType(TypeDefinition type, MethodDefinition baseMethod)
+        {
+            // Find the correct interface implementation and instantiate any generics.
+            MethodSignature? baseMethodSig = null;
+            foreach (var interfaceImpl in type.Interfaces)
+            {
+                if (Comparer.Equals(interfaceImpl.Interface?.ToTypeSignature().GetUnderlyingTypeDefOrRef(), baseMethod.DeclaringType))
+                {
+                    baseMethodSig = baseMethod.Signature?.InstantiateGenericTypes(GenericContext.FromType(interfaceImpl.Interface!));
+                    break;
+                }
+            }
+            if (baseMethodSig is null)
+                return null;
+
+            // Find implemented method in type.
+            for (int i = 0; i < type.Methods.Count; i++)
+            {
+                var method = type.Methods[i];
+                // Only public virtual instance methods can implicity implement interface methods. (ECMA-335, 6th edition, II.12.2)
+                if (method.IsPublic
+                    && method.IsVirtual
+                    && !method.IsStatic
+                    && method.Name == baseMethod.Name
+                    && Comparer.Equals(method.Signature, baseMethodSig))
+                    return method;
             }
 
             return null;
