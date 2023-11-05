@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Echo.Ast.Patterns;
 using Echo.Code;
+using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
 namespace Echo.Ast.Tests.Patterns
@@ -10,12 +11,12 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyPhiWithAnyVariables()
         {
-            var statement = new PhiStatement<int>(new AstVariable("phi1"), new List<VariableExpression<int>>
+            var statement = new PhiStatement<int>(new DummyVariable("phi1"), new List<VariableExpression<int>>
             {
-                new VariableExpression<int>(new AstVariable("v1")),
-                new VariableExpression<int>(new AstVariable("v2")),
-                new VariableExpression<int>(new AstVariable("v3")),
-                new VariableExpression<int>(new AstVariable("v4")),
+                new VariableExpression<int>(new DummyVariable("v1")),
+                new VariableExpression<int>(new DummyVariable("v2")),
+                new VariableExpression<int>(new DummyVariable("v3")),
+                new VariableExpression<int>(new DummyVariable("v4")),
             });
 
             var pattern = StatementPattern.Phi<int>();
@@ -28,12 +29,12 @@ namespace Echo.Ast.Tests.Patterns
         {
             var group = new CaptureGroup("phiGroup");
             
-            var statement = new PhiStatement<int>(new AstVariable("phi1"), new List<VariableExpression<int>>
+            var statement = new PhiStatement<int>(new DummyVariable("phi1"), new List<VariableExpression<int>>
             {
-                new VariableExpression<int>(new AstVariable("v1")),
-                new VariableExpression<int>(new AstVariable("v2")),
-                new VariableExpression<int>(new AstVariable("v3")),
-                new VariableExpression<int>(new AstVariable("v4")),
+                new VariableExpression<int>(new DummyVariable("v1")),
+                new VariableExpression<int>(new DummyVariable("v2")),
+                new VariableExpression<int>(new DummyVariable("v3")),
+                new VariableExpression<int>(new DummyVariable("v4")),
             });
 
             var pattern = StatementPattern.Phi<int>()
@@ -48,11 +49,11 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyPhiWithFixedVariables()
         {
-            var statement = new PhiStatement<int>(new AstVariable("phi1"), new List<VariableExpression<int>>
+            var statement = new PhiStatement<int>(new DummyVariable("phi1"), new List<VariableExpression<int>>
             {
-                new VariableExpression<int>(new AstVariable("v1")),
-                new VariableExpression<int>(new AstVariable("v2")),
-                new VariableExpression<int>(new AstVariable("v3")),
+                new VariableExpression<int>(new DummyVariable("v1")),
+                new VariableExpression<int>(new DummyVariable("v2")),
+                new VariableExpression<int>(new DummyVariable("v3")),
             });
 
             var pattern = StatementPattern.Phi<int>()
@@ -63,7 +64,7 @@ namespace Echo.Ast.Tests.Patterns
 
             Assert.True(pattern.Matches(statement));
 
-            statement.Sources.Add(new VariableExpression<int>(new AstVariable("v4")));
+            statement.Sources.Add(new VariableExpression<int>(new DummyVariable("v4")));
 
             Assert.False(pattern.Matches(statement));
         }

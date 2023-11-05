@@ -1,6 +1,7 @@
 using System;
 using Echo.Ast.Patterns;
 using Echo.Code;
+using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
 namespace Echo.Ast.Tests.Patterns
@@ -12,7 +13,7 @@ namespace Echo.Ast.Tests.Patterns
         {
             var statement = new AssignmentStatement<int>(new IVariable[]
             {
-                new AstVariable("var1"),
+                new DummyVariable("var1"),
             }, new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty));
             
             var pattern = StatementPattern.Assignment<int>();
@@ -27,7 +28,7 @@ namespace Echo.Ast.Tests.Patterns
             
             var statement = new AssignmentStatement<int>(new IVariable[]
             {
-                new AstVariable("var1"),
+                new DummyVariable("var1"),
             }, new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty));
 
             var pattern = StatementPattern
@@ -47,7 +48,7 @@ namespace Echo.Ast.Tests.Patterns
             
             var statement = new AssignmentStatement<int>(new IVariable[]
             {
-                new AstVariable("var1"),
+                new DummyVariable("var1"),
             }, new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty));
 
             var pattern = StatementPattern
