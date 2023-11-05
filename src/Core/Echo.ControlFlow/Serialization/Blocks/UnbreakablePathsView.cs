@@ -116,7 +116,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 var handlerRegion = ehRegion.Handlers[i];
 
                 // Ensure the handler that we can jump to has an entrypoint node.
-                var handlerEntry = handlerRegion.GetEntrypoint();
+                var handlerEntry = handlerRegion.GetEntryPoint();
                 if (handlerEntry is null)
                 {
                     throw new InvalidOperationException(
@@ -133,9 +133,9 @@ namespace Echo.ControlFlow.Serialization.Blocks
             
             ControlFlowNode<TInstruction> nextEntry = null;
             if (node.ParentRegion == handlerRegion.Prologue)
-                nextEntry = handlerRegion.Contents.Entrypoint;
+                nextEntry = handlerRegion.Contents.EntryPoint;
             if (nextEntry is null && node.ParentRegion == handlerRegion.Contents)
-                nextEntry = handlerRegion.Epilogue?.Entrypoint;
+                nextEntry = handlerRegion.Epilogue?.EntryPoint;
 
             if (nextEntry != null)
                 AddSuccessorToResult(result, nextEntry);

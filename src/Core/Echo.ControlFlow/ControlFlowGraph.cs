@@ -16,9 +16,9 @@ namespace Echo.ControlFlow
     /// object in a type safe manner. 
     /// </summary>
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
-    public class ControlFlowGraph<TInstruction> : IGraph, IControlFlowRegion<TInstruction>
+    public class ControlFlowGraph<TInstruction> : IGraph, IScopeControlFlowRegion<TInstruction>
     {
-        private ControlFlowNode<TInstruction> _entrypoint;
+        private ControlFlowNode<TInstruction> _entryPoint;
 
         /// <summary>
         /// Creates a new empty graph.
@@ -34,16 +34,16 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets or sets the node that is executed first in the control flow graph.
         /// </summary>
-        public ControlFlowNode<TInstruction> Entrypoint
+        public ControlFlowNode<TInstruction> EntryPoint
         {
-            get => _entrypoint;
+            get => _entryPoint;
             set
             {
-                if (_entrypoint != value)
+                if (_entryPoint != value)
                 {
                     if (!Nodes.Contains(value))
                         throw new ArgumentException("Node is not present in the graph.", nameof(value));
-                    _entrypoint = value;
+                    _entryPoint = value;
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace Echo.ControlFlow
         /// <inheritdoc />
         IEnumerable<ISubGraph> ISubGraph.GetSubGraphs() => Regions;
 
-        ControlFlowNode<TInstruction> IControlFlowRegion<TInstruction>.GetEntrypoint() => Entrypoint;
+        ControlFlowNode<TInstruction> IControlFlowRegion<TInstruction>.GetEntryPoint() => EntryPoint;
 
         /// <inheritdoc />
         IEnumerable<ControlFlowRegion<TInstruction>> IControlFlowRegion<TInstruction>.GetSubRegions() => Regions;

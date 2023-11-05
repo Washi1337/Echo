@@ -3,7 +3,7 @@ using Echo.Code;
 
 namespace Echo.Ast.Analysis
 {
-    internal sealed class ReadVariableFinderWalker<TInstruction> : AstNodeWalkerBase<TInstruction>
+    internal sealed class ReadVariableFinderWalker<TInstruction> : AstNodeWalker<TInstruction>
     {
         internal int Count => Variables.Count;
 

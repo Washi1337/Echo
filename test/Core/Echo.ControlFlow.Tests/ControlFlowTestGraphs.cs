@@ -11,7 +11,7 @@ namespace Echo.ControlFlow.Tests
             var n1 = new ControlFlowNode<DummyInstruction>(0, DummyInstruction.Ret(0));
 
             graph.Nodes.Add(n1);
-            graph.Entrypoint = n1;
+            graph.EntryPoint = n1;
 
             return graph;
         }
@@ -33,7 +33,7 @@ namespace Echo.ControlFlow.Tests
                 DummyInstruction.Ret(3));
 
             graph.Nodes.AddRange(new[] {n1, n2, n3, n4});
-            graph.Entrypoint = n1;
+            graph.EntryPoint = n1;
 
             n1.ConnectWith(n2);
             n2.ConnectWith(n3);
@@ -57,7 +57,7 @@ namespace Echo.ControlFlow.Tests
                 DummyInstruction.Ret(3));
 
             graph.Nodes.AddRange(new[] {n1, n2, n3});
-            graph.Entrypoint = n1;
+            graph.EntryPoint = n1;
 
             n1.ConnectWith(n2);
             n1.ConnectWith(n3, ControlFlowEdgeType.Conditional);
@@ -84,7 +84,7 @@ namespace Echo.ControlFlow.Tests
                 DummyInstruction.Ret(4));
 
             graph.Nodes.AddRange(new[] {n1, n2, n3, n4});
-            graph.Entrypoint = n1;
+            graph.EntryPoint = n1;
 
             n1.ConnectWith(n2);
             n1.ConnectWith(n3, ControlFlowEdgeType.Conditional);
@@ -119,7 +119,7 @@ namespace Echo.ControlFlow.Tests
                 DummyInstruction.Ret(7));
 
             graph.Nodes.AddRange(new[] {n1, n2, n3, n4, n5, n6});
-            graph.Entrypoint = n1;
+            graph.EntryPoint = n1;
 
             n1.ConnectWith(n2);
             n1.ConnectWith(n6, ControlFlowEdgeType.Conditional);
@@ -150,7 +150,7 @@ namespace Echo.ControlFlow.Tests
                 DummyInstruction.Ret(4));
 
             graph.Nodes.AddRange(new[] {n1, n2, n3, n4});
-            graph.Entrypoint = n1;
+            graph.EntryPoint = n1;
 
             n1.ConnectWith(n3);
             n3.ConnectWith(n2, ControlFlowEdgeType.Conditional);
@@ -178,7 +178,7 @@ namespace Echo.ControlFlow.Tests
                 DummyInstruction.Ret(5));
             
             graph.Nodes.AddRange(new[] {n1, n2, n3, n4, n5, n6});
-            graph.Entrypoint = n1;
+            graph.EntryPoint = n1;
 
             n1.ConnectWith(n2);
             n1.ConnectWith(n3,ControlFlowEdgeType.Conditional);

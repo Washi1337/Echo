@@ -68,11 +68,11 @@ namespace Echo.ControlFlow.Regions
         }
 
         /// <inheritdoc />
-        public override ControlFlowNode<TInstruction> GetEntrypoint()
+        public override ControlFlowNode<TInstruction> GetEntryPoint()
         {
-            var entrypoint = _prologue?.GetEntrypoint();
-            entrypoint ??= Contents.GetEntrypoint();
-            entrypoint ??= _epilogue?.GetEntrypoint();
+            var entrypoint = _prologue?.GetEntryPoint();
+            entrypoint ??= Contents.GetEntryPoint();
+            entrypoint ??= _epilogue?.GetEntryPoint();
             return entrypoint;
         }
 

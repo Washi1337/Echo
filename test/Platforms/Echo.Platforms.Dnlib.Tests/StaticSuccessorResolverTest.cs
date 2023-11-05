@@ -33,7 +33,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.If));
             var cfg = method.ConstructStaticFlowGraph();
             
-            Assert.Single(cfg.Entrypoint.ConditionalEdges);
+            Assert.Single(cfg.EntryPoint.ConditionalEdges);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.SwitchColor));
             var cfg = method.ConstructStaticFlowGraph();
             
-            Assert.Equal(3, cfg.Entrypoint.ConditionalEdges.Count);
+            Assert.Equal(3, cfg.EntryPoint.ConditionalEdges.Count);
         }
         
         [Fact]

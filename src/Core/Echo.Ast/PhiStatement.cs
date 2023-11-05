@@ -13,13 +13,23 @@ namespace Echo.Ast
         /// <summary>
         /// Creates a new Phi statement
         /// </summary>
-        /// <param name="target">The target variable that will be assigned to</param>
-        /// <param name="sources">The possible sources for the assignment</param>
-        public PhiStatement(IVariable target, IEnumerable<VariableExpression<TInstruction>> sources)
+        /// <param name="representative">The target variable that will be assigned to</param>
+        public PhiStatement(IVariable representative)
         {
+            Representative = representative;
             Sources = new TreeNodeCollection<PhiStatement<TInstruction>, VariableExpression<TInstruction>>(this);
-            Target = target;
+        }
+        
+        /// <summary>
+        /// Creates a new Phi statement
+        /// </summary>
+        /// <param name="representative">The target variable that will be assigned to</param>
+        /// <param name="sources">The possible sources for the assignment</param>
+        public PhiStatement(IVariable representative, IEnumerable<VariableExpression<TInstruction>> sources)
+        {
+            Representative = representative;
             
+            Sources = new TreeNodeCollection<PhiStatement<TInstruction>, VariableExpression<TInstruction>>(this);
             foreach (var source in sources)
                 Sources.Add(source);
         }
@@ -27,16 +37,16 @@ namespace Echo.Ast
         /// <summary>
         /// The variable that will be assigned to
         /// </summary>
-        public IVariable Target
+        public IVariable Representative
         {
             get;
             private set;
         }
 
         /// <summary>
-        /// The possible sources for that could be assigned to <see cref="Target"/>
+        /// The possible sources for that could be assigned to <see cref="Representative"/>
         /// </summary>
-        public ICollection<VariableExpression<TInstruction>> Sources
+        public IList<VariableExpression<TInstruction>> Sources
         {
             get;
         }
@@ -53,13 +63,13 @@ namespace Echo.Ast
             visitor.Visit(this, state);
 
         /// <summary>
-        /// Modifies the current <see cref="PhiStatement{TInstruction}"/> to assign to <paramref name="target"/>
+        /// Modifies the current <see cref="PhiStatement{TInstruction}"/> to assign to <paramref name="variable"/>
         /// </summary>
-        /// <param name="target">The new target to assign</param>
-        /// <returns>The same <see cref="PhiStatement{TInstruction}"/> instance but with the new <paramref name="target"/></returns>
-        public PhiStatement<TInstruction> WithTarget(IVariable target)
+        /// <param name="variable">The new target to assign</param>
+        /// <returns>The same <see cref="PhiStatement{TInstruction}"/> instance but with the new <paramref name="variable"/></returns>
+        public PhiStatement<TInstruction> WithRepresentative(IVariable variable)
         {
-            Target = target;
+            Representative = variable;
             return this;
         }
 
@@ -87,7 +97,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"{Target} = φ({string.Join(", ", Sources)})";
+        public override string ToString() => $"{Representative.Name} = φ({string.Join(", ", Sources)})";
 
         internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) => ToString();
     }

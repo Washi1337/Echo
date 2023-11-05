@@ -14,11 +14,13 @@ namespace Echo.Ast
         private readonly FlowControlDeterminer<TInstruction> _flowControlDeterminer;
 
         /// <summary>
-        /// Create a new decorator around the <paramref name="isa"/>
+        /// Create a new decorator around the <paramref name="baseArchitecture"/>
         /// </summary>
-        /// <param name="isa">The <see cref="IArchitecture{TInstruction}"/> to decorate</param>
-        public AstArchitecture(IArchitecture<TInstruction> isa) =>
-            _flowControlDeterminer = new FlowControlDeterminer<TInstruction>(isa);
+        /// <param name="baseArchitecture">The <see cref="IArchitecture{TInstruction}"/> to decorate</param>
+        public AstArchitecture(IArchitecture<TInstruction> baseArchitecture)
+        {
+            _flowControlDeterminer = new FlowControlDeterminer<TInstruction>(baseArchitecture);
+        }
 
         /// <inheritdoc />
         public long GetOffset(in Statement<TInstruction> instruction) => throw new NotSupportedException();
@@ -27,9 +29,11 @@ namespace Echo.Ast
         public int GetSize(in Statement<TInstruction> instruction) => 1;
 
         /// <inheritdoc />
-        public InstructionFlowControl GetFlowControl(in Statement<TInstruction> instruction) =>
-            instruction.Accept(_flowControlDeterminer, null);
-        
+        public InstructionFlowControl GetFlowControl(in Statement<TInstruction> instruction)
+        {
+            return instruction.Accept(_flowControlDeterminer, null);
+        }
+
         /// <inheritdoc />
         public int GetStackPushCount(in Statement<TInstruction> instruction) => 0;
 

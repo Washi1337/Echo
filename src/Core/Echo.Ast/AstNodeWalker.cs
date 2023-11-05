@@ -4,7 +4,7 @@ namespace Echo.Ast
     /// Provides a base contract for Ast walkers
     /// </summary>
     /// <typeparam name="TInstruction">The type of the instruction</typeparam>
-    public abstract class AstNodeWalkerBase<TInstruction> : IAstNodeVisitor<TInstruction, object>
+    public abstract class AstNodeWalker<TInstruction> : IAstNodeVisitor<TInstruction, object>
     {
         /// <summary>
         /// Begin visiting a given <see cref="AssignmentStatement{TInstruction}"/>
@@ -64,60 +64,60 @@ namespace Echo.Ast
         /// <param name="variableExpression">The <see cref="VariableExpression{TInstruction}"/> that is will be visited</param>
         protected virtual void VisitVariableExpression(VariableExpression<TInstruction> variableExpression) { }
 
-        private void VisitChildren(AstNodeBase<TInstruction> node)
+        private void VisitChildren(AstNode<TInstruction> node)
         {
             foreach (var child in node.GetChildren())
-                ((AstNodeBase<TInstruction>) child).Accept(this, null);
+                ((AstNode<TInstruction>) child).Accept(this, null);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object>.Visit(AssignmentStatement<TInstruction> assignmentStatement,
+        void IAstNodeVisitor<TInstruction, object>.Visit(AssignmentStatement<TInstruction> statement,
             object state)
         {
-            EnterAssignmentStatement(assignmentStatement);
+            EnterAssignmentStatement(statement);
 
-            assignmentStatement.Expression.Accept(this, state);
+            statement.Expression.Accept(this, state);
 
-            ExitAssignmentStatement(assignmentStatement);
+            ExitAssignmentStatement(statement);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object>.Visit(ExpressionStatement<TInstruction> expressionStatement,
+        void IAstNodeVisitor<TInstruction, object>.Visit(ExpressionStatement<TInstruction> expression,
             object state)
         {
-            EnterExpressionStatement(expressionStatement);
+            EnterExpressionStatement(expression);
 
-            expressionStatement.Expression.Accept(this, state);
+            expression.Expression.Accept(this, state);
 
-            ExitExpressionStatement(expressionStatement);
+            ExitExpressionStatement(expression);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object>.Visit(PhiStatement<TInstruction> phiStatement, object state)
+        void IAstNodeVisitor<TInstruction, object>.Visit(PhiStatement<TInstruction> statement, object state)
         {
-            EnterPhiStatement(phiStatement);
+            EnterPhiStatement(statement);
 
-            foreach (var source in phiStatement.Sources)
+            foreach (var source in statement.Sources)
                 source.Accept(this, state);
 
-            ExitPhiStatement(phiStatement);
+            ExitPhiStatement(statement);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object>.Visit(InstructionExpression<TInstruction> instructionExpression, object state)
+        void IAstNodeVisitor<TInstruction, object>.Visit(InstructionExpression<TInstruction> expression, object state)
         {
-            EnterInstructionExpression(instructionExpression);
+            EnterInstructionExpression(expression);
 
-            foreach (var parameter in instructionExpression.Arguments)
+            foreach (var parameter in expression.Arguments)
                 parameter.Accept(this, state);
 
-            ExitInstructionExpression(instructionExpression);
+            ExitInstructionExpression(expression);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object>.Visit(VariableExpression<TInstruction> variableExpression, object state)
+        void IAstNodeVisitor<TInstruction, object>.Visit(VariableExpression<TInstruction> expression, object state)
         {
-            VisitVariableExpression(variableExpression);
+            VisitVariableExpression(expression);
         }
     }
 }

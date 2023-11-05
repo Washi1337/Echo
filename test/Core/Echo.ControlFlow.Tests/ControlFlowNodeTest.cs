@@ -445,7 +445,7 @@ namespace Echo.ControlFlow.Tests
             handler.Contents.Nodes.Add(n2);
 
             n1.ConnectWith(n2, ControlFlowEdgeType.Abnormal);
-            graph.Entrypoint = n1;
+            graph.EntryPoint = n1;
 
             var (first, second) = n1.SplitAtIndex(2);
             Assert.Equal(first.ParentRegion, second.ParentRegion);

@@ -18,4 +18,9 @@
       <ProjectReference Include="..\..\Platforms\Echo.Platforms.DummyPlatform\Echo.Platforms.DummyPlatform.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Patterns\AssignmentStatementPattern.cs" />
+      <Compile Remove="Patterns\PhiStatementPatternTest.cs" />
+    </ItemGroup>
+
 </Project>

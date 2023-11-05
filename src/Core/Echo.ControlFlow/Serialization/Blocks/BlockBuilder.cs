@@ -250,7 +250,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
 
             public override string ToString()
             {
-                return $"{Region.GetType().Name}, Offset: {Region.GetEntrypoint().Offset:X8}";
+                return $"{Region.GetType().Name}, Offset: {Region.GetEntryPoint().Offset:X8}";
             }
         }
         

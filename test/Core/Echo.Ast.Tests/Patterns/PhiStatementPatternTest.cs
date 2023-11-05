@@ -42,7 +42,7 @@ namespace Echo.Ast.Tests.Patterns
             var result = pattern.Match(statement);
             Assert.True(result.IsSuccess);
             Assert.Contains(group, result.Captures);
-            Assert.Contains(statement.Target, result.Captures[group]);
+            Assert.Contains(statement.Representative, result.Captures[group]);
         }
         
         [Fact]

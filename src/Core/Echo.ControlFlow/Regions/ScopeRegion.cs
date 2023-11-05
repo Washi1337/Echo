@@ -10,7 +10,7 @@ namespace Echo.ControlFlow.Regions
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public class ScopeRegion<TInstruction> : ControlFlowRegion<TInstruction>
     {
-        private ControlFlowNode<TInstruction> _entrypoint;
+        private ControlFlowNode<TInstruction> _entryPoint;
 
         /// <summary>
         /// Creates a new instance of the <see cref="ScopeRegion{TInstruction}"/> class.
@@ -24,10 +24,10 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets or sets the first node that is executed in the region.
         /// </summary>
-        public ControlFlowNode<TInstruction> Entrypoint
+        public ControlFlowNode<TInstruction> EntryPoint
         {
-            get => _entrypoint;
-            set => _entrypoint = value;
+            get => _entryPoint;
+            set => _entryPoint = value;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Echo.ControlFlow.Regions
         }
 
         /// <inheritdoc />
-        public override ControlFlowNode<TInstruction> GetEntrypoint() => Entrypoint;
+        public override ControlFlowNode<TInstruction> GetEntryPoint() => EntryPoint;
 
         /// <inheritdoc />
         public override IEnumerable<ControlFlowRegion<TInstruction>> GetSubRegions() => Regions;

@@ -3,5 +3,5 @@
     /// <summary>
     /// Provides a base contract for expressions in the AST
     /// </summary>
-    public abstract class Expression<TInstruction> : AstNodeBase<TInstruction> { }
+    public abstract class Expression<TInstruction> : AstNode<TInstruction> { }
 }

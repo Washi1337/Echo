@@ -25,7 +25,7 @@ namespace Echo.ControlFlow.Construction
             var graph = new ControlFlowGraph<TInstruction>(Architecture);
             CreateNodes(graph, traversalResult);
             ConnectNodes(graph, traversalResult);
-            graph.Entrypoint = graph.GetNodeByOffset(entrypoint);
+            graph.EntryPoint = graph.GetNodeByOffset(entrypoint);
             
             return graph;
         }

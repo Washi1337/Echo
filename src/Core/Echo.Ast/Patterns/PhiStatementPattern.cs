@@ -69,7 +69,7 @@ namespace Echo.Ast.Patterns
             }
 
             // Match contents.
-            Target.Match(statement.Target, result);
+            Target.Match(statement.Representative, result);
             if (!result.IsSuccess)
                 return;
 
@@ -82,8 +82,7 @@ namespace Echo.Ast.Patterns
                     return;
                 }
 
-                // TODO: remove ToArray() and use indexing in the Sources property directly.
-                var sources = statement.Sources.ToArray();
+                var sources = statement.Sources;
                 for (int i = 0; i < Sources.Count && result.IsSuccess; i++)
                     Sources[i].Match(sources[i], result);
             }

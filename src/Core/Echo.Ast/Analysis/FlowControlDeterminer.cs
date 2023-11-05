@@ -10,19 +10,19 @@ namespace Echo.Ast.Analysis
         internal FlowControlDeterminer(IArchitecture<TInstruction> isa) =>
             _isa = isa;
 
-        public InstructionFlowControl Visit(AssignmentStatement<TInstruction> assignmentStatement, object state) =>
-            assignmentStatement.Expression.Accept(this, state);
+        public InstructionFlowControl Visit(AssignmentStatement<TInstruction> statement, object state) =>
+            statement.Expression.Accept(this, state);
 
-        public InstructionFlowControl Visit(ExpressionStatement<TInstruction> expressionStatement, object state) =>
-            expressionStatement.Expression.Accept(this, state);
+        public InstructionFlowControl Visit(ExpressionStatement<TInstruction> statement, object state) =>
+            statement.Expression.Accept(this, state);
 
-        public InstructionFlowControl Visit(PhiStatement<TInstruction> phiStatement, object state) =>
+        public InstructionFlowControl Visit(PhiStatement<TInstruction> statement, object state) =>
             InstructionFlowControl.Fallthrough;
 
-        public InstructionFlowControl Visit(InstructionExpression<TInstruction> instructionExpression, object state) =>
-            _isa.GetFlowControl(instructionExpression.Instruction);
+        public InstructionFlowControl Visit(InstructionExpression<TInstruction> expression, object state) =>
+            _isa.GetFlowControl(expression.Instruction);
 
-        public InstructionFlowControl Visit(VariableExpression<TInstruction> variableExpression, object state) =>
+        public InstructionFlowControl Visit(VariableExpression<TInstruction> expression, object state) =>
             InstructionFlowControl.Fallthrough;
     }
 }

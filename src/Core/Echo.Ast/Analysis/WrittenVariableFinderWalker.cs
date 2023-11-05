@@ -3,7 +3,7 @@ using Echo.Code;
 
 namespace Echo.Ast.Analysis
 {
-    internal sealed class WrittenVariableFinderWalker<TInstruction> : AstNodeWalkerBase<TInstruction>
+    internal sealed class WrittenVariableFinderWalker<TInstruction> : AstNodeWalker<TInstruction>
     {
         internal int Count => Variables.Count;
         
@@ -19,6 +19,6 @@ namespace Echo.Ast.Analysis
         }
 
         protected override void ExitPhiStatement(PhiStatement<TInstruction> phiStatement) =>
-            Variables.Add(phiStatement.Target);
+            Variables.Add(phiStatement.Representative);
     }
 }

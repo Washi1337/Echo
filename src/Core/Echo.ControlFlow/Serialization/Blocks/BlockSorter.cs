@@ -50,7 +50,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             var sorter = new TopologicalSorter<ControlFlowNode<TInstruction>>(pathsView.GetImpliedNeighbours, true);
 
             return sorter
-                .GetTopologicalSorting(cfg.Entrypoint)
+                .GetTopologicalSorting(cfg.EntryPoint)
                 .Reverse()
                 .SelectMany(n => pathsView.GetUnbreakablePath(n));
         }

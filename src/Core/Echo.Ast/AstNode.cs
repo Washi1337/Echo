@@ -6,7 +6,7 @@ namespace Echo.Ast
     /// <summary>
     /// Provides a base contract for all Ast nodes
     /// </summary>
-    public abstract class AstNodeBase<TInstruction> : TreeNodeBase
+    public abstract class AstNode<TInstruction> : TreeNodeBase
     {
         /// <summary>
         /// Implements the visitor pattern

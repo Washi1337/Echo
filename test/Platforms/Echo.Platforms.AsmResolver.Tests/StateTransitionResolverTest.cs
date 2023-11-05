@@ -40,7 +40,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var body = method.CilMethodBody!;
             var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
             
-            Assert.Single(cfg.Entrypoint.ConditionalEdges);
+            Assert.Single(cfg.EntryPoint.ConditionalEdges);
             
             var ldstrAdult = FindLdstr("Adult");
             var ldstrChild = FindLdstr("Child");
