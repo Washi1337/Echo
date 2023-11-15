@@ -120,15 +120,11 @@ public sealed class AstBuilder<TInstruction>
                 
                 // If we are the final terminator or branch instruction at the end of the block, we want to flush any
                 // remaining values on the stack *before* the instruction statement.
-                if ((architecture.GetFlowControl(instruction)
-                        & (InstructionFlowControl.CanBranch | InstructionFlowControl.IsTerminator)) != 0)
-                {
+                if ((architecture.GetFlowControl(instruction) & (InstructionFlowControl.CanBranch | InstructionFlowControl.IsTerminator)) != 0)
                     FlushStack(node, stack);
-                }
 
                 // Ensure order of operations is preserved if expression is potentially impure.
-                if (!expression.Accept(AstPurityVisitor<TInstruction>.Instance, _purityClassifier).ToBooleanOrFalse())
-                    FlushStackAndPush(node, stack);
+                FlushStackIfImpure(node, stack, expression);
 
                 // Wrap the expression into an independent statement and add it.
                 node.Transformed.Contents.Instructions.Add(new ExpressionStatement<TInstruction>(expression));
@@ -143,8 +139,7 @@ public sealed class AstBuilder<TInstruction>
                 // Multiple values are produced, move them into separate variables and push them on eval stack.
                 
                 // Ensure order of operations is preserved if expression is potentially impure.
-                if (!expression.Accept(AstPurityVisitor<TInstruction>.Instance, _purityClassifier).ToBooleanOrFalse())
-                    FlushStackAndPush(node, stack);
+                FlushStackIfImpure(node, stack, expression);
                  
                 // Declare new intermediate variables.
                 var variables = new IVariable[pushCount];
@@ -179,6 +174,28 @@ public sealed class AstBuilder<TInstruction>
         var variables = FlushStackInternal(node, stack, n => n.DeclareStackIntermediate());
         for (int i = 0; i < variables.Count; i++)
             stack.Push(new VariableExpression<TInstruction>(variables[i]));
+    }
+
+    private void FlushStackIfImpure(
+        LiftedNode<TInstruction> node, 
+        Stack<Expression<TInstruction>> stack, 
+        Expression<TInstruction> expression)
+    {
+        if (expression.IsPure(_purityClassifier).ToBooleanOrFalse())
+            return;
+
+        bool fullyPureStack = true;
+        foreach (var value in stack)
+        {
+            if (!value.IsPure(_purityClassifier).ToBooleanOrFalse())
+            {
+                fullyPureStack = false;
+                break;
+            }
+        }
+
+        if (!fullyPureStack)
+            FlushStackAndPush(node, stack);
     }
 
     private static IList<IVariable> FlushStackInternal(

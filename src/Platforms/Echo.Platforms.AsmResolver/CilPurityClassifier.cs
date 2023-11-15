@@ -268,6 +268,9 @@ namespace Echo.Platforms.AsmResolver
         {
             switch (instruction.OpCode.Code)
             {
+                case CilCode.Newarr:
+                    return false;
+                
                 case CilCode.Stelem:
                     return ArrayWritePurity | DefaultTypeAccessPurity;
                 
