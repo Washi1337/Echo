@@ -15,8 +15,8 @@ public class DummyPurityClassifier : IPurityClassifier<DummyInstruction>
         return instruction.OpCode switch
         {
             DummyOpCode.Op => Trilean.Unknown,
-            DummyOpCode.Push => true,
-            DummyOpCode.Pop => true,
+            DummyOpCode.Push => false,
+            DummyOpCode.Pop => false,
             DummyOpCode.Get => true,
             DummyOpCode.Set => false,
             DummyOpCode.Jmp => true,

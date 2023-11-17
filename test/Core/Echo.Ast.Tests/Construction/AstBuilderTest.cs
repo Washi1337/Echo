@@ -374,6 +374,9 @@ public class AstBuilderTest
             DummyInstruction.Ret(11)
         });
 
+        using var fs = File.CreateText("/tmp/output.dot");
+        cfg.ToDotGraph(fs);
+
         var block = cfg.Nodes[0].Contents;
         Assert.IsAssignableFrom<AssignmentStatement<DummyInstruction>>(block.Instructions[0]);
         Assert.IsAssignableFrom<ExpressionStatement<DummyInstruction>>(block.Instructions[1]);
