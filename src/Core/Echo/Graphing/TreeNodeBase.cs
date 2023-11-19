@@ -5,19 +5,28 @@ using System.Linq;
 namespace Echo.Graphing
 {
     /// <summary>
-    /// Provides a base contract for nodes that will be used in a tree
+    /// Provides a base contract for nodes that will be used in a tree.
     /// </summary>
     public abstract class TreeNodeBase : INode
     {
         private readonly object _lock = new();
-        
+        private TreeNodeBase? _parent;
+
         /// <summary>
         /// The parent of this <see cref="TreeNodeBase"/>
         /// </summary>
         public TreeNodeBase? Parent
         {
-            get;
-            internal set;
+            get => _parent;
+            internal set
+            {
+                if (_parent != value)
+                {
+                    var original = _parent;
+                    _parent = value;
+                    OnParentChanged(original);
+                }
+            }
         }
 
         /// <inheritdoc />
@@ -78,6 +87,14 @@ namespace Echo.Graphing
                 if (child is not null)
                     child.Parent = this;
             }
+        }
+
+        /// <summary>
+        /// Called when the parent of the tree node changes.
+        /// </summary>
+        /// <param name="old">The original tree node parent.</param>
+        protected virtual void OnParentChanged(TreeNodeBase? old)
+        {
         }
     }
 }
