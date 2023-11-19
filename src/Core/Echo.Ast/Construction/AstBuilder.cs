@@ -117,7 +117,8 @@ public sealed class AstBuilder<TInstruction>
             {
                 var argument = Pop(node, stack);
                 expression.Arguments.Insert(0, argument);
-                expression.OriginalRange = expression.OriginalRange!.Value!.Expand(argument.OriginalRange!.Value!);
+                if (argument.OriginalRange is not null)
+                    expression.OriginalRange = expression.OriginalRange.Value.Expand(argument.OriginalRange.Value);
             }
         }
 
