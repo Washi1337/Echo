@@ -23,7 +23,7 @@ namespace Echo.ControlFlow.Blocks
         public ScopeBlock<TInstruction> Contents
         {
             get;
-        } = new ScopeBlock<TInstruction>();
+        } = new();
 
         /// <summary>
         /// Gets or sets the epilogue block that gets executed after the main handler block (if available).
@@ -76,5 +76,9 @@ namespace Echo.ControlFlow.Blocks
 
         /// <inheritdoc />
         public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitHandlerBlock(this);
+
+        /// <inheritdoc />
+        public TResult AcceptVisitor<TState, TResult>(IBlockVisitor<TInstruction, TState, TResult> visitor, TState state) 
+            => visitor.VisitHandlerBlock(this, state);
     }
 }
