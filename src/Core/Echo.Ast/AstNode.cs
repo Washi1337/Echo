@@ -10,6 +10,16 @@ namespace Echo.Ast
     public abstract class AstNode<TInstruction> : TreeNodeBase
     {
         /// <summary>
+        /// Gets or sets the original address range this AST node mapped to in the raw disassembly of the code
+        /// (if available).
+        /// </summary>
+        public AddressRange? OriginalRange
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
         /// Determines whether the AST node consists of only pure expressions that do not affect state.
         /// </summary>
         /// <param name="classifier">The object responsible for classifying individual instructions for purity</param>

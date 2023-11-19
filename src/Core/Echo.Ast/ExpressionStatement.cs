@@ -15,7 +15,11 @@ namespace Echo.Ast
         /// Creates a new expression statement
         /// </summary>
         /// <param name="expression">The expression</param>
-        public ExpressionStatement(Expression<TInstruction> expression) => Expression = expression;
+        public ExpressionStatement(Expression<TInstruction> expression)
+        {
+            Expression = expression;
+            OriginalRange = expression.OriginalRange;
+        }
 
         /// <summary>
         /// The expression that this <see cref="ExpressionStatement{TInstruction}"/> holds
@@ -33,12 +37,12 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
-            visitor.Visit(this, state);
+        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) 
+            => visitor.Visit(this, state);
 
         /// <inheritdoc />
-        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
-            visitor.Visit(this, state);
+        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) 
+            => visitor.Visit(this, state);
 
         /// <summary>
         /// Modifies the current <see cref="ExpressionStatement{TInstruction}"/> to have <paramref name="expression"/>
@@ -54,7 +58,7 @@ namespace Echo.Ast
         /// <inheritdoc />
         public override string ToString() => $"{Expression}";
 
-        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
-            $"{Expression.Format(instructionFormatter)}";
+        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) 
+            => $"{Expression.Format(instructionFormatter)}";
     }
 }

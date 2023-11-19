@@ -78,6 +78,20 @@ namespace Echo
         public bool Contains(AddressRange range) => Contains(range.Start) && Contains(range.End);
 
         /// <summary>
+        /// Expands the address range such that the provided offset is included in the range.
+        /// </summary>
+        /// <param name="offset">The offset to include.</param>
+        /// <returns>The new expanded range.</returns>
+        public AddressRange Expand(long offset) => new(Math.Min(Start, offset), Math.Max(End, offset));
+        
+        /// <summary>
+        /// Expands the address range such that the provided address range is included in the total range.
+        /// </summary>
+        /// <param name="other">The other address range to include.</param>
+        /// <returns>The new expanded range.</returns>
+        public AddressRange Expand(AddressRange other) => new(Math.Min(Start, other.Start), Math.Max(End, other.End));
+
+        /// <summary>
         /// Determines whether the range is considered equal with the provided range.
         /// </summary>
         /// <param name="other">The other range.</param>

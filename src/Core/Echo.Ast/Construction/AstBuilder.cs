@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Echo.Ast.Analysis;
 using Echo.Code;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Regions;
@@ -94,9 +93,16 @@ public sealed class AstBuilder<TInstruction>
         Stack<Expression<TInstruction>> stack)
     {
         var architecture = _original.Architecture;
-        
+        long startOffset = architecture.GetOffset(instruction);
+
         // Wrap the instruction into an expression.
-        var expression = new InstructionExpression<TInstruction>(instruction);
+        var expression = new InstructionExpression<TInstruction>(instruction)
+        {
+            OriginalRange = new AddressRange(
+                startOffset,
+                startOffset + architecture.GetSize(instruction)
+            )
+        };
 
         // Determine the arguments.
         int popCount = architecture.GetStackPopCount(instruction);
@@ -108,7 +114,11 @@ public sealed class AstBuilder<TInstruction>
         else
         {
             for (int i = 0; i < popCount; i++)
-                expression.Arguments.Insert(0, Pop(node, stack));
+            {
+                var argument = Pop(node, stack);
+                expression.Arguments.Insert(0, argument);
+                expression.OriginalRange = expression.OriginalRange!.Value!.Expand(argument.OriginalRange!.Value!);
+            }
         }
 
         // Determine the produced values.

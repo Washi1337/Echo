@@ -30,6 +30,7 @@ namespace Echo.Ast
         {
             Expression = expression;
             Variables = variables.ToList();
+            OriginalRange = expression.OriginalRange;
         }
 
         /// <summary>
