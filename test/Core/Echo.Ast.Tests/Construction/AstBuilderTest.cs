@@ -208,6 +208,53 @@ public class AstBuilderTest
     }
     
     [Fact]
+    public void NestedImpureExpressions()
+    {
+        // Construct
+        var cfg = ConstructGraph(new[]
+        {
+            // op(op(), op())
+            DummyInstruction.Op(0, 0, 1),
+            DummyInstruction.Op(1, 0, 1),
+            DummyInstruction.Op(2, 2, 1),
+            
+            // op(op(), op())
+            DummyInstruction.Op(3, 0, 1),
+            DummyInstruction.Op(4, 0, 1),
+            DummyInstruction.Op(5, 2, 1),
+            
+            // op( op(op(), op()) , op(op(), op()) )
+            DummyInstruction.Op(6, 2, 0),
+            
+            // ret()
+            DummyInstruction.Ret(7),
+        });
+        
+        // Verify
+        var n1 = Assert.Single(cfg.Nodes);
+        
+        var pattern = StatementPattern.Expression(ExpressionPattern
+            .Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+            .WithArguments(
+                ExpressionPattern
+                    .Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                    .WithArguments(
+                        ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op)),
+                        ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                    ),
+                ExpressionPattern
+                    .Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                    .WithArguments(
+                        ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op)),
+                        ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                    )
+            )
+        );
+        
+        Assert.True(pattern.Match(n1.Contents.Instructions[0]).IsSuccess);
+    }
+    
+    [Fact]
     public void PushArgumentBeforeImpureStatement()
     {
         // Construct
