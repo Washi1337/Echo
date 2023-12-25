@@ -9,7 +9,7 @@ namespace Echo.Ast.Tests.Patterns
         public void SameInstructionWithZeroArgumentsShouldMatch()
         {
             var input = Expression.Instruction(1234);
-            var pattern = ExpressionPattern.Instruction(1234);
+            var pattern = ExpressionPattern.InstructionLiteral(1234);
 
             Assert.True(pattern.Matches(input));
         }
@@ -18,7 +18,7 @@ namespace Echo.Ast.Tests.Patterns
         public void DifferentInstructionWithZeroArgumentsShouldNotMatch()
         {
             var input = Expression.Instruction(5678);
-            var pattern = ExpressionPattern.Instruction(1234);
+            var pattern = ExpressionPattern.InstructionLiteral(1234);
 
             Assert.False(pattern.Matches(input));
         }
@@ -37,7 +37,7 @@ namespace Echo.Ast.Tests.Patterns
             var input = Expression.Instruction(sameInstruction ? 1234 : 5678, arguments);
 
             var result = ExpressionPattern
-                .Instruction(1234)
+                .InstructionLiteral(1234)
                 .WithAnyArguments()
                 .Match(input);
 
@@ -55,7 +55,7 @@ namespace Echo.Ast.Tests.Patterns
                 );
             
             var pattern = ExpressionPattern
-                .Instruction(1234)
+                .InstructionLiteral(1234)
                 .WithArguments(ExpressionPattern.Any<int>(), ExpressionPattern.Any<int>());
 
             Assert.True(pattern.Matches(input));
@@ -71,7 +71,7 @@ namespace Echo.Ast.Tests.Patterns
             );
             
             var pattern = ExpressionPattern
-                .Instruction(1234)
+                .InstructionLiteral(1234)
                 .WithArguments(ExpressionPattern.Any<int>(), ExpressionPattern.Any<int>());
 
             Assert.False(pattern.Matches(input));
@@ -81,9 +81,9 @@ namespace Echo.Ast.Tests.Patterns
         public void SameInstructionWithNonMatchingArgumentsShouldNotMatch()
         {
             var pattern = ExpressionPattern
-                .Instruction(1234)
+                .InstructionLiteral(1234)
                 .WithArguments(
-                    ExpressionPattern.Instruction(5678), 
+                    ExpressionPattern.InstructionLiteral(5678), 
                     ExpressionPattern.Any<int>()
                 );
 
@@ -101,7 +101,7 @@ namespace Echo.Ast.Tests.Patterns
         public void SameInstructionWithDifferentArgumentCountShouldNotMatch()
         {
             var pattern = ExpressionPattern
-                .Instruction(1234)
+                .InstructionLiteral(1234)
                 .WithArguments(
                     ExpressionPattern.Any<int>(),
                     ExpressionPattern.Any<int>()
@@ -120,9 +120,9 @@ namespace Echo.Ast.Tests.Patterns
         public void SameInstructionWithComplexMatchingArgumentsShouldNotMatch()
         {
             var pattern = ExpressionPattern
-                .Instruction(1234)
+                .InstructionLiteral(1234)
                 .WithArguments(
-                    ExpressionPattern.Instruction(1234) | ExpressionPattern.Instruction(5678),
+                    ExpressionPattern.InstructionLiteral(1234) | ExpressionPattern.InstructionLiteral(5678),
                     ExpressionPattern.Any<int>());
 
             var input = Expression

@@ -47,7 +47,7 @@ public sealed class AstBuilder<TInstruction>
         // are executed as a single unit, and as such, within a single node we can assume an isolated eval stack.
         // This avoids full data flow analysis (i.e., building a full DFG) to build ASTs, at the cost of a slight
         // chance of overproducing some synthetic variables to communicate non-zero stack deltas between cfg nodes.
-        // In practice however this is much rarer to occur than not.
+        // In practice however this is much rarer to occur than not: Typically a block has a stack delta of 0.
         //
         // We only use SSA form and PHI nodes for synthetic stack variables. This is because many languages/platforms
         // allow for variables to be accessed by reference and thus it is not clear just from the access alone whether
@@ -82,7 +82,7 @@ public sealed class AstBuilder<TInstruction>
             LiftInstruction(result, node.Contents.Instructions[i], stack);
 
         // Any values left on the stack we move into synthetic out variables.
-        FlushStack(result, stack);
+        FlushStackAsOutput(result, stack);
         
         return result;
     }
@@ -121,19 +121,24 @@ public sealed class AstBuilder<TInstruction>
         }
 
         // Determine the produced values.
-        int pushCount = architecture.GetStackPushCount(instruction);
-        switch (pushCount)
+        switch (architecture.GetStackPushCount(instruction))
         {
             case 0:
                 // No value produced means we are dealing with a new independent statement.
                 
-                // If we are the final terminator or branch instruction at the end of the block, we want to flush any
-                // remaining values on the stack *before* the instruction statement.
                 if ((architecture.GetFlowControl(instruction) & (InstructionFlowControl.CanBranch | InstructionFlowControl.IsTerminator)) != 0)
-                    FlushStack(node, stack);
-
-                // Ensure order of operations is preserved if expression is potentially impure.
-                FlushStackIfImpure(node, stack, expression);
+                {
+                    // If we are the final terminator or branch instruction at the end of the block, we need to flush
+                    // any remaining values on the stack *before* the instruction statement to ensure the operations
+                    // are evaluated before jumping to the next block.
+                    FlushStackAsOutput(node, stack);
+                }
+                else
+                {
+                    // For any other case we may still need to flush the stack if the expression is potentially impure
+                    // and the stack contains potentially impure items, to preserve order of impure operations.
+                    FlushStackIfImpure(node, stack, expression);
+                }
 
                 // Wrap the expression into an independent statement and add it.
                 node.Transformed.Contents.Instructions.Add(expression.ToStatement());
@@ -144,7 +149,7 @@ public sealed class AstBuilder<TInstruction>
                 stack.Push(expression);
                 break;
 
-            default:
+            case var pushCount:
                 // Multiple values are produced, move them into separate variables and push them on eval stack.
                 
                 // Ensure order of operations is preserved if expression is potentially impure.
@@ -173,14 +178,36 @@ public sealed class AstBuilder<TInstruction>
             : stack.Pop();
     }
 
-    private static void FlushStack(LiftedNode<TInstruction> node, Stack<Expression<TInstruction>> stack)
+    private static void FlushStackAsOutput(LiftedNode<TInstruction> node, Stack<Expression<TInstruction>> stack)
     {
-        FlushStackInternal(node, stack, n => n.DeclareStackOutput());
+        FlushStackInternal(node, stack, (n, value) =>
+        {
+            if (value is VariableExpression<TInstruction> {Variable: SyntheticVariable variable})
+            {
+                // If this output expression is already variable expression, we do not need to allocate a new variable
+                // and can instead just promote the variable to a stack output variable (inlining).
+                node.StackOutputs.Add(variable);
+            }
+            else
+            {
+                // Otherwise, declare and assign the value to a new stack output variable.
+                variable = n.DeclareStackOutput();
+                n.Transformed.Contents.Instructions.Add(Statement.Assignment(variable, value));
+            }
+
+            return variable;
+        });
     }
 
     private static void FlushStackAndPush(LiftedNode<TInstruction> node, Stack<Expression<TInstruction>> stack)
     {
-        var variables = FlushStackInternal(node, stack, n => n.DeclareStackIntermediate());
+        var variables = FlushStackInternal(node, stack, (n, value) =>
+        {
+            var intermediate = n.DeclareStackIntermediate();
+            n.Transformed.Contents.Instructions.Add(Statement.Assignment(intermediate, value));
+            return intermediate;
+        });
+
         for (int i = 0; i < variables.Count; i++)
             stack.Push(variables[i].ToExpression<TInstruction>());
     }
@@ -190,9 +217,12 @@ public sealed class AstBuilder<TInstruction>
         Stack<Expression<TInstruction>> stack, 
         Expression<TInstruction> expression)
     {
+        // Is this expression potentially impure?
         if (expression.IsPure(_purityClassifier).ToBooleanOrFalse())
             return;
 
+        // Does the stack contain potentially impure expressions?
+        // We then still need to flush to preserve order of operations.
         bool fullyPureStack = true;
         foreach (var value in stack)
         {
@@ -210,21 +240,17 @@ public sealed class AstBuilder<TInstruction>
     private static IList<IVariable> FlushStackInternal(
         LiftedNode<TInstruction> node, 
         Stack<Expression<TInstruction>> stack,
-        Func<LiftedNode<TInstruction>, IVariable> declareVariable)
+        Func<LiftedNode<TInstruction>, Expression<TInstruction>, SyntheticVariable> flush)
     {
-        // Declare new variables.
-        var variables = new IVariable[stack.Count];
-        for (int i = 0; i < stack.Count; i++)
-            variables[i] = declareVariable(node);
-
-        // Create assignment statements.
-        var assignments = new AssignmentStatement<TInstruction>[stack.Count];
-        for (int i = variables.Length - 1; i >= 0; i--)
-            assignments[i] = Statement.Assignment(variables[i], stack.Pop());
-
-        // Add them.
-        foreach (var assignment in assignments)
-            node.Transformed.Contents.Instructions.Add(assignment);
+        // Collect all values from the stack.
+        var values = new Expression<TInstruction>[stack.Count];
+        for (int i = values.Length - 1; i >= 0; i--)
+            values[i] = stack.Pop();
+        
+        // Flush them to variables.
+        var variables = new IVariable[values.Length];
+        for (int i = 0; i < values.Length; i++)
+            variables[i] = flush(node, values[i]);
 
         return variables;
     }

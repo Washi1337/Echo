@@ -411,6 +411,42 @@ public class AstBuilderTest
     }
 
     [Fact]
+    public void TwoNodesWithIndirectStackDeltaShouldInline()
+    {
+        // Construct
+        var cfg = ConstructGraph(new[]
+        {
+            DummyInstruction.Push(0, 1),
+            DummyInstruction.Op(1, 0, 0),
+            DummyInstruction.Jmp(2, 10),
+
+            DummyInstruction.Pop(10, 1),
+            DummyInstruction.Ret(11)
+        });
+
+        var variable = new CaptureGroup<IVariable>();
+
+        var match1 = StatementPattern
+            .Assignment(
+                Pattern.Any<IVariable>().CaptureAs(variable),
+                ExpressionPattern.Any<DummyInstruction>()
+            )
+            .FollowedBy(ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op)).ToStatement())
+            .FollowedBy(ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Jmp)).ToStatement())
+            .Match(cfg.Nodes[0].Contents.Instructions);
+
+        var match2 = StatementPattern
+            .Assignment(
+                Pattern.Any<IVariable>(),
+                ExpressionPattern.Variable<DummyInstruction>(Pattern.Any<IVariable>().CaptureAs(variable))
+            )
+            .Match(cfg.Nodes[10].Contents.Instructions[0]);
+
+        Assert.True(match1.IsSuccess);
+        Assert.True(match2.IsSuccess);
+    }
+    
+    [Fact]
     public void TwoNodesPushBeforeImpure()
     {
         // Construct
@@ -624,13 +660,19 @@ public class AstBuilderTest
         var variablesCapture = new CaptureGroup<IVariable>("variables");
         var sourcesCapture = new CaptureGroup<VariableExpression<DummyInstruction>>("sources");
 
-        var pattern = StatementPattern.Assignment(
-            Pattern.Any<IVariable>().CaptureAs(variablesCapture),
-            ExpressionPattern.Any<DummyInstruction>()
-        );
-        
-        var match1 = pattern.Match(cfg.Nodes[0].Contents.Instructions[1]);
-        var match2 = pattern.Match(cfg.Nodes[3].Contents.Instructions[^1]);
+        var match1 = StatementPattern
+            .Assignment<DummyInstruction>()
+            .WithVariables(
+                Pattern.Any<IVariable>().CaptureAs(variablesCapture),
+                Pattern.Any<IVariable>()
+            )
+            .Match(cfg.Nodes[0].Contents.Instructions[0]);
+
+        var match2 = StatementPattern
+            .Assignment<DummyInstruction>()
+            .WithVariables(1)
+            .CaptureVariables(variablesCapture)
+            .Match(cfg.Nodes[3].Contents.Instructions[^1]);
         
         var match3 = StatementPattern.Phi<DummyInstruction>()
             .WithSources(2)
@@ -669,14 +711,20 @@ public class AstBuilderTest
         
         var variablesCapture = new CaptureGroup<IVariable>("variables");
         var sourcesCapture = new CaptureGroup<VariableExpression<DummyInstruction>>("sources");
-
-        var pattern = StatementPattern.Assignment(
-            Pattern.Any<IVariable>().CaptureAs(variablesCapture),
-            ExpressionPattern.Any<DummyInstruction>()
-        );
         
-        var match1 = pattern.Match(cfg.Nodes[0].Contents.Instructions[^2]);
-        var match2 = pattern.Match(cfg.Nodes[4].Contents.Instructions[^1]);
+        var match1 = StatementPattern
+            .Assignment<DummyInstruction>()
+            .WithVariables(
+                Pattern.Any<IVariable>().CaptureAs(variablesCapture),
+                Pattern.Any<IVariable>()
+            )
+            .Match(cfg.Nodes[0].Contents.Instructions[^2]);
+     
+        var match2 = StatementPattern
+                .Assignment<DummyInstruction>()
+                .WithVariables(1)
+                .CaptureVariables(variablesCapture)
+                .Match(cfg.Nodes[4].Contents.Instructions[^1]);
 
         var match3 = StatementPattern.Phi<DummyInstruction>()
             .WithSources(2)

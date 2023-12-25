@@ -18,7 +18,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="instruction">The instruction to match on.</param>
         /// <returns>The pattern.</returns>
-        public static InstructionExpressionPattern<TInstruction> Instruction<TInstruction>(TInstruction instruction)
+        public static InstructionExpressionPattern<TInstruction> InstructionLiteral<TInstruction>(TInstruction instruction)
             => new(Pattern.Literal(instruction));
 
         /// <summary>
