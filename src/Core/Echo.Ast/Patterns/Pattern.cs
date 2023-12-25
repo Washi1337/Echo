@@ -11,14 +11,14 @@ namespace Echo.Ast.Patterns
         /// Creates a new pattern that matches any object instance of the specified type.
         /// </summary>
         /// <returns>The pattern.</returns>
-        public static AnyPattern<T> Any<T>() => new AnyPattern<T>();
+        public static AnyPattern<T> Any<T>() => new();
         
         /// <summary>
         /// Creates a new pattern that value-matches the input with an object instance of the specified type.
         /// </summary>
         /// <param name="o">The instance to match with.</param>
         /// <returns></returns>
-        public static LiteralPattern<T> Literal<T>(T o) => new LiteralPattern<T>(o);
+        public static LiteralPattern<T> Literal<T>(T o) => new(o);
     }
     
     /// <summary>

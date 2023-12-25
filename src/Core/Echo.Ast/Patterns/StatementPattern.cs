@@ -12,22 +12,15 @@ namespace Echo.Ast.Patterns
         /// Creates a new pattern that matches any type of statement. 
         /// </summary>
         /// <returns>The pattern.</returns>
-        public static AnyPattern<Statement<TInstruction>> Any<TInstruction>()
-        {
-            return new AnyPattern<Statement<TInstruction>>();
-        }
+        public static AnyPattern<Statement<TInstruction>> Any<TInstruction>() => new();
 
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="AssignmentStatement{TInstruction}"/> with
         /// a single variable on the left hand side of the equals sign.
         /// </summary>
-        public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>()
-        {
-            return new AssignmentStatementPattern<TInstruction>(
-                Pattern.Any<IVariable>(),
-                Pattern.Any<Expression<TInstruction>>());
-        }
-        
+        public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>() 
+            => new(Pattern.Any<IVariable>(), Pattern.Any<Expression<TInstruction>>());
+
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="AssignmentStatement{TInstruction}"/>.
         /// </summary>
@@ -56,16 +49,14 @@ namespace Echo.Ast.Patterns
         /// Creates a new pattern that matches on instances of <see cref="ExpressionStatement{TInstruction}"/> with
         /// any kind of embedded expression.
         /// </summary>
-        public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>()
-        {
-            return new ExpressionStatementPattern<TInstruction>();
-        }
-        
+        public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>() => new();
+
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="ExpressionStatement{TInstruction}"/>.
         /// </summary>
         /// <param name="expression">The pattern for the embedded expression.</param>
-        public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>(Pattern<Expression<TInstruction>> expression)
+        public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>(
+            Pattern<Expression<TInstruction>> expression)
         {
             return new ExpressionStatementPattern<TInstruction>(expression);
         }
@@ -76,7 +67,8 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="instruction">The instruction pattern to match on.</param>
         /// <returns>The pattern.</returns>
-        public static ExpressionStatementPattern<TInstruction> Instruction<TInstruction>(Pattern<TInstruction> instruction)
+        public static ExpressionStatementPattern<TInstruction> Instruction<TInstruction>(
+            Pattern<TInstruction> instruction)
         {
             return new ExpressionStatementPattern<TInstruction>(ExpressionPattern.Instruction(instruction));
         }
@@ -86,10 +78,7 @@ namespace Echo.Ast.Patterns
         /// any target and any number of source variables.
         /// </summary>
         /// <returns>The pattern.</returns>
-        public static PhiStatementPattern<TInstruction> Phi<TInstruction>()
-        {
-            return new PhiStatementPattern<TInstruction>();
-        }
+        public static PhiStatementPattern<TInstruction> Phi<TInstruction>() => new();
 
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="PhiStatementPattern{TInstruction}"/> with
@@ -97,10 +86,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="target">The target pattern to match on.</param>
         /// <returns>The pattern.</returns>
-        public static PhiStatementPattern<TInstruction> Phi<TInstruction>(Pattern<IVariable> target)
-        {
-            return new PhiStatementPattern<TInstruction>(target);
-        }
+        public static PhiStatementPattern<TInstruction> Phi<TInstruction>(Pattern<IVariable> target) => new(target);
     }
     
     /// <summary>
