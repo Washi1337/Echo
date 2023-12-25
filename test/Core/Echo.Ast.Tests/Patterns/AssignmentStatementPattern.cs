@@ -1,4 +1,3 @@
-using System;
 using Echo.Ast.Patterns;
 using Echo.Code;
 using Echo.Platforms.DummyPlatform.Code;
@@ -11,10 +10,10 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyVariableAndAnyExpression()
         {
-            var statement = new AssignmentStatement<int>(new IVariable[]
-            {
+            var statement = new AssignmentStatement<int>(
                 new DummyVariable("var1"),
-            }, new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty));
+                new InstructionExpression<int>(1)
+            );
             
             var pattern = StatementPattern.Assignment<int>();
 
@@ -24,32 +23,31 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyVariableWithSpecificExpression()
         {
-            var group = new CaptureGroup("group");
-            
-            var statement = new AssignmentStatement<int>(new IVariable[]
-            {
+            var statement = new AssignmentStatement<int>(
                 new DummyVariable("var1"),
-            }, new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty));
-
+                new InstructionExpression<int>(1)
+            );
+            
+            var group = new CaptureGroup<Expression<int>>("group");
             var pattern = StatementPattern
                 .Assignment<int>()
                 .WithExpression(Pattern.Any<Expression<int>>().CaptureAs(group));
 
             var result = pattern.Match(statement);
             Assert.True(result.IsSuccess);
-            Assert.Contains(group, result.Captures);
-            Assert.Contains(statement.Expression, result.Captures[group]);
+            Assert.Contains(group, result.GetCaptureGroups());
+            Assert.Contains(statement.Expression, result.GetCaptures(group));
         }
 
         [Fact]
         public void SpecificVariable()
         {
-            var group = new CaptureGroup("group");
+            var group = new CaptureGroup<IVariable>("group");
             
-            var statement = new AssignmentStatement<int>(new IVariable[]
-            {
+            var statement = new AssignmentStatement<int>(
                 new DummyVariable("var1"),
-            }, new InstructionExpression<int>(1, ArraySegment<Expression<int>>.Empty));
+                new InstructionExpression<int>(1)
+            );
 
             var pattern = StatementPattern
                 .Assignment<int>()
@@ -57,8 +55,8 @@ namespace Echo.Ast.Tests.Patterns
 
             var result = pattern.Match(statement);
             Assert.True(result.IsSuccess);
-            Assert.Contains(group, result.Captures);
-            Assert.Contains(statement.Variables[0], result.Captures[group]);
+            Assert.Contains(group, result.GetCaptureGroups());
+            Assert.Contains(statement.Variables[0], result.GetCaptures(group));
         }
     }
 }

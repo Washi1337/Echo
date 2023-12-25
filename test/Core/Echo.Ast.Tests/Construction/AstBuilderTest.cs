@@ -67,7 +67,7 @@ public class AstBuilderTest
         // Verify
         var node = Assert.Single(cfg.Nodes);
 
-        var arguments = new CaptureGroup("arguments");
+        var arguments = new CaptureGroup<Expression<DummyInstruction>>("arguments");
         
         // pop(push(), push())
         var match = StatementPattern
@@ -83,7 +83,7 @@ public class AstBuilderTest
         Assert.True(match.IsSuccess);
         Assert.Equal(
             new long[] {0, 1},
-            match.Captures[arguments]
+            match.GetCaptures(arguments)
                 .Cast<InstructionExpression<DummyInstruction>>()
                 .Select(x => x.Instruction.Offset));
     }
@@ -110,7 +110,7 @@ public class AstBuilderTest
         // Verify
         var node = Assert.Single(cfg.Nodes);
 
-        var arguments = new CaptureGroup("arguments");
+        var arguments = new CaptureGroup<Expression<DummyInstruction>>("arguments");
 
         // pop(push())
         var match = StatementPattern
@@ -124,9 +124,10 @@ public class AstBuilderTest
         Assert.True(match.IsSuccess);
         Assert.Equal(
             new long[] {0},
-            match.Captures[arguments]
+            match.GetCaptures(arguments)
                 .Cast<InstructionExpression<DummyInstruction>>()
-                .Select(x => x.Instruction.Offset));
+                .Select(x => x.Instruction.Offset)
+        );
 
         // pop(push(), push())
         match = StatementPattern
@@ -142,9 +143,10 @@ public class AstBuilderTest
         Assert.True(match.IsSuccess);
         Assert.Equal(
             new long[] {2, 3},
-            match.Captures[arguments]
+            match.GetCaptures(arguments)
                 .Cast<InstructionExpression<DummyInstruction>>()
-                .Select(x => x.Instruction.Offset));
+                .Select(x => x.Instruction.Offset)
+        );
     }
 
     [Fact]
@@ -169,7 +171,8 @@ public class AstBuilderTest
             .Assignment(
                 new[] {Pattern.Any<IVariable>(), Pattern.Any<IVariable>()},
                 ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op))
-            ).Match(cfg.Nodes[0].Contents.Instructions[0]).IsSuccess);
+            ).Match(cfg.Nodes[0].Contents.Instructions[0]).IsSuccess
+        );
     }
     
     [Fact]
@@ -280,7 +283,7 @@ public class AstBuilderTest
         
         // Verify
         var node = Assert.Single(cfg.Nodes);
-        var variable = new CaptureGroup("variable");
+        var variable = new CaptureGroup<IVariable>("variable");
 
         // tmp1 = push()
         // tmp2 = push()
@@ -317,8 +320,8 @@ public class AstBuilderTest
         Assert.True(match3.IsSuccess);
         Assert.True(match4.IsSuccess);
         
-        Assert.Same(match1.Captures[variable][0], match4.Captures[variable][0]);
-        Assert.Same(match2.Captures[variable][0], match3.Captures[variable][0]);
+        Assert.Same(match1.GetCaptures(variable)[0], match4.GetCaptures(variable)[0]);
+        Assert.Same(match2.GetCaptures(variable)[0], match3.GetCaptures(variable)[0]);
     }
 
     [Fact]
@@ -370,7 +373,7 @@ public class AstBuilderTest
         Assert.Equal(2, cfg.Nodes.Count);
         var (n1, n2) = (cfg.Nodes[0], cfg.Nodes[10]);
 
-        var variable = new CaptureGroup("variable");
+        var variable = new CaptureGroup<IVariable>("variable");
         
         // out = push()
         var match1 = StatementPattern
@@ -401,8 +404,8 @@ public class AstBuilderTest
             .Match(n2.Contents.Instructions[1]);
         Assert.True(match3.IsSuccess);
         
-        Assert.Same(match1.Captures[variable][0], match2.Captures[variable][1]);
-        Assert.Same(match2.Captures[variable][0], match3.Captures[variable][0]);
+        Assert.Same(match1.GetCaptures(variable)[0], match2.GetCaptures(variable)[1]);
+        Assert.Same(match2.GetCaptures(variable)[0], match3.GetCaptures(variable)[0]);
 
         Assert.Same(n2, n1.UnconditionalNeighbour);
     }
@@ -445,8 +448,8 @@ public class AstBuilderTest
         });
         
         // Verify
-        var variable = new CaptureGroup("variable");
-        var value = new CaptureGroup("value");
+        var variable = new CaptureGroup<IVariable>("variable");
+        var value = new CaptureGroup<Expression<DummyInstruction>>("value");
         var pattern = StatementPattern.Assignment(
             Pattern.Any<IVariable>().CaptureAs(variable),
             ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push)).CaptureAs(value)
@@ -459,8 +462,8 @@ public class AstBuilderTest
         Assert.True(match2.IsSuccess);
 
         // Ensure order of operations is preserved.
-        var a = (InstructionExpression<DummyInstruction>) match1.Captures[value][0];
-        var b = (InstructionExpression<DummyInstruction>) match2.Captures[value][0];
+        var a = (InstructionExpression<DummyInstruction>) match1.GetCaptures(value)[0];
+        var b = (InstructionExpression<DummyInstruction>) match2.GetCaptures(value)[0];
         Assert.Equal(0, a.Instruction.Offset);
         Assert.Equal(1, b.Instruction.Offset);
     }
@@ -495,32 +498,32 @@ public class AstBuilderTest
         Assert.Same(n4, n3.UnconditionalNeighbour);
 
         // Verify phi variables.
-        var variable = new CaptureGroup("variables");
+        var variableCapture = new CaptureGroup<IVariable>("variables");
+        var sourcesCapture = new CaptureGroup<VariableExpression<DummyInstruction>>("sources");
 
         var match1 = StatementPattern.Assignment(
-            Pattern.Any<IVariable>().CaptureAs(variable),
+            Pattern.Any<IVariable>().CaptureAs(variableCapture),
             ExpressionPattern.Any<DummyInstruction>()
         ).Match(n2.Contents.Instructions[0]);
         var match2 = StatementPattern.Assignment(
-            Pattern.Any<IVariable>().CaptureAs(variable),
+            Pattern.Any<IVariable>().CaptureAs(variableCapture),
             ExpressionPattern.Any<DummyInstruction>()
         ).Match(n3.Contents.Instructions[0]);
         var match3 = StatementPattern.Phi<DummyInstruction>()
             .WithSources(2)
-            .CaptureSources(variable)
+            .CaptureSources(sourcesCapture)
             .Match(n4.Contents.Instructions[0]);
 
         Assert.True(match1.IsSuccess);
         Assert.True(match2.IsSuccess);
         Assert.True(match3.IsSuccess);
         
-        var sources = match3.Captures[variable]
-            .OfType<VariableExpression<DummyInstruction>>()
+        var sources = match3.GetCaptures(sourcesCapture)
             .Select(x => x.Variable)
             .ToArray();
         
-        Assert.Contains(match1.Captures[variable][0], sources);
-        Assert.Contains(match2.Captures[variable][0], sources);
+        Assert.Contains(match1.GetCaptures(variableCapture)[0], sources);
+        Assert.Contains(match2.GetCaptures(variableCapture)[0], sources);
     }
 
     [Fact]
@@ -568,23 +571,24 @@ public class AstBuilderTest
         Assert.Same(n6, n5.UnconditionalNeighbour);
         
         // Verify phi variables.
-        var variable = new CaptureGroup("variables");
+        var variablesCapture = new CaptureGroup<IVariable>("variables");
+        var sourcesCapture = new CaptureGroup<VariableExpression<DummyInstruction>>("sources");
 
         var match1 = StatementPattern.Assignment(
-            Pattern.Any<IVariable>().CaptureAs(variable),
+            Pattern.Any<IVariable>().CaptureAs(variablesCapture),
             ExpressionPattern.Any<DummyInstruction>()
         ).Match(n3.Contents.Instructions[0]);
         var match2 = StatementPattern.Assignment(
-            Pattern.Any<IVariable>().CaptureAs(variable),
+            Pattern.Any<IVariable>().CaptureAs(variablesCapture),
             ExpressionPattern.Any<DummyInstruction>()
         ).Match(n4.Contents.Instructions[0]);
         var match3 = StatementPattern.Assignment(
-            Pattern.Any<IVariable>().CaptureAs(variable),
+            Pattern.Any<IVariable>().CaptureAs(variablesCapture),
             ExpressionPattern.Any<DummyInstruction>()
         ).Match(n5.Contents.Instructions[0]);
         var match4 = StatementPattern.Phi<DummyInstruction>()
             .WithSources(3)
-            .CaptureSources(variable)
+            .CaptureSources(sourcesCapture)
             .Match(n6.Contents.Instructions[0]);
 
         Assert.True(match1.IsSuccess);
@@ -592,14 +596,13 @@ public class AstBuilderTest
         Assert.True(match3.IsSuccess);
         Assert.True(match4.IsSuccess);
         
-        var sources = match4.Captures[variable]
-            .OfType<VariableExpression<DummyInstruction>>()
+        var sources = match4.GetCaptures(sourcesCapture)
             .Select(x => x.Variable)
             .ToArray();
         
-        Assert.Contains(match1.Captures[variable][0], sources);
-        Assert.Contains(match2.Captures[variable][0], sources);
-        Assert.Contains(match3.Captures[variable][0], sources);
+        Assert.Contains(match1.GetCaptures(variablesCapture)[0], sources);
+        Assert.Contains(match2.GetCaptures(variablesCapture)[0], sources);
+        Assert.Contains(match3.GetCaptures(variablesCapture)[0], sources);
     }
 
     [Fact]
@@ -618,10 +621,11 @@ public class AstBuilderTest
             DummyInstruction.Ret(6),
         });
         
-        var variables = new CaptureGroup("variables");
+        var variablesCapture = new CaptureGroup<IVariable>("variables");
+        var sourcesCapture = new CaptureGroup<VariableExpression<DummyInstruction>>("sources");
 
         var pattern = StatementPattern.Assignment(
-            Pattern.Any<IVariable>().CaptureAs(variables),
+            Pattern.Any<IVariable>().CaptureAs(variablesCapture),
             ExpressionPattern.Any<DummyInstruction>()
         );
         
@@ -630,20 +634,19 @@ public class AstBuilderTest
         
         var match3 = StatementPattern.Phi<DummyInstruction>()
             .WithSources(2)
-            .CaptureSources(variables)
+            .CaptureSources(sourcesCapture)
             .Match(cfg.Nodes[5].Contents.Instructions[0]);
         
         Assert.True(match1.IsSuccess);
         Assert.True(match2.IsSuccess);
         Assert.True(match3.IsSuccess);
 
-        var sources = match3.Captures[variables]
-            .OfType<VariableExpression<DummyInstruction>>()
+        var sources = match3.GetCaptures(sourcesCapture)
             .Select(x => x.Variable)
             .ToArray();
         
-        Assert.Contains(match1.Captures[variables][0], sources);
-        Assert.Contains(match2.Captures[variables][0], sources);
+        Assert.Contains(match1.GetCaptures(variablesCapture)[0], sources);
+        Assert.Contains(match2.GetCaptures(variablesCapture)[0], sources);
     }
 
     [Fact]
@@ -664,10 +667,11 @@ public class AstBuilderTest
             DummyInstruction.Ret(7),
         });
         
-        var variables = new CaptureGroup("variables");
+        var variablesCapture = new CaptureGroup<IVariable>("variables");
+        var sourcesCapture = new CaptureGroup<VariableExpression<DummyInstruction>>("sources");
 
         var pattern = StatementPattern.Assignment(
-            Pattern.Any<IVariable>().CaptureAs(variables),
+            Pattern.Any<IVariable>().CaptureAs(variablesCapture),
             ExpressionPattern.Any<DummyInstruction>()
         );
         
@@ -676,19 +680,18 @@ public class AstBuilderTest
 
         var match3 = StatementPattern.Phi<DummyInstruction>()
             .WithSources(2)
-            .CaptureSources(variables)
+            .CaptureSources(sourcesCapture)
             .Match(cfg.Nodes[6].Contents.Instructions[1]);
         
         Assert.True(match1.IsSuccess);
         Assert.True(match3.IsSuccess);
 
-        var sources = match3.Captures[variables]
-            .OfType<VariableExpression<DummyInstruction>>()
+        var sources = match3.GetCaptures(sourcesCapture)
             .Select(x => x.Variable)
             .ToArray();
         
-        Assert.Contains(match1.Captures[variables][0], sources);
-        Assert.Contains(match2.Captures[variables][0], sources);
+        Assert.Contains(match1.GetCaptures(variablesCapture)[0], sources);
+        Assert.Contains(match2.GetCaptures(variablesCapture)[0], sources);
     }
     
     [Fact]
@@ -740,20 +743,21 @@ public class AstBuilderTest
         Assert.Same(n2, Assert.Single(n2.ConditionalEdges).Target);
         Assert.Same(n3, n2.UnconditionalNeighbour);
 
-        var variable = new CaptureGroup("variable");
+        var variableCapture = new CaptureGroup<IVariable>("variable");
+        var sourcesCapture = new CaptureGroup<VariableExpression<DummyInstruction>>("source");
 
         var match1 = StatementPattern
             .Assignment(
-                Pattern.Any<IVariable>().CaptureAs(variable),
+                Pattern.Any<IVariable>().CaptureAs(variableCapture),
                 ExpressionPattern.Any<DummyInstruction>())
             .Match(n1.Contents.Instructions[0]);
         var match2 = StatementPattern.Phi<DummyInstruction>()
             .WithSources(2)
-            .CaptureSources(variable)
+            .CaptureSources(sourcesCapture)
             .Match(n2.Contents.Instructions[0]);
         var match3 = StatementPattern
             .Assignment(
-                Pattern.Any<IVariable>().CaptureAs(variable),
+                Pattern.Any<IVariable>().CaptureAs(variableCapture),
                 ExpressionPattern.Any<DummyInstruction>())
             .Match(n2.Contents.Instructions[^2]);
         
@@ -761,13 +765,12 @@ public class AstBuilderTest
         Assert.True(match2.IsSuccess);
         Assert.True(match3.IsSuccess);
         
-        var sources = match2.Captures[variable]
-            .OfType<VariableExpression<DummyInstruction>>()
+        var sources = match2.GetCaptures(sourcesCapture)
             .Select(x => x.Variable)
             .ToArray();
         
-        Assert.Contains(match1.Captures[variable][0], sources);
-        Assert.Contains(match3.Captures[variable][0], sources);
+        Assert.Contains(match1.GetCaptures(variableCapture)[0], sources);
+        Assert.Contains(match3.GetCaptures(variableCapture)[0], sources);
     }
 
     [Fact]

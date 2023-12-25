@@ -147,15 +147,15 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="sources">The patterns that describe the sources of the phi node.</param>
         /// <returns>The current pattern.</returns>
-        public PhiStatementPattern<TInstruction> WithSources(IEnumerable<Pattern<VariableExpression<TInstruction>>> sources) => 
-            WithSources(sources.ToArray());
+        public PhiStatementPattern<TInstruction> WithSources(IEnumerable<Pattern<VariableExpression<TInstruction>>> sources)
+            => WithSources(sources.ToArray());
 
         /// <summary>
         /// Indicates all sources should be captured in a certain group.
         /// </summary>
         /// <param name="captureGroup">The group.</param>
         /// <returns>The current pattern.</returns>
-        public PhiStatementPattern<TInstruction> CaptureSources(CaptureGroup captureGroup)
+        public PhiStatementPattern<TInstruction> CaptureSources(CaptureGroup<VariableExpression<TInstruction>> captureGroup)
         {
             foreach (var source in Sources)
                 source.CaptureAs(captureGroup);

@@ -63,7 +63,7 @@ namespace Echo.Ast.Patterns
         /// <summary>
         /// Gets or sets the capture group this pattern was assigned to.
         /// </summary>
-        public CaptureGroup CaptureGroup
+        public CaptureGroup<T> CaptureGroup
         {
             get;
             set;
@@ -124,8 +124,7 @@ namespace Echo.Ast.Patterns
 
             foreach (var input in inputSequence)
             {
-                result.Captures.Clear();
-                result.IsSuccess = true;
+                result.Clear();
 
                 Match(input, result);
 
@@ -133,7 +132,7 @@ namespace Echo.Ast.Patterns
                     return result;
             }
             
-            result.Captures.Clear();
+            result.Clear();
             result.IsSuccess = false;
             return result;
         }
@@ -159,7 +158,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="captureGroup">The capture group to add the object to.</param>
         /// <returns>The pattern.</returns>
-        public Pattern<T> CaptureAs(CaptureGroup captureGroup)
+        public Pattern<T> CaptureAs(CaptureGroup<T> captureGroup)
         {
             CaptureGroup = captureGroup;
             return this;

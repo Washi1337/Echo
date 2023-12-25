@@ -178,7 +178,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="captureGroup">The group.</param>
         /// <returns>The current pattern.</returns>
-        public InstructionExpressionPattern<TInstruction> CaptureArguments(CaptureGroup captureGroup)
+        public InstructionExpressionPattern<TInstruction> CaptureArguments(CaptureGroup<Expression<TInstruction>> captureGroup)
         {
             foreach (var argument in Arguments)
                 argument.CaptureAs(captureGroup);
