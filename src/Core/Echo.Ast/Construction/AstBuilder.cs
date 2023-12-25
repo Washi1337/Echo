@@ -96,20 +96,18 @@ public sealed class AstBuilder<TInstruction>
         long startOffset = architecture.GetOffset(instruction);
 
         // Wrap the instruction into an expression.
-        var expression = new InstructionExpression<TInstruction>(instruction)
-        {
-            OriginalRange = new AddressRange(
-                startOffset,
-                startOffset + architecture.GetSize(instruction)
-            )
-        };
-
+        var expression = Expression.Instruction(instruction);
+        expression.OriginalRange = new AddressRange(
+            startOffset,
+            startOffset + architecture.GetSize(instruction)
+        );
+        
         // Determine the arguments.
         int popCount = architecture.GetStackPopCount(instruction);
         if (popCount == -1)
         {
             while (stack.Count > 0)
-                node.Transformed.Contents.Instructions.Add(new ExpressionStatement<TInstruction>(stack.Pop()));
+                node.Transformed.Contents.Instructions.Add(stack.Pop().ToStatement());
         }
         else
         {
@@ -138,7 +136,7 @@ public sealed class AstBuilder<TInstruction>
                 FlushStackIfImpure(node, stack, expression);
 
                 // Wrap the expression into an independent statement and add it.
-                node.Transformed.Contents.Instructions.Add(new ExpressionStatement<TInstruction>(expression));
+                node.Transformed.Contents.Instructions.Add(expression.ToStatement());
                 break;
 
             case 1:
@@ -158,11 +156,11 @@ public sealed class AstBuilder<TInstruction>
                     variables[i] = node.DeclareStackIntermediate();
 
                 // Add the assignment statement.
-                node.Transformed.Contents.Instructions.Add(new AssignmentStatement<TInstruction>(variables, expression));
+                node.Transformed.Contents.Instructions.Add(Statement.Assignment(variables, expression));
 
                 // Push the intermediate variables.
                 foreach (var variable in variables)
-                    stack.Push(new VariableExpression<TInstruction>(variable));
+                    stack.Push(variable.ToExpression<TInstruction>());
 
                 break;
         }
@@ -171,7 +169,7 @@ public sealed class AstBuilder<TInstruction>
     private static Expression<TInstruction> Pop(LiftedNode<TInstruction> node, Stack<Expression<TInstruction>> stack)
     {
         return stack.Count == 0
-            ? new VariableExpression<TInstruction>(node.DeclareStackInput())
+            ? node.DeclareStackInput().ToExpression<TInstruction>()
             : stack.Pop();
     }
 
@@ -184,7 +182,7 @@ public sealed class AstBuilder<TInstruction>
     {
         var variables = FlushStackInternal(node, stack, n => n.DeclareStackIntermediate());
         for (int i = 0; i < variables.Count; i++)
-            stack.Push(new VariableExpression<TInstruction>(variables[i]));
+            stack.Push(variables[i].ToExpression<TInstruction>());
     }
 
     private void FlushStackIfImpure(
@@ -222,7 +220,7 @@ public sealed class AstBuilder<TInstruction>
         // Create assignment statements.
         var assignments = new AssignmentStatement<TInstruction>[stack.Count];
         for (int i = variables.Length - 1; i >= 0; i--)
-            assignments[i] = new AssignmentStatement<TInstruction>(variables[i], stack.Pop());
+            assignments[i] = Statement.Assignment(variables[i], stack.Pop());
 
         // Add them.
         foreach (var assignment in assignments)
@@ -276,7 +274,7 @@ public sealed class AstBuilder<TInstruction>
                 foreach (var source in value.Sources)
                 {
                     if (input.Sources.All(x => x.Variable != source))
-                        input.Sources.Add(new VariableExpression<TInstruction>(source));
+                        input.Sources.Add(source.ToExpression<TInstruction>());
                 }
             }
 
@@ -304,7 +302,7 @@ public sealed class AstBuilder<TInstruction>
                     var singleSource = input.Sources[0];
                     input.Sources.RemoveAt(0);
 
-                    var simplified = new AssignmentStatement<TInstruction>(input.Representative, singleSource);
+                    var simplified = Statement.Assignment(input.Representative, singleSource);
                     block.Transformed.Contents.Instructions.Insert(0, simplified);
                 }
                 else

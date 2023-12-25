@@ -15,7 +15,10 @@ namespace Echo.Ast
         /// Creates a new variable expression
         /// </summary>
         /// <param name="variable">The variable</param>
-        public VariableExpression(IVariable variable) => Variable = variable;
+        public VariableExpression(IVariable variable)
+        {
+            Variable = variable;
+        }
 
         /// <summary>
         /// The variable that is represented by the AST node

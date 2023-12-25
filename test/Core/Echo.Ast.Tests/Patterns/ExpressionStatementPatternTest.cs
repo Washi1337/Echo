@@ -10,22 +10,19 @@ namespace Echo.Ast.Tests.Patterns
         public void TestComplexCapture()
         {
             // Define test "ret(push(0, 1))" expression/
-            var expression = new InstructionExpression<DummyInstruction>(DummyInstruction.Push(0, 1));
-            var statement = new ExpressionStatement<DummyInstruction>(
-                new InstructionExpression<DummyInstruction>(DummyInstruction.Ret(1), expression)
-            );
+            var expression = Expression.Instruction(DummyInstruction.Push(0, 1));
+            var statement = Expression.Instruction(DummyInstruction.Ret(1), expression).ToStatement();
             
             // Define capture group.
             var returnValueGroup = new CaptureGroup<Expression<DummyInstruction>>("returnValue");
             
             // Create ret(?) pattern. 
-            var pattern = StatementPattern.Expression(
-                ExpressionPattern
-                    .Instruction(new DummyInstructionPattern(DummyOpCode.Ret))
-                    .WithArguments(
-                        ExpressionPattern.Any<DummyInstruction>().CaptureAs(returnValueGroup)
-                    )
-            );
+            var pattern = ExpressionPattern
+                .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Ret))
+                .WithArguments(
+                    ExpressionPattern.Any<DummyInstruction>().CaptureAs(returnValueGroup)
+                )
+                .ToStatement();
 
             // Match.
             var result = pattern.Match(statement);

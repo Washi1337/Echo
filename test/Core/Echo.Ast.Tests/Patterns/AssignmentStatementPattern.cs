@@ -10,9 +10,9 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyVariableAndAnyExpression()
         {
-            var statement = new AssignmentStatement<int>(
+            var statement = Statement.Assignment(
                 new DummyVariable("var1"),
-                new InstructionExpression<int>(1)
+                Expression.Instruction(1)
             );
             
             var pattern = StatementPattern.Assignment<int>();
@@ -23,9 +23,9 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyVariableWithSpecificExpression()
         {
-            var statement = new AssignmentStatement<int>(
+            var statement = Statement.Assignment(
                 new DummyVariable("var1"),
-                new InstructionExpression<int>(1)
+                Expression.Instruction(1)
             );
             
             var group = new CaptureGroup<Expression<int>>("group");
@@ -44,9 +44,9 @@ namespace Echo.Ast.Tests.Patterns
         {
             var group = new CaptureGroup<IVariable>("group");
             
-            var statement = new AssignmentStatement<int>(
+            var statement = Statement.Assignment(
                 new DummyVariable("var1"),
-                new InstructionExpression<int>(1)
+                Expression.Instruction(1)
             );
 
             var pattern = StatementPattern

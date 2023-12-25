@@ -72,10 +72,10 @@ public class AstBuilderTest
         // pop(push(), push())
         var match = StatementPattern
             .Expression(ExpressionPattern
-                .Instruction(new DummyInstructionPattern(DummyOpCode.Pop))
+                .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Pop))
                 .WithArguments(
-                    ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push)),
-                    ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push))
+                    ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Push)),
+                    ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Push))
                 ).CaptureArguments(arguments)
             )
             .Match(node.Contents.Instructions[0]);
@@ -115,9 +115,9 @@ public class AstBuilderTest
         // pop(push())
         var match = StatementPattern
             .Expression(ExpressionPattern
-                .Instruction(new DummyInstructionPattern(DummyOpCode.Pop))
+                .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Pop))
                 .WithArguments(
-                    ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push))
+                    ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Push))
                 ).CaptureArguments(arguments)
             )
             .Match(node.Contents.Instructions[0]);
@@ -132,10 +132,10 @@ public class AstBuilderTest
         // pop(push(), push())
         match = StatementPattern
             .Expression(ExpressionPattern
-                .Instruction(new DummyInstructionPattern(DummyOpCode.Pop))
+                .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Pop))
                 .WithArguments(
-                    ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push)),
-                    ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push))
+                    ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Push)),
+                    ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Push))
                 ).CaptureArguments(arguments)
             )
             .Match(node.Contents.Instructions[1]);
@@ -170,7 +170,7 @@ public class AstBuilderTest
         Assert.True(StatementPattern
             .Assignment(
                 new[] {Pattern.Any<IVariable>(), Pattern.Any<IVariable>()},
-                ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op))
             ).Match(cfg.Nodes[0].Contents.Instructions[0]).IsSuccess
         );
     }
@@ -196,12 +196,12 @@ public class AstBuilderTest
 
         var match = StatementPattern
             .Expression(ExpressionPattern
-                .Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op))
                 .WithArguments(
-                    ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push)),
-                    ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                    ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Push)),
+                    ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op))
                         .WithArguments(
-                            ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push))
+                            ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Push))
                         )
                 )
             )
@@ -237,19 +237,19 @@ public class AstBuilderTest
         var n1 = Assert.Single(cfg.Nodes);
         
         var pattern = StatementPattern.Expression(ExpressionPattern
-            .Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+            .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op))
             .WithArguments(
                 ExpressionPattern
-                    .Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                    .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op))
                     .WithArguments(
-                        ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op)),
-                        ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                        ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op)),
+                        ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op))
                     ),
                 ExpressionPattern
-                    .Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                    .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op))
                     .WithArguments(
-                        ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op)),
-                        ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                        ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op)),
+                        ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op))
                     )
             )
         );
@@ -290,7 +290,7 @@ public class AstBuilderTest
         var pattern1 = StatementPattern
             .Assignment(
                 Pattern.Any<IVariable>().CaptureAs(variable),
-                ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push))
+                ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Push))
             );
         var match1 = pattern1.Match(node.Contents.Instructions[0]);
         var match2 = pattern1.Match(node.Contents.Instructions[1]);
@@ -301,7 +301,7 @@ public class AstBuilderTest
         // op(push())
         Assert.True(StatementPattern
             .Expression(ExpressionPattern
-                .Instruction(new DummyInstructionPattern(DummyOpCode.Op))
+                .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op))
                 .WithArguments(1)
             )
             .Match(node.Contents.Instructions[2]).IsSuccess);
@@ -309,7 +309,7 @@ public class AstBuilderTest
         // pop(tmp)
         var pattern2 = StatementPattern
             .Expression(ExpressionPattern
-                .Instruction(new DummyInstructionPattern(DummyOpCode.Pop))
+                .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Pop))
                 .WithArguments(ExpressionPattern.Variable<DummyInstruction>(
                     Pattern.Any<IVariable>().CaptureAs(variable))
                 )
@@ -379,7 +379,7 @@ public class AstBuilderTest
         var match1 = StatementPattern
             .Assignment(
                 Pattern.Any<IVariable>().CaptureAs(variable),
-                 ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push))
+                 ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Push))
             )
             .Match(n1.Contents.Instructions[0]);
         Assert.True(match1.IsSuccess);
@@ -396,7 +396,7 @@ public class AstBuilderTest
         // pop(in)
         var match3 = StatementPattern
             .Expression(ExpressionPattern
-                .Instruction(new DummyInstructionPattern(DummyOpCode.Pop))
+                .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Pop))
                 .WithArguments(
                     ExpressionPattern.Variable<DummyInstruction>(Pattern.Any<IVariable>().CaptureAs(variable))
                 )
@@ -452,7 +452,7 @@ public class AstBuilderTest
         var value = new CaptureGroup<Expression<DummyInstruction>>("value");
         var pattern = StatementPattern.Assignment(
             Pattern.Any<IVariable>().CaptureAs(variable),
-            ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push)).CaptureAs(value)
+            ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Push)).CaptureAs(value)
         );
 
         // Ensure expressions are pushed as variables.

@@ -18,7 +18,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="instruction">The instruction to match on.</param>
         /// <returns>The pattern.</returns>
-        public static InstructionExpressionPattern<TInstruction> InstructionLiteral<TInstruction>(TInstruction instruction)
+        public static InstructionExpressionPattern<TInstruction> Instruction<TInstruction>(TInstruction instruction)
             => new(Pattern.Literal(instruction));
 
         /// <summary>
@@ -57,5 +57,10 @@ namespace Echo.Ast.Patterns
     /// <typeparam name="TInstruction">The type of instructions stored in the abstract syntax tree.</typeparam>
     public abstract class ExpressionPattern<TInstruction> : Pattern<Expression<TInstruction>>
     {
+        /// <summary>
+        /// Wraps the expression pattern in an expression statement pattern.
+        /// </summary>
+        /// <returns>The resulting statement pattern.</returns>
+        public ExpressionStatementPattern<TInstruction> ToStatement() => new(this);
     }
 }

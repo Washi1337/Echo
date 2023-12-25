@@ -34,9 +34,9 @@ namespace Echo.Ast.Tests.Patterns
             var pattern3 = Pattern.Literal(3);
 
             var combined = pattern1 | pattern2;
-            combined = combined | pattern3;
+            combined |= pattern3;
 
-            Assert.Equal(new[] {pattern1, pattern2, pattern3}, combined.Options);
+            Assert.Equal(new Pattern<int>[] {pattern1, pattern2, pattern3}, combined.Options);
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Echo.Ast.Tests.Patterns
             var combined = pattern2 | pattern3;
             combined = pattern1 | combined;
 
-            Assert.Equal(new[] {pattern1, pattern2, pattern3}, combined.Options);
+            Assert.Equal(new Pattern<int>[] {pattern1, pattern2, pattern3}, combined.Options);
         }
 
     }

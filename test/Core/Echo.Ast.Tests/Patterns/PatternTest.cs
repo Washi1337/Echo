@@ -12,7 +12,7 @@ namespace Echo.Ast.Tests.Patterns
         {
             var pattern = Pattern.Any<object>();
             
-            var myObject = new object();
+            object myObject = new();
             var result = pattern.Match(myObject);
             
             Assert.True(result.IsSuccess);
@@ -25,7 +25,7 @@ namespace Echo.Ast.Tests.Patterns
             var pattern = Pattern.Any<object>()
                 .CaptureAs(_captureGroup);
             
-            object myObject = new object();
+            object myObject = new();
             var result = pattern.Match(myObject);
             
             Assert.True(result.IsSuccess);

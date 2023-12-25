@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Echo.Ast.Patterns;
 using Echo.Code;
 using Echo.Platforms.DummyPlatform.Code;
@@ -11,7 +10,7 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyPhiWithAnyVariables()
         {
-            var statement = new PhiStatement<int>(new DummyVariable("phi1"), new VariableExpression<int>[]
+            var statement = Statement.Phi(new DummyVariable("phi1"), new VariableExpression<int>[]
             {
                 new(new DummyVariable("v1")),
                 new(new DummyVariable("v2")),
@@ -27,7 +26,7 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyPhiWithSpecificTargetPattern()
         {
-            var statement = new PhiStatement<int>(new DummyVariable("phi1"), new VariableExpression<int>[]
+            var statement = Statement.Phi(new DummyVariable("phi1"), new VariableExpression<int>[]
             {
                 new(new DummyVariable("v1")),
                 new(new DummyVariable("v2")),
@@ -49,7 +48,7 @@ namespace Echo.Ast.Tests.Patterns
         [Fact]
         public void AnyPhiWithFixedVariables()
         {
-            var statement = new PhiStatement<int>(new DummyVariable("phi1"), new VariableExpression<int>[]
+            var statement = Statement.Phi(new DummyVariable("phi1"), new VariableExpression<int>[]
             {
                 new(new DummyVariable("v1")),
                 new(new DummyVariable("v2")),
