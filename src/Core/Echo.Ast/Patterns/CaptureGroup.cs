@@ -5,7 +5,7 @@ namespace Echo.Ast.Patterns
     /// </summary>
     public abstract class CaptureGroup
     {
-        internal CaptureGroup(string name)
+        internal CaptureGroup(string? name)
         {
             Name = name;
         }
@@ -13,7 +13,7 @@ namespace Echo.Ast.Patterns
         /// <summary>
         /// Gets the name of the capture group.
         /// </summary>
-        public string Name
+        public string? Name
         {
             get;
         }
@@ -37,7 +37,7 @@ namespace Echo.Ast.Patterns
         /// Creates a new named capture group.
         /// </summary>
         /// <param name="name">The name of the capture.</param>
-        public CaptureGroup(string name)
+        public CaptureGroup(string? name)
             : base(name)
         {
         }

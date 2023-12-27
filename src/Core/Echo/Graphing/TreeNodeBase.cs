@@ -69,6 +69,23 @@ namespace Echo.Graphing
         public bool HasSuccessor(INode node) => GetChildren().Contains(node);
 
         /// <summary>
+        /// Updates the value and the parent of the <paramref name="child"/> node, ensuring that the new value is not
+        /// <c>null</c>.
+        /// </summary>
+        /// <param name="child">The child element to update.</param>
+        /// <param name="value">The new value to assign to the <paramref name="child"/>.</param>
+        /// <exception cref="ArgumentNullException">When the new node is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">When the node already has a parent.</exception>
+        protected void UpdateChildNotNull<T>(ref T child, T value)
+            where T : TreeNodeBase
+        {
+            if (value is null)
+                throw new ArgumentNullException(nameof(value));
+
+            UpdateChild(ref child!, value);
+        }
+
+        /// <summary>
         /// Updates the value and the parent of the <paramref name="child"/> node.
         /// </summary>
         /// <param name="child">The child element to update.</param>

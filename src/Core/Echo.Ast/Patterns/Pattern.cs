@@ -63,7 +63,7 @@ namespace Echo.Ast.Patterns
         /// <summary>
         /// Gets or sets the capture group this pattern was assigned to.
         /// </summary>
-        public CaptureGroup<T> CaptureGroup
+        public CaptureGroup<T>? CaptureGroup
         {
             get;
             set;

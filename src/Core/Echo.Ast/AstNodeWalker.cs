@@ -4,7 +4,7 @@ namespace Echo.Ast
     /// Provides a base contract for Ast walkers
     /// </summary>
     /// <typeparam name="TInstruction">The type of the instruction</typeparam>
-    public abstract class AstNodeWalker<TInstruction> : IAstNodeVisitor<TInstruction, object>
+    public abstract class AstNodeWalker<TInstruction> : IAstNodeVisitor<TInstruction, object?>
     {
         /// <summary>
         /// Begin visiting a given <see cref="AssignmentStatement{TInstruction}"/>
@@ -71,8 +71,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object>.Visit(AssignmentStatement<TInstruction> statement,
-            object state)
+        void IAstNodeVisitor<TInstruction, object?>.Visit(AssignmentStatement<TInstruction> statement, object? state)
         {
             EnterAssignmentStatement(statement);
 
@@ -82,8 +81,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object>.Visit(ExpressionStatement<TInstruction> expression,
-            object state)
+        void IAstNodeVisitor<TInstruction, object?>.Visit(ExpressionStatement<TInstruction> expression, object? state)
         {
             EnterExpressionStatement(expression);
 
@@ -93,7 +91,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object>.Visit(PhiStatement<TInstruction> statement, object state)
+        void IAstNodeVisitor<TInstruction, object?>.Visit(PhiStatement<TInstruction> statement, object? state)
         {
             EnterPhiStatement(statement);
 
@@ -104,7 +102,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object>.Visit(InstructionExpression<TInstruction> expression, object state)
+        void IAstNodeVisitor<TInstruction, object?>.Visit(InstructionExpression<TInstruction> expression, object? state)
         {
             EnterInstructionExpression(expression);
 
@@ -115,7 +113,7 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object>.Visit(VariableExpression<TInstruction> expression, object state)
+        void IAstNodeVisitor<TInstruction, object?>.Visit(VariableExpression<TInstruction> expression, object? state)
         {
             VisitVariableExpression(expression);
         }

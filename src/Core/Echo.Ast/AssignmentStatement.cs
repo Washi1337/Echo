@@ -11,7 +11,7 @@ namespace Echo.Ast
     /// </summary>
     public sealed class AssignmentStatement<TInstruction> : Statement<TInstruction>
     {
-        private Expression<TInstruction> _expression;
+        private Expression<TInstruction> _expression = null!;
 
         /// <summary>
         /// Creates a new assignment statement
@@ -19,7 +19,9 @@ namespace Echo.Ast
         /// <param name="variable">The variable</param>
         /// <param name="expression">The expression</param>
         public AssignmentStatement(IVariable variable, Expression<TInstruction> expression)
-            : this(new[] { variable }, expression) { }
+            : this(new[] {variable}, expression)
+        {
+        }
 
         /// <summary>
         /// Creates a new assignment statement
@@ -47,7 +49,7 @@ namespace Echo.Ast
         public Expression<TInstruction> Expression
         {
             get => _expression;
-            set => UpdateChild(ref _expression, value);
+            set => UpdateChildNotNull(ref _expression, value);
         }
 
         /// <inheritdoc />

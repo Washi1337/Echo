@@ -9,7 +9,7 @@ namespace Echo.Ast
     /// </summary>
     public sealed class ExpressionStatement<TInstruction> : Statement<TInstruction>
     {
-        private Expression<TInstruction> _expression;
+        private Expression<TInstruction> _expression = null!;
 
         /// <summary>
         /// Creates a new expression statement
@@ -27,7 +27,7 @@ namespace Echo.Ast
         public Expression<TInstruction> Expression
         {
             get => _expression;
-            set => UpdateChild(ref _expression, value);
+            set => UpdateChildNotNull(ref _expression, value);
         }
 
         /// <inheritdoc />
