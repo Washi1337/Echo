@@ -14,6 +14,8 @@ Main Features
 - Data flow analysis
     - Create data flow graphs
     - Inspect stack and variable dependencies of instructions.
+- AST building
+    - Lift control flow graphs to Abstract Syntax Trees (ASTs).
 - Unified generic API.
     - Serialize any kind of graph to the dot file format.
     - Adding a new platform for flow analysis requires minimal effort
@@ -21,12 +23,12 @@ Main Features
 
 Supported platforms:
 
-| Architecture | Back-end                                                | Control Flow | Data Flow | Purity Classification | Emulation |
-|--------------|---------------------------------------------------------|--------------|-----------|-----------------------|-----------|
-| CIL          | [AsmResolver](https://github.com/Washi1337/AsmResolver) | ✓            | ✓         | ✓                     | ✓ (WIP)   |
-| CIL          | [dnlib](https://github.com/0xd4d/dnlib)                 | ✓            | ✓         | ✓                     |           |
-| x86 (32-bit) | [Iced](https://github.com/icedland/iced)                | ✓            | ✓         |                       |           |
-| x86 (64-bit) | [Iced](https://github.com/icedland/iced)                | ✓            | ✓         |                       |           |
+| Architecture | Back-end                                                | Control Flow | Data Flow | AST | Purity Classification | Emulation |
+|--------------|---------------------------------------------------------|--------------|-----------|-----|-----------------------|-----------|
+| CIL          | [AsmResolver](https://github.com/Washi1337/AsmResolver) | ✓            | ✓         | ✓   | ✓                     | ✓ (WIP)   |
+| CIL          | [dnlib](https://github.com/0xd4d/dnlib)                 | ✓            | ✓         | ✓   | ✓                     |           |
+| x86 (32-bit) | [Iced](https://github.com/icedland/iced)                | ✓            | ✓         | ✓   |                       |           |
+| x86 (64-bit) | [Iced](https://github.com/icedland/iced)                | ✓            | ✓         | ✓   |                       |           |
 
 
 Compiling
@@ -55,4 +57,3 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 Found a bug or have questions?
 ------------------------------
 Please use the [issue tracker](https://github.com/Washi1337/Echo/issues). Try to be as descriptive as possible.
-
