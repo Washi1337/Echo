@@ -95,10 +95,5 @@ namespace Echo.Ast
 
             return this;
         }
-
-        /// <inheritdoc />
-        public override string ToString() => $"{Representative.Name} = φ({string.Join(", ", Sources)})";
-
-        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) => ToString();
     }
 }

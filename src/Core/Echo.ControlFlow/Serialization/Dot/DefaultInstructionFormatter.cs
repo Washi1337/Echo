@@ -6,8 +6,10 @@
     /// <typeparam name="TInstruction">The type of the instruction to create a formatter of.</typeparam>
     public sealed class DefaultInstructionFormatter<TInstruction> : IInstructionFormatter<TInstruction>
     {
-        internal static readonly DefaultInstructionFormatter<TInstruction> Instance =
-            new DefaultInstructionFormatter<TInstruction>();
+        /// <summary>
+        /// Gets a singleton instance of the <see cref="DefaultInstructionFormatter{TInstruction}"/> class.
+        /// </summary>
+        public static DefaultInstructionFormatter<TInstruction> Instance { get; } = new();
 
         /// <inheritdoc />
         public string Format(in TInstruction instruction) => instruction.ToString();

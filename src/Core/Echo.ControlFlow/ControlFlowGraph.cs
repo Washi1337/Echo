@@ -117,11 +117,19 @@ namespace Echo.ControlFlow
         /// </summary>
         /// <param name="writer">The output stream.</param>
         /// <remarks>To customize the layout of the final graph, use the <see cref="DotWriter"/> class.</remarks>
-        public void ToDotGraph(TextWriter writer)
+        public void ToDotGraph(TextWriter writer) => ToDotGraph(writer, DefaultInstructionFormatter<TInstruction>.Instance);
+
+        /// <summary>
+        /// Serializes the control flow graph to the provided output stream, in graphviz dot format.
+        /// </summary>
+        /// <param name="formatter">The instruction formatter.</param>
+        /// <param name="writer">The output stream.</param>
+        /// <remarks>To customize the layout of the final graph, use the <see cref="DotWriter"/> class.</remarks>
+        public void ToDotGraph(TextWriter writer, IInstructionFormatter<TInstruction> formatter)
         {
             var dotWriter = new DotWriter(writer)
             {
-                NodeAdorner = new ControlFlowNodeAdorner<TInstruction>(),
+                NodeAdorner = new ControlFlowNodeAdorner<TInstruction>(formatter),
                 EdgeAdorner = new ControlFlowEdgeAdorner<TInstruction>(),
                 SubGraphAdorner = new ExceptionHandlerAdorner<TInstruction>(),
             };

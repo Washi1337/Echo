@@ -1,3 +1,4 @@
+using System.Text;
 using Echo.Code;
 using Echo.ControlFlow.Serialization.Dot;
 using Echo.Graphing;
@@ -9,6 +10,11 @@ namespace Echo.Ast
     /// </summary>
     public abstract class AstNode<TInstruction> : TreeNodeBase
     {
+        /// <summary>
+        /// Gets the parent of the AST node. 
+        /// </summary>
+        public new AstNode<TInstruction>? Parent => base.Parent as AstNode<TInstruction>;
+        
         /// <summary>
         /// Gets or sets the original address range this AST node mapped to in the raw disassembly of the code
         /// (if available).
@@ -42,6 +48,13 @@ namespace Echo.Ast
         /// </summary>
         public abstract TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state);
 
-        internal abstract string Format(IInstructionFormatter<TInstruction> instructionFormatter);
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            var formatter = new AstFormatter<TInstruction>();
+            var builder = new StringBuilder();
+            Accept(formatter, builder);
+            return builder.ToString();
+        }
     }
 }

@@ -54,11 +54,5 @@ namespace Echo.Ast
             Expression = expression;
             return this;
         }
-
-        /// <inheritdoc />
-        public override string ToString() => $"{Expression}";
-
-        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) 
-            => $"{Expression.Format(instructionFormatter)}";
     }
 }

@@ -50,10 +50,5 @@ namespace Echo.Ast
             Variable = variable;
             return this;
         }
-
-        /// <inheritdoc />
-        public override string ToString() => $"{Variable.Name}";
-
-        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) => ToString();
     }
 }

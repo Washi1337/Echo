@@ -104,11 +104,5 @@ namespace Echo.Ast
 
             return this;
         }
-
-        /// <inheritdoc />
-        public override string ToString() => $"{Instruction}({string.Join(", ", Arguments)})";
-
-        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
-            $"{instructionFormatter.Format(Instruction)}({string.Join(", ", Arguments)})";
     }
 }

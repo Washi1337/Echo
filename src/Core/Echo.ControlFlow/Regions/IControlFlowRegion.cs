@@ -69,6 +69,10 @@ namespace Echo.ControlFlow.Regions
         IEnumerable<ControlFlowNode<TInstruction>> GetSuccessors();
     }
 
+    /// <summary>
+    /// Represents a scope of regions. 
+    /// </summary>
+    /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public interface IScopeControlFlowRegion<TInstruction> : IControlFlowRegion<TInstruction>
     {
         /// <summary>
