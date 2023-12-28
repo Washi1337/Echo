@@ -173,9 +173,17 @@ public sealed class AstBuilder<TInstruction>
 
     private static Expression<TInstruction> Pop(LiftedNode<TInstruction> node, Stack<Expression<TInstruction>> stack)
     {
-        return stack.Count == 0
-            ? node.DeclareStackInput().ToExpression<TInstruction>()
-            : stack.Pop();
+        if (stack.Count == 0)
+        {
+            var variable = node.DeclareStackInput();
+            
+            var expression = variable.ToExpression<TInstruction>();
+            node.StackInputReferences.Add(variable, expression);
+            
+            return expression;
+        }
+        else
+            return stack.Pop();
     }
 
     private static void FlushStackAsOutput(LiftedNode<TInstruction> node, Stack<Expression<TInstruction>> stack)
@@ -323,13 +331,15 @@ public sealed class AstBuilder<TInstruction>
                 var input = block.StackInputs[i];
                 if (input.Sources.Count == 1)
                 {
-                    // Optimization: if there is one source only for the phi node, pre-emptively remove the 
-                    // phi node and replace it with a normal assignment.
+                    // Optimization: if there is one source only for the phi node, we can inline the input stack
+                    // variable. Since an input stack slot is only consumed once, it thus only has one variable
+                    // expression. Therefore, inlining is exactly one update of a variable expression.
+                    
                     var singleSource = input.Sources[0];
                     input.Sources.RemoveAt(0);
-
-                    var simplified = Statement.Assignment(input.Representative, singleSource);
-                    block.Transformed.Contents.Instructions.Insert(0, simplified);
+                    
+                    if (block.StackInputReferences.TryGetValue(input.Representative, out var expression))
+                        expression.Variable = singleSource.Variable;
                 }
                 else
                 {

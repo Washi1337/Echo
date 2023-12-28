@@ -26,7 +26,7 @@ namespace Echo.Ast
         public IVariable Variable
         {
             get;
-            private set;
+            internal set;
         }
 
         /// <inheritdoc />

@@ -146,7 +146,7 @@ namespace Echo.Graphing.Serialization.Dot
                 Writer.Indent++;
                 
                 var attributes = SubGraphAdorner.GetSubGraphAttributes(subGraph);
-                if (attributes?.Count > 0)
+                if (attributes.Count > 0)
                 {
                     string delimiter = IncludeSemicolons
                         ? ";"
@@ -234,9 +234,6 @@ namespace Echo.Graphing.Serialization.Dot
 
         private void WriteEntityAttributes(IEnumerable<KeyValuePair<string, string>> attributes)
         {
-            if (attributes == null)
-                return;
-            
             var array = attributes as KeyValuePair<string, string>[] ?? attributes.ToArray();
             if (array.Length > 0)
             {

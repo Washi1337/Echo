@@ -379,33 +379,24 @@ public class AstBuilderTest
         var match1 = StatementPattern
             .Assignment(
                 Pattern.Any<IVariable>().CaptureAs(variable),
-                 ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Push))
+                 ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Push))
             )
             .Match(n1.Contents.Instructions[0]);
         Assert.True(match1.IsSuccess);
-
-        // in = out
-        var match2 = StatementPattern
-            .Assignment(
-                Pattern.Any<IVariable>().CaptureAs(variable),
-                 ExpressionPattern.Variable<DummyInstruction>(Pattern.Any<IVariable>().CaptureAs(variable))
-            )
-            .Match(n2.Contents.Instructions[0]);
-        Assert.True(match2.IsSuccess);
         
-        // pop(in)
-        var match3 = StatementPattern
+        // pop(out)
+        var match2 = StatementPattern
             .Expression(ExpressionPattern
-                .Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Pop))
+                .Instruction(new DummyInstructionPattern(DummyOpCode.Pop))
                 .WithArguments(
                     ExpressionPattern.Variable<DummyInstruction>(Pattern.Any<IVariable>().CaptureAs(variable))
                 )
             )
-            .Match(n2.Contents.Instructions[1]);
-        Assert.True(match3.IsSuccess);
+            .Match(n2.Contents.Instructions[0]);
+        Assert.True(match2.IsSuccess);
         
-        Assert.Same(match1.GetCaptures(variable)[0], match2.GetCaptures(variable)[1]);
-        Assert.Same(match2.GetCaptures(variable)[0], match3.GetCaptures(variable)[0]);
+        Assert.Same(match1.GetCaptures(variable)[0], match2.GetCaptures(variable)[0]);
+        Assert.Same(match2.GetCaptures(variable)[0], match2.GetCaptures(variable)[0]);
 
         Assert.Same(n2, n1.UnconditionalNeighbour);
     }
@@ -436,9 +427,11 @@ public class AstBuilderTest
             .Match(cfg.Nodes[0].Contents.Instructions);
 
         var match2 = StatementPattern
-            .Assignment(
-                Pattern.Any<IVariable>(),
-                ExpressionPattern.Variable<DummyInstruction>(Pattern.Any<IVariable>().CaptureAs(variable))
+            .Expression(ExpressionPattern
+                .Instruction(new DummyInstructionPattern(DummyOpCode.Pop))
+                .WithArguments(
+                    ExpressionPattern.Variable<DummyInstruction>(Pattern.Any<IVariable>().CaptureAs(variable))
+                )
             )
             .Match(cfg.Nodes[10].Contents.Instructions[0]);
 
@@ -459,9 +452,6 @@ public class AstBuilderTest
             DummyInstruction.Pop(10, 1),
             DummyInstruction.Ret(11)
         });
-
-        using var fs = File.CreateText("/tmp/output.dot");
-        cfg.ToDotGraph(fs);
 
         var block = cfg.Nodes[0].Contents;
         Assert.IsAssignableFrom<AssignmentStatement<DummyInstruction>>(block.Instructions[0]);
@@ -729,7 +719,7 @@ public class AstBuilderTest
         var match3 = StatementPattern.Phi<DummyInstruction>()
             .WithSources(2)
             .CaptureSources(sourcesCapture)
-            .Match(cfg.Nodes[6].Contents.Instructions[1]);
+            .Match(cfg.Nodes[6].Contents.Instructions[0]);
         
         Assert.True(match1.IsSuccess);
         Assert.True(match3.IsSuccess);

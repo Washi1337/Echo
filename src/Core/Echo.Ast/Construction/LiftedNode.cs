@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Echo.Code;
 using Echo.ControlFlow;
 
 namespace Echo.Ast.Construction;
@@ -46,6 +47,11 @@ internal sealed class LiftedNode<TInstruction>
     /// </summary>
     public List<SyntheticVariable> StackOutputs { get; } = new();
 
+    /// <summary>
+    /// Gets a mapping from stack input variables to the expression the stack value is used.
+    /// </summary>
+    public Dictionary<IVariable, VariableExpression<TInstruction>> StackInputReferences { get; } = new();
+    
     /// <summary>
     /// Defines a new synthetic stack input.
     /// </summary>
