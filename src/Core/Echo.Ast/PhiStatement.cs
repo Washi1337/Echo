@@ -77,6 +77,22 @@ namespace Echo.Ast
         }
 
         /// <summary>
+        /// Determines whether the provided variable is a source for this PHI node.
+        /// </summary>
+        /// <param name="variable">The variable.</param>
+        /// <returns><c>true</c> if the variable is a valid source, <c>false</c> otherwise.</returns>
+        public bool HasSource(IVariable variable)
+        {
+            for (int i = 0; i < Sources.Count; i++)
+            {
+                if (Sources[i].Variable == variable)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Modifies the current <see cref="PhiStatement{TInstruction}"/> to assign values from <paramref name="sources"/>
         /// </summary>
         /// <param name="sources">The sources to get values from</param>

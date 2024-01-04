@@ -82,4 +82,19 @@ namespace Echo.Ast
             return finder.Variables.Count;
         }
     }
+
+    /// <summary>
+    /// Provides extension methods for AST architectures.
+    /// </summary>
+    public static class AstArchitectureExtensions
+    {
+        /// <summary>
+        /// Wraps the provided architecture to an AST architecture.
+        /// </summary>
+        /// <param name="self">The architecture.</param>
+        /// <typeparam name="TInstruction">The type of instructions defined by the architecture.</typeparam>
+        /// <returns>The lifted architecture.</returns>
+        public static AstArchitecture<TInstruction> ToAst<TInstruction>(this IArchitecture<TInstruction> self) 
+            => new(self);
+    }
 }

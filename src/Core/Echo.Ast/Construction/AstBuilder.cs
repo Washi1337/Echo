@@ -13,7 +13,7 @@ namespace Echo.Ast.Construction;
 public sealed class AstBuilder<TInstruction>
 {
     private readonly ControlFlowGraph<TInstruction> _original;
-    private readonly ControlFlowGraph<Statement<TInstruction>> _transformed;
+    private readonly ControlFlowGraph<Statement<TInstruction>> _lifted;
     private readonly IPurityClassifier<TInstruction> _purityClassifier;
     private readonly Dictionary<ControlFlowNode<TInstruction>, LiftedNode<TInstruction>> _liftedNodes = new();
     
@@ -21,7 +21,7 @@ public sealed class AstBuilder<TInstruction>
     {
         _original = original;
         _purityClassifier = purityClassifier;
-        _transformed = new ControlFlowGraph<Statement<TInstruction>>(new AstArchitecture<TInstruction>(original.Architecture));
+        _lifted = new ControlFlowGraph<Statement<TInstruction>>(original.Architecture.ToAst());
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ public sealed class AstBuilder<TInstruction>
     {
         var builder = new AstBuilder<TInstruction>(cfg, purityClassifier);
         builder.Run();
-        return builder._transformed;
+        return builder._lifted;
     }
         
     private void Run()
@@ -66,7 +66,7 @@ public sealed class AstBuilder<TInstruction>
         {
             var liftedNode = LiftNode(node);
             _liftedNodes.Add(node, liftedNode);
-            _transformed.Nodes.Add(liftedNode.Transformed);
+            _lifted.Nodes.Add(liftedNode.Transformed);
         }
     }
 
@@ -173,28 +173,25 @@ public sealed class AstBuilder<TInstruction>
 
     private static Expression<TInstruction> Pop(LiftedNode<TInstruction> node, Stack<Expression<TInstruction>> stack)
     {
-        if (stack.Count == 0)
-        {
-            var variable = node.DeclareStackInput();
-            
-            var expression = variable.ToExpression<TInstruction>();
-            node.StackInputReferences.Add(variable, expression);
-            
-            return expression;
-        }
-        else
+        // If there is something on the stack, we can pop it. Otherwise it is a stack-input for this basic block.
+        if (stack.Count != 0)
             return stack.Pop();
+        
+        var variable = node.DeclareStackInput();
+        var expression = variable.ToExpression<TInstruction>();
+        node.StackInputReferences.Add(variable, expression);
+        return expression;
     }
 
     private static void FlushStackAsOutput(LiftedNode<TInstruction> node, Stack<Expression<TInstruction>> stack)
     {
-        FlushStackInternal(node, stack, (n, value) =>
+        FlushStackInternal(node, stack, static (n, value) =>
         {
             if (value is VariableExpression<TInstruction> {Variable: SyntheticVariable variable})
             {
                 // If this output expression is already variable expression, we do not need to allocate a new variable
                 // and can instead just promote the variable to a stack output variable (inlining).
-                node.StackOutputs.Add(variable);
+                n.StackOutputs.Add(variable);
             }
             else
             {
@@ -209,7 +206,7 @@ public sealed class AstBuilder<TInstruction>
 
     private static void FlushStackAndPush(LiftedNode<TInstruction> node, Stack<Expression<TInstruction>> stack)
     {
-        var variables = FlushStackInternal(node, stack, (n, value) =>
+        var variables = FlushStackInternal(node, stack, static (n, value) =>
         {
             var intermediate = n.DeclareStackIntermediate();
             n.Transformed.Contents.Instructions.Add(Statement.Assignment(intermediate, value));
@@ -225,7 +222,7 @@ public sealed class AstBuilder<TInstruction>
         Stack<Expression<TInstruction>> stack, 
         Expression<TInstruction> expression)
     {
-        // Is this expression potentially impure?
+        // Is this expression pure with 100% certainty?
         if (expression.IsPure(_purityClassifier).ToBooleanOrFalse())
             return;
 
@@ -272,28 +269,26 @@ public sealed class AstBuilder<TInstruction>
 
         while (agenda.Count > 0)
         {
-            var current = agenda.Dequeue();
-            var liftedNode = _liftedNodes[current.Node];
+            var currentState = agenda.Dequeue();
+            var liftedNode = _liftedNodes[currentState.Node];
 
-            // Have we visited this block before?
-            bool changed = false;
             if (!recordedStates.TryGetValue(liftedNode, out var previousState))
             {
                 // We have never visited this block before. Register the new state.
-                recordedStates[liftedNode] = current;
-                changed = true;
+                recordedStates[liftedNode] = currentState;
             }
-            else if (previousState.MergeWith(current, out var newState))
+            else if (previousState.MergeWith(currentState, out var mergedState))
             {
                 // Merging the states resulted in a change. We have to revisit this path.
-                current = newState;
-                recordedStates[liftedNode] = newState;
-                changed = true;
+                currentState = mergedState;
+                recordedStates[liftedNode] = mergedState;
             }
-
-            // If we did not make any change to the states, we can stop.
-            if (!changed)
+            else
+            {
+                // We did not change anything to the recorded input states, so there is no need to recompute the PHI
+                // nodes nor any of its successors.
                 continue;
+            }
 
             // Consume stack values, and add them to the phi statements.
             for (int i = liftedNode.StackInputs.Count - 1; i >= 0; i--)
@@ -301,24 +296,24 @@ public sealed class AstBuilder<TInstruction>
                 var input = liftedNode.StackInputs[i];
                 
                 // Protection against malformed code streams with stack underflow.
-                if (current.Stack.IsEmpty)
+                if (currentState.Stack.IsEmpty)
                     break;
 
-                current = current.Pop(out var value);
+                currentState = currentState.Pop(out var value);
                 foreach (var source in value.Sources)
                 {
-                    if (input.Sources.All(x => x.Variable != source))
+                    if (!input.HasSource(source))
                         input.Sources.Add(source.ToExpression<TInstruction>());
                 }
             }
 
             // Push new values on stack.
             foreach (var output in liftedNode.StackOutputs)
-                current = current.Push(new StackSlot(output));
+                currentState = currentState.Push(new StackSlot(output));
 
             // Schedule successors.
-            foreach (var successor in current.Node.GetSuccessors())
-                agenda.Enqueue(current.MoveTo(successor));
+            foreach (var successor in currentState.Node.GetSuccessors())
+                agenda.Enqueue(currentState.MoveTo(successor));
         }
     }
 
@@ -367,9 +362,9 @@ public sealed class AstBuilder<TInstruction>
 
     private void TransformRegions()
     {
-        _transformed.EntryPoint = _liftedNodes[_original.EntryPoint].Transformed;
+        _lifted.EntryPoint = _liftedNodes[_original.EntryPoint].Transformed;
         foreach (var region in _original.Regions)
-            TransformRegion(x => _transformed.Regions.Add((ControlFlowRegion<Statement<TInstruction>>) x), region);
+            TransformRegion(x => _lifted.Regions.Add((ControlFlowRegion<Statement<TInstruction>>) x), region);
     }
 
     private void TransformRegion(
