@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Echo.ControlFlow.Serialization.Dot;
 using Echo.Code;
 using Echo.Graphing;
 
 namespace Echo.Ast
 {
     /// <summary>
-    /// Represents an assignment in the AST
+    /// Represents a statement that assigns a value to a (set of) variable(s).
     /// </summary>
     public sealed class AssignmentStatement<TInstruction> : Statement<TInstruction>
     {
@@ -59,12 +58,16 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
-            visitor.Visit(this, state);
+        public override void Accept(IAstNodeVisitor<TInstruction> visitor) 
+            => visitor.Visit(this);
 
         /// <inheritdoc />
-        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
-            visitor.Visit(this, state);
+        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) 
+            => visitor.Visit(this, state);
+
+        /// <inheritdoc />
+        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) 
+            => visitor.Visit(this, state);
 
         /// <summary>
         /// Modifies the current <see cref="AssignmentStatement{TInstruction}"/> to assign to <paramref name="variables"/>

@@ -1,121 +1,78 @@
 namespace Echo.Ast
 {
     /// <summary>
-    /// Provides a base contract for Ast walkers
+    /// Provides a mechanism for performing a full traversal of an abstract syntax tree (AST).
     /// </summary>
-    /// <typeparam name="TInstruction">The type of the instruction</typeparam>
-    public abstract class AstNodeWalker<TInstruction> : IAstNodeVisitor<TInstruction, object?>
+    /// <typeparam name="TInstruction">The instruction stored in the AST.</typeparam>
+    public class AstNodeWalker<TInstruction> : IAstNodeVisitor<TInstruction>
     {
-        /// <summary>
-        /// Begin visiting a given <see cref="AssignmentStatement{TInstruction}"/>
-        /// </summary>
-        /// <param name="assignmentStatement">The <see cref="AssignmentStatement{TInstruction}"/> that is being entered</param>
-        protected virtual void EnterAssignmentStatement(AssignmentStatement<TInstruction> assignmentStatement) =>
-            VisitChildren(assignmentStatement);
+        private readonly IAstNodeListener<TInstruction> _listener;
 
         /// <summary>
-        /// Finish visiting a given <see cref="AssignmentStatement{TInstruction}"/>
+        /// Creates a new AST node walker.
         /// </summary>
-        /// <param name="assignmentStatement">The <see cref="AssignmentStatement{TInstruction}"/> that is being entered</param>
-        protected virtual void ExitAssignmentStatement(AssignmentStatement<TInstruction> assignmentStatement) { }
-
-        /// <summary>
-        /// Begin visiting a given <see cref="ExpressionStatement{TInstruction}"/>
-        /// </summary>
-        /// <param name="expressionStatement">The <see cref="ExpressionStatement{TInstruction}"/> that is being entered</param>
-        protected virtual void EnterExpressionStatement(ExpressionStatement<TInstruction> expressionStatement) =>
-            VisitChildren(expressionStatement);
-
-        /// <summary>
-        /// Finish visiting a given <see cref="ExpressionStatement{TInstruction}"/>
-        /// </summary>
-        /// <param name="expressionStatement">The <see cref="ExpressionStatement{TInstruction}"/> that is being finished</param>
-        protected virtual void ExitExpressionStatement(ExpressionStatement<TInstruction> expressionStatement) { }
-
-        /// <summary>
-        /// Begin visiting a given <see cref="PhiStatement{TInstruction}"/>
-        /// </summary>
-        /// <param name="phiStatement">The <see cref="PhiStatement{TInstruction}"/> that is being entered</param>
-        protected virtual void EnterPhiStatement(PhiStatement<TInstruction> phiStatement) =>
-            VisitChildren(phiStatement);
-
-        /// <summary>
-        /// Finish visiting a given <see cref="PhiStatement{TInstruction}"/>
-        /// </summary>
-        /// <param name="phiStatement">The <see cref="PhiStatement{TInstruction}"/> that is being finished</param>
-        protected virtual void ExitPhiStatement(PhiStatement<TInstruction> phiStatement) { }
-
-        /// <summary>
-        /// Begin visiting a given <see cref="InstructionExpression{TInstruction}"/>
-        /// </summary>
-        /// <param name="instructionExpression">The <see cref="InstructionExpression{TInstruction}"/> that is being entered</param>
-        protected virtual void EnterInstructionExpression(InstructionExpression<TInstruction> instructionExpression) =>
-            VisitChildren(instructionExpression);
-
-        /// <summary>
-        /// Finish visiting a given <see cref="InstructionExpression{TInstruction}"/>
-        /// </summary>
-        /// <param name="instructionExpression">The <see cref="InstructionExpression{TInstruction}"/> that is being finished</param>
-        protected virtual void ExitInstructionExpression(InstructionExpression<TInstruction> instructionExpression) { }
-
-        /// <summary>
-        /// Visiting a given <see cref="VariableExpression{TInstruction}"/>
-        /// </summary>
-        /// <param name="variableExpression">The <see cref="VariableExpression{TInstruction}"/> that is will be visited</param>
-        protected virtual void VisitVariableExpression(VariableExpression<TInstruction> variableExpression) { }
-
-        private void VisitChildren(AstNode<TInstruction> node)
+        /// <param name="listener">The listener to call after every traversal step.</param>
+        public AstNodeWalker(IAstNodeListener<TInstruction> listener)
         {
-            foreach (var child in node.GetChildren())
-                ((AstNode<TInstruction>) child).Accept(this, null);
+            _listener = listener;
+        }
+
+        /// <summary>
+        /// Walks the provided AST with the provided listener.
+        /// </summary>
+        /// <param name="listener">The listener to callback after every traversal step.</param>
+        /// <param name="node">The root node of the AST.</param>
+        public static void Walk(IAstNodeListener<TInstruction> listener, AstNode<TInstruction> node)
+        {
+            var walker = new AstNodeWalker<TInstruction>(listener);
+            walker.Walk(node);
+        }
+
+        /// <summary>
+        /// Walks the provided AST.
+        /// </summary>
+        /// <param name="node">The root node of the AST.</param>
+        public void Walk(AstNode<TInstruction> node) => node.Accept(this);
+
+        /// <inheritdoc />
+        public void Visit(AssignmentStatement<TInstruction> statement)
+        {
+            _listener.EnterAssignmentStatement(statement);
+            statement.Expression.Accept(this);
+            _listener.ExitAssignmentStatement(statement);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object?>.Visit(AssignmentStatement<TInstruction> statement, object? state)
+        public void Visit(ExpressionStatement<TInstruction> expression)
         {
-            EnterAssignmentStatement(statement);
-
-            statement.Expression.Accept(this, state);
-
-            ExitAssignmentStatement(statement);
+            _listener.EnterExpressionStatement(expression);
+            expression.Expression.Accept(this);
+            _listener.ExitExpressionStatement(expression);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object?>.Visit(ExpressionStatement<TInstruction> expression, object? state)
+        public void Visit(PhiStatement<TInstruction> statement)
         {
-            EnterExpressionStatement(expression);
-
-            expression.Expression.Accept(this, state);
-
-            ExitExpressionStatement(expression);
+            _listener.EnterPhiStatement(statement);
+            for (int i = 0; i < statement.Sources.Count; i++)
+                statement.Sources[i].Accept(this);
+            _listener.ExitPhiStatement(statement);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object?>.Visit(PhiStatement<TInstruction> statement, object? state)
+        public void Visit(InstructionExpression<TInstruction> expression)
         {
-            EnterPhiStatement(statement);
-
-            foreach (var source in statement.Sources)
-                source.Accept(this, state);
-
-            ExitPhiStatement(statement);
+            _listener.EnterInstructionExpression(expression);
+            for (int i = 0; i < expression.Arguments.Count; i++)
+                expression.Arguments[i].Accept(this);
+            _listener.ExitInstructionExpression(expression);
         }
 
         /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object?>.Visit(InstructionExpression<TInstruction> expression, object? state)
+        public void Visit(VariableExpression<TInstruction> expression)
         {
-            EnterInstructionExpression(expression);
-
-            foreach (var parameter in expression.Arguments)
-                parameter.Accept(this, state);
-
-            ExitInstructionExpression(expression);
-        }
-
-        /// <inheritdoc />
-        void IAstNodeVisitor<TInstruction, object?>.Visit(VariableExpression<TInstruction> expression, object? state)
-        {
-            VisitVariableExpression(expression);
+            _listener.EnterVariableExpression(expression);
+            _listener.ExitVariableExpression(expression);
         }
     }
 }

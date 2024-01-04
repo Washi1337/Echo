@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Echo.ControlFlow.Serialization.Dot;
 using Echo.Graphing;
 
 namespace Echo.Ast
@@ -62,6 +61,10 @@ namespace Echo.Ast
 
         /// <inheritdoc />
         public override IEnumerable<TreeNodeBase> GetChildren() => Arguments;
+
+        /// <inheritdoc />
+        public override void Accept(IAstNodeVisitor<TInstruction> visitor) 
+            => visitor.Visit(this);
 
         /// <inheritdoc />
         public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>

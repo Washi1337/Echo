@@ -1,17 +1,16 @@
 using System.Text;
 using Echo.Code;
-using Echo.ControlFlow.Serialization.Dot;
 using Echo.Graphing;
 
 namespace Echo.Ast
 {
     /// <summary>
-    /// Provides a base contract for all AST nodes
+    /// Represents a single node in an Abstract Syntax Tree (AST).
     /// </summary>
     public abstract class AstNode<TInstruction> : TreeNodeBase
     {
         /// <summary>
-        /// Gets the parent of the AST node. 
+        /// Gets the direct parent of the AST node. 
         /// </summary>
         public new AstNode<TInstruction>? Parent => base.Parent as AstNode<TInstruction>;
         
@@ -37,6 +36,11 @@ namespace Echo.Ast
         {
             return Accept(Analysis.AstPurityVisitor<TInstruction>.Instance, classifier);
         }
+        
+        /// <summary>
+        /// Implements the visitor pattern
+        /// </summary>
+        public abstract void Accept(IAstNodeVisitor<TInstruction> visitor);
         
         /// <summary>
         /// Implements the visitor pattern

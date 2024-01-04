@@ -5,16 +5,16 @@ using Echo.Code;
 namespace Echo.Ast
 {
     /// <summary>
-    /// Provides a decorator around <typeparamref name="TInstruction"/> for the AST
+    /// Describes an architecture that is lifted from a stack-based platform to an expression-based platform.
     /// </summary>
-    /// <typeparam name="TInstruction">The instruction</typeparam>
+    /// <typeparam name="TInstruction">The instructions defined by the satck-based platform.</typeparam>
     public class AstArchitecture<TInstruction>
         : IArchitecture<Statement<TInstruction>>
     {
         private readonly FlowControlDeterminer<TInstruction> _flowControlDeterminer;
 
         /// <summary>
-        /// Create a new decorator around the <paramref name="baseArchitecture"/>
+        /// Wraps the provided stack-based architecture to the lifted expression-based architecture.
         /// </summary>
         /// <param name="baseArchitecture">The <see cref="IArchitecture{TInstruction}"/> to decorate</param>
         public AstArchitecture(IArchitecture<TInstruction> baseArchitecture)
@@ -43,45 +43,43 @@ namespace Echo.Ast
         /// <inheritdoc />
         public int GetReadVariablesCount(in Statement<TInstruction> instruction)
         {
-            var visitor = new ReadVariableFinderWalker<TInstruction>();
-            instruction.Accept(visitor, null);
-
-            return visitor.Count;
+            var finder = new ReadVariableFinder<TInstruction>();
+            AstNodeWalker<TInstruction>.Walk(finder, instruction);
+            return finder.Variables.Count;
         }
 
         /// <inheritdoc />
         public int GetReadVariables(in Statement<TInstruction> instruction, Span<IVariable> variablesBuffer)
         {
-            var visitor = new ReadVariableFinderWalker<TInstruction>();
-            instruction.Accept(visitor, null);
+            var finder = new ReadVariableFinder<TInstruction>();
+            AstNodeWalker<TInstruction>.Walk(finder, instruction);
             
             int i = 0;
-            foreach (var variable in visitor.Variables)
+            foreach (var variable in finder.Variables)
                 variablesBuffer[i++] = variable;
 
-            return visitor.Count;
+            return finder.Variables.Count;
         }
 
         /// <inheritdoc />
         public int GetWrittenVariablesCount(in Statement<TInstruction> instruction)
         {
-            var visitor = new WrittenVariableFinderWalker<TInstruction>();
-            instruction.Accept(visitor, null);
-
-            return visitor.Count;
+            var finder = new WrittenVariableFinder<TInstruction>();
+            AstNodeWalker<TInstruction>.Walk(finder, instruction);
+            return finder.Variables.Count;
         }
 
         /// <inheritdoc />
         public int GetWrittenVariables(in Statement<TInstruction> instruction, Span<IVariable> variablesBuffer)
         {
-            var visitor = new WrittenVariableFinderWalker<TInstruction>();
-            instruction.Accept(visitor, null);
+            var finder = new WrittenVariableFinder<TInstruction>();
+            AstNodeWalker<TInstruction>.Walk(finder, instruction);
             
             int i = 0;
-            foreach (var variable in visitor.Variables)
+            foreach (var variable in finder.Variables)
                 variablesBuffer[i++] = variable;
 
-            return visitor.Count;
+            return finder.Variables.Count;
         }
     }
 }
