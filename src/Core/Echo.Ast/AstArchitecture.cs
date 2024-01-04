@@ -11,6 +11,7 @@ namespace Echo.Ast
     public class AstArchitecture<TInstruction>
         : IArchitecture<Statement<TInstruction>>
     {
+        private readonly IArchitecture<TInstruction> _baseArchitecture;
         private readonly FlowControlDeterminer<TInstruction> _flowControlDeterminer;
 
         /// <summary>
@@ -19,6 +20,7 @@ namespace Echo.Ast
         /// <param name="baseArchitecture">The <see cref="IArchitecture{TInstruction}"/> to decorate</param>
         public AstArchitecture(IArchitecture<TInstruction> baseArchitecture)
         {
+            _baseArchitecture = baseArchitecture;
             _flowControlDeterminer = new FlowControlDeterminer<TInstruction>(baseArchitecture);
         }
 
@@ -43,7 +45,7 @@ namespace Echo.Ast
         /// <inheritdoc />
         public int GetReadVariablesCount(in Statement<TInstruction> instruction)
         {
-            var finder = new ReadVariableFinder<TInstruction>();
+            var finder = new ReadVariableFinder<TInstruction>(_baseArchitecture);
             AstNodeWalker<TInstruction>.Walk(finder, instruction);
             return finder.Variables.Count;
         }
@@ -51,7 +53,7 @@ namespace Echo.Ast
         /// <inheritdoc />
         public int GetReadVariables(in Statement<TInstruction> instruction, Span<IVariable> variablesBuffer)
         {
-            var finder = new ReadVariableFinder<TInstruction>();
+            var finder = new ReadVariableFinder<TInstruction>(_baseArchitecture);
             AstNodeWalker<TInstruction>.Walk(finder, instruction);
             
             int i = 0;
@@ -64,7 +66,7 @@ namespace Echo.Ast
         /// <inheritdoc />
         public int GetWrittenVariablesCount(in Statement<TInstruction> instruction)
         {
-            var finder = new WrittenVariableFinder<TInstruction>();
+            var finder = new WrittenVariableFinder<TInstruction>(_baseArchitecture);
             AstNodeWalker<TInstruction>.Walk(finder, instruction);
             return finder.Variables.Count;
         }
@@ -72,7 +74,7 @@ namespace Echo.Ast
         /// <inheritdoc />
         public int GetWrittenVariables(in Statement<TInstruction> instruction, Span<IVariable> variablesBuffer)
         {
-            var finder = new WrittenVariableFinder<TInstruction>();
+            var finder = new WrittenVariableFinder<TInstruction>(_baseArchitecture);
             AstNodeWalker<TInstruction>.Walk(finder, instruction);
             
             int i = 0;
