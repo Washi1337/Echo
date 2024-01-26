@@ -364,12 +364,12 @@ public sealed class AstBuilder<TInstruction>
     {
         _lifted.EntryPoint = _liftedNodes[_original.EntryPoint].Transformed;
         foreach (var region in _original.Regions)
-            TransformRegion(x => _lifted.Regions.Add((ControlFlowRegion<Statement<TInstruction>>) x), region);
+            TransformRegion(x => _lifted.Regions.Add(x), region);
     }
 
     private void TransformRegion(
-        Action<IControlFlowRegion<Statement<TInstruction>>> addSection,
-        IControlFlowRegion<TInstruction> region
+        Action<ControlFlowRegion<Statement<TInstruction>>> addSection,
+        ControlFlowRegion<TInstruction> region
     )
     {
         switch (region)
@@ -434,7 +434,7 @@ public sealed class AstBuilder<TInstruction>
     )
     {
         foreach (var subRegion in originalRegion.Regions)
-            TransformRegion(x => newRegion.Regions.Add((ControlFlowRegion<Statement<TInstruction>>) x), subRegion);
+            TransformRegion(x => newRegion.Regions.Add(x), subRegion);
     }
 
 }

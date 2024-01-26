@@ -323,7 +323,7 @@ public class AstBuilderTest
         Assert.Same(match1.GetCaptures(variable)[0], match4.GetCaptures(variable)[0]);
         Assert.Same(match2.GetCaptures(variable)[0], match3.GetCaptures(variable)[0]);
     }
-
+    
     [Fact]
     public void TwoNodes()
     {

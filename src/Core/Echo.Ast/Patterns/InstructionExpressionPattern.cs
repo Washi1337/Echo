@@ -173,6 +173,12 @@ namespace Echo.Ast.Patterns
             return this;
         }
 
+        public InstructionExpressionPattern<TInstruction> CaptureContent(CaptureGroup<TInstruction> captureGroup)
+        {
+            Content.CaptureAs(captureGroup);
+            return this;
+        }
+
         /// <summary>
         /// Indicates all arguments should be captured in a certain group.
         /// </summary>
