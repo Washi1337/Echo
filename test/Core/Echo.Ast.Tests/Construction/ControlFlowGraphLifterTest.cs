@@ -16,7 +16,7 @@ using Xunit;
 
 namespace Echo.Ast.Tests.Construction;
 
-public class AstBuilderTest
+public class ControlFlowGraphLifterTest
 {
     private static ControlFlowGraph<Statement<DummyInstruction>> ConstructGraph(
         IList<DummyInstruction> instructions,

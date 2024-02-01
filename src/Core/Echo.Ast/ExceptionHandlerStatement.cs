@@ -26,7 +26,7 @@ public class ExceptionHandlerStatement<TInstruction> : Statement<TInstruction>
     public BlockStatement<TInstruction> ProtectedBlock
     {
         get => _protectedBlock;
-        private set => UpdateChildNotNull(ref _protectedBlock, value);
+        internal set => UpdateChildNotNull(ref _protectedBlock, value);
     }
 
     /// <summary>

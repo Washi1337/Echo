@@ -115,9 +115,8 @@ public class AstFormatter<TInstruction> :
         
         for (int i = 0; i < statement.Statements.Count; i++)
         {
-            if (i > 0)
-                state.WriteLine();
             statement.Statements[i].Accept(this, state);
+            state.WriteLine();
         }
 
         state.Indent--;
@@ -150,28 +149,19 @@ public class AstFormatter<TInstruction> :
         if (clause.Prologue is not null)
         {
             state.WriteLine("prologue");
-            state.WriteLine('{');
-            state.Indent++;
             clause.Prologue.Accept(this, state);
-            state.Indent--;
-            state.WriteLine('}');
+            state.WriteLine();
         }
         
         state.WriteLine("code");
-        state.WriteLine('{');
-        state.Indent++;
         clause.Contents.Accept(this, state);
-        state.Indent--;
-        state.WriteLine('}');
+        state.WriteLine();
 
         if (clause.Epilogue is not null)
         {
             state.WriteLine("epilogue");
-            state.WriteLine('{');
-            state.Indent++;
             clause.Epilogue.Accept(this, state);
-            state.Indent--;
-            state.WriteLine('}');
+            state.WriteLine();
         }
 
         state.Indent--;

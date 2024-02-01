@@ -25,7 +25,7 @@ public class CompilationUnit<TInstruction> : AstNode<TInstruction>
     public BlockStatement<TInstruction> Root
     {
         get => _root;
-        private set => UpdateChildNotNull(ref _root, value);
+        internal set => UpdateChildNotNull(ref _root, value);
     }
 
     /// <inheritdoc />

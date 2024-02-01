@@ -45,7 +45,7 @@ public class HandlerClause<TInstruction> : AstNode<TInstruction>
     public BlockStatement<TInstruction> Contents
     {
         get => _contents;
-        private set => UpdateChildNotNull(ref _contents, value);
+        internal set => UpdateChildNotNull(ref _contents, value);
     }
 
     /// <summary>
