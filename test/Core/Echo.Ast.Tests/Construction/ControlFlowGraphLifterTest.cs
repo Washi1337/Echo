@@ -30,7 +30,7 @@ public class ControlFlowGraphLifterTest
 
         cfg.DetectExceptionHandlerRegions(exceptionHandlerRanges);
         
-        return cfg.ToAst(DummyPurityClassifier.Instance);
+        return cfg.Lift(DummyPurityClassifier.Instance);
     }
     
     [Fact]
