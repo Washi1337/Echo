@@ -13,33 +13,33 @@ namespace Echo.Ast.Patterns
         /// <summary>
         /// Creates a new instruction expression pattern describing an instruction expression with zero parameters.
         /// </summary>
-        /// <param name="content">The pattern describing the instruction that is stored in the expression.</param>
-        public InstructionExpressionPattern(Pattern<TInstruction> content)
+        /// <param name="instruction">The pattern describing the instruction that is stored in the expression.</param>
+        public InstructionExpressionPattern(Pattern<TInstruction> instruction)
         {
-            Content = content;
+            Instruction = instruction;
             AnyArguments = false;
         }
 
         /// <summary>
         /// Creates a new instruction expression pattern.
         /// </summary>
-        /// <param name="content">The pattern describing the instruction that is stored in the expression.</param>
+        /// <param name="instruction">The pattern describing the instruction that is stored in the expression.</param>
         /// <param name="anyArguments"><c>true</c> if any arguments should be accepted, <c>false</c> to indicate the
         /// expression should have zero parameters.</param>
-        public InstructionExpressionPattern(Pattern<TInstruction> content, bool anyArguments)
+        public InstructionExpressionPattern(Pattern<TInstruction> instruction, bool anyArguments)
         {
-            Content = content;
+            Instruction = instruction;
             AnyArguments = anyArguments;
         }
 
         /// <summary>
         /// Creates a new instruction expression pattern.
         /// </summary>
-        /// <param name="content">The pattern describing the instruction that is stored in the expression.</param>
+        /// <param name="instruction">The pattern describing the instruction that is stored in the expression.</param>
         /// <param name="arguments">The list of patterns that describe the arguments of the input expression should match with.</param>
-        public InstructionExpressionPattern(Pattern<TInstruction> content, params Pattern<Expression<TInstruction>>[] arguments)
+        public InstructionExpressionPattern(Pattern<TInstruction> instruction, params Pattern<Expression<TInstruction>>[] arguments)
         {
-            Content = content;
+            Instruction = instruction;
             AnyArguments = false;
             foreach (var argument in arguments)
                 Arguments.Add(argument);
@@ -48,11 +48,11 @@ namespace Echo.Ast.Patterns
         /// <summary>
         /// Creates a new instruction expression pattern.
         /// </summary>
-        /// <param name="content">The pattern describing the instruction that is stored in the expression.</param>
+        /// <param name="instruction">The pattern describing the instruction that is stored in the expression.</param>
         /// <param name="arguments">The list of patterns that describe the arguments of the input expression should match with.</param>
-        public InstructionExpressionPattern(Pattern<TInstruction> content, IEnumerable<Pattern<Expression<TInstruction>>> arguments)
+        public InstructionExpressionPattern(Pattern<TInstruction> instruction, IEnumerable<Pattern<Expression<TInstruction>>> arguments)
         {
-            Content = content;
+            Instruction = instruction;
             AnyArguments = false;
             foreach (var argument in arguments)
                 Arguments.Add(argument);
@@ -61,7 +61,7 @@ namespace Echo.Ast.Patterns
         /// <summary>
         /// Gets or sets a pattern describing the instruction that is stored in the expression. 
         /// </summary>
-        public Pattern<TInstruction> Content
+        public Pattern<TInstruction> Instruction
         {
             get;
             set;
@@ -99,7 +99,7 @@ namespace Echo.Ast.Patterns
             }
 
             // Match contents.
-            Content.Match(expression.Instruction, result);
+            Instruction.Match(expression.Instruction, result);
             if (!result.IsSuccess)
                 return;
 
@@ -173,9 +173,14 @@ namespace Echo.Ast.Patterns
             return this;
         }
 
-        public InstructionExpressionPattern<TInstruction> CaptureContent(CaptureGroup<TInstruction> captureGroup)
+        /// <summary>
+        /// Indicates the instruction should be captured in a certain group.
+        /// </summary>
+        /// <param name="captureGroup">The group.</param>
+        /// <returns>The current pattern.</returns>
+        public InstructionExpressionPattern<TInstruction> CaptureInstruction(CaptureGroup<TInstruction> captureGroup)
         {
-            Content.CaptureAs(captureGroup);
+            Instruction.CaptureAs(captureGroup);
             return this;
         }
 
@@ -197,7 +202,7 @@ namespace Echo.Ast.Patterns
         {
             var builder = new StringBuilder();
             
-            builder.Append(Content);
+            builder.Append(Instruction);
             
             builder.Append('(');
             if (AnyArguments)

@@ -10,7 +10,7 @@ namespace Echo.Ast
     /// </summary>
     public sealed class VariableExpression<TInstruction> : Expression<TInstruction>
     {
-        private IVariable _variable;
+        private IVariable _variable = null!;
 
         /// <summary>
         /// Creates a new variable expression
