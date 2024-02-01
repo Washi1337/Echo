@@ -1,5 +1,9 @@
+using System.Collections.Generic;
+using System.IO;
 using Echo.Code;
+using Echo.ControlFlow.Serialization.Dot;
 using Echo.Graphing;
+using Echo.Graphing.Serialization.Dot;
 
 namespace Echo.Ast
 {

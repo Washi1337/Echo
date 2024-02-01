@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Echo.Code;
 using Echo.Graphing;
 
@@ -30,7 +29,9 @@ namespace Echo.Ast
         public AssignmentStatement(IEnumerable<IVariable> variables, Expression<TInstruction> expression)
         {
             Expression = expression;
-            Variables = variables.ToList();
+            Variables = new VariableCollection<TInstruction>(this);
+            foreach (var variable in variables)
+                Variables.Add(variable);
             OriginalRange = expression.OriginalRange;
         }
 
