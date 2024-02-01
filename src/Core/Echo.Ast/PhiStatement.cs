@@ -54,6 +54,22 @@ namespace Echo.Ast
         public override IEnumerable<TreeNodeBase> GetChildren() => Sources;
 
         /// <inheritdoc />
+        protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot)
+        {
+            newRoot.RegisterVariableWrite(Representative, this);
+            for (int i = 0; i < Sources.Count; i++)
+                newRoot.RegisterVariableUse(Sources[i]);
+        }
+
+        /// <inheritdoc />
+        protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot)
+        {
+            oldRoot.UnregisterVariableWrite(Representative, this);
+            for (int i = 0; i < Sources.Count; i++)
+                oldRoot.UnregisterVariableUse(Sources[i]);
+        }
+
+        /// <inheritdoc />
         public override void Accept(IAstNodeVisitor<TInstruction> visitor) 
             => visitor.Visit(this);
 

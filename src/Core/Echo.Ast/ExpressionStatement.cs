@@ -36,6 +36,12 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
+        protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot) => Expression.OnAttach(newRoot);
+
+        /// <inheritdoc />
+        protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot) => Expression.OnDetach(oldRoot);
+
+        /// <inheritdoc />
         public override void Accept(IAstNodeVisitor<TInstruction> visitor) 
             => visitor.Visit(this);
 

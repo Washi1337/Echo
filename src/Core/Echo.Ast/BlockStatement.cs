@@ -29,6 +29,20 @@ public class BlockStatement<TInstruction> : Statement<TInstruction>
     public override IEnumerable<TreeNodeBase> GetChildren() => Statements;
 
     /// <inheritdoc />
+    protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot)
+    {
+        for (int i = 0; i < Statements.Count; i++)
+            Statements[i].OnAttach(newRoot);
+    }
+
+    /// <inheritdoc />
+    protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot)
+    {
+        for (int i = 0; i < Statements.Count; i++)
+            Statements[i].OnDetach(oldRoot);
+    }
+
+    /// <inheritdoc />
     public override void Accept(IAstNodeVisitor<TInstruction> visitor) => visitor.Visit(this);
 
     /// <inheritdoc />

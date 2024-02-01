@@ -58,6 +58,22 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
+        protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot)
+        {
+            for (int index = 0; index < Variables.Count; index++)
+                newRoot.RegisterVariableWrite(Variables[index], this);
+            Expression.OnAttach(newRoot);
+        }
+
+        /// <inheritdoc />
+        protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot)
+        {
+            for (int index = 0; index < Variables.Count; index++)
+                oldRoot.UnregisterVariableWrite(Variables[index], this);
+            Expression.OnDetach(oldRoot);
+        }
+
+        /// <inheritdoc />
         public override void Accept(IAstNodeVisitor<TInstruction> visitor) 
             => visitor.Visit(this);
 

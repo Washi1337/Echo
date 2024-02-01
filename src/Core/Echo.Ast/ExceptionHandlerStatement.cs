@@ -44,7 +44,23 @@ public class ExceptionHandlerStatement<TInstruction> : Statement<TInstruction>
         foreach (var handler in Handlers)
             yield return handler;
     }
-    
+
+    /// <inheritdoc />
+    protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot)
+    {
+        ProtectedBlock.OnAttach(newRoot);
+        for (int i = 0; i < Handlers.Count; i++)
+            Handlers[i].OnAttach(newRoot);
+    }
+
+    /// <inheritdoc />
+    protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot)
+    {
+        ProtectedBlock.OnDetach(oldRoot);
+        for (int i = 0; i < Handlers.Count; i++)
+            Handlers[i].OnDetach(oldRoot);
+    }
+
     /// <inheritdoc />
     public override void Accept(IAstNodeVisitor<TInstruction> visitor) => visitor.Visit(this);
 

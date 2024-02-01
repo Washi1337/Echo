@@ -69,6 +69,8 @@ public class CompilationUnitBuilder<TInstruction> : IBlockVisitor<Statement<TIns
     {
         var result = new HandlerClause<TInstruction>();
 
+        result.Tag = block.Tag;
+
         if (block.Prologue is not null)
             result.Prologue = (BlockStatement<TInstruction>?) block.Prologue.AcceptVisitor(this, state);
 

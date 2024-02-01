@@ -10,6 +10,8 @@ namespace Echo.Ast
     /// </summary>
     public sealed class VariableExpression<TInstruction> : Expression<TInstruction>
     {
+        private IVariable _variable;
+
         /// <summary>
         /// Creates a new variable expression
         /// </summary>
@@ -24,12 +26,38 @@ namespace Echo.Ast
         /// </summary>
         public IVariable Variable
         {
-            get;
-            internal set;
+            get => _variable;
+            internal set
+            {
+                if (_variable != value)
+                { 
+                    // Force detach/attach to update variable xrefs.
+                    var root = GetParentCompilationUnit();
+                    if (root is not null)
+                        OnDetach(root);
+                    
+                    _variable = value;
+                    
+                    if (root is not null)
+                        OnAttach(root);
+                }
+            }
         }
 
         /// <inheritdoc />
         public override IEnumerable<TreeNodeBase> GetChildren() => Array.Empty<TreeNodeBase>();
+
+        /// <inheritdoc />
+        protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot)
+        {
+            newRoot.RegisterVariableUse(this);
+        }
+
+        /// <inheritdoc />
+        protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot)
+        {
+            oldRoot.UnregisterVariableUse(this);
+        }
 
         /// <inheritdoc />
         public override void Accept(IAstNodeVisitor<TInstruction> visitor) 

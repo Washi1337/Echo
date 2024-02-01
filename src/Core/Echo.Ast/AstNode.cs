@@ -1,4 +1,3 @@
-using System.Text;
 using Echo.Code;
 using Echo.Graphing;
 
@@ -23,6 +22,18 @@ namespace Echo.Ast
             get;
             set;
         }
+
+        /// <summary>
+        /// Obtains the parent compilation unit the AST is added to (if available).
+        /// </summary>
+        /// <returns>The compilation unit, or <c>null</c> if the node is detached from any compilation unit.</returns>
+        public CompilationUnit<TInstruction>? GetParentCompilationUnit()
+        {
+            var current = this;
+            while (current is not CompilationUnit<TInstruction> unit && current.Parent is not null)
+                current = current.Parent;
+            return current as CompilationUnit<TInstruction>;
+        }
         
         /// <summary>
         /// Determines whether the AST node consists of only pure expressions that do not affect state.
@@ -35,6 +46,37 @@ namespace Echo.Ast
         public Trilean IsPure(IPurityClassifier<TInstruction> classifier)
         {
             return Accept(Analysis.AstPurityVisitor<TInstruction>.Instance, classifier);
+        }
+
+        /// <summary>
+        /// Called when the node was added to a root compilation unit.
+        /// </summary>
+        /// <param name="newRoot">The new root compilation unit of the node.</param>
+        protected internal abstract void OnAttach(CompilationUnit<TInstruction> newRoot);
+        
+
+        /// <summary>
+        /// Called when the node was removed from a root compilation unit.
+        /// </summary>
+        /// <param name="oldRoot">The old root compilation unit the node was removed from.</param>
+        protected internal abstract void OnDetach(CompilationUnit<TInstruction> oldRoot);
+
+        /// <inheritdoc />
+        protected override void OnParentChanged(TreeNodeBase? old)
+        {
+            base.OnParentChanged(old);
+
+            var oldRoot = (old as AstNode<TInstruction>)?.GetParentCompilationUnit();
+            var newRoot = GetParentCompilationUnit();
+
+            if (oldRoot != newRoot)
+            {
+                if (oldRoot is not null)
+                    OnDetach(oldRoot);
+
+                if (newRoot is not null)
+                    OnAttach(newRoot);
+            }
         }
         
         /// <summary>

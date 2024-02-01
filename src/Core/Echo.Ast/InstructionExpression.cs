@@ -63,6 +63,20 @@ namespace Echo.Ast
         public override IEnumerable<TreeNodeBase> GetChildren() => Arguments;
 
         /// <inheritdoc />
+        protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot)
+        {
+            for (int i = 0; i < Arguments.Count; i++)
+                Arguments[i].OnAttach(newRoot);
+        }
+
+        /// <inheritdoc />
+        protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot)
+        {
+            for (int i = 0; i < Arguments.Count; i++)
+                Arguments[i].OnDetach(oldRoot);
+        }
+
+        /// <inheritdoc />
         public override void Accept(IAstNodeVisitor<TInstruction> visitor) 
             => visitor.Visit(this);
 

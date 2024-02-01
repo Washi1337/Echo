@@ -66,7 +66,23 @@ public class HandlerClause<TInstruction> : AstNode<TInstruction>
         if (Epilogue is not null)
             yield return Epilogue;
     }
-    
+
+    /// <inheritdoc />
+    protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot)
+    {
+        Prologue?.OnAttach(newRoot);
+        Contents.OnAttach(newRoot);
+        Epilogue?.OnAttach(newRoot);
+    }
+
+    /// <inheritdoc />
+    protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot)
+    {
+        Prologue?.OnDetach(oldRoot);
+        Contents.OnDetach(oldRoot);
+        Epilogue?.OnDetach(oldRoot);
+    }
+
     /// <inheritdoc />
     public override void Accept(IAstNodeVisitor<TInstruction> visitor) => visitor.Visit(this);
 
