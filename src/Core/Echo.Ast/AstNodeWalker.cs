@@ -35,6 +35,14 @@ namespace Echo.Ast
         public void Walk(AstNode<TInstruction> node) => node.Accept(this);
 
         /// <inheritdoc />
+        public void Visit(CompilationUnit<TInstruction> unit)
+        {
+            _listener.EnterCompilationUnit(unit);
+            unit.Root.Accept(this);
+            _listener.ExitCompilationUnit(unit);
+        }
+
+        /// <inheritdoc />
         public void Visit(AssignmentStatement<TInstruction> statement)
         {
             _listener.EnterAssignmentStatement(statement);
@@ -57,6 +65,58 @@ namespace Echo.Ast
             for (int i = 0; i < statement.Sources.Count; i++)
                 statement.Sources[i].Accept(this);
             _listener.ExitPhiStatement(statement);
+        }
+
+        /// <inheritdoc />
+        public void Visit(BlockStatement<TInstruction> statement)
+        {
+            _listener.EnterBlockStatement(statement);
+            foreach (var s in statement.Statements)
+                s.Accept(this);
+            _listener.ExitBlockStatement(statement);
+        }
+
+        /// <inheritdoc />
+        public void Visit(ExceptionHandlerStatement<TInstruction> statement)
+        {
+            _listener.EnterExceptionHandlerStatement(statement);
+
+            _listener.EnterProtectedBlock(statement);
+            statement.ProtectedBlock.Accept(this);
+            _listener.ExitProtectedBlock(statement);
+
+            for (int i = 0; i < statement.Handlers.Count; i++)
+            {
+                var handlerBlock = statement.Handlers[i];
+                
+                _listener.EnterHandlerBlock(statement, i);
+                handlerBlock.Accept(this);
+                _listener.ExitHandlerBlock(statement, i);
+            }
+            
+            _listener.ExitExceptionHandlerBlock(statement);
+        }
+
+        /// <inheritdoc />
+        public void Visit(HandlerClause<TInstruction> clause)
+        {
+            if (clause.Prologue is not null)
+            {
+                _listener.EnterPrologueBlock(clause);
+                clause.Prologue.Accept(this);
+                _listener.ExitPrologueBlock(clause);
+            }
+
+            _listener.EnterHandlerContents(clause);
+            clause.Contents.Accept(this);
+            _listener.ExitHandlerContents(clause);
+            
+            if (clause.Epilogue is not null)
+            {
+                _listener.EnterEpilogueBlock(clause);
+                clause.Epilogue.Accept(this);
+                _listener.ExitEpilogueBlock(clause);
+            }
         }
 
         /// <inheritdoc />

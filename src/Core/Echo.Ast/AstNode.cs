@@ -53,12 +53,6 @@ namespace Echo.Ast
         public abstract TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state);
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            var formatter = new AstFormatter<TInstruction>();
-            var builder = new StringBuilder();
-            Accept(formatter, builder);
-            return builder.ToString();
-        }
+        public override string ToString() => new AstFormatter<TInstruction>().Format(this);
     }
 }

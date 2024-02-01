@@ -7,6 +7,12 @@ namespace Echo.Ast
     public abstract class AstNodeListener<TInstruction> : IAstNodeListener<TInstruction>
     {
         /// <inheritdoc />
+        public void EnterCompilationUnit(CompilationUnit<TInstruction> unit) {}
+
+        /// <inheritdoc />
+        public void ExitCompilationUnit(CompilationUnit<TInstruction> unit) {}
+
+        /// <inheritdoc />
         public virtual void EnterAssignmentStatement(AssignmentStatement<TInstruction> statement) {}
         
         /// <inheritdoc />
@@ -23,7 +29,49 @@ namespace Echo.Ast
         
         /// <inheritdoc />
         public virtual void ExitPhiStatement(PhiStatement<TInstruction> statement) {}
+
+        /// <inheritdoc />
+        public virtual void EnterBlockStatement(BlockStatement<TInstruction> statement) {}
+
+        /// <inheritdoc />
+        public virtual void ExitBlockStatement(BlockStatement<TInstruction> statement) {}
+
+        /// <inheritdoc />
+        public virtual void EnterExceptionHandlerStatement(ExceptionHandlerStatement<TInstruction> statement) {}
+
+        /// <inheritdoc />
+        public virtual void ExitExceptionHandlerBlock(ExceptionHandlerStatement<TInstruction> statement) {}
+
+        /// <inheritdoc />
+        public virtual void EnterProtectedBlock(ExceptionHandlerStatement<TInstruction> statement) {}
+
+        /// <inheritdoc />
+        public virtual void ExitProtectedBlock(ExceptionHandlerStatement<TInstruction> statement) {}
         
+        /// <inheritdoc />
+        public virtual void EnterHandlerBlock(ExceptionHandlerStatement<TInstruction> statement, int handlerIndex) {}
+
+        /// <inheritdoc />
+        public virtual void ExitHandlerBlock(ExceptionHandlerStatement<TInstruction> statement, int handlerIndex) {}
+
+        /// <inheritdoc />
+        public virtual void EnterPrologueBlock(HandlerClause<TInstruction> clause) {}
+
+        /// <inheritdoc />
+        public virtual void ExitPrologueBlock(HandlerClause<TInstruction> clause) {}
+
+        /// <inheritdoc />
+        public virtual void EnterEpilogueBlock(HandlerClause<TInstruction> clause) {}
+
+        /// <inheritdoc />
+        public virtual void ExitEpilogueBlock(HandlerClause<TInstruction> clause) {}
+
+        /// <inheritdoc />
+        public virtual void EnterHandlerContents(HandlerClause<TInstruction> clause) {}
+
+        /// <inheritdoc />
+        public virtual void ExitHandlerContents(HandlerClause<TInstruction> clause) {}
+
         /// <inheritdoc />
         public virtual void EnterVariableExpression(VariableExpression<TInstruction> expression) {}
         

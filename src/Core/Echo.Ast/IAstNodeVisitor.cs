@@ -7,6 +7,11 @@ namespace Echo.Ast
     public interface IAstNodeVisitor<TInstruction>
     {
         /// <summary>
+        /// Visits a given <see cref="CompilationUnit{TInstruction}"/>
+        /// </summary>
+        void Visit(CompilationUnit<TInstruction> unit);
+        
+        /// <summary>
         /// Visits a given <see cref="AssignmentStatement{TInstruction}"/>
         /// </summary>
         void Visit(AssignmentStatement<TInstruction> statement);
@@ -20,7 +25,22 @@ namespace Echo.Ast
         /// Visits a given <see cref="PhiStatement{TInstruction}"/>
         /// </summary>
         void Visit(PhiStatement<TInstruction> statement);
-        
+
+        /// <summary>
+        /// Visits a given <see cref="BlockStatement{TInstruction}"/>
+        /// </summary>
+        void Visit(BlockStatement<TInstruction> statement);
+
+        /// <summary>
+        /// Visits a given <see cref="ExceptionHandlerStatement{TInstruction}"/>
+        /// </summary>
+        void Visit(ExceptionHandlerStatement<TInstruction> statement);
+
+        /// <summary>
+        /// Visits a given <see cref="HandlerClause{TInstruction}"/>
+        /// </summary>
+        void Visit(HandlerClause<TInstruction> clause);
+
         /// <summary>
         /// Visits a given <see cref="InstructionExpression{TInstruction}"/>
         /// </summary>
@@ -30,6 +50,7 @@ namespace Echo.Ast
         /// Visits a given <see cref="VariableExpression{TInstruction}"/>
         /// </summary>
         void Visit(VariableExpression<TInstruction> expression);
+
     }
     
     /// <summary>
@@ -39,6 +60,11 @@ namespace Echo.Ast
     /// <typeparam name="TState">The state to pass between visitors</typeparam>
     public interface IAstNodeVisitor<TInstruction, in TState>
     {
+        /// <summary>
+        /// Visits a given <see cref="CompilationUnit{TInstruction}"/>
+        /// </summary>
+        void Visit(CompilationUnit<TInstruction> unit, TState state);
+
         /// <summary>
         /// Visits a given <see cref="AssignmentStatement{TInstruction}"/>
         /// </summary>
@@ -53,6 +79,21 @@ namespace Echo.Ast
         /// Visits a given <see cref="PhiStatement{TInstruction}"/>
         /// </summary>
         void Visit(PhiStatement<TInstruction> statement, TState state);
+        
+        /// <summary>
+        /// Visits a given <see cref="BlockStatement{TInstruction}"/>
+        /// </summary>
+        void Visit(BlockStatement<TInstruction> statement, TState state);
+
+        /// <summary>
+        /// Visits a given <see cref="ExceptionHandlerStatement{TInstruction}"/>
+        /// </summary>
+        void Visit(ExceptionHandlerStatement<TInstruction> statement, TState state);
+
+        /// <summary>
+        /// Visits a given <see cref="HandlerClause{TInstruction}"/>
+        /// </summary>
+        void Visit(HandlerClause<TInstruction> clause, TState state);
         
         /// <summary>
         /// Visits a given <see cref="InstructionExpression{TInstruction}"/>
@@ -74,6 +115,11 @@ namespace Echo.Ast
     public interface IAstNodeVisitor<TInstruction, in TState, out TOut>
     {
         /// <summary>
+        /// Visits a given <see cref="CompilationUnit{TInstruction}"/>
+        /// </summary>
+        TOut Visit(CompilationUnit<TInstruction> unit, TState state);
+        
+        /// <summary>
         /// Visits a given <see cref="AssignmentStatement{TInstruction}"/>
         /// </summary>
         TOut Visit(AssignmentStatement<TInstruction> statement, TState state);
@@ -88,6 +134,21 @@ namespace Echo.Ast
         /// </summary>
         TOut Visit(PhiStatement<TInstruction> statement, TState state);
         
+        /// <summary>
+        /// Visits a given <see cref="BlockStatement{TInstruction}"/>
+        /// </summary>
+        TOut Visit(BlockStatement<TInstruction> statement, TState state);
+        
+        /// <summary>
+        /// Visits a given <see cref="ExceptionHandlerStatement{TInstruction}"/>
+        /// </summary>
+        TOut Visit(ExceptionHandlerStatement<TInstruction> statement, TState state);
+        
+        /// <summary>
+        /// Visits a given <see cref="HandlerClause{TInstruction}"/>
+        /// </summary>
+        TOut Visit(HandlerClause<TInstruction> clause, TState state);
+
         /// <summary>
         /// Visits a given <see cref="InstructionExpression{TInstruction}"/>
         /// </summary>

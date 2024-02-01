@@ -25,13 +25,13 @@ namespace Echo.Graphing.Serialization.Dot
         /// <param name="writer">The writer responsible for writing the output.</param>
         public DotWriter(TextWriter writer)
         {
-            Writer = new IndentedTextWriter(writer ?? throw new ArgumentNullException(nameof(writer)));
+            Writer = new System.CodeDom.Compiler.IndentedTextWriter(writer ?? throw new ArgumentNullException(nameof(writer)));
         }
 
         /// <summary>
         /// Gets the writer that is used to write textual data to the output stream.
         /// </summary>
-        protected IndentedTextWriter Writer
+        protected System.CodeDom.Compiler.IndentedTextWriter Writer
         {
             get;
         }
