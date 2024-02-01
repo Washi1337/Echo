@@ -41,9 +41,9 @@ public class CompilationUnit<TInstruction> : AstNode<TInstruction>
     /// <returns>The expressions referencing the variable.</returns>
     public IEnumerable<VariableExpression<TInstruction>> GetVariableUses(IVariable variable)
     {
-        return !_variableUses.TryGetValue(variable, out var uses) 
+        return !_variableUses.TryGetValue(variable, out var uses)
             ? Enumerable.Empty<VariableExpression<TInstruction>>()
-            : uses;
+            : uses.ToArray(); // Clone to prevent list being modified after returning.
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ public class CompilationUnit<TInstruction> : AstNode<TInstruction>
     {
         return !_variableWrites.TryGetValue(variable, out var writes) 
             ? Enumerable.Empty<Statement<TInstruction>>()
-            : writes;
+            : writes.ToArray(); // Clone to prevent list being modified after returning.
     }
 
     internal void RegisterVariableUse(VariableExpression<TInstruction> expression)
