@@ -24,7 +24,7 @@ public class BlockStatement<TInstruction> : Statement<TInstruction>
     {
         get;
     }
-
+    
     /// <inheritdoc />
     public override IEnumerable<TreeNodeBase> GetChildren() => Statements;
 

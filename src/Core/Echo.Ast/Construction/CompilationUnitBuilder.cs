@@ -34,9 +34,16 @@ public class CompilationUnitBuilder<TInstruction> : IBlockVisitor<Statement<TIns
     public AstNode<TInstruction> VisitBasicBlock(BasicBlock<Statement<TInstruction>> block, object? state)
     {
         var result = new BlockStatement<TInstruction>();
-
+        
         foreach (var statement in block.Instructions)
             result.Statements.Add(statement);
+
+        if (result.Statements.Count > 0
+            && result.Statements[0].OriginalRange is { } start
+            && result.Statements[result.Statements.Count - 1].OriginalRange is { } end)
+        {
+            result.OriginalRange = new AddressRange(start.Start, end.End);
+        }
 
         return result;
     }
@@ -48,6 +55,13 @@ public class CompilationUnitBuilder<TInstruction> : IBlockVisitor<Statement<TIns
 
         foreach (var b in block.Blocks)
             result.Statements.Add((Statement<TInstruction>) b.AcceptVisitor(this, state));
+
+        if (result.Statements.Count > 0
+            && result.Statements[0].OriginalRange is { } start
+            && result.Statements[result.Statements.Count - 1].OriginalRange is { } end)
+        {
+            result.OriginalRange = new AddressRange(start.Start, end.End);
+        }
 
         return result;
     }
@@ -61,6 +75,23 @@ public class CompilationUnitBuilder<TInstruction> : IBlockVisitor<Statement<TIns
         foreach (var handler in block.Handlers)
             result.Handlers.Add((HandlerClause<TInstruction>) handler.AcceptVisitor(this, state));
 
+        if (result.ProtectedBlock.OriginalRange is { } start)
+        {
+            AddressRange? end = null;
+            
+            for (int i = result.Handlers.Count - 1; i >= 0; i--)
+            {
+                if (result.Handlers[i].OriginalRange is { } candidate)
+                {
+                    end = candidate;
+                    break;
+                }
+            }
+            
+            end ??= start;
+            result.OriginalRange = new AddressRange(start.Start, end.Value.End);
+        }
+
         return result;
     }
 
@@ -71,13 +102,28 @@ public class CompilationUnitBuilder<TInstruction> : IBlockVisitor<Statement<TIns
 
         result.Tag = block.Tag;
 
+        AddressRange? start = null;
+        AddressRange? end;
+
         if (block.Prologue is not null)
-            result.Prologue = (BlockStatement<TInstruction>?) block.Prologue.AcceptVisitor(this, state);
+        {
+            result.Prologue = (BlockStatement<TInstruction>) block.Prologue.AcceptVisitor(this, state);
+            start = result.Prologue.OriginalRange;
+        }
 
         result.Contents = (BlockStatement<TInstruction>) block.Contents.AcceptVisitor(this, state);
-        
+        start ??= result.Contents.OriginalRange;
+        end = result.Contents.OriginalRange;
+
         if (block.Epilogue is not null)
-            result.Epilogue = (BlockStatement<TInstruction>?) block.Epilogue.AcceptVisitor(this, state);
+        {
+            result.Epilogue = (BlockStatement<TInstruction>) block.Epilogue.AcceptVisitor(this, state);
+            start ??= result.Epilogue.OriginalRange;
+            end = result.Epilogue.OriginalRange;
+        }
+
+        if (start is not null && end is not null)
+            result.OriginalRange = new AddressRange(start.Value.Start, end.Value.End);
         
         return result;
     }
