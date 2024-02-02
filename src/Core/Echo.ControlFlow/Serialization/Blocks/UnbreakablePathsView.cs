@@ -36,7 +36,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 var n = path[i];
                 
                 // Add unconditional edge.
-                if (n.UnconditionalEdge != null && n.UnconditionalEdge.Type == ControlFlowEdgeType.Unconditional)
+                if (n.UnconditionalEdge is {Type: ControlFlowEdgeType.Unconditional})
                     AddSuccessorToResult(result, n.UnconditionalNeighbour);
 
                 // Add explicit conditional / abnormal edges.
@@ -150,7 +150,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             }
 
             for (int i = 0; i < successors.Count; i++)
-                result.Add(successors[i]);
+                AddSuccessorToResult(result, successors[i]);
         }
     }
 }
