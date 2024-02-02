@@ -22,6 +22,9 @@ namespace Echo.Graphing
             {
                 if (_parent != value)
                 {
+                    if (value == this)
+                        throw new ArgumentException("Cannot add a node to itself as a child.");
+                    
                     var original = _parent;
                     _parent = value;
                     OnParentChanged(original);
