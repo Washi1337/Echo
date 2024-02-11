@@ -32,11 +32,13 @@ namespace Echo.ControlFlow.Blocks
             : null;
 
         /// <inheritdoc />
-        public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => 
-            visitor.VisitScopeBlock(this);
+        public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitScopeBlock(this);
 
         /// <inheritdoc />
-        public override string ToString() => 
-            BlockFormatter<TInstruction>.Format(this);
+        public TResult AcceptVisitor<TState, TResult>(IBlockVisitor<TInstruction, TState, TResult> visitor, TState state) 
+            => visitor.VisitScopeBlock(this, state);
+
+        /// <inheritdoc />
+        public override string ToString() => BlockFormatter<TInstruction>.Format(this);
     }
 }

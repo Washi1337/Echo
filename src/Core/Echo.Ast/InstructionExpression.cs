@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Echo.ControlFlow.Serialization.Dot;
+﻿using System.Collections.Generic;
 using Echo.Graphing;
 
 namespace Echo.Ast
@@ -16,15 +13,20 @@ namespace Echo.Ast
         /// </summary>
         /// <param name="instruction">The instruction</param>
         public InstructionExpression(TInstruction instruction)
-            : this(instruction, Array.Empty<Expression<TInstruction>>()) { }
-        
+        {
+            Instruction = instruction;
+            Arguments = new TreeNodeCollection<InstructionExpression<TInstruction>, Expression<TInstruction>>(this);
+        }
+
         /// <summary>
         /// Creates a new instruction expression node
         /// </summary>
         /// <param name="instruction">The instruction</param>
         /// <param name="arguments">The parameters to the <paramref name="instruction" /></param>
         public InstructionExpression(TInstruction instruction, params Expression<TInstruction>[] arguments)
-            : this(instruction, arguments as IEnumerable<Expression<TInstruction>>) { }
+            : this(instruction, arguments as IEnumerable<Expression<TInstruction>>)
+        {
+        }
 
         /// <summary>
         /// Creates a new instruction expression node
@@ -59,6 +61,24 @@ namespace Echo.Ast
 
         /// <inheritdoc />
         public override IEnumerable<TreeNodeBase> GetChildren() => Arguments;
+
+        /// <inheritdoc />
+        protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot)
+        {
+            for (int i = 0; i < Arguments.Count; i++)
+                Arguments[i].OnAttach(newRoot);
+        }
+
+        /// <inheritdoc />
+        protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot)
+        {
+            for (int i = 0; i < Arguments.Count; i++)
+                Arguments[i].OnDetach(oldRoot);
+        }
+
+        /// <inheritdoc />
+        public override void Accept(IAstNodeVisitor<TInstruction> visitor) 
+            => visitor.Visit(this);
 
         /// <inheritdoc />
         public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
@@ -101,11 +121,5 @@ namespace Echo.Ast
 
             return this;
         }
-
-        /// <inheritdoc />
-        public override string ToString() => $"{Instruction}({string.Join(", ", Arguments)})";
-
-        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
-            $"{instructionFormatter.Format(Instruction)}({string.Join(", ", Arguments)})";
     }
 }

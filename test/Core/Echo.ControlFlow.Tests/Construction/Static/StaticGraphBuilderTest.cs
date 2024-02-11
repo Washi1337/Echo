@@ -40,7 +40,7 @@ namespace Echo.ControlFlow.Tests.Construction.Static
 
             Assert.Single(graph.Nodes);
             Assert.Equal(instructions, graph.Nodes.First().Contents.Instructions);
-            Assert.Equal(graph.Nodes.First(), graph.Entrypoint);
+            Assert.Equal(graph.Nodes.First(), graph.EntryPoint);
         }
 
         [Fact]
@@ -106,11 +106,11 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             var graph = BuildControlFlowGraph(instructions);
 
             Assert.Equal(4, graph.Nodes.Count);
-            Assert.Single(graph.Entrypoint.ConditionalEdges);
-            Assert.NotNull(graph.Entrypoint.UnconditionalEdge);
+            Assert.Single(graph.EntryPoint.ConditionalEdges);
+            Assert.NotNull(graph.EntryPoint.UnconditionalEdge);
             Assert.Equal(
-                graph.Entrypoint.UnconditionalNeighbour.UnconditionalNeighbour, 
-                graph.Entrypoint.ConditionalEdges.First().Target.UnconditionalNeighbour);
+                graph.EntryPoint.UnconditionalNeighbour.UnconditionalNeighbour, 
+                graph.EntryPoint.ConditionalEdges.First().Target.UnconditionalNeighbour);
         }
 
         [Fact]
@@ -145,11 +145,11 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             Assert.Equal(4, graph.Nodes.Count);
             
             // Entrypoint.
-            Assert.NotNull(graph.Entrypoint.UnconditionalNeighbour);
-            Assert.Empty(graph.Entrypoint.ConditionalEdges);
+            Assert.NotNull(graph.EntryPoint.UnconditionalNeighbour);
+            Assert.Empty(graph.EntryPoint.ConditionalEdges);
             
             // Loop header
-            var loopHeader = graph.Entrypoint.UnconditionalNeighbour;
+            var loopHeader = graph.EntryPoint.UnconditionalNeighbour;
             Assert.NotNull(loopHeader.UnconditionalEdge);
             Assert.Single(loopHeader.ConditionalEdges);
             

@@ -5,18 +5,18 @@ namespace Echo.Ast.Tests.Patterns
 {
     public class PatternTest
     {
-        private readonly CaptureGroup _captureGroup = new CaptureGroup("MyCapture");
+        private readonly CaptureGroup<object> _captureGroup = new("MyCapture");
         
         [Fact]
         public void NonCapturedAnyPatternShouldMatchAndExtractValue()
         {
             var pattern = Pattern.Any<object>();
             
-            var myObject = new object();
+            object myObject = new();
             var result = pattern.Match(myObject);
             
             Assert.True(result.IsSuccess);
-            Assert.DoesNotContain(_captureGroup, result.Captures);
+            Assert.DoesNotContain(_captureGroup, result.GetCaptures(_captureGroup));
         }
 
         [Fact]
@@ -25,12 +25,12 @@ namespace Echo.Ast.Tests.Patterns
             var pattern = Pattern.Any<object>()
                 .CaptureAs(_captureGroup);
             
-            var myObject = new object();
+            object myObject = new();
             var result = pattern.Match(myObject);
             
             Assert.True(result.IsSuccess);
-            Assert.Contains(_captureGroup, result.Captures);
-            Assert.Contains(myObject, result.Captures[_captureGroup]);
+            Assert.Contains(_captureGroup, result.GetCaptureGroups());
+            Assert.Contains(myObject, result.GetCaptures(_captureGroup));
         }
     }
 }

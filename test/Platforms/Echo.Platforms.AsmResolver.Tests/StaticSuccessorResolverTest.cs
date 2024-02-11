@@ -39,7 +39,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var body = method.CilMethodBody!;
             var cfg = body.ConstructStaticFlowGraph();
             
-            Assert.Single(cfg.Entrypoint.ConditionalEdges);
+            Assert.Single(cfg.EntryPoint.ConditionalEdges);
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var body = method.CilMethodBody!;
             var cfg = body.ConstructStaticFlowGraph();
             
-            Assert.Equal(3, cfg.Entrypoint.ConditionalEdges.Count);
+            Assert.Equal(3, cfg.EntryPoint.ConditionalEdges.Count);
         }
 
         [Fact]

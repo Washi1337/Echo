@@ -55,7 +55,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="captureGroup">The capture group to add the extracted variable to.</param>
         /// <returns>The current pattern.</returns>
-        public Pattern<Expression<TInstruction>> CaptureVariable(CaptureGroup captureGroup)
+        public Pattern<Expression<TInstruction>> CaptureVariable(CaptureGroup<IVariable> captureGroup)
         {
             Variable.CaptureAs(captureGroup);
             return this;

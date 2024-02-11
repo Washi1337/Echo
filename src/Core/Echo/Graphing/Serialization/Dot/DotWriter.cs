@@ -25,13 +25,13 @@ namespace Echo.Graphing.Serialization.Dot
         /// <param name="writer">The writer responsible for writing the output.</param>
         public DotWriter(TextWriter writer)
         {
-            Writer = new IndentedTextWriter(writer ?? throw new ArgumentNullException(nameof(writer)));
+            Writer = new System.CodeDom.Compiler.IndentedTextWriter(writer ?? throw new ArgumentNullException(nameof(writer)));
         }
 
         /// <summary>
         /// Gets the writer that is used to write textual data to the output stream.
         /// </summary>
-        protected IndentedTextWriter Writer
+        protected System.CodeDom.Compiler.IndentedTextWriter Writer
         {
             get;
         }
@@ -146,7 +146,7 @@ namespace Echo.Graphing.Serialization.Dot
                 Writer.Indent++;
                 
                 var attributes = SubGraphAdorner.GetSubGraphAttributes(subGraph);
-                if (attributes?.Count > 0)
+                if (attributes.Count > 0)
                 {
                     string delimiter = IncludeSemicolons
                         ? ";"
@@ -234,9 +234,6 @@ namespace Echo.Graphing.Serialization.Dot
 
         private void WriteEntityAttributes(IEnumerable<KeyValuePair<string, string>> attributes)
         {
-            if (attributes == null)
-                return;
-            
             var array = attributes as KeyValuePair<string, string>[] ?? attributes.ToArray();
             if (array.Length > 0)
             {

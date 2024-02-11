@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Echo.ControlFlow.Serialization.Dot;
 using Echo.Graphing;
 
 namespace Echo.Ast
@@ -9,13 +8,17 @@ namespace Echo.Ast
     /// </summary>
     public sealed class ExpressionStatement<TInstruction> : Statement<TInstruction>
     {
-        private Expression<TInstruction> _expression;
+        private Expression<TInstruction> _expression = null!;
 
         /// <summary>
         /// Creates a new expression statement
         /// </summary>
         /// <param name="expression">The expression</param>
-        public ExpressionStatement(Expression<TInstruction> expression) => Expression = expression;
+        public ExpressionStatement(Expression<TInstruction> expression)
+        {
+            Expression = expression;
+            OriginalRange = expression.OriginalRange;
+        }
 
         /// <summary>
         /// The expression that this <see cref="ExpressionStatement{TInstruction}"/> holds
@@ -23,7 +26,7 @@ namespace Echo.Ast
         public Expression<TInstruction> Expression
         {
             get => _expression;
-            set => UpdateChild(ref _expression, value);
+            set => UpdateChildNotNull(ref _expression, value);
         }
 
         /// <inheritdoc />
@@ -33,12 +36,22 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
-            visitor.Visit(this, state);
+        protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot) => Expression.OnAttach(newRoot);
 
         /// <inheritdoc />
-        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
-            visitor.Visit(this, state);
+        protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot) => Expression.OnDetach(oldRoot);
+
+        /// <inheritdoc />
+        public override void Accept(IAstNodeVisitor<TInstruction> visitor) 
+            => visitor.Visit(this);
+
+        /// <inheritdoc />
+        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) 
+            => visitor.Visit(this, state);
+
+        /// <inheritdoc />
+        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) 
+            => visitor.Visit(this, state);
 
         /// <summary>
         /// Modifies the current <see cref="ExpressionStatement{TInstruction}"/> to have <paramref name="expression"/>
@@ -50,11 +63,5 @@ namespace Echo.Ast
             Expression = expression;
             return this;
         }
-
-        /// <inheritdoc />
-        public override string ToString() => $"{Expression}";
-
-        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
-            $"{Expression.Format(instructionFormatter)}";
     }
 }

@@ -10,7 +10,7 @@ namespace Echo.Graphing.Serialization.Dot
         /// </summary>
         /// <param name="color">The color of the entity.</param>
         /// <param name="style">The line drawing style of the entity.</param>
-        public DotEntityStyle(string color, string style)
+        public DotEntityStyle(string? color, string? style)
         {
             Color = color;
             Style = style;
@@ -19,7 +19,7 @@ namespace Echo.Graphing.Serialization.Dot
         /// <summary>
         /// Gets the color of the entity.
         /// </summary>
-        public string Color
+        public string? Color
         {
             get;
         }
@@ -27,7 +27,7 @@ namespace Echo.Graphing.Serialization.Dot
         /// <summary>
         /// Gets the line drawing style of the entity.
         /// </summary>
-        public string Style
+        public string? Style
         {
             get;
         }

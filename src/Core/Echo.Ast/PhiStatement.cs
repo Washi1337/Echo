@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Echo.ControlFlow.Serialization.Dot;
 using Echo.Code;
 using Echo.Graphing;
 
@@ -13,13 +12,23 @@ namespace Echo.Ast
         /// <summary>
         /// Creates a new Phi statement
         /// </summary>
-        /// <param name="target">The target variable that will be assigned to</param>
-        /// <param name="sources">The possible sources for the assignment</param>
-        public PhiStatement(IVariable target, IEnumerable<VariableExpression<TInstruction>> sources)
+        /// <param name="representative">The target variable that will be assigned to</param>
+        public PhiStatement(IVariable representative)
         {
+            Representative = representative;
             Sources = new TreeNodeCollection<PhiStatement<TInstruction>, VariableExpression<TInstruction>>(this);
-            Target = target;
+        }
+        
+        /// <summary>
+        /// Creates a new Phi statement
+        /// </summary>
+        /// <param name="representative">The target variable that will be assigned to</param>
+        /// <param name="sources">The possible sources for the assignment</param>
+        public PhiStatement(IVariable representative, IEnumerable<VariableExpression<TInstruction>> sources)
+        {
+            Representative = representative;
             
+            Sources = new TreeNodeCollection<PhiStatement<TInstruction>, VariableExpression<TInstruction>>(this);
             foreach (var source in sources)
                 Sources.Add(source);
         }
@@ -27,22 +36,42 @@ namespace Echo.Ast
         /// <summary>
         /// The variable that will be assigned to
         /// </summary>
-        public IVariable Target
+        public IVariable Representative
         {
             get;
             private set;
         }
 
         /// <summary>
-        /// The possible sources for that could be assigned to <see cref="Target"/>
+        /// The possible sources for that could be assigned to <see cref="Representative"/>
         /// </summary>
-        public ICollection<VariableExpression<TInstruction>> Sources
+        public IList<VariableExpression<TInstruction>> Sources
         {
             get;
         }
 
         /// <inheritdoc />
         public override IEnumerable<TreeNodeBase> GetChildren() => Sources;
+
+        /// <inheritdoc />
+        protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot)
+        {
+            newRoot.RegisterVariableWrite(Representative, this);
+            for (int i = 0; i < Sources.Count; i++)
+                newRoot.RegisterVariableUse(Sources[i]);
+        }
+
+        /// <inheritdoc />
+        protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot)
+        {
+            oldRoot.UnregisterVariableWrite(Representative, this);
+            for (int i = 0; i < Sources.Count; i++)
+                oldRoot.UnregisterVariableUse(Sources[i]);
+        }
+
+        /// <inheritdoc />
+        public override void Accept(IAstNodeVisitor<TInstruction> visitor) 
+            => visitor.Visit(this);
 
         /// <inheritdoc />
         public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
@@ -53,14 +82,30 @@ namespace Echo.Ast
             visitor.Visit(this, state);
 
         /// <summary>
-        /// Modifies the current <see cref="PhiStatement{TInstruction}"/> to assign to <paramref name="target"/>
+        /// Modifies the current <see cref="PhiStatement{TInstruction}"/> to assign to <paramref name="variable"/>
         /// </summary>
-        /// <param name="target">The new target to assign</param>
-        /// <returns>The same <see cref="PhiStatement{TInstruction}"/> instance but with the new <paramref name="target"/></returns>
-        public PhiStatement<TInstruction> WithTarget(IVariable target)
+        /// <param name="variable">The new target to assign</param>
+        /// <returns>The same <see cref="PhiStatement{TInstruction}"/> instance but with the new <paramref name="variable"/></returns>
+        public PhiStatement<TInstruction> WithRepresentative(IVariable variable)
         {
-            Target = target;
+            Representative = variable;
             return this;
+        }
+
+        /// <summary>
+        /// Determines whether the provided variable is a source for this PHI node.
+        /// </summary>
+        /// <param name="variable">The variable.</param>
+        /// <returns><c>true</c> if the variable is a valid source, <c>false</c> otherwise.</returns>
+        public bool HasSource(IVariable variable)
+        {
+            for (int i = 0; i < Sources.Count; i++)
+            {
+                if (Sources[i].Variable == variable)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -85,10 +130,5 @@ namespace Echo.Ast
 
             return this;
         }
-
-        /// <inheritdoc />
-        public override string ToString() => $"{Target} = φ({string.Join(", ", Sources)})";
-
-        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) => ToString();
     }
 }

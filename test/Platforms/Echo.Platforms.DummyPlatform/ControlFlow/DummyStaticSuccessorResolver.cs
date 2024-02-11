@@ -8,6 +8,11 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
 {
     public class DummyStaticSuccessorResolver : IStaticSuccessorResolver<DummyInstruction>
     {
+        public static DummyStaticSuccessorResolver Instance
+        {
+            get;
+        } = new();
+        
         /// <inheritdoc />
         public int GetSuccessorsCount(in DummyInstruction instruction)
         {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Echo.ControlFlow.Collections;
 using Echo.Graphing;
 
 namespace Echo.ControlFlow.Regions
@@ -32,7 +33,7 @@ namespace Echo.ControlFlow.Regions
         /// Obtains the first node that is executed in the region (if available).
         /// </summary>
         /// <returns>The node, or <c>null</c> if no entrypoint was specified..</returns>
-        ControlFlowNode<TInstruction> GetEntrypoint();
+        ControlFlowNode<TInstruction> GetEntryPoint();
         
         /// <summary>
         /// Gets a collection of all nested regions defined in this region.
@@ -66,6 +67,21 @@ namespace Echo.ControlFlow.Regions
         /// </summary>
         /// <returns>The nodes.</returns>
         IEnumerable<ControlFlowNode<TInstruction>> GetSuccessors();
+    }
+
+    /// <summary>
+    /// Represents a scope of regions. 
+    /// </summary>
+    /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
+    public interface IScopeControlFlowRegion<TInstruction> : IControlFlowRegion<TInstruction>
+    {
+        /// <summary>
+        /// Gets a collection of nested sub regions that this region defines.
+        /// </summary>
+        public RegionCollection<TInstruction, ControlFlowRegion<TInstruction>> Regions
+        {
+            get;
+        }
     }
     
     /// <summary>

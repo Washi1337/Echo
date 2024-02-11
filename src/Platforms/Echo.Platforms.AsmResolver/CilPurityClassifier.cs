@@ -57,7 +57,7 @@ namespace Echo.Platforms.AsmResolver
         {
             get;
             set;
-        } = true;
+        } = false;
         
         /// <summary>
         /// Gets or sets a value indicating whether writes to field should be considered pure or not by default.  
@@ -76,7 +76,7 @@ namespace Echo.Platforms.AsmResolver
         {
             get;
             set;
-        } = true;
+        } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether method calls should be considered pure or not by default.  
@@ -268,6 +268,9 @@ namespace Echo.Platforms.AsmResolver
         {
             switch (instruction.OpCode.Code)
             {
+                case CilCode.Newarr:
+                    return false;
+                
                 case CilCode.Stelem:
                     return ArrayWritePurity | DefaultTypeAccessPurity;
                 

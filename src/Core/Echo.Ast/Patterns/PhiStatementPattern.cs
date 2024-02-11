@@ -69,7 +69,7 @@ namespace Echo.Ast.Patterns
             }
 
             // Match contents.
-            Target.Match(statement.Target, result);
+            Target.Match(statement.Representative, result);
             if (!result.IsSuccess)
                 return;
 
@@ -82,8 +82,7 @@ namespace Echo.Ast.Patterns
                     return;
                 }
 
-                // TODO: remove ToArray() and use indexing in the Sources property directly.
-                var sources = statement.Sources.ToArray();
+                var sources = statement.Sources;
                 for (int i = 0; i < Sources.Count && result.IsSuccess; i++)
                     Sources[i].Match(sources[i], result);
             }
@@ -148,15 +147,15 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="sources">The patterns that describe the sources of the phi node.</param>
         /// <returns>The current pattern.</returns>
-        public PhiStatementPattern<TInstruction> WithSources(IEnumerable<Pattern<VariableExpression<TInstruction>>> sources) => 
-            WithSources(sources.ToArray());
+        public PhiStatementPattern<TInstruction> WithSources(IEnumerable<Pattern<VariableExpression<TInstruction>>> sources)
+            => WithSources(sources.ToArray());
 
         /// <summary>
         /// Indicates all sources should be captured in a certain group.
         /// </summary>
         /// <param name="captureGroup">The group.</param>
         /// <returns>The current pattern.</returns>
-        public PhiStatementPattern<TInstruction> CaptureSources(CaptureGroup captureGroup)
+        public PhiStatementPattern<TInstruction> CaptureSources(CaptureGroup<VariableExpression<TInstruction>> captureGroup)
         {
             foreach (var source in Sources)
                 source.CaptureAs(captureGroup);

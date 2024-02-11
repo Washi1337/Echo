@@ -157,16 +157,16 @@ namespace Echo.ControlFlow.Regions.Detection
             foreach (var range in sortedRanges)
             {
                 var protectedRegion = rangeToRegionMapping[range.ProtectedRange];
-                protectedRegion.Entrypoint ??= cfg.GetNodeByOffset(range.ProtectedRange.Start);
+                protectedRegion.EntryPoint ??= cfg.GetNodeByOffset(range.ProtectedRange.Start);
 
                 var handlerRegion = rangeToRegionMapping[range.HandlerRange];
-                handlerRegion.Entrypoint ??= cfg.GetNodeByOffset(range.HandlerRange.Start);
+                handlerRegion.EntryPoint ??= cfg.GetNodeByOffset(range.HandlerRange.Start);
 
                 if (rangeToRegionMapping.TryGetValue(range.PrologueRange, out var prologueRegion))
-                    prologueRegion.Entrypoint ??= cfg.GetNodeByOffset(range.PrologueRange.Start);
+                    prologueRegion.EntryPoint ??= cfg.GetNodeByOffset(range.PrologueRange.Start);
 
                 if (rangeToRegionMapping.TryGetValue(range.EpilogueRange, out var epilogueRegion))
-                    epilogueRegion.Entrypoint ??= cfg.GetNodeByOffset(range.EpilogueRange.Start);
+                    epilogueRegion.EntryPoint ??= cfg.GetNodeByOffset(range.EpilogueRange.Start);
             }
         }
         

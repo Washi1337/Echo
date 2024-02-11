@@ -61,7 +61,7 @@ namespace Echo.ControlFlow.Blocks
         }
         
         /// <summary>
-        /// Gets a collection of isntructions that are executed in sequence when this basic block is executed.
+        /// Gets a collection of instructions that are executed in sequence when this basic block is executed.
         /// </summary>
         public IList<TInstruction> Instructions
         {
@@ -96,5 +96,9 @@ namespace Echo.ControlFlow.Blocks
 
         /// <inheritdoc />
         public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitBasicBlock(this);
+
+        /// <inheritdoc />
+        public TResult AcceptVisitor<TState, TResult>(IBlockVisitor<TInstruction, TState, TResult> visitor, TState state)
+            => visitor.VisitBasicBlock(this, state);
     }
 }

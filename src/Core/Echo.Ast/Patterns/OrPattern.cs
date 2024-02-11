@@ -44,8 +44,7 @@ namespace Echo.Ast.Patterns
             foreach (var option in Options)
             {
                 // Assume clean slate.
-                tempResult.IsSuccess = true;
-                tempResult.Captures.Clear();
+                tempResult.Clear();
 
                 // Try matching the current option.
                 option.Match(input, tempResult);
@@ -53,12 +52,7 @@ namespace Echo.Ast.Patterns
                 // If successful, copy over captured objects.
                 if (tempResult.IsSuccess)
                 {
-                    foreach (var entry in result.Captures)
-                    {
-                        foreach (var o in entry.Value)
-                            result.AddCapturedObject(entry.Key, o);
-                    }
-
+                    result.MergeWith(tempResult);
                     return;
                 }
             }

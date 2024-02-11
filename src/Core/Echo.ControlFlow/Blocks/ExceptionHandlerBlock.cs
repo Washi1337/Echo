@@ -15,7 +15,7 @@ namespace Echo.ControlFlow.Blocks
         public ScopeBlock<TInstruction> ProtectedBlock
         {
             get;
-        } = new ScopeBlock<TInstruction>();
+        } = new();
 
         /// <summary>
         /// Gets a collection of handler blocks.
@@ -67,6 +67,10 @@ namespace Echo.ControlFlow.Blocks
 
         /// <inheritdoc />
         public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitExceptionHandlerBlock(this);
+
+        /// <inheritdoc />
+        public TResult AcceptVisitor<TState, TResult>(IBlockVisitor<TInstruction, TState, TResult> visitor, TState state)
+            => visitor.VisitExceptionHandlerBlock(this, state);
 
         /// <inheritdoc />
         public override string ToString() => BlockFormatter<TInstruction>.Format(this);

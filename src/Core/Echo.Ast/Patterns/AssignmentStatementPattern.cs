@@ -125,7 +125,7 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="captureGroup">The group.</param>
         /// <returns>The current pattern.</returns>
-        public AssignmentStatementPattern<TInstruction> CaptureVariables(CaptureGroup captureGroup)
+        public AssignmentStatementPattern<TInstruction> CaptureVariables(CaptureGroup<IVariable> captureGroup)
         {
             foreach (var variable in Variables)
                 variable.CaptureAs(captureGroup);

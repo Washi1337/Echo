@@ -54,10 +54,10 @@ namespace Echo.ControlFlow.Tests
             var node = new ControlFlowNode<int>(0, 0);
             graph.Nodes.Add(node);
 
-            graph.Entrypoint = node;
+            graph.EntryPoint = node;
             
             Assert.Single(graph.Nodes);
-            Assert.Equal(node, graph.Entrypoint);
+            Assert.Equal(node, graph.EntryPoint);
         }
 
         [Fact]

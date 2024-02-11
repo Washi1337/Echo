@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Echo.ControlFlow.Serialization.Dot;
 using Echo.Code;
 using Echo.Graphing;
 
@@ -11,23 +10,58 @@ namespace Echo.Ast
     /// </summary>
     public sealed class VariableExpression<TInstruction> : Expression<TInstruction>
     {
+        private IVariable _variable = null!;
+
         /// <summary>
         /// Creates a new variable expression
         /// </summary>
         /// <param name="variable">The variable</param>
-        public VariableExpression(IVariable variable) => Variable = variable;
+        public VariableExpression(IVariable variable)
+        {
+            Variable = variable;
+        }
 
         /// <summary>
         /// The variable that is represented by the AST node
         /// </summary>
         public IVariable Variable
         {
-            get;
-            private set;
+            get => _variable;
+            internal set
+            {
+                if (_variable != value)
+                { 
+                    // Force detach/attach to update variable xrefs.
+                    var root = GetParentCompilationUnit();
+                    if (root is not null)
+                        OnDetach(root);
+                    
+                    _variable = value;
+                    
+                    if (root is not null)
+                        OnAttach(root);
+                }
+            }
         }
 
         /// <inheritdoc />
         public override IEnumerable<TreeNodeBase> GetChildren() => Array.Empty<TreeNodeBase>();
+
+        /// <inheritdoc />
+        protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot)
+        {
+            newRoot.RegisterVariableUse(this);
+        }
+
+        /// <inheritdoc />
+        protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot)
+        {
+            oldRoot.UnregisterVariableUse(this);
+        }
+
+        /// <inheritdoc />
+        public override void Accept(IAstNodeVisitor<TInstruction> visitor) 
+            => visitor.Visit(this);
 
         /// <inheritdoc />
         public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
@@ -47,10 +81,5 @@ namespace Echo.Ast
             Variable = variable;
             return this;
         }
-
-        /// <inheritdoc />
-        public override string ToString() => $"{Variable.Name}";
-
-        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) => ToString();
     }
 }

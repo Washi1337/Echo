@@ -26,12 +26,12 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// <returns>The constructed dominator tree.</returns>
         public static DominatorTree<T> FromGraph(ControlFlowGraph<T> graph)
         {
-            if (graph.Entrypoint == null)
+            if (graph.EntryPoint == null)
                 throw new ArgumentException("Control flow graph does not have an entrypoint.");
             
-            var idoms = GetImmediateDominators(graph.Entrypoint);
-            var nodes = ConstructTreeNodes(idoms, graph.Entrypoint);
-            return new DominatorTree<T>(nodes, graph.Entrypoint);
+            var idoms = GetImmediateDominators(graph.EntryPoint);
+            var nodes = ConstructTreeNodes(idoms, graph.EntryPoint);
+            return new DominatorTree<T>(nodes, graph.EntryPoint);
         }
         
         /// <summary>
@@ -123,7 +123,7 @@ namespace Echo.ControlFlow.Analysis.Domination
                 // all the nodes in the protected region as predecessor. However, for this algorithm,
                 // it should be enough to only schedule the entrypoint of the protected region.
                 bool isHandlerEntrypoint = node.GetParentHandler() is { } parentHandler
-                                           && node == parentHandler.GetEntrypoint();
+                                           && node == parentHandler.GetEntryPoint();
 
                 int actualInDegree1 = node.InDegree;
                 if (isHandlerEntrypoint)
@@ -142,7 +142,7 @@ namespace Echo.ControlFlow.Analysis.Domination
 
                 // Copy over protected entrypoint if we were a handler entrypoint.
                 if (isHandlerEntrypoint)
-                    predecessorBuffer[actualInDegree1 - 1] = node.GetParentExceptionHandler().ProtectedRegion.Entrypoint;
+                    predecessorBuffer[actualInDegree1 - 1] = node.GetParentExceptionHandler().ProtectedRegion.EntryPoint;
                 return actualInDegree1;
             }
 
@@ -181,7 +181,7 @@ namespace Echo.ControlFlow.Analysis.Domination
                     && currentNode.IsInRegion(parentEh.ProtectedRegion))
                 {
                     for (int i = 0; i < parentEh.Handlers.Count; i++)
-                        Schedule(currentNode, parentEh.Handlers[i].GetEntrypoint());
+                        Schedule(currentNode, parentEh.Handlers[i].GetEntryPoint());
                 }
             }
 

@@ -11,7 +11,7 @@ namespace Echo.Ast.Tests.Patterns
         {
             var variable = new DummyVariable("variable");
             var pattern = ExpressionPattern.Variable<DummyInstruction>();
-            Assert.True(pattern.Matches(new VariableExpression<DummyInstruction>(variable)));
+            Assert.True(pattern.Matches(variable.ToExpression<DummyInstruction>()));
         }
 
         [Fact]
@@ -19,7 +19,7 @@ namespace Echo.Ast.Tests.Patterns
         {
             var variable = new DummyVariable("variable");
             var pattern = ExpressionPattern.Variable<DummyInstruction>(variable);
-            Assert.True(pattern.Matches(new VariableExpression<DummyInstruction>(variable)));
+            Assert.True(pattern.Matches(variable.ToExpression<DummyInstruction>()));
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Echo.Ast.Tests.Patterns
             var variable2 = new DummyVariable("variable2");
             
             var pattern = ExpressionPattern.Variable<DummyInstruction>(variable1);
-            Assert.False(pattern.Matches(new VariableExpression<DummyInstruction>(variable2)));
+            Assert.False(pattern.Matches(variable2.ToExpression<DummyInstruction>()));
         }
     }
 }

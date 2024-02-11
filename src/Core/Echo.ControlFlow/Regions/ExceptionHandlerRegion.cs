@@ -41,7 +41,7 @@ namespace Echo.ControlFlow.Regions
         }
 
         /// <inheritdoc />
-        public override ControlFlowNode<TInstruction> GetEntrypoint() => ProtectedRegion.Entrypoint;
+        public override ControlFlowNode<TInstruction> GetEntryPoint() => ProtectedRegion.EntryPoint;
 
         /// <inheritdoc />
         public override IEnumerable<ControlFlowNode<TInstruction>> GetNodes() =>

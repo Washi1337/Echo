@@ -1,17 +1,15 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Echo.ControlFlow.Serialization.Dot;
 using Echo.Code;
 using Echo.Graphing;
 
 namespace Echo.Ast
 {
     /// <summary>
-    /// Represents an assignment in the AST
+    /// Represents a statement that assigns a value to a (set of) variable(s).
     /// </summary>
     public sealed class AssignmentStatement<TInstruction> : Statement<TInstruction>
     {
-        private Expression<TInstruction> _expression;
+        private Expression<TInstruction> _expression = null!;
 
         /// <summary>
         /// Creates a new assignment statement
@@ -19,7 +17,9 @@ namespace Echo.Ast
         /// <param name="variable">The variable</param>
         /// <param name="expression">The expression</param>
         public AssignmentStatement(IVariable variable, Expression<TInstruction> expression)
-            : this(new[] { variable }, expression) { }
+            : this(new[] {variable}, expression)
+        {
+        }
 
         /// <summary>
         /// Creates a new assignment statement
@@ -29,7 +29,10 @@ namespace Echo.Ast
         public AssignmentStatement(IEnumerable<IVariable> variables, Expression<TInstruction> expression)
         {
             Expression = expression;
-            Variables = variables.ToList();
+            Variables = new VariableCollection<TInstruction>(this);
+            foreach (var variable in variables)
+                Variables.Add(variable);
+            OriginalRange = expression.OriginalRange;
         }
 
         /// <summary>
@@ -46,7 +49,7 @@ namespace Echo.Ast
         public Expression<TInstruction> Expression
         {
             get => _expression;
-            set => UpdateChild(ref _expression, value);
+            set => UpdateChildNotNull(ref _expression, value);
         }
 
         /// <inheritdoc />
@@ -56,12 +59,32 @@ namespace Echo.Ast
         }
 
         /// <inheritdoc />
-        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) =>
-            visitor.Visit(this, state);
+        protected internal override void OnAttach(CompilationUnit<TInstruction> newRoot)
+        {
+            for (int index = 0; index < Variables.Count; index++)
+                newRoot.RegisterVariableWrite(Variables[index], this);
+            Expression.OnAttach(newRoot);
+        }
 
         /// <inheritdoc />
-        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) =>
-            visitor.Visit(this, state);
+        protected internal override void OnDetach(CompilationUnit<TInstruction> oldRoot)
+        {
+            for (int index = 0; index < Variables.Count; index++)
+                oldRoot.UnregisterVariableWrite(Variables[index], this);
+            Expression.OnDetach(oldRoot);
+        }
+
+        /// <inheritdoc />
+        public override void Accept(IAstNodeVisitor<TInstruction> visitor) 
+            => visitor.Visit(this);
+
+        /// <inheritdoc />
+        public override void Accept<TState>(IAstNodeVisitor<TInstruction, TState> visitor, TState state) 
+            => visitor.Visit(this, state);
+
+        /// <inheritdoc />
+        public override TOut Accept<TState, TOut>(IAstNodeVisitor<TInstruction, TState, TOut> visitor, TState state) 
+            => visitor.Visit(this, state);
 
         /// <summary>
         /// Modifies the current <see cref="AssignmentStatement{TInstruction}"/> to assign to <paramref name="variables"/>
@@ -96,11 +119,5 @@ namespace Echo.Ast
             Expression = expression;
             return this;
         }
-
-        /// <inheritdoc />
-        public override string ToString() => $"{string.Join(", ", Variables.Select(v => v.Name))} = {Expression}";
-        
-        internal override string Format(IInstructionFormatter<TInstruction> instructionFormatter) =>
-           $"{string.Join(", ", Variables.Select(v => v.Name))} = {Expression.Format(instructionFormatter)}"; 
     }
 }

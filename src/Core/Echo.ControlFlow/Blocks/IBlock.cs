@@ -31,5 +31,12 @@ namespace Echo.ControlFlow.Blocks
         /// </summary>
         /// <param name="visitor">The visitor to accept.</param>
         void AcceptVisitor(IBlockVisitor<TInstruction> visitor);
+
+        /// <summary>
+        /// Visit the current block using the provided visitor.
+        /// </summary>
+        /// <param name="visitor">The visitor to accept.</param>
+        /// <param name="state">An argument to pass onto the visitor.</param>
+        TResult AcceptVisitor<TState, TResult>(IBlockVisitor<TInstruction, TState, TResult> visitor, TState state);
     }
 }
