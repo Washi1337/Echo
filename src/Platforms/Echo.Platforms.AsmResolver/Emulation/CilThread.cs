@@ -22,6 +22,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             Machine = machine;
             CallStack = callStack;
+            IsAlive = true;
         }
 
         /// <summary>
@@ -41,6 +42,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public CallStack CallStack
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the thread is alive and present in the parent machine.
+        /// </summary>
+        public bool IsAlive
+        {
+            get;
+            internal set;
         }
 
         /// <summary>
@@ -203,6 +213,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
         private void Step(CilExecutionContext context)
         {
+            if (!IsAlive)
+                throw new CilEmulatorException("The thread is not alive.");
+            
             if (CallStack.Peek().IsRoot)
                 throw new CilEmulatorException("No method is currently being executed.");
 

@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using AsmResolver.DotNet;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
@@ -15,6 +17,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// </summary>
     public class CilVirtualMachine
     {
+        /// <summary>
+        /// Fires when a new thread was created.
+        /// </summary>
+        public event EventHandler<CilThread>? ThreadCreated;
+        
+        /// <summary>
+        /// Fires when a thread was destroyed.
+        /// </summary>
+        public event EventHandler<CilThread>? ThreadDestroyed; 
+        
         private readonly List<CilThread> _threads = new();
         private readonly CallStackMemory _callStackMemory;
 
@@ -167,7 +179,31 @@ namespace Echo.Platforms.AsmResolver.Emulation
             var stack = _callStackMemory.Allocate(stackSize);
             var thread = new CilThread(this, stack);
             _threads.Add(thread);
+            ThreadCreated?.Invoke(this, thread);
             return thread;
+        }
+
+        /// <summary>
+        /// Removes a thread and its stack from the machine. 
+        /// </summary>
+        /// <param name="thread">The thread to remove.</param>
+        /// <remarks>
+        /// This does not gracefully terminate a thread. Any code that is still running will remain executing, and may
+        /// have unwanted side-effects. Therefore, be sure to only call this method only when it is certain that no code
+        /// is running. 
+        /// </remarks>
+        public void DestroyThread(CilThread thread)
+        {
+            if (thread.Machine != this)
+                throw new ArgumentException("Cannot remove a thread from a different machine.");
+            if (!thread.IsAlive)
+                throw new ArgumentException("Cannot destroy a thread that is already destroyed.");
+            
+            thread.IsAlive = false;
+            _threads.Remove(thread);
+            _callStackMemory.Free(thread.CallStack);
+            
+            ThreadDestroyed?.Invoke(this, thread);
         }
     }
 }
