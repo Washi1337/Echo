@@ -1,0 +1,19 @@
+- name: General
+- name: Introduction
+  href: ../index.md
+- name: API Overview
+  href: overview.md
+
+- name: Core
+- name: Overview
+  href: core/index.md
+- name: Control Flow Graphs
+  href: core/cfg-basics.md
+- name: Data Flow Graphs
+  href: core/dfg-basics.md
+- name: Graph Construction
+  href: core/cfg-construction.md
+- name: Block Trees
+  href: core/blocks.md
+- name: Dominator Analysis
+  href: core/dominators.md

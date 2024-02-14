@@ -1,0 +1,159 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": ["Core/Echo/*.csproj"],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/core/common",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },    
+    {
+      "src": [
+        {
+          "files": ["Core/Echo.Ast/*.csproj"],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/core/ast",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+    {
+      "src": [
+        {
+          "files": ["Core/Echo.ControlFlow/*.csproj"],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/core/controlflow",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+    {
+      "src": [
+        {
+          "files": ["Core/Echo.DataFlow/*.csproj"],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/core/dataflow",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+    {
+      "src": [
+        {
+          "files": ["Platforms/Echo.Platforms.AsmResolver/*.csproj"],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/platforms/asmresolver",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+    {
+      "src": [
+        {
+          "files": ["Platforms/Echo.Platforms.Dnlib/*.csproj"],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/platforms/dnlib",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+    {
+      "src": [
+        {
+          "files": ["Platforms/Echo.Platforms.Iced/*.csproj"],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/platforms/iced",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+   ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "api/**.yml",
+          "api/index.md"
+        ]
+      },
+      {
+        "files": [
+          "guides/**.md",
+          "guides/**/toc.yml",
+          "toc.yml",
+          "*.md"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
+    "output": "_site",
+    "globalMetadataFiles": [],
+    "fileMetadataFiles": [],
+    "template": [
+      "default",
+      "modern",
+      "my-template"
+    ],
+    "postProcessors": [
+      "ExtractSearchIndex"
+    ],
+    "globalMetadata": {
+      "_enableSearch": "true",
+      "_appTitle": "Echo",
+      "_appName": "Echo"
+    },
+    "keepFileLink": false,
+    "disableGitFeatures": false
+  }
+}
