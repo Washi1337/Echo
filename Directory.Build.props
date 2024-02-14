@@ -7,7 +7,7 @@
         <RepositoryUrl>https://github.com/Washi1337/Echo</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <LangVersion>10</LangVersion>
-        <Version>0.9.0.0-alpha.2</Version>
+        <Version>0.9.0.1</Version>
     </PropertyGroup>
 
 </Project>
