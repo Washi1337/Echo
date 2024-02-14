@@ -30,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// </summary>
         /// <param name="maxSize">The maximum number of bytes the stack can hold.</param>
         /// <param name="factory">The service responsible for managing types.</param>
-        public CallStack(int maxSize, ValueFactory factory)
+        public CallStack(uint maxSize, ValueFactory factory)
         {
             _factory = factory;
             AddressRange = new AddressRange(0, maxSize);

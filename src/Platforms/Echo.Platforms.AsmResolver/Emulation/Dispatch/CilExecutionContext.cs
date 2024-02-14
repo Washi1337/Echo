@@ -13,24 +13,26 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         /// </summary>
         /// <param name="machine">The parent machine the instruction is executed on.</param>
         /// <param name="cancellationToken">A token used for canceling the emulation.</param>
-        public CilExecutionContext(CilVirtualMachine machine, CancellationToken cancellationToken)
+        public CilExecutionContext(CilThread thread, CancellationToken cancellationToken)
         {
-            Machine = machine;
+            Thread = thread;
             CancellationToken = cancellationToken;
         }
 
-        /// <summary>
-        /// Gets the parent machine the instruction is executed on.
-        /// </summary>
-        public CilVirtualMachine Machine
+        public CilThread Thread
         {
             get;
         }
 
         /// <summary>
+        /// Gets the parent machine the instruction is executed on.
+        /// </summary>
+        public CilVirtualMachine Machine => Thread.Machine;
+
+        /// <summary>
         /// Gets the current active stack frame.
         /// </summary>
-        public CallFrame CurrentFrame => Machine.CallStack.Peek();
+        public CallFrame CurrentFrame => Thread.CallStack.Peek();
 
         /// <summary>
         /// Gets a token used for canceling the emulation.

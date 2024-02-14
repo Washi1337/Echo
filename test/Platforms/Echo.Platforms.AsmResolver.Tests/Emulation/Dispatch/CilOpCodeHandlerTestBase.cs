@@ -26,9 +26,10 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
             body.Instructions.Add(CilOpCodes.Ret);
             
             var vm = new CilVirtualMachine(fixture.MockModule, false);
-            vm.CallStack.Push(dummyMethod);
+            var thread = vm.CreateThread();
+            thread.CallStack.Push(dummyMethod);
             
-            Context = new CilExecutionContext(vm, CancellationToken.None);
+            Context = new CilExecutionContext(thread, CancellationToken.None);
             Dispatcher = new CilDispatcher();
         }
 

@@ -29,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
                 body.LocalVariables.Add(new CilLocalVariable(localType));
             method.CilMethodBody = body;
 
-            Context.Machine.CallStack.Push(method);
+            Context.Thread.CallStack.Push(method);
         }
 
         [Theory]

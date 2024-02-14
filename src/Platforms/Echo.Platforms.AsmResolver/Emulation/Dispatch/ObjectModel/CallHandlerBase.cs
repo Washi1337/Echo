@@ -155,7 +155,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     for (int i = 0; i < arguments.Count; i++)
                         frame.WriteArgument(i, arguments[i]);
 
-                    context.Machine.CallStack.Push(frame);
+                    context.Thread.CallStack.Push(frame);
                     return CilDispatchResult.Success();
 
                 case InvocationResultType.StepOver:

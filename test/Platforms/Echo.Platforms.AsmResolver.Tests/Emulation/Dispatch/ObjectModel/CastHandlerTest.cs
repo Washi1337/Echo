@@ -195,7 +195,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int16);
 
-            Context.Machine.CallStack.Push(methodSpecification);
+            Context.Thread.CallStack.Push(methodSpecification);
 
             var value = 32000;
 
@@ -225,7 +225,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int32);
 
-            Context.Machine.CallStack.Push(methodSpecification);
+            Context.Thread.CallStack.Push(methodSpecification);
 
             var value = 214000000;
 
@@ -254,7 +254,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int64);
 
-            Context.Machine.CallStack.Push(methodSpecification);
+            Context.Thread.CallStack.Push(methodSpecification);
 
             var value = 922000000000000000L;
 

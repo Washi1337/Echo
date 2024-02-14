@@ -20,16 +20,18 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
     {
         private readonly MockModuleFixture _fixture;
         private readonly CilVirtualMachine _vm;
+        private readonly CilThread _mainThread;
 
         public ExceptionHandlerStackTest(MockModuleFixture fixture)
         {
             _fixture = fixture;
             _vm = new CilVirtualMachine(_fixture.MockModule, false);
+            _mainThread = _vm.CreateThread();
         }
 
         private CallFrame GetMockFrame(string methodName)
         {
-            return _vm.CallStack.Push(_fixture.GetTestMethod(methodName));
+            return _mainThread.CallStack.Push(_fixture.GetTestMethod(methodName));
         }
 
         private ObjectHandle GetMockException(Type type)

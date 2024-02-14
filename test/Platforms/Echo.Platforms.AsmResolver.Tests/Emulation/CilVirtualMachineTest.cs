@@ -27,12 +27,14 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         private readonly MockModuleFixture _fixture;
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly CilVirtualMachine _vm;
+        private readonly CilThread _mainThread;
 
         public CilVirtualMachineTest(MockModuleFixture fixture, ITestOutputHelper testOutputHelper)
         {
             _fixture = fixture;
             _testOutputHelper = testOutputHelper;
             _vm = new CilVirtualMachine(fixture.MockModule, false);
+            _mainThread = _vm.CreateThread();
         }
 
         [Fact]
@@ -52,20 +54,20 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             dummyMethod.CilMethodBody = body;
 
             // Push frame on stack.
-            _vm.CallStack.Push(dummyMethod);
+            _mainThread.CallStack.Push(dummyMethod);
 
             // Execute all nops.
             for (int i = 0; i < 100; i++)
-                _vm.Step();
+                _mainThread.Step();
 
             // Check if we're still in the dummy method.
-            Assert.Equal(2, _vm.CallStack.Count);
+            Assert.Equal(2, _mainThread.CallStack.Count);
             
             // Execute return.
-            _vm.Step();
+            _mainThread.Step();
             
             // Check if we exited.
-            Assert.True(Assert.Single(_vm.CallStack).IsRoot);
+            Assert.True(Assert.Single(_mainThread.CallStack).IsRoot);
         }
 
         [Fact(Timeout = 5000)]
@@ -85,12 +87,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             dummyMethod.CilMethodBody = body;
             
             // Push frame on stack.
-            _vm.CallStack.Push(dummyMethod);
+            _mainThread.CallStack.Push(dummyMethod);
 
-            _vm.Run();
+            _mainThread.Run();
             
             // Check if we exited.
-            Assert.True(Assert.Single(_vm.CallStack).IsRoot);
+            Assert.True(Assert.Single(_mainThread.CallStack).IsRoot);
         }
 
         [Fact(Timeout = 5000)]
@@ -111,7 +113,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             dummyMethod.CilMethodBody = body;
             
             // Push frame on stack.
-            _vm.CallStack.Push(dummyMethod);
+            _mainThread.CallStack.Push(dummyMethod);
 
             var tokenSource = new CancellationTokenSource();
             
@@ -123,7 +125,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                     tokenSource.Cancel();
             };
 
-            Assert.Throws<OperationCanceledException>(() => _vm.Run(tokenSource.Token));;
+            Assert.Throws<OperationCanceledException>(() => _mainThread.Run(tokenSource.Token));;
         }
 
         [Fact]
@@ -151,10 +153,10 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             dummyMethod.CilMethodBody = body;
             
             // Push frame on stack.
-            var frame = _vm.CallStack.Push(dummyMethod);
+            var frame = _mainThread.CallStack.Push(dummyMethod);
 
             for (int i = 0; i < 5; i++)
-                _vm.Step();
+                _mainThread.Step();
 
             var result = frame.EvaluationStack.Peek();
             Assert.Equal((3 + 4) * 5, result.Contents.AsSpan().I32);
@@ -180,13 +182,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             dummyMethod.CilMethodBody.Instructions.CalculateOffsets();
             
             // Step into method.
-            _vm.CallStack.Push(dummyMethod);
+            _mainThread.CallStack.Push(dummyMethod);
             
             // Step over first instruction.
-            _vm.StepOver();
+            _mainThread.StepOver();
             
             // We expect to just have moved to the second instruction.
-            Assert.Equal(dummyMethod.CilMethodBody.Instructions[1].Offset, _vm.CallStack.Peek().ProgramCounter);
+            Assert.Equal(dummyMethod.CilMethodBody.Instructions[1].Offset, _mainThread.CallStack.Peek().ProgramCounter);
         }
 
         [Fact]
@@ -224,15 +226,15 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             bar.CilMethodBody.Instructions.CalculateOffsets();
             
             // Step into method.
-            _vm.CallStack.Push(foo);
+            _mainThread.CallStack.Push(foo);
             
             // Single-step instruction.
             _vm.Invoker = DefaultInvokers.StepIn;
-            _vm.Step();
+            _mainThread.Step();
             
             // We expect to have completed "Bar" in its entirety, and moved to the second instruction.
-            Assert.Equal(bar, _vm.CallStack.Peek().Method);
-            Assert.Equal(bar.CilMethodBody.Instructions[0].Offset, _vm.CallStack.Peek().ProgramCounter);
+            Assert.Equal(bar, _mainThread.CallStack.Peek().Method);
+            Assert.Equal(bar.CilMethodBody.Instructions[0].Offset, _mainThread.CallStack.Peek().ProgramCounter);
         }
         
         [Fact]
@@ -270,14 +272,14 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             bar.CilMethodBody.Instructions.CalculateOffsets();
             
             // Step into method.
-            _vm.CallStack.Push(foo);
+            _mainThread.CallStack.Push(foo);
             
             // Step over first instruction.
-            _vm.StepOver();
+            _mainThread.StepOver();
             
             // We expect to have completed "Bar" in its entirety, and moved to the second instruction.
-            Assert.Equal(foo, _vm.CallStack.Peek().Method);
-            Assert.Equal(foo.CilMethodBody.Instructions[1].Offset, _vm.CallStack.Peek().ProgramCounter);
+            Assert.Equal(foo, _mainThread.CallStack.Peek().Method);
+            Assert.Equal(foo.CilMethodBody.Instructions[1].Offset, _mainThread.CallStack.Peek().ProgramCounter);
         }
         
         [Fact]
@@ -304,14 +306,14 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             label.Instruction = foo.CilMethodBody.Instructions[^1];
             
             // Step into method.
-            _vm.CallStack.Push(foo);
+            _mainThread.CallStack.Push(foo);
             
             // Step over first instruction.
-            _vm.StepOver();
+            _mainThread.StepOver();
             
             // We expect to have jumped.
-            Assert.Equal(foo, _vm.CallStack.Peek().Method);
-            Assert.Equal(label.Offset, _vm.CallStack.Peek().ProgramCounter);
+            Assert.Equal(foo, _mainThread.CallStack.Peek().Method);
+            Assert.Equal(label.Offset, _mainThread.CallStack.Peek().ProgramCounter);
         }
 
         [Fact]
@@ -378,7 +380,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 arraySpan.SliceArrayElement(_vm.ValueFactory, factory.Int32, i).Write(100 + i);
             
             // Call Sum.
-            var returnValue = _vm.Call(sum, new BitVector[] { arrayAddress });
+            var returnValue = _mainThread.Call(sum, new BitVector[] { arrayAddress });
             Assert.NotNull(returnValue);
             Assert.Equal(Enumerable.Range(100, 10).Sum(), returnValue!.AsSpan().I32);
         }
@@ -432,7 +434,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             _vm.Invoker = DefaultInvokers.StepIn;
 
             // Call Foo.
-            var returnValue = _vm.Call(foo, Array.Empty<BitVector>());
+            var returnValue = _mainThread.Call(foo, Array.Empty<BitVector>());
             Assert.NotNull(returnValue);
             Assert.Equal((3 + 4) * 5, returnValue!.AsSpan().I32);
         }
@@ -486,7 +488,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
 
             // Call it with a real string builder.
             var builder = new StringBuilder();
-            var returnValue = _vm.Call(foo, new object[] { builder, "John Doe" });
+            var returnValue = _mainThread.Call(foo, new object[] { builder, "John Doe" });
 
             // Check result.
             Assert.Null(returnValue);
@@ -498,7 +500,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         {
             var method = _fixture.GetTestMethod(nameof(TestClass.TryFinally));
 
-            var result = _vm.Call(method, new object[] { false });
+            var result = _mainThread.Call(method, new object[] { false });
             Assert.NotNull(result);
             Assert.Equal(101, result!.AsSpan().I32);
         }
@@ -508,7 +510,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         {
             var method = _fixture.GetTestMethod(nameof(TestClass.TryFinally));
 
-            var result = Assert.Throws<EmulatedException>(() => _vm.Call(method, new object[] {true}));
+            var result = Assert.Throws<EmulatedException>(() => _mainThread.Call(method, new object[] {true}));
             Assert.Equal("System.Exception", result.ExceptionObject.GetObjectType().FullName);
         }
         
@@ -537,7 +539,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             var reflectionMethod = typeof(TestClass).GetMethod(methodName);
             int expectedResult = (int) reflectionMethod!.Invoke(null, new[] {parameter})!;
 
-            var result = _vm.Call(method, new[] {parameter});
+            var result = _mainThread.Call(method, new[] {parameter});
             
             Assert.NotNull(result);
             Assert.Equal(expectedResult, result!.AsSpan().I32);
@@ -566,7 +568,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 expectedException = ex.InnerException!;
             }
 
-            var result = Assert.Throws<EmulatedException>(() => _vm.Call(method, new[] {parameter}));
+            var result = Assert.Throws<EmulatedException>(() => _mainThread.Call(method, new[] {parameter}));
             Assert.Equal(expectedException.GetType().FullName, result.ExceptionObject.GetObjectType().FullName);
         }
 
