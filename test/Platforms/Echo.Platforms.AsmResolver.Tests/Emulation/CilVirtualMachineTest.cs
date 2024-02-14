@@ -38,6 +38,21 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         }
 
         [Fact]
+        public void CreateSingleThread()
+        {
+            Assert.Contains(_mainThread, _vm.Threads);
+        }
+
+        [Fact]
+        public void CreateSecondaryThread()
+        {
+            var thread = _vm.CreateThread();
+            Assert.Contains(_mainThread, _vm.Threads);
+            Assert.False(thread.CallStack.AddressRange.Contains(_mainThread.CallStack.AddressRange.Start));
+            Assert.False(thread.CallStack.AddressRange.Contains(_mainThread.CallStack.AddressRange.End - 1));
+        }
+
+        [Fact]
         public void SingleStep()
         {
             // Prepare dummy method.

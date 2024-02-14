@@ -45,9 +45,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             
                 last = range.End;
             }
-
+            
             _mapping.Map(last, result);
-        
             return result;
         }
 

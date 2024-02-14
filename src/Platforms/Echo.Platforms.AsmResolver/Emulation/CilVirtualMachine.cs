@@ -162,7 +162,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <param name="stackSize">The amount of memory to allocate for the thread's stack.</param>
         /// <returns>The created thread.</returns>
-        public CilThread CreateThread(uint stackSize = 0x40000000U)
+        public CilThread CreateThread(uint stackSize = 0x0010_0000)
         {
             var stack = _callStackMemory.Allocate(stackSize);
             var thread = new CilThread(this, stack);
