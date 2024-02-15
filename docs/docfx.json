@@ -112,12 +112,12 @@
       "memberLayout": "samePage",
       "allowCompilationErrors": false
     },
-   ],
+  ],
   "build": {
     "content": [
       {
         "files": [
-          "api/**.yml",
+          "api/**/*.yml",
           "api/index.md"
         ]
       },
