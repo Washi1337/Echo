@@ -1,0 +1,17 @@
+- name: Core
+- name: Echo.dll
+  href: core/common/toc.yml
+- name: Echo.Ast.dll
+  href: core/ast/toc.yml
+- name: Echo.ControlFlow.dll
+  href: core/controlflow/toc.yml
+- name: Echo.DataFlow.dll
+  href: core/dataflow/toc.yml
+  
+- name: Platforms
+- name: Echo.Platforms.AsmResolver.dll
+  href: platforms/asmresolver/toc.yml
+- name: Echo.Platforms.Dnlib.dll
+  href: platforms/dnlib/toc.yml
+- name: Echo.Platforms.Iced.dll
+  href: platforms/iced/toc.yml
