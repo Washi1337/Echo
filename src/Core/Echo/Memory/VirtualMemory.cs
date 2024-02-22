@@ -49,12 +49,18 @@ namespace Echo.Memory
         /// <exception cref="ArgumentException">Occurs when the address was already in use.</exception>
         public void Map(long address, IMemorySpace space)
         {
+            if (space.AddressRange.Length == 0)
+                throw new ArgumentException("Cannot map an empty memory space.");
+            
             if (!AddressRange.Contains(address))
-                throw new ArgumentException($"Address {address:X8} does not fall within the virtual memory.");
+                throw new ArgumentException($"Address 0x{address:X8} does not fall within the virtual memory.");
+            
+            if (!AddressRange.Contains(address + space.AddressRange.Length - 1))
+                throw new ArgumentException($"Insufficient space available at address 0x{address:X8} to map {space.AddressRange.Length} bytes within the virtual memory.");
 
             int index = GetMemorySpaceIndex(address);
             if (index != -1)
-                throw new ArgumentException($"Address {address:X8} is already in use.");
+                throw new ArgumentException($"Address 0x{address:X8} is already in use.");
 
             // Insertion sort to ensure _spaces remains sorted.
             int i = 0;

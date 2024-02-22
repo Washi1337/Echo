@@ -22,8 +22,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
             _fixture = fixture;
 
             var machine = new CilVirtualMachine(fixture.MockModule, false);
-            _context = new CilExecutionContext(machine, CancellationToken.None);
-            _context.Machine.CallStack.Push(fixture.MockModule.GetOrCreateModuleConstructor());
+            var thread = machine.CreateThread();
+            _context = new CilExecutionContext(thread, CancellationToken.None);
+            _context.Thread.CallStack.Push(fixture.MockModule.GetOrCreateModuleConstructor());
         }
 
         [Fact]

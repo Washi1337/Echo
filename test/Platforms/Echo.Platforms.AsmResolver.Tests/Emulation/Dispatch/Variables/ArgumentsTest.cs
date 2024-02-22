@@ -18,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
         {
         }
         
-          private void PrepareMethodWithArgument(int localCount, TypeSignature localType)
+        private void PrepareMethodWithArgument(int localCount, TypeSignature localType)
         {
             var factory = ModuleFixture.MockModule.CorLibTypeFactory;
             var method = new MethodDefinition("DummyMethod", MethodAttributes.Static,
@@ -31,7 +31,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
             var body = new CilMethodBody(method);
             method.CilMethodBody = body;
 
-            Context.Machine.CallStack.Push(method);
+            Context.Thread.CallStack.Push(method);
         }
 
         [Theory]

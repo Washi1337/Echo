@@ -60,7 +60,7 @@ public class LdFldaHandlerTest : CilOpCodeHandlerTestBase
             LocalVariables = {new CilLocalVariable(structType.ToTypeSignature())}
         };
 
-        Context.Machine.CallStack.Push(method);
+        Context.Thread.CallStack.Push(method);
         
         // Push address to struct.
         var stack = Context.CurrentFrame.EvaluationStack;

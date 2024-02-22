@@ -18,13 +18,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
         [Fact]
         public void RetFromVoidShouldPopFromCallStack()
         {
-            int currentFrameCount = Context.Machine.CallStack.Count;
+            int currentFrameCount = Context.Thread.CallStack.Count;
 
             var instruction = new CilInstruction(CilOpCodes.Ret);
             var result = Dispatcher.Dispatch(Context, instruction);
             
             Assert.True(result.IsSuccess);
-            Assert.Equal(currentFrameCount - 1, Context.Machine.CallStack.Count);
+            Assert.Equal(currentFrameCount - 1, Context.Thread.CallStack.Count);
         }
         
         [Fact]
@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ControlFlow
         {
             var method = new MethodDefinition("Dummy", MethodAttributes.Static,
                 MethodSignature.CreateStatic(ModuleFixture.MockModule.CorLibTypeFactory.Int32));
-            var frame = Context.Machine.CallStack.Push(method);
+            var frame = Context.Thread.CallStack.Push(method);
             frame.EvaluationStack.Push(new StackSlot(0x0123456789abcdef, StackSlotTypeHint.Integer));
             
             var calleeFrame = Context.CurrentFrame;

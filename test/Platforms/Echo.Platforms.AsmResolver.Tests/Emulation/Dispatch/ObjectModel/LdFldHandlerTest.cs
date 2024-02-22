@@ -114,7 +114,7 @@ public class LdFldHandlerTest : CilOpCodeHandlerTestBase
             LocalVariables = {new CilLocalVariable(structType.ToTypeSignature())}
         };
 
-        Context.Machine.CallStack.Push(method);
+        Context.Thread.CallStack.Push(method);
 
         // Initialize variable with field set to 1337. 
         var instance = factory.CreateValue(structType.ToTypeSignature(), true);

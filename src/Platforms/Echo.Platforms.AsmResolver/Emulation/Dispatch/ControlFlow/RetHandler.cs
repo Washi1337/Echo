@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         /// <inheritdoc />
         public CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
         {
-            var frame = context.Machine.CallStack.Pop();
+            var frame = context.Thread.CallStack.Pop();
             var genericContext = GenericContext.FromMethod(frame.Method);
             if (frame.Method.Signature!.ReturnsValue)
             {
