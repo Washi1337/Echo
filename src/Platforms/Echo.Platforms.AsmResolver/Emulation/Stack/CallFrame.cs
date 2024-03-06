@@ -89,7 +89,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                 AllocateFrameField(parameterType);
 
             // Actually reserve space for the entire frame.
-            _localStorage = new BitVector((int) (currentOffset * factory.PointerSize), false);
+            _localStorage = new BitVector((int) (currentOffset * 8), false);
             
             // Initialize locals to zero when method body says we should.
             if (_initializeLocals)
