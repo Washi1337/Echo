@@ -7,13 +7,21 @@
 - name: Core
 - name: Overview
   href: core/index.md
-- name: Control Flow Graphs
+- name: Bit Vectors
+  href: core/bit-vectors.md
+- name: Control Flow Graphs (CFG)
   href: core/cfg-basics.md
-- name: Data Flow Graphs
+- name: Data Flow Graphs (DFG)
   href: core/dfg-basics.md
 - name: Graph Construction
   href: core/cfg-construction.md
 - name: Block Trees
   href: core/blocks.md
+- name: Abstract Syntax Trees (AST)
+  href: core/ast-basics.md
 - name: Dominator Analysis
   href: core/dominators.md
+
+- name: AsmResolver Backend
+- name: CIL Graph Construction
+  href: asmresolver/cil-graphs.md

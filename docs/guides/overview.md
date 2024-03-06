@@ -6,9 +6,11 @@ The Echo project consists of two main parts:
 
 In the following we will describe them briefly:
 
+
 ## Core
 
 The core libraries expose the base interfaces that all platforms should implement, as well as the analysis algorithms that work on these models.
+
 
 ## Platforms
 
