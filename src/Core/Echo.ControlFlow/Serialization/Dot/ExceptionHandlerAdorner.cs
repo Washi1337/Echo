@@ -248,7 +248,7 @@ namespace Echo.ControlFlow.Serialization.Dot
                 }
             }
 
-            return (DefaultStyle, HandlerContentsLabel);
+            return (DefaultStyle, "Scope");
         }
         
     }
