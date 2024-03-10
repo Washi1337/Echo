@@ -126,6 +126,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             // Set string length field.
             chunkSpan.SliceStringLength(_factory).Write(length);
 
+            // Write null-terminator.
+            chunkSpan.Slice(chunkSpan.Count - 16).Write((ushort) 0);
+            
             return address;
         }
 
@@ -148,6 +151,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
 
             // Write string contents.
             chunkSpan.SliceStringData(_factory).Write(contents);
+            
+            // Write null-terminator.
+            chunkSpan.Slice(chunkSpan.Count - 16 - 1).U16 = 0;
 
             return address;
         }

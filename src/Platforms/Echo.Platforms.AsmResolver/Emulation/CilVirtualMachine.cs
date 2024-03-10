@@ -135,6 +135,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
+        /// Gets the service that is responsible for allocating new objects.
+        /// </summary>
+        public IObjectAllocator Allocator
+        {
+            get;
+            set;
+        } = DefaultAllocators.VirtualHeap;
+
+        /// <summary>
         /// Gets the service that is responsible for invoking external functions or methods.
         /// </summary>
         public IMethodInvoker Invoker

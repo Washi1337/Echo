@@ -1,5 +1,6 @@
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation
@@ -20,10 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// <summary>
         /// Gets the type of result this object contains. 
         /// </summary>
-        public InvocationResultType ResultType
-        {
-            get;
-        }
+        public InvocationResultType ResultType { get; }
 
         /// <summary>
         /// Gets a value indicating whether the invocation was inconclusive and not handled yet.
@@ -33,25 +31,20 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// <summary>
         /// Determines whether the invocation was successful.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Value))]
         public bool IsSuccess => ResultType is InvocationResultType.StepIn or InvocationResultType.StepOver;
 
         /// <summary>
         /// When <see cref="ResultType"/> is <see cref="InvocationResultType.StepOver"/>, gets the value that the
         /// method returned (if available).
         /// </summary>
-        public BitVector? Value
-        {
-            get;
-        }
+        public BitVector? Value { get; }
 
         /// <summary>
         /// When <see cref="ResultType"/> is <see cref="InvocationResultType.Exception"/>, gets the handle to the
         /// exception object that was thrown.
         /// </summary>
-        public ObjectHandle ExceptionObject
-        {
-            get;
-        }
+        public ObjectHandle ExceptionObject { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal string Tag => ResultType.ToString();
@@ -65,12 +58,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         public static InvocationResult Inconclusive() => new(InvocationResultType.Inconclusive, null, default);
         
         /// <summary>
-        /// Constructs a new inconclusive invocation result, where the invocation was handled as a step-in action.
+        /// Constructs a new conclusive invocation result, where the invocation was handled as a step-in action.
         /// </summary>
         public static InvocationResult StepIn() => new(InvocationResultType.StepIn, null, default);
         
         /// <summary>
-        /// Constructs a new inconclusive invocation result, where the invocation was fully handled by the invoker and
+        /// Constructs a new conclusive invocation result, where the invocation was fully handled by the invoker and
         /// a result was produced.
         /// </summary>
         /// <param name="value">

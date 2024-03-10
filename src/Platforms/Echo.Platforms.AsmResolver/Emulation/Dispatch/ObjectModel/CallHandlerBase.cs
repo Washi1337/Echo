@@ -104,7 +104,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             return result;
         }
 
-        private BitVector GetInstancePointer(CilExecutionContext context, IMethodDescriptor method)
+        private static BitVector GetInstancePointer(CilExecutionContext context, IMethodDescriptor method)
         {
             var factory = context.Machine.ValueFactory;
             var stack = context.CurrentFrame.EvaluationStack;
@@ -161,7 +161,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 case InvocationResultType.StepOver:
                     // Method was fully handled by the invoker, push result if it produced any.
                     if (result.Value is not null)
-                        context.CurrentFrame.EvaluationStack.Push(result.Value, method.Signature!.ReturnType, true);
+                    {
+                        var genericContext = GenericContext.FromMethod(method);
+                        var returnType = method.Signature!.ReturnType.InstantiateGenericTypes(genericContext);
+                        context.CurrentFrame.EvaluationStack.Push(result.Value, returnType, true);
+                    }
 
                     return CilDispatchResult.Success();
 

@@ -183,7 +183,10 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The slice that contains the raw characters of the string.</returns>
         public static BitVectorSpan SliceStringData(this BitVectorSpan span, ValueFactory factory)
         {
-            return span.Slice((int) (factory.StringHeaderSize * 8));
+            return span.Slice(
+                (int)(factory.StringHeaderSize * 8),
+                (int)((span.ByteCount - 2 - factory.StringHeaderSize) * 8)
+            );
         }
 
         /// <summary>
