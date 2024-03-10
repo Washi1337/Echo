@@ -11,7 +11,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         /// <summary>
         /// Creates a new execution context for CIL instructions.
         /// </summary>
-        /// <param name="machine">The parent machine the instruction is executed on.</param>
+        /// <param name="thread">The parent thread the instruction is executed on.</param>
         /// <param name="cancellationToken">A token used for canceling the emulation.</param>
         public CilExecutionContext(CilThread thread, CancellationToken cancellationToken)
         {
@@ -19,6 +19,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
             CancellationToken = cancellationToken;
         }
 
+        /// <summary>
+        /// Gets the parent thread the instruction is executed on.
+        /// </summary>
         public CilThread Thread
         {
             get;
