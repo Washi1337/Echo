@@ -38,7 +38,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
             {
                 // TODO: replace with dynamic method to force call specific method.
                 object? result = reflectionMethod.Invoke(marshalledInstance, marshalledArguments);
-                return InvocationResult.StepOver(marshaller.ToBitVector(result));
+                return InvocationResult.StepOver(method.Signature!.ReturnsValue 
+                    ? marshaller.ToBitVector(result)
+                    : null);
             }
             catch (Exception ex)
             {
