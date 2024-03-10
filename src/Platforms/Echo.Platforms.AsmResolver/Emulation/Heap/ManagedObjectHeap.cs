@@ -130,6 +130,29 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         }
 
         /// <summary>
+        /// Allocates a string into the virtual managed heap.
+        /// </summary>
+        /// <param name="contents">The string data.</param>
+        /// <returns>The address of the string that was allocated.</returns>
+        public long AllocateString(BitVector contents)
+        {
+            int stringLength = contents.ByteCount / sizeof(char);
+            long address = _backingHeap.Allocate(_factory.GetStringObjectSize(stringLength), false);
+            var chunkSpan = _backingHeap.GetChunkSpan(address);
+
+            // Set object type.
+            SetMethodTable(chunkSpan, _factory.ContextModule.CorLibTypeFactory.String);
+
+            // Set string length field.
+            chunkSpan.SliceStringLength(_factory).Write(stringLength);
+
+            // Write string contents.
+            chunkSpan.SliceStringData(_factory).Write(contents);
+
+            return address;
+        }
+
+        /// <summary>
         /// Gets the address to an interned string in the virtual managed heap.
         /// </summary>
         /// <param name="value">The string.</param>

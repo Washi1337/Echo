@@ -43,6 +43,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
             BitVectorPool = new BitVectorPool();
             Marshaller = new CliMarshaller(this);
 
+            // Force System.String to be aligned at 4 bytes (required for low level string APIs).
+            GetTypeDefOrRefContentsLayout(contextModule.CorLibTypeFactory.String.Type, default, 4);
+
             DecimalType = new TypeReference(
                 contextModule, 
                 contextModule.CorLibTypeFactory.CorLibScope, 
@@ -249,7 +252,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <param name="length">The number of characters in the string.</param>
         /// <returns>The total size in bytes.</returns>
-        public uint GetStringObjectSize(int length) => StringHeaderSize + sizeof(char) * (uint) length;
+        public uint GetStringObjectSize(int length) => StringHeaderSize + sizeof(char) * (uint)(length + 1);
 
         /// <summary>
         /// Computes the total size of an object.
@@ -405,8 +408,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             {
                 memoryLayout = type switch
                 {
-                    ITypeDefOrRef typeDefOrRef => GetTypeDefOrRefContentsLayout(typeDefOrRef, default),
-                    // TypeSignature {IsValueType: false} signature => GetTypeDefOrRefContentsLayout(signature.GetUnderlyingTypeDefOrRef(), default),
+                    ITypeDefOrRef typeDefOrRef => GetTypeDefOrRefContentsLayout(typeDefOrRef, default, PointerSize),
                     TypeSignature signature => GetTypeSignatureContentsLayout(signature),
                     _ => throw new ArgumentOutOfRangeException(nameof(type))
                 };
@@ -447,7 +449,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             return ArrayHeaderSize + index * GetTypeValueMemoryLayout(elementType).Size;
         }
         
-        private TypeMemoryLayout GetTypeDefOrRefContentsLayout(ITypeDefOrRef type, GenericContext context)
+        private TypeMemoryLayout GetTypeDefOrRefContentsLayout(ITypeDefOrRef type, GenericContext context, uint alignment)
         {
             if (type is TypeSpecification {Signature: { } signature})
                 return GetTypeSignatureContentsLayout(signature);
@@ -469,6 +471,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             
             uint currentOffset = 0;
 
+            // Walk up the type hierarchy to root.
             var hierarchy = new Stack<TypeDefinition>();
             while (definition is not null)
             {
@@ -476,6 +479,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 definition = definition.BaseType?.Resolve();
             } 
 
+            // Add all fields top-to-bottom to the layout.
             while (hierarchy.Count > 0)
             {
                 var currentType = hierarchy.Pop();
@@ -485,14 +489,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
                     if (field.IsStatic || field.Signature is null)
                         continue;
 
+                    // Infer layout for this field.
                     var contentsLayout = field.Signature.FieldType
                         .InstantiateGenericTypes(context)
                         .GetImpliedMemoryLayout(Is32Bit);
-
+                    
                     var fieldLayout = new FieldMemoryLayout(field, currentOffset, contentsLayout);
-
                     SetField.Invoke(layout, new object[] {field, fieldLayout});
-                    currentOffset = (currentOffset + contentsLayout.Size).Align(PointerSize);
+                    
+                    currentOffset = (currentOffset + contentsLayout.Size).Align(alignment);
                 }
             }
 
@@ -505,9 +510,11 @@ namespace Echo.Platforms.AsmResolver.Emulation
             switch (type.ElementType)
             {
                 case ElementType.String:
+                    return GetTypeDefOrRefContentsLayout(type.GetUnderlyingTypeDefOrRef()!, GenericContext.FromType(type), sizeof(uint));
+                
                 case ElementType.Class:
                 case ElementType.GenericInst:
-                    return GetTypeDefOrRefContentsLayout(type.GetUnderlyingTypeDefOrRef()!, GenericContext.FromType(type));
+                    return GetTypeDefOrRefContentsLayout(type.GetUnderlyingTypeDefOrRef()!, GenericContext.FromType(type), PointerSize);
 
                 default:
                     return type.GetImpliedMemoryLayout(Is32Bit);
