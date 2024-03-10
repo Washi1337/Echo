@@ -78,12 +78,27 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </remarks>
         public BitVector? Call(IMethodDescriptor method, object[] arguments)
         {
+            return Call(method, CancellationToken.None,arguments);
+        }
+        
+        /// <summary>
+        /// Calls the provided method in the context of the virtual machine.
+        /// </summary>
+        /// <param name="method">The method to call.</param>
+        /// <param name="cancellationToken">A token that can be used for canceling the emulation.</param>
+        /// <param name="arguments">The arguments.</param>
+        /// <returns>The return value, or <c>null</c> if the provided method does not return a value.</returns>
+        /// <remarks>
+        /// This method is blocking until the emulation of the call completes.
+        /// </remarks>
+        public BitVector? Call(IMethodDescriptor method, CancellationToken cancellationToken, object[] arguments)
+        {
             // Short circuit before we do expensive marshalling...
             if (arguments.Length != method.Signature!.GetTotalParameterCount())
                 throw new TargetParameterCountException();
 
             var marshalled = arguments.Select(x => Machine.ObjectMarshaller.ToBitVector(x)).ToArray();
-            return Call(method, CancellationToken.None, marshalled);
+            return Call(method, cancellationToken, marshalled);
         }
 
         /// <summary>
@@ -122,13 +137,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
             var signature = method.Signature.InstantiateGenericTypes(context);
 
             // Set up callee frame.
-            var frame = CallStack.Push(method);
+            var frame = new CallFrame(method, Machine.ValueFactory);
             for (int i = 0; i < arguments.Length; i++)
             {
                 var slot = Machine.ValueFactory.Marshaller.ToCliValue(arguments[i], signature.ParameterTypes[i]);
                 frame.WriteArgument(i, slot.Contents);
                 pool.Return(slot.Contents);
             }
+
+            CallStack.Push(frame);
 
             // Run until we return.
             StepOut(cancellationToken);
