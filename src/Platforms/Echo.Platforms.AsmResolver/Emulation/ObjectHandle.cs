@@ -10,7 +10,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// <summary>
     /// Represents an address to an object (including its object header) within a CIL virtual machine. 
     /// </summary>
-    [DebuggerDisplay("{Address} ({Tag})")]
     public readonly struct ObjectHandle : IEquatable<ObjectHandle>
     {
         /// <summary>
@@ -51,16 +50,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public StructHandle Contents => new(Machine, Address + Machine.ValueFactory.ObjectHeaderSize);
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        internal string Tag
+        internal object? Tag
         {
             get
             {
                 if (IsNull)
-                    return "null";
+                    return null;
 
                 try
                 {
-                    return GetObjectType().FullName;
+                    return GetObjectType();
                 }
                 catch
                 {
@@ -204,10 +203,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <exception cref="ArgumentException">Occurs when the array has an unknown length.</exception>
         public BitVector ReadArrayData()
         {
-            var arrayType = GetObjectType();
-            if (arrayType is not SzArrayTypeSignature { BaseType: { } elementType })
-                throw new ArgumentException("The object handle does not point to an array type");
-            
             var length = Machine.ValueFactory.BitVectorPool.Rent(32, false);
             try
             {
@@ -215,20 +210,38 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 ReadArrayLength(length);
                 if (!length.AsSpan().IsFullyKnown)
                     throw new ArgumentException("The array has an unknown length.");
-
-                // Determine total space required to store the array data.
-                int elementSize = (int) Machine.ValueFactory.GetTypeValueMemoryLayout(elementType).Size;
-                var result = new BitVector(length.AsSpan().I32 * elementSize * 8, false);
                 
                 // Read the data.
-                ReadArrayData(result);
-                
-                return result;
+                return ReadArrayData(0, length.AsSpan().I32);
             }
             finally
             {
                 Machine.ValueFactory.BitVectorPool.Return(length);
-            }
+            }   
+        }
+        
+        /// <summary>
+        /// Interprets the handle as an array reference, and obtains all elements of the array as one continuous buffer
+        /// of bytes.
+        /// </summary>
+        /// <param name="startIndex">The index to start reading from.</param>
+        /// <param name="length">The number of elements to read.</param>
+        /// <returns>The raw array data.</returns>
+        /// <exception cref="ArgumentException">Occurs when the array has an unknown length.</exception>
+        public BitVector ReadArrayData(int startIndex, int length)
+        {
+            var arrayType = GetObjectType();
+            if (arrayType is not SzArrayTypeSignature { BaseType: { } elementType })
+                throw new ArgumentException("The object handle does not point to an array type");
+            
+            // Determine total space required to store the array data.
+            int elementSize = (int) Machine.ValueFactory.GetTypeValueMemoryLayout(elementType).Size;
+            var result = new BitVector(length * elementSize * 8, false);
+            
+            // Read the data.
+            ReadArrayData(result, startIndex, elementType);
+
+            return result;
         }
 
         /// <summary>
@@ -240,6 +253,36 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public void ReadArrayData(BitVectorSpan buffer)
         {
             Machine.Memory.Read(Address + Machine.ValueFactory.ArrayHeaderSize, buffer);
+        }
+
+        /// <summary>
+        /// Interprets the handle as an array reference, and obtains all elements of the array as one continuous buffer
+        /// of bytes.
+        /// </summary>
+        /// <param name="buffer">The buffer to copy the array data into.</param>
+        /// <param name="startIndex">The start index to read from.</param>
+        /// <returns>The raw array data.</returns>
+        public void ReadArrayData(BitVectorSpan buffer, int startIndex)
+        {
+            var arrayType = GetObjectType();
+            if (arrayType is not SzArrayTypeSignature { BaseType: { } elementType })
+                throw new ArgumentException("The object handle does not point to an array type");
+
+            ReadArrayData(buffer, startIndex, elementType);
+        }
+
+        /// <summary>
+        /// Interprets the handle as an array reference, and obtains all elements of the array as one continuous buffer
+        /// of bytes.
+        /// </summary>
+        /// <param name="buffer">The buffer to copy the array data into.</param>
+        /// <param name="startIndex">The start index to read from.</param>
+        /// <param name="elementType">The element type to assume.</param>
+        /// <returns>The raw array data.</returns>
+        public void ReadArrayData(BitVectorSpan buffer, int startIndex, TypeSignature elementType)
+        {
+            int elementSize = (int) Machine.ValueFactory.GetTypeValueMemoryLayout(elementType).Size;
+            Machine.Memory.Read(Address + Machine.ValueFactory.ArrayHeaderSize + startIndex * elementSize, buffer);
         }
 
         /// <summary>
@@ -257,7 +300,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// of bytes.
         /// </summary>
         /// <param name="buffer">The buffer to copy the array data from.</param>
-        public void WriteArrayData(byte[] buffer)
+        public void WriteArrayData(ReadOnlySpan<byte> buffer)
         {
             Machine.Memory.Write(Address + Machine.ValueFactory.ArrayHeaderSize, buffer);
         }
@@ -362,6 +405,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"0x{Address.ToString(Machine.Is32Bit ? "X8" : "X16")}";
+        public override string ToString() => $"0x{Address.ToString(Machine.Is32Bit ? "X8" : "X16")} ({Tag})";
     }
 }

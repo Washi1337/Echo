@@ -14,6 +14,11 @@ public static class DefaultAllocators
     /// Gets an allocator that allocates objects in the virtualalized heap of the underlying virtual machine.
     /// </summary>
     public static VirtualHeapAllocator VirtualHeap => VirtualHeapAllocator.Instance;
+
+    /// <summary>
+    /// Gets an allocator that handles System.String constructors.
+    /// </summary>
+    public static StringAllocator String => StringAllocator.Instance;
     
     /// <summary>
     /// Chains the first object allocator with the provided object allocator in such a way that if the result of the

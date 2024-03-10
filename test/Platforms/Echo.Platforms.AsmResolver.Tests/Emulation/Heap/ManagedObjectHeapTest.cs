@@ -47,7 +47,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
         {
             // Beautiful pointer abuse to read the raw data of the string.
             var rawObjectAddress = *(nint*) Unsafe.AsPointer(ref value);
-            byte[] data = new byte[sizeof(nint) + sizeof(int) + value.Length * sizeof(char)];
+            byte[] data = new byte[sizeof(nint) + sizeof(int) + (value.Length+1) * sizeof(char)];
             Marshal.Copy(rawObjectAddress, data, 0, data.Length);
 
             var objectSpan = new BitVector(data).AsSpan();

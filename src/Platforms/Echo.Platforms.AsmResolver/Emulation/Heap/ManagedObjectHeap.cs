@@ -43,6 +43,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         public AddressRange AddressRange => _backingHeap.AddressRange;
 
         /// <summary>
+        /// Allocates flat unmanaged memory in the heap (i.e., without any object header).
+        /// </summary>
+        /// <param name="size">The size in bytes of the memory region to allocate.</param>
+        /// <param name="initialize">A value indicating whether the object should be initialized with zeroes.</param>
+        /// <returns>The address of the memory that was allocated.</returns>
+        public long AllocateFlat(uint size, bool initialize)
+        {
+            return _backingHeap.Allocate(size, initialize);
+        }
+
+        /// <summary>
         /// Allocates a managed object of the provided type in the heap.
         /// </summary>
         /// <param name="type">The type of object to allocate.</param>
@@ -153,7 +164,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             chunkSpan.SliceStringData(_factory).Write(contents);
             
             // Write null-terminator.
-            chunkSpan.Slice(chunkSpan.Count - 16 - 1).U16 = 0;
+            chunkSpan.Slice(chunkSpan.Count - 16).Write((ushort) 0);
 
             return address;
         }

@@ -141,7 +141,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             get;
             set;
-        } = DefaultAllocators.VirtualHeap;
+        } = DefaultAllocators.String.WithFallback(DefaultAllocators.VirtualHeap);
 
         /// <summary>
         /// Gets the service that is responsible for invoking external functions or methods.
