@@ -204,15 +204,25 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <exception cref="ArgumentException">Occurs when the array has an unknown length.</exception>
         public BitVector ReadArrayData()
         {
+            var arrayType = GetObjectType();
+            if (arrayType is not SzArrayTypeSignature { BaseType: { } elementType })
+                throw new ArgumentException("The object handle does not point to an array type");
+            
             var length = Machine.ValueFactory.BitVectorPool.Rent(32, false);
             try
             {
+                // Read the length of the array.
                 ReadArrayLength(length);
                 if (!length.AsSpan().IsFullyKnown)
                     throw new ArgumentException("The array has an unknown length.");
 
-                var result = new BitVector(length.AsSpan().I32 * 8, false);
+                // Determine total space required to store the array data.
+                int elementSize = (int) Machine.ValueFactory.GetTypeValueMemoryLayout(elementType).Size;
+                var result = new BitVector(length.AsSpan().I32 * elementSize * 8, false);
+                
+                // Read the data.
                 ReadArrayData(result);
+                
                 return result;
             }
             finally
