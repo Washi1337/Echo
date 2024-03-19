@@ -49,7 +49,7 @@ eh.Handlers.Add(handler);
 
 ## Constructing Blocks
 
-Constructing structural blocks can be done by creating a [control flow graph](cfg.md) first, and then using the `ConstructBlocks` extension method:
+Constructing structural blocks can be done by creating a [control flow graph](cfg-construction.md) first, and then using the `ConstructBlocks` extension method:
 
 ```csharp
 using Echo.ControlFlow.Serialization.Blocks;
