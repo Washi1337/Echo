@@ -17,7 +17,16 @@ namespace Echo.Memory
         private static StringBuilder? _builder;
         
         [ThreadStatic]
-        private static List<BitVector?>? _temporaryVectors; 
+        private static List<BitVector?>? _temporaryVectors;
+
+        /// <summary>
+        /// Creates a new span around an existing bitvector.
+        /// </summary>
+        /// <param name="vector">The vector to span.</param>
+        public BitVectorSpan(BitVector vector)
+            : this(vector.Bits, vector.KnownMask)
+        {
+        }
 
         /// <summary>
         /// Creates a new span around a pair of bits and a known bit mask.
@@ -349,6 +358,11 @@ namespace Echo.Memory
 
             return _builder.ToString();
         }
+
+        /// <summary>
+        /// Copies the span into a new bit vector.
+        /// </summary>
+        public BitVector ToVector() => new(this);
         
         private void AssertSameBitSize(BitVectorSpan other)
         {
@@ -398,7 +412,7 @@ namespace Echo.Memory
         }
 
         /// <inheritdoc />
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             // Since this is a ref struct, it will
             // never equal any reference type

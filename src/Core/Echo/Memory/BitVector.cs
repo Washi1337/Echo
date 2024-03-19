@@ -8,7 +8,8 @@ namespace Echo.Memory
     /// Represents an array of bits for which the concrete may be known or unknown, and can be reinterpreted as
     /// different value types, and operated on using the different semantics of these types.
     /// </summary>
-    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
+    // [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
+    [DebuggerTypeProxy(typeof(BitVectorSpan))]
     public class BitVector : ICloneable
     {
         /// <summary>
@@ -51,6 +52,15 @@ namespace Echo.Memory
         {
             Bits = bits;
             KnownMask = knownMask;
+        }
+        
+        /// <summary>
+        /// Copies a span into a new bit vector.
+        /// </summary>
+        /// <param name="span">The span to copy.</param>
+        public BitVector(BitVectorSpan span)
+            : this(span.Bits.ToArray(), span.KnownMask.ToArray())
+        {
         }
         
         /// <summary>
