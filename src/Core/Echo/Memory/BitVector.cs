@@ -8,7 +8,6 @@ namespace Echo.Memory
     /// Represents an array of bits for which the concrete may be known or unknown, and can be reinterpreted as
     /// different value types, and operated on using the different semantics of these types.
     /// </summary>
-    // [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     [DebuggerTypeProxy(typeof(BitVectorSpan))]
     public class BitVector : ICloneable
     {
@@ -266,10 +265,6 @@ namespace Echo.Memory
         {
             get;
         }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        internal string DebuggerDisplay => AsSpan().DebuggerDisplay;
         
         /// <summary>
         /// Gets the number of bits stored in the bit vector.
