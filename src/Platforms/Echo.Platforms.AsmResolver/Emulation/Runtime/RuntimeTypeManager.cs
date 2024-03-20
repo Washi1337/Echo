@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Runtime;
 
@@ -12,7 +13,7 @@ public sealed class RuntimeTypeManager
     private readonly CilVirtualMachine _machine;
     
     private readonly ConcurrentDictionary<ITypeDescriptor, TypeInitialization> _initializations 
-        = new(EqualityComparer<ITypeDescriptor>.Default);
+        = new(SignatureComparer.Default);
 
     /// <summary>
     /// Creates a new runtime type manager.
