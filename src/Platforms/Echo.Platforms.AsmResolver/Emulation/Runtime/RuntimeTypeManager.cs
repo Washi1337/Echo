@@ -51,16 +51,23 @@ public sealed class RuntimeTypeManager
     {
         var initialization = GetInitialization(type);
 
+        // If we already have an exception cached as a result of a previous type-load failure, rethrow it.
+        if (!initialization.Exception.IsNull)
+            return TypeInitializerResult.Exception(initialization.Exception);
+        
+        // We only need to call the constructor once.
+        if (initialization.ConstructorCalled)
+            return TypeInitializerResult.NoAction();
+        
         lock (initialization)
         {
-            // If we already have an exception cached as a result of a previous type-load failure, rethrow it.
+            // Try check if any thread beat us in the initialization handling.
             if (!initialization.Exception.IsNull)
                 return TypeInitializerResult.Exception(initialization.Exception);
-            
-            // We only need to call the constructor once.
+
             if (initialization.ConstructorCalled)
                 return TypeInitializerResult.NoAction();
-
+            
             // Try resolve the type that is being initialized.
             var definition = type.Resolve();
             if (definition is null)
@@ -71,7 +78,7 @@ public sealed class RuntimeTypeManager
                     
                 return TypeInitializerResult.Exception(initialization.Exception);
             }
-
+            
             // "Call" the constructor.
             initialization.ConstructorCalled = true;
                 
