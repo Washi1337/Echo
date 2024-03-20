@@ -13,7 +13,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
     /// <summary>
     /// Represents a single frame in a virtual stack.
     /// </summary>
-    public class CallFrame : IMemorySpace
+    public partial class CallFrame : IMemorySpace
     {
         // Stack layout sketch:
         // 
@@ -230,6 +230,25 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// Reads the value of a local variable into a buffer. 
         /// </summary>
         /// <param name="index">The index of the variable.</param>
+        /// <returns>A bit vector with the current data of the local variable.</returns>
+        public BitVector ReadLocal(int index)
+        {
+            if (Body is null)
+                throw new ArgumentException("Method does not have a managed method body.");
+
+            var context = GenericContext.FromMethod(Method);
+            var type = Body.LocalVariables[index].VariableType.InstantiateGenericTypes(context);
+            
+            var result = EvaluationStack.Factory.CreateValue(type, false);
+            ReadLocal(index, result);
+            
+            return result;
+        }
+
+        /// <summary>
+        /// Reads the value of a local variable into a buffer. 
+        /// </summary>
+        /// <param name="index">The index of the variable.</param>
         /// <param name="buffer">The buffer to write the data into.</param>
         public void ReadLocal(int index, BitVectorSpan buffer) => Read(GetLocalAddress(index), buffer);
 
@@ -249,6 +268,25 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public long GetArgumentAddress(int index) => index < Method.Signature!.GetTotalParameterCount()
             ? _baseAddress + _offsets[LocalsCount + 1 + index]
             : throw new ArgumentOutOfRangeException(nameof(index));
+
+        /// <summary>
+        /// Reads the value of a local variable into a buffer. 
+        /// </summary>
+        /// <param name="index">The index of the variable.</param>
+        /// <returns>A bit vector with the current data of the argument.</returns>
+        public BitVector ReadArgument(int index)
+        {
+            if (Body is null)
+                throw new ArgumentException("Method does not have a managed method body.");
+            
+            var context = GenericContext.FromMethod(Method);
+            var type = Body.Owner.Parameters.GetBySignatureIndex(index).ParameterType.InstantiateGenericTypes(context);
+            
+            var result = EvaluationStack.Factory.CreateValue(type, false);
+            ReadArgument(index, result);
+            
+            return result;
+        }
 
         /// <summary>
         /// Reads the value of an argument into a buffer. 

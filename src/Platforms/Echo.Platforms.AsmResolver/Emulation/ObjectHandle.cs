@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
@@ -10,7 +9,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
     /// <summary>
     /// Represents an address to an object (including its object header) within a CIL virtual machine. 
     /// </summary>
-    public readonly struct ObjectHandle : IEquatable<ObjectHandle>
+    public readonly partial struct ObjectHandle : IEquatable<ObjectHandle>
     {
         /// <summary>
         /// Creates a new object handle from the provided address.
@@ -49,25 +48,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         public StructHandle Contents => new(Machine, Address + Machine.ValueFactory.ObjectHeaderSize);
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        internal object? Tag
-        {
-            get
-            {
-                if (IsNull)
-                    return null;
-
-                try
-                {
-                    return GetObjectType();
-                }
-                catch
-                {
-                    return "<invalid>";
-                }
-            }
-        }
-
         /// <summary>
         /// Gets the object's type (or method table).
         /// </summary>
@@ -81,6 +61,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 // Dereference the object pointer to get the bits for the method table pointer.
                 var methodTableSpan = methodTableVector.AsSpan();
                 Machine.Memory.Read(Address, methodTableSpan);
+
+                if (!methodTableSpan.IsFullyKnown)
+                    throw new ArgumentException("Object contains an unknown method table.");
 
                 // Read the method table pointer.
                 long methodTablePointer = methodTableSpan.ReadNativeInteger(Machine.Is32Bit);

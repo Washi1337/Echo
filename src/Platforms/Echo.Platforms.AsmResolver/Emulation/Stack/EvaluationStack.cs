@@ -8,15 +8,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
     /// </summary>
     public class EvaluationStack : IndexableStack<StackSlot>
     {
-        private readonly ValueFactory _factory;
-
         /// <summary>
         /// Creates a new evaluation stack.
         /// </summary>
         /// <param name="factory">The value factory to use.</param>
         public EvaluationStack(ValueFactory factory)
         {
-            _factory = factory;
+            Factory = factory;
+        }
+
+        internal ValueFactory Factory
+        {
+            get;
         }
 
         /// <summary>
@@ -25,10 +28,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <param name="value">The handle to push.</param>
         public void Push(ObjectHandle value)
         {
-            var vector = _factory.RentNativeInteger(value.Address);
-            Push(vector, _factory.ContextModule.CorLibTypeFactory.Object, true);
+            var vector = Factory.RentNativeInteger(value.Address);
+            Push(vector, Factory.ContextModule.CorLibTypeFactory.Object, true);
         }
-        
+
         /// <summary>
         /// Marshals the provided bitvector into a stack slot, and pushes it onto the stack.
         /// </summary>
@@ -37,7 +40,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <returns>The stack slot that was created.</returns>
         public void Push(BitVectorSpan value, TypeSignature originalType)
         {
-            var vector = _factory.BitVectorPool.Rent(value.Count, false);
+            var vector = Factory.BitVectorPool.Rent(value.Count, false);
             vector.AsSpan().Write(value);
             Push(vector, originalType, true);
         }
@@ -62,10 +65,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <returns>The stack slot that was created.</returns>
         public void Push(BitVector value, TypeSignature originalType, bool releaseBitVector)
         {
-            var marshalled = _factory.Marshaller.ToCliValue(value, originalType);
+            var marshalled = Factory.Marshaller.ToCliValue(value, originalType);
             
             if (releaseBitVector)
-                _factory.BitVectorPool.Return(value);
+                Factory.BitVectorPool.Return(value);
             
             Push(marshalled);
         }
@@ -79,8 +82,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         {
             var slot = Pop();
             
-            var marshalled = _factory.Marshaller.FromCliValue(slot, targetType);
-            _factory.BitVectorPool.Return(slot.Contents);
+            var marshalled = Factory.Marshaller.FromCliValue(slot, targetType);
+            Factory.BitVectorPool.Return(slot.Contents);
             
             return marshalled;
         }
@@ -89,7 +92,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public override void Clear()
         {
             for (int i = 0; i < Count; i++)
-                _factory.BitVectorPool.Return(this[i].Contents);
+                Factory.BitVectorPool.Return(this[i].Contents);
 
             base.Clear();
         }
