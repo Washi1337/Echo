@@ -8,12 +8,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     /// Implements a CIL instruction handler for <c>ldsflda</c> operations.
     /// </summary>
     [DispatcherTableEntry(CilCode.Ldsflda)]
-    public class LdsFldaHandler : FallThroughOpCodeHandler
+    public class LdsFldaHandler : FieldOpCodeHandler
     {
         /// <inheritdoc />
-        protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
+        protected override CilDispatchResult DispatchInternal(
+            CilExecutionContext context, 
+            CilInstruction instruction, 
+            IFieldDescriptor field)
         {
-            var field = (IFieldDescriptor) instruction.Operand!;
             var address = context.Machine.ValueFactory.RentNativeInteger(
                 context.Machine.StaticFields.GetFieldAddress(field));
             context.CurrentFrame.EvaluationStack.Push(new StackSlot(address, StackSlotTypeHint.Integer));

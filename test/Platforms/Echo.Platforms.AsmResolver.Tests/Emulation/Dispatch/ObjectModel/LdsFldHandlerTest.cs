@@ -1,7 +1,12 @@
+using System.Linq;
+using System.Text;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using Echo.Platforms.AsmResolver.Emulation;
+using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel;
@@ -26,8 +31,7 @@ public class LdsFldHandlerTest : CilOpCodeHandlerTestBase
         var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldsfld, field));
 
         Assert.True(result.IsSuccess);
-        Assert.Single(stack);
-        Assert.Equal(1337, stack.Pop().Contents.AsSpan().I32);
+        Assert.Equal(1337, Assert.Single(stack).Contents.AsSpan().I32);
     }
 
     [Fact]
@@ -43,7 +47,37 @@ public class LdsFldHandlerTest : CilOpCodeHandlerTestBase
         var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldsfld, field));
 
         Assert.True(result.IsSuccess);
-        Assert.Single(stack);
-        Assert.Equal(1337.0, stack.Pop().Contents.AsSpan().F64);
+        Assert.Equal(1337.0, Assert.Single(stack).Contents.AsSpan().F64);
+    }
+
+    [Fact]
+    public void ReadStaticInt32WithInitializer()
+    {
+        // Lookup metadata.
+        var type = ModuleFixture.MockModule.LookupMember<TypeDefinition>(typeof(ClassWithInitializer).MetadataToken);
+        var cctor = type.GetStaticConstructor();
+        var field = type.Fields.First(x => x.Name == nameof(ClassWithInitializer.Field));
+
+        // Load static field.
+        var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldsfld, field));
+        
+        // Verify we jumped into the cctor.
+        Assert.True(result.IsSuccess);
+        Assert.Same(cctor, Context.Thread.CallStack.Peek(0).Method);
+
+        // Finish execution of the cctor.
+        Context.Thread.StepOut();
+        
+        // Load static field again.
+        result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldsfld, field));
+        
+        // Verify we did not jump into the cctor.
+        Assert.True(result.IsSuccess);
+        Assert.NotSame(cctor, Context.Thread.CallStack.Peek(0).Method);
+        
+        // Verify that a string is pushed.
+        var slot = Assert.Single(Context.CurrentFrame.EvaluationStack).Contents.AsObjectHandle(Context.Machine);
+        Assert.False(slot.IsNull);
+        Assert.Equal(ClassWithInitializer.Field, Encoding.Unicode.GetString(slot.ReadStringData().Bits));
     }
 }
