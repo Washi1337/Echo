@@ -9,6 +9,7 @@ using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Tests.Mock;
+using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
@@ -236,6 +237,24 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.Single(invoker.LastArguments!);
             Assert.Equal(1, invoker.LastArguments![0].AsSpan().I32);
         }
-    }
 
+        [Fact]
+        public void CallStepInWithInitializer()
+        {
+            // Look up metadata.
+            var type = ModuleFixture.MockModule.LookupMember<TypeDefinition>(typeof(ClassWithInitializer).MetadataToken);
+            var cctor = type.GetStaticConstructor();
+            var method = type.Methods.First(m => m.Name == nameof(ClassWithInitializer.MethodFieldAccess));
+
+            // Step into method.
+            Context.Machine.Invoker = DefaultInvokers.StepIn;
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Call, method));
+
+            Assert.True(result.IsSuccess);
+            
+            // Verify that the .cctor is called.
+            Assert.Same(cctor, Context.Thread.CallStack.Peek(0).Method);
+            Assert.Same(method, Context.Thread.CallStack.Peek(1).Method);
+        }
+    }
 }

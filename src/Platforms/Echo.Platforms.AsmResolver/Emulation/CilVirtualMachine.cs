@@ -62,6 +62,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             }
 
             Dispatcher = new CilDispatcher();
+            TypeManager = new RuntimeTypeManager(this);
             Threads = new ReadOnlyCollection<CilThread>(_threads);
         }
 
@@ -151,6 +152,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
             set;
         } = DefaultInvokers.ReturnUnknown;
+
+        /// <summary>
+        /// Gets the service that is responsible for the initialization and management of runtime types residing in
+        /// the virtual machine.
+        /// </summary>
+        public RuntimeTypeManager TypeManager
+        {
+            get;
+        }
 
         /// <summary>
         /// Gets or sets the service that is responsible for resolving unknown values on the stack in critical moments.
