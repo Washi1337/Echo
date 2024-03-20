@@ -47,7 +47,7 @@ public sealed class RuntimeTypeManager
     /// <param name="type">The type that failed to initialize.</param>
     /// <param name="innerException">The exception object that describes the failure.</param>
     /// <returns>The resulting TypeInitializationException instance.</returns>
-    public ObjectHandle RegisterTypeInitializationException(ITypeDescriptor type, ObjectHandle innerException)
+    public ObjectHandle RegisterInitializationException(ITypeDescriptor type, ObjectHandle innerException)
     {
         var initialization = GetInitialization(type);
         if (!initialization.Exception.IsNull)
@@ -62,7 +62,7 @@ public sealed class RuntimeTypeManager
                     .AsObjectHandle(_machine);
             }
             
-            // TODO: incorporate `exceptionObject`.
+            // TODO: incorporate `innerException`.
         }
 
         return initialization.Exception;
