@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
@@ -5,6 +6,7 @@ using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Memory;
+using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Emulation.Invocation;
@@ -255,6 +257,25 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             // Verify that the .cctor is called.
             Assert.Same(cctor, Context.Thread.CallStack.Peek(0).Method);
             Assert.Same(method, Context.Thread.CallStack.Peek(1).Method);
+        }
+
+        [Fact]
+        public void CallStepInWithThrowingInitializer()
+        {
+            // Look up metadata.
+            var type = ModuleFixture.MockModule.LookupMember<TypeDefinition>(typeof(ClassWithThrowingInitializer).MetadataToken);
+            var cctor = type.GetStaticConstructor();
+            var method = type.Methods.First(m => m.Name == nameof(ClassWithThrowingInitializer.MethodFieldAccess));
+
+            // Step into method.
+            Context.Machine.Invoker = DefaultInvokers.StepIn;
+            Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Call, method));
+
+            Assert.Same(cctor, Context.Thread.CallStack.Peek(0).Method);
+            Assert.Same(method, Context.Thread.CallStack.Peek(1).Method);
+
+            var exception = Assert.Throws<EmulatedException>(() => Context.Thread.StepOut());
+            Assert.Equal(nameof(TypeInitializationException), exception.ExceptionObject.GetObjectType().Name);
         }
     }
 }

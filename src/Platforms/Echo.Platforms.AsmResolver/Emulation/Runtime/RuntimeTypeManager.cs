@@ -42,6 +42,33 @@ public sealed class RuntimeTypeManager
     }
 
     /// <summary>
+    /// Registers the event that a type has failed to initialize. 
+    /// </summary>
+    /// <param name="type">The type that failed to initialize.</param>
+    /// <param name="innerException">The exception object that describes the failure.</param>
+    /// <returns>The resulting TypeInitializationException instance.</returns>
+    public ObjectHandle RegisterTypeInitializationException(ITypeDescriptor type, ObjectHandle innerException)
+    {
+        var initialization = GetInitialization(type);
+        if (!initialization.Exception.IsNull)
+            return initialization.Exception;
+
+        lock (initialization)
+        {
+            if (initialization.Exception.IsNull)
+            {
+                initialization.Exception = _machine.Heap
+                    .AllocateObject(_machine.ValueFactory.TypeInitializationExceptionType, true)
+                    .AsObjectHandle(_machine);
+            }
+            
+            // TODO: incorporate `exceptionObject`.
+        }
+
+        return initialization.Exception;
+    }
+    
+    /// <summary>
     /// Handles the type initialization on the provided thread.
     /// </summary>
     /// <param name="thread">The thread the initialization is to be called on.</param>
