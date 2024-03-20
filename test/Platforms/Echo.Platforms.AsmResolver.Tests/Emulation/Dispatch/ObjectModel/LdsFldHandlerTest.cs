@@ -1,5 +1,7 @@
+using System;
 using System.Linq;
 using System.Text;
+using AsmResolver;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -79,5 +81,21 @@ public class LdsFldHandlerTest : CilOpCodeHandlerTestBase
         var slot = Assert.Single(Context.CurrentFrame.EvaluationStack).Contents.AsObjectHandle(Context.Machine);
         Assert.False(slot.IsNull);
         Assert.Equal(ClassWithInitializer.Field, Encoding.Unicode.GetString(slot.ReadStringData().Bits));
+    }
+
+    [Fact]
+    public void ReadStaticInt32WithFieldRva()
+    {
+        var field = new FieldDefinition(
+            "StaticInt32WithFieldRva", 
+            FieldAttributes.Static | FieldAttributes.HasFieldRva,
+            ModuleFixture.MockModule.CorLibTypeFactory.Int32
+        );
+        field.FieldRva = new DataSegment(BitConverter.GetBytes(1337));
+
+        var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldsfld, field));
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(1337, Assert.Single(Context.CurrentFrame.EvaluationStack).Contents.AsSpan().I32);
     }
 }

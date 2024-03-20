@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using AsmResolver;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 
@@ -109,7 +110,7 @@ public sealed class RuntimeTypeManager
             
             // "Call" the constructor.
             initialization.ConstructorCalled = true;
-                
+
             // Actually find the constructor and call it if it is there.
             var cctor = definition.GetStaticConstructor();
             if (cctor is not null)
