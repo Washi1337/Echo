@@ -59,7 +59,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
         private static MethodDefinition? FindMethodImplementationInType(TypeDefinition? type, MethodDefinition? baseMethod)
         {
-            if (type is null || baseMethod is null)
+            if (type is null || baseMethod is null || !baseMethod.IsVirtual)
                 return baseMethod;
 
             var implementation = default(MethodDefinition);
