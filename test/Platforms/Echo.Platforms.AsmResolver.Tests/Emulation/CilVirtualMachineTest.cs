@@ -589,6 +589,23 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         }
 
         [Fact]
+        public void SteppingWithNestedInitializers()
+        {
+            // Look up metadata.
+            var method = _fixture
+                .MockModule.LookupMember<TypeDefinition>(typeof(ClassWithNestedInitializer.Class1).MetadataToken)
+                .Methods.First(m => m.Name == nameof(ClassWithNestedInitializer.Class1.Method));
+
+            // CAll method.
+            _vm.Invoker = DefaultInvokers.StepIn;
+            var result = _mainThread.Call(method, Array.Empty<BitVector>());
+            
+            // Verify.
+            Assert.NotNull(result);
+            Assert.Equal(1337, result.AsSpan().I32);
+        }
+
+        [Fact]
         public void StaticFieldWithInitialValueUpdate()
         {
             var type = _fixture.MockModule.LookupMember<TypeDefinition>(typeof(ClassWithInitializer).MetadataToken);
