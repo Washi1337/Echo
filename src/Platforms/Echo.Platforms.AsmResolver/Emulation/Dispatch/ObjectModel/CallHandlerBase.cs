@@ -156,6 +156,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                         frame.WriteArgument(i, arguments[i]);
 
                     context.Thread.CallStack.Push(frame);
+
+                    // Ensure type initializer is called for declaring type when necessary.
+                    // TODO: Handle `beforefieldinit` flag.
+                    if (method.DeclaringType is { } declaringType)
+                    {
+                        return context.Machine.TypeManager
+                            .HandleInitialization(context.Thread, declaringType)
+                            .ToDispatchResult();
+                    }
+                    
                     return CilDispatchResult.Success();
 
                 case InvocationResultType.StepOver:

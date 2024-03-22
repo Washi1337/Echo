@@ -1,6 +1,5 @@
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
@@ -9,15 +8,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     /// Implements a CIL instruction handler for <c>stfld</c> operations.
     /// </summary>
     [DispatcherTableEntry(CilCode.Stfld)]
-    public class StFldHandler : FallThroughOpCodeHandler
+    public class StFldHandler : FieldOpCodeHandler
     {
         /// <inheritdoc />
-        protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
+        protected override CilDispatchResult DispatchInternal(
+            CilExecutionContext context, 
+            CilInstruction instruction, 
+            IFieldDescriptor field)
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
             
-            var field = (IFieldDescriptor) instruction.Operand!;
             var value = stack.Pop(field.Signature!.FieldType);
             var instance = stack.Pop();
 

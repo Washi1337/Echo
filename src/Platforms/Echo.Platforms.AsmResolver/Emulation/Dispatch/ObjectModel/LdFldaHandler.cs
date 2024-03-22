@@ -9,15 +9,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     /// Implements a CIL instruction handler for <c>ldflda</c> operations.
     /// </summary>
     [DispatcherTableEntry(CilCode.Ldflda)]
-    public class LdFldaHandler : FallThroughOpCodeHandler
+    public class LdFldaHandler : FieldOpCodeHandler
     {
         /// <inheritdoc />
-        protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
+        protected override CilDispatchResult DispatchInternal(
+            CilExecutionContext context, 
+            CilInstruction instruction, 
+            IFieldDescriptor field)
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
             
-            var field = (IFieldDescriptor) instruction.Operand!;
             var instance = stack.Pop();
             var result = context.Machine.ValueFactory.RentNativeInteger(false);
 

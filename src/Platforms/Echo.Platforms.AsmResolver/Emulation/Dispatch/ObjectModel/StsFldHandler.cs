@@ -7,12 +7,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     /// Implements a CIL instruction handler for <c>stsfld</c> operations.
     /// </summary>
     [DispatcherTableEntry(CilCode.Stsfld)]
-    public class StsFldHandler : FallThroughOpCodeHandler
+    public class StsFldHandler : FieldOpCodeHandler
     {
         /// <inheritdoc />
-        protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
+        protected override CilDispatchResult DispatchInternal(
+            CilExecutionContext context, 
+            CilInstruction instruction, 
+            IFieldDescriptor field)
         {
-            var field = (IFieldDescriptor) instruction.Operand!;
             var value = context.CurrentFrame.EvaluationStack.Pop(field.Signature!.FieldType);
             
             try

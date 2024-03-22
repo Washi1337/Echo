@@ -49,50 +49,62 @@ namespace Echo.Platforms.AsmResolver.Emulation
             DecimalType = new TypeReference(
                 contextModule, 
                 contextModule.CorLibTypeFactory.CorLibScope, 
-                "System",
-                "Decimal").Resolve()!;
+                nameof(System),
+                nameof(Decimal)).Resolve()!;
             
             InvalidProgramExceptionType = new TypeReference(
-                    contextModule, 
-                    contextModule.CorLibTypeFactory.CorLibScope, 
-                    "System",
-                    "InvalidProgramException").Resolve()!;
+                contextModule, 
+                contextModule.CorLibTypeFactory.CorLibScope, 
+                nameof(System),
+                nameof(InvalidProgramException)).Resolve()!;
+            
+            TypeInitializationExceptionType = new TypeReference(
+                contextModule, 
+                contextModule.CorLibTypeFactory.CorLibScope, 
+                nameof(System),
+                nameof(TypeInitializationException)).Resolve()!;
             
             NullReferenceExceptionType = new TypeReference(
                 contextModule, 
                 contextModule.CorLibTypeFactory.CorLibScope, 
-                "System",
-                "NullReferenceException").Resolve()!;
+                nameof(System),
+                nameof(NullReferenceException)).Resolve()!;
+            
+            InvalidProgramExceptionType = new TypeReference(
+                contextModule, 
+                contextModule.CorLibTypeFactory.CorLibScope, 
+                nameof(System),
+                nameof(InvalidProgramException)).Resolve()!;
             
             IndexOutOfRangeExceptionType = new TypeReference(
                 contextModule, 
                 contextModule.CorLibTypeFactory.CorLibScope, 
-                "System",
-                "IndexOutOfRangeException").Resolve()!;
+                nameof(System),
+                nameof(IndexOutOfRangeException)).Resolve()!;
             
             StackOverflowExceptionType = new TypeReference(
                 contextModule, 
                 contextModule.CorLibTypeFactory.CorLibScope, 
-                "System",
-                "StackOverflowException").Resolve()!;
+                nameof(System),
+                nameof(StackOverflowException)).Resolve()!;
             
             MissingMethodExceptionType = new TypeReference(
                 contextModule, 
                 contextModule.CorLibTypeFactory.CorLibScope, 
-                "System",
-                "MissingMethodException").Resolve()!;
+                nameof(System),
+                nameof(MissingMethodException)).Resolve()!;
             
             InvalidCastExceptionType = new TypeReference(
                 contextModule, 
                 contextModule.CorLibTypeFactory.CorLibScope, 
-                "System",
-                "InvalidCastException").Resolve()!;
+                nameof(System),
+                nameof(InvalidCastException)).Resolve()!;
             
             OverflowExceptionType = new TypeReference(
                 contextModule, 
                 contextModule.CorLibTypeFactory.CorLibScope, 
-                "System",
-                "OverflowException").Resolve()!;
+                nameof(System),
+                nameof(OverflowException)).Resolve()!;
         }
 
         /// <summary>
@@ -102,7 +114,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets a value indicating whether the environment is a 32-bit or 64-bit system.
         /// </summary>
@@ -134,11 +146,19 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets a reference to the <see cref="InvalidProgramException"/> type. 
         /// </summary>
         public ITypeDescriptor InvalidProgramExceptionType
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a reference to the <see cref="TypeInitializationException"/> type. 
+        /// </summary>
+        public TypeDefinition TypeInitializationExceptionType
         {
             get;
         }

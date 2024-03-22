@@ -1,7 +1,6 @@
 using System;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
@@ -10,15 +9,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     /// Implements a CIL instruction handler for <c>ldfld</c> operations.
     /// </summary>
     [DispatcherTableEntry(CilCode.Ldfld)]
-    public class LdFldHandler : FallThroughOpCodeHandler
+    public class LdFldHandler : FieldOpCodeHandler
     {
         /// <inheritdoc />
-        protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
+        protected override CilDispatchResult DispatchInternal(
+            CilExecutionContext context, 
+            CilInstruction instruction, 
+            IFieldDescriptor field)
         {
             var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
             
-            var field = (IFieldDescriptor) instruction.Operand!;
             var instance = stack.Pop();
 
             try

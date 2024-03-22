@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using Echo.Memory;
@@ -51,6 +52,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
             {
                 var layout = _valueFactory.GetTypeValueMemoryLayout(field.Signature!.FieldType);
                 address = _heap.Allocate(layout.Size, true);
+
+                if (field.Resolve() is { IsStatic: true, HasFieldRva: true, FieldRva: IReadableSegment data } def)
+                {
+                    field = def;
+                    _heap.GetChunkSpan(address).Write(data.WriteIntoArray());
+                }
+                
                 _fields.Add(field, address);
             }
 

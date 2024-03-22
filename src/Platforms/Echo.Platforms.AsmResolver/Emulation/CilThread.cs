@@ -260,7 +260,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
                 // If there were any errors thrown after dispatching, it may trigger the execution of one of the
                 // exception handlers in the entire call stack.
-                if (!UnwindCallStack(exceptionObject))
+                if (!UnwindCallStack(ref exceptionObject))
                     throw new EmulatedException(exceptionObject);
             }
         }
@@ -281,11 +281,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
             }
         }
 
-        private bool UnwindCallStack(ObjectHandle exceptionObject)
+        private bool UnwindCallStack(ref ObjectHandle exceptionObject)
         {
             while (!CallStack.Peek().IsRoot)
             {
                 var currentFrame = CallStack.Peek();
+
+                // If the exception happened in a .cctor, register it and wrap it in a type initialization error.
+                if (currentFrame.Body?.Owner is { IsConstructor: true, IsStatic: true, DeclaringType: {} type })
+                    exceptionObject = Machine.TypeManager.RegisterInitializationException(type, exceptionObject);
 
                 var result = currentFrame.ExceptionHandlerStack.RegisterException(exceptionObject);
                 if (result.IsSuccess)
