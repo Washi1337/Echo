@@ -7,6 +7,7 @@ using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation;
+using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Emulation.Invocation;
@@ -238,6 +239,41 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             Assert.Single(invoker.LastArguments!);
             Assert.Equal(1, invoker.LastArguments![0].AsSpan().I32);
+        }
+
+        [Fact]
+        public void CallMethodWithGenericArgumentFromCaller()
+        {
+            var factory = ModuleFixture.MockModule.CorLibTypeFactory;
+            
+            var caller = new MethodDefinition(
+                "GenericCaller",
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(factory.Int32, 1, new GenericParameterSignature(GenericParameterType.Method, 0))
+            ).MakeGenericInstanceMethod(factory.Int32);
+
+            var module = new ModuleDefinition("DummyModule");
+            var calleeType = new TypeDefinition(null, "SomeGenericType", TypeAttributes.Class, factory.Object.Type);
+            module.TopLevelTypes.Add(calleeType);
+            
+            var callee = calleeType
+                .MakeGenericInstanceType(new GenericParameterSignature(GenericParameterType.Method, 0))
+                .ToTypeDefOrRef()
+                .CreateMemberReference("SomeMethod", MethodSignature.CreateStatic(factory.Void));
+            
+            Context.Thread.CallStack.Push(caller);
+            Context.Machine.Invoker = DefaultInvokers.StepIn;
+            
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Call, callee));
+
+            Assert.Equal(CilDispatchResult.Success(), result);
+            Assert.Equal(calleeType
+                    .MakeGenericInstanceType(factory.Int32)
+                    .ToTypeDefOrRef()
+                    .CreateMemberReference(callee.Name!, MethodSignature.CreateStatic(factory.Void)),
+                Context.CurrentFrame.Method,
+                SignatureComparer.Default
+            );
         }
 
         [Fact]

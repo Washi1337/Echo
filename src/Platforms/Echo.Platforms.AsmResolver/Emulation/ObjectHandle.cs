@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
@@ -25,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets the machine the object lives in.
         /// </summary>
-        public CilVirtualMachine Machine
+        public CilVirtualMachine? Machine
         {
             get;
         }
@@ -46,14 +47,26 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets the address to the beginning of the object's data.
         /// </summary>
-        public StructHandle Contents => new(Machine, Address + Machine.ValueFactory.ObjectHeaderSize);
+        public StructHandle Contents
+        {
+            get
+            {
+                if (Machine is null)
+                    return default;
+
+                return new(Machine, Address + Machine.ValueFactory.ObjectHeaderSize);
+            }
+        }
 
         /// <summary>
         /// Gets the object's type (or method table).
         /// </summary>
         /// <returns>The type.</returns>
+        [MemberNotNull(nameof(Machine))]
         public ITypeDescriptor GetObjectType()
         {
+            AssertIsValidHandle();
+            
             var pool = Machine.ValueFactory.BitVectorPool;
             var methodTableVector = pool.RentNativeInteger(Machine.Is32Bit, false);
             try
@@ -77,12 +90,20 @@ namespace Echo.Platforms.AsmResolver.Emulation
             }
         }
 
+        [MemberNotNull(nameof(Machine))]
+        private void AssertIsValidHandle()
+        {
+            if (Machine is null)
+                throw new InvalidOperationException("Object handle is not associated to a machine.");
+        }
+
         /// <summary>
         /// Obtains the object's data memory layout.
         /// </summary>
         /// <returns>The memory layout.</returns>
         public TypeMemoryLayout GetMemoryLayout()
         {
+            AssertIsValidHandle();
             return Machine.ValueFactory.GetTypeContentsMemoryLayout(GetObjectType());
         }
 
@@ -131,6 +152,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="buffer">The buffer to copy the length bits into.</param>
         public void ReadStringLength(BitVectorSpan buffer)
         {
+            AssertIsValidHandle();
             Machine.Memory.Read(Address + Machine.ValueFactory.StringLengthOffset, buffer);
         }
 
@@ -141,6 +163,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <exception cref="ArgumentException">Occurs when the string has an unknown length.</exception>
         public BitVector ReadStringData()
         {
+            AssertIsValidHandle();
             var length = Machine.ValueFactory.BitVectorPool.Rent(32, false);
             try
             {
@@ -175,6 +198,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="buffer">The buffer to copy the length bits into.</param>
         public void ReadArrayLength(BitVectorSpan buffer)
         {
+            AssertIsValidHandle();
             Machine.Memory.Read(Address + Machine.ValueFactory.ArrayLengthOffset, buffer);
         }
 
@@ -186,6 +210,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <exception cref="ArgumentException">Occurs when the array has an unknown length.</exception>
         public BitVector ReadArrayData()
         {
+            AssertIsValidHandle();
             var length = Machine.ValueFactory.BitVectorPool.Rent(32, false);
             try
             {
@@ -235,6 +260,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The raw array data.</returns>
         public void ReadArrayData(BitVectorSpan buffer)
         {
+            AssertIsValidHandle();
             Machine.Memory.Read(Address + Machine.ValueFactory.ArrayHeaderSize, buffer);
         }
 
@@ -264,6 +290,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The raw array data.</returns>
         public void ReadArrayData(BitVectorSpan buffer, int startIndex, TypeSignature elementType)
         {
+            AssertIsValidHandle();
             int elementSize = (int) Machine.ValueFactory.GetTypeValueMemoryLayout(elementType).Size;
             Machine.Memory.Read(Address + Machine.ValueFactory.ArrayHeaderSize + startIndex * elementSize, buffer);
         }
@@ -275,6 +302,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="buffer">The buffer to copy the array data from.</param>
         public void WriteArrayData(BitVectorSpan buffer)
         {
+            AssertIsValidHandle();
             Machine.Memory.Write(Address + Machine.ValueFactory.ArrayHeaderSize, buffer);
         }
 
@@ -285,6 +313,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="buffer">The buffer to copy the array data from.</param>
         public void WriteArrayData(ReadOnlySpan<byte> buffer)
         {
+            AssertIsValidHandle();
             Machine.Memory.Write(Address + Machine.ValueFactory.ArrayHeaderSize, buffer);
         }
         
@@ -296,6 +325,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The address of the element.</returns>
         public long GetArrayElementAddress(TypeSignature elementType, long index)
         {
+            AssertIsValidHandle();
             return Address + Machine.ValueFactory.GetArrayElementOffset(elementType, index);
         }
 
@@ -307,6 +337,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The bits of the element.</returns>
         public BitVector ReadArrayElement(TypeSignature elementType, long index)
         {
+            AssertIsValidHandle();
             var buffer = Machine.ValueFactory.CreateValue(elementType, false);
             ReadArrayElement(elementType, index, buffer);
             return buffer;
@@ -320,6 +351,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="buffer">The buffer to write the bits of the element into.</param>
         public void ReadArrayElement(TypeSignature elementType, long index, BitVectorSpan buffer)
         {
+            AssertIsValidHandle();
             Machine.Memory.Read(GetArrayElementAddress(elementType, index), buffer);
         }
 
@@ -331,6 +363,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="buffer">The bits of the element to write to the element.</param>
         public void WriteArrayElement(TypeSignature elementType, long index, BitVectorSpan buffer)
         {
+            AssertIsValidHandle();
             Machine.Memory.Write(GetArrayElementAddress(elementType, index), buffer);
         }
 
@@ -340,6 +373,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The object's data.</returns>
         public BitVector ReadObjectData()
         {
+            AssertIsValidHandle();
             var buffer = Machine.ValueFactory.CreateValue(GetObjectType().ToTypeSignature(), false);
             ReadObjectData(buffer);
             return buffer;
@@ -352,6 +386,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The object's data.</returns>
         public BitVector ReadObjectData(TypeSignature type)
         {
+            AssertIsValidHandle();
             var buffer = Machine.ValueFactory.CreateValue(type, false);
             ReadObjectData(buffer);
             return buffer;
@@ -363,13 +398,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="buffer">The buffer to write the data to.</param>
         public void ReadObjectData(BitVectorSpan buffer)
         {
+            AssertIsValidHandle();
             Machine.Memory.Read(Contents.Address, buffer);
         }
-        
+
         /// <inheritdoc />
         public bool Equals(ObjectHandle other)
         {
-            return Machine.Equals(other.Machine) && Address == other.Address;
+            return Equals(Machine, other.Machine) && Address == other.Address;
         }
 
         /// <inheritdoc />
@@ -383,11 +419,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             unchecked
             {
-                return (Machine.GetHashCode() * 397) ^ Address.GetHashCode();
+                return ((Machine != null ? Machine.GetHashCode() : 0) * 397) ^ Address.GetHashCode();
             }
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"0x{Address.ToString(Machine.Is32Bit ? "X8" : "X16")} ({Tag})";
+        public override string ToString()
+        {
+            return Machine is null
+                ? "<invalid>"
+                : $"0x{Address.ToString(Machine.Is32Bit ? "X8" : "X16")} ({Tag})";
+        }
     }
 }

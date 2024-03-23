@@ -34,7 +34,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     case AllocationResultType.Allocated:
                         // Insert the allocated "this" pointer into the arguments and call constructor.
                         arguments.Insert(0, allocation.Address!);
-                        var result = HandleCall(context, instruction, arguments);
+                        var result = HandleCall(context, instruction, constructor, arguments);
                 
                         // If successful, push the resulting object onto the stack.
                         if (result.IsSuccess)
@@ -66,12 +66,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         protected override bool ShouldPopInstanceObject(IMethodDescriptor method) => false;
 
         /// <inheritdoc />
-        protected override MethodDevirtualizationResult DevirtualizeMethodInternal(
-            CilExecutionContext context,
+        protected override MethodDevirtualizationResult DevirtualizeMethodInternal(CilExecutionContext context,
             CilInstruction instruction,
+            IMethodDescriptor method,
             IList<BitVector> arguments)
         {
-            return MethodDevirtualizationResult.Success((IMethodDescriptor) instruction.Operand!);
+            return MethodDevirtualizationResult.Success(method);
         }
     }
 }

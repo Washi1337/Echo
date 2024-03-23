@@ -12,12 +12,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
     public class CallHandler : CallHandlerBase
     {
         /// <inheritdoc />
-        protected override MethodDevirtualizationResult DevirtualizeMethodInternal(
-            CilExecutionContext context,
-            CilInstruction instruction, 
+        protected override MethodDevirtualizationResult DevirtualizeMethodInternal(CilExecutionContext context,
+            CilInstruction instruction,
+            IMethodDescriptor method,
             IList<BitVector> arguments)
         {
-            return MethodDevirtualizationResult.Success((IMethodDescriptor) instruction.Operand!);
+            return MethodDevirtualizationResult.Success(method);
         }
     }
 }

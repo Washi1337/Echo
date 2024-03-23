@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures.Types;
@@ -8,7 +9,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
     /// Provides information about the result of an instruction dispatch.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay}")]
-    public readonly struct CilDispatchResult
+    public readonly struct CilDispatchResult : IEquatable<CilDispatchResult>
     {
         private CilDispatchResult(ObjectHandle exceptionObject)
         {
@@ -111,5 +112,26 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
 
             return Exception(context.Machine, context.Machine.ValueFactory.InvalidCastExceptionType);
         }
+
+        /// <inheritdoc />
+        public bool Equals(CilDispatchResult other)
+        {
+            return ExceptionObject.Equals(other.ExceptionObject);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            return obj is CilDispatchResult other && Equals(other);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return ExceptionObject.GetHashCode();
+        }
+
+        /// <inheritdoc />
+        public override string ToString() => DebuggerDisplay.ToString();
     }
 }

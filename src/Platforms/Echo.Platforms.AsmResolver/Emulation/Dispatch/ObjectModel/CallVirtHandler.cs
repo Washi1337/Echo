@@ -16,9 +16,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         private static readonly SignatureComparer Comparer = new();
 
         /// <inheritdoc />
-        protected override MethodDevirtualizationResult DevirtualizeMethodInternal(
-            CilExecutionContext context,
-            CilInstruction instruction, 
+        protected override MethodDevirtualizationResult DevirtualizeMethodInternal(CilExecutionContext context,
+            CilInstruction instruction,
+            IMethodDescriptor method,
             IList<BitVector> arguments)
         {
             switch (arguments[0].AsSpan())
@@ -34,7 +34,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                         .AsObjectHandle(context.Machine));
                 
                 case var objectPointer:
-                    var method = (IMethodDescriptor) instruction.Operand!;
                     var objectType = objectPointer.AsObjectHandle(context.Machine).GetObjectType();
                     var implementation = FindMethodImplementationInType(objectType.Resolve(), method.Resolve());
                     

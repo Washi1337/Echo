@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
@@ -17,12 +18,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// <inheritdoc />
         public virtual CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
         {
-            var method = (IMethodDescriptor) instruction.Operand!;
+            var method = InstantiateDeclaringType(context.CurrentFrame.Method, (IMethodDescriptor)instruction.Operand!);
             var arguments = GetArguments(context, method);
 
             try
             {
-                return HandleCall(context, instruction, arguments);
+                return HandleCall(context, instruction, method, arguments);
             }
             finally
             {
@@ -51,12 +52,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         protected CilDispatchResult HandleCall(
             CilExecutionContext context, 
             CilInstruction instruction, 
+            IMethodDescriptor method,
             IList<BitVector> arguments)
         {
             var callerFrame = context.CurrentFrame;
 
             // Devirtualize the method in the operand.
-            var devirtualization = DevirtualizeMethod(context, instruction, arguments);
+            var devirtualization = DevirtualizeMethod(context, instruction, method, arguments);
             if (devirtualization.IsUnknown)
                 throw new CilEmulatorException($"Devirtualization of method call {instruction} was inconclusive.");
 
@@ -113,20 +115,20 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             return stack.Pop(declaringType);
         }
 
-        private MethodDevirtualizationResult DevirtualizeMethod(
-            CilExecutionContext context,
-            CilInstruction instruction, 
+        private MethodDevirtualizationResult DevirtualizeMethod(CilExecutionContext context,
+            CilInstruction instruction,
+            IMethodDescriptor method,
             IList<BitVector> arguments)
         {
-            var result = DevirtualizeMethodInternal(context, instruction, arguments);
+            var result = DevirtualizeMethodInternal(context, instruction, method, arguments);
             if (!result.IsUnknown)
                 return result;
             
-            var method = context.Machine.UnknownResolver.ResolveMethod(context, instruction, arguments)
+            var resolved = context.Machine.UnknownResolver.ResolveMethod(context, instruction, arguments)
                          ?? instruction.Operand as IMethodDescriptor;
 
-            if (method is not null)
-                result = MethodDevirtualizationResult.Success(method);
+            if (resolved is not null)
+                result = MethodDevirtualizationResult.Success(resolved);
 
             return result;
         }
@@ -136,13 +138,28 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// </summary>
         /// <param name="context">The execution context the instruction is evaluated in.</param>
         /// <param name="instruction">The instruction that is being evaluated.</param>
+        /// <param name="method"></param>
         /// <param name="arguments">The arguments pushed onto the stack.</param>
         /// <returns>The result of the devirtualization.</returns>
-        protected abstract MethodDevirtualizationResult DevirtualizeMethodInternal(
-            CilExecutionContext context,
+        protected abstract MethodDevirtualizationResult DevirtualizeMethodInternal(CilExecutionContext context,
             CilInstruction instruction,
+            IMethodDescriptor method,
             IList<BitVector> arguments);
 
+        private static IMethodDescriptor InstantiateDeclaringType(IMethodDescriptor caller, IMethodDescriptor callee)
+        {
+            // The caller may pass along generic type arguments to the callee.
+            var context = GenericContext.FromMethod(caller); 
+            if (callee.DeclaringType?.ToTypeDefOrRef() is TypeSpecification { Signature: {} typeSignature })
+            {
+                var newType = typeSignature.InstantiateGenericTypes(context);
+                if (newType != typeSignature)
+                    return newType.ToTypeDefOrRef().CreateMemberReference(callee.Name!, callee.Signature!);
+            }
+
+            return callee;
+        }
+        
         private static CilDispatchResult Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments)
         {
             var result = context.Machine.Invoker.Invoke(context, method, arguments);
