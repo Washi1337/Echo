@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
@@ -20,8 +21,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             CilInstruction instruction, 
             IList<BitVector> arguments)
         {
-            var method = ((IMethodDescriptor) instruction.Operand!).Resolve();
-
             switch (arguments[0].AsSpan())
             {
                 case { IsFullyKnown: false }:
@@ -35,9 +34,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                         .AsObjectHandle(context.Machine));
                 
                 case var objectPointer:
+                    var method = (IMethodDescriptor) instruction.Operand!;
                     var objectType = objectPointer.AsObjectHandle(context.Machine).GetObjectType();
-                    var implementation = FindMethodImplementationInType(objectType.Resolve(), method);
-
+                    var implementation = FindMethodImplementationInType(objectType.Resolve(), method.Resolve());
+                    
                     if (implementation is null)
                     {
                         return MethodDevirtualizationResult.Exception(context.Machine
@@ -47,7 +47,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                             .AsObjectHandle(context.Machine));
                     }
                     
-                    return MethodDevirtualizationResult.Success(implementation);
+                    // instantiate generics
+                    var genericContext = GenericContext.FromMethod(method);
+                    if (genericContext.IsEmpty)
+                        return MethodDevirtualizationResult.Success(implementation);
+                    
+                    var methodRef = objectType.ToTypeDefOrRef().CreateMemberReference(implementation.Name!, implementation.Signature!);
+                    return MethodDevirtualizationResult.Success(genericContext.Method != null ? methodRef.MakeGenericInstanceMethod(genericContext.Method.TypeArguments.ToArray()) : methodRef);
             }
         }
 
@@ -134,7 +140,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             for (int i = 0; i < type.MethodImplementations.Count; i++)
             {
                 var impl = type.MethodImplementations[i];
-                if (Comparer.Equals(baseMethod, impl.Declaration))
+
+                // Compare underlying TypeDefOrRef and instantiate any generics to ensure correct comparison.
+                if (!Comparer.Equals(impl.Declaration?.DeclaringType?.ToTypeSignature().GetUnderlyingTypeDefOrRef(), baseMethod.DeclaringType))
+                    continue;
+
+                var context = GenericContext.FromMethod(impl.Declaration!);
+                var implMethodSig = impl.Declaration?.Signature?.InstantiateGenericTypes(context); 
+                var baseMethodSig = baseMethod.Signature?.InstantiateGenericTypes(context);
+                if (Comparer.Equals(baseMethodSig, implMethodSig))
                     return impl.Body?.Resolve();
             }
 
