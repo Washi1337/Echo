@@ -47,6 +47,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// </summary>
         /// <param name="context">The context to evaluate the instruction in.</param>
         /// <param name="instruction">The instruction to dispatch and evaluate.</param>
+        /// <param name="method">The method that is called.</param>
         /// <param name="arguments">The arguments to call the method with.</param>
         /// <returns>The dispatching result.</returns>
         protected CilDispatchResult HandleCall(
@@ -115,12 +116,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             return stack.Pop(declaringType);
         }
 
-        private MethodDevirtualizationResult DevirtualizeMethod(CilExecutionContext context,
+        private MethodDevirtualizationResult DevirtualizeMethod(
+            CilExecutionContext context,
             CilInstruction instruction,
             IMethodDescriptor method,
             IList<BitVector> arguments)
         {
-            var result = DevirtualizeMethodInternal(context, instruction, method, arguments);
+            var result = DevirtualizeMethodInternal(context, method, arguments);
             if (!result.IsUnknown)
                 return result;
             
@@ -137,14 +139,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// Devirtualizes and resolves the method that is referenced by the provided instruction.
         /// </summary>
         /// <param name="context">The execution context the instruction is evaluated in.</param>
-        /// <param name="instruction">The instruction that is being evaluated.</param>
-        /// <param name="method"></param>
+        /// <param name="method">The method that is being devirtualized.</param>
         /// <param name="arguments">The arguments pushed onto the stack.</param>
         /// <returns>The result of the devirtualization.</returns>
-        protected abstract MethodDevirtualizationResult DevirtualizeMethodInternal(CilExecutionContext context,
-            CilInstruction instruction,
+        protected abstract MethodDevirtualizationResult DevirtualizeMethodInternal(
+            CilExecutionContext context,
             IMethodDescriptor method,
-            IList<BitVector> arguments);
+            IList<BitVector> arguments
+        );
 
         private static IMethodDescriptor InstantiateDeclaringType(IMethodDescriptor caller, IMethodDescriptor callee)
         {
@@ -207,6 +209,121 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+        
+        protected static MethodDefinition? FindMethodImplementationInType(TypeDefinition? type, MethodDefinition? baseMethod)
+        {
+            if (type is null || baseMethod is null || !baseMethod.IsVirtual)
+                return baseMethod;
+
+            var implementation = default(MethodDefinition);
+            var declaringType = baseMethod.DeclaringType!;
+
+            // If this is a static method, it means we must be implementing a 'static abstract' interface method. 
+            if (baseMethod.IsStatic && !declaringType.IsInterface)
+                return baseMethod;
+            
+            while (type is not null && !SignatureComparer.Default.Equals(type, declaringType))
+            {
+                if (baseMethod.IsStatic)
+                {
+                    // Static base methods can only be implemented through explicit interface implementation.
+                    implementation = TryFindExplicitInterfaceImplementationInType(type, baseMethod);
+                }
+                else
+                {
+                    // Prioritize interface implementations.
+                    if (declaringType.IsInterface)
+                    {
+                        implementation = TryFindExplicitInterfaceImplementationInType(type, baseMethod)
+                            ?? TryFindImplicitInterfaceImplementationInType(type, baseMethod);
+                    }
+
+                    // Try to find other implicit implementations.
+                    implementation ??= TryFindImplicitImplementationInType(type, baseMethod);
+                }
+
+                if (implementation is not null)
+                    break;
+                
+                // Move up type hierarchy tree.
+                type = type.BaseType?.Resolve();
+            }
+
+            // If there's no override, just use the base implementation (if available).
+            if (implementation is null && !baseMethod.IsAbstract)
+                implementation = baseMethod;
+            
+            return implementation;
+        }
+
+        private static MethodDefinition? TryFindImplicitImplementationInType(TypeDefinition type, MethodDefinition baseMethod)
+        {
+            foreach (var method in type.Methods)
+            {
+                if (method is { IsVirtual: true, IsReuseSlot: true }
+                    && method.Name == baseMethod.Name
+                    && SignatureComparer.Default.Equals(method.Signature, baseMethod.Signature))
+                {
+                    return method;
+                }
+            }
+
+            return null;
+        }
+
+        private static MethodDefinition? TryFindImplicitInterfaceImplementationInType(TypeDefinition type, MethodDefinition baseMethod)
+        {
+            // Find the correct interface implementation and instantiate any generics.
+            MethodSignature? baseMethodSig = null;
+            foreach (var interfaceImpl in type.Interfaces)
+            {
+                if (SignatureComparer.Default.Equals(interfaceImpl.Interface?.ToTypeSignature().GetUnderlyingTypeDefOrRef(), baseMethod.DeclaringType))
+                {
+                    baseMethodSig = baseMethod.Signature?.InstantiateGenericTypes(GenericContext.FromType(interfaceImpl.Interface!));
+                    break;
+                }
+            }
+            if (baseMethodSig is null)
+                return null;
+
+            // Find implemented method in type.
+            for (int i = 0; i < type.Methods.Count; i++)
+            {
+                var method = type.Methods[i];
+                // Only public virtual instance methods can implicity implement interface methods. (ECMA-335, 6th edition, II.12.2)
+                if (method is { IsPublic: true, IsVirtual: true, IsStatic: false }
+                    && method.Name == baseMethod.Name
+                    && SignatureComparer.Default.Equals(method.Signature, baseMethodSig))
+                {
+                    return method;
+                }
+            }
+
+            return null;
+        }
+
+        private static MethodDefinition? TryFindExplicitInterfaceImplementationInType(TypeDefinition type, MethodDefinition baseMethod)
+        {
+            for (int i = 0; i < type.MethodImplementations.Count; i++)
+            {
+                var impl = type.MethodImplementations[i];
+                if (impl.Declaration is null || impl.Declaration.Name != baseMethod.Name)
+                    continue;
+
+                // Compare underlying TypeDefOrRef and instantiate any generics to ensure correct comparison.
+                var declaringType = impl.Declaration?.DeclaringType?.ToTypeSignature().GetUnderlyingTypeDefOrRef();
+                if (!SignatureComparer.Default.Equals(declaringType, baseMethod.DeclaringType))
+                    continue;
+
+                var context = GenericContext.FromMethod(impl.Declaration!);
+                var implMethodSig = impl.Declaration!.Signature?.InstantiateGenericTypes(context); 
+                var baseMethodSig = baseMethod.Signature?.InstantiateGenericTypes(context);
+                if (SignatureComparer.Default.Equals(baseMethodSig, implMethodSig))
+                    return impl.Body?.Resolve();
+            }
+
+            return null;
         }
     }
 }

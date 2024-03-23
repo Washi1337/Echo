@@ -67,7 +67,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
         /// <inheritdoc />
         protected override MethodDevirtualizationResult DevirtualizeMethodInternal(CilExecutionContext context,
-            CilInstruction instruction,
             IMethodDescriptor method,
             IList<BitVector> arguments)
         {

@@ -70,9 +70,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                 _initializeLocals = body.InitializeLocals;
                 LocalsCount = body.LocalVariables.Count;
 
-                foreach (var local in body.LocalVariables)
-                    AllocateFrameField(local.VariableType);
-                
+                for (int i = 0; i < body.LocalVariables.Count; i++)
+                    AllocateFrameField(body.LocalVariables[i].VariableType);
+
                 Body = body;
             }
 
@@ -101,7 +101,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             }
 
             InitializeExceptionHandlerFrames();
-            
+            return;
+
             void AllocateFrameField(TypeSignature type)
             {
                 _offsets.Add(currentOffset);
@@ -114,51 +115,32 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <summary>
         /// Gets a value indicating the frame is the root frame of the call stack.
         /// </summary>
-        public bool IsRoot
-        {
-            get;
-        }
+        public bool IsRoot { get; }
 
         /// <summary>
         /// Gets the method which this frame was associated with.
         /// </summary>
-        public IMethodDescriptor Method
-        {
-            get;
-        }
+        public IMethodDescriptor Method { get; }
 
         /// <summary>
         /// Gets the managed body of the method that this frame is associated with (if available).
         /// </summary>
-        public CilMethodBody? Body
-        {
-            get;
-        }
+        public CilMethodBody? Body { get; }
 
         /// <summary>
         /// Gets the number of locals stored in the frame.
         /// </summary>
-        public int LocalsCount
-        {
-            get;
-        }
+        public int LocalsCount { get; }
 
         /// <summary>
         /// Gets the offset within the method body of the next instruction to evaluate.
         /// </summary>
-        public int ProgramCounter
-        {
-            get;
-            set;
-        }
+        public int ProgramCounter { get; set; }
 
         /// <summary>
         /// Gets a virtual evaluation stack associated stored the frame.
         /// </summary>
-        public EvaluationStack EvaluationStack
-        {
-            get;
-        }
+        public EvaluationStack EvaluationStack { get; }
 
         /// <summary>
         /// Gets a collection of exception handler frames present in the method body.
@@ -168,10 +150,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <summary>
         /// Gets the stack of currently active exception handler frames in the method.
         /// </summary>
-        public ExceptionHandlerStack ExceptionHandlerStack
-        {
-            get;
-        } = new();
+        public ExceptionHandlerStack ExceptionHandlerStack { get; } = new();
 
         /// <summary>
         /// Gets the number of bytes (excluding the evaluation stack) the stack frame spans.
@@ -181,12 +160,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <summary>
         /// Gets a value indicating whether the frame can be extended with extra stack memory.
         /// </summary>
-        public bool CanAllocateMemory
-        {
-            get;
-            internal set;
-        }
+        public bool CanAllocateMemory { get; internal set; }
 
+        /// <summary>
+        /// Gets or sets the current type that the following call instruction is constrained by, if any.
+        /// </summary>
+        public ITypeDescriptor? ConstrainedType { get; set; }
+        
         /// <inheritdoc />
         public AddressRange AddressRange => new(_baseAddress, _baseAddress + _localStorage.ByteCount);
 

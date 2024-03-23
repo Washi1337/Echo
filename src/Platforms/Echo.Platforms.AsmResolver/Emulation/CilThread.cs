@@ -242,27 +242,44 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
             // Determine the next instruction to dispatch.
             int pc = currentFrame.ProgramCounter;
-            var instruction = body.Instructions.GetByOffset(pc);
-            if (instruction is null)
-                throw new CilEmulatorException($"Invalid program counter in {currentFrame}.");
+            int index = body.Instructions.GetIndexByOffset(pc);
 
-            // Are we entering any protected regions?
-            UpdateExceptionHandlerStack();
-
-            // Dispatch the instruction.
-            var result = Machine.Dispatcher.Dispatch(context, instruction);
-
-            if (!result.IsSuccess)
+            // Note: This is a loop because instructions can have prefixes. A single step must execute an entire
+            // instruction including its prefixes. 
+            bool continuing = true;
+            while (continuing)
             {
-                var exceptionObject = result.ExceptionObject;
-                if (exceptionObject.IsNull)
-                    throw new CilEmulatorException("A null exception object was thrown.");
+                var instruction = body.Instructions[index];
+                if (instruction is null)
+                    throw new CilEmulatorException($"Invalid program counter in {currentFrame}.");
 
-                // If there were any errors thrown after dispatching, it may trigger the execution of one of the
-                // exception handlers in the entire call stack.
-                if (!UnwindCallStack(ref exceptionObject))
-                    throw new EmulatedException(exceptionObject);
+                // Continue until we are no longer a prefix instruction.
+                continuing = instruction.OpCode.OpCodeType == CilOpCodeType.Prefix;
+                index++;
+                
+                // Are we entering any protected regions?
+                UpdateExceptionHandlerStack();
+
+                // Dispatch the instruction.
+                var result = Machine.Dispatcher.Dispatch(context, instruction);
+
+                // Did we throw an exception?
+                if (!result.IsSuccess)
+                {
+                    var exceptionObject = result.ExceptionObject;
+                    if (exceptionObject.IsNull)
+                        throw new CilEmulatorException("A null exception object was thrown.");
+
+                    // If there were any errors thrown after dispatching, it may trigger the execution of one of the
+                    // exception handlers in the entire call stack. If no handler is catching it, we communicate it to
+                    // the caller of the Echo API itself.
+                    if (!UnwindCallStack(ref exceptionObject))
+                        throw new EmulatedException(exceptionObject);
+                }
             }
+
+            // Reset any prefix-related flags.
+            currentFrame.ConstrainedType = null;
         }
 
         private void UpdateExceptionHandlerStack()

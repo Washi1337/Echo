@@ -1,7 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
@@ -38,7 +42,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Callvirt, method));
             
             // Verify that we jumped into the base method implementation.
-            Assert.True(result.IsSuccess);
+            Assert.Equal(CilDispatchResult.Success(), result);
             Assert.Same(method, Context.CurrentFrame.Method);
         }
         
@@ -63,7 +67,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Callvirt, baseMethod));
             
             // Verify that we jumped into the overridden method.
-            Assert.True(result.IsSuccess);
+            Assert.Equal(CilDispatchResult.Success(), result);
             Assert.Same(overriddenMethod, Context.CurrentFrame.Method);
         }
 
@@ -105,10 +109,32 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             // Execute a callvirt.
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Callvirt, baseMethod));
 
-            Assert.True(result.IsSuccess);
+            Assert.Equal(CilDispatchResult.Success(), result);
             Assert.Equal(resolver.LastResolveMethodAttempt, baseMethod);
         }
-
+      
+        [Fact]
+        public void ConstrainedCallVirt()
+        {
+            // Lookup metadata.
+            var factory = ModuleFixture.MockModule.CorLibTypeFactory;
+            var objectToString = factory.Object.Type
+                .CreateMemberReference("ToString", MethodSignature.CreateInstance(factory.String));
+            var int32ToString = factory.Int32.Type
+                .CreateMemberReference("ToString", MethodSignature.CreateInstance(factory.String));
+            
+            // Set up stack and constrained type.
+            Context.CurrentFrame.ConstrainedType = factory.Int32;
+            Context.CurrentFrame.EvaluationStack.Push(new StackSlot(1337, StackSlotTypeHint.Integer));
+            
+            // Execute a callvirt.
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Callvirt, objectToString));
+            
+            // Verify we entered Int32::ToString
+            Assert.Equal(CilDispatchResult.Success(), result);
+            Assert.Equal(int32ToString, Context.CurrentFrame.Method, SignatureComparer.Default);
+        }
+        
         private sealed class MyUnknownResolver : ThrowUnknownResolver
         {
             public IMethodDescriptor? LastResolveMethodAttempt;

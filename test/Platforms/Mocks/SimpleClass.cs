@@ -138,5 +138,7 @@ namespace Mocks
 
             return ret;
         }
+
+        public static string GenericToString<T>(T value) => value.ToString();
     }
 }

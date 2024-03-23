@@ -6,6 +6,7 @@ using System.Threading;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation;
@@ -622,6 +623,44 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             Assert.Equal(1337 + 2, _vm.StaticFields.GetFieldSpan(counter).I32);
             _mainThread.Call(increment, Array.Empty<BitVector>());
             Assert.Equal(1337 + 3, _vm.StaticFields.GetFieldSpan(counter).I32);
+        }
+
+        [Fact]
+        public void StepPrefixedInstructionsShouldStepOverAllInstructions()
+        {
+            var factory = _fixture.MockModule.CorLibTypeFactory;
+            var toString = factory.Object.Type
+                .CreateMemberReference("ToString", MethodSignature.CreateInstance(factory.String));
+            
+            var dummyMethod = new MethodDefinition(
+                "DummyMethod",
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(factory.String, 1,
+                    new GenericParameterSignature(GenericParameterType.Method, 0))
+            );
+            dummyMethod.GenericParameters.Add(new GenericParameter("T"));
+            dummyMethod.CilMethodBody = new CilMethodBody(dummyMethod)
+            {
+                Instructions =
+                {
+                    {Ldarga_S, dummyMethod.Parameters[0]},
+                    {Constrained, new GenericParameterSignature(GenericParameterType.Method, 0).ToTypeDefOrRef()},
+                    {Callvirt, toString},
+                    Ret
+                }
+            };
+            dummyMethod.CilMethodBody.Instructions.CalculateOffsets();
+
+            var frame = _mainThread.CallStack.Push(dummyMethod.MakeGenericInstanceMethod(factory.Int32));
+            frame.WriteArgument(0, new BitVector(1337));
+
+            var instructions = dummyMethod.CilMethodBody.Instructions;
+            
+            Assert.Equal(instructions[0].Offset, frame.ProgramCounter);
+            _mainThread.Step();
+            Assert.Equal(instructions[1].Offset, frame.ProgramCounter);
+            _mainThread.Step();
+            Assert.Equal(instructions[3].Offset, frame.ProgramCounter);
         }
     }
 }

@@ -313,5 +313,52 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var exception = Assert.Throws<EmulatedException>(() => Context.Thread.StepOut());
             Assert.Equal(nameof(TypeInitializationException), exception.ExceptionObject.GetObjectType().Name);
         }
+
+        [Fact]
+        public void ConstrainedCallAbstractStatic()
+        {
+            var factory = ModuleFixture.MockModule.CorLibTypeFactory;
+
+            // Set up dummy metadata.
+            var module = new ModuleDefinition("Dummy");
+            
+            // static abstract IFoo::Method()
+            var interfaceType = new TypeDefinition(null, "IFoo", TypeAttributes.Interface);
+            var interfaceMethod = new MethodDefinition(
+                "Method",
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Abstract
+                | MethodAttributes.Virtual | MethodAttributes.Static,
+                MethodSignature.CreateStatic(factory.Void)
+            );
+            interfaceType.Methods.Add(interfaceMethod);
+            module.TopLevelTypes.Add(interfaceType);
+            
+            // static Foo::Method() that implements IFoo::Method()
+            var classType = new TypeDefinition(null, "Foo", TypeAttributes.Interface);
+            classType.Interfaces.Add(new InterfaceImplementation(interfaceType));
+            var classMethod = new MethodDefinition(
+                "Method",
+                MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig,
+                MethodSignature.CreateStatic(factory.Void)
+            );
+            classType.MethodImplementations.Add(new MethodImplementation(interfaceMethod, classMethod));
+            classType.Methods.Add(classMethod);
+            module.TopLevelTypes.Add(classType);
+
+            // Allocate a Foo object.
+            long objectPointer = Context.Machine.Heap.AllocateObject(classType, true);
+            Context.CurrentFrame.EvaluationStack.Push(new StackSlot(
+                Context.Machine.ValueFactory.CreateNativeInteger(objectPointer),
+                StackSlotTypeHint.Integer));
+            
+            // Execute a constrained callvirt.
+            Context.Machine.Invoker = DefaultInvokers.StepIn;
+            Context.CurrentFrame.ConstrainedType = classType;
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Call, interfaceMethod));
+            
+            // Verify we entered Foo::Method()
+            Assert.Equal(CilDispatchResult.Success(), result);
+            Assert.Equal(classMethod, Context.CurrentFrame.Method, SignatureComparer.Default);
+        }
     }
 }
