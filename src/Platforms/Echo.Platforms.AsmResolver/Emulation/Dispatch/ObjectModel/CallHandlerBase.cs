@@ -151,15 +151,58 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         private static IMethodDescriptor InstantiateDeclaringType(IMethodDescriptor caller, IMethodDescriptor callee)
         {
             // The caller may pass along generic type arguments to the callee.
-            var context = GenericContext.FromMethod(caller); 
+            
+            // Note: Since this is a hot path, try to delay allocations when possible.
+            
+            var context = GenericContext.FromMethod(caller);
+            var result = callee;
+            
+            // Instantiate any args in the declaring type.
             if (callee.DeclaringType?.ToTypeDefOrRef() is TypeSpecification { Signature: {} typeSignature })
             {
                 var newType = typeSignature.InstantiateGenericTypes(context);
                 if (newType != typeSignature)
-                    return newType.ToTypeDefOrRef().CreateMemberReference(callee.Name!, callee.Signature!);
+                    result = newType.ToTypeDefOrRef().CreateMemberReference(callee.Name!, callee.Signature!);
             }
 
-            return callee;
+            // When generic instance method call, instantiate any type arguments when necessary. 
+            if (callee is MethodSpecification { Method: {} method, Signature: { } signature })
+            {
+                // Delay the allocation of a completely new method specification unless we absolutely need to.
+                
+                // Try finding the first argument that needed instantiation. 
+                TypeSignature? firstInstantiated = null; 
+                int index = -1;
+                for (int i = 0; i < signature.TypeArguments.Count; i++)
+                {
+                    var original = signature.TypeArguments[i];
+                    var instantiated = original.InstantiateGenericTypes(context);
+                    if (instantiated != original)
+                    {
+                        firstInstantiated = instantiated;
+                        index = i;
+                        break;
+                    }
+                }
+
+                // If there is one, create the new signature.
+                if (firstInstantiated is not null)
+                {
+                    var args = new TypeSignature[signature.TypeArguments.Count];
+                    for (int i = 0; i < index; i++)
+                        args[i] = signature.TypeArguments[i];
+                    args[index] = firstInstantiated;
+                    for (int i = index + 1; i < args.Length; i++)
+                        args[i] = signature.TypeArguments[i].InstantiateGenericTypes(context);
+                    
+                    if (result is MemberReference member)
+                        result = member.MakeGenericInstanceMethod(args);
+                    else
+                        result = method.MakeGenericInstanceMethod(args);
+                }
+            }
+            
+            return result;
         }
         
         private static CilDispatchResult Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments)

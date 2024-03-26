@@ -140,5 +140,7 @@ namespace Mocks
         }
 
         public static string GenericToString<T>(T value) => value.ToString();
+
+        public static string GenericNestedToString<T>(T value) => GenericToString(value);
     }
 }

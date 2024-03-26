@@ -5,7 +5,7 @@ using AsmResolver.PE.DotNet.Cil;
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel;
 
 /// <summary>
-/// Implements a CIL instruction handler for <c>constrained</c> operations.
+/// Implements a CIL instruction handler for <c>constrained</c> prefix operations.
 /// </summary>
 [DispatcherTableEntry(CilCode.Constrained)]
 public class ConstrainedHandler : FallThroughOpCodeHandler

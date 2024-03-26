@@ -2,6 +2,9 @@ using AsmResolver.PE.DotNet.Cil;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers;
 
+/// <summary>
+/// Implements a CIL instruction handler for <c>unaligned</c> prefix instructions.
+/// </summary>
 [DispatcherTableEntry(CilCode.Unaligned)]
 public class UnalignedHandler : FallThroughOpCodeHandler
 {

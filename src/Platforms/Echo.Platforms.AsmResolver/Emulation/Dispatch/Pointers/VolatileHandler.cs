@@ -2,6 +2,9 @@ using AsmResolver.PE.DotNet.Cil;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers;
 
+/// <summary>
+/// Implements a CIL instruction handler for <c>volatile</c> prefix instructions.
+/// </summary>
 [DispatcherTableEntry(CilCode.Volatile)]
 public class VolatileHandler : FallThroughOpCodeHandler
 {
