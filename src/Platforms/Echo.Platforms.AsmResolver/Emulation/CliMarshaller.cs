@@ -77,6 +77,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 case ElementType.U4:
                 case ElementType.U8:
                 case ElementType.U:
+                case ElementType.Char:
                     return true;
 
                 default:
