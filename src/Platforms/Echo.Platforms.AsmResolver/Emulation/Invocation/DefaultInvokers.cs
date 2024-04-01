@@ -47,6 +47,26 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// Gets the default shim for the <see cref="System.String"/> type.
         /// </summary>
         public static StringInvoker StringShim => StringInvoker.Instance;
+
+        /// <summary>
+        /// Gets the default shim for the <see cref="System.Runtime.CompilerServices.Unsafe"/> class.
+        /// </summary>
+        public static UnsafeInvoker UnsafeShim => UnsafeInvoker.Instance;
+
+        /// <summary>
+        /// Gets the default shim for the <see cref="System.Runtime.CompilerServices.RuntimeHelpers"/> class.
+        /// </summary>
+        public static RuntimeHelpersInvoker RuntimeHelpersShim => RuntimeHelpersInvoker.Instance;
+        
+        /// <summary>
+        /// Gets the default shim for methods found in the <c>System.Runtime.Intrinsics</c> namespace of the BCL. 
+        /// </summary>
+        public static IntrinsicsInvoker IntrinsicsShim => IntrinsicsInvoker.Instance;
+        
+        /// <summary>
+        /// Gets the default shim for the <see cref="System.Runtime.InteropServices.MemoryMarshal"/> class.
+        /// </summary>
+        public static MemoryMarshalInvoker MemoryMarshalShim => MemoryMarshalInvoker.Instance;
         
         /// <summary>
         /// Gets the method invoker that forwards any method that is not within the resolution scope of the current
@@ -66,6 +86,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// Creates a new method shim invoker that multiplexes a set of methods to individual handlers.  
         /// </summary>
         public static MethodShimInvoker CreateShim() => new();
+
+        /// <summary>
+        /// Creates a method invoker that provides default shim implementations for various base class library methods
+        /// that are implemented by the runtime.  
+        /// </summary>
+        /// <returns></returns>
+        public static IMethodInvoker CreateDefaultShims() => StringShim
+            .WithFallback(UnsafeShim)
+            .WithFallback(RuntimeHelpersShim)
+            .WithFallback(IntrinsicsShim)
+            .WithFallback(MemoryMarshalShim);
 
         /// <summary>
         /// Chains the first method invoker with the provided method invoker in such a way that if the result of the
