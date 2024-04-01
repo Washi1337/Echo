@@ -42,6 +42,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// Gets the method invoker that steps over any method by invoking it via System.Reflection. 
         /// </summary>
         public static ReflectionInvoker ReflectionInvoke => ReflectionInvoker.Instance;
+
+        /// <summary>
+        /// Gets the default shim for the <see cref="System.String"/> type.
+        /// </summary>
+        public static StringInvoker StringShim => StringInvoker.Instance;
         
         /// <summary>
         /// Gets the method invoker that forwards any method that is not within the resolution scope of the current
