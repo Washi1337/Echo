@@ -309,6 +309,19 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
+        /// Creates a new 32-bit vector from the bit vector pool containing the boolean value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The vector.</returns>
+        public BitVector CreateBoolean(Trilean value)
+        {
+            var vector = new BitVector(32, true);
+            var span = vector.AsSpan();
+            span[0] = value;
+            return vector;
+        }
+
+        /// <summary>
         /// Rents a new native integer bit vector containing the null reference.
         /// </summary>
         /// <returns>The constructed bit vector.</returns>
@@ -332,6 +345,19 @@ namespace Echo.Platforms.AsmResolver.Emulation
         {
             var vector = BitVectorPool.RentNativeInteger(Is32Bit, false);
             vector.AsSpan().WriteNativeInteger(value, Is32Bit);
+            return vector;
+        }
+
+        /// <summary>
+        /// Rents a 32-bit vector from the bit vector pool containing the boolean value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The vector</returns>
+        public BitVector RentBoolean(Trilean value)
+        {
+            var vector = BitVectorPool.Rent(32, true);
+            var span = vector.AsSpan();
+            span[0] = value;
             return vector;
         }
         
