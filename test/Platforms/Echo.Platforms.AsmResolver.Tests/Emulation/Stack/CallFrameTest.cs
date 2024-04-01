@@ -127,5 +127,62 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             Assert.Equal(pointer , address);
             Assert.Equal(originalSize + 100, frame.Size);
         }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(0x7fff_0000)]
+        public void AllocateShouldRetainArguments(long baseAddress)
+        {
+            var method = _fixture.GetTestMethod(nameof(TestClass.MultipleArguments));
+            var stack = new CallStack(1000, _factory);
+            stack.Rebase(baseAddress);
+            
+            var frame = stack.Push(method);
+            frame.WriteArgument(0, new BitVector(1337));
+            frame.WriteArgument(1, new BitVector(1338));
+            frame.WriteArgument(2, new BitVector(1339));
+
+            Assert.Equal(1337, frame.ReadArgument(0).AsSpan().I32);
+            Assert.Equal(1338, frame.ReadArgument(1).AsSpan().I32);
+            Assert.Equal(1339, frame.ReadArgument(2).AsSpan().I32);
+            
+            long address = frame.Allocate(100);
+            
+            Assert.True(frame.ReadArgument(0).IsFullyKnown);
+            Assert.Equal(1337, frame.ReadArgument(0).AsSpan().I32);
+            Assert.True(frame.ReadArgument(1).IsFullyKnown);
+            Assert.Equal(1338, frame.ReadArgument(1).AsSpan().I32);
+            Assert.True(frame.ReadArgument(2).IsFullyKnown);
+            Assert.Equal(1339, frame.ReadArgument(2).AsSpan().I32);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(0x7fff_0000)]
+        public void AllocateShouldRetainLocals(long baseAddress)
+        {
+            var method = _fixture.GetTestMethod(nameof(TestClass.MultipleLocals));
+            var stack = new CallStack(1000, _factory);
+            stack.Rebase(baseAddress);
+            
+            var frame = stack.Push(method);
+            frame.WriteLocal(0, new BitVector(1337));
+            frame.WriteLocal(1, new BitVector(1338));
+            frame.WriteLocal(2, new BitVector(1339));
+
+            Assert.Equal(1337, frame.ReadLocal(0).AsSpan().I32);
+            Assert.Equal(1338, frame.ReadLocal(1).AsSpan().I32);
+            Assert.Equal(1339, frame.ReadLocal(2).AsSpan().I32);
+            
+            long address = frame.Allocate(100);
+            
+            Assert.True(frame.ReadLocal(0).IsFullyKnown);
+            Assert.Equal(1337, frame.ReadLocal(0).AsSpan().I32);
+            Assert.True(frame.ReadLocal(1).IsFullyKnown);
+            Assert.Equal(1338, frame.ReadLocal(1).AsSpan().I32);
+            Assert.True(frame.ReadLocal(2).IsFullyKnown);
+            Assert.Equal(1339, frame.ReadLocal(2).AsSpan().I32);
+        }
+        
     }
 }

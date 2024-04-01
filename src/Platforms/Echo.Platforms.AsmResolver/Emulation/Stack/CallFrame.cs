@@ -188,7 +188,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             long address = AddressRange.End;
             _localStorage = _localStorage.Resize(_localStorage.Count + size * 8, false);
             if (!_initializeLocals)
-                _localStorage.AsSpan((int) (address - _baseAddress)).MarkFullyUnknown();
+                _localStorage.AsSpan(0, (int) (address - _baseAddress)).MarkFullyUnknown();
             
             return address;
         }
