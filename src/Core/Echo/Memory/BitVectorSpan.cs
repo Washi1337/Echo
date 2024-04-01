@@ -362,7 +362,20 @@ namespace Echo.Memory
         /// <summary>
         /// Copies the span into a new bit vector.
         /// </summary>
+        /// <returns>The vector.</returns>
         public BitVector ToVector() => new(this);
+
+        /// <summary>
+        /// Copies the span into a new bit vector that is rented from the provided pool.
+        /// </summary>
+        /// <param name="pool">The pool to rent the vector from.</param>
+        /// <returns>The vector.</returns>
+        public BitVector ToVector(BitVectorPool pool)
+        {
+            var result = pool.Rent(Count, false);
+            CopyTo(result);
+            return result;
+        }
         
         private void AssertSameBitSize(BitVectorSpan other)
         {
