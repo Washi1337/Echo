@@ -21,7 +21,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var factory = context.Machine.ValueFactory;
             
             var instance = stack.Pop();
-            var result = context.Machine.ValueFactory.RentNativeInteger(false);
+            var result = factory.RentNativeInteger(false);
 
             try
             {
@@ -56,11 +56,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             
             var factory = context.Machine.ValueFactory;
             
-            uint fieldOffset = factory.GetFieldMemoryLayout(field).Offset;
+            uint fieldOffset = factory.TypeManager.GetFieldMemoryLayout(field).Offset;
             
             var resultSpan = result.AsSpan();
             var fieldOffsetVector = factory.RentNativeInteger(fieldOffset);
-            var objectHeaderSize = factory.RentNativeInteger(factory.ObjectHeaderSize);
+            var objectHeaderSize = factory.RentNativeInteger(factory.TypeManager.ObjectHeaderSize);
 
             try
             {

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation;
+using Echo.Platforms.AsmResolver.Emulation.Runtime;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Mocks;
@@ -11,14 +12,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation;
 public class CliMarshallerTest : IClassFixture<MockModuleFixture>
 {
     private readonly MockModuleFixture _fixture;
-    private readonly ValueFactory _factory;
     private readonly CliMarshaller _marshaller;
 
     public CliMarshallerTest(MockModuleFixture fixture)
     {
         _fixture = fixture;
-        _factory = new ValueFactory(_fixture.MockModule, false);
-        _marshaller = new CliMarshaller(_factory);
+        var factory = new ValueFactory(new RuntimeTypeManager(_fixture.MockModule, false));
+        _marshaller = new CliMarshaller(factory);
     }
 
     [Fact]

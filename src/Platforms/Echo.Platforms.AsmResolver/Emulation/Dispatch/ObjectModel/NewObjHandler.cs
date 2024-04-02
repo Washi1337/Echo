@@ -47,7 +47,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var callerStack = callerFrame.EvaluationStack;
 
             // Stack allocate the structure.
-            long address = context.CurrentFrame.Allocate((int)factory.GetTypeContentsMemoryLayout(instanceType).Size);
+            long address = context.CurrentFrame.Allocate((int)factory.TypeManager.GetMethodTable(instanceType).ContentsLayout.Size);
             var thisPointer = factory.CreateNativeInteger(address);
 
             // Call the constructor with the constructor.

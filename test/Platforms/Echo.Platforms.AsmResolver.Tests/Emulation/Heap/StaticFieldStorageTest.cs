@@ -17,8 +17,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
         public StaticFieldStorageTest(MockModuleFixture fixture)
         {
             _fixture = fixture;
-            
-            _factory = new ValueFactory(fixture.MockModule, false);
+
+            var manager = new RuntimeTypeManager(fixture.MockModule, false);
+            _factory = new ValueFactory(manager);
             _storage = new StaticFieldStorage(_factory, 0x0100_0000);
         }
 

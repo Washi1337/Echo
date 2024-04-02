@@ -38,7 +38,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 // Copy the value into the object data.
                 context.Machine.Heap
                     .GetObjectSpan(address)
-                    .SliceObjectData(factory)
+                    .SliceObjectData(factory.TypeManager)
                     .Write(value);
 
                 // Push box object address.

@@ -83,7 +83,7 @@ public class UnsafeInvoker : IMethodInvoker
         var pool = valueFactory.BitVectorPool;
         
         // Determine the size of a single element.
-        uint elementSize = valueFactory.GetTypeValueMemoryLayout(typeArguments[0]).Size;
+        uint elementSize = valueFactory.TypeManager.GetMethodTable(typeArguments[0]).ValueLayout.Size;
         var elementSizeVector = valueFactory.RentNativeInteger(elementSize);
         
         // We need to resize the offset as Unsafe.Add<T> accepts both a nint and an int32 as offset.

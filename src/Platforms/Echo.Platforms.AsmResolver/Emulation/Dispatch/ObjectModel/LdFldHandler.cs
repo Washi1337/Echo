@@ -54,7 +54,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var stack = context.CurrentFrame.EvaluationStack;
             var factory = context.Machine.ValueFactory;
             
-            var result = context.Machine.ValueFactory.RentValue(field.Signature!.FieldType, false);
+            var result = factory.RentValue(field.Signature!.FieldType, false);
 
             try
             {
@@ -62,7 +62,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 {
                     case StackSlotTypeHint.Structure:
                         // Structure was pushed onto the stack directly. Read the field directly from the structure.
-                        result.AsSpan().Write(instance.Contents.AsSpan().SliceStructField(factory, field));
+                        result.AsSpan().Write(instance.Contents.AsSpan().SliceStructField(factory.TypeManager, field));
                         stack.Push(result, field.Signature.FieldType);
                         return CilDispatchResult.Success();
 

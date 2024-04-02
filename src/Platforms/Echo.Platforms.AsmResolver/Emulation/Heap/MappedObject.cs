@@ -44,7 +44,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// </summary>
 
         /// <inheritdoc />
-        public AddressRange AddressRange => new(_baseAddress, _baseAddress + _machine.ValueFactory.ObjectHeaderSize + _virtualLayout.Size);
+        public AddressRange AddressRange => new(
+            _baseAddress,
+            _baseAddress + _machine.ValueFactory.TypeManager.ObjectHeaderSize + _virtualLayout.Size
+        );
 
         /// <inheritdoc />
         public bool IsValidAddress(long address) => AddressRange.Contains(address);
@@ -76,16 +79,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         {
             var array = (Array) Object;
             
-            if (offset == _machine.ValueFactory.ArrayLengthOffset)
+            if (offset == _machine.ValueFactory.TypeManager.ArrayLengthOffset)
             {
                 buffer.Write(array.Length);
             }
-            else if (offset >= _machine.ValueFactory.ArrayHeaderSize)
+            else if (offset >= _machine.ValueFactory.TypeManager.ArrayHeaderSize)
             {
                 // Determine array element index.
                 var representative = GetArrayElementRepresentative();
-                uint size = _machine.ValueFactory.GetTypeValueMemoryLayout(representative).Size;
-                int index = (int) ((offset - _machine.ValueFactory.ArrayHeaderSize) / size);
+                uint size = _machine.ValueFactory.TypeManager.GetMethodTable(representative).ValueLayout.Size;
+                int index = (int) ((offset - _machine.ValueFactory.TypeManager.ArrayHeaderSize) / size);
                 
                 // Read + Marshal
                 object value = array.GetValue(index);
@@ -118,15 +121,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
 
         private void WriteToArray(uint offset, BitVectorSpan buffer)
         {
-            if (offset < _machine.ValueFactory.ArrayHeaderSize)
+            if (offset < _machine.ValueFactory.TypeManager.ArrayHeaderSize)
                 return;
 
             var array = (Array) Object;
             
             // Determine array element index.
             var representative = GetArrayElementRepresentative();
-            uint size = _machine.ValueFactory.GetTypeValueMemoryLayout(representative).Size;
-            int index = (int) ((offset - _machine.ValueFactory.ArrayHeaderSize) / size);
+            uint size = _machine.ValueFactory.TypeManager.GetMethodTable(representative).ValueLayout.Size;
+            int index = (int) ((offset - _machine.ValueFactory.TypeManager.ArrayHeaderSize) / size);
 
             // Marshal + Write.
             object? value = _machine.ObjectMarshaller.ToObject(buffer, Object.GetType().GetElementType()!);
@@ -183,7 +186,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         private FieldInfo? GetFieldInfoAtOffset(uint offset)
         {
             // Skip object header.
-            offset -= _machine.ValueFactory.ObjectHeaderSize;
+            offset -= _machine.ValueFactory.TypeManager.ObjectHeaderSize;
             
             // See if we have looked up the field already before.
             if (_fields.TryGetValue(offset, out var fieldInfo))

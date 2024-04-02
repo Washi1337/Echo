@@ -40,7 +40,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Memory = new VirtualMemory(is32Bit ? uint.MaxValue : long.MaxValue);
             Loader = new PELoader(Memory);
             
-            ValueFactory = new ValueFactory(contextModule, is32Bit);
+            TypeManager = new RuntimeTypeManager(contextModule, is32Bit);
+            ValueFactory = new ValueFactory(TypeManager);
             ObjectMapMemory = new ObjectMapMemory(this, 0x1000_0000);
             ObjectMarshaller = new ObjectMarshaller(this);
             
@@ -62,14 +63,21 @@ namespace Echo.Platforms.AsmResolver.Emulation
             }
 
             Dispatcher = new CilDispatcher();
-            TypeManager = new RuntimeTypeManager(this);
             Threads = new ReadOnlyCollection<CilThread>(_threads);
+        }
+
+        /// <summary>
+        /// Gets the service that is responsible for initializing and managing types in the virtual machine.
+        /// </summary>
+        public RuntimeTypeManager TypeManager
+        {
+            get;
         }
 
         /// <summary>
         /// Gets a value indicating whether the environment is a 32-bit or 64-bit system.
         /// </summary>
-        public bool Is32Bit => ValueFactory.Is32Bit;
+        public bool Is32Bit => TypeManager.Is32Bit;
 
         /// <summary>
         /// Gets the main memory interface of the virtual machine.
@@ -107,7 +115,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
-        /// Gets the service that is responsible for managing types in the virtual machine.
+        /// Gets the service that is responsible for creating instances (bit vectors) of a specific type.
         /// </summary>
         public ValueFactory ValueFactory
         {
@@ -152,15 +160,6 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
             set;
         } = DefaultInvokers.ReturnUnknown;
-
-        /// <summary>
-        /// Gets the service that is responsible for the initialization and management of runtime types residing in
-        /// the virtual machine.
-        /// </summary>
-        public RuntimeTypeManager TypeManager
-        {
-            get;
-        }
 
         /// <summary>
         /// Gets or sets the service that is responsible for resolving unknown values on the stack in critical moments.

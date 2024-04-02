@@ -54,7 +54,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 if (Machine is null)
                     return default;
 
-                return new(Machine, Address + Machine.ValueFactory.ObjectHeaderSize);
+                return new(Machine, Address + Machine.ValueFactory.TypeManager.ObjectHeaderSize);
             }
         }
 
@@ -104,7 +104,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public TypeMemoryLayout GetMemoryLayout()
         {
             AssertIsValidHandle();
-            return Machine.ValueFactory.GetTypeContentsMemoryLayout(GetObjectType());
+            return Machine.ValueFactory.TypeManager.GetMethodTable(GetObjectType()).ContentsLayout;
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public void ReadStringLength(BitVectorSpan buffer)
         {
             AssertIsValidHandle();
-            Machine.Memory.Read(Address + Machine.ValueFactory.StringLengthOffset, buffer);
+            Machine.Memory.Read(Address + Machine.ValueFactory.TypeManager.StringLengthOffset, buffer);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                     throw new ArgumentException("The string has an unknown length.");
 
                 var result = new BitVector(length.AsSpan().I32 * sizeof(char) * 8, false);
-                Machine.Memory.Read(Address + Machine.ValueFactory.StringHeaderSize, result);
+                Machine.Memory.Read(Address + Machine.ValueFactory.TypeManager.StringHeaderSize, result);
                 return result;
             }
             finally
@@ -199,7 +199,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public void ReadArrayLength(BitVectorSpan buffer)
         {
             AssertIsValidHandle();
-            Machine.Memory.Read(Address + Machine.ValueFactory.ArrayLengthOffset, buffer);
+            Machine.Memory.Read(Address + Machine.ValueFactory.TypeManager.ArrayLengthOffset, buffer);
         }
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 throw new ArgumentException("The object handle does not point to an array type");
             
             // Determine total space required to store the array data.
-            int elementSize = (int) Machine.ValueFactory.GetTypeValueMemoryLayout(elementType).Size;
+            int elementSize = (int) Machine.ValueFactory.TypeManager.GetMethodTable(elementType).ValueLayout.Size;
             var result = new BitVector(length * elementSize * 8, false);
             
             // Read the data.
@@ -261,7 +261,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public void ReadArrayData(BitVectorSpan buffer)
         {
             AssertIsValidHandle();
-            Machine.Memory.Read(Address + Machine.ValueFactory.ArrayHeaderSize, buffer);
+            Machine.Memory.Read(Address + Machine.ValueFactory.TypeManager.ArrayHeaderSize, buffer);
         }
 
         /// <summary>
@@ -291,8 +291,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public void ReadArrayData(BitVectorSpan buffer, int startIndex, TypeSignature elementType)
         {
             AssertIsValidHandle();
-            int elementSize = (int) Machine.ValueFactory.GetTypeValueMemoryLayout(elementType).Size;
-            Machine.Memory.Read(Address + Machine.ValueFactory.ArrayHeaderSize + startIndex * elementSize, buffer);
+            int elementSize = (int) Machine.ValueFactory.TypeManager.GetMethodTable(elementType).ValueLayout.Size;
+            Machine.Memory.Read(Address + Machine.ValueFactory.TypeManager.ArrayHeaderSize + startIndex * elementSize, buffer);
         }
 
         /// <summary>
@@ -303,7 +303,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public void WriteArrayData(BitVectorSpan buffer)
         {
             AssertIsValidHandle();
-            Machine.Memory.Write(Address + Machine.ValueFactory.ArrayHeaderSize, buffer);
+            Machine.Memory.Write(Address + Machine.ValueFactory.TypeManager.ArrayHeaderSize, buffer);
         }
 
         /// <summary>
@@ -314,7 +314,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public void WriteArrayData(ReadOnlySpan<byte> buffer)
         {
             AssertIsValidHandle();
-            Machine.Memory.Write(Address + Machine.ValueFactory.ArrayHeaderSize, buffer);
+            Machine.Memory.Write(Address + Machine.ValueFactory.TypeManager.ArrayHeaderSize, buffer);
         }
         
         /// <summary>
@@ -326,7 +326,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public long GetArrayElementAddress(TypeSignature elementType, long index)
         {
             AssertIsValidHandle();
-            return Address + Machine.ValueFactory.GetArrayElementOffset(elementType, index);
+            return Address + Machine.ValueFactory.TypeManager.GetArrayElementOffset(elementType, index);
         }
 
         /// <summary>

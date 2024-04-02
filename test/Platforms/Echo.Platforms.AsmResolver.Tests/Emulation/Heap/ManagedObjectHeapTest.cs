@@ -7,6 +7,7 @@ using Echo.Memory;
 using Echo.Memory.Heap;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Heap;
+using Echo.Platforms.AsmResolver.Emulation.Runtime;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Mocks;
 using Xunit;
@@ -17,13 +18,16 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
     {
         private static readonly SignatureComparer Comparer = new();
         private readonly MockModuleFixture _fixture;
+        private readonly RuntimeTypeManager _manager;
         private readonly ValueFactory _factory;
         private readonly ManagedObjectHeap _objectHeap;
+
 
         public ManagedObjectHeapTest(MockModuleFixture fixture)
         {
             _fixture = fixture;
-            _factory = new ValueFactory(fixture.CurrentTestModule, false);
+            _manager = new RuntimeTypeManager(fixture.CurrentTestModule, false);
+            _factory = new ValueFactory(_manager);
             _objectHeap = new ManagedObjectHeap(new BasicHeap(1000), _factory);
         }
 
@@ -36,9 +40,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
             var objectSpan = _objectHeap.GetObjectSpan(address);
 
             Assert.Equal(_factory.ContextModule.CorLibTypeFactory.String,
-                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_factory).I64));
-            Assert.Equal(value.Length, objectSpan.SliceStringLength(_factory).I32);
-            Assert.Equal(value, new string(MemoryMarshal.Cast<byte, char>(objectSpan.SliceStringData(_factory).Bits)));
+                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64));
+            Assert.Equal(value.Length, objectSpan.SliceStringLength(_manager).I32);
+            Assert.Equal(value, new string(MemoryMarshal.Cast<byte, char>(objectSpan.SliceStringData(_manager).Bits)));
         }
 
         [Theory]
@@ -51,8 +55,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
             Marshal.Copy(rawObjectAddress, data, 0, data.Length);
 
             var objectSpan = new BitVector(data).AsSpan();
-            Assert.Equal(value.Length, objectSpan.SliceStringLength(_factory).I32);
-            Assert.Equal(value, new string(MemoryMarshal.Cast<byte, char>(objectSpan.SliceStringData(_factory).Bits)));
+            Assert.Equal(value.Length, objectSpan.SliceStringLength(_manager).I32);
+            Assert.Equal(value, new string(MemoryMarshal.Cast<byte, char>(objectSpan.SliceStringData(_manager).Bits)));
         }
 
         [Fact]
@@ -67,22 +71,22 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
             // Set elements 0 to 10.
             for (int i = 0; i < 10; i++)
             {
-                var elementSpan = objectSpan.SliceArrayElement(_factory, elementType, i);
+                var elementSpan = objectSpan.SliceArrayElement(_manager, elementType, i);
                 elementSpan.I32 = i;
             }
 
             // Verify type
             Assert.Equal(
                 _factory.ContextModule.CorLibTypeFactory.Int32.MakeSzArrayType(),
-                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_factory).I64),
+                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64),
                 Comparer);
             
             // Verify length.
-            var lengthSpan = objectSpan.SliceArrayLength(_factory);
+            var lengthSpan = objectSpan.SliceArrayLength(_manager);
             Assert.Equal(10, lengthSpan.I32);
 
             // Verify elements.
-            int[] elements = MemoryMarshal.Cast<byte, int>(objectSpan.SliceArrayData(_factory).Bits).ToArray();
+            int[] elements = MemoryMarshal.Cast<byte, int>(objectSpan.SliceArrayData(_manager).Bits).ToArray();
             Assert.Equal(new[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, elements);
         }
 
@@ -96,17 +100,17 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
             var objectSpan = _objectHeap.GetObjectSpan(address);
 
             // Set fields
-            var dataSpan = objectSpan.SliceObjectData(_factory);
+            var dataSpan = objectSpan.SliceObjectData(_manager);
             for (int i = 0; i < elementType.Fields.Count; i++)
             {
-                var fieldSpan = dataSpan.SliceStructField(_factory, elementType.Fields[i]);
+                var fieldSpan = dataSpan.SliceStructField(_manager, elementType.Fields[i]);
                 fieldSpan.I32 = i;
             }
 
             // Verify type
             Assert.Equal(
                 elementType,
-                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_factory).I64),
+                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64),
                 Comparer);
 
             // Verify contents.
@@ -124,9 +128,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
             // Allocate embedded object.
             long address2 = _objectHeap.AllocateObject(elementType, true);
             var objectSpan = _objectHeap.GetObjectSpan(address2);
-            var dataSpan = objectSpan.SliceObjectData(_factory);
+            var dataSpan = objectSpan.SliceObjectData(_manager);
             
-            var fieldSpan = dataSpan.SliceStructField(_factory, tagField);
+            var fieldSpan = dataSpan.SliceStructField(_manager, tagField);
             fieldSpan.I32 = 0x1337;
             
             // Allocate wrapped object.
@@ -134,16 +138,16 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
             objectSpan = _objectHeap.GetObjectSpan(address1);
             
             // Set fields
-            dataSpan = objectSpan.SliceObjectData(_factory);
-            fieldSpan = dataSpan.SliceStructField(_factory, tagField);
+            dataSpan = objectSpan.SliceObjectData(_manager);
+            fieldSpan = dataSpan.SliceStructField(_manager, tagField);
             fieldSpan.I32 = 0x1337;
-            fieldSpan = dataSpan.SliceStructField(_factory, itemField);
+            fieldSpan = dataSpan.SliceStructField(_manager, itemField);
             fieldSpan.I64 = address2;
 
             // Verify type
             Assert.Equal(
                 elementType,
-                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_factory).I64),
+                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64),
                 Comparer);
         }
     }

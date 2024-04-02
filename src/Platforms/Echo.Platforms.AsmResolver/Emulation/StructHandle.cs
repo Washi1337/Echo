@@ -43,7 +43,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The address.</returns>
         public long GetFieldAddress(IFieldDescriptor field)
         {
-            return Address + Machine.ValueFactory.GetFieldMemoryLayout(field).Offset;
+            return Address + Machine.ValueFactory.TypeManager.GetFieldMemoryLayout(field).Offset;
         }
 
         /// <summary>

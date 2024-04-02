@@ -50,7 +50,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
         {
             if (!_fields.TryGetValue(field, out long address))
             {
-                var layout = _valueFactory.GetTypeValueMemoryLayout(field.Signature!.FieldType);
+                var layout = _valueFactory.TypeManager.GetMethodTable(field.Signature!.FieldType).ValueLayout;
                 address = _heap.Allocate(layout.Size, true);
 
                 if (field.Resolve() is { IsStatic: true, HasFieldRva: true, FieldRva: IReadableSegment data } def)

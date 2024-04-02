@@ -107,7 +107,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             {
                 _offsets.Add(currentOffset);
                 var actualType = type.InstantiateGenericTypes(context);
-                currentOffset += factory.GetTypeValueMemoryLayout(actualType).Size;
+                currentOffset += factory.TypeManager.GetMethodTable(actualType).ValueLayout.Size;
                 currentOffset = currentOffset.Align(factory.PointerSize);
             }
         }

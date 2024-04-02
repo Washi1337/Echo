@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
             var type = ((ITypeDefOrRef)instruction.Operand!).ToTypeSignature().InstantiateGenericTypes(genericContext);
             var value = factory.BitVectorPool.Rent(32, false);
-            value.AsSpan().Write(factory.GetTypeValueMemoryLayout(type).Size);
+            value.AsSpan().Write(factory.TypeManager.GetMethodTable(type).ValueLayout.Size);
             stack.Push(new StackSlot(value, StackSlotTypeHint.Integer));
 
             return CilDispatchResult.Success();

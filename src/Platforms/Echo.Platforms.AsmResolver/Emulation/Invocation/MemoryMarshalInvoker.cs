@@ -34,7 +34,7 @@ public class MemoryMarshalInvoker : IMethodInvoker
     private static InvocationResult InvokeGetArrayDataReference(CilExecutionContext context, IList<BitVector> arguments)
     {
         var arrayObject = arguments[0].AsObjectHandle(context.Machine);
-        long result = arrayObject.Address + context.Machine.ValueFactory.ArrayHeaderSize;
+        long result = arrayObject.Address + context.Machine.ValueFactory.TypeManager.ArrayHeaderSize;
         return InvocationResult.StepOver(context.Machine.ValueFactory.RentNativeInteger(result));
     }
 }

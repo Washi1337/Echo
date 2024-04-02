@@ -92,15 +92,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             // Special treatment for array types.
             if (descriptor is TypeSpecification { Signature: SzArrayTypeSignature arrayType })
             {
-                uint totalSize = _machine.ValueFactory.GetArrayObjectSize(arrayType.BaseType, ((Array) value).Length);
-                uint dataSize = totalSize - _machine.ValueFactory.ObjectHeaderSize;
+                uint totalSize = _machine.ValueFactory.TypeManager.GetArrayObjectSize(arrayType.BaseType, ((Array) value).Length);
+                uint dataSize = totalSize - _machine.ValueFactory.TypeManager.ObjectHeaderSize;
                 return new TypeMemoryLayout(
                     descriptor, 
                     dataSize,
                     _machine.Is32Bit ? MemoryLayoutAttributes.Is32Bit : MemoryLayoutAttributes.Is64Bit);
             }
 
-            return _machine.ValueFactory.GetTypeContentsMemoryLayout(descriptor);
+            return _machine.ValueFactory.TypeManager.GetMethodTable(descriptor).ContentsLayout;
         }
 
         /// <summary>

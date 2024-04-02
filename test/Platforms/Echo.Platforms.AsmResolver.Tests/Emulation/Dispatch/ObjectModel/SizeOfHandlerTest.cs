@@ -39,7 +39,7 @@ public class SizeOfHandlerTest : CilOpCodeHandlerTestBase
     public void SizeOfUserType(Type type)
     {
         var definition = ModuleFixture.MockModule.TopLevelTypes.First(t => t.IsTypeOf(type.Namespace, type.Name));
-        uint size = Context.Machine.ValueFactory.GetTypeValueMemoryLayout(definition).Size;
+        uint size = Context.Machine.TypeManager.GetMethodTable(definition).ValueLayout.Size;
         AssertCorrect(definition, (int) size);
     }
     

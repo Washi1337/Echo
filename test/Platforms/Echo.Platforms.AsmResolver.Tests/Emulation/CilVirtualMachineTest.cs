@@ -394,7 +394,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             long arrayAddress = _vm.Heap.AllocateSzArray(factory.Int32, 10, false);
             var arraySpan = _vm.Heap.GetObjectSpan(arrayAddress);
             for (int i = 0; i < 10; i++)
-                arraySpan.SliceArrayElement(_vm.ValueFactory, factory.Int32, i).Write(100 + i);
+                arraySpan.SliceArrayElement(_vm.TypeManager, factory.Int32, i).Write(100 + i);
             
             // Call Sum.
             var returnValue = _mainThread.Call(sum, new BitVector[] { arrayAddress });

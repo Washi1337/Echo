@@ -223,7 +223,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     // TODO: Handle `beforefieldinit` flag.
                     if (method.DeclaringType is { } declaringType)
                     {
-                        return context.Machine.TypeManager
+                        return context.Machine.ValueFactory.TypeManager
                             .HandleInitialization(context.Thread, declaringType)
                             .ToDispatchResult();
                     }

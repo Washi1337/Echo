@@ -97,7 +97,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             originalType = GetElementType(originalType);
 
             // Measure the new size on the stack.
-            uint size = _valueFactory.GetTypeValueMemoryLayout(originalType).Size;
+            uint size = _valueFactory.TypeManager.GetMethodTable(originalType).ValueLayout.Size;
             size = size switch
             {
                 <= 4 => 4,
@@ -134,7 +134,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             // Resolve the "underlying" element type, if there is any.
             targetType = GetElementType(targetType);
             
-            uint size = _valueFactory.GetTypeValueMemoryLayout(targetType).Size;
+            uint size = _valueFactory.TypeManager.GetMethodTable(targetType).ValueLayout.Size;
             
             bool signExtend = IsSignedIntegerType(targetType);
             return value.Contents.Resize((int) (size * 8), signExtend, _valueFactory.BitVectorPool);

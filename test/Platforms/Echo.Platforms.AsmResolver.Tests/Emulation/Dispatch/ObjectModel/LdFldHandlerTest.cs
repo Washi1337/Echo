@@ -47,7 +47,7 @@ public class LdFldHandlerTest : CilOpCodeHandlerTestBase
     public void ReadInstanceFieldFromClass()
     {
         var stack = Context.CurrentFrame.EvaluationStack;
-        var factory = Context.Machine.ValueFactory;
+        var manager = Context.Machine.ValueFactory.TypeManager;
         
         // Obtain class type and field.
         var classType = ModuleFixture.MockModule.TopLevelTypes.First(t => t.Name == nameof(SimpleClass));
@@ -56,7 +56,7 @@ public class LdFldHandlerTest : CilOpCodeHandlerTestBase
         // Allocate object of the class, and set the field to 1337.
         long address = Context.Machine.Heap.AllocateObject(classType, true);
         var objectSpan = Context.Machine.Heap.GetObjectSpan(address);
-        objectSpan.SliceObjectField(factory, field).Write(1337);
+        objectSpan.SliceObjectField(manager, field).Write(1337);
         
         // Push address of object onto stack.
         stack.Push(new StackSlot(address, StackSlotTypeHint.Integer));
@@ -74,6 +74,7 @@ public class LdFldHandlerTest : CilOpCodeHandlerTestBase
     public void ReadInstanceFieldFromStructureByValue()
     {
         var stack = Context.CurrentFrame.EvaluationStack;
+        var manager = Context.Machine.TypeManager;
         var factory = Context.Machine.ValueFactory;
 
         // Obtain struct type and field.
@@ -82,7 +83,7 @@ public class LdFldHandlerTest : CilOpCodeHandlerTestBase
         
         // Create instance of struct, and set field to 1337.
         var objectSpan = factory.CreateValue(structType.ToTypeSignature(), true);
-        objectSpan.AsSpan().SliceStructField(factory, field).Write(1337);
+        objectSpan.AsSpan().SliceStructField(manager, field).Write(1337);
         
         // Push struct onto stack
         stack.Push(new StackSlot(objectSpan, StackSlotTypeHint.Structure));
@@ -118,7 +119,7 @@ public class LdFldHandlerTest : CilOpCodeHandlerTestBase
 
         // Initialize variable with field set to 1337. 
         var instance = factory.CreateValue(structType.ToTypeSignature(), true);
-        instance.AsSpan().SliceStructField(factory, field).Write(1337);
+        instance.AsSpan().SliceStructField(factory.TypeManager, field).Write(1337);
         Context.CurrentFrame.WriteLocal(0, instance);
         
         // Push address to struct.

@@ -16,7 +16,7 @@ public abstract class FieldOpCodeHandler : ICilOpCodeHandler
         // Ensure the enclosing type is initialized in the runtime.
         if (field.DeclaringType is { } declaringType)
         {
-            var initResult = context.Machine.TypeManager.HandleInitialization(context.Thread, declaringType);
+            var initResult = context.Machine.ValueFactory.TypeManager.HandleInitialization(context.Thread, declaringType);
             if (!initResult.IsNoAction)
                 return initResult.ToDispatchResult();
         }

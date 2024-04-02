@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             long array = Context.Machine.Heap.AllocateSzArray(elementType, elementCount, false);
             var arraySpan = Context.Machine.Heap.GetObjectSpan(array);
             for (int i = 0; i < elementCount; i++)
-                arraySpan.SliceArrayElement(factory, elementType, i).Write(100 + i);
+                arraySpan.SliceArrayElement(Context.Machine.TypeManager, elementType, i).Write(100 + i);
             
             return array;
         }

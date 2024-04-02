@@ -306,7 +306,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
                 // If the exception happened in a .cctor, register it and wrap it in a type initialization error.
                 if (currentFrame.Body?.Owner is { IsConstructor: true, IsStatic: true, DeclaringType: {} type })
-                    exceptionObject = Machine.TypeManager.RegisterInitializationException(type, exceptionObject);
+                    exceptionObject = Machine.ValueFactory.TypeManager.RegisterInitializationException(Machine, type, exceptionObject);
 
                 var result = currentFrame.ExceptionHandlerStack.RegisterException(exceptionObject);
                 if (result.IsSuccess)

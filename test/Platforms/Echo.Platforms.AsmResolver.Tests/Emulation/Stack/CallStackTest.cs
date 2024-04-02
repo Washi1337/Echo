@@ -1,6 +1,7 @@
 using System;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation;
+using Echo.Platforms.AsmResolver.Emulation.Runtime;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Mocks;
@@ -16,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public VirtualStackTest(MockModuleFixture fixture)
         {
             _fixture = fixture;
-            _factory = new ValueFactory(fixture.CurrentTestModule, false);
+            _factory = new ValueFactory(new RuntimeTypeManager(fixture.CurrentTestModule, false));
         }
 
         [Fact]

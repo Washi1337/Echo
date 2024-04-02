@@ -50,7 +50,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
                 Assert.Empty(stack);
                 
                 var arraySpan = Context.Machine.Heap.GetObjectSpan(array);
-                Assert.Equal(100 + i, arraySpan.SliceArrayElement(factory, elementType, i).I32);
+                Assert.Equal(100 + i, arraySpan.SliceArrayElement(factory.TypeManager, elementType, i).I32);
             });
         }
     }

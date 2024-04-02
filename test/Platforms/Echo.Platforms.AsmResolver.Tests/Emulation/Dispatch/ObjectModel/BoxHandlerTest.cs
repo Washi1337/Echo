@@ -40,7 +40,7 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
     public void BoxPrimitive()
     {
         var stack = Context.CurrentFrame.EvaluationStack;
-        var factory = Context.Machine.ValueFactory;
+        var manager = Context.Machine.TypeManager;
 
         // Push integer.
         var type = ModuleFixture.MockModule.CorLibTypeFactory.Int32.Type;
@@ -54,14 +54,14 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
         var handle = Assert.Single(stack).Contents.AsObjectHandle(Context.Machine);
         
         Assert.Equal(type, handle.GetObjectType(), SignatureComparer.Default);
-        Assert.Equal(1337, Context.Machine.Heap.GetObjectSpan(handle.Address).SliceObjectData(factory).I32);
+        Assert.Equal(1337, Context.Machine.Heap.GetObjectSpan(handle.Address).SliceObjectData(manager).I32);
     }
 
     [Fact]
     public void BoxUserValueType()
     {
         var stack = Context.CurrentFrame.EvaluationStack;
-        var factory = Context.Machine.ValueFactory;
+        var manager = Context.Machine.TypeManager;
 
         // Look up metadata.
         var type = ModuleFixture.MockModule.TopLevelTypes.First(t => t.Name == nameof(SimpleStruct));
@@ -70,10 +70,10 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
         var fieldZ = type.Fields.First(f => f.Name == nameof(SimpleStruct.Z));
         
         // Create new SimpleStruct { X=1337, Y=1338, Z=1339 }; 
-        var value = factory.CreateValue(type.ToTypeSignature(true), false);
-        value.AsSpan().SliceStructField(factory, fieldX).Write(1337);
-        value.AsSpan().SliceStructField(factory, fieldY).Write(1338);
-        value.AsSpan().SliceStructField(factory, fieldZ).Write(1339);
+        var value = Context.Machine.ValueFactory.CreateValue(type.ToTypeSignature(true), false);
+        value.AsSpan().SliceStructField(manager, fieldX).Write(1337);
+        value.AsSpan().SliceStructField(manager, fieldY).Write(1338);
+        value.AsSpan().SliceStructField(manager, fieldZ).Write(1339);
         
         // Push it.
         stack.Push(new StackSlot(value, StackSlotTypeHint.Structure));
@@ -87,8 +87,8 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
         
         Assert.Equal(type, handle.GetObjectType(), SignatureComparer.Default);
         var boxObjectSpan = Context.Machine.Heap.GetObjectSpan(handle.Address);
-        Assert.Equal(1337, boxObjectSpan.SliceObjectField(factory, fieldX).I32);
-        Assert.Equal(1338, boxObjectSpan.SliceObjectField(factory, fieldY).I32);
-        Assert.Equal(1339, boxObjectSpan.SliceObjectField(factory, fieldZ).I32);
+        Assert.Equal(1337, boxObjectSpan.SliceObjectField(manager, fieldX).I32);
+        Assert.Equal(1338, boxObjectSpan.SliceObjectField(manager, fieldY).I32);
+        Assert.Equal(1339, boxObjectSpan.SliceObjectField(manager, fieldZ).I32);
     }
 }

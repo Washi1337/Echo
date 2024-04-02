@@ -23,6 +23,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void UnboxedPointerShouldPointToStructData()
         {
             var stack = Context.CurrentFrame.EvaluationStack;
+            var manager = Context.Machine.TypeManager;
             var factory = Context.Machine.ValueFactory;
             
             var type = ModuleFixture.MockModule.TopLevelTypes.First(t => t.Name == nameof(SimpleStruct));
@@ -32,9 +33,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             long address = Context.Machine.Heap.AllocateObject(type, false);
             var objectSpan = Context.Machine.Heap.GetObjectSpan(address);
-            objectSpan.SliceObjectField(factory, fieldX).Write(1337);
-            objectSpan.SliceObjectField(factory, fieldY).Write(1338);
-            objectSpan.SliceObjectField(factory, fieldZ).Write(1339);
+            objectSpan.SliceObjectField(manager, fieldX).Write(1337);
+            objectSpan.SliceObjectField(manager, fieldY).Write(1338);
+            objectSpan.SliceObjectField(manager, fieldZ).Write(1339);
 
             stack.Push(new StackSlot(factory.CreateNativeInteger(address), StackSlotTypeHint.Integer));
 
@@ -45,9 +46,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             var buffer = factory.CreateValue(type.ToTypeSignature(true), false).AsSpan();
             Context.Machine.Memory.Read(dataAddress, buffer);
-            Assert.Equal(1337, buffer.SliceStructField(factory, fieldX).I32);
-            Assert.Equal(1338, buffer.SliceStructField(factory, fieldY).I32);
-            Assert.Equal(1339, buffer.SliceStructField(factory, fieldZ).I32);
+            Assert.Equal(1337, buffer.SliceStructField(manager, fieldX).I32);
+            Assert.Equal(1338, buffer.SliceStructField(manager, fieldY).I32);
+            Assert.Equal(1339, buffer.SliceStructField(manager, fieldZ).I32);
         }
 
         [Theory]
@@ -134,6 +135,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void UnboxAnyShouldPushStructData()
         {
             var stack = Context.CurrentFrame.EvaluationStack;
+            var manager = Context.Machine.TypeManager;
             var factory = Context.Machine.ValueFactory;
             
             var type = ModuleFixture.MockModule.TopLevelTypes.First(t => t.Name == nameof(SimpleStruct));
@@ -143,9 +145,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             long address = Context.Machine.Heap.AllocateObject(type, false);
             var objectSpan = Context.Machine.Heap.GetObjectSpan(address);
-            objectSpan.SliceObjectField(factory, fieldX).Write(1337);
-            objectSpan.SliceObjectField(factory, fieldY).Write(1338);
-            objectSpan.SliceObjectField(factory, fieldZ).Write(1339);
+            objectSpan.SliceObjectField(manager, fieldX).Write(1337);
+            objectSpan.SliceObjectField(manager, fieldY).Write(1338);
+            objectSpan.SliceObjectField(manager, fieldZ).Write(1339);
 
             stack.Push(new StackSlot(factory.CreateNativeInteger(address), StackSlotTypeHint.Integer));
 
@@ -153,9 +155,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
 
             Assert.True(result.IsSuccess);
             var buffer = Assert.Single(stack).Contents.AsSpan();
-            Assert.Equal(1337, buffer.SliceStructField(factory, fieldX).I32);
-            Assert.Equal(1338, buffer.SliceStructField(factory, fieldY).I32);
-            Assert.Equal(1339, buffer.SliceStructField(factory, fieldZ).I32);
+            Assert.Equal(1337, buffer.SliceStructField(manager, fieldX).I32);
+            Assert.Equal(1338, buffer.SliceStructField(manager, fieldY).I32);
+            Assert.Equal(1339, buffer.SliceStructField(manager, fieldZ).I32);
         }
 
         [Theory]

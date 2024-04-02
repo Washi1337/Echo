@@ -46,7 +46,7 @@ public class StFldHandlerTest : CilOpCodeHandlerTestBase
     public void WriteInstanceFieldFromClass()
     {
         var stack = Context.CurrentFrame.EvaluationStack;
-        var factory = Context.Machine.ValueFactory;
+        var manager = Context.Machine.TypeManager;
         
         // Obtain class type and field.
         var classType = ModuleFixture.MockModule.TopLevelTypes.First(t => t.Name == nameof(SimpleClass));
@@ -66,7 +66,7 @@ public class StFldHandlerTest : CilOpCodeHandlerTestBase
         // Verify.
         Assert.True(result.IsSuccess);
         Assert.Empty(stack);
-        Assert.Equal(1337, objectSpan.SliceObjectField(factory, field).I32);
+        Assert.Equal(1337, objectSpan.SliceObjectField(manager, field).I32);
     }
     
     [Fact]
@@ -104,6 +104,6 @@ public class StFldHandlerTest : CilOpCodeHandlerTestBase
         
         var instance = factory.CreateValue(structType.ToTypeSignature(), true);
         Context.CurrentFrame.ReadLocal(0, instance);
-        Assert.Equal(1337, instance.AsSpan().SliceStructField(factory, field).I32);
+        Assert.Equal(1337, instance.AsSpan().SliceStructField(factory.TypeManager, field).I32);
     }
 }

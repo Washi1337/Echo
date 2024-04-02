@@ -33,9 +33,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             Assert.Equal(StackSlotTypeHint.Integer, slot.TypeHint);
             
             var arraySpan = Context.Machine.Heap.GetObjectSpan(slot.Contents);
-            Assert.Equal(elementCount, arraySpan.SliceArrayLength(factory).I32);
+            Assert.Equal(elementCount, arraySpan.SliceArrayLength(factory.TypeManager).I32);
             for (int i = 0; i < elementCount; i++)
-                Assert.Equal(0, arraySpan.SliceArrayElement(factory, elementType, i).I32);
+                Assert.Equal(0, arraySpan.SliceArrayElement(factory.TypeManager, elementType, i).I32);
         }
 
         [Fact]
