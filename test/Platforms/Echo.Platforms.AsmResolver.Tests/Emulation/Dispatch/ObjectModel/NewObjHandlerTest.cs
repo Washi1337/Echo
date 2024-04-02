@@ -31,7 +31,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.True(result.IsSuccess);
             var slot = Context.CurrentFrame.EvaluationStack.Peek();
             Assert.Equal(StackSlotTypeHint.Integer, slot.TypeHint);
-            var instanceType = slot.Contents.AsObjectHandle(Context.Machine).GetObjectType();
+            var instanceType = slot.Contents.AsObjectHandle(Context.Machine).GetMethodTable().Type;
             Assert.Equal("System.Object", instanceType.FullName);
         }
 
@@ -51,7 +51,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.Equal(StackSlotTypeHint.Integer, slot.TypeHint);
             
             var handle = slot.Contents.AsObjectHandle(Context.Machine);
-            Assert.Equal(typeof(SimpleClass).FullName, handle.GetObjectType().FullName);
+            Assert.Equal(typeof(SimpleClass).FullName, handle.GetMethodTable().Type.FullName);
 
             Assert.All(type.Fields.Where(f=>!f.IsStatic), field =>
             {

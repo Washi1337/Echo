@@ -33,7 +33,7 @@ public class CpBlkHandlerTest : CilOpCodeHandlerTestBase
 
         // Verify
         Assert.False(result.IsSuccess);
-        var exceptionType = result.ExceptionObject.GetObjectType();
+        var exceptionType = result.ExceptionObject.GetMethodTable().Type;
         Assert.Equal("System.NullReferenceException", exceptionType.FullName);
     }
     
@@ -56,7 +56,7 @@ public class CpBlkHandlerTest : CilOpCodeHandlerTestBase
 
         // Verify
         Assert.False(result.IsSuccess);
-        var exceptionType = result.ExceptionObject.GetObjectType();
+        var exceptionType = result.ExceptionObject.GetMethodTable().Type;
         Assert.Equal("System.NullReferenceException", exceptionType.FullName);
     }
     

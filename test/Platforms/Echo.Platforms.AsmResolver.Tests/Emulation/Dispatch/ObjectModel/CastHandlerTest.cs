@@ -68,7 +68,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode(), targetType));
             
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionObject.GetObjectType();
+            var exceptionType = result.ExceptionObject.GetMethodTable().Type;
             Assert.Equal("System.InvalidCastException", exceptionType.FullName);
         }
 
@@ -108,7 +108,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode(), targetType));
             
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionObject.GetObjectType();
+            var exceptionType = result.ExceptionObject.GetMethodTable().Type;
             Assert.Equal("System.InvalidCastException", exceptionType.FullName);
         }
 

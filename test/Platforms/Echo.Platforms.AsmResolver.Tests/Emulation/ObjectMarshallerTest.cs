@@ -73,7 +73,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
 
             var handle = _machine.ObjectMarshaller.ToBitVector(obj).AsObjectHandle(_machine);
 
-            var type = handle.GetObjectType();
+            var type = handle.GetMethodTable().Type;
             Assert.Equal(nameof(SimpleClass), type.Name);
 
             var definition = type.Resolve()!;
@@ -108,7 +108,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             
             var elementType = _machine.ContextModule.CorLibTypeFactory.Int32;
             
-            Assert.Equal(elementType.MakeSzArrayType(), result.GetObjectType().ToTypeSignature(), SignatureComparer.Default);
+            Assert.Equal(elementType.MakeSzArrayType(), result.GetMethodTable().Type.ToTypeSignature(), SignatureComparer.Default);
             Assert.Equal(array.Length, result.ReadArrayLength().AsSpan().I32);
             Assert.All(Enumerable.Range(0, array.Length), i =>
             {

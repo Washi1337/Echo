@@ -239,7 +239,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                 {
                     case CilExceptionHandlerType.Exception:
                         var supportedType = CurrentHandler.ExceptionType!.ToTypeSignature();
-                        var actualType = ExceptionObject.GetObjectType().ToTypeSignature();
+                        var actualType = ExceptionObject.GetMethodTable().Type.ToTypeSignature();
 
                         if (actualType.IsAssignableTo(supportedType))
                         {

@@ -44,7 +44,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     case { } actualAddress:
                         // A non-null reference was passed.
                         var handle = actualAddress.AsObjectHandle(context.Machine);
-                        var objectType = handle.GetObjectType().ToTypeSignature();
+                        var objectType = handle.GetMethodTable().Type.ToTypeSignature();
 
                         // TODO: handle full verifier-assignable-to operation.
                         return objectType.IsAssignableTo(targetType)

@@ -14,7 +14,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime;
 public sealed class RuntimeTypeManager
 {
     private readonly ConcurrentDictionary<IMethodDescriptor, int> _vtableIndices = new(EqualityComparer<IMethodDescriptor>.Default);
-    private readonly ConcurrentDictionary<ITypeDescriptor, MethodTable> _methodTables = new(SignatureComparer.Default);
+
+    private readonly ConcurrentDictionary<ITypeDescriptor, MethodTable> _methodTables = new(
+        new SignatureComparer(SignatureComparisonFlags.VersionAgnostic)
+    );
 
     /// <summary>
     /// Creates a new type manager for a .NET process that has the provided main module.

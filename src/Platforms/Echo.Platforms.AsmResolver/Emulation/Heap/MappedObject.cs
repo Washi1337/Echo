@@ -64,8 +64,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             uint offset = (uint) (address - _baseAddress);
             if (offset == 0)
             {
-                long methodTable = _machine.ValueFactory.ClrMockMemory.MethodTables.GetAddress(_virtualLayout.Type);
-                buffer.Write(methodTable);
+                var methodTable = _machine.TypeManager.GetMethodTable(_virtualLayout.Type);
+                buffer.Write(_machine.ValueFactory.ClrMockMemory.MethodTables.GetAddress(methodTable));
                 return;
             }
             
@@ -193,7 +193,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
                 return fieldInfo;
             
             // Find target field.
-            if (!_virtualLayout!.TryGetFieldAtOffset(offset, out var field))
+            if (!_virtualLayout.TryGetFieldAtOffset(offset, out var field))
                 return null;
 
             // Find corresponding reflection field.

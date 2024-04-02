@@ -53,7 +53,7 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
         Assert.True(result.IsSuccess);
         var handle = Assert.Single(stack).Contents.AsObjectHandle(Context.Machine);
         
-        Assert.Equal(type, handle.GetObjectType(), SignatureComparer.Default);
+        Assert.Equal(type, handle.GetMethodTable().Type, SignatureComparer.Default);
         Assert.Equal(1337, Context.Machine.Heap.GetObjectSpan(handle.Address).SliceObjectData(manager).I32);
     }
 
@@ -85,7 +85,7 @@ public class BoxHandlerTest : CilOpCodeHandlerTestBase
         Assert.True(result.IsSuccess);
         var handle = Assert.Single(stack).Contents.AsObjectHandle(Context.Machine);
         
-        Assert.Equal(type, handle.GetObjectType(), SignatureComparer.Default);
+        Assert.Equal(type, handle.GetMethodTable().Type, SignatureComparer.Default);
         var boxObjectSpan = Context.Machine.Heap.GetObjectSpan(handle.Address);
         Assert.Equal(1337, boxObjectSpan.SliceObjectField(manager, fieldX).I32);
         Assert.Equal(1338, boxObjectSpan.SliceObjectField(manager, fieldY).I32);

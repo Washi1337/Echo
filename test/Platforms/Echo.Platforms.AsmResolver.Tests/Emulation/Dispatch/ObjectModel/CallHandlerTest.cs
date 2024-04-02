@@ -352,7 +352,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.Same(method, Context.Thread.CallStack.Peek(1).Method);
 
             var exception = Assert.Throws<EmulatedException>(() => Context.Thread.StepOut());
-            Assert.Equal(nameof(TypeInitializationException), exception.ExceptionObject.GetObjectType().Name);
+            Assert.Equal(nameof(TypeInitializationException), exception.ExceptionObject.GetMethodTable().Type.Name);
         }
 
         [Fact]

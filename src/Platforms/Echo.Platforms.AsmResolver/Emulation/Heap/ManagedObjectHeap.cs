@@ -6,6 +6,7 @@ using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Memory;
 using Echo.Memory.Heap;
+using Echo.Platforms.AsmResolver.Emulation.Runtime;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Heap
 {
@@ -73,10 +74,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
                 case ElementType.String:
                     throw new InvalidOperationException("Cannot allocate a string without knowing its size.");
             }
-            
-            long address = _backingHeap.Allocate(_factory.TypeManager.GetMethodTable(type).DataSize, initialize);
+
+            var methodTable = _factory.TypeManager.GetMethodTable(type);
+            long address = _backingHeap.Allocate(methodTable.DataSize, initialize);
             var chunkSpan = _backingHeap.GetChunkSpan(address);
-            SetMethodTable(chunkSpan, type);
+            SetMethodTable(chunkSpan, methodTable);
             return address;
         }
 
@@ -94,7 +96,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             var chunkSpan = _backingHeap.GetChunkSpan(address);
 
             // Set object type.
-            SetMethodTable(chunkSpan, elementType.MakeSzArrayType());
+            SetMethodTable(chunkSpan, _factory.TypeManager.GetMethodTable(elementType.MakeSzArrayType()));
 
             // Set array length field.
             chunkSpan.SliceArrayLength(_factory.TypeManager).WriteNativeInteger(elementCount, _factory.Is32Bit);
@@ -128,14 +130,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// <returns>The address of the string that was allocated.</returns>
         public long AllocateString(int length, bool initialize)
         {
-            long address = _backingHeap.Allocate(_factory.TypeManager.GetStringObjectSize(length), initialize);
+            var manager = _factory.TypeManager;
+            
+            long address = _backingHeap.Allocate(manager.GetStringObjectSize(length), initialize);
             var chunkSpan = _backingHeap.GetChunkSpan(address);
 
             // Set object type.
-            SetMethodTable(chunkSpan, _factory.TypeManager.ContextModule.CorLibTypeFactory.String);
+            SetMethodTable(chunkSpan, manager.GetMethodTable(manager.ContextModule.CorLibTypeFactory.String));
             
             // Set string length field.
-            chunkSpan.SliceStringLength(_factory.TypeManager).Write(length);
+            chunkSpan.SliceStringLength(manager).Write(length);
 
             // Write null-terminator.
             chunkSpan.Slice(chunkSpan.Count - 16).Write((ushort) 0);
@@ -151,17 +155,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         public long AllocateString(BitVector contents)
         {
             int stringLength = contents.ByteCount / sizeof(char);
-            long address = _backingHeap.Allocate(_factory.TypeManager.GetStringObjectSize(stringLength), false);
+            var manager = _factory.TypeManager;
+            long address = _backingHeap.Allocate(manager.GetStringObjectSize(stringLength), false);
             var chunkSpan = _backingHeap.GetChunkSpan(address);
 
             // Set object type.
-            SetMethodTable(chunkSpan, _factory.TypeManager.ContextModule.CorLibTypeFactory.String);
+            SetMethodTable(chunkSpan, manager.GetMethodTable(manager.ContextModule.CorLibTypeFactory.String));
 
             // Set string length field.
-            chunkSpan.SliceStringLength(_factory.TypeManager).Write(stringLength);
+            chunkSpan.SliceStringLength(manager).Write(stringLength);
 
             // Write string contents.
-            chunkSpan.SliceStringData(_factory.TypeManager).Write(contents);
+            chunkSpan.SliceStringData(manager).Write(contents);
             
             // Write null-terminator.
             chunkSpan.Slice(chunkSpan.Count - 16).Write((ushort) 0);
@@ -185,9 +190,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             return address;
         }
         
-        private void SetMethodTable(BitVectorSpan objectSpan, ITypeDescriptor type) => objectSpan
+        private void SetMethodTable(BitVectorSpan objectSpan, MethodTable methodTable) => objectSpan
             .SliceObjectMethodTable(_factory.TypeManager)
-            .WriteNativeInteger(_factory.ClrMockMemory.MethodTables.GetAddress(type), _factory.TypeManager.Is32Bit);
+            .WriteNativeInteger(_factory.ClrMockMemory.MethodTables.GetAddress(methodTable), _factory.TypeManager.Is32Bit);
 
         /// <summary>
         /// Gets the size of the object at the provided address.

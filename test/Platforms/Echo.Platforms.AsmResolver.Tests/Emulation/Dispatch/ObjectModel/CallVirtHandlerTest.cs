@@ -1,11 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet;
-using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
@@ -87,7 +84,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Callvirt, baseMethod));
 
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionObject.GetObjectType();
+            var exceptionType = result.ExceptionObject.GetMethodTable().Type;
             Assert.Equal("System.NullReferenceException", exceptionType.FullName);
         }
 

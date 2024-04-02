@@ -73,16 +73,16 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         {
             var exception = _vm.ObjectMarshaller.ToObjectHandle(Activator.CreateInstance(exceptionType));
             var frame = GetMockFrame(nameof(TestClass.TryCatchCatch)).ExceptionHandlers[0];
-            
+
             Assert.Equal(new[]
             {
                 "System.IO.IOException",
                 "System.Net.WebException"
-            }, frame.Handlers.Select(x=>x.ExceptionType!.FullName));
+            }, frame.Handlers.Select(x => x.ExceptionType!.FullName));
 
             int? offset = frame.RegisterException(exception);
             if (expectedIndex.HasValue)
-                Assert.Same(frame.CurrentHandler, frame.Handlers[expectedIndex.Value]);
+                Assert.Same(frame.Handlers[expectedIndex.Value], frame.CurrentHandler);
             else
                 Assert.False(offset.HasValue);
         }

@@ -21,6 +21,16 @@ namespace Echo.Memory
         /// </summary>
         /// <param name="size">The size in bytes of the memory.</param>
         /// <param name="itemSize">The size in bytes of a single element.</param>
+        public GenericMockMemory(int size, int itemSize)
+            : this(size, itemSize, EqualityComparer<T>.Default)
+        {
+        }
+        
+        /// <summary>
+        /// Creates a new generic mock memory chunk.
+        /// </summary>
+        /// <param name="size">The size in bytes of the memory.</param>
+        /// <param name="itemSize">The size in bytes of a single element.</param>
         /// <param name="comparer">The equality comparer to use for comparing elements for uniqueness.</param>
         public GenericMockMemory(int size, int itemSize, IEqualityComparer<T> comparer)
             : base(size)

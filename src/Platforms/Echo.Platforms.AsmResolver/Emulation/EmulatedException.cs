@@ -12,7 +12,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <param name="exceptionObject">The handle to the virtual exception object.</param>
         public EmulatedException(ObjectHandle exceptionObject)
-            : base($"An exception of type {exceptionObject.GetObjectType().FullName} was thrown by the emulated code.")
+            : base($"An exception of type {exceptionObject.GetMethodTable().Type.FullName} was thrown by the emulated code.")
         {
             ExceptionObject = exceptionObject;
         }

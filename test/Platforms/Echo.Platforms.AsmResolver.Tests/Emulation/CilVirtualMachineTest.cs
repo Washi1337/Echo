@@ -528,7 +528,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             var method = _fixture.GetTestMethod(nameof(TestClass.TryFinally));
 
             var result = Assert.Throws<EmulatedException>(() => _mainThread.Call(method, new object[] {true}));
-            Assert.Equal("System.Exception", result.ExceptionObject.GetObjectType().FullName);
+            Assert.Equal("System.Exception", result.ExceptionObject.GetMethodTable().Type.FullName);
         }
         
         [Theory]
@@ -586,7 +586,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             }
 
             var result = Assert.Throws<EmulatedException>(() => _mainThread.Call(method, new[] {parameter}));
-            Assert.Equal(expectedException.GetType().FullName, result.ExceptionObject.GetObjectType().FullName);
+            Assert.Equal(expectedException.GetType().FullName, result.ExceptionObject.GetMethodTable().Type.FullName);
         }
 
         [Fact]

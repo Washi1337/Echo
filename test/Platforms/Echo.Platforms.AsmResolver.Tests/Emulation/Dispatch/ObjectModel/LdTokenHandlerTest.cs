@@ -1,4 +1,5 @@
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Echo.Platforms.AsmResolver.Tests.Mock;
@@ -24,8 +25,9 @@ public class LdTokenHandlerTest : CilOpCodeHandlerTestBase
         long handle = Assert.Single(Context.CurrentFrame.EvaluationStack).Contents
             .AsSpan()
             .ReadNativeInteger(Context.Machine.Is32Bit);
-        
-        Assert.Equal(type, Context.Machine.ValueFactory.ClrMockMemory.MethodTables.GetObject(handle));
+
+        var methodTable = Context.Machine.ValueFactory.ClrMockMemory.MethodTables.GetObject(handle);
+        Assert.Equal(type, methodTable.Type, SignatureComparer.Default);
     }
 
     [Fact]

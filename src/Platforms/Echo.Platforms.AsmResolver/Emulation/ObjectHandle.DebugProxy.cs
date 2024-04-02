@@ -19,7 +19,7 @@ public readonly partial struct ObjectHandle
 
             try
             {
-                return GetObjectType();
+                return GetMethodTable().Type.FullName;
             }
             catch
             {
@@ -45,7 +45,7 @@ public readonly partial struct ObjectHandle
                 if (_handle.IsNull)
                     return Array.Empty<KeyValuePair<object, object>>();
 
-                var type = _handle.GetObjectType().ToTypeSignature();
+                var type = _handle.GetMethodTable().Type.ToTypeSignature();
 
                 return type switch
                 {

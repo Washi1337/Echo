@@ -4,6 +4,7 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures.Types;
 using Echo.Memory;
+using Echo.Platforms.AsmResolver.Emulation.Runtime;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
@@ -63,7 +64,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <returns>The type.</returns>
         [MemberNotNull(nameof(Machine))]
-        public ITypeDescriptor GetObjectType()
+        public MethodTable GetMethodTable()
         {
             AssertIsValidHandle();
             
@@ -104,7 +105,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public TypeMemoryLayout GetMemoryLayout()
         {
             AssertIsValidHandle();
-            return Machine.ValueFactory.TypeManager.GetMethodTable(GetObjectType()).ContentsLayout;
+            return GetMethodTable().ContentsLayout;
         }
 
         /// <summary>
@@ -238,7 +239,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <exception cref="ArgumentException">Occurs when the array has an unknown length.</exception>
         public BitVector ReadArrayData(int startIndex, int length)
         {
-            var arrayType = GetObjectType();
+            var arrayType = GetMethodTable().Type;
             if (arrayType is not SzArrayTypeSignature { BaseType: { } elementType })
                 throw new ArgumentException("The object handle does not point to an array type");
             
@@ -273,7 +274,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The raw array data.</returns>
         public void ReadArrayData(BitVectorSpan buffer, int startIndex)
         {
-            var arrayType = GetObjectType();
+            var arrayType = GetMethodTable().Type;
             if (arrayType is not SzArrayTypeSignature { BaseType: { } elementType })
                 throw new ArgumentException("The object handle does not point to an array type");
 
@@ -374,7 +375,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public BitVector ReadObjectData()
         {
             AssertIsValidHandle();
-            var buffer = Machine.ValueFactory.CreateValue(GetObjectType().ToTypeSignature(), false);
+            var buffer = Machine.ValueFactory.CreateValue(GetMethodTable().Type.ToTypeSignature(), false);
             ReadObjectData(buffer);
             return buffer;
         }
@@ -426,6 +427,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <inheritdoc />
         public override string ToString()
         {
+            if (IsNull)
+                return "null";
+
             return Machine is null
                 ? "<invalid>"
                 : $"0x{Address.ToString(Machine.Is32Bit ? "X8" : "X16")} ({Tag})";

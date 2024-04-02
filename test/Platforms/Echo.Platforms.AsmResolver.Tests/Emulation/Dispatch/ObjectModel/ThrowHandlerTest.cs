@@ -28,7 +28,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Throw));
             
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionObject.GetObjectType();
+            var exceptionType = result.ExceptionObject.GetMethodTable().Type;
             Assert.Equal("System.NullReferenceException", exceptionType.FullName);
         }
 
@@ -50,7 +50,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Throw));
             
             Assert.False(result.IsSuccess);
-            var observedExceptionType = result.ExceptionObject.GetObjectType();
+            var observedExceptionType = result.ExceptionObject.GetMethodTable().Type;
             Assert.Equal(exceptionType, observedExceptionType, SignatureComparer.Default);
         }
     }

@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 
             // Verify
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionObject.GetObjectType();
+            var exceptionType = result.ExceptionObject.GetMethodTable().Type;
             Assert.Equal("System.NullReferenceException", exceptionType.FullName);
         }
 
@@ -55,7 +55,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 
             // Verify
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionObject.GetObjectType();
+            var exceptionType = result.ExceptionObject.GetMethodTable().Type;
             Assert.Equal("System.NullReferenceException", exceptionType.FullName);
         }
 

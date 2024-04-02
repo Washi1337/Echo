@@ -39,8 +39,12 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
             long address = _objectHeap.AllocateString(value);
             var objectSpan = _objectHeap.GetObjectSpan(address);
 
-            Assert.Equal(_factory.ContextModule.CorLibTypeFactory.String,
-                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64));
+            Assert.Equal(
+                _factory.ContextModule.CorLibTypeFactory.String,
+                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64).Type,
+                SignatureComparer.Default
+            );
+            
             Assert.Equal(value.Length, objectSpan.SliceStringLength(_manager).I32);
             Assert.Equal(value, new string(MemoryMarshal.Cast<byte, char>(objectSpan.SliceStringData(_manager).Bits)));
         }
@@ -78,8 +82,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
             // Verify type
             Assert.Equal(
                 _factory.ContextModule.CorLibTypeFactory.Int32.MakeSzArrayType(),
-                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64),
-                Comparer);
+                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64).Type,
+                Comparer
+            );
             
             // Verify length.
             var lengthSpan = objectSpan.SliceArrayLength(_manager);
@@ -110,8 +115,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
             // Verify type
             Assert.Equal(
                 elementType,
-                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64),
-                Comparer);
+                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64).Type,
+                Comparer
+            );
 
             // Verify contents.
             var actualValue = MemoryMarshal.Cast<byte, SimpleStruct>(dataSpan.Bits)[0];
@@ -147,8 +153,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
             // Verify type
             Assert.Equal(
                 elementType,
-                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64),
-                Comparer);
+                _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_manager).I64).Type,
+                Comparer
+            );
         }
     }
 }

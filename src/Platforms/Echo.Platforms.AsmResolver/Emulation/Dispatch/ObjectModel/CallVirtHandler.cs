@@ -37,7 +37,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 case var objectPointer:
                     // Determine the type to apply virtual dispatch on.
                     var objectType = context.CurrentFrame.ConstrainedType
-                        ?? objectPointer.AsObjectHandle(context.Machine).GetObjectType();
+                        ?? objectPointer.AsObjectHandle(context.Machine).GetMethodTable().Type;
                     
                     // Find the implementation.
                     var implementation = FindMethodImplementationInType(objectType.Resolve(), method.Resolve());

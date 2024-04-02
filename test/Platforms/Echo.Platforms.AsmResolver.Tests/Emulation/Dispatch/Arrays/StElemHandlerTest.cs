@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Stelem_I4));
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionObject.GetObjectType();
+            var exceptionType = result.ExceptionObject.GetMethodTable().Type;
             Assert.Equal("System.IndexOutOfRangeException", exceptionType.FullName);
         }
 

@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
         {
             _backingBuffer = new VirtualMemory(0x0300_0000);
 
-            MethodTables = new GenericMockMemory<ITypeDescriptor>(0x0100_0000, 0x100, SignatureComparer.Default);
+            MethodTables = new GenericMockMemory<MethodTable>(0x0100_0000, 0x100);
             Methods = new GenericMockMemory<IMethodDescriptor>(0x0100_0000, 0x20, SignatureComparer.Default);
             Fields = new GenericMockMemory<IFieldDescriptor>(0x0100_0000, 0x20, SignatureComparer.Default);
 
@@ -35,7 +35,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
         /// <summary>
         /// Gets the memory assigned for method table structures (types).
         /// </summary>
-        public GenericMockMemory<ITypeDescriptor> MethodTables
+        public GenericMockMemory<MethodTable> MethodTables
         {
             get;
         }

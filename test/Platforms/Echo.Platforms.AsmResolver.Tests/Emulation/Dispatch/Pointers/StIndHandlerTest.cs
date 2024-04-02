@@ -24,7 +24,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Stind_I4));
 
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionObject.GetObjectType();
+            var exceptionType = result.ExceptionObject.GetMethodTable().Type;
             Assert.Equal("System.NullReferenceException", exceptionType.FullName);
         }
 

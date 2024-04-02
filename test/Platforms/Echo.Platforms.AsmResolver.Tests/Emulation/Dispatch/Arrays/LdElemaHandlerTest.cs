@@ -39,7 +39,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
                 Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
             
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionObject.GetObjectType();
+            var exceptionType = result.ExceptionObject.GetMethodTable().Type;
             Assert.Equal("System.NullReferenceException", exceptionType.FullName);
         }
         
@@ -57,7 +57,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
                 Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
             
             Assert.False(result.IsSuccess);
-            var exceptionType = result.ExceptionObject.GetObjectType();
+            var exceptionType = result.ExceptionObject.GetMethodTable().Type;
             Assert.Equal("System.IndexOutOfRangeException", exceptionType.FullName);
         }
         
