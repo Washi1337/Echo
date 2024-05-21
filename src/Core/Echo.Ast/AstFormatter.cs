@@ -86,9 +86,9 @@ public class AstFormatter<TInstruction> :
     }
 
     /// <inheritdoc />
-    public void Visit(ExpressionStatement<TInstruction> expression, IndentedTextWriter state)
+    public void Visit(ExpressionStatement<TInstruction> statement, IndentedTextWriter state)
     {
-        expression.Expression.Accept(this, state);
+        statement.Expression.Accept(this, state);
         state.Write(';');
     }
 

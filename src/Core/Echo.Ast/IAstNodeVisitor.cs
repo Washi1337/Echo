@@ -73,7 +73,7 @@ namespace Echo.Ast
         /// <summary>
         /// Visits a given <see cref="ExpressionStatement{TInstruction}"/>
         /// </summary>
-        void Visit(ExpressionStatement<TInstruction> expression, TState state);
+        void Visit(ExpressionStatement<TInstruction> statement, TState state);
 
         /// <summary>
         /// Visits a given <see cref="PhiStatement{TInstruction}"/>

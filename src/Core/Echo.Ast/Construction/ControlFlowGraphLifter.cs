@@ -208,6 +208,10 @@ public sealed class ControlFlowGraphLifter<TInstruction>
     {
         var variables = FlushStackInternal(node, stack, static (n, value) =>
         {
+            // Optimization: If we are simply reassigning variables, we can skip introducing a new variable (inlining).
+            if (value is VariableExpression<TInstruction> variableExpression)
+                return variableExpression.Variable;
+            
             var intermediate = n.DeclareStackIntermediate();
             n.Transformed.Contents.Instructions.Add(Statement.Assignment(intermediate, value));
             return intermediate;
@@ -245,7 +249,7 @@ public sealed class ControlFlowGraphLifter<TInstruction>
     private static IList<IVariable> FlushStackInternal(
         LiftedNode<TInstruction> node, 
         Stack<Expression<TInstruction>> stack,
-        Func<LiftedNode<TInstruction>, Expression<TInstruction>, SyntheticVariable> flush)
+        Func<LiftedNode<TInstruction>, Expression<TInstruction>, IVariable> flush)
     {
         // Collect all values from the stack.
         var values = new Expression<TInstruction>[stack.Count];
