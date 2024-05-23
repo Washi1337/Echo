@@ -64,7 +64,12 @@ internal sealed class LiftedNode<TInstruction>
     public SyntheticVariable DeclareStackInput()
     {
         var result = new SyntheticVariable(Original.Offset, StackInputs.Count, SyntheticVariableKind.StackIn);
-        StackInputs.Insert(0, new PhiStatement<TInstruction>(result));
+        var phiStatement = new PhiStatement<TInstruction>(result)
+        {
+            OriginalRange = new AddressRange(Original.Offset, Original.Offset)
+        };
+        
+        StackInputs.Insert(0, phiStatement);
         return result;
     }
 
