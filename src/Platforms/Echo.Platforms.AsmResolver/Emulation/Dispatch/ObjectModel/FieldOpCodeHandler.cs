@@ -1,4 +1,5 @@
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel;
@@ -16,7 +17,9 @@ public abstract class FieldOpCodeHandler : ICilOpCodeHandler
         // Ensure the enclosing type is initialized in the runtime.
         if (field.DeclaringType is { } declaringType)
         {
-            var initResult = context.Machine.TypeManager.HandleInitialization(context.Thread, declaringType);
+            var genericContext = GenericContext.FromMember(context.CurrentFrame.Method);
+            var instantiated = declaringType.ToTypeSignature().InstantiateGenericTypes(genericContext);
+            var initResult = context.Machine.TypeManager.HandleInitialization(context.Thread, instantiated);
             if (!initResult.IsNoAction)
                 return initResult.ToDispatchResult();
         }

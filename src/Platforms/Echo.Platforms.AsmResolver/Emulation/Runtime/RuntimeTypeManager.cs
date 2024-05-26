@@ -104,10 +104,10 @@ public sealed class RuntimeTypeManager
                 initialization.Exception = _machine.Heap
                     .AllocateObject(_machine.ValueFactory.TypeInitializationExceptionType, true)
                     .AsObjectHandle(_machine);
-                    
+
                 return TypeInitializerResult.Exception(initialization.Exception);
             }
-            
+
             // "Call" the constructor.
             initialization.ConstructorCalled = true;
 
@@ -115,7 +115,18 @@ public sealed class RuntimeTypeManager
             var cctor = definition.GetStaticConstructor();
             if (cctor is not null)
             {
-                thread.CallStack.Push(cctor);
+                var result = (IMethodDescriptor) cctor;
+                
+                // Instantiate any args in the declaring type.
+                var context = GenericContext.FromType(type);
+                if (type.ToTypeSignature() is {} typeSignature)
+                {
+                    var newType = typeSignature.InstantiateGenericTypes(context);
+                    if (newType != typeSignature)
+                        result = newType.ToTypeDefOrRef().CreateMemberReference(cctor.Name!, cctor.Signature!);
+                }
+
+                thread.CallStack.Push(result);
                 return TypeInitializerResult.Redirected();
             }
 
