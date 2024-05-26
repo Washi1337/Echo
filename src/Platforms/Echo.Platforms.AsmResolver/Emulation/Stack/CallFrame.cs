@@ -186,9 +186,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                 throw new ArgumentOutOfRangeException(nameof(size));
 
             long address = AddressRange.End;
-            _localStorage = _localStorage.Resize(_localStorage.Count + size * 8, false);
+            int originalSize = _localStorage.Count;
+            _localStorage = _localStorage.Resize(originalSize + size * 8, false);
             if (!_initializeLocals)
-                _localStorage.AsSpan(0, (int) (address - _baseAddress)).MarkFullyUnknown();
+                _localStorage.AsSpan(originalSize, _localStorage.Count - originalSize).MarkFullyUnknown();
             
             return address;
         }
