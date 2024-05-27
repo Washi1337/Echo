@@ -54,6 +54,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         public static UnsafeInvoker UnsafeShim => UnsafeInvoker.Instance;
 
         /// <summary>
+        /// Gets the default shim for the <see cref="System.Delegate"/> class.
+        /// </summary>
+        public static DelegateInvoker DelegateShim => DelegateInvoker.Instance;
+
+        /// <summary>
         /// Gets the default shim for the <see cref="System.Runtime.CompilerServices.RuntimeHelpers"/> class.
         /// </summary>
         public static RuntimeHelpersInvoker RuntimeHelpersShim => RuntimeHelpersInvoker.Instance;
@@ -96,7 +101,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
             .WithFallback(UnsafeShim)
             .WithFallback(RuntimeHelpersShim)
             .WithFallback(IntrinsicsShim)
-            .WithFallback(MemoryMarshalShim);
+            .WithFallback(MemoryMarshalShim)
+            .WithFallback(DelegateShim);
 
         /// <summary>
         /// Chains the first method invoker with the provided method invoker in such a way that if the result of the

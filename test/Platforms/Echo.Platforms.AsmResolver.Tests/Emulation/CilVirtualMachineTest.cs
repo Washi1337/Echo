@@ -662,5 +662,36 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             _mainThread.Step();
             Assert.Equal(instructions[3].Offset, frame.ProgramCounter);
         }
+        
+        [Fact]
+        public void CallDelegate()
+        {
+            var method = _fixture.MockModule
+                    .LookupMember<TypeDefinition>(typeof(TestClass).MetadataToken)
+                    .Methods.First(m => m.Name == nameof(TestClass.TestDelegateCall));
+
+            _vm.Invoker = DefaultInvokers.DelegateShim.WithFallback(DefaultInvokers.StepIn);
+
+            _mainThread.CallStack.Push(method);
+            bool entered = false;
+            bool retIsFive = false;
+            while ((entered & retIsFive) != true)
+            {
+                _mainThread.Step();
+                if (!entered && _mainThread.CallStack.Count == 3
+                    && _mainThread.CallStack.Peek().Method.Name == "ReturnAnyInt")
+                    entered = true;
+                else if (entered && !retIsFive && _mainThread.CallStack.Count == 2)
+                {
+                    var stack = _mainThread.CallStack.Peek().EvaluationStack;
+                    if (stack.Count == 1 && stack.Peek().Contents.AsSpan().U32 == 5)
+                    {
+                        retIsFive = true;
+                    }
+                }
+            }
+            Assert.True(entered);
+            Assert.True(retIsFive);
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net;
 using InlineIL;
@@ -284,6 +284,16 @@ namespace Mocks
             }
 
             return result;
+        }
+        
+        public delegate int ReturnAnyIntDelegate();
+        
+        private static int ReturnAnyInt() => 5;
+        
+        public static int TestDelegateCall()
+        {
+            ReturnAnyIntDelegate del = ReturnAnyInt;
+            return del();
         }
     }
 }

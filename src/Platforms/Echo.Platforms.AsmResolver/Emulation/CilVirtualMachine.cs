@@ -43,6 +43,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             ValueFactory = new ValueFactory(contextModule, is32Bit);
             ObjectMapMemory = new ObjectMapMemory(this, 0x1000_0000);
             ObjectMarshaller = new ObjectMarshaller(this);
+            FunctionMarshaller = new FunctionMarshaller(this);
             
             if (is32Bit)
             {
@@ -175,6 +176,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets or sets the service for marshalling managed objects into bitvectors and back.
         /// </summary>
         public IObjectMarshaller ObjectMarshaller
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public IFunctionMarshaller FunctionMarshaller
         {
             get;
             set;
