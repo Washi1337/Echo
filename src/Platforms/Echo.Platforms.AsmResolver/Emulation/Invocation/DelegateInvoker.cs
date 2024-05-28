@@ -23,7 +23,7 @@ public class DelegateInvoker : IMethodInvoker
         if (method is not { Name: { } name, DeclaringType: { } declaringType, Signature: { } signature })
             return InvocationResult.Inconclusive();
         
-        if (declaringType.Resolve()?.BaseType?.IsTypeOf("System", "MulticastDelegate") == false)
+        if (declaringType.Resolve()?.IsDelegate == false)
             return InvocationResult.Inconclusive();
         
         if (method.Name == ".ctor")
@@ -42,24 +42,17 @@ public class DelegateInvoker : IMethodInvoker
     private InvocationResult ConstructDelegate(CilExecutionContext context, IList<BitVector> arguments)
     {
         var vm = context.Machine;
-        var corlib = vm.ContextModule.CorLibTypeFactory;
+        var valueFactory = vm.ValueFactory;
 
         var self = arguments[0].AsObjectHandle(vm);
         var obj = arguments[1];
         var methodPtr = arguments[2];
 
-        var _delegate = self.GetObjectType().Resolve()!.BaseType!.Resolve()!.BaseType;
-        IFieldDescriptor _target = new MemberReference(_delegate, "_target", new FieldSignature(corlib.Object));
-        IFieldDescriptor _methodPtr = new MemberReference(_delegate, "_methodPtr", new FieldSignature(corlib.IntPtr));
+        var _target = valueFactory.DelegateTargetField;
+        var _methodPtr = valueFactory.DelegateMethodPtrField;
 
-        if (obj.IsFullyKnown && obj.AsObjectHandle(vm).IsNull)
-            self.WriteField(_target, obj);
-
+        self.WriteField(_target, obj);
         self.WriteField(_methodPtr, methodPtr);
-
-        //var methodBase = vm.FunctionMarshaller.ResolveMethodPointer((nuint)methodPtr.AsSpan().ReadNativeInteger(vm.Is32Bit));
-        //if (methodBase != null)
-        //    self.WriteField(_methodBase, marshall IMethodDescriptor to RuntimeMethodInfo);
 
         return InvocationResult.StepOver(null);
     }
@@ -67,28 +60,26 @@ public class DelegateInvoker : IMethodInvoker
     private InvocationResult InvokeDelegate(CilExecutionContext context, IList<BitVector> arguments)
     {
         var vm = context.Machine;
+        var valueFactory = vm.ValueFactory;
         var stack = context.CurrentFrame.EvaluationStack;
-        var corlib = vm.ContextModule.CorLibTypeFactory;
 
         var self = arguments[0].AsObjectHandle(vm);
 
-        var _delegate = self.GetObjectType().Resolve()!.BaseType!.Resolve()!.BaseType;
-        IFieldDescriptor _target = new MemberReference(_delegate, "_target", new FieldSignature(corlib.Object));
-        IFieldDescriptor _methodPtr = new MemberReference(_delegate, "_methodPtr", new FieldSignature(corlib.IntPtr));
+        var _target = valueFactory.DelegateTargetField;
+        var _methodPtr = valueFactory.DelegateMethodPtrField;
 
         var methodPtr = self.ReadField(_methodPtr).AsSpan().ReadNativeInteger(vm.Is32Bit);
-        var method = vm.FunctionMarshaller.ResolveMethodPointer((nuint)methodPtr);
 
-        if (method == null)
-            throw new Exception("Cant resolve method");
+        if (!valueFactory.ClrMockMemory.MethodEntryPoints.TryGetObject(methodPtr, out var method))
+            throw new CilEmulatorException($"Cant resolve method from {self.GetObjectType().FullName}::_methodPtr. Possible causes: IMethodDescriptor was not mapped by the emulator, or memory was corrupted.");
 
-        var arg1 = self.ReadField(_target);
-        if (arg1.AsSpan().ReadNativeInteger(vm.Is32Bit) != 0)
-            stack.Push(arg1.AsObjectHandle(vm));
+        // read and push this for HasThis methods
+        if (method!.Signature!.HasThis)
+            stack.Push(self.ReadField(_target).AsObjectHandle(vm));
 
         // skip 1 for delegate "this"
         for (var i = 1; i < arguments.Count; i++)
-            stack.Push(arguments[i], method.Signature!.ParameterTypes[i]);
+            stack.Push(arguments[i], method!.Signature!.ParameterTypes[i]);
 
         var result = vm.Dispatcher.Dispatch(context, new(CilOpCodes.Call, method));
 

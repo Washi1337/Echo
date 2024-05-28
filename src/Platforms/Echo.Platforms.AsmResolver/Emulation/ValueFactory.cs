@@ -46,6 +46,22 @@ namespace Echo.Platforms.AsmResolver.Emulation
             // Force System.String to be aligned at 4 bytes (required for low level string APIs).
             GetTypeDefOrRefContentsLayout(contextModule.CorLibTypeFactory.String.Type, default, 4);
 
+            DelegateType = new TypeReference(
+                contextModule,
+                contextModule.CorLibTypeFactory.CorLibScope,
+                nameof(System),
+                nameof(Delegate)).Resolve()!;
+
+            DelegateTargetField = new MemberReference(
+                (IMemberRefParent)DelegateType,
+                "_target",
+                new FieldSignature(contextModule.CorLibTypeFactory.Object));
+
+            DelegateMethodPtrField = new MemberReference(
+                (IMemberRefParent)DelegateType,
+                "_methodPtr",
+                new FieldSignature(contextModule.CorLibTypeFactory.IntPtr));
+
             DecimalType = new TypeReference(
                 contextModule, 
                 contextModule.CorLibTypeFactory.CorLibScope, 
@@ -143,6 +159,30 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// Gets a reference to the <see cref="Decimal"/> type. 
         /// </summary>
         public ITypeDescriptor DecimalType
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a reference to the <see cref="Delegate"/> type. 
+        /// </summary>
+        public ITypeDescriptor DelegateType
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Get a reference to the <see cref="Delegate"/> _target field.
+        /// </summary>
+        public IFieldDescriptor DelegateTargetField
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Get a reference to the <see cref="Delegate"/> _methodPtr field.
+        /// </summary>
+        public IFieldDescriptor DelegateMethodPtrField
         {
             get;
         }

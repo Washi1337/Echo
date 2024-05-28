@@ -15,10 +15,10 @@ public class LdftnHandler: FallThroughOpCodeHandler
     {
         var stack = context.CurrentFrame.EvaluationStack;
         var factory = context.Machine.ValueFactory;
-        var marshaller = context.Machine.FunctionMarshaller;
+        var methods = context.Machine.ValueFactory.ClrMockMemory.MethodEntryPoints;
         var type = context.Machine.ContextModule.CorLibTypeFactory.IntPtr;
 
-        var functionPointer = marshaller.GetFunctionPointer((IMethodDescriptor)instruction.Operand!);
+        var functionPointer = methods.GetAddress((IMethodDescriptor)instruction.Operand!);
         stack.Push(factory.CreateNativeInteger((long)functionPointer), type);
 
         return CilDispatchResult.Success();
