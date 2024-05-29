@@ -33,7 +33,7 @@ public class DelegateInvoker : IMethodInvoker
         
         if (method.Name == "Invoke")
         {
-            return InvokeDelegate(context, arguments);
+            return InvokeDelegate(context, method, arguments);
         }
 
         return InvocationResult.Inconclusive();
@@ -57,7 +57,7 @@ public class DelegateInvoker : IMethodInvoker
         return InvocationResult.StepOver(null);
     }
     
-    private InvocationResult InvokeDelegate(CilExecutionContext context, IList<BitVector> arguments)
+    private InvocationResult InvokeDelegate(CilExecutionContext context, IMethodDescriptor invokeMethod, IList<BitVector> arguments)
     {
         var vm = context.Machine;
         var valueFactory = vm.ValueFactory;
@@ -73,19 +73,21 @@ public class DelegateInvoker : IMethodInvoker
         if (!valueFactory.ClrMockMemory.MethodEntryPoints.TryGetObject(methodPtr, out var method))
             throw new CilEmulatorException($"Cant resolve method from {self.GetObjectType().FullName}::_methodPtr. Possible causes: IMethodDescriptor was not mapped by the emulator, or memory was corrupted.");
 
+        
+        context.Thread.CallStack.Push(invokeMethod).IsTrampoline = true;
+        
+        var frame = context.Thread.CallStack.Push(method!);
+
+        int argumentIndex = 0;
+
         // read and push this for HasThis methods
         if (method!.Signature!.HasThis)
-            stack.Push(self.ReadField(_target).AsObjectHandle(vm));
+            frame.WriteArgument(argumentIndex++, self.ReadField(_target));
 
         // skip 1 for delegate "this"
         for (var i = 1; i < arguments.Count; i++)
-            stack.Push(arguments[i], method!.Signature!.ParameterTypes[i]);
+            frame.WriteArgument(argumentIndex++, arguments[i]);
 
-        var result = vm.Dispatcher.Dispatch(context, new(CilOpCodes.Call, method));
-
-        if (!result.IsSuccess)
-            return InvocationResult.Exception(result.ExceptionObject);
-
-        return InvocationResult.StepOver(null);
+        return InvocationResult.FullyHandled();
     }
 }

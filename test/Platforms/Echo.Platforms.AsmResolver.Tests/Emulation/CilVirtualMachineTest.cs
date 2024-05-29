@@ -673,25 +673,48 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             _vm.Invoker = DefaultInvokers.DelegateShim.WithFallback(DefaultInvokers.StepIn);
 
             _mainThread.CallStack.Push(method);
-            bool entered = false;
-            bool retIsFive = false;
-            while ((entered & retIsFive) != true)
+
+            bool enteredInDelegateInvoke = false;
+            bool enteredInReturnAnyInt = false;
+            bool retFromInnerMethodIsFive = false;
+            bool retFromDelegateInvokeIsFive = false;
+            while ((enteredInDelegateInvoke
+                & enteredInReturnAnyInt
+                & retFromInnerMethodIsFive
+                & retFromDelegateInvokeIsFive) != true)
             {
                 _mainThread.Step();
-                if (!entered && _mainThread.CallStack.Count == 3
+                // check if ReturnAnyIntDelegate::Invoke() has been called
+                if (!enteredInDelegateInvoke && _mainThread.CallStack.Count == 3
+                    && _mainThread.CallStack.Peek().Method.Name == "Invoke")
+                    enteredInDelegateInvoke = true;
+                // check if TestClass::ReturnAnyInt() has been called
+                if (!enteredInReturnAnyInt && _mainThread.CallStack.Count == 4
                     && _mainThread.CallStack.Peek().Method.Name == "ReturnAnyInt")
-                    entered = true;
-                else if (entered && !retIsFive && _mainThread.CallStack.Count == 2)
+                    enteredInReturnAnyInt = true;
+                // check if TestClass::ReturnAnyInt() returns 5
+                if ((enteredInDelegateInvoke & enteredInReturnAnyInt) && _mainThread.CallStack.Count == 3)
                 {
                     var stack = _mainThread.CallStack.Peek().EvaluationStack;
                     if (stack.Count == 1 && stack.Peek().Contents.AsSpan().U32 == 5)
                     {
-                        retIsFive = true;
+                        retFromInnerMethodIsFive = true;
+                    }
+                }
+                // check if ReturnAnyIntDelegate::Invoke() returns 5
+                else if ((enteredInDelegateInvoke & enteredInReturnAnyInt & retFromInnerMethodIsFive) && _mainThread.CallStack.Count == 2)
+                {
+                    var stack = _mainThread.CallStack.Peek().EvaluationStack;
+                    if (stack.Count == 1 && stack.Peek().Contents.AsSpan().U32 == 5)
+                    {
+                        retFromDelegateInvokeIsFive = true;
                     }
                 }
             }
-            Assert.True(entered);
-            Assert.True(retIsFive);
+            Assert.True(enteredInDelegateInvoke);
+            Assert.True(enteredInReturnAnyInt);
+            Assert.True(retFromInnerMethodIsFive);
+            Assert.True(retFromDelegateInvokeIsFive);
         }
     }
 }

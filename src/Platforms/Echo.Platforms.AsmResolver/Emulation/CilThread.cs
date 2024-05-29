@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
@@ -235,6 +236,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
             
             if (CallStack.Peek().IsRoot)
                 throw new CilEmulatorException("No method is currently being executed.");
+
+            if (CallStack.Peek().IsTrampoline)
+            {
+                var trampolineFrame = CallStack.Pop();
+                if (trampolineFrame.EvaluationStack.Count != 0)
+                    CallStack.Peek().EvaluationStack.Push(trampolineFrame.EvaluationStack.Pop());
+                return;
+            }
 
             var currentFrame = CallStack.Peek();
             if (currentFrame.Body is not { } body)

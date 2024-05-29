@@ -70,7 +70,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// The result that was produced by the method, or <c>null</c> if the method does not return a value.
         /// </param>
         public static InvocationResult StepOver(BitVector? value) => new(InvocationResultType.StepOver, value, default);
-        
+
+        /// <summary>
+        /// Constructs a new conclusive invocation result, where the invocation was fully emulated by the invoker.
+        /// </summary>
+        public static InvocationResult FullyHandled() => new(InvocationResultType.FullyHandled, null, default);
+
         /// <summary>
         /// Constructs a new failed invocation result with the provided pointer to an exception object describing the
         /// error that occurred.
