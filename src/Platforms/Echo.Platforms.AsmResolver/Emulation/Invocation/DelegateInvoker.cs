@@ -61,7 +61,6 @@ public class DelegateInvoker : IMethodInvoker
     {
         var vm = context.Machine;
         var valueFactory = vm.ValueFactory;
-        var stack = context.CurrentFrame.EvaluationStack;
 
         var self = arguments[0].AsObjectHandle(vm);
 
@@ -73,21 +72,35 @@ public class DelegateInvoker : IMethodInvoker
         if (!valueFactory.ClrMockMemory.MethodEntryPoints.TryGetObject(methodPtr, out var method))
             throw new CilEmulatorException($"Cant resolve method from {self.GetObjectType().FullName}::_methodPtr. Possible causes: IMethodDescriptor was not mapped by the emulator, or memory was corrupted.");
 
-        
-        context.Thread.CallStack.Push(invokeMethod).IsTrampoline = true;
-        
-        var frame = context.Thread.CallStack.Push(method!);
+
+        var trampolineFrame = context.Thread.CallStack.Push(invokeMethod);
+        trampolineFrame.IsTrampoline = true;
+
+        var newArguments = new BitVector[method!.Signature!.GetTotalParameterCount()];
 
         int argumentIndex = 0;
 
         // read and push this for HasThis methods
         if (method!.Signature!.HasThis)
-            frame.WriteArgument(argumentIndex++, self.ReadField(_target));
+            newArguments[argumentIndex++] = self.ReadField(_target);
 
         // skip 1 for delegate "this"
         for (var i = 1; i < arguments.Count; i++)
-            frame.WriteArgument(argumentIndex++, arguments[i]);
+            newArguments[argumentIndex++] = arguments[i];
 
+        var result = context.Machine.Invoker.Invoke(context, method, newArguments);
+
+        if (!result.IsSuccess)
+            return result; // return error
+        else if (result.ResultType == InvocationResultType.StepIn)
+        {
+            var frame = context.Thread.CallStack.Push(method);
+            for (int i = 0; i < newArguments.Length; i++)
+                frame.WriteArgument(i, newArguments[i]);
+        }
+        else if (result.ResultType == InvocationResultType.StepOver && result.Value != null)
+            trampolineFrame.EvaluationStack.Push(result.Value, method!.Signature!.ReturnType);
+        
         return InvocationResult.FullyHandled();
     }
 }
