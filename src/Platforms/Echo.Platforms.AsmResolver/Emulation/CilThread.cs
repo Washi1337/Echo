@@ -240,7 +240,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (CallStack.Peek().IsTrampoline)
             {
                 var trampolineFrame = CallStack.Pop();
-                if (trampolineFrame.EvaluationStack.Count != 0)
+                if (trampolineFrame.Method.Signature!.ReturnsValue)
                     CallStack.Peek().EvaluationStack.Push(trampolineFrame.EvaluationStack.Pop());
                 return;
             }

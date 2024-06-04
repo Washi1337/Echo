@@ -671,50 +671,44 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                     .Methods.First(m => m.Name == nameof(TestClass.TestDelegateCall));
 
             _vm.Invoker = DefaultInvokers.DelegateShim.WithFallback(DefaultInvokers.StepIn);
-
             _mainThread.CallStack.Push(method);
 
-            bool enteredInDelegateInvoke = false;
-            bool enteredInReturnAnyInt = false;
-            bool retFromInnerMethodIsFive = false;
-            bool retFromDelegateInvokeIsFive = false;
-            while ((enteredInDelegateInvoke
-                & enteredInReturnAnyInt
-                & retFromInnerMethodIsFive
-                & retFromDelegateInvokeIsFive) != true)
-            {
-                _mainThread.Step();
-                // check if ReturnAnyIntDelegate::Invoke() has been called
-                if (!enteredInDelegateInvoke && _mainThread.CallStack.Count == 3
-                    && _mainThread.CallStack.Peek().Method.Name == "Invoke")
-                    enteredInDelegateInvoke = true;
-                // check if TestClass::ReturnAnyInt() has been called
-                if (!enteredInReturnAnyInt && _mainThread.CallStack.Count == 4
-                    && _mainThread.CallStack.Peek().Method.Name == "ReturnAnyInt")
-                    enteredInReturnAnyInt = true;
-                // check if TestClass::ReturnAnyInt() returns 5
-                if ((enteredInDelegateInvoke & enteredInReturnAnyInt) && _mainThread.CallStack.Count == 3)
-                {
-                    var stack = _mainThread.CallStack.Peek().EvaluationStack;
-                    if (stack.Count == 1 && stack.Peek().Contents.AsSpan().U32 == 5)
-                    {
-                        retFromInnerMethodIsFive = true;
-                    }
-                }
-                // check if ReturnAnyIntDelegate::Invoke() returns 5
-                else if ((enteredInDelegateInvoke & enteredInReturnAnyInt & retFromInnerMethodIsFive) && _mainThread.CallStack.Count == 2)
-                {
-                    var stack = _mainThread.CallStack.Peek().EvaluationStack;
-                    if (stack.Count == 1 && stack.Peek().Contents.AsSpan().U32 == 5)
-                    {
-                        retFromDelegateInvokeIsFive = true;
-                    }
-                }
-            }
-            Assert.True(enteredInDelegateInvoke);
-            Assert.True(enteredInReturnAnyInt);
-            Assert.True(retFromInnerMethodIsFive);
-            Assert.True(retFromDelegateInvokeIsFive);
+            var instructions = method.CilMethodBody!.Instructions;
+
+            var callDelegateOffset = instructions.First(instruction => instruction.OpCode.Code == CilCode.Callvirt).Offset;
+
+            _mainThread.StepWhile(CancellationToken.None, context => context.CurrentFrame.ProgramCounter != callDelegateOffset);
+            _mainThread.Step(); // call delegate::invoke
+            // callstack:
+            // (0) root -> (1) TestClass::TestDelegateCall -> (2) ReturnAnyIntDelegate::Invoke -> (3) TestClass::ReturnAnyInt
+            Assert.Equal(4, _mainThread.CallStack.Count);
+
+            _mainThread.StepOut();
+            // callstack:
+            // (0) root -> (1) TestClass::TestDelegateCall -> (2) ReturnAnyIntDelegate::Invoke
+            // evaluation stack:
+            // (0) i32: 5
+            Assert.Equal(3, _mainThread.CallStack.Count);
+            Assert.Single(_mainThread.CallStack.Peek().EvaluationStack);
+            Assert.Equal(5, _mainThread.CallStack.Peek().EvaluationStack.Peek().Contents.AsSpan().I32);
+
+            _mainThread.StepOut();
+            // callstack:
+            // (0) root -> (1) TestClass::TestDelegateCall
+            // evaluation stack:
+            // (0) i32: 5
+            Assert.Equal(2, _mainThread.CallStack.Count);
+            Assert.Single(_mainThread.CallStack.Peek().EvaluationStack);
+            Assert.Equal(5, _mainThread.CallStack.Peek().EvaluationStack.Peek().Contents.AsSpan().I32);
+
+            _mainThread.StepOut();
+            // callstack:
+            // (0) root
+            // evaluation stack:
+            // (0) i32: 5
+            Assert.Single(_mainThread.CallStack);
+            Assert.Single(_mainThread.CallStack.Peek().EvaluationStack);
+            Assert.Equal(5, _mainThread.CallStack.Peek().EvaluationStack.Peek().Contents.AsSpan().I32);
         }
     }
 }

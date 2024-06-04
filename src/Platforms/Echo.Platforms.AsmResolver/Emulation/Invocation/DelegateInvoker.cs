@@ -23,20 +23,21 @@ public class DelegateInvoker : IMethodInvoker
         if (method is not { Name: { } name, DeclaringType: { } declaringType, Signature: { } signature })
             return InvocationResult.Inconclusive();
         
-        if (declaringType.Resolve()?.IsDelegate == false)
+        if (declaringType.Resolve() is { IsDelegate: false })
             return InvocationResult.Inconclusive();
         
         if (method.Name == ".ctor")
         {
             return ConstructDelegate(context, arguments);
         }
-        
-        if (method.Name == "Invoke")
+        else if (method.Name == "Invoke")
         {
             return InvokeDelegate(context, method, arguments);
         }
-
-        return InvocationResult.Inconclusive();
+        else
+        {
+            return InvocationResult.Inconclusive();
+        }
     }
     
     private InvocationResult ConstructDelegate(CilExecutionContext context, IList<BitVector> arguments)
@@ -48,11 +49,8 @@ public class DelegateInvoker : IMethodInvoker
         var obj = arguments[1];
         var methodPtr = arguments[2];
 
-        var _target = valueFactory.DelegateTargetField;
-        var _methodPtr = valueFactory.DelegateMethodPtrField;
-
-        self.WriteField(_target, obj);
-        self.WriteField(_methodPtr, methodPtr);
+        self.WriteField(valueFactory.DelegateTargetField, obj);
+        self.WriteField(valueFactory.DelegateMethodPtrField, methodPtr);
 
         return InvocationResult.StepOver(null);
     }
@@ -64,17 +62,15 @@ public class DelegateInvoker : IMethodInvoker
 
         var self = arguments[0].AsObjectHandle(vm);
 
-        var _target = valueFactory.DelegateTargetField;
-        var _methodPtr = valueFactory.DelegateMethodPtrField;
+        var methodPtrFieldValue = self.ReadField(valueFactory.DelegateMethodPtrField);
 
-        var methodPtr = self.ReadField(_methodPtr).AsSpan().ReadNativeInteger(vm.Is32Bit);
+        if (!methodPtrFieldValue.IsFullyKnown)
+            throw new CilEmulatorException($"Field {self.GetObjectType().FullName}::_methodPtr contains an unknown value. Perhaps delegate was initialised with an error, or memory was corrupted.");
+
+        var methodPtr = methodPtrFieldValue.AsSpan().ReadNativeInteger(vm.Is32Bit);
 
         if (!valueFactory.ClrMockMemory.MethodEntryPoints.TryGetObject(methodPtr, out var method))
             throw new CilEmulatorException($"Cant resolve method from {self.GetObjectType().FullName}::_methodPtr. Possible causes: IMethodDescriptor was not mapped by the emulator, or memory was corrupted.");
-
-
-        var trampolineFrame = context.Thread.CallStack.Push(invokeMethod);
-        trampolineFrame.IsTrampoline = true;
 
         var newArguments = new BitVector[method!.Signature!.GetTotalParameterCount()];
 
@@ -82,7 +78,7 @@ public class DelegateInvoker : IMethodInvoker
 
         // read and push this for HasThis methods
         if (method!.Signature!.HasThis)
-            newArguments[argumentIndex++] = self.ReadField(_target);
+            newArguments[argumentIndex++] = self.ReadField(valueFactory.DelegateTargetField);
 
         // skip 1 for delegate "this"
         for (var i = 1; i < arguments.Count; i++)
@@ -91,15 +87,26 @@ public class DelegateInvoker : IMethodInvoker
         var result = context.Machine.Invoker.Invoke(context, method, newArguments);
 
         if (!result.IsSuccess)
-            return result; // return error
+        {
+            // return error
+            return result;
+        }
+        else if (result.ResultType == InvocationResultType.StepOver)
+        {
+            // return value
+            return result;
+        }
         else if (result.ResultType == InvocationResultType.StepIn)
         {
+            // create and push the trampoline frame
+            var trampolineFrame = context.Thread.CallStack.Push(invokeMethod);
+            trampolineFrame.IsTrampoline = true;
+
+            // create and push the method for which the delegate was created
             var frame = context.Thread.CallStack.Push(method);
             for (int i = 0; i < newArguments.Length; i++)
                 frame.WriteArgument(i, newArguments[i]);
         }
-        else if (result.ResultType == InvocationResultType.StepOver && result.Value != null)
-            trampolineFrame.EvaluationStack.Push(result.Value, method!.Signature!.ReturnType);
         
         return InvocationResult.FullyHandled();
     }
