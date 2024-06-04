@@ -10,7 +10,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// Indicates the invocation was not handled yet.
         /// </summary>
         Inconclusive,
-        
+
         /// <summary>
         /// Indicates the invocation is handled as a step-in action.
         /// </summary>
@@ -20,7 +20,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// Indicates the invocation is handled fully by the invoker.
         /// </summary>
         StepOver,
-        
+
+        /// <summary>
+        /// Indicates the invocation is fully emulated by the invoker.
+        /// </summary>
+        FullyHandled,
+
         /// <summary>
         /// Indicates the invocation resulted in an error.
         /// </summary>

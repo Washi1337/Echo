@@ -241,6 +241,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
                     return CilDispatchResult.Success();
 
+                case InvocationResultType.FullyHandled:
+                    return CilDispatchResult.Success();
+
                 case InvocationResultType.Exception:
                     // There was an exception during the invocation. Throw it.
                     return CilDispatchResult.Exception(result.ExceptionObject);

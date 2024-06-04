@@ -662,5 +662,53 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             _mainThread.Step();
             Assert.Equal(instructions[3].Offset, frame.ProgramCounter);
         }
+        
+        [Fact]
+        public void CallDelegate()
+        {
+            var method = _fixture.MockModule
+                    .LookupMember<TypeDefinition>(typeof(TestClass).MetadataToken)
+                    .Methods.First(m => m.Name == nameof(TestClass.TestDelegateCall));
+
+            _vm.Invoker = DefaultInvokers.DelegateShim.WithFallback(DefaultInvokers.StepIn);
+            _mainThread.CallStack.Push(method);
+
+            var instructions = method.CilMethodBody!.Instructions;
+
+            var callDelegateOffset = instructions.First(instruction => instruction.OpCode.Code == CilCode.Callvirt).Offset;
+
+            _mainThread.StepWhile(CancellationToken.None, context => context.CurrentFrame.ProgramCounter != callDelegateOffset);
+            _mainThread.Step(); // call delegate::invoke
+            // callstack:
+            // (0) root -> (1) TestClass::TestDelegateCall -> (2) ReturnAnyIntDelegate::Invoke -> (3) TestClass::ReturnAnyInt
+            Assert.Equal(4, _mainThread.CallStack.Count);
+
+            _mainThread.StepOut();
+            // callstack:
+            // (0) root -> (1) TestClass::TestDelegateCall -> (2) ReturnAnyIntDelegate::Invoke
+            // evaluation stack:
+            // (0) i32: 5
+            Assert.Equal(3, _mainThread.CallStack.Count);
+            Assert.Single(_mainThread.CallStack.Peek().EvaluationStack);
+            Assert.Equal(5, _mainThread.CallStack.Peek().EvaluationStack.Peek().Contents.AsSpan().I32);
+
+            _mainThread.StepOut();
+            // callstack:
+            // (0) root -> (1) TestClass::TestDelegateCall
+            // evaluation stack:
+            // (0) i32: 5
+            Assert.Equal(2, _mainThread.CallStack.Count);
+            Assert.Single(_mainThread.CallStack.Peek().EvaluationStack);
+            Assert.Equal(5, _mainThread.CallStack.Peek().EvaluationStack.Peek().Contents.AsSpan().I32);
+
+            _mainThread.StepOut();
+            // callstack:
+            // (0) root
+            // evaluation stack:
+            // (0) i32: 5
+            Assert.Single(_mainThread.CallStack);
+            Assert.Single(_mainThread.CallStack.Peek().EvaluationStack);
+            Assert.Equal(5, _mainThread.CallStack.Peek().EvaluationStack.Peek().Contents.AsSpan().I32);
+        }
     }
 }

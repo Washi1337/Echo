@@ -118,6 +118,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public bool IsRoot { get; }
 
         /// <summary>
+        /// Gets a value indicating that the frame is a trampoline, and that it immediately returns the value of the next method on the stack
+        /// </summary>
+        public bool IsTrampoline { get; set; }
+
+        /// <summary>
         /// Gets the method which this frame was associated with.
         /// </summary>
         public IMethodDescriptor Method { get; }
