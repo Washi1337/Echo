@@ -295,5 +295,21 @@ namespace Mocks
             ReturnAnyIntDelegate del = ReturnAnyInt;
             return del();
         }
+
+        public static void TestVirtualDelegateCall()
+        {
+            var objects = new object[] { "Mr.String", new TestClass() };
+            for(int i = 0; i < objects.Length; i++)
+            {
+                var @object = objects[i];
+                var function = new Func<string>(@object.ToString);
+                _ = function();
+            }
+        }
+
+        public override string ToString()
+        {
+            return "Mocks.TestClass";
+        }
     }
 }
