@@ -27,30 +27,34 @@ public class LdvirtftnHandler : FallThroughOpCodeHandler
         if (thisObjectType == null)
             throw new CilEmulatorException("Unable to resolve the type of object");
 
-        var virtualFunction = ((IMethodDescriptor)instruction.Operand!);
-        var virtualFunctionName = virtualFunction.Name;
-        var virtualFunctionSignature = virtualFunction.Signature;
+        var virtualFunction = (IMethodDescriptor)instruction.Operand!;
 
-        do
-        {   
-            // try resolve function
-            var resolvedVirtualFunction = thisObjectType.Methods
-                .FirstOrDefault(method => method.Name == virtualFunctionName 
-                && SignatureComparer.Default.Equals(method.Signature, virtualFunctionSignature));
+        IMethodDescriptor? implementation = CallHandlerBase.FindMethodImplementationInType(thisObjectType, virtualFunction.Resolve());
 
-            // if resolved then push function pointer
-            if (resolvedVirtualFunction != null)
-            {
-                var functionPointer = methods.GetAddress(resolvedVirtualFunction);
-                stack.Push(factory.CreateNativeInteger(functionPointer), type);
-                return CilDispatchResult.Success();
-            }
+        if (implementation == null)
+        {
+            return CilDispatchResult.Exception(
+                context.Machine.Heap.AllocateObject(
+                        context.Machine.ValueFactory.MissingMethodExceptionType,
+                        true)
+                    .AsObjectHandle(context.Machine)
+            );
+        }
 
-            // else switch to BaseType and try resolve again
-            thisObjectType = thisObjectType.BaseType?.Resolve();
-        }   // or exit and throw CilEmulationException
-        while (thisObjectType != null);
+        // Instantiate any generics.
+        var genericContext = GenericContext.FromMethod(virtualFunction);
+        if (!genericContext.IsEmpty)
+        {
+            var instantiated = thisObjectType
+            .CreateMemberReference(implementation.Name!, implementation.Signature!);
 
-        throw new CilEmulatorException($"Unable to resolve a virtual function for type {thisObjectType!.FullName}");
+            implementation = genericContext.Method != null
+                ? instantiated.MakeGenericInstanceMethod(genericContext.Method.TypeArguments.ToArray())
+                : instantiated;
+        }
+
+        var functionPointer = methods.GetAddress(implementation);
+        stack.Push(factory.CreateNativeInteger(functionPointer), type);
+        return CilDispatchResult.Success();
     }
 }
