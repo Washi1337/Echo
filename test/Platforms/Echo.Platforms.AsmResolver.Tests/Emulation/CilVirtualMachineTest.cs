@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using AsmResolver;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
@@ -709,6 +710,42 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             Assert.Single(_mainThread.CallStack);
             Assert.Single(_mainThread.CallStack.Peek().EvaluationStack);
             Assert.Equal(5, _mainThread.CallStack.Peek().EvaluationStack.Peek().Contents.AsSpan().I32);
+        }
+
+        [Fact]
+        public void CallDelegateWithVirtualFunction()
+        {
+            var method = _fixture.MockModule
+                    .LookupMember<TypeDefinition>(typeof(TestClass).MetadataToken)
+                    .Methods.First(m => m.Name == nameof(TestClass.TestVirtualDelegateCall));
+
+            _vm.Invoker = DefaultInvokers.CreateDefaultShims().WithFallback(DefaultInvokers.StepIn).WithFallback(DefaultInvokers.ReflectionInvoke);
+            _mainThread.CallStack.Push(method);
+
+            var instructions = method.CilMethodBody!.Instructions;
+
+            var invokeDelegateOffset = instructions
+                .First(instruction => instruction.Operand is IMethodDescriptor descriptor 
+                    && descriptor.Name == "Invoke")
+                .Offset;
+
+            var expectedResults = new string[] { "Mr.String", "Mocks.TestClass" };
+
+            for (int i = 0; i < expectedResults.Length; i++)
+            {
+                _mainThread.StepWhile(CancellationToken.None, context => context.CurrentFrame.ProgramCounter != invokeDelegateOffset);
+                _mainThread.Step(); // invoke: string Func<object>::Invoke()
+                // Expected stack:
+                // (0) root -> (1) TestVirtualDelegateCall -> (2) Func<object>::Invoke -> (3) *::ToString
+                Assert.Equal(4, _mainThread.CallStack.Count);
+
+                // exit from *::ToString
+                while (_mainThread.CallStack.Count != 2)
+                    _mainThread.StepOut();
+
+                var returnedString = _mainThread.CallStack.Peek().EvaluationStack.Peek();
+                Assert.Equal(expectedResults[i], _vm.ObjectMarshaller.ToObject<string>(returnedString.Contents.AsSpan()));
+            }
         }
     }
 }

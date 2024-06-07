@@ -257,7 +257,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             }
         }
         
-        protected static MethodDefinition? FindMethodImplementationInType(TypeDefinition? type, MethodDefinition? baseMethod)
+        internal static MethodDefinition? FindMethodImplementationInType(TypeDefinition? type, MethodDefinition? baseMethod)
         {
             if (type is null || baseMethod is null || !baseMethod.IsVirtual)
                 return baseMethod;
