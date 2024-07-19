@@ -29,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var cfg = body.ConstructSymbolicFlowGraph(out _);
             
             Assert.Single(cfg.Nodes);
-            Assert.Equal(body.Instructions, cfg.Nodes[0].Contents.Instructions);
+            Assert.Equal(body.Instructions, cfg.Nodes.GetByOffset(0)!.Contents.Instructions);
         }
         
         [Fact]
@@ -40,7 +40,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var body = method.CilMethodBody!;
             var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
             
-            Assert.Single(cfg.EntryPoint.ConditionalEdges);
+            Assert.Single(cfg.EntryPoint!.ConditionalEdges);
             
             var ldstrAdult = FindLdstr("Adult");
             var ldstrChild = FindLdstr("Child");
@@ -99,7 +99,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var cfg = method.CilMethodBody.ConstructSymbolicFlowGraph(out _);
 
             var node = Assert.Single(cfg.Nodes);
-            Assert.Equal(CilOpCodes.Jmp, node.Contents.Footer.OpCode);
+            Assert.Equal(CilOpCodes.Jmp, node.Contents.Footer!.OpCode);
         }
     }
 }

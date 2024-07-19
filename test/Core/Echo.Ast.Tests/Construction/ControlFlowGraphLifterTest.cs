@@ -166,12 +166,13 @@ public class ControlFlowGraphLifterTest
             // ret()
             DummyInstruction.Ret(3)
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
 
         Assert.True(StatementPattern
             .Assignment(
                 new[] {Pattern.Any<IVariable>(), Pattern.Any<IVariable>()},
                 ExpressionPattern.Instruction<DummyInstruction>(new DummyInstructionPattern(DummyOpCode.Op))
-            ).Match(cfg.Nodes[0].Contents.Instructions[0]).IsSuccess
+            ).Match(offsetMap[0].Contents.Instructions[0]).IsSuccess
         );
     }
     
@@ -336,9 +337,10 @@ public class ControlFlowGraphLifterTest
             DummyInstruction.Op(10, 0,0),
             DummyInstruction.Ret(11)
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
         
         Assert.Equal(2, cfg.Nodes.Count);
-        var (n1, n2) = (cfg.Nodes[0], cfg.Nodes[10]);
+        var (n1, n2) = (offsetMap[0], offsetMap[10]);
 
         Assert.True(StatementPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op))
             .Match(n1.Contents.Instructions[0])
@@ -369,9 +371,10 @@ public class ControlFlowGraphLifterTest
             DummyInstruction.Pop(10, 1),
             DummyInstruction.Ret(11)
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
         
         Assert.Equal(2, cfg.Nodes.Count);
-        var (n1, n2) = (cfg.Nodes[0], cfg.Nodes[10]);
+        var (n1, n2) = (offsetMap[0], offsetMap[10]);
 
         var variable = new CaptureGroup<IVariable>("variable");
         
@@ -414,6 +417,7 @@ public class ControlFlowGraphLifterTest
             DummyInstruction.Pop(10, 1),
             DummyInstruction.Ret(11)
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
 
         var variable = new CaptureGroup<IVariable>();
 
@@ -424,7 +428,7 @@ public class ControlFlowGraphLifterTest
             )
             .FollowedBy(ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Op)).ToStatement())
             .FollowedBy(ExpressionPattern.Instruction(new DummyInstructionPattern(DummyOpCode.Jmp)).ToStatement())
-            .Match(cfg.Nodes[0].Contents.Instructions);
+            .Match(offsetMap[0].Contents.Instructions);
 
         var match2 = StatementPattern
             .Expression(ExpressionPattern
@@ -433,7 +437,7 @@ public class ControlFlowGraphLifterTest
                     ExpressionPattern.Variable<DummyInstruction>(Pattern.Any<IVariable>().CaptureAs(variable))
                 )
             )
-            .Match(cfg.Nodes[10].Contents.Instructions[0]);
+            .Match(offsetMap[10].Contents.Instructions[0]);
 
         Assert.True(match1.IsSuccess);
         Assert.True(match2.IsSuccess);
@@ -452,8 +456,9 @@ public class ControlFlowGraphLifterTest
             DummyInstruction.Pop(10, 1),
             DummyInstruction.Ret(11)
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
 
-        var block = cfg.Nodes[0].Contents;
+        var block = offsetMap[0].Contents;
         Assert.IsAssignableFrom<AssignmentStatement<DummyInstruction>>(block.Instructions[0]);
         Assert.IsAssignableFrom<ExpressionStatement<DummyInstruction>>(block.Instructions[1]);
     }
@@ -472,6 +477,7 @@ public class ControlFlowGraphLifterTest
             DummyInstruction.Pop(11, 1),
             DummyInstruction.Ret(12)
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
         
         // Verify
         var variable = new CaptureGroup<IVariable>("variable");
@@ -482,8 +488,8 @@ public class ControlFlowGraphLifterTest
         );
 
         // Ensure expressions are pushed as variables.
-        var match1 = pattern.Match(cfg.Nodes[0].Contents.Instructions[0]);
-        var match2 = pattern.Match(cfg.Nodes[0].Contents.Instructions[1]);
+        var match1 = pattern.Match(offsetMap[0].Contents.Instructions[0]);
+        var match2 = pattern.Match(offsetMap[0].Contents.Instructions[1]);
         Assert.True(match1.IsSuccess);
         Assert.True(match2.IsSuccess);
 
@@ -515,9 +521,10 @@ public class ControlFlowGraphLifterTest
             DummyInstruction.Pop(11, 1),
             DummyInstruction.Ret(12)
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
 
         // Verify graph structure.
-        var (n1, n2, n3, n4) = (cfg.Nodes[0], cfg.Nodes[2], cfg.Nodes[10], cfg.Nodes[11]);
+        var (n1, n2, n3, n4) = (offsetMap[0], offsetMap[2], offsetMap[10], offsetMap[11]);
         Assert.Same(n2, n1.UnconditionalNeighbour);
         Assert.Same(n3, Assert.Single(n1.ConditionalEdges).Target);
         Assert.Same(n4, n2.UnconditionalNeighbour);
@@ -581,10 +588,11 @@ public class ControlFlowGraphLifterTest
             DummyInstruction.Pop(21, 1),
             DummyInstruction.Ret(22)
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
         
         // Verify graph structure.
         var (n1, n2, n3, n4, n5, n6) = 
-            (cfg.Nodes[0], cfg.Nodes[2], cfg.Nodes[4], cfg.Nodes[10], cfg.Nodes[20], cfg.Nodes[21]);
+            (offsetMap[0], offsetMap[2], offsetMap[4], offsetMap[10], offsetMap[20], offsetMap[21]);
         
         Assert.Same(n2, n1.UnconditionalNeighbour);
         Assert.Same(n5, Assert.Single(n1.ConditionalEdges).Target);
@@ -646,6 +654,7 @@ public class ControlFlowGraphLifterTest
             DummyInstruction.Pop(5, 1),
             DummyInstruction.Ret(6),
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
         
         var variablesCapture = new CaptureGroup<IVariable>("variables");
         var sourcesCapture = new CaptureGroup<VariableExpression<DummyInstruction>>("sources");
@@ -656,18 +665,18 @@ public class ControlFlowGraphLifterTest
                 Pattern.Any<IVariable>().CaptureAs(variablesCapture),
                 Pattern.Any<IVariable>()
             )
-            .Match(cfg.Nodes[0].Contents.Instructions[0]);
+            .Match(offsetMap[0].Contents.Instructions[0]);
 
         var match2 = StatementPattern
             .Assignment<DummyInstruction>()
             .WithVariables(1)
             .CaptureVariables(variablesCapture)
-            .Match(cfg.Nodes[3].Contents.Instructions[^1]);
+            .Match(offsetMap[3].Contents.Instructions[^1]);
         
         var match3 = StatementPattern.Phi<DummyInstruction>()
             .WithSources(2)
             .CaptureSources(sourcesCapture)
-            .Match(cfg.Nodes[5].Contents.Instructions[0]);
+            .Match(offsetMap[5].Contents.Instructions[0]);
         
         Assert.True(match1.IsSuccess);
         Assert.True(match2.IsSuccess);
@@ -698,6 +707,7 @@ public class ControlFlowGraphLifterTest
             DummyInstruction.Pop(6, 2),
             DummyInstruction.Ret(7),
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
         
         var variablesCapture = new CaptureGroup<IVariable>("variables");
         var sourcesCapture = new CaptureGroup<VariableExpression<DummyInstruction>>("sources");
@@ -708,18 +718,18 @@ public class ControlFlowGraphLifterTest
                 Pattern.Any<IVariable>().CaptureAs(variablesCapture),
                 Pattern.Any<IVariable>()
             )
-            .Match(cfg.Nodes[0].Contents.Instructions[^2]);
+            .Match(offsetMap[0].Contents.Instructions[^2]);
      
         var match2 = StatementPattern
                 .Assignment<DummyInstruction>()
                 .WithVariables(1)
                 .CaptureVariables(variablesCapture)
-                .Match(cfg.Nodes[4].Contents.Instructions[^1]);
+                .Match(offsetMap[4].Contents.Instructions[^1]);
 
         var match3 = StatementPattern.Phi<DummyInstruction>()
             .WithSources(2)
             .CaptureSources(sourcesCapture)
-            .Match(cfg.Nodes[6].Contents.Instructions[0]);
+            .Match(offsetMap[6].Contents.Instructions[0]);
         
         Assert.True(match1.IsSuccess);
         Assert.True(match3.IsSuccess);
@@ -747,9 +757,10 @@ public class ControlFlowGraphLifterTest
             
             DummyInstruction.Ret(4), 
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
 
         // Verify
-        var (n1, n2, n3) = (cfg.Nodes[0], cfg.Nodes[1], cfg.Nodes[4]);
+        var (n1, n2, n3) = (offsetMap[0], offsetMap[1], offsetMap[4]);
         
         Assert.Same(n2, n1.UnconditionalNeighbour);
         Assert.Same(n2, Assert.Single(n2.ConditionalEdges).Target);
@@ -774,9 +785,10 @@ public class ControlFlowGraphLifterTest
             
             DummyInstruction.Ret(5), 
         });
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
         
         // Verify
-        var (n1, n2, n3) = (cfg.Nodes[0], cfg.Nodes[1], cfg.Nodes[5]);
+        var (n1, n2, n3) = (offsetMap[0], offsetMap[1], offsetMap[5]);
         Assert.Same(n2, n1.UnconditionalNeighbour);
         Assert.Same(n2, Assert.Single(n2.ConditionalEdges).Target);
         Assert.Same(n3, n2.UnconditionalNeighbour);
@@ -832,9 +844,10 @@ public class ControlFlowGraphLifterTest
             new AddressRange(1, 3),
             new AddressRange(3, 5)
         ));
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
         
         // Verify
-        var (n1, n2, n3, n4) = (cfg.Nodes[0], cfg.Nodes[1], cfg.Nodes[3], cfg.Nodes[5]);
+        var (n1, n2, n3, n4) = (offsetMap[0], offsetMap[1], offsetMap[3], offsetMap[5]);
         
         var eh = Assert.IsAssignableFrom<ExceptionHandlerRegion<Statement<DummyInstruction>>>(Assert.Single(cfg.Regions));
         Assert.Same(n2, eh.ProtectedRegion.EntryPoint);
@@ -863,9 +876,10 @@ public class ControlFlowGraphLifterTest
             new AddressRange(1, 3),
             new AddressRange(3, 6)
         ));
+        var offsetMap = cfg.Nodes.CreateOffsetMap();
         
         // Verify
-        var (n1, n2, n3, n4) = (cfg.Nodes[0], cfg.Nodes[1], cfg.Nodes[3], cfg.Nodes[6]);
+        var (n1, n2, n3, n4) = (offsetMap[0], offsetMap[1], offsetMap[3], offsetMap[6]);
         
         var eh = Assert.IsAssignableFrom<ExceptionHandlerRegion<Statement<DummyInstruction>>>(Assert.Single(cfg.Regions));
         Assert.Same(n2, eh.ProtectedRegion.EntryPoint);

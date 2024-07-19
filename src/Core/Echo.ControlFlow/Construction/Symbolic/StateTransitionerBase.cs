@@ -12,6 +12,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to evaluate.</typeparam>
     public abstract class StateTransitionerBase<TInstruction> : IStateTransitioner<TInstruction>
+        where TInstruction : notnull
     {
         private IVariable[] _variablesBuffer = new IVariable[1];
         

@@ -8,6 +8,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that this collection provides.</typeparam>
     public interface ISymbolicInstructionProvider<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets the architecture describing the instructions exposed by this instruction provider.

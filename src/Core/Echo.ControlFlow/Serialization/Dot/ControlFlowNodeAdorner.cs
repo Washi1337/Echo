@@ -10,6 +10,7 @@ namespace Echo.ControlFlow.Serialization.Dot
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions the nodes contain.</typeparam>
     public class ControlFlowNodeAdorner<TInstruction> : IDotNodeAdorner
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new <see cref="ControlFlowNodeAdorner{TInstruction}"/> with the default formatter.
@@ -72,7 +73,7 @@ namespace Echo.ControlFlow.Serialization.Dot
         }
         
         /// <inheritdoc />
-        public IDictionary<string, string> GetNodeAttributes(INode node, long id)
+        public IDictionary<string, string>? GetNodeAttributes(INode node, long id)
         {
             if (node is ControlFlowNode<TInstruction> cfgNode)
             {

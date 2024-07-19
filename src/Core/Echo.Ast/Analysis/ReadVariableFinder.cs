@@ -5,6 +5,7 @@ using Echo.Code;
 namespace Echo.Ast.Analysis
 {
     internal sealed class ReadVariableFinder<TInstruction> : AstNodeListener<TInstruction>
+        where TInstruction : notnull
     {
         private readonly IArchitecture<TInstruction> _architecture;
 

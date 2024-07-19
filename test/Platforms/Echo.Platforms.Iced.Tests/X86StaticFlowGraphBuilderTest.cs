@@ -58,16 +58,17 @@ namespace Echo.Platforms.Iced.Tests
                 0x5d,                 // pop ebp
                 0xc3                  // ret
             }, 0);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
             
             Assert.Equal(new long[]
             {
                 0x0, 0x7, 0xe, 0x11, 0x17,
             }.ToHashSet(), cfg.Nodes.Select(n => n.Offset).ToHashSet());
-            Assert.Equal(cfg.Nodes[0x7], cfg.Nodes[0x0].UnconditionalNeighbour);
-            Assert.Equal(cfg.Nodes[0xE], cfg.Nodes[0x7].UnconditionalNeighbour);
-            Assert.Contains(cfg.Nodes[0x11], cfg.Nodes[0x7].ConditionalEdges.Select(e=>e.Target));
-            Assert.Equal(cfg.Nodes[0x11], cfg.Nodes[0xE].UnconditionalNeighbour);
-            Assert.Contains(cfg.Nodes[0x7], cfg.Nodes[0x11].ConditionalEdges.Select(e=>e.Target));
+            Assert.Equal(offsetMap[0x7], offsetMap[0x0].UnconditionalNeighbour);
+            Assert.Equal(offsetMap[0xE], offsetMap[0x7].UnconditionalNeighbour);
+            Assert.Contains(offsetMap[0x11], offsetMap[0x7].ConditionalEdges.Select(e=>e.Target));
+            Assert.Equal(offsetMap[0x11], offsetMap[0xE].UnconditionalNeighbour);
+            Assert.Contains(offsetMap[0x7], offsetMap[0x11].ConditionalEdges.Select(e=>e.Target));
         }
 
         [Fact]
@@ -79,13 +80,14 @@ namespace Echo.Platforms.Iced.Tests
                 /* 2: */ 0xFF,        // db     0xFF
                 /* 3: */ 0xC3         // ret
             }, 0);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
             
             Assert.Contains(cfg.Nodes, node => node.Offset == 0);
             Assert.DoesNotContain(cfg.Nodes, node => node.Offset == 2);
             Assert.Contains(cfg.Nodes, node => node.Offset == 3);
             
-            Assert.Single(cfg.Nodes[0].Contents.Instructions);
-            Assert.Single(cfg.Nodes[3].Contents.Instructions);
+            Assert.Single(offsetMap[0].Contents.Instructions);
+            Assert.Single(offsetMap[3].Contents.Instructions);
         }
 
         [Fact]
@@ -118,17 +120,18 @@ namespace Echo.Platforms.Iced.Tests
                 /* 0x2D */    0x5B,                                 // pop ebx
                 /* 0x2E */    0xC3,                                 // ret
             }, 0);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
             
             Assert.Equal(new long[]
             {
                 0x0, 0xD, 0x14, 0x15,
             }.ToHashSet(), cfg.Nodes.Select(n => n.Offset).ToHashSet());
 
-            Assert.Equal(cfg.Nodes[0xD], cfg.Nodes[0].UnconditionalNeighbour);
-            Assert.Equal(cfg.Nodes[0x15], cfg.Nodes[0xD].UnconditionalNeighbour);
-            Assert.Equal(cfg.Nodes[0x15], cfg.Nodes[0x14].UnconditionalNeighbour);
+            Assert.Equal(offsetMap[0xD], offsetMap[0].UnconditionalNeighbour);
+            Assert.Equal(offsetMap[0x15], offsetMap[0xD].UnconditionalNeighbour);
+            Assert.Equal(offsetMap[0x15], offsetMap[0x14].UnconditionalNeighbour);
             Assert.Contains(
-                cfg.Nodes[0x0].ConditionalEdges
+                offsetMap[0x0].ConditionalEdges
                     .Select(e => e.Target),
                 node => node.Offset == 0x14);
         }

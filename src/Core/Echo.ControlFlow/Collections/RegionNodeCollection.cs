@@ -13,6 +13,7 @@ namespace Echo.ControlFlow.Collections
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class RegionNodeCollection<TInstruction> : Collection<ControlFlowNode<TInstruction>>
+        where TInstruction : notnull
     {
         private readonly IControlFlowRegion<TInstruction> _owner;
 

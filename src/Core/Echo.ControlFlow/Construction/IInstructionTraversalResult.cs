@@ -9,6 +9,7 @@ namespace Echo.ControlFlow.Construction
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that were traversed.</typeparam>
     public interface IInstructionTraversalResult<TInstruction> : IStaticInstructionProvider<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Determines whether an offset was marked as a block header during the traversal.

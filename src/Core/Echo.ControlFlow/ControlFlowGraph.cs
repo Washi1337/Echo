@@ -15,10 +15,11 @@ namespace Echo.ControlFlow
     /// Provides a generic base implementation of a control flow graph that contains for each node a user predefined
     /// object in a type safe manner. 
     /// </summary>
-    /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
+    /// <typeparam name="TInstruction">The type of instructions that each node in the graph stores.</typeparam>
     public class ControlFlowGraph<TInstruction> : IGraph, IScopeControlFlowRegion<TInstruction>
+        where TInstruction : notnull
     {
-        private ControlFlowNode<TInstruction> _entryPoint;
+        private ControlFlowNode<TInstruction>? _entryPoint;
 
         /// <summary>
         /// Creates a new empty graph.
@@ -34,14 +35,14 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets or sets the node that is executed first in the control flow graph.
         /// </summary>
-        public ControlFlowNode<TInstruction> EntryPoint
+        public ControlFlowNode<TInstruction>? EntryPoint
         {
             get => _entryPoint;
             set
             {
                 if (_entryPoint != value)
                 {
-                    if (!Nodes.Contains(value))
+                    if (value is not null && !Nodes.Contains(value))
                         throw new ArgumentException("Node is not present in the graph.", nameof(value));
                     _entryPoint = value;
                 }
@@ -73,10 +74,10 @@ namespace Echo.ControlFlow
         }
 
         /// <inheritdoc />
-        ControlFlowGraph<TInstruction> IControlFlowRegion<TInstruction>.ParentGraph => null;
+        ControlFlowGraph<TInstruction>? IControlFlowRegion<TInstruction>.ParentGraph => null;
 
         /// <inheritdoc />
-        IControlFlowRegion<TInstruction> IControlFlowRegion<TInstruction>.ParentRegion => null;
+        IControlFlowRegion<TInstruction>? IControlFlowRegion<TInstruction>.ParentRegion => null;
         
         /// <summary>
         /// Gets a collection of all edges that transfer control from one block to the other in the graph.
@@ -88,10 +89,13 @@ namespace Echo.ControlFlow
         IEnumerable<IEdge> IGraph.GetEdges() => GetEdges();
 
         /// <inheritdoc />
-        public ControlFlowNode<TInstruction> GetNodeByOffset(long offset) => Nodes[offset];
+        IEnumerable<ControlFlowNode<TInstruction>> IControlFlowRegion<TInstruction>.GetNodes() => Nodes;
 
         /// <inheritdoc />
-        IEnumerable<ControlFlowNode<TInstruction>> IControlFlowRegion<TInstruction>.GetNodes() => Nodes;
+        ControlFlowNode<TInstruction>? IControlFlowRegion<TInstruction>.GetNodeByOffset(long offset)
+        {
+            return Nodes.GetByOffset(offset);
+        }
 
         /// <inheritdoc />
         IEnumerable<INode> ISubGraph.GetNodes() => Nodes;
@@ -99,18 +103,16 @@ namespace Echo.ControlFlow
         /// <inheritdoc />
         IEnumerable<ISubGraph> ISubGraph.GetSubGraphs() => Regions;
 
-        ControlFlowNode<TInstruction> IControlFlowRegion<TInstruction>.GetEntryPoint() => EntryPoint;
+        ControlFlowNode<TInstruction>? IControlFlowRegion<TInstruction>.GetEntryPoint() => EntryPoint;
 
         /// <inheritdoc />
         IEnumerable<ControlFlowRegion<TInstruction>> IControlFlowRegion<TInstruction>.GetSubRegions() => Regions;
         
         /// <inheritdoc />
-        bool IControlFlowRegion<TInstruction>.RemoveNode(ControlFlowNode<TInstruction> node) => 
-            Nodes.Remove(node);
+        bool IControlFlowRegion<TInstruction>.RemoveNode(ControlFlowNode<TInstruction> node) => Nodes.Remove(node);
 
         /// <inheritdoc />
-        IEnumerable<ControlFlowNode<TInstruction>> IControlFlowRegion<TInstruction>.GetSuccessors() =>
-            Enumerable.Empty<ControlFlowNode<TInstruction>>();
+        IEnumerable<ControlFlowNode<TInstruction>> IControlFlowRegion<TInstruction>.GetSuccessors() => [];
 
         /// <summary>
         /// Serializes the control flow graph to the provided output stream, in graphviz dot format.

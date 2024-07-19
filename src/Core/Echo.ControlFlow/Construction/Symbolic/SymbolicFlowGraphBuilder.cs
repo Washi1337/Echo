@@ -13,6 +13,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to store in the control flow graph.</typeparam>
     public class SymbolicFlowGraphBuilder<TInstruction> : FlowGraphBuilderBase<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new symbolic control flow graph builder using the provided program state transition resolver.  
@@ -281,11 +282,8 @@ namespace Echo.ControlFlow.Construction.Symbolic
 
             public void Dispose()
             {
-                if (_transitionsBuffer is null)
-                    return;
-
                 _transitionsBufferPool.Return(_transitionsBuffer);
-                _transitionsBuffer = null;
+                _transitionsBuffer = null!;
             }
         }
     }

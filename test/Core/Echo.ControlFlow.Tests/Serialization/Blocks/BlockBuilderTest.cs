@@ -6,7 +6,6 @@ using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Regions.Detection;
 using Echo.ControlFlow.Serialization.Blocks;
-using Echo.Code;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
@@ -63,7 +62,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             
             var region = new ScopeRegion<DummyInstruction>();
             cfg.Regions.Add(region);
-            region.Nodes.Add(cfg.Nodes[2]);
+            region.Nodes.Add(cfg.Nodes.GetByOffset(2));
             
             var rootScope = cfg.ConstructBlocks();
             

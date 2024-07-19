@@ -1,5 +1,4 @@
-﻿using System;
-using Echo.DataFlow.Emulation;
+﻿using Echo.DataFlow.Emulation;
 
 namespace Echo.ControlFlow.Construction.Symbolic
 {
@@ -8,6 +7,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
     /// </summary>
     /// <typeparam name="TInstruction">The type of instruction that was executed.</typeparam>
     public readonly struct StateTransition<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new program state transition.

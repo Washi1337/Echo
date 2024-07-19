@@ -12,6 +12,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that this collection provides.</typeparam>
     public class StaticToSymbolicAdapter<TInstruction> : ISymbolicInstructionProvider<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new instance of the <see cref="StaticToSymbolicAdapter{TInstruction}"/> adapter.

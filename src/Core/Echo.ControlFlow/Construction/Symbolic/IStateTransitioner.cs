@@ -15,6 +15,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
     /// </para>
     /// </remarks>
     public interface IStateTransitioner<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets the initial state of the program at a provided entry point address.

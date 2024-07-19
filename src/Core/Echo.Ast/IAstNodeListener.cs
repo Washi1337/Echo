@@ -6,6 +6,7 @@ namespace Echo.Ast
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions stored in the AST.</typeparam>
     public interface IAstNodeListener<TInstruction>
+    where TInstruction : notnull
     {
         /// <summary>
         /// Enters a compilation unit.

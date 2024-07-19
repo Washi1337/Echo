@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Echo.Code;
 
 namespace Echo.ControlFlow.Regions.Detection
 {
@@ -20,6 +19,7 @@ namespace Echo.ControlFlow.Regions.Detection
         public static void DetectExceptionHandlerRegions<TInstruction>(
             this ControlFlowGraph<TInstruction> cfg,
             IEnumerable<ExceptionHandlerRange> ranges)
+            where TInstruction : notnull
         {
             // Sort all ranges by their start and end offsets.
             var sortedRanges = ranges.ToList();
@@ -34,6 +34,7 @@ namespace Echo.ControlFlow.Regions.Detection
         private static Dictionary<AddressRange, ScopeRegion<TInstruction>> CreateEHRegions<TInstruction>(
             ControlFlowGraph<TInstruction> cfg, 
             IReadOnlyList<ExceptionHandlerRange> sortedRanges)
+            where TInstruction : notnull
         {
             var result = new Dictionary<AddressRange, ScopeRegion<TInstruction>>();
 
@@ -88,10 +89,11 @@ namespace Echo.ControlFlow.Regions.Detection
             return result;
         }
 
-        private static ScopeRegion<TInstruction> FindParentRegion<TInstruction>(
+        private static ScopeRegion<TInstruction>? FindParentRegion<TInstruction>(
             Dictionary<AddressRange, ScopeRegion<TInstruction>> regions,
             IReadOnlyList<ExceptionHandlerRange> sortedRanges,
             int currentRangeIndex)
+            where TInstruction : notnull
         {
             var ehRange = sortedRanges[currentRangeIndex];
             
@@ -118,6 +120,7 @@ namespace Echo.ControlFlow.Regions.Detection
             ControlFlowGraph<TInstruction> cfg, 
             IReadOnlyList<ExceptionHandlerRange> sortedRanges,
             Dictionary<AddressRange, ScopeRegion<TInstruction>> rangeToRegionMapping)
+            where TInstruction : notnull
         {
             foreach (var node in cfg.Nodes)
             {
@@ -130,6 +133,7 @@ namespace Echo.ControlFlow.Regions.Detection
         private static AddressRange? GetParentRange<TInstruction>(
             IReadOnlyList<ExceptionHandlerRange> sortedRanges, 
             ControlFlowNode<TInstruction> node)
+            where TInstruction : notnull
         {
             // Since the ranges are sorted in such a way that outer ranges are coming first, we can simply reverse the
             // linear lookup to get the smallest EH region that this node contains. 
@@ -151,22 +155,25 @@ namespace Echo.ControlFlow.Regions.Detection
             return null;
         }
 
-        private static void DetermineRegionEntrypoints<TInstruction>(ControlFlowGraph<TInstruction> cfg, List<ExceptionHandlerRange> sortedRanges,
+        private static void DetermineRegionEntrypoints<TInstruction>(
+            ControlFlowGraph<TInstruction> cfg, 
+            List<ExceptionHandlerRange> sortedRanges,
             Dictionary<AddressRange, ScopeRegion<TInstruction>> rangeToRegionMapping)
+            where TInstruction : notnull
         {
             foreach (var range in sortedRanges)
             {
                 var protectedRegion = rangeToRegionMapping[range.ProtectedRange];
-                protectedRegion.EntryPoint ??= cfg.GetNodeByOffset(range.ProtectedRange.Start);
+                protectedRegion.EntryPoint ??= cfg.Nodes.GetByOffset(range.ProtectedRange.Start);
 
                 var handlerRegion = rangeToRegionMapping[range.HandlerRange];
-                handlerRegion.EntryPoint ??= cfg.GetNodeByOffset(range.HandlerRange.Start);
+                handlerRegion.EntryPoint ??= cfg.Nodes.GetByOffset(range.HandlerRange.Start);
 
                 if (rangeToRegionMapping.TryGetValue(range.PrologueRange, out var prologueRegion))
-                    prologueRegion.EntryPoint ??= cfg.GetNodeByOffset(range.PrologueRange.Start);
+                    prologueRegion.EntryPoint ??= cfg.Nodes.GetByOffset(range.PrologueRange.Start);
 
                 if (rangeToRegionMapping.TryGetValue(range.EpilogueRange, out var epilogueRegion))
-                    epilogueRegion.EntryPoint ??= cfg.GetNodeByOffset(range.EpilogueRange.Start);
+                    epilogueRegion.EntryPoint ??= cfg.Nodes.GetByOffset(range.EpilogueRange.Start);
             }
         }
         

@@ -40,7 +40,7 @@ namespace Echo.ControlFlow.Regions.Detection
             AddressRange protectedRange,
             AddressRange prologueRange,
             AddressRange handlerRange,
-            object userData) 
+            object? userData) 
             : this(protectedRange, prologueRange, handlerRange, AddressRange.NilRange, userData)
         {
         }
@@ -74,7 +74,7 @@ namespace Echo.ControlFlow.Regions.Detection
             AddressRange prologueRange,
             AddressRange handlerRange,
             AddressRange epilogueRange,
-            object userData)
+            object? userData)
             : this(protectedRange, handlerRange, userData)
         {
             PrologueRange = prologueRange;
@@ -87,7 +87,7 @@ namespace Echo.ControlFlow.Regions.Detection
         /// <param name="protectedRange">The range indicating the code that is protected by the handler.</param>
         /// <param name="handlerRange">The range indicating the handler code.</param>
         /// <param name="userData">A user defined tag that is added to the exception handler.</param>
-        public ExceptionHandlerRange(AddressRange protectedRange, AddressRange handlerRange, object userData)
+        public ExceptionHandlerRange(AddressRange protectedRange, AddressRange handlerRange, object? userData)
         {
             ProtectedRange = protectedRange;
             PrologueRange = AddressRange.NilRange;
@@ -134,7 +134,7 @@ namespace Echo.ControlFlow.Regions.Detection
         /// <summary>
         /// Gets a user defined tag that is added to the exception handler.
         /// </summary>
-        public object UserData
+        public object? UserData
         {
             get;
         }
@@ -148,7 +148,7 @@ namespace Echo.ControlFlow.Regions.Detection
             ProtectedRange.Equals(other.ProtectedRange) && HandlerRange.Equals(other.HandlerRange);
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => 
+        public override bool Equals(object? obj) => 
             obj is ExceptionHandlerRange other && Equals(other);
 
         /// <inheritdoc />

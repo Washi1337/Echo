@@ -10,6 +10,7 @@ namespace Echo.Ast
     /// <typeparam name="TInstruction">The instructions defined by the satck-based platform.</typeparam>
     public class AstArchitecture<TInstruction>
         : IArchitecture<Statement<TInstruction>>
+        where TInstruction : notnull
     {
         private readonly IArchitecture<TInstruction> _baseArchitecture;
         private readonly FlowControlDeterminer<TInstruction> _flowControlDeterminer;
@@ -97,6 +98,7 @@ namespace Echo.Ast
         /// <typeparam name="TInstruction">The type of instructions defined by the architecture.</typeparam>
         /// <returns>The lifted architecture.</returns>
         public static AstArchitecture<TInstruction> ToAst<TInstruction>(this IArchitecture<TInstruction> self) 
+            where TInstruction : notnull
             => new(self);
     }
 }

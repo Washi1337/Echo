@@ -8,6 +8,7 @@ namespace Echo.Ast;
 /// </summary>
 /// <typeparam name="TInstruction">The type of instruction stored in the AST.</typeparam>
 public class ExceptionHandlerStatement<TInstruction> : Statement<TInstruction>
+    where TInstruction : notnull
 {
     private BlockStatement<TInstruction> _protectedBlock = null!;
 

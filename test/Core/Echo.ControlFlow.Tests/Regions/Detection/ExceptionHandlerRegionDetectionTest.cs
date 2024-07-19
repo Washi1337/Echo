@@ -4,7 +4,6 @@ using System.Linq;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Regions.Detection;
-using Echo.Code;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
@@ -51,15 +50,16 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             };
 
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
             
-            Assert.Same(cfg, cfg.Nodes[0].ParentRegion);
-            Assert.Same(cfg, cfg.Nodes[5].ParentRegion);
+            Assert.Same(cfg, offsetMap[0]!.ParentRegion);
+            Assert.Same(cfg, offsetMap[5]!.ParentRegion);
 
-            var ehRegion = cfg.Nodes[1].GetParentExceptionHandler();
+            var ehRegion = offsetMap[1]!.GetParentExceptionHandler();
             Assert.NotNull(ehRegion);
             
-            Assert.Same(ehRegion.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion.Handlers); 
+            Assert.Same(ehRegion.ProtectedRegion, offsetMap[1].ParentRegion); 
+            Assert.Contains(offsetMap[3].GetParentHandler(), ehRegion.Handlers); 
         }
 
         [Theory]
@@ -102,15 +102,16 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             };
 
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
             
-            var ehRegion1 = cfg.Nodes[1].GetParentExceptionHandler();
-            var ehRegion2 = cfg.Nodes[6].GetParentExceptionHandler();
+            var ehRegion1 = offsetMap[1].GetParentExceptionHandler();
+            var ehRegion2 = offsetMap[6].GetParentExceptionHandler();
             
             Assert.NotSame(ehRegion1, ehRegion2);
-            Assert.Same(ehRegion1.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion1.Handlers); 
-            Assert.Same(ehRegion1.ProtectedRegion, cfg.Nodes[1].ParentRegion); 
-            Assert.Contains(cfg.Nodes[3].GetParentHandler(), ehRegion1.Handlers); 
+            Assert.Same(ehRegion1.ProtectedRegion, offsetMap[1].ParentRegion); 
+            Assert.Contains(offsetMap[3].GetParentHandler(), ehRegion1.Handlers); 
+            Assert.Same(ehRegion1.ProtectedRegion, offsetMap[1].ParentRegion); 
+            Assert.Contains(offsetMap[3].GetParentHandler(), ehRegion1.Handlers); 
         }
 
         [Theory]
@@ -147,12 +148,13 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             };
 
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
 
-            var ehRegion = cfg.Nodes[1].GetParentExceptionHandler();
+            var ehRegion = offsetMap[1].GetParentExceptionHandler();
             
-            Assert.Same(ehRegion, cfg.Nodes[3].GetParentExceptionHandler());
-            Assert.Same(ehRegion, cfg.Nodes[5].GetParentExceptionHandler());
-            Assert.NotSame(cfg.Nodes[3].ParentRegion, cfg.Nodes[5].ParentRegion);
+            Assert.Same(ehRegion, offsetMap[3].GetParentExceptionHandler());
+            Assert.Same(ehRegion, offsetMap[5].GetParentExceptionHandler());
+            Assert.NotSame(offsetMap[3].ParentRegion, offsetMap[5].ParentRegion);
         }
 
         [Theory]
@@ -194,18 +196,19 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             };
 
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
 
-            var ehRegion1 = cfg.Nodes[1].GetParentExceptionHandler();
-            var ehRegion2 = cfg.Nodes[2].GetParentExceptionHandler();
+            var ehRegion1 = offsetMap[1].GetParentExceptionHandler();
+            var ehRegion2 = offsetMap[2].GetParentExceptionHandler();
             
             Assert.NotSame(ehRegion1, ehRegion2);
-            Assert.Null(cfg.Nodes[0].GetParentExceptionHandler());
-            Assert.Same(ehRegion1, cfg.Nodes[1].GetParentExceptionHandler());
-            Assert.Same(ehRegion2, cfg.Nodes[2].GetParentExceptionHandler());
-            Assert.Same(ehRegion2, cfg.Nodes[4].GetParentExceptionHandler());
-            Assert.Same(ehRegion1, cfg.Nodes[6].GetParentExceptionHandler());
-            Assert.Same(ehRegion1, cfg.Nodes[7].GetParentExceptionHandler());
-            Assert.Null(cfg.Nodes[9].GetParentExceptionHandler());
+            Assert.Null(offsetMap[0].GetParentExceptionHandler());
+            Assert.Same(ehRegion1, offsetMap[1].GetParentExceptionHandler());
+            Assert.Same(ehRegion2, offsetMap[2].GetParentExceptionHandler());
+            Assert.Same(ehRegion2, offsetMap[4].GetParentExceptionHandler());
+            Assert.Same(ehRegion1, offsetMap[6].GetParentExceptionHandler());
+            Assert.Same(ehRegion1, offsetMap[7].GetParentExceptionHandler());
+            Assert.Null(offsetMap[9].GetParentExceptionHandler());
         }
 
         [Theory]
@@ -247,18 +250,19 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             };
 
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
 
-            var ehRegion1 = cfg.Nodes[1].GetParentExceptionHandler();
-            var ehRegion2 = cfg.Nodes[4].GetParentExceptionHandler();
+            var ehRegion1 = offsetMap[1].GetParentExceptionHandler();
+            var ehRegion2 = offsetMap[4].GetParentExceptionHandler();
             
             Assert.NotSame(ehRegion1, ehRegion2);
-            Assert.Null(cfg.Nodes[0].GetParentExceptionHandler());
-            Assert.Same(ehRegion1, cfg.Nodes[1].GetParentExceptionHandler());
-            Assert.Same(ehRegion1, cfg.Nodes[3].GetParentExceptionHandler());
-            Assert.Same(ehRegion2, cfg.Nodes[4].GetParentExceptionHandler());
-            Assert.Same(ehRegion2, cfg.Nodes[6].GetParentExceptionHandler());
-            Assert.Same(ehRegion1, cfg.Nodes[8].GetParentExceptionHandler());
-            Assert.Null(cfg.Nodes[9].GetParentExceptionHandler());
+            Assert.Null(offsetMap[0].GetParentExceptionHandler());
+            Assert.Same(ehRegion1, offsetMap[1].GetParentExceptionHandler());
+            Assert.Same(ehRegion1, offsetMap[3].GetParentExceptionHandler());
+            Assert.Same(ehRegion2, offsetMap[4].GetParentExceptionHandler());
+            Assert.Same(ehRegion2, offsetMap[6].GetParentExceptionHandler());
+            Assert.Same(ehRegion1, offsetMap[8].GetParentExceptionHandler());
+            Assert.Null(offsetMap[9].GetParentExceptionHandler());
         }
 
         [Fact]
@@ -297,19 +301,20 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             };
 
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
 
-            var ehRegion = cfg.Nodes[1].GetParentExceptionHandler();
+            var ehRegion = offsetMap[1].GetParentExceptionHandler();
             var handlerRegion = Assert.Single(ehRegion.Handlers);
             Assert.NotNull(handlerRegion);
             Assert.NotNull(handlerRegion.Prologue);
             Assert.NotNull(handlerRegion.Epilogue);
 
-            Assert.Same(cfg, cfg.Nodes[0].ParentRegion);
-            Assert.Same(ehRegion.ProtectedRegion, cfg.Nodes[1].ParentRegion);
-            Assert.Same(handlerRegion.Prologue, cfg.Nodes[3].GetParentHandler().Prologue);
-            Assert.Same(handlerRegion.Contents, cfg.Nodes[5].GetParentHandler().Contents);
-            Assert.Same(handlerRegion.Epilogue, cfg.Nodes[7].GetParentHandler().Epilogue);
-            Assert.Same(cfg, cfg.Nodes[9].ParentRegion);
+            Assert.Same(cfg, offsetMap[0].ParentRegion);
+            Assert.Same(ehRegion.ProtectedRegion, offsetMap[1].ParentRegion);
+            Assert.Same(handlerRegion.Prologue, offsetMap[3].GetParentHandler().Prologue);
+            Assert.Same(handlerRegion.Contents, offsetMap[5].GetParentHandler().Contents);
+            Assert.Same(handlerRegion.Epilogue, offsetMap[7].GetParentHandler().Epilogue);
+            Assert.Same(cfg, offsetMap[9].ParentRegion);
         }
 
     }

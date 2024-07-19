@@ -1,11 +1,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using Echo.ControlFlow.Construction;
 using Echo.ControlFlow.Construction.Symbolic;
-using Echo.ControlFlow.Serialization.Dot;
-using Echo.Graphing.Serialization.Dot;
 using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
 using Echo.Platforms.DummyPlatform.Code;
@@ -307,8 +304,8 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             Assert.Contains(cfg.Nodes, n => n.Offset == 0);
             Assert.Contains(cfg.Nodes, n => n.Offset == 10);
             Assert.DoesNotContain(cfg.Nodes, n => n.Offset == 1);
-            Assert.Empty(cfg.Nodes[0].GetOutgoingEdges());
-            Assert.Empty(cfg.Nodes[10].GetIncomingEdges());
+            Assert.Empty(cfg.Nodes.GetByOffset(0)!.GetOutgoingEdges());
+            Assert.Empty(cfg.Nodes.GetByOffset(10)!.GetIncomingEdges());
         }
     }
 }

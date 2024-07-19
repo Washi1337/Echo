@@ -232,7 +232,7 @@ namespace Echo.Graphing.Serialization.Dot
             Writer.WriteLine();
         }
 
-        private void WriteEntityAttributes(IEnumerable<KeyValuePair<string, string>> attributes)
+        private void WriteEntityAttributes(IEnumerable<KeyValuePair<string, string>>? attributes)
         {
             var array = attributes as KeyValuePair<string, string>[] ?? attributes.ToArray();
             if (array.Length > 0)
@@ -243,7 +243,7 @@ namespace Echo.Graphing.Serialization.Dot
             }
         }
 
-        private void WriteAttributes(IEnumerable<KeyValuePair<string, string>> attributes, string delimiter, bool newLines)
+        private void WriteAttributes(IEnumerable<KeyValuePair<string, string>>? attributes, string delimiter, bool newLines)
         {
             var array = attributes as KeyValuePair<string, string>[] ?? attributes.ToArray();
             for (int i = 0; i < array.Length; i++)

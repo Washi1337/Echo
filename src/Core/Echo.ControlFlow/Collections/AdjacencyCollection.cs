@@ -3,24 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Echo.Code;
-using Echo.Graphing;
 
 namespace Echo.ControlFlow.Collections
 {
     /// <summary>
     /// Represents a collection of edges originating from a single node.
     /// </summary>
-    /// <typeparam name="TContents">The type of data that each node stores.</typeparam>
+    /// <typeparam name="TInstruction">The type of data that each node stores.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class AdjacencyCollection<TContents> : ICollection<ControlFlowEdge<TContents>>
+    public class AdjacencyCollection<TInstruction> : ICollection<ControlFlowEdge<TInstruction>>
+        where TInstruction : notnull
     {
-        private readonly Dictionary<INode, HashSet<ControlFlowEdge<TContents>>> _neighbours 
-            = new Dictionary<INode, HashSet<ControlFlowEdge<TContents>>>();
+        private readonly Dictionary<ControlFlowNode<TInstruction>, HashSet<ControlFlowEdge<TInstruction>>> _neighbours = new();
 
         private int _count;
 
-        internal AdjacencyCollection(ControlFlowNode<TContents> owner, ControlFlowEdgeType edgeType)
+        internal AdjacencyCollection(ControlFlowNode<TInstruction> owner, ControlFlowEdgeType edgeType)
         {
             EdgeType = edgeType;
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
@@ -43,19 +41,9 @@ namespace Echo.ControlFlow.Collections
         /// <summary>
         /// Gets the node that all edges are originating from.
         /// </summary>
-        public ControlFlowNode<TContents> Owner
+        public ControlFlowNode<TInstruction> Owner
         {
             get;
-        }
-
-        /// <summary>
-        /// Creates and adds a edge to the node with the provided address.
-        /// </summary>
-        /// <param name="neighbourAddress">The address of the new neighbouring node.</param>
-        /// <returns>The created edge.</returns>
-        public ControlFlowEdge<TContents> Add(long neighbourAddress)
-        {
-            return Add(Owner.ParentGraph.Nodes[neighbourAddress]);
         }
 
         /// <summary>
@@ -63,9 +51,9 @@ namespace Echo.ControlFlow.Collections
         /// </summary>
         /// <param name="neighbour">The new neighbouring node.</param>
         /// <returns>The created edge.</returns>
-        public ControlFlowEdge<TContents> Add(ControlFlowNode<TContents> neighbour)
+        public ControlFlowEdge<TInstruction> Add(ControlFlowNode<TInstruction> neighbour)
         {
-            var edge = new ControlFlowEdge<TContents>(Owner, neighbour, EdgeType);
+            var edge = new ControlFlowEdge<TInstruction>(Owner, neighbour, EdgeType);
             Add(edge);
             return edge;
         }
@@ -78,7 +66,7 @@ namespace Echo.ControlFlow.Collections
         /// <exception cref="ArgumentException">
         /// Occurs when the provided edge cannot be added to this collection because of an invalid source node or edge type.
         /// </exception>
-        public ControlFlowEdge<TContents> Add(ControlFlowEdge<TContents> edge)
+        public ControlFlowEdge<TInstruction> Add(ControlFlowEdge<TInstruction> edge)
         {
             AssertEdgeValidity(Owner, edge, EdgeType);
             GetEdges(edge.Target).Add(edge);
@@ -88,7 +76,7 @@ namespace Echo.ControlFlow.Collections
         }
 
         /// <inheritdoc />
-        void ICollection<ControlFlowEdge<TContents>>.Add(ControlFlowEdge<TContents> edge)
+        void ICollection<ControlFlowEdge<TInstruction>>.Add(ControlFlowEdge<TInstruction> edge)
         {
             Add(edge);
         }
@@ -107,19 +95,19 @@ namespace Echo.ControlFlow.Collections
         /// </summary>
         /// <param name="neighbour">The node to check.</param>
         /// <returns><c>True</c> if the provided node is a neighbour, <c>false</c> otherwise.</returns>
-        public bool Contains(ControlFlowNode<TContents> neighbour)
+        public bool Contains(ControlFlowNode<TInstruction> neighbour)
         {
             return GetEdges(neighbour).Count > 0;
         }
 
         /// <inheritdoc />
-        public bool Contains(ControlFlowEdge<TContents> item)
+        public bool Contains(ControlFlowEdge<TInstruction> item)
         {
             return GetEdges(item.Target).Contains(item);
         }
 
         /// <inheritdoc />
-        public void CopyTo(ControlFlowEdge<TContents>[] array, int arrayIndex)
+        public void CopyTo(ControlFlowEdge<TInstruction>[] array, int arrayIndex)
         {
             foreach (var edges in _neighbours.Values)
             {
@@ -129,22 +117,11 @@ namespace Echo.ControlFlow.Collections
         }
 
         /// <summary>
-        /// Removes all edges originating from the current node to the neighbour with the provided address.
-        /// </summary>
-        /// <param name="neighbourAddress">The address of the neighbour to cut ties with.</param>
-        /// <returns><c>True</c> if at least one edge was removed, <c>false</c> otherwise.</returns>
-        public bool Remove(long neighbourAddress)
-        {
-            var nodes = Owner.ParentGraph.Nodes;
-            return nodes.Contains(neighbourAddress) && Remove(nodes[neighbourAddress]);
-        }
-        
-        /// <summary>
         /// Removes all edges originating from the current node to the provided neighbour.
         /// </summary>
         /// <param name="neighbour">The neighbour to cut ties with.</param>
         /// <returns><c>True</c> if at least one edge was removed, <c>false</c> otherwise.</returns>
-        public bool Remove(ControlFlowNode<TContents> neighbour)
+        public bool Remove(ControlFlowNode<TInstruction> neighbour)
         {
             var edges = GetEdges(neighbour);
             if (edges.Count > 0)
@@ -158,7 +135,7 @@ namespace Echo.ControlFlow.Collections
         }
         
         /// <inheritdoc />
-        public bool Remove(ControlFlowEdge<TContents> edge)
+        public bool Remove(ControlFlowEdge<TInstruction> edge)
         {
             bool result = GetEdges(edge.Target).Remove(edge);
             if (result)
@@ -171,7 +148,7 @@ namespace Echo.ControlFlow.Collections
         }
 
         internal static void AssertEdgeValidity(
-            ControlFlowNode<TContents> owner, ControlFlowEdge<TContents> item, ControlFlowEdgeType type)
+            ControlFlowNode<TInstruction> owner, ControlFlowEdge<TInstruction> item, ControlFlowEdgeType type)
         {
             if (item.Type != type)
             {
@@ -188,87 +165,25 @@ namespace Echo.ControlFlow.Collections
         /// </summary>
         /// <param name="target">The neighbouring node.</param>
         /// <returns>The edges.</returns>
-        public IEnumerable<ControlFlowEdge<TContents>> GetEdgesToNeighbour(ControlFlowNode<TContents> target) => 
+        public IEnumerable<ControlFlowEdge<TInstruction>> GetEdgesToNeighbour(ControlFlowNode<TInstruction> target) => 
             GetEdges(target);
 
-        private ICollection<ControlFlowEdge<TContents>> GetEdges(INode target)
+        private ICollection<ControlFlowEdge<TInstruction>> GetEdges(ControlFlowNode<TInstruction> target)
         {
             if (!_neighbours.TryGetValue(target, out var edges))
             {
-                edges = new HashSet<ControlFlowEdge<TContents>>();
+                edges = new HashSet<ControlFlowEdge<TInstruction>>();
                 _neighbours[target] = edges;
             }
 
             return edges;
         }
 
-        /// <summary>
-        /// Obtains an enumerator that enumerates all nodes in the collection.
-        /// </summary>
-        /// <returns></returns>
-        public Enumerator GetEnumerator() => new Enumerator(this);
-
-        IEnumerator<ControlFlowEdge<TContents>> IEnumerable<ControlFlowEdge<TContents>>.GetEnumerator() =>
-            GetEnumerator();
+        /// <inheritdoc />
+        public IEnumerator<ControlFlowEdge<TInstruction>> GetEnumerator() =>
+            _neighbours.SelectMany(x => x.Value).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        /// <summary>
-        /// Represents an enumerator that enumerates all nodes in a control flow graph.
-        /// </summary>
-        public struct Enumerator : IEnumerator<ControlFlowEdge<TContents>>
-        {
-            private Dictionary<INode, HashSet<ControlFlowEdge<TContents>>>.Enumerator _groupEnumerator;
-            private HashSet<ControlFlowEdge<TContents>>.Enumerator _itemIterator;
-            private bool _hasItemIterator;
-            private ControlFlowEdge<TContents> _current;
-
-            /// <summary>
-            /// Creates a new instance of the <see cref="Enumerator"/> structure.
-            /// </summary>
-            /// <param name="collection">The collection to enumerate.</param>
-            public Enumerator(AdjacencyCollection<TContents> collection)
-            {
-                _groupEnumerator = collection._neighbours.GetEnumerator();
-                _itemIterator = default;
-                _hasItemIterator = false;
-                _current = null;
-            }
-
-            /// <inheritdoc />
-            public ControlFlowEdge<TContents> Current => _current;
-
-            object IEnumerator.Current => Current;
-
-            /// <inheritdoc />
-            public bool MoveNext()
-            {
-                while (true)
-                {
-                    if (!_hasItemIterator)
-                    {
-                        if (!_groupEnumerator.MoveNext())
-                            return false;
-
-                        _itemIterator = _groupEnumerator.Current.Value.GetEnumerator();
-                        _hasItemIterator = true;
-                    }
-
-                    if (_itemIterator.MoveNext())
-                    {
-                        _current = _itemIterator.Current;
-                        return true;
-                    }
-
-                    _hasItemIterator = false;
-                }
-            }
-
-            /// <inheritdoc />
-            public void Reset() => ((IEnumerator) _groupEnumerator).Reset();
-
-            /// <inheritdoc />
-            public void Dispose() => _groupEnumerator.Dispose();
-        }
     }
 }

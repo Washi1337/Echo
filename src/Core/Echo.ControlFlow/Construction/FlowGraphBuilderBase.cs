@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using Echo.Code;
+using Echo.ControlFlow.Blocks;
 
 namespace Echo.ControlFlow.Construction
 {
@@ -10,6 +11,7 @@ namespace Echo.ControlFlow.Construction
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to store in the control flow graph.</typeparam>
     public abstract class FlowGraphBuilderBase<TInstruction> : IFlowGraphBuilder<TInstruction>
+        where TInstruction : notnull
     {
         /// <inheritdoc />
         public abstract IArchitecture<TInstruction> Architecture
@@ -25,7 +27,7 @@ namespace Echo.ControlFlow.Construction
             var graph = new ControlFlowGraph<TInstruction>(Architecture);
             CreateNodes(graph, traversalResult);
             ConnectNodes(graph, traversalResult);
-            graph.EntryPoint = graph.GetNodeByOffset(entrypoint);
+            graph.EntryPoint = graph.Nodes.GetByOffset(entrypoint);
             
             return graph;
         }
@@ -42,7 +44,8 @@ namespace Echo.ControlFlow.Construction
 
         private void CreateNodes(ControlFlowGraph<TInstruction> graph, IInstructionTraversalResult<TInstruction> traversalResult)
         {
-            ControlFlowNode<TInstruction> currentNode = null;
+            var currentNode = default(ControlFlowNode<TInstruction>);
+            
             foreach (var instruction in traversalResult.GetAllInstructions())
             {
                 // Check if we reached a new block header.
@@ -50,7 +53,7 @@ namespace Echo.ControlFlow.Construction
                 if (currentNode == null || traversalResult.IsBlockHeader(offset))
                 {
                     // We arrived at a new basic block header. Create a new node for it. 
-                    currentNode = new ControlFlowNode<TInstruction>(offset);
+                    currentNode = new ControlFlowNode<TInstruction>(new BasicBlock<TInstruction>(offset));
                     graph.Nodes.Add(currentNode);
                 }
 
@@ -98,7 +101,7 @@ namespace Echo.ControlFlow.Construction
                     {
                         var successor = successorsBuffer[i];
                         
-                        var successorNode = graph.GetNodeByOffset(successor.DestinationAddress);
+                        var successorNode = graph.Nodes.GetByOffset(successor.DestinationAddress);
                         if (successorNode == null)
                             throw new ArgumentException($"Instruction at address {footerOffset:X8} refers to a non-existing node.");
 

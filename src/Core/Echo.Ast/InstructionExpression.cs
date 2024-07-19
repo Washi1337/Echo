@@ -7,6 +7,7 @@ namespace Echo.Ast
     /// Represents an instruction in the AST
     /// </summary>
     public sealed class InstructionExpression<TInstruction> : Expression<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new instruction expression node with no arguments

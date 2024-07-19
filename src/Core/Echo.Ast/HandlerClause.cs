@@ -8,6 +8,7 @@ namespace Echo.Ast;
 /// </summary>
 /// <typeparam name="TInstruction">The type of instructions stored in the AST.</typeparam>
 public class HandlerClause<TInstruction> : AstNode<TInstruction>
+    where TInstruction : notnull
 {
     private BlockStatement<TInstruction>? _prologue;
     private BlockStatement<TInstruction> _contents = null!;

@@ -9,6 +9,7 @@ namespace Echo.Ast.Patterns
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions stored in the abstract syntax tree.</typeparam>
     public class PhiStatementPattern<TInstruction> : StatementPattern<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new phi statement that matches on any target and source variables.

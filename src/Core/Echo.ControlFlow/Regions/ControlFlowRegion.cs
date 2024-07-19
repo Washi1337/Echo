@@ -8,9 +8,10 @@ namespace Echo.ControlFlow.Regions
     /// </summary>
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public abstract class ControlFlowRegion<TInstruction> : IControlFlowRegion<TInstruction>
+        where TInstruction : notnull
     {
         /// <inheritdoc />
-        public ControlFlowGraph<TInstruction> ParentGraph
+        public ControlFlowGraph<TInstruction>? ParentGraph
         {
             get
             {
@@ -32,7 +33,7 @@ namespace Echo.ControlFlow.Regions
         }
 
         /// <inheritdoc />
-        public IControlFlowRegion<TInstruction> ParentRegion
+        public IControlFlowRegion<TInstruction>? ParentRegion
         {
             get;
             internal set;
@@ -41,22 +42,22 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets or sets a user-defined tag that is assigned to this region. 
         /// </summary>
-        public object Tag
+        public object? Tag
         {
             get;
             set;
         }
 
         /// <inheritdoc />
-        public abstract ControlFlowNode<TInstruction> GetEntryPoint();
+        public abstract ControlFlowNode<TInstruction>? GetEntryPoint();
 
         /// <inheritdoc />
-        public virtual ControlFlowNode<TInstruction> GetNodeByOffset(long offset)
+        public virtual ControlFlowNode<TInstruction>? GetNodeByOffset(long offset)
         {
             foreach (var region in GetSubRegions())
             {
                 var node = region.GetNodeByOffset(offset);
-                if (node != null)
+                if (node is not null)
                     return node;
             }
 

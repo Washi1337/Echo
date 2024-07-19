@@ -83,15 +83,14 @@ namespace Echo.Graphing.Analysis.Sorting
                 {
                     if (permanent.Contains(current.Node))
                         continue;
-                    if (temporary.Contains(current.Node))
+                    
+                    if (!temporary.Add(current.Node))
                     {
                         if (IgnoreCycles)
                             continue;
                         throw new CycleDetectedException();
                     }
-
-                    temporary.Add(current.Node);
-
+                    
                     // Schedule remaining steps. We push this before pushing dependencies so it gets executed after
                     // the dependencies are traversed.
                     agenda.Push(new State(current.Node, true));

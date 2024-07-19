@@ -1,7 +1,6 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Linq;
 using Echo.Code;
 
 namespace Echo.ControlFlow.Construction.Static
@@ -18,6 +17,7 @@ namespace Echo.ControlFlow.Construction.Static
     /// this graph builder, but <c>jmp eax</c> is not.
     /// </remarks>
     public class StaticFlowGraphBuilder<TInstruction> : FlowGraphBuilderBase<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new static graph builder using the provided instruction successor resolver.

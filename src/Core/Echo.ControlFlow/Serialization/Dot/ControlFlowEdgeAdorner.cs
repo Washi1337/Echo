@@ -10,6 +10,7 @@ namespace Echo.ControlFlow.Serialization.Dot
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions the nodes contain.</typeparam>
     public class ControlFlowEdgeAdorner<TInstruction> : IDotEdgeAdorner
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets or sets the edge style to use for normal fallthrough edges.
@@ -57,7 +58,7 @@ namespace Echo.ControlFlow.Serialization.Dot
         } = new DotEntityStyle("gray", "dashed");
 
         /// <inheritdoc />
-        public IDictionary<string, string> GetEdgeAttributes(IEdge edge, long sourceId, long targetId)
+        public IDictionary<string, string>? GetEdgeAttributes(IEdge edge, long sourceId, long targetId)
         {
             if (edge is ControlFlowEdge<TInstruction> cfgEdge)
             {
@@ -75,9 +76,9 @@ namespace Echo.ControlFlow.Serialization.Dot
                 };
 
                 if (!string.IsNullOrEmpty(style.Color))
-                    result["color"] = style.Color;
+                    result["color"] = style.Color!;
                 if (!string.IsNullOrEmpty(style.Style))
-                    result["style"] = style.Style;
+                    result["style"] = style.Style!;
                 
                 return result;
             }

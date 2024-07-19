@@ -38,6 +38,7 @@ namespace Echo.ControlFlow.Construction.Static
     /// </para>
     /// </remarks>
     public interface IStaticSuccessorResolver<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets the number of successors of the provided instruction.

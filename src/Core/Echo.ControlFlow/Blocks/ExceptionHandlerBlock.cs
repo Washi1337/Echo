@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Echo.ControlFlow.Blocks
 {
@@ -8,6 +7,7 @@ namespace Echo.ControlFlow.Blocks
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions stored in the blocks.</typeparam>
     public class ExceptionHandlerBlock<TInstruction> : IBlock<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets the protected block.
@@ -28,7 +28,7 @@ namespace Echo.ControlFlow.Blocks
         /// <summary>
         /// Gets or sets a user-defined tag that is assigned to this block. 
         /// </summary>
-        public object Tag
+        public object? Tag
         {
             get;
             set;
@@ -48,7 +48,7 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <inheritdoc />
-        public BasicBlock<TInstruction> GetFirstBlock()
+        public BasicBlock<TInstruction>? GetFirstBlock()
         {
             var result = ProtectedBlock.GetFirstBlock();
             for (int i = 0; i < Handlers.Count && result is null; i++)
@@ -57,9 +57,9 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <inheritdoc />
-        public BasicBlock<TInstruction> GetLastBlock()
+        public BasicBlock<TInstruction>? GetLastBlock()
         {
-            BasicBlock<TInstruction> result = null;
+            var result = default(BasicBlock<TInstruction>);
             for (int i = Handlers.Count - 1; i > 0 && result is null; i--)
                 result = Handlers[i].GetFirstBlock();
             return result ?? ProtectedBlock.GetLastBlock();
