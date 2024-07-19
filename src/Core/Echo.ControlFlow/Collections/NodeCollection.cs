@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Echo.ControlFlow.Blocks;
 
 namespace Echo.ControlFlow.Collections
 {
@@ -27,6 +28,18 @@ namespace Echo.ControlFlow.Collections
 
         /// <inheritdoc />
         public bool IsReadOnly => false;
+
+        /// <summary>
+        /// Wraps a basic block into a node and adds it to the graph.
+        /// </summary>
+        /// <param name="item">The block.</param>
+        /// <returns>The created node.</returns>
+        public ControlFlowNode<TInstruction> Add(BasicBlock<TInstruction> item)
+        {
+            var node = new ControlFlowNode<TInstruction>(item);
+            Add(node);
+            return node;
+        }
 
         /// <inheritdoc />
         public void Add(ControlFlowNode<TInstruction> item)
@@ -135,11 +148,21 @@ namespace Echo.ControlFlow.Collections
                 node.UpdateOffset();
         }
 
+        /// <summary>
+        /// Constructs a mapping from basic block header offsets to their respective nodes.
+        /// </summary>
+        /// <returns>The mapping</returns>
+        /// <exception cref="ArgumentException">The control flow graph contains nodes with duplicated offsets.</exception>
         public IDictionary<long, ControlFlowNode<TInstruction>> CreateOffsetMap()
         {
             return _nodes.ToDictionary(x => x.Offset, x => x);
         }
 
+        /// <summary>
+        /// Finds a node by its basic block header offset.
+        /// </summary>
+        /// <param name="offset">The offset.</param>
+        /// <returns>The node, or <c>null</c> if no node was found with the provided offset.</returns>
         public ControlFlowNode<TInstruction>? GetByOffset(long offset) => _nodes.FirstOrDefault(x => x.Contents.Offset == offset);
 
         /// <inheritdoc />

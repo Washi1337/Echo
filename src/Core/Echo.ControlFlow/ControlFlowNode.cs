@@ -97,6 +97,9 @@ namespace Echo.ControlFlow
             internal set;
         }
 
+        /// <summary>
+        /// Gets the offset of the basic block the node is representing.
+        /// </summary>
         public long Offset => Contents.Offset;
 
         /// <inheritdoc />
@@ -120,6 +123,15 @@ namespace Echo.ControlFlow
         public BasicBlock<TInstruction> Contents
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets or sets user data that is added to the node.
+        /// </summary>
+        public object? UserData
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -245,6 +257,9 @@ namespace Echo.ControlFlow
             return edge;
         }
         
+        /// <summary>
+        /// Synchronizes the basic block's offset with the offset of the first instruction.
+        /// </summary>
         public void UpdateOffset()
         {
             if (ParentGraph is not null)

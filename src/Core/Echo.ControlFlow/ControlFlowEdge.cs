@@ -59,6 +59,15 @@ namespace Echo.ControlFlow
             get;
         }
 
+        /// <summary>
+        /// Gets or sets user data that is added to the edge.
+        /// </summary>
+        public object? UserData
+        {
+            get;
+            set;
+        }
+
         INode IEdge.Origin => Origin;
 
         INode IEdge.Target => Target;

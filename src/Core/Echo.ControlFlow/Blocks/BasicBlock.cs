@@ -95,6 +95,10 @@ namespace Echo.ControlFlow.Blocks
         /// <inheritdoc />
         public BasicBlock<TInstruction> GetLastBlock() => this;
 
+        /// <summary>
+        /// Synchronizes the basic block's offset with the offset of the first instruction.
+        /// </summary>
+        /// <param name="architecture">The architecture description of the instructions.</param>
         public void UpdateOffset(IArchitecture<TInstruction> architecture)
         {
             Offset = Header is not null
