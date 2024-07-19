@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Blocks;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Regions.Detection;
 using Echo.ControlFlow.Serialization.Blocks;

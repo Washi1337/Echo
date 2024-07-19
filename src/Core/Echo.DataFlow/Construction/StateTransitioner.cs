@@ -1,26 +1,26 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Echo.Code;
-using Echo.DataFlow;
 using Echo.DataFlow.Emulation;
 
-namespace Echo.ControlFlow.Construction.Symbolic
+namespace Echo.DataFlow.Construction
 {
     /// <summary>
     /// Provides a base implementation for a state transition resolver, that maintains a data flow graph (DFG) for
     /// resolving each program state transition an instruction might apply.  
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to evaluate.</typeparam>
-    public abstract class StateTransitionerBase<TInstruction> : IStateTransitioner<TInstruction>
+    public abstract class StateTransitioner<TInstruction> : IStateTransitioner<TInstruction>
         where TInstruction : notnull
     {
-        private IVariable[] _variablesBuffer = new IVariable[1];
+        private readonly List<IVariable> _variablesBuffer = new();
         
         /// <summary>
         /// Initializes the base implementation of the state state transition resolver.
         /// </summary>
         /// <param name="architecture">The architecture that describes the instruction set.</param>
-        public StateTransitionerBase(IArchitecture<TInstruction> architecture)
+        public StateTransitioner(IArchitecture<TInstruction> architecture)
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
             DataFlowGraph = new DataFlowGraph<TInstruction>(architecture);
@@ -46,14 +46,11 @@ namespace Echo.ControlFlow.Construction.Symbolic
         public virtual SymbolicProgramState<TInstruction> GetInitialState(long entrypointAddress) => new(entrypointAddress);
 
         /// <inheritdoc />
-        public abstract int GetTransitionCount(
+        public abstract void GetTransitions(
             in SymbolicProgramState<TInstruction> currentState,
-            in TInstruction instruction);
-
-        /// <inheritdoc />
-        public abstract int GetTransitions(in SymbolicProgramState<TInstruction> currentState,
-            in TInstruction instruction,
-            Span<StateTransition<TInstruction>> transitionBuffer);
+            in TInstruction instruction, 
+            IList<StateTransition<TInstruction>> transitionsBuffer
+        );
 
         /// <summary>
         /// Applies the default fallthrough transition on a symbolic program state. 
@@ -114,22 +111,12 @@ namespace Echo.ControlFlow.Construction.Symbolic
         {
             var instruction = node.Contents;
 
-            // Ensure buffer is large enough.
-            int readCount = Architecture.GetReadVariablesCount(instruction);
-            int writtenCount = Architecture.GetWrittenVariablesCount(instruction);
-
-            int bufferSize = Math.Max(readCount, writtenCount);
-            if (_variablesBuffer.Length < bufferSize)
-                _variablesBuffer = new IVariable[bufferSize];
-
             // Get read variables.
-            var variablesBufferSlice = _variablesBuffer.AsSpan(0, readCount);
-            int actualCount = Architecture.GetReadVariables(instruction, variablesBufferSlice);
-            if (actualCount > variablesBufferSlice.Length)
-                throw new ArgumentException("GetReadVariables returned a number of variables that is inconsistent.");
+            _variablesBuffer.Clear();
+            Architecture.GetReadVariables(instruction, _variablesBuffer);
 
             // Register variable dependencies.
-            for (int i = 0; i < actualCount; i++)
+            for (int i = 0; i < _variablesBuffer.Count; i++)
             {
                 var variable = _variablesBuffer[i];
                 if (variables.TryGetValue(variable, out var dataSources))
@@ -137,13 +124,11 @@ namespace Echo.ControlFlow.Construction.Symbolic
             }
 
             // Get written variables.
-            variablesBufferSlice = _variablesBuffer.AsSpan(0, writtenCount);
-            actualCount = Architecture.GetWrittenVariables(instruction, variablesBufferSlice);
-            if (actualCount > bufferSize)
-                throw new ArgumentException("GetWrittenVariables returned a number of variables that is inconsistent.");
+            _variablesBuffer.Clear();
+            Architecture.GetWrittenVariables(instruction, _variablesBuffer);
 
             // Apply variable changes in program state.
-            for (int i = 0; i < actualCount; i++)
+            for (int i = 0; i < _variablesBuffer.Count; i++)
             {
                 var variable = _variablesBuffer[i];
                 variables = variables.SetItem(variable, SymbolicValue<TInstruction>.CreateVariableValue(node, variable));
@@ -177,16 +162,11 @@ namespace Echo.ControlFlow.Construction.Symbolic
                     node.StackDependencies.Add(new StackDependency<TInstruction>());
                 
                 // Get read variables.
-                int variableReadCount = Architecture.GetReadVariablesCount(instruction);
-                if (_variablesBuffer.Length < variableReadCount)
-                    _variablesBuffer = new IVariable[variableReadCount];
+                _variablesBuffer.Clear();
+                Architecture.GetReadVariables(instruction, _variablesBuffer);
                 
-                int actualCount = Architecture.GetReadVariables(instruction, _variablesBuffer);
-                if (actualCount > variableReadCount)
-                    throw new ArgumentException("GetReadVariables returned a number of variables that is inconsistent with GetReadVariablesCount.");
-
                 // Register (unknown) variable dependencies.
-                for (int i = 0; i < actualCount; i++)
+                for (int i = 0; i < _variablesBuffer.Count; i++)
                 {
                     var variable = _variablesBuffer[i];
                     if (!node.VariableDependencies.ContainsVariable(variable))

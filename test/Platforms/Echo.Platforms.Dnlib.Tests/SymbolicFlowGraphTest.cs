@@ -1,8 +1,6 @@
-﻿using System;
-using System.Linq;
-using dnlib.DotNet.Emit;
+﻿using dnlib.DotNet.Emit;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Symbolic;
+using Echo.DataFlow.Construction;
 using Mocks;
 using Xunit;
 

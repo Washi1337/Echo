@@ -7,7 +7,6 @@ using Echo.Ast.Tests.Patterns;
 using Echo.Code;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Regions.Detection;
 using Echo.Platforms.DummyPlatform.Code;
@@ -323,6 +322,27 @@ public class ControlFlowGraphLifterTest
         
         Assert.Same(match1.GetCaptures(variable)[0], match4.GetCaptures(variable)[0]);
         Assert.Same(match2.GetCaptures(variable)[0], match3.GetCaptures(variable)[0]);
+    }
+    
+    [Fact]
+    public void Test()
+    {
+        // Construct
+        var cfg = ConstructGraph(new[]
+        {
+            DummyInstruction.Push(0, 1),
+            DummyInstruction.Op(1, 0, 1),
+            DummyInstruction.Op(2, 0, 1),
+            DummyInstruction.Op(3, 1, 1),
+            DummyInstruction.Op(4, 0, 1),
+            DummyInstruction.Op(5, 4, 0),
+            
+            // ret()
+            DummyInstruction.Ret(6)
+        });
+        
+        using var fs = File.CreateText("/tmp/output.dot");
+        cfg.ToDotGraph(fs, new DummyFormatter { IncludeOffset = false }.ToAstFormatter());
     }
     
     [Fact]

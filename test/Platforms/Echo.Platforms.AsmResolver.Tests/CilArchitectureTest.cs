@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
@@ -18,7 +19,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             
             var architecture = new CilArchitecture(method.CilMethodBody!);
 
-            var readVariables = new IVariable[1];
+            var readVariables = new List<IVariable>();
             architecture.GetReadVariables(new CilInstruction(CilOpCodes.Ldarg_0), readVariables);
 
             Assert.Equal(new[] {method.Parameters[0]}, readVariables
@@ -36,13 +37,14 @@ namespace Echo.Platforms.AsmResolver.Tests
             
             var architecture = new CilArchitecture(method.CilMethodBody!);
 
-            var readVariables = new IVariable[1];
+            var readVariables = new List<IVariable>();
             architecture.GetReadVariables(new CilInstruction(CilOpCodes.Ldarg_0), readVariables);
             
             Assert.Equal(new[] { method.Parameters.ThisParameter }, readVariables
                 .Cast<CilParameter>()
                 .Select(p => p.Parameter));
 
+            readVariables.Clear();
             architecture.GetReadVariables(new CilInstruction(CilOpCodes.Ldarg_1), readVariables);
             Assert.Equal(new[] { method.Parameters[0] }, readVariables
                 .Cast<CilParameter>()

@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
 
-namespace Echo.ControlFlow.Construction.Static
+namespace Echo.ControlFlow.Construction
 {
     /// <summary>
     /// Provides members for resolving the static successors of a single instruction. That is, resolve any successor
@@ -41,18 +42,10 @@ namespace Echo.ControlFlow.Construction.Static
         where TInstruction : notnull
     {
         /// <summary>
-        /// Gets the number of successors of the provided instruction.
-        /// </summary>
-        /// <param name="instruction">The instruction to resolve the successors from.</param>
-        /// <returns>The number of successors.</returns>
-        int GetSuccessorsCount(in TInstruction instruction);
-
-        /// <summary>
         /// Gets a collection of references that represent the successors of the provided instruction.
         /// </summary>
         /// <param name="instruction">The instruction to resolve the successors from.</param>
-        /// <param name="successorsBuffer">The buffer to write the successors into.</param>
-        /// <returns>The extracted successor references.</returns>
-        int GetSuccessors(in TInstruction instruction, Span<SuccessorInfo> successorsBuffer);
+        /// <param name="successorsBuffer">The buffer to add the successors into.</param>
+        void GetSuccessors(in TInstruction instruction, IList<SuccessorInfo> successorsBuffer);
     }
 }

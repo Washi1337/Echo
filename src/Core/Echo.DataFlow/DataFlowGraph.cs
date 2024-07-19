@@ -23,7 +23,7 @@ namespace Echo.DataFlow
         public DataFlowGraph(IArchitecture<TContents> architecture)
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
-            Nodes = new DataFlowNodeCollection<TContents>(this);
+            Nodes = new NodeCollection<TContents>(this);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Echo.DataFlow
         /// <summary>
         /// Gets a collection of nodes that are present in the graph.
         /// </summary>
-        public DataFlowNodeCollection<TContents> Nodes
+        public NodeCollection<TContents> Nodes
         {
             get;
         }

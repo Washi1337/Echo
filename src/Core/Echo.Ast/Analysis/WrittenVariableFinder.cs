@@ -31,18 +31,7 @@ namespace Echo.Ast.Analysis
 
         public override void ExitInstructionExpression(InstructionExpression<TInstruction> expression)
         {
-            int count = _architecture.GetWrittenVariablesCount(expression.Instruction);
-            if (count == 0)
-                return;
-            
-            var variables = ArrayPool<IVariable>.Shared.Rent(count);
-            
-            int actualCount = _architecture.GetWrittenVariables(expression.Instruction, variables);
-            for (int i = 0; i < actualCount; i++)
-                Variables.Add(variables[i]);
-            
-            ArrayPool<IVariable>.Shared.Return(variables);
-            
+            _architecture.GetWrittenVariables(expression.Instruction, Variables);
             base.ExitInstructionExpression(expression);
         }
     }

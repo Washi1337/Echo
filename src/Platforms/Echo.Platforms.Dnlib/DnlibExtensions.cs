@@ -4,11 +4,9 @@ using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Static;
-using Echo.ControlFlow.Construction.Symbolic;
 using Echo.ControlFlow.Regions.Detection;
-using Echo.Code;
 using Echo.DataFlow;
+using Echo.DataFlow.Construction;
 
 namespace Echo.Platforms.Dnlib
 {

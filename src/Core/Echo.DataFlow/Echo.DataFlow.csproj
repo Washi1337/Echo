@@ -18,6 +18,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Echo.ControlFlow\Echo.ControlFlow.csproj" />
       <ProjectReference Include="..\Echo\Echo.csproj" />
     </ItemGroup>
 

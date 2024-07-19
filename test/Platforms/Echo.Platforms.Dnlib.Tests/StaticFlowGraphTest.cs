@@ -1,7 +1,6 @@
 ﻿using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Regions;
 using Mocks;
 using Xunit;

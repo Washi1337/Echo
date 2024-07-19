@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Static;
 using Echo.ControlFlow.Regions.Detection;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;

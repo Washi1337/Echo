@@ -1,6 +1,7 @@
-﻿using Echo.DataFlow.Emulation;
+﻿using Echo.ControlFlow;
+using Echo.DataFlow.Emulation;
 
-namespace Echo.ControlFlow.Construction.Symbolic
+namespace Echo.DataFlow.Construction
 {
     /// <summary>
     /// Represents an object that encodes the transition from one program state to another after an instruction was executed.

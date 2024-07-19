@@ -11,12 +11,12 @@ namespace Echo.DataFlow.Collections
     /// </summary>
     /// <typeparam name="TContents">The type of data that is stored in each node.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class DataFlowNodeCollection<TContents> : ICollection<DataFlowNode<TContents>>
+    public class NodeCollection<TContents> : ICollection<DataFlowNode<TContents>>
     {
         private readonly Dictionary<long, DataFlowNode<TContents>> _nodes = new();
         private readonly DataFlowGraph<TContents> _owner;
 
-        internal DataFlowNodeCollection(DataFlowGraph<TContents> owner)
+        internal NodeCollection(DataFlowGraph<TContents> owner)
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }

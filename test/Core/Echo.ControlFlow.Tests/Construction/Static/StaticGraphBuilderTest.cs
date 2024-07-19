@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Echo.ControlFlow.Construction.Static;
+using Echo.ControlFlow.Construction;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 

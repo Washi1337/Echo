@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Echo.Ast.Analysis;
 using Echo.Code;
 
@@ -44,45 +45,23 @@ namespace Echo.Ast
         public int GetStackPopCount(in Statement<TInstruction> instruction) => 0;
 
         /// <inheritdoc />
-        public int GetReadVariablesCount(in Statement<TInstruction> instruction)
-        {
-            var finder = new ReadVariableFinder<TInstruction>(_baseArchitecture);
-            AstNodeWalker<TInstruction>.Walk(finder, instruction);
-            return finder.Variables.Count;
-        }
-
-        /// <inheritdoc />
-        public int GetReadVariables(in Statement<TInstruction> instruction, Span<IVariable> variablesBuffer)
+        public void GetReadVariables(in Statement<TInstruction> instruction, ICollection<IVariable> variablesBuffer)
         {
             var finder = new ReadVariableFinder<TInstruction>(_baseArchitecture);
             AstNodeWalker<TInstruction>.Walk(finder, instruction);
             
-            int i = 0;
             foreach (var variable in finder.Variables)
-                variablesBuffer[i++] = variable;
-
-            return finder.Variables.Count;
+                variablesBuffer.Add(variable);
         }
 
         /// <inheritdoc />
-        public int GetWrittenVariablesCount(in Statement<TInstruction> instruction)
-        {
-            var finder = new WrittenVariableFinder<TInstruction>(_baseArchitecture);
-            AstNodeWalker<TInstruction>.Walk(finder, instruction);
-            return finder.Variables.Count;
-        }
-
-        /// <inheritdoc />
-        public int GetWrittenVariables(in Statement<TInstruction> instruction, Span<IVariable> variablesBuffer)
+        public void GetWrittenVariables(in Statement<TInstruction> instruction, ICollection<IVariable> variablesBuffer)
         {
             var finder = new WrittenVariableFinder<TInstruction>(_baseArchitecture);
             AstNodeWalker<TInstruction>.Walk(finder, instruction);
             
-            int i = 0;
             foreach (var variable in finder.Variables)
-                variablesBuffer[i++] = variable;
-
-            return finder.Variables.Count;
+                variablesBuffer.Add(variable);
         }
     }
 

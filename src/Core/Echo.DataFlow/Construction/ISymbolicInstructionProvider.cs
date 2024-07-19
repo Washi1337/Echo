@@ -1,7 +1,7 @@
 using Echo.Code;
 using Echo.DataFlow.Emulation;
 
-namespace Echo.ControlFlow.Construction.Symbolic
+namespace Echo.DataFlow.Construction
 {
     /// <summary>
     /// Provides members for obtaining instructions based on the current state of a program.

@@ -1,7 +1,6 @@
 using System.Linq;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Static;
 using Iced.Intel;
 using Xunit;
 

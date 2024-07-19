@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Echo.Code;
 using Echo.DataFlow.Emulation;
 
-namespace Echo.ControlFlow.Construction.Symbolic
+namespace Echo.DataFlow.Construction
 {
     /// <summary>
     /// Provides an implementation of an adapter that maps a <see cref="IStaticInstructionProvider{TInstruction}"/>
