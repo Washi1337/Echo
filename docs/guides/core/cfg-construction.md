@@ -67,7 +67,7 @@ This interface takes a symbolic input state, and transforms it into a set of all
 
 ```csharp
 IArchitecture<TInstruction> architecture = ...;
-IStateTransitioner<TInstruction> transitioner = ...;
+StateTransitioner<TInstruction> transitioner = ...;
 
 IList<TInstruction> instructions = ...;
 var builder = new SymbolicFlowGraphBuilder<TInstruction>(
@@ -79,12 +79,15 @@ var builder = new SymbolicFlowGraphBuilder<TInstruction>(
 var cfg = builder.ConstructFlowGraph();
 ```
 
-A by-product of symbolic graph building is that it also produces a **data flow graph**:
+Most state transitioners produce a data flow graph as a by-product.
 
 ```csharp
-var dfg = builder.DataFlowGraph;
-```
+// First create the CFG.
+var cfg = builder.ConstructFlowGraph();
 
+// After building the CFG, a DFG is populated in the transitioner.
+var dfg = transitioner.DataFlowGraph;
+```
 
 > [!WARNING]
 > While symbolic graph construction usually is more accurate, it is significantly slower than static graph construction and can take a lot of memory.
