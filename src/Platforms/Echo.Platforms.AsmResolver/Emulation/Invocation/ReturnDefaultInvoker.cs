@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using AsmResolver.DotNet;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 

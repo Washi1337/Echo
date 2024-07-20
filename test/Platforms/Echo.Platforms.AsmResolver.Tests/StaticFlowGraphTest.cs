@@ -1,15 +1,10 @@
-using System.IO;
-using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using Echo.ControlFlow.Analysis.Domination;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Echo.ControlFlow.Regions;
-using Echo.Graphing.Serialization.Dot;
 using Echo.Platforms.AsmResolver.Tests.Mock;
-using Mocks;
 using Xunit;
 
 namespace Echo.Platforms.AsmResolver.Tests
