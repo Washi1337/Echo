@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
-using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.DotNet.Signatures;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 

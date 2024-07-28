@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using AsmResolver.DotNet;
-using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
 {

@@ -1,7 +1,7 @@
 using System;
-using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using static AsmResolver.PE.DotNet.Cil.CilCode;

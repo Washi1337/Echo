@@ -1,4 +1,4 @@
-using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Stack

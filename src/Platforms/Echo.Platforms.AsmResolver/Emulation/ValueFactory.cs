@@ -5,8 +5,7 @@ using AsmResolver;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Runtime;
 
@@ -156,7 +155,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
-        /// Gets a reference to the <see cref="Decimal"/> type. 
+        /// Gets a reference to the <see cref="decimal"/> type. 
         /// </summary>
         public ITypeDescriptor DecimalType
         {

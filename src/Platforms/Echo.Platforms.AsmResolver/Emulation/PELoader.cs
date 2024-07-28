@@ -50,7 +50,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <param name="file">The file to map.</param>
         /// <returns>The new base address of the PE file.</returns>
-        public long MapPE(IPEFile file)
+        public long MapPE(PEFile file)
         {
             long baseAddress = _currentAddress;
             

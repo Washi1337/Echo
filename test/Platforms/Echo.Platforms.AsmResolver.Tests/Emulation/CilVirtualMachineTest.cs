@@ -6,7 +6,6 @@ using System.Threading;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation;
@@ -18,7 +17,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 using static AsmResolver.PE.DotNet.Cil.CilOpCodes;
-using MethodAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.MethodAttributes;
+using MethodAttributes = AsmResolver.PE.DotNet.Metadata.Tables.MethodAttributes;
 using MethodDefinition = AsmResolver.DotNet.MethodDefinition;
 using TestClass = Mocks.TestClass;
 
