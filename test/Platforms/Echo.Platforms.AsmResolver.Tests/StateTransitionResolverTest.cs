@@ -39,6 +39,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.If));
             var body = method.CilMethodBody!;
             var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
             
             Assert.Single(cfg.EntryPoint!.ConditionalEdges);
             
@@ -69,9 +70,9 @@ namespace Echo.Platforms.AsmResolver.Tests
                     if (!visited.Add(currentOffset))
                         continue;
                     
-                    var current = dfg.Nodes[currentOffset];
+                    var current = offsetMap[currentOffset];
                     foreach (var dependant in current.GetDependants())
-                        agenda.Push(dependant.Id);
+                        agenda.Push(dependant.Offset);
                 }
 
                 return false;

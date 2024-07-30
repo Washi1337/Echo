@@ -9,14 +9,15 @@ namespace Echo.DataFlow.Collections
     /// <summary>
     /// Represents a mutable collection of nodes present in a data flow graph.
     /// </summary>
-    /// <typeparam name="TContents">The type of data that is stored in each node.</typeparam>
+    /// <typeparam name="TInstruction">The type of instruction that is stored in each node.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class NodeCollection<TContents> : ICollection<DataFlowNode<TContents>>
+    public class NodeCollection<TInstruction> : ICollection<DataFlowNode<TInstruction>>
+        where TInstruction : notnull
     {
-        private readonly Dictionary<long, DataFlowNode<TContents>> _nodes = new();
-        private readonly DataFlowGraph<TContents> _owner;
+        private readonly List<DataFlowNode<TInstruction>> _nodes = new();
+        private readonly DataFlowGraph<TInstruction> _owner;
 
-        internal NodeCollection(DataFlowGraph<TContents> owner)
+        internal NodeCollection(DataFlowGraph<TInstruction> owner)
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
@@ -28,35 +29,26 @@ namespace Echo.DataFlow.Collections
         public bool IsReadOnly => false;
 
         /// <summary>
-        /// Gets a node by its identifier.
-        /// </summary>
-        /// <param name="id">The node identifier.</param>
-        public DataFlowNode<TContents> this[long id] => _nodes[id];
-
-        /// <summary>
         /// Creates and adds a new node to the collection of data flow nodes.
         /// </summary>
-        /// <param name="id">The unique identifier of the node.</param>
         /// <param name="contents">The contents of the node.</param>
         /// <returns>The created node.</returns>
-        public DataFlowNode<TContents> Add(long id, TContents contents)
+        public DataFlowNode<TInstruction> Add(TInstruction contents)
         {
-            var node = new DataFlowNode<TContents>(id, contents);
+            var node = new DataFlowNode<TInstruction>(contents);
             Add(node);
             return node;
         }
         
         /// <inheritdoc />
-        public void Add(DataFlowNode<TContents> item)
+        public void Add(DataFlowNode<TInstruction> item)
         {
             if (item.ParentGraph == _owner)
                 return;
-            if (item.ParentGraph != null)
+            if (item.ParentGraph is not null)
                 throw new ArgumentException("Cannot add a node from another graph.");
-            if (_nodes.ContainsKey(item.Id))
-                throw new ArgumentException($"A node with identifier 0x{item.Id:X8} was already added to the graph.");
 
-            _nodes.Add(item.Id, item);
+            _nodes.Add(item);
             item.ParentGraph = _owner;
         }
 
@@ -67,23 +59,23 @@ namespace Echo.DataFlow.Collections
         /// <exception cref="ArgumentException">
         /// Occurs when at least one node in the provided collection is already added to another graph.
         /// </exception>
-        public void AddRange(IEnumerable<DataFlowNode<TContents>> items)
+        public void AddRange(IEnumerable<DataFlowNode<TInstruction>> items)
         {
             var nodes = items.ToArray();
 
+            // Validate before adding.
             for (int i = 0; i < nodes.Length; i++)
             {
                 var node = nodes[i];
-                if (node.ParentGraph != _owner && node.ParentGraph != null)
+                if (node.ParentGraph is not null && node.ParentGraph != _owner)
                     throw new ArgumentException("Sequence contains nodes from another graph.");
-                if (_nodes.ContainsKey(node.Id))
-                    throw new ArgumentException($"Sequence contains nodes with identifiers that were already added to the graph.");
             }
 
+            // Add the nodes.
             for (int i = 0; i < nodes.Length; i++)
             {
                 var node = nodes[i];
-                _nodes.Add(node.Id, node);
+                _nodes.Add(node);
                 node.ParentGraph = _owner;
             }
         }
@@ -91,114 +83,53 @@ namespace Echo.DataFlow.Collections
         /// <inheritdoc />
         public void Clear()
         {
-            foreach (long node in _nodes.Keys.ToArray())
+            foreach (var node in _nodes.ToArray())
                 Remove(node);
         }
-
-        /// <summary>
-        /// Determines whether a node with a specific offset was added to the collection.
-        /// </summary>
-        /// <param name="offset">The offset to the node.</param>
-        /// <returns><c>true</c> if there exists a node with the provided offset, <c>false</c> otherwise.</returns>
-        public bool Contains(long offset)
-        {
-            return _nodes.ContainsKey(offset);
-        }
+        
+        /// <inheritdoc />
+        public bool Contains(DataFlowNode<TInstruction> item) => _nodes.Contains(item);
 
         /// <inheritdoc />
-        public bool Contains(DataFlowNode<TContents> item)
-        {
-            if (item == null)
-                return false;
-            return _nodes.TryGetValue(item.Id, out var node) && node == item;
-        }
+        public void CopyTo(DataFlowNode<TInstruction>[] array, int arrayIndex) => _nodes.CopyTo(array, arrayIndex);
 
         /// <inheritdoc />
-        public void CopyTo(DataFlowNode<TContents>[] array, int arrayIndex)
+        public bool Remove(DataFlowNode<TInstruction> item)
         {
-            _nodes.Values.CopyTo(array, arrayIndex);
-        }
-
-        /// <summary>
-        /// Removes a node by its offset.
-        /// </summary>
-        /// <param name="offset">The offset. of the node to remove.</param>
-        /// <returns><c>true</c> if the collection contained a node with the provided offset., and the node was removed
-        /// successfully, <c>false</c> otherwise.</returns>
-        public bool Remove(long offset)
-        {
-            if (_nodes.TryGetValue(offset, out var node))
+            if (_nodes.Remove(item))
             {
-                node.Disconnect();
-                node.ParentGraph = null;
-                _nodes.Remove(offset);
+                item.Disconnect();
+                item.ParentGraph = null;
                 return true;
             }
-
+            
             return false;
         }
 
         /// <summary>
-        /// Synchronizes all offsets of each node with the underlying instructions.
+        /// Synchronizes all offsets of each node and basic blocks with the underlying instructions.
         /// </summary>
-        /// <exception cref="InvalidOperationException">Occurs when one or more nodes are in a state that new offsets
-        /// cannot be determined. This includes duplicated offsets.</exception>
-        /// <remarks>
-        /// <para>
-        /// Because updating offsets is a relatively expensive task, calls to this method should be delayed as much as
-        /// possible.
-        /// </para>
-        /// <para>
-        /// This method will invalidate any enumerators that are enumerating this collection of nodes.
-        /// </para>
-        /// </remarks>
-        public void UpdateIndices()
+        public void UpdateOffsets()
         {
-            var nodes = new Dictionary<long, DataFlowNode<TContents>>(Count);
+            foreach (var node in _nodes)
+                node.UpdateOffset();
+        }
 
-            // Verify whether all basic blocks are valid, i.e. all offsets can be obtained successfully and contain
-            // no duplicate offsets. If any problem arises we do not want to commit any changes to the node collection.
-            foreach (var entry in _nodes)
-            {
-                var node = entry.Value;
-                if (node.IsExternal)
-                {
-                    nodes.Add(entry.Key, entry.Value);
-                }
-                else
-                {
-                    long newOffset = _owner.Architecture.GetOffset(node.Contents);
-                    if (nodes.ContainsKey(newOffset))
-                    {
-                        throw new InvalidOperationException(
-                            $"Collection contains multiple instances of the offset {newOffset:X8}.");
-                    }
-
-                    nodes.Add(newOffset, node);
-                }
-            }
-
-            // Update the collection by editing the dictionary directly instead of using the public Clear and Add
-            // methods. The public methods remove any incident edges to each node, which means we'd have to add them 
-            // again. 
-
-            _nodes.Clear();
-
-            foreach (var entry in nodes)
-            {
-                entry.Value.Id = entry.Key;
-                _nodes.Add(entry.Key, entry.Value);
-            }
+        /// <summary>
+        /// Constructs a mapping from basic block header offsets to their respective nodes.
+        /// </summary>
+        /// <returns>The mapping</returns>
+        /// <exception cref="ArgumentException">The control flow graph contains nodes with duplicated offsets.</exception>
+        public IDictionary<long, DataFlowNode<TInstruction>> CreateOffsetMap()
+        {
+            return _nodes
+                .Where(x => !x.IsExternal)
+                .ToDictionary(x => x.Offset, x => x);
         }
 
         /// <inheritdoc />
-        public bool Remove(DataFlowNode<TContents> item) => 
-            item != null && Remove(item.Id);
-
-        /// <inheritdoc />
-        public IEnumerator<DataFlowNode<TContents>> GetEnumerator() => _nodes.Values.GetEnumerator();
+        public IEnumerator<DataFlowNode<TInstruction>> GetEnumerator() => _nodes.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        
     }
 }

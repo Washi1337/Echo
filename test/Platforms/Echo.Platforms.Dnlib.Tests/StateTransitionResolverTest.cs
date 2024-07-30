@@ -34,6 +34,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var type = (TypeDef) _moduleFixture.MockModule.ResolveToken(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.If));
             var cfg = method.ConstructSymbolicFlowGraph(out var dfg);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
             
             Assert.Single(cfg.EntryPoint!.ConditionalEdges);
             
@@ -64,9 +65,9 @@ namespace Echo.Platforms.Dnlib.Tests
                     if (!visited.Add(currentOffset))
                         continue;
                     
-                    var current = dfg.Nodes[currentOffset];
+                    var current = offsetMap[currentOffset];
                     foreach (var dependant in current.GetDependants())
-                        agenda.Push(dependant.Id);
+                        agenda.Push(dependant.Offset);
                 }
 
                 return false;

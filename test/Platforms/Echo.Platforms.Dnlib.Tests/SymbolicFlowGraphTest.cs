@@ -50,8 +50,8 @@ namespace Echo.Platforms.Dnlib.Tests
 
             // check that `arg0 % 2` is correctly turned into dfg
             var remNode = Assert.Single(graph.Nodes, n => n.StackDependencies.Count == 2);
-            Assert.Single(remNode!.StackDependencies, n => Assert.Single(n)!.Node.Contents.IsLdarg());
-            Assert.Single(remNode!.StackDependencies, n => Assert.Single(n)!.Node.Contents.IsLdcI4());
+            Assert.Single(remNode!.StackDependencies, n => Assert.Single(n)!.Node.Instruction.IsLdarg());
+            Assert.Single(remNode!.StackDependencies, n => Assert.Single(n)!.Node.Instruction.IsLdcI4());
             Assert.Single(remNode.GetDependants());
         }
     }

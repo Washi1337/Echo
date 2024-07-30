@@ -8,6 +8,7 @@ namespace Echo.Code
     /// </summary>
     /// <typeparam name="TInstruction">The type of the instruction model this architecture describes.</typeparam>
     public interface IArchitecture<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets the offset of an instruction.

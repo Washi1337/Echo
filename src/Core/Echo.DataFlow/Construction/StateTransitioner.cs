@@ -42,6 +42,11 @@ namespace Echo.DataFlow.Construction
             get;
         }
 
+        public IDictionary<long, DataFlowNode<TInstruction>> OffsetMap
+        {
+            get;
+        } = new Dictionary<long, DataFlowNode<TInstruction>>();
+
         /// <inheritdoc />
         public virtual SymbolicProgramState<TInstruction> GetInitialState(long entrypointAddress) => new(entrypointAddress);
 
@@ -74,7 +79,9 @@ namespace Echo.DataFlow.Construction
             DataFlowNode<TInstruction> node, 
             ImmutableStack<SymbolicValue<TInstruction>> stack)
         {
-            var instruction = node.Contents;
+            var instruction = node.Instruction;
+            if (instruction is null)
+                throw new ArgumentException("Cannot apply stack transition on an empty data flow node.");
             
             int argumentsCount = Architecture.GetStackPopCount(instruction);
             if (argumentsCount == -1)
@@ -109,7 +116,9 @@ namespace Echo.DataFlow.Construction
             DataFlowNode<TInstruction> node,
             ImmutableDictionary<IVariable, SymbolicValue<TInstruction>> variables)
         {
-            var instruction = node.Contents;
+            var instruction = node.Instruction;
+            if (instruction is null)
+                throw new ArgumentException("Cannot apply variable transition on an empty data flow node.");
 
             // Get read variables.
             _variablesBuffer.Clear();
@@ -146,16 +155,14 @@ namespace Echo.DataFlow.Construction
         protected DataFlowNode<TInstruction> GetOrCreateDataFlowNode(TInstruction instruction)
         {
             long offset = Architecture.GetOffset(instruction);
-            DataFlowNode<TInstruction> node;
 
-            if (DataFlowGraph.Nodes.Contains(offset))
+            if (!OffsetMap.TryGetValue(offset, out var node))
             {
-                node = DataFlowGraph.Nodes[offset];
-            }
-            else
-            {
-                node = new DataFlowNode<TInstruction>(offset, instruction);
-                
+                node = new DataFlowNode<TInstruction>(instruction)
+                {
+                    Offset = offset
+                };
+
                 // Register (unknown) stack dependencies.
                 int stackArgumentCount = Architecture.GetStackPopCount(instruction);
                 for (int i = 0; i < stackArgumentCount; i++)
@@ -174,6 +181,7 @@ namespace Echo.DataFlow.Construction
                 }
 
                 DataFlowGraph.Nodes.Add(node);
+                OffsetMap.Add(offset, node);
             }
 
             return node;

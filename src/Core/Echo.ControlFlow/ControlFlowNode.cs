@@ -13,7 +13,7 @@ namespace Echo.ControlFlow
     /// in a sequence.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to store in the node.</typeparam>
-    public class ControlFlowNode<TInstruction> : INode
+    public class ControlFlowNode<TInstruction> : IIdentifiedNode
         where TInstruction : notnull
     {
         private ControlFlowEdge<TInstruction>? _unconditionalEdge;
@@ -101,6 +101,8 @@ namespace Echo.ControlFlow
         /// Gets the offset of the basic block the node is representing.
         /// </summary>
         public long Offset => Contents.Offset;
+
+        long IIdentifiedNode.Id => Offset;
 
         /// <inheritdoc />
         public int InDegree => IncomingEdges.Count;

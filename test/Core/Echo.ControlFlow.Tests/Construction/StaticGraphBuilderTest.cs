@@ -5,7 +5,7 @@ using Echo.ControlFlow.Construction;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
-namespace Echo.ControlFlow.Tests.Construction.Static
+namespace Echo.ControlFlow.Tests.Construction
 {
     public class StaticGraphBuilderTest
     {

@@ -3,14 +3,15 @@ namespace Echo.DataFlow
     /// <summary>
     /// Represents a data source that refers to a stack value produced by a node in a data flow graph.
     /// </summary>
-    /// <typeparam name="TContents">The type of data stored in each data flow node.</typeparam>
-    public class StackDataSource<TContents> : DataSource<TContents>
+    /// <typeparam name="TInstruction">The type of data stored in each data flow node.</typeparam>
+    public class StackDataSource<TInstruction> : DataSource<TInstruction> 
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new stack data source, referencing the first stack value produced by the provided node.
         /// </summary>
         /// <param name="node">The node producing the value.</param>
-        public StackDataSource(DataFlowNode<TContents> node)
+        public StackDataSource(DataFlowNode<TInstruction> node)
             : base(node)
         {
         }
@@ -20,7 +21,7 @@ namespace Echo.DataFlow
         /// </summary>
         /// <param name="node">The node producing the value.</param>
         /// <param name="slotIndex">The index of the stack value that was produced by the node.</param>
-        public StackDataSource(DataFlowNode<TContents> node, int slotIndex)
+        public StackDataSource(DataFlowNode<TInstruction> node, int slotIndex)
             : base(node)
         {
             SlotIndex = slotIndex;
@@ -38,12 +39,12 @@ namespace Echo.DataFlow
         public override DataDependencyType Type => DataDependencyType.Stack;
 
         /// <inheritdoc />
-        public override string ToString() => $"{Node.Id:X8}#{SlotIndex}";
+        public override string ToString() => $"{Node.Offset:X8}#{SlotIndex}";
 
         /// <inheritdoc />
-        protected override bool Equals(DataSource<TContents> other)
+        protected override bool Equals(DataSource<TInstruction> other)
         {
-            return base.Equals(other) && other is StackDataSource<TContents> source && source.SlotIndex == SlotIndex;
+            return base.Equals(other) && other is StackDataSource<TInstruction> source && source.SlotIndex == SlotIndex;
         }
 
         /// <inheritdoc />

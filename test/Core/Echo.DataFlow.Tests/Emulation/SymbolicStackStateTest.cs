@@ -11,7 +11,7 @@ namespace Echo.DataFlow.Tests.Emulation
     {
         private static DataFlowNode<DummyInstruction> CreateDummyNode(long id)
         {
-            return new DataFlowNode<DummyInstruction>(id, DummyInstruction.Op(id, 0, 1));
+            return new DataFlowNode<DummyInstruction>(DummyInstruction.Op(id, 0, 1));
         }
 
         [Fact]

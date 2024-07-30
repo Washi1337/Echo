@@ -42,17 +42,10 @@ namespace Echo.Platforms.Dnlib
 
                 var exceptionSource = default(ExternalDataSourceNode<Instruction>);
                 
-                if (handler.HandlerStart!.Offset == entrypointAddress)
+                if (handler.HandlerStart is not null && handler.HandlerStart.Offset == entrypointAddress
+                    || handler.FilterStart is not null && handler.FilterStart.Offset == entrypointAddress)
                 {
-                    exceptionSource = new ExternalDataSourceNode<Instruction>(
-                        -(long) handler.HandlerStart.Offset,
-                        $"HandlerException_{handler.HandlerStart.Offset:X4}");
-                }
-                else if (handler.FilterStart != null && handler.FilterStart.Offset == entrypointAddress)
-                {
-                    exceptionSource = new ExternalDataSourceNode<Instruction>(
-                        -(long) handler.FilterStart.Offset,
-                        $"FilterException_{handler.FilterStart.Offset:X4}");
+                    exceptionSource = new ExternalDataSourceNode<Instruction>(handler);
                 }
 
                 if (exceptionSource is { })
