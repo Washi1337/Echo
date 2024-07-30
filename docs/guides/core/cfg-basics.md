@@ -37,7 +37,7 @@ foreach (var node in cfg.Nodes)
     Console.WriteLine($"{node.Offset:X8}");
 ```
 
-Individual nodes can also be obtained by looking them up by offset:
+Individual nodes can be obtained by looking them up by offset:
 
 ```csharp
 var node = cfg.Nodes.GetByOffset(offset: 0x1234);
@@ -50,11 +50,13 @@ To ensure all nodes have updated offsets according to their contents, use the `U
 cfg.Nodes.UpdateOffsets();
 ```
 
-If many nodes are supposed to be queried by offset, consider first creating an offset map; a dictionary that maps all basic block header offsets to their corresponding nodes:
+When doing many lookups by offset, consider first creating an offset map for faster lookups.
 
 ```csharp
 var offsetMap = cfg.Nodes.CreateOffsetMap();
-var node = cfg.Nodes[0x1234];
+var n1 = offsetMap[0x0001];
+var n2 = offsetMap[0x0004];
+var n3 = offsetMap[0x0010];
 ```
 
 Every node exposes a basic block containing the instructions it executes:
@@ -118,7 +120,7 @@ If only interested in the target nodes, `GetSuccessors()` can be used instead:
 ```csharp
 foreach (var successor in node.GetSuccessors())
     Console.WriteLine(successor);
-```
+```[dfg-basics.md](dfg-basics.md)
 
 Similarly, incoming edges can also be obtained using `GetIncomingEdges()` and `GetPredecessors()`:
 

@@ -116,7 +116,7 @@ namespace Echo.DataFlow.Collections
         }
 
         /// <summary>
-        /// Constructs a mapping from basic block header offsets to their respective nodes.
+        /// Constructs a mapping from instruction offsets to their respective nodes.
         /// </summary>
         /// <returns>The mapping</returns>
         /// <exception cref="ArgumentException">The control flow graph contains nodes with duplicated offsets.</exception>
@@ -126,6 +126,17 @@ namespace Echo.DataFlow.Collections
                 .Where(x => !x.IsExternal)
                 .ToDictionary(x => x.Offset, x => x);
         }
+
+        /// <summary>
+        /// Finds a node by its instruction offset.
+        /// </summary>
+        /// <param name="offset">The offset.</param>
+        /// <returns>The node, or <c>null</c> if no node was found with the provided offset.</returns>
+        /// <remarks>
+        /// This is a linear lookup. For many lookups by offset, consider first creating an offset map using
+        /// <see cref="CreateOffsetMap"/>.
+        /// </remarks>
+        public DataFlowNode<TInstruction>? GetByOffset(long offset) => _nodes.FirstOrDefault(x => x.Offset == offset);
 
         /// <inheritdoc />
         public IEnumerator<DataFlowNode<TInstruction>> GetEnumerator() => _nodes.GetEnumerator();

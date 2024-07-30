@@ -37,23 +37,30 @@ DataFlowGraph<TInstruction> dfg = ...;
 
 // Iterate over all nodes in a data flow graph:
 foreach (var node in dfg.Nodes)
-    Console.WriteLine(node.Contents);
+    Console.WriteLine(node.Instruction);
 ```
 
-Nodes are indexed by offset.
-They can be obtained via the `GetNodeById` method:
+Individual nodes can be obtained by looking them up by offset:
 
 ```csharp
-var node = dfg.GetNodeById(id: 0x1234);
+var node = dfg.Nodes.GetByOffset(offset: 0x1234);
 ```
 
-Every node exposes a basic blockc containing the instructions that introduces or requires dependencies:
+This performs a linear search through all the nodes, and finds the first node that matches in offset.
+To ensure all nodes have updated offsets according to their contents, use the `UpdateOffsets` method:
 
 ```csharp
-DataFlowNode<TInstruction> node = ...;
-var instruction = node.Contents;
+dfg.Nodes.UpdateOffsets();
 ```
 
+When doing many lookups by offset, consider first creating an offset map for faster lookups.
+
+```csharp
+var offsetMap = dfg.Nodes.CreateOffsetMap();
+var n1 = offsetMap[0x0001];
+var n2 = offsetMap[0x0004];
+var n3 = offsetMap[0x0010];
+```
 
 ## Edges
 
@@ -105,7 +112,7 @@ var dependencies = node.GetOrderedDependencies();
 
 By default, `GetOrderedDependencies` traverses all edges in the data flow graph.
 This includes variable dependencies that were registered in the graph.
-If only the stack dependnecies are meant to be traversed (e.g. to get the instructions that make up a single expression), additional flags can be specified to alter the behaviour of the traversal.
+If only the stack dependencies are meant to be traversed (e.g. to get the instructions that make up a single expression), additional flags can be specified to alter the behaviour of the traversal.
 
 ```csharp
 DataFlowGraph<TInstruction> node = ...
