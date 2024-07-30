@@ -18,7 +18,7 @@ namespace Echo.DataFlow
         }
 
         /// <summary>
-        /// Gets the name of the auxiliary data flow node.
+        /// Gets the object representing the external source of the auxiliary data flow node.
         /// </summary>
         public object Source
         {

@@ -28,7 +28,7 @@ namespace Echo.ControlFlow.Regions.Detection
             // Build up region tree.
             var rangeToRegionMapping = CreateEHRegions(cfg, sortedRanges);
             InsertNodesInEHRegions(cfg, sortedRanges, rangeToRegionMapping);
-            DetermineRegionEntrypoints(cfg, sortedRanges, rangeToRegionMapping);
+            DetermineRegionEntryPoints(cfg, sortedRanges, rangeToRegionMapping);
         }
 
         private static Dictionary<AddressRange, ScopeRegion<TInstruction>> CreateEHRegions<TInstruction>(
@@ -155,25 +155,27 @@ namespace Echo.ControlFlow.Regions.Detection
             return null;
         }
 
-        private static void DetermineRegionEntrypoints<TInstruction>(
+        private static void DetermineRegionEntryPoints<TInstruction>(
             ControlFlowGraph<TInstruction> cfg, 
             List<ExceptionHandlerRange> sortedRanges,
             Dictionary<AddressRange, ScopeRegion<TInstruction>> rangeToRegionMapping)
             where TInstruction : notnull
         {
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
+            
             foreach (var range in sortedRanges)
             {
                 var protectedRegion = rangeToRegionMapping[range.ProtectedRange];
-                protectedRegion.EntryPoint ??= cfg.Nodes.GetByOffset(range.ProtectedRange.Start);
+                protectedRegion.EntryPoint ??= offsetMap[range.ProtectedRange.Start];
 
                 var handlerRegion = rangeToRegionMapping[range.HandlerRange];
-                handlerRegion.EntryPoint ??= cfg.Nodes.GetByOffset(range.HandlerRange.Start);
+                handlerRegion.EntryPoint ??= offsetMap[range.HandlerRange.Start];
 
                 if (rangeToRegionMapping.TryGetValue(range.PrologueRange, out var prologueRegion))
-                    prologueRegion.EntryPoint ??= cfg.Nodes.GetByOffset(range.PrologueRange.Start);
+                    prologueRegion.EntryPoint ??= offsetMap[range.PrologueRange.Start];
 
                 if (rangeToRegionMapping.TryGetValue(range.EpilogueRange, out var epilogueRegion))
-                    epilogueRegion.EntryPoint ??= cfg.Nodes.GetByOffset(range.EpilogueRange.Start);
+                    epilogueRegion.EntryPoint ??= offsetMap[range.EpilogueRange.Start];
             }
         }
         
