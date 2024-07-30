@@ -7,6 +7,7 @@ namespace Echo.ControlFlow.Blocks
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that this block contains.</typeparam>
     public interface IBlock<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets an ordered collection of all basic blocks that can be found in this block.
@@ -18,13 +19,13 @@ namespace Echo.ControlFlow.Blocks
         /// Gets the first basic block that appears in the ordered list of blocks. 
         /// </summary>
         /// <returns>The first basic block, or <c>null</c> if the block contains no basic blocks..</returns>
-        BasicBlock<TInstruction> GetFirstBlock();
+        BasicBlock<TInstruction>? GetFirstBlock();
 
         /// <summary>
         /// Gets the last basic block that appears in the ordered list of blocks. 
         /// </summary>
         /// <returns>The last basic block, or <c>null</c> if the block contains no basic blocks..</returns>
-        BasicBlock<TInstruction> GetLastBlock();
+        BasicBlock<TInstruction>? GetLastBlock();
 
         /// <summary>
         /// Visit the current block using the provided visitor.

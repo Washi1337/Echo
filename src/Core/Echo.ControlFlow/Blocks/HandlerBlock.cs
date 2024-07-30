@@ -7,11 +7,12 @@ namespace Echo.ControlFlow.Blocks
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that this block contains.</typeparam>
     public class HandlerBlock<TInstruction> : IBlock<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets or sets the prologue block that gets executed before the main handler block (if available).
         /// </summary>
-        public ScopeBlock<TInstruction> Prologue
+        public ScopeBlock<TInstruction>? Prologue
         {
             get;
             set;
@@ -28,7 +29,7 @@ namespace Echo.ControlFlow.Blocks
         /// <summary>
         /// Gets or sets the epilogue block that gets executed after the main handler block (if available).
         /// </summary>
-        public ScopeBlock<TInstruction> Epilogue
+        public ScopeBlock<TInstruction>? Epilogue
         {
             get;
             set;
@@ -37,7 +38,7 @@ namespace Echo.ControlFlow.Blocks
         /// <summary>
         /// Gets or sets a user-defined tag that is assigned to this block. 
         /// </summary>
-        public object Tag
+        public object? Tag
         {
             get;
             set;
@@ -63,13 +64,13 @@ namespace Echo.ControlFlow.Blocks
         }
 
         /// <inheritdoc />
-        public BasicBlock<TInstruction> GetFirstBlock() =>
+        public BasicBlock<TInstruction>? GetFirstBlock() =>
             Prologue?.GetFirstBlock()
             ?? Contents.GetFirstBlock()
             ?? Epilogue?.GetFirstBlock();
 
         /// <inheritdoc />
-        public BasicBlock<TInstruction> GetLastBlock() =>
+        public BasicBlock<TInstruction>? GetLastBlock() =>
             Epilogue?.GetLastBlock()
             ?? Contents.GetLastBlock()
             ?? Prologue?.GetLastBlock();

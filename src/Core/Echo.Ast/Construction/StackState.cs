@@ -7,6 +7,7 @@ namespace Echo.Ast.Construction;
 
 [DebuggerDisplay("{Node} (Stack: {Stack})")]
 internal readonly struct StackState<TInstruction>
+    where TInstruction : notnull
 {
     public StackState(ControlFlowNode<TInstruction> node)
     {

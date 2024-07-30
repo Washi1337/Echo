@@ -8,6 +8,7 @@ namespace Echo.ControlFlow.Blocks
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions stored in the block.</typeparam>
     public class BlockFormatter<TInstruction> : IBlockListener<TInstruction>
+        where TInstruction : notnull
     {
         private const string DefaultIndentationString = "    ";
 

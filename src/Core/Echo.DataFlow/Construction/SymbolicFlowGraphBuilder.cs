@@ -3,16 +3,18 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.Code;
+using Echo.ControlFlow.Construction;
 using Echo.DataFlow.Emulation;
 
-namespace Echo.ControlFlow.Construction.Symbolic
+namespace Echo.DataFlow.Construction
 {
     /// <summary>
     /// Provides an implementation of a control flow graph builder that traverses the instructions in a recursive manner,
     /// and maintains an symbolic program state to determine all possible branch targets of any indirect branching instruction.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to store in the control flow graph.</typeparam>
-    public class SymbolicFlowGraphBuilder<TInstruction> : FlowGraphBuilderBase<TInstruction>
+    public class SymbolicFlowGraphBuilder<TInstruction> : FlowGraphBuilder<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new symbolic control flow graph builder using the provided program state transition resolver.  
@@ -79,7 +81,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
         protected override IInstructionTraversalResult<TInstruction> CollectInstructions(
             long entrypoint, IEnumerable<long> knownBlockHeaders)
         {
-            using var context = new GraphBuilderContext(Architecture);
+            var context = new GraphBuilderContext(Architecture);
             long[] blockHeaders = knownBlockHeaders as long[] ?? knownBlockHeaders.ToArray();
             
             // Perform traversal.
@@ -155,24 +157,13 @@ namespace Echo.ControlFlow.Construction.Symbolic
         {
             var result = context.Result;
             
-            // Get a buffer to write to.
-            int transitionCount = StateTransitioner.GetTransitionCount(currentState, instruction);
-            var transitionsBuffer = context.GetTransitionsBuffer(transitionCount);
-
             // Read transitions.
-            var transitionsBufferSlice = transitionsBuffer.AsSpan(0, transitionCount);
-            int actualTransitionCount = StateTransitioner.GetTransitions(currentState, instruction, transitionsBufferSlice);
-            if (actualTransitionCount > transitionCount)
-            {
-                // Sanity check: This should only happen if the transition resolver contains a bug.
-                throw new ArgumentException(
-                    "The number of transitions that was returned by the transition resolver is inconsistent "
-                    + "with the number of actual written transitions.");
-            }
+            context.TransitionsBuffer.Clear();
+            StateTransitioner.GetTransitions(currentState, instruction, context.TransitionsBuffer);
 
-            for (int i = 0; i < actualTransitionCount; i++)
+            for (int i = 0; i < context.TransitionsBuffer.Count; i++)
             {
-                var transition = transitionsBufferSlice[i];
+                var transition = context.TransitionsBuffer[i];
 
                 if (transition.IsRealEdge)
                 {
@@ -242,51 +233,19 @@ namespace Echo.ControlFlow.Construction.Symbolic
             }
         }
 
-        private sealed class GraphBuilderContext : IDisposable
+        private sealed class GraphBuilderContext
         {
-            private readonly ArrayPool<StateTransition<TInstruction>> _transitionsBufferPool;
-            private StateTransition<TInstruction>[] _transitionsBuffer;
-
             internal GraphBuilderContext(IArchitecture<TInstruction> architecture)
             {
                 Result = new InstructionTraversalResult<TInstruction>(architecture);
                 RecordedStates = new Dictionary<long, SymbolicProgramState<TInstruction>>();
-
-                _transitionsBufferPool = ArrayPool<StateTransition<TInstruction>>.Shared;
-
-                // Most common case is at most 2 transitions per instruction.
-                _transitionsBuffer = _transitionsBufferPool.Rent(2);
             }
 
-            internal InstructionTraversalResult<TInstruction> Result
-            {
-                get;
-            }
+            internal InstructionTraversalResult<TInstruction> Result { get; }
 
-            internal IDictionary<long, SymbolicProgramState<TInstruction>> RecordedStates
-            {
-                get;
-            }
+            internal IDictionary<long, SymbolicProgramState<TInstruction>> RecordedStates { get; }
 
-            internal StateTransition<TInstruction>[] GetTransitionsBuffer(int minimalSize)
-            {
-                if (_transitionsBuffer.Length < minimalSize)
-                {
-                    _transitionsBufferPool.Return(_transitionsBuffer);
-                    _transitionsBuffer = _transitionsBufferPool.Rent(minimalSize);
-                }
-
-                return _transitionsBuffer;
-            }
-
-            public void Dispose()
-            {
-                if (_transitionsBuffer is null)
-                    return;
-
-                _transitionsBufferPool.Return(_transitionsBuffer);
-                _transitionsBuffer = null;
-            }
+            public List<StateTransition<TInstruction>> TransitionsBuffer { get; } = new(2);
         }
     }
 }

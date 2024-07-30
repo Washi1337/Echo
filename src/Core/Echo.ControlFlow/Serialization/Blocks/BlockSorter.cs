@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.Graphing.Analysis.Sorting;
@@ -45,18 +46,23 @@ namespace Echo.ControlFlow.Serialization.Blocks
         /// <returns>The ordering.</returns>
         public static IEnumerable<ControlFlowNode<TInstruction>> SortNodes<TInstruction>(
             this ControlFlowGraph<TInstruction> cfg)
+            where TInstruction : notnull
         {
-            var pathsView = DetermineUnbreakablePaths(cfg);
-            var sorter = new TopologicalSorter<ControlFlowNode<TInstruction>>(pathsView.GetImpliedNeighbours, true);
+            if (cfg.EntryPoint is null)
+                throw new ArgumentException("Control flow graph does not have an entry point.");
+            
+            var paths = GetUnbreakablePaths(cfg);
+            var sorter = new TopologicalSorter<ControlFlowNode<TInstruction>>(paths.GetImpliedNeighbours, true);
 
             return sorter
                 .GetTopologicalSorting(cfg.EntryPoint)
                 .Reverse()
-                .SelectMany(n => pathsView.GetUnbreakablePath(n));
+                .SelectMany(n => paths.GetUnbreakablePath(n));
         }
 
-        private static UnbreakablePathsView<TInstruction> DetermineUnbreakablePaths<TInstruction>(
+        private static UnbreakablePathsView<TInstruction> GetUnbreakablePaths<TInstruction>(
             ControlFlowGraph<TInstruction> cfg)
+            where TInstruction : notnull
         {
             var visited = new HashSet<ControlFlowNode<TInstruction>>();
             var result = new UnbreakablePathsView<TInstruction>();
@@ -73,6 +79,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
         private static List<ControlFlowNode<TInstruction>> GetFallThroughPath<TInstruction>(
             ControlFlowNode<TInstruction> start, 
             ISet<ControlFlowNode<TInstruction>> visited)
+            where TInstruction : notnull
         {
             // Navigate back to root of fallthrough path.
             var predecessor = start;
@@ -95,11 +102,8 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 result.Add(current);
 
                 // Navigate forwards.
-                if (current.UnconditionalEdge != null
-                    && current.UnconditionalEdge.Type == ControlFlowEdgeType.FallThrough)
-                {
-                    agenda.Push(current.UnconditionalNeighbour);
-                }
+                if (current.UnconditionalEdge is {Type: ControlFlowEdgeType.FallThrough, Target: { } neighbour})
+                    agenda.Push(neighbour);
 
                 // Verify that the current node has only one fallthrough predecessor.
                 GetFallThroughPredecessor(current);
@@ -108,8 +112,9 @@ namespace Echo.ControlFlow.Serialization.Blocks
             return result;
         }
 
-        private static ControlFlowNode<TInstruction> GetFallThroughPredecessor<TInstruction>(
+        private static ControlFlowNode<TInstruction>? GetFallThroughPredecessor<TInstruction>(
             ControlFlowNode<TInstruction> node)
+            where TInstruction : notnull
         {
             // There can only be one incoming fallthrough edge for every node. If more than one exists,
             // the input control flow graph is constructed incorrectly.
@@ -120,13 +125,13 @@ namespace Echo.ControlFlow.Serialization.Blocks
             // instructions of v and w are placed right before the header of f. Therefore, the footers of
             // v and w must be the same instruction, implying v = w, which is a contradiction.
 
-            ControlFlowNode<TInstruction> predecessor = null;
+            ControlFlowNode<TInstruction>? predecessor = null;
             
             foreach (var incomingEdge in node.GetIncomingEdges())
             {
                 if (incomingEdge.Type == ControlFlowEdgeType.FallThrough)
                 {
-                    if (predecessor != null)
+                    if (predecessor is not null)
                     {
                         throw new BlockOrderingException(
                             $"Node {node.Offset:X8} has multiple fallthrough predecessors.");

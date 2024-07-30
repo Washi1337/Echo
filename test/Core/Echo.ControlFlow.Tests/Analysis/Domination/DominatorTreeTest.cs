@@ -1,4 +1,4 @@
-using System.IO;
+using System.Linq;
 using Echo.ControlFlow.Analysis.Domination;
 using Echo.ControlFlow.Regions;
 using Echo.Platforms.DummyPlatform;
@@ -16,7 +16,7 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
 
             var dominatorTree = DominatorTree<DummyInstruction>.FromGraph(graph);
             Assert.Equal(graph.EntryPoint, dominatorTree.Root.OriginalNode);
-            Assert.True(dominatorTree.Dominates(graph.EntryPoint, graph.EntryPoint));
+            Assert.True(dominatorTree.Dominates(graph.EntryPoint!, graph.EntryPoint!));
         }
 
         [Fact]
@@ -24,10 +24,10 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         {
             // Artificially construct a path of four nodes in sequential order. 
             var graph = TestGraphs.CreatePath();
-            var n1 = graph.GetNodeByOffset(0);
-            var n2 = graph.GetNodeByOffset(1);
-            var n3 = graph.GetNodeByOffset(2);
-            var n4 = graph.GetNodeByOffset(3);
+            var n1 = graph.Nodes.GetByOffset(0)!;
+            var n2 = graph.Nodes.GetByOffset(1)!;
+            var n3 = graph.Nodes.GetByOffset(2)!;
+            var n4 = graph.Nodes.GetByOffset(3)!;
 
             var dominatorTree = DominatorTree<DummyInstruction>.FromGraph(graph);
             Assert.Equal(graph.EntryPoint, dominatorTree.Root.OriginalNode);
@@ -58,10 +58,10 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         {
             // Artificially construct an if construct.
             var graph = TestGraphs.CreateIfElse();
-            var n1 = graph.GetNodeByOffset(0);
-            var n2 = graph.GetNodeByOffset(2);
-            var n3 = graph.GetNodeByOffset(3);
-            var n4 = graph.GetNodeByOffset(4);
+            var n1 = graph.Nodes.GetByOffset(0)!;
+            var n2 = graph.Nodes.GetByOffset(2)!;
+            var n3 = graph.Nodes.GetByOffset(3)!;
+            var n4 = graph.Nodes.GetByOffset(4)!;
             
             var dominatorTree = DominatorTree<DummyInstruction>.FromGraph(graph);
             Assert.Equal(graph.EntryPoint, dominatorTree.Root.OriginalNode);
@@ -92,10 +92,10 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         {
             // Artificially construct a looping construct.
             var graph = TestGraphs.CreateLoop();
-            var n1 = graph.GetNodeByOffset(0);
-            var n2 = graph.GetNodeByOffset(1);
-            var n3 = graph.GetNodeByOffset(2);
-            var n4 = graph.GetNodeByOffset(4);
+            var n1 = graph.Nodes.GetByOffset(0);
+            var n2 = graph.Nodes.GetByOffset(1);
+            var n3 = graph.Nodes.GetByOffset(2);
+            var n4 = graph.Nodes.GetByOffset(4);
             
             var dominatorTree = DominatorTree<DummyInstruction>.FromGraph(graph);
             Assert.Equal(graph.EntryPoint, dominatorTree.Root.OriginalNode);
@@ -125,41 +125,41 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         public void ExceptionHandler()
         {
             var cfg = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            
-            for (int i = 0; i < 7; i++)
-                cfg.Nodes.Add(new ControlFlowNode<int>(i));
 
-            cfg.EntryPoint = cfg.Nodes[0];
+            var nodes = Enumerable.Range(0, 7).Select(x => new ControlFlowNode<int>(x)).ToArray();
+            cfg.Nodes.AddRange(nodes);
 
-            cfg.Nodes[0].ConnectWith(cfg.Nodes[1]);
-            cfg.Nodes[1].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.Conditional);
-            cfg.Nodes[1].ConnectWith(cfg.Nodes[3], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[2].ConnectWith(cfg.Nodes[4], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[3].ConnectWith(cfg.Nodes[4], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[4].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[5].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.Unconditional);
+            cfg.EntryPoint = cfg.Nodes.GetByOffset(0);
+
+            nodes[0].ConnectWith(nodes[1]);
+            nodes[1].ConnectWith(nodes[2], ControlFlowEdgeType.Conditional);
+            nodes[1].ConnectWith(nodes[3], ControlFlowEdgeType.FallThrough);
+            nodes[2].ConnectWith(nodes[4], ControlFlowEdgeType.Unconditional);
+            nodes[3].ConnectWith(nodes[4], ControlFlowEdgeType.FallThrough);
+            nodes[4].ConnectWith(nodes[6], ControlFlowEdgeType.Unconditional);
+            nodes[5].ConnectWith(nodes[6], ControlFlowEdgeType.Unconditional);
 
             var ehRegion = new ExceptionHandlerRegion<int>();
             cfg.Regions.Add(ehRegion);
 
-            ehRegion.ProtectedRegion.EntryPoint = cfg.Nodes[1];
+            ehRegion.ProtectedRegion.EntryPoint = nodes[1];
             ehRegion.ProtectedRegion.Nodes.AddRange(new[]
             {
-                cfg.Nodes[1],
-                cfg.Nodes[2],
-                cfg.Nodes[3],
-                cfg.Nodes[4],
+                nodes[1],
+                nodes[2],
+                nodes[3],
+                nodes[4],
             });
             
             var handler = new HandlerRegion<int>();
             ehRegion.Handlers.Add(handler);
-            handler.Contents.Nodes.Add(cfg.Nodes[5]);
-            handler.Contents.EntryPoint = cfg.Nodes[5];
+            handler.Contents.Nodes.Add(nodes[5]);
+            handler.Contents.EntryPoint = nodes[5];
 
             var tree = DominatorTree<int>.FromGraph(cfg);
-            Assert.True(tree.Dominates(cfg.Nodes[1], cfg.Nodes[6]));
-            Assert.False(tree.Dominates(cfg.Nodes[4], cfg.Nodes[6]));
-            Assert.False(tree.Dominates(cfg.Nodes[5], cfg.Nodes[6]));
+            Assert.True(tree.Dominates(nodes[1], nodes[6]));
+            Assert.False(tree.Dominates(nodes[4], nodes[6]));
+            Assert.False(tree.Dominates(nodes[5], nodes[6]));
         }
     }
 }

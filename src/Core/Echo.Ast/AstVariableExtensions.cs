@@ -17,6 +17,7 @@ public static class AstVariableExtensions
     public static IEnumerable<VariableExpression<TInstruction>> GetIsUsedBy<TInstruction>(
         this IVariable self,
         CompilationUnit<TInstruction> unit)
+        where TInstruction : notnull
     {
         return unit.GetVariableUses(self);
     } 
@@ -30,6 +31,7 @@ public static class AstVariableExtensions
     public static IEnumerable<Statement<TInstruction>> GetIsWrittenBy<TInstruction>(
         this IVariable self,
         CompilationUnit<TInstruction> unit)
+        where TInstruction : notnull
     {
         return unit.GetVariableWrites(self);
     } 

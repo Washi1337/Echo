@@ -29,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var cfg = body.ConstructSymbolicFlowGraph(out _);
             
             Assert.Single(cfg.Nodes);
-            Assert.Equal(body.Instructions, cfg.Nodes[0].Contents.Instructions);
+            Assert.Equal(body.Instructions, cfg.Nodes.GetByOffset(0)!.Contents.Instructions);
         }
         
         [Fact]
@@ -39,8 +39,9 @@ namespace Echo.Platforms.AsmResolver.Tests
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.If));
             var body = method.CilMethodBody!;
             var cfg = body.ConstructSymbolicFlowGraph(out var dfg);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
             
-            Assert.Single(cfg.EntryPoint.ConditionalEdges);
+            Assert.Single(cfg.EntryPoint!.ConditionalEdges);
             
             var ldstrAdult = FindLdstr("Adult");
             var ldstrChild = FindLdstr("Child");
@@ -69,9 +70,9 @@ namespace Echo.Platforms.AsmResolver.Tests
                     if (!visited.Add(currentOffset))
                         continue;
                     
-                    var current = dfg.Nodes[currentOffset];
+                    var current = offsetMap[currentOffset];
                     foreach (var dependant in current.GetDependants())
-                        agenda.Push(dependant.Id);
+                        agenda.Push(dependant.Offset);
                 }
 
                 return false;
@@ -99,7 +100,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var cfg = method.CilMethodBody.ConstructSymbolicFlowGraph(out _);
 
             var node = Assert.Single(cfg.Nodes);
-            Assert.Equal(CilOpCodes.Jmp, node.Contents.Footer.OpCode);
+            Assert.Equal(CilOpCodes.Jmp, node.Contents.Footer!.OpCode);
         }
     }
 }

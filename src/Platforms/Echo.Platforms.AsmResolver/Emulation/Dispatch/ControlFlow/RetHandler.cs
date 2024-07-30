@@ -16,7 +16,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
         {
             var calleeFrame = context.Thread.CallStack.Pop();
             var callerFrame = context.CurrentFrame;
-
+            
             var genericContext = GenericContext.FromMethod(calleeFrame.Method);
             if (calleeFrame.Method.Signature!.ReturnsValue)
             {
@@ -25,31 +25,32 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
                 var value = calleeFrame.EvaluationStack.Pop(returnType);
                 callerFrame.EvaluationStack.Push(value, returnType, true);
             }
-            else if (callerFrame.Body is { } body)
+            else if (calleeFrame.Body is {Owner: {IsConstructor: true, IsStatic: false}}
+                     && callerFrame.Body is { } body)
             {
                 // The method may still be a constructor called via newobj.
                 // In that case we need to push the created value, stored in the `this` pointer.
-
+                
                 int index = body.Instructions.GetIndexByOffset(callerFrame.ProgramCounter) - 1;
                 if (index != -1 && body.Instructions[index].OpCode.Code == CilCode.Newobj)
                 {
                     var resultingType = calleeFrame.Method.DeclaringType!
                         .ToTypeSignature()
                         .InstantiateGenericTypes(genericContext);
-
+                    
                     var slot = CreateResultingStackSlot(
                         context,
                         resultingType,
                         calleeFrame.ReadArgument(0)
                     );
-
+                    
                     callerFrame.EvaluationStack.Push(slot);
                 }
             }
-
+            
             return CilDispatchResult.Success();
         }
-
+        
         internal static StackSlot CreateResultingStackSlot(
             CilExecutionContext context,
             TypeSignature type,

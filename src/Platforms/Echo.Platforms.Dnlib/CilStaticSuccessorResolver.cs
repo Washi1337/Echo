@@ -3,111 +3,91 @@ using System.Collections.Generic;
 using dnlib.DotNet.Emit;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Static;
 using DnlibCode = dnlib.DotNet.Emit.Code;
 
 namespace Echo.Platforms.Dnlib
 {
     /// <summary>
-    /// Provides an implementation of <see cref="IStaticSuccessorResolver{CilInstruction}"/>
+    /// Provides an implementation of <see cref="IStaticSuccessorResolver{Instruction}"/>
     /// </summary>
     public class CilStaticSuccessorResolver : IStaticSuccessorResolver<Instruction>
     {
         /// <summary>
         /// Gets a reusable singleton instance of the static successor resolver for the CIL architecture.
         /// </summary>
-        public static CilStaticSuccessorResolver Instance
-        {
-            get;
-        } = new();
-
+        public static CilStaticSuccessorResolver Instance { get; } = new();
+        
         /// <inheritdoc />
-        public int GetSuccessorsCount(in Instruction instruction)
+        public void GetSuccessors(in Instruction instruction, IList<SuccessorInfo> successorsBuffer)
         {
+            // Multiplex based on flow control.
             switch (instruction.OpCode.FlowControl)
             {
-                case FlowControl.Call when instruction.OpCode.Code == DnlibCode.Jmp:
-                    return 0;
-                    
-                case FlowControl.Break:
-                case FlowControl.Meta:
-                case FlowControl.Next:
-                case FlowControl.Branch:
-                case FlowControl.Call:
-                    return 1;
+                case FlowControl.Break or FlowControl.Meta or FlowControl.Next or FlowControl.Call:
+                    if (instruction.OpCode.Code != DnlibCode.Jmp)
+                        AddFallThrough(instruction, successorsBuffer);
+                    break;
                 
-                case FlowControl.Cond_Branch when instruction.OpCode.Code == DnlibCode.Switch:
-                    return ((ICollection<Instruction>) instruction.Operand).Count + 1;
-
+                case FlowControl.Branch:
+                    AddUnconditionalBranch(instruction, successorsBuffer);
+                    break;
+                
                 case FlowControl.Cond_Branch:
-                    return 2;
+                    AddConditionalBranches(instruction, successorsBuffer);
+                    break;
 
-                case FlowControl.Return:
-                case FlowControl.Throw:
-                    return 0;
+                case FlowControl.Return or FlowControl.Throw:
+                    return;
 
                 case FlowControl.Phi:
-                    throw new NotSupportedException("There are no known instructions with Phi control flow");
+                    throw new NotSupportedException();
 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        /// <inheritdoc />
-        public int GetSuccessors(in Instruction instruction, Span<SuccessorInfo> successorsBuffer)
+        private static void AddFallThrough(Instruction instruction, IList<SuccessorInfo> successorsBuffer)
         {
-            switch (instruction.OpCode.FlowControl)
+            successorsBuffer.Add(FallThrough(instruction));
+        }
+
+        private static void AddUnconditionalBranch(Instruction instruction, IList<SuccessorInfo> successorsBuffer)
+        {
+            // Unconditional branches always move to the instruction referenced in the operand.
+            var label = (Instruction) instruction.Operand!;
+            successorsBuffer.Add(new SuccessorInfo(label.Offset, ControlFlowEdgeType.Unconditional));
+        }
+
+        private static void AddConditionalBranches(Instruction instruction, IList<SuccessorInfo> successorsBuffer)
+        {
+            // Conditional branches can reference one or more instructions in the operand.
+            switch (instruction.Operand)
             {
-                case FlowControl.Break:
-                case FlowControl.Meta:
-                case FlowControl.Next:
-                    successorsBuffer[0] = FallThrough(instruction);
-                    return 1;
+                case Instruction singleTarget:
+                    successorsBuffer.Add(Conditional(singleTarget));
+                    successorsBuffer.Add(FallThrough(instruction));
+                    break;
 
-                case FlowControl.Call:
-                    if (instruction.OpCode.Code == DnlibCode.Jmp)
-                        return 0;
-                    
-                    successorsBuffer[0] = FallThrough(instruction);
-                    return 1;
-
-                case FlowControl.Branch:
-                    successorsBuffer[0] = Branch(false, instruction);
-                    return 1;
-
-                case FlowControl.Cond_Branch when instruction.OpCode.Code == DnlibCode.Switch:
-                    var multipleTargets = (Instruction[]) instruction.Operand;
-                    for (int i = 0; i < multipleTargets.Length; i++)
-                        successorsBuffer[i] = new SuccessorInfo(multipleTargets[i].Offset, ControlFlowEdgeType.Conditional);
-                    successorsBuffer[multipleTargets.Length] = FallThrough(instruction);
-                    return multipleTargets.Length + 1;
-
-                case FlowControl.Cond_Branch:
-                    successorsBuffer[0] = Branch(true, instruction);
-                    successorsBuffer[1] = FallThrough(instruction);
-                    return 2;
-
-                case FlowControl.Return:
-                case FlowControl.Throw:
-                    return 0;
-
-                case FlowControl.Phi:
-                    throw new NotSupportedException("There are no known instructions with Phi control flow");
-
+                case IList<Instruction> multipleTargets:
+                    for (int i = 0; i < multipleTargets.Count; i++)
+                        successorsBuffer.Add(Conditional(multipleTargets[i]));
+                    successorsBuffer.Add(FallThrough(instruction));
+                    break;
+                
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private static SuccessorInfo Conditional(Instruction singleTarget)
+        {
+            return new SuccessorInfo(singleTarget.Offset, ControlFlowEdgeType.Conditional);
         }
 
         private static SuccessorInfo FallThrough(Instruction instruction)
         {
             return new SuccessorInfo(instruction.Offset + instruction.GetSize(), ControlFlowEdgeType.FallThrough);
         }
-
-        private static SuccessorInfo Branch(bool conditional, Instruction instruction) =>
-            new SuccessorInfo(((Instruction) instruction.Operand).Offset, conditional
-                ? ControlFlowEdgeType.Conditional
-                : ControlFlowEdgeType.Unconditional);
     }
 }

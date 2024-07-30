@@ -203,58 +203,12 @@ namespace Echo.ControlFlow.Tests
                 n3, n3, n3, n3
             }, n1.ConditionalEdges.Select(e => e.Target));
         }
-
-        [Fact]
-        public void UpdateOffsetsWithNoChangeShouldReuseNodeInstances()
-        {
-            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            
-            var n1 = new ControlFlowNode<int>(1, 1);
-            var n2 = new ControlFlowNode<int>(2, 2);
-            var n3 = new ControlFlowNode<int>(3, 3);
-
-            graph.Nodes.AddRange(new[]
-            {
-                n1, n2, n3
-            });
-            
-            graph.Nodes.UpdateOffsets();
-            
-            Assert.Same(n1, graph.Nodes[1]);
-            Assert.Same(n2, graph.Nodes[2]);
-            Assert.Same(n3, graph.Nodes[3]);
-        }
-
-        [Fact]
-        public void UpdateOffsetsWithChangeShouldReuseNodeInstances()
-        {
-            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            
-            var n1 = new ControlFlowNode<int>(1, 1);
-            var n2 = new ControlFlowNode<int>(2, 2);
-            var n3 = new ControlFlowNode<int>(3, 3);
-
-            graph.Nodes.AddRange(new[]
-            {
-                n1, n2, n3
-            });
-
-            n1.Contents.Instructions[0] = 4;
-            n2.Contents.Instructions[0] = 5;
-            n3.Contents.Instructions[0] = 6;
-            
-            graph.Nodes.UpdateOffsets();
-            
-            Assert.Same(n1, graph.Nodes[4]);
-            Assert.Same(n2, graph.Nodes[5]);
-            Assert.Same(n3, graph.Nodes[6]);
-        }
-
+        
         [Fact]
         public void UpdateOffsetsShouldUpdateNodeOffset()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = new ControlFlowNode<int>(1, 1);
+            var n1 = new ControlFlowNode<int>(1);
             graph.Nodes.Add(n1);
             
             n1.Contents.Instructions[0] = 5;
@@ -262,52 +216,6 @@ namespace Echo.ControlFlow.Tests
             
             Assert.Equal(5, n1.Offset);
             Assert.Equal(5, n1.Contents.Offset);
-        }
-
-        [Fact]
-        public void UpdateOffsetsOnEmptyBasicBlocksShouldThrowAndDiscard()
-        {
-            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = new ControlFlowNode<int>(1, 1);
-            var n2 = new ControlFlowNode<int>(2);
-            graph.Nodes.AddRange(new[]
-            {
-                n1,
-                n2
-            });
-
-            Assert.Throws<InvalidOperationException>(() => graph.Nodes.UpdateOffsets());
-
-            Assert.Equal(1, n1.Offset);
-            Assert.Equal(1, n1.Contents.Offset);
-            Assert.Equal(2, n2.Offset);
-        }
-
-        [Fact]
-        public void UpdateOffsetsWithDuplicatedOffsetsShouldThrowAndDiscard()
-        {
-            var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = new ControlFlowNode<int>(1, 1);
-            var n2 = new ControlFlowNode<int>(2, 2);
-            var n3 = new ControlFlowNode<int>(3, 3);
-            graph.Nodes.AddRange(new[]
-            {
-                n1,
-                n2,
-                n3
-            });
-
-            n2.Contents.Instructions[0] = 4;
-            n3.Contents.Instructions[0] = 4;
-            
-            Assert.Throws<InvalidOperationException>(() => graph.Nodes.UpdateOffsets());
-            
-            Assert.Equal(1, n1.Offset);
-            Assert.Equal(1, n1.Contents.Offset);
-            Assert.Equal(2, n2.Offset);
-            Assert.Equal(2, n2.Contents.Offset);
-            Assert.Equal(3, n3.Offset);
-            Assert.Equal(3, n3.Contents.Offset);
         }
     }
 }

@@ -19,6 +19,7 @@ public static class AstBuilder
     public static ControlFlowGraph<Statement<TInstruction>> Lift<TInstruction>(
         this ControlFlowGraph<TInstruction> cfg,
         IPurityClassifier<TInstruction> classifier)
+        where TInstruction : notnull
     {
         return ControlFlowGraphLifter<TInstruction>.Lift(cfg, classifier);
     }
@@ -34,6 +35,7 @@ public static class AstBuilder
     public static CompilationUnit<TInstruction> ToCompilationUnit<TInstruction>(
         this ControlFlowGraph<TInstruction> self,
         IPurityClassifier<TInstruction> classifier)
+        where TInstruction : notnull
     {
         return new CompilationUnitBuilder<TInstruction>().Construct(self.Lift(classifier));
     }
@@ -46,6 +48,7 @@ public static class AstBuilder
     /// <returns>The constructed compilation unit.</returns>
     public static CompilationUnit<TInstruction> ToCompilationUnit<TInstruction>(
         this ControlFlowGraph<Statement<TInstruction>> self)
+        where TInstruction : notnull
     {
         return new CompilationUnitBuilder<TInstruction>().Construct(self);
     }
@@ -58,6 +61,7 @@ public static class AstBuilder
     /// <returns>The constructed compilation unit.</returns>
     public static CompilationUnit<TInstruction> ToCompilationUnit<TInstruction>(
         this ScopeBlock<Statement<TInstruction>> self)
+        where TInstruction : notnull
     {
         return new CompilationUnitBuilder<TInstruction>().Construct(self);
     }

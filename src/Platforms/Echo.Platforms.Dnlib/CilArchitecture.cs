@@ -98,51 +98,21 @@ namespace Echo.Platforms.Dnlib
         }
 
         /// <inheritdoc />
-        public int GetReadVariablesCount(in Instruction instruction) => 
-            instruction.IsLdloc() || instruction.IsLdarg() 
-                ? 1
-                : 0;
-        
-        /// <inheritdoc />
-        public int GetReadVariables(in Instruction instruction, Span<IVariable> variablesBuffer)
+        public void GetReadVariables(in Instruction instruction, ICollection<IVariable> variablesBuffer)
         {
             if (instruction.IsLdloc())
-            {
-                variablesBuffer[0] = _variables[instruction.GetLocal(MethodBody.Variables).Index];
-                return 1;
-            }
-
-            if (instruction.IsLdarg())
-            {
-                variablesBuffer[0] = _parameters[instruction.GetParameter(Method.Parameters).Index];
-                return 1;
-            }
-
-            return 0;
+                variablesBuffer.Add(_variables[instruction.GetLocal(MethodBody.Variables).Index]);
+            else if (instruction.IsLdarg())
+                variablesBuffer.Add(_parameters[instruction.GetParameter(Method.Parameters).Index]);
         }
-        
-        /// <inheritdoc />
-        public int GetWrittenVariablesCount(in Instruction instruction) => 
-            instruction.IsStloc() || instruction.IsStarg() 
-                ? 1
-                : 0;
 
         /// <inheritdoc />
-        public int GetWrittenVariables(in Instruction instruction, Span<IVariable> variablesBuffer)
+        public void GetWrittenVariables(in Instruction instruction, ICollection<IVariable> variablesBuffer)
         {
             if (instruction.IsStloc())
-            {
-                variablesBuffer[0] = _variables[instruction.GetLocal(MethodBody.Variables).Index];
-                return 1;
-            }
-
-            if (instruction.IsStarg())
-            {
-                variablesBuffer[0] = _parameters[instruction.GetParameter(Method.Parameters).Index];
-                return 1;
-            }
-
-            return 0;
+                variablesBuffer.Add(_variables[instruction.GetLocal(MethodBody.Variables).Index]);
+            else if (instruction.IsStarg())
+                variablesBuffer.Add(_parameters[instruction.GetParameter(Method.Parameters).Index]);
         }
     }
 }

@@ -10,17 +10,18 @@ namespace Echo.DataFlow.Collections
     /// <summary>
     /// Represents a collection of dependencies allocated on a stack for a node in a data flow graph.
     /// </summary>
-    /// <typeparam name="TContents">The type of contents to put in each node.</typeparam>
+    /// <typeparam name="TInstruction">The type of instructions to put in each node.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class StackDependencyCollection<TContents> : Collection<StackDependency<TContents>>
+    public class StackDependencyCollection<TInstruction> : Collection<StackDependency<TInstruction>>
+        where TInstruction : notnull
     {
-        private readonly DataFlowNode<TContents> _owner;
+        private readonly DataFlowNode<TInstruction> _owner;
 
         /// <summary>
         /// Creates a new dependency collection for a node.
         /// </summary>
         /// <param name="owner">The owner node.</param>
-        internal StackDependencyCollection(DataFlowNode<TContents> owner)
+        internal StackDependencyCollection(DataFlowNode<TInstruction> owner)
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
@@ -30,7 +31,7 @@ namespace Echo.DataFlow.Collections
         /// </summary>
         public int EdgeCount => this.Sum(d => d.Count);
 
-        private void AssertDependencyValidity(StackDependency<TContents> item)
+        private void AssertDependencyValidity(StackDependency<TInstruction> item)
         {
             if (item is null)
                 throw new ArgumentNullException(nameof(item));
@@ -56,12 +57,12 @@ namespace Echo.DataFlow.Collections
             else if (count > Count)
             {
                 while(Count != count)
-                    Add(new StackDependency<TContents>());
+                    Add(new StackDependency<TInstruction>());
             }
         }
 
         /// <inheritdoc />
-        protected override void InsertItem(int index, StackDependency<TContents> item)
+        protected override void InsertItem(int index, StackDependency<TInstruction> item)
         {
             AssertDependencyValidity(item);
             base.InsertItem(index, item);
@@ -69,7 +70,7 @@ namespace Echo.DataFlow.Collections
         }
 
         /// <inheritdoc />
-        protected override void SetItem(int index, StackDependency<TContents> item)
+        protected override void SetItem(int index, StackDependency<TInstruction> item)
         {
             AssertDependencyValidity(item);
             
@@ -101,26 +102,26 @@ namespace Echo.DataFlow.Collections
         /// <summary>
         /// Represents an enumerator for a stack dependency collection.
         /// </summary>
-        public struct Enumerator : IEnumerator<StackDependency<TContents>>
+        public struct Enumerator : IEnumerator<StackDependency<TInstruction>>
         {
-            private readonly StackDependencyCollection<TContents> _collection;
-            private StackDependency<TContents> _current;
+            private readonly StackDependencyCollection<TInstruction> _collection;
+            private StackDependency<TInstruction> _current;
             private int _index;
 
             /// <summary>
             /// Creates a new instance of the <see cref="Enumerator"/> structure.
             /// </summary>
             /// <param name="collection">The collection to enumerate.</param>
-            public Enumerator(StackDependencyCollection<TContents> collection)
+            public Enumerator(StackDependencyCollection<TInstruction> collection)
                 : this()
             {
                 _collection = collection;
                 _index = -1;
-                _current = null;
+                _current = null!;
             }
 
             /// <inheritdoc />
-            public StackDependency<TContents> Current => _current;
+            public StackDependency<TInstruction> Current => _current;
 
             object IEnumerator.Current => Current;
 
@@ -134,7 +135,6 @@ namespace Echo.DataFlow.Collections
                     return true;
                 }
 
-                _current = null;
                 return false;
             }
 
@@ -142,7 +142,6 @@ namespace Echo.DataFlow.Collections
             public void Reset()
             {
                 _index = -1;
-                _current = null;
             }
 
             /// <inheritdoc />

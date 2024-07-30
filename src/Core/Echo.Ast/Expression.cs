@@ -14,7 +14,9 @@ namespace Echo.Ast
         /// <param name="variable">The variable.</param>
         /// <typeparam name="TInstruction">The type of instruction.</typeparam>
         /// <returns>The resulting expression.</returns>
-        public static VariableExpression<TInstruction> Variable<TInstruction>(IVariable variable) => new(variable);
+        public static VariableExpression<TInstruction> Variable<TInstruction>(IVariable variable)
+            where TInstruction : notnull
+            => new(variable);
         
         /// <summary>
         /// Wraps an instruction into an expression with no arguments.
@@ -22,7 +24,9 @@ namespace Echo.Ast
         /// <param name="instruction">The instruction.</param>
         /// <typeparam name="TInstruction">The type of instruction.</typeparam>
         /// <returns>The resulting expression.</returns>
-        public static InstructionExpression<TInstruction> Instruction<TInstruction>(TInstruction instruction) => new(instruction);
+        public static InstructionExpression<TInstruction> Instruction<TInstruction>(TInstruction instruction) 
+            where TInstruction : notnull
+            => new(instruction);
 
         /// <summary>
         /// Wraps an instruction into an expression with the provided arguments.
@@ -34,6 +38,7 @@ namespace Echo.Ast
         public static InstructionExpression<TInstruction> Instruction<TInstruction>(
             TInstruction instruction,
             params Expression<TInstruction>[] arguments)
+            where TInstruction : notnull
         {
             return new InstructionExpression<TInstruction>(instruction, arguments);
         }
@@ -48,6 +53,7 @@ namespace Echo.Ast
         public static InstructionExpression<TInstruction> Instruction<TInstruction>(
             TInstruction instruction,
             IEnumerable<Expression<TInstruction>> arguments)
+            where TInstruction : notnull
         {
             return new InstructionExpression<TInstruction>(instruction, arguments);
         }
@@ -59,13 +65,17 @@ namespace Echo.Ast
         /// <typeparam name="TInstruction">The type of instruction.</typeparam>
         /// <returns>The resulting expression.</returns>
         public static VariableExpression<TInstruction> ToExpression<TInstruction>(this IVariable variable) 
-            => new(variable);
+            where TInstruction : notnull
+        {
+            return new VariableExpression<TInstruction>(variable);
+        }
     }
     
     /// <summary>
     /// Provides a base contract for expressions in the AST
     /// </summary>
     public abstract class Expression<TInstruction> : AstNode<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Wraps the expression into an expression statement.

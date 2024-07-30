@@ -11,6 +11,7 @@ namespace Echo.Ast.Construction;
 /// Lifts every node in a control flow graph to its AST representation. 
 /// </summary>
 public sealed class ControlFlowGraphLifter<TInstruction>
+    where TInstruction : notnull
 {
     private readonly ControlFlowGraph<TInstruction> _original;
     private readonly ControlFlowGraph<Statement<TInstruction>> _lifted;
@@ -269,7 +270,7 @@ public sealed class ControlFlowGraphLifter<TInstruction>
         var recordedStates = new Dictionary<LiftedNode<TInstruction>, StackState<TInstruction>>();
 
         var agenda = new Queue<StackState<TInstruction>>();
-        agenda.Enqueue(new StackState<TInstruction>(_original.EntryPoint));
+        agenda.Enqueue(new StackState<TInstruction>(_original.EntryPoint!));
 
         while (agenda.Count > 0)
         {
@@ -366,7 +367,7 @@ public sealed class ControlFlowGraphLifter<TInstruction>
 
     private void TransformRegions()
     {
-        _lifted.EntryPoint = _liftedNodes[_original.EntryPoint].Transformed;
+        _lifted.EntryPoint = _liftedNodes[_original.EntryPoint!].Transformed;
         foreach (var region in _original.Regions)
             TransformRegion(x => _lifted.Regions.Add(x), region);
     }
@@ -407,7 +408,7 @@ public sealed class ControlFlowGraphLifter<TInstruction>
             newScopeRegion.Nodes.Add(_liftedNodes[node].Transformed);
 
         // Set up entry point.
-        newScopeRegion.EntryPoint = _liftedNodes[scopeRegion.EntryPoint].Transformed;
+        newScopeRegion.EntryPoint = _liftedNodes[scopeRegion.EntryPoint!].Transformed;
         
         // Recursively traverse the region tree.   
         TransformSubRegions(scopeRegion, newScopeRegion);

@@ -1,4 +1,4 @@
-using Echo.Code;
+using System;
 using Echo.Graphing;
 
 namespace Echo.ControlFlow
@@ -11,15 +11,16 @@ namespace Echo.ControlFlow
     /// If an edge is in between two nodes, it means that control might be transferred from the one node to the other
     /// during the execution of the program that is encoded by the control flow graph. 
     /// </remarks>
-    /// <typeparam name="TContents">The type of contents that the connected nodes store.</typeparam>
-    public class ControlFlowEdge<TContents> : IEdge
+    /// <typeparam name="TInstruction">The type of instructions that the connected nodes store.</typeparam>
+    public class ControlFlowEdge<TInstruction> : IEdge
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new fallthrough edge between two nodes.
         /// </summary>
         /// <param name="origin">The node to start the edge at.</param>
         /// <param name="target">The node to use as destination for the edge.</param>
-        public ControlFlowEdge(ControlFlowNode<TContents> origin, ControlFlowNode<TContents> target)
+        public ControlFlowEdge(ControlFlowNode<TInstruction> origin, ControlFlowNode<TInstruction> target)
             : this(origin, target, ControlFlowEdgeType.FallThrough)
         {
         }
@@ -30,7 +31,7 @@ namespace Echo.ControlFlow
         /// <param name="origin">The node to start the edge at.</param>
         /// <param name="target">The node to use as destination for the edge.</param>
         /// <param name="edgeType">The type of the edge to create.</param>
-        public ControlFlowEdge(ControlFlowNode<TContents> origin, ControlFlowNode<TContents> target, ControlFlowEdgeType edgeType)
+        public ControlFlowEdge(ControlFlowNode<TInstruction> origin, ControlFlowNode<TInstruction> target, ControlFlowEdgeType edgeType)
         {
             Origin = origin;
             Target = target;
@@ -40,12 +41,12 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the graph that contains this edge.
         /// </summary>
-        public ControlFlowGraph<TContents> ParentGraph => Origin?.ParentGraph ?? Target?.ParentGraph;
+        public ControlFlowGraph<TInstruction>? ParentGraph => Origin.ParentGraph ?? Target.ParentGraph;
 
         /// <summary>
         /// Gets the node that this edge originates from.
         /// </summary>
-        public ControlFlowNode<TContents> Origin
+        public ControlFlowNode<TInstruction> Origin
         {
             get;
         }
@@ -53,9 +54,18 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the node that this edge targets.
         /// </summary>
-        public ControlFlowNode<TContents> Target
+        public ControlFlowNode<TInstruction> Target
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets or sets user data that is added to the edge.
+        /// </summary>
+        public object? UserData
+        {
+            get;
+            set;
         }
 
         INode IEdge.Origin => Origin;
@@ -71,6 +81,6 @@ namespace Echo.ControlFlow
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"{Origin.Offset:X8} -> {Target.Offset:X8} ({Type})";
+        public override string ToString() => $"{Origin} -> {Target} ({Type})";
     }
 }

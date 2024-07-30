@@ -5,6 +5,7 @@ namespace Echo.Ast
     /// </summary>
     /// <typeparam name="TInstruction">The type of the instruction the AST models</typeparam>
     public interface IAstNodeVisitor<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Visits a given <see cref="CompilationUnit{TInstruction}"/>
@@ -59,6 +60,7 @@ namespace Echo.Ast
     /// <typeparam name="TInstruction">The type of the instruction the AST models</typeparam>
     /// <typeparam name="TState">The state to pass between visitors</typeparam>
     public interface IAstNodeVisitor<TInstruction, in TState>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Visits a given <see cref="CompilationUnit{TInstruction}"/>
@@ -113,6 +115,7 @@ namespace Echo.Ast
     /// <typeparam name="TState">The state to pass between visitors</typeparam>
     /// <typeparam name="TOut">The return type of the Visit methods</typeparam>
     public interface IAstNodeVisitor<TInstruction, in TState, out TOut>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Visits a given <see cref="CompilationUnit{TInstruction}"/>

@@ -4,6 +4,7 @@ using Echo.Code;
 namespace Echo.Ast;
 
 internal sealed class VariableCollection<TInstruction> : Collection<IVariable>
+    where TInstruction : notnull
 {
     private readonly Statement<TInstruction> _owner;
 

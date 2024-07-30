@@ -8,7 +8,7 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
-            var n1 = new ControlFlowNode<DummyInstruction>(0, DummyInstruction.Ret(0));
+            var n1 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Ret(0));
 
             graph.Nodes.Add(n1);
             graph.EntryPoint = n1;
@@ -20,19 +20,24 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
-            var n1 = new ControlFlowNode<DummyInstruction>(0, 
-                DummyInstruction.Op(0, 0, 0));
+            var n1 = new ControlFlowNode<DummyInstruction>( 
+                DummyInstruction.Op(0, 0, 0)
+            );
 
-            var n2 = new ControlFlowNode<DummyInstruction>(1, 
-                DummyInstruction.Op(1, 0, 0));
+            var n2 = new ControlFlowNode<DummyInstruction>(
+                DummyInstruction.Op(1, 0, 0)
+            );
 
-            var n3 = new ControlFlowNode<DummyInstruction>(2, 
-                DummyInstruction.Op(2, 0, 0));
+            var n3 = new ControlFlowNode<DummyInstruction>(
+                DummyInstruction.Op(2, 0, 0)
+            );
 
-            var n4 = new ControlFlowNode<DummyInstruction>(3, 
-                DummyInstruction.Ret(3));
+            var n4 = new ControlFlowNode<DummyInstruction>(
+                DummyInstruction.Ret(3)
+            );
 
-            graph.Nodes.AddRange(new[] {n1, n2, n3, n4});
+            graph.Nodes.AddRange([n1, n2, n3, n4]);
+            graph.Nodes.UpdateOffsets();
             graph.EntryPoint = n1;
 
             n1.ConnectWith(n2);
@@ -46,17 +51,17 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
-            var n1 = new ControlFlowNode<DummyInstruction>(0, 
+            var n1 = new ControlFlowNode<DummyInstruction>(
                 DummyInstruction.Op(0, 0, 1),
-                DummyInstruction.JmpCond(1, 3));
+                DummyInstruction.JmpCond(1, 3)
+            );
 
-            var n2 = new ControlFlowNode<DummyInstruction>(2, 
-                DummyInstruction.Op(2, 0, 0));
+            var n2 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Op(2, 0, 0));
 
-            var n3 = new ControlFlowNode<DummyInstruction>(3, 
-                DummyInstruction.Ret(3));
+            var n3 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Ret(3));
 
-            graph.Nodes.AddRange(new[] {n1, n2, n3});
+            graph.Nodes.AddRange([n1, n2, n3]);
+            graph.Nodes.UpdateOffsets();
             graph.EntryPoint = n1;
 
             n1.ConnectWith(n2);
@@ -70,20 +75,19 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
-            var n1 = new ControlFlowNode<DummyInstruction>(0, 
+            var n1 = new ControlFlowNode<DummyInstruction>(
                 DummyInstruction.Op(0, 0, 1), 
-                DummyInstruction.JmpCond(1, 3));
+                DummyInstruction.JmpCond(1, 3)
+            );
 
-            var n2 = new ControlFlowNode<DummyInstruction>(2, 
-                DummyInstruction.Jmp(2, 4));
+            var n2 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Jmp(2, 4));
 
-            var n3 = new ControlFlowNode<DummyInstruction>(3, 
-                DummyInstruction.Op(3, 0, 0));
+            var n3 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Op(3, 0, 0));
 
-            var n4 = new ControlFlowNode<DummyInstruction>(4, 
-                DummyInstruction.Ret(4));
+            var n4 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Ret(4));
 
-            graph.Nodes.AddRange(new[] {n1, n2, n3, n4});
+            graph.Nodes.AddRange([n1, n2, n3, n4]);
+            graph.Nodes.UpdateOffsets();
             graph.EntryPoint = n1;
 
             n1.ConnectWith(n2);
@@ -98,27 +102,26 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
-            var n1 = new ControlFlowNode<DummyInstruction>(0, 
+            var n1 = new ControlFlowNode<DummyInstruction>(
                 DummyInstruction.Op(0, 0, 1), 
-                DummyInstruction.JmpCond(1, 7));
+                DummyInstruction.JmpCond(1, 7)
+            );
 
-            var n2 = new ControlFlowNode<DummyInstruction>(2, 
+            var n2 = new ControlFlowNode<DummyInstruction>( 
                 DummyInstruction.Op(2, 0, 1), 
-                DummyInstruction.JmpCond(3, 4));
+                DummyInstruction.JmpCond(3, 4)
+            );
 
-            var n3 = new ControlFlowNode<DummyInstruction>(4, 
-                DummyInstruction.Jmp(4, 6));
+            var n3 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Jmp(4, 6));
             
-            var n4 = new ControlFlowNode<DummyInstruction>(5, 
-                DummyInstruction.Jmp(5, 6));
+            var n4 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Jmp(5, 6));
             
-            var n5 = new ControlFlowNode<DummyInstruction>(6, 
-                DummyInstruction.Jmp(6, 7));
+            var n5 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Jmp(6, 7));
 
-            var n6 = new ControlFlowNode<DummyInstruction>(7, 
-                DummyInstruction.Ret(7));
+            var n6 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Ret(7));
 
-            graph.Nodes.AddRange(new[] {n1, n2, n3, n4, n5, n6});
+            graph.Nodes.AddRange([n1, n2, n3, n4, n5, n6]);
+            graph.Nodes.UpdateOffsets();
             graph.EntryPoint = n1;
 
             n1.ConnectWith(n2);
@@ -136,20 +139,19 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
-            var n1 = new ControlFlowNode<DummyInstruction>(0, 
-                DummyInstruction.Jmp(0, 2));
+            var n1 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Jmp(0, 2));
 
-            var n2 = new ControlFlowNode<DummyInstruction>(1, 
-                DummyInstruction.Jmp(1, 4));
+            var n2 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Jmp(1, 4));
 
-            var n3 = new ControlFlowNode<DummyInstruction>(2, 
+            var n3 = new ControlFlowNode<DummyInstruction>(
                 DummyInstruction.Op(2, 0, 1), 
-                DummyInstruction.JmpCond(3, 1));
+                DummyInstruction.JmpCond(3, 1)
+            );
 
-            var n4 = new ControlFlowNode<DummyInstruction>(4, 
-                DummyInstruction.Ret(4));
+            var n4 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Ret(4));
 
-            graph.Nodes.AddRange(new[] {n1, n2, n3, n4});
+            graph.Nodes.AddRange([n1, n2, n3, n4]);
+            graph.Nodes.UpdateOffsets();
             graph.EntryPoint = n1;
 
             n1.ConnectWith(n3);
@@ -164,20 +166,15 @@ namespace Echo.ControlFlow.Tests
         {
             var graph = new ControlFlowGraph<DummyInstruction>(DummyArchitecture.Instance);
 
-            var n1 = new ControlFlowNode<DummyInstruction>(0, 
-                DummyInstruction.Switch(0, 2, 3, 4, 5));
-            var n2 = new ControlFlowNode<DummyInstruction>(1, 
-                DummyInstruction.Jmp(1, 5));
-            var n3 = new ControlFlowNode<DummyInstruction>(2, 
-                DummyInstruction.Jmp(2, 5));
-            var n4 = new ControlFlowNode<DummyInstruction>(3, 
-                DummyInstruction.Jmp(3, 5));
-            var n5 = new ControlFlowNode<DummyInstruction>(4, 
-                DummyInstruction.Jmp(4, 5));
-            var n6 = new ControlFlowNode<DummyInstruction>(5, 
-                DummyInstruction.Ret(5));
+            var n1 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Switch(0, 2, 3, 4, 5));
+            var n2 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Jmp(1, 5));
+            var n3 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Jmp(2, 5));
+            var n4 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Jmp(3, 5));
+            var n5 = new ControlFlowNode<DummyInstruction>(DummyInstruction.Jmp(4, 5));
+            var n6 = new ControlFlowNode<DummyInstruction>(                DummyInstruction.Ret(5));
             
-            graph.Nodes.AddRange(new[] {n1, n2, n3, n4, n5, n6});
+            graph.Nodes.AddRange([n1, n2, n3, n4, n5, n6]);
+            graph.Nodes.UpdateOffsets();
             graph.EntryPoint = n1;
 
             n1.ConnectWith(n2);

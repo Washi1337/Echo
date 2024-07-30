@@ -27,7 +27,7 @@ Refer to the platform-specific documentation for more details.
 ## Nodes
 
 Nodes in a control flow graph represent the individual basic blocks in the code, and are implemented by the `ControlFlowNode<TInstruction>` class.
-They can be accessed from the `Nodes` property:
+They can be accessed from the `Nodes` property, which can be iterated:
 
 ```csharp
 ControlFlowGraph<TInstruction> cfg = ...;
@@ -37,14 +37,29 @@ foreach (var node in cfg.Nodes)
     Console.WriteLine($"{node.Offset:X8}");
 ```
 
-Nodes are indexed by offset.
-They can be obtained via the `GetNodeByOffset` method:
+Individual nodes can be obtained by looking them up by offset:
 
 ```csharp
-var node = cfg.GetNodeByOffset(offset: 0x1234);
+var node = cfg.Nodes.GetByOffset(offset: 0x1234);
 ```
 
-Every node exposes a basic blockc containing the instructions it executes:
+This performs a linear search through all the nodes, and finds the first basic block that matches.
+To ensure all nodes have updated offsets according to their contents, use the `UpdateOffsets` method:
+
+```csharp
+cfg.Nodes.UpdateOffsets();
+```
+
+When doing many lookups by offset, consider first creating an offset map for faster lookups.
+
+```csharp
+var offsetMap = cfg.Nodes.CreateOffsetMap();
+var n1 = offsetMap[0x0001];
+var n2 = offsetMap[0x0004];
+var n3 = offsetMap[0x0010];
+```
+
+Every node exposes a basic block containing the instructions it executes:
 
 ```csharp
 ControlFlowNode<TInstruction> node = ...;
@@ -105,7 +120,7 @@ If only interested in the target nodes, `GetSuccessors()` can be used instead:
 ```csharp
 foreach (var successor in node.GetSuccessors())
     Console.WriteLine(successor);
-```
+```[dfg-basics.md](dfg-basics.md)
 
 Similarly, incoming edges can also be obtained using `GetIncomingEdges()` and `GetPredecessors()`:
 
@@ -116,6 +131,19 @@ foreach (var predecessor in node.GetPredecessors())
     Console.WriteLine(predecessor);
 ```
 
+
+New edges can be drawn by either mutating the outgoing edges properties, or by using the `ConnectWith` helper method:
+
+```csharp
+ControlFlowNode<TInstruction> node1 = ...;
+ControlFlowNode<TInstruction> node2 = ...;
+ControlFlowNode<TInstruction> node3 = ...;
+ControlFlowNode<TInstruction> node4 = ...;
+
+node1.ConnectWith(node2);
+node2.ConnectWith(node3, ControlFlowEdgeType.Conditional);
+node2.ConnectWith(node4, ControlFlowEdgeType.FallThrough);
+```
 
 ## Regions
 

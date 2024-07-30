@@ -5,6 +5,7 @@ namespace Echo.Ast
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions stored in the AST.</typeparam>
     public abstract class AstNodeListener<TInstruction> : IAstNodeListener<TInstruction>
+        where TInstruction : notnull
     {
         /// <inheritdoc />
         public void EnterCompilationUnit(CompilationUnit<TInstruction> unit) {}

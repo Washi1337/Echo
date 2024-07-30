@@ -9,6 +9,7 @@ namespace Echo.Ast.Construction;
 /// </summary>
 /// <typeparam name="TInstruction">The type of instructions stored in the AST.</typeparam>
 public class CompilationUnitBuilder<TInstruction> : IBlockVisitor<Statement<TInstruction>, object?, AstNode<TInstruction>>
+    where TInstruction : notnull
 {
     /// <summary>
     /// Constructs a compilation unit based on a lifted control flow graph.

@@ -16,6 +16,7 @@ public static class AstFormatter
     /// <typeparam name="TInstruction">The type of instructions stored in the AST.</typeparam>
     /// <returns>The constructed formatter.</returns>
     public static AstFormatter<TInstruction> ToAstFormatter<TInstruction>(this IInstructionFormatter<TInstruction> self)
+        where TInstruction : notnull
     {
         return new AstFormatter<TInstruction>(self);
     }
@@ -28,6 +29,7 @@ public static class AstFormatter
 public class AstFormatter<TInstruction> :
     IAstNodeVisitor<TInstruction, IndentedTextWriter>,
     IInstructionFormatter<Statement<TInstruction>>
+    where TInstruction : notnull
 {
     /// <summary>
     /// Creates a new AST formatter using the default instruction formatter.

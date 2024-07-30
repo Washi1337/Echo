@@ -10,12 +10,13 @@ namespace Echo.DataFlow
     /// nodes where the owner node might pull data from.
     /// </summary>
     /// <typeparam name="TSource">The type of data source that this dependency uses.</typeparam>
-    /// <typeparam name="TContents">The type of contents to put in a data flow node.</typeparam>
-    public abstract class DataDependency<TSource, TContents> : ISet<TSource>
-        where TSource : DataSource<TContents>
+    /// <typeparam name="TInstruction">The type of contents to put in a data flow node.</typeparam>
+    public abstract class DataDependency<TSource, TInstruction> : ISet<TSource>
+        where TSource : DataSource<TInstruction>
+        where TInstruction : notnull
     {
-        private readonly List<DataFlowEdge<TContents>> _edges = new();
-        private DataFlowNode<TContents> _dependent;
+        private readonly List<DataFlowEdge<TInstruction>> _edges = new();
+        private DataFlowNode<TInstruction>? _dependent;
 
         /// <inheritdoc />
         public int Count => _edges.Count;
@@ -31,7 +32,7 @@ namespace Echo.DataFlow
         /// <summary>
         /// Gets the node that owns the dependency.
         /// </summary>
-        public DataFlowNode<TContents> Dependent
+        public DataFlowNode<TInstruction>? Dependent
         {
             get => _dependent;
             internal set
@@ -65,12 +66,12 @@ namespace Echo.DataFlow
             
             if (item is null)
                 throw new ArgumentNullException(nameof(item));
-            if (item.Node.ParentGraph != _dependent.ParentGraph)
+            if (_dependent is null || item.Node.ParentGraph != _dependent.ParentGraph)
                 throw new ArgumentException("Data source is not added to the same graph.");
             
             if (!Contains(item))
             {
-                AddEdge(new(Dependent, item));
+                AddEdge(new DataFlowEdge<TInstruction>(_dependent, item));
                 return true;
             }
 
@@ -206,7 +207,7 @@ namespace Echo.DataFlow
                 Add(item);
         }
 
-        private void AddEdge(DataFlowEdge<TContents> edge)
+        private void AddEdge(DataFlowEdge<TInstruction> edge)
         {
             _edges.Add(edge);
             edge.DataSource.Node.IncomingEdges.Add(edge);
@@ -268,7 +269,7 @@ namespace Echo.DataFlow
         /// </summary>
         /// <param name="node">The node.</param>
         /// <returns><c>true</c> if at least one edge was removed, <c>false</c> otherwise.</returns>
-        public bool Remove(DataFlowNode<TContents> node)
+        public bool Remove(DataFlowNode<TInstruction> node)
         {
             AssertDependentIsNotNull();
 
@@ -287,7 +288,7 @@ namespace Echo.DataFlow
             return changed;
         }
 
-        private void RemoveEdge(DataFlowEdge<TContents> edge)
+        private void RemoveEdge(DataFlowEdge<TInstruction> edge)
         {
             if (_edges.Remove(edge))
             {
@@ -307,12 +308,12 @@ namespace Echo.DataFlow
         /// Gets a collection of data flow edges that encode the stored data sources.
         /// </summary>
         /// <returns>The edges.</returns>
-        public IEnumerable<DataFlowEdge<TContents>> GetEdges() => _edges;
+        public IEnumerable<DataFlowEdge<TInstruction>> GetEdges() => _edges;
 
         /// <summary>
         /// Gets a collection of nodes that are possible data sources for the dependency.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<DataFlowNode<TContents>> GetNodes() => _edges.Select(e => e.DataSource.Node);
+        public IEnumerable<DataFlowNode<TInstruction>> GetNodes() => _edges.Select(e => e.DataSource.Node);
     }
 }

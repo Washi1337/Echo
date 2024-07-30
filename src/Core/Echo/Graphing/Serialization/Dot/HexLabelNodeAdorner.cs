@@ -36,7 +36,7 @@ namespace Echo.Graphing.Serialization.Dot
         } = 0;
 
         /// <inheritdoc />
-        public IDictionary<string, string> GetNodeAttributes(INode node, long id) => new Dictionary<string, string>
+        public IDictionary<string, string>? GetNodeAttributes(INode node, long id) => new Dictionary<string, string>
         {
             ["label"] = $"{Prefix}{id.ToString($"X{PaddingZeroes.ToString()}")}{Suffix}"
         };

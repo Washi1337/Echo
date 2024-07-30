@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Echo.Code;
 
 namespace Echo.Platforms.DummyPlatform
@@ -38,13 +39,13 @@ namespace Echo.Platforms.DummyPlatform
         public int GetStackPushCount(in int instruction) => 0;
 
         public int GetStackPopCount(in int instruction) => 0;
-        public int GetReadVariablesCount(in int instruction) => 0;
+        
+        public void GetReadVariables(in int instruction, ICollection<IVariable> variablesBuffer)
+        {
+        }
 
-        public int GetReadVariables(in int instruction, Span<IVariable> variablesBuffer) => 0;
-
-        public int GetWrittenVariablesCount(in int instruction) => 0;
-
-        public int GetWrittenVariables(in int instruction, Span<IVariable> variablesBuffer) => 0;
-
+        public void GetWrittenVariables(in int instruction, ICollection<IVariable> variablesBuffer)
+        {
+        }
     }
 }

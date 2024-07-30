@@ -8,6 +8,7 @@ namespace Echo.Code
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions to store.</typeparam>
     public class ListInstructionProvider<TInstruction> : IStaticInstructionProvider<TInstruction>
+        where TInstruction : notnull
     {
         private readonly IDictionary<long, TInstruction> _instructions = new Dictionary<long, TInstruction>();
 

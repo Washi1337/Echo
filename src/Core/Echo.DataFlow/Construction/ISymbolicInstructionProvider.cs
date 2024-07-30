@@ -1,13 +1,14 @@
 using Echo.Code;
 using Echo.DataFlow.Emulation;
 
-namespace Echo.ControlFlow.Construction.Symbolic
+namespace Echo.DataFlow.Construction
 {
     /// <summary>
     /// Provides members for obtaining instructions based on the current state of a program.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that this collection provides.</typeparam>
     public interface ISymbolicInstructionProvider<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets the architecture describing the instructions exposed by this instruction provider.

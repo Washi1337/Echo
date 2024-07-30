@@ -1,18 +1,15 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
+using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Symbolic;
-using Echo.ControlFlow.Serialization.Dot;
-using Echo.Graphing.Serialization.Dot;
-using Echo.DataFlow;
+using Echo.DataFlow.Construction;
 using Echo.DataFlow.Emulation;
 using Echo.Platforms.DummyPlatform.Code;
 using Echo.Platforms.DummyPlatform.ControlFlow;
 using Xunit;
 
-namespace Echo.ControlFlow.Tests.Construction.Symbolic
+namespace Echo.DataFlow.Tests.Construction
 {
     public class SymbolicGraphBuilderTest
     {
@@ -40,8 +37,9 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             };
 
             var (cfg, dfg) = BuildFlowGraphs(instructions);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
             
-            Assert.Empty(dfg.Nodes[0].StackDependencies);
+            Assert.Empty(offsetMap[0].StackDependencies);
         }
         
         [Fact]
@@ -55,10 +53,11 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             };
 
             var (cfg, dfg) = BuildFlowGraphs(instructions);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
             
-            Assert.Single(dfg.Nodes[1].StackDependencies);
-            Assert.Equal(dfg.Nodes[0], dfg.Nodes[1].StackDependencies[0].First().Node);
-            Assert.Equal(new[]{dfg.Nodes[1]}, dfg.Nodes[0].GetDependants());
+            Assert.Single(offsetMap[1].StackDependencies);
+            Assert.Equal(offsetMap[0], offsetMap[1].StackDependencies[0].First().Node);
+            Assert.Equal(new[]{offsetMap[1]}, offsetMap[0].GetDependants());
         }
         
         [Fact]
@@ -74,12 +73,13 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             };
 
             var (cfg, dfg) = BuildFlowGraphs(instructions);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
             
-            Assert.Equal(3, dfg.Nodes[3].StackDependencies.Count);
+            Assert.Equal(3, offsetMap[3].StackDependencies.Count);
             Assert.Equal(new[]
             {
-                dfg.Nodes[0], dfg.Nodes[1], dfg.Nodes[2],
-            }, dfg.Nodes[3].StackDependencies.Select(dep => dep.First().Node));
+                offsetMap[0], offsetMap[1], offsetMap[2],
+            }, offsetMap[3].StackDependencies.Select(dep => dep.First().Node));
         }
         
         [Fact]
@@ -101,11 +101,12 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             };
 
             var (cfg, dfg) = BuildFlowGraphs(instructions);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
             
-            Assert.Single(dfg.Nodes[3].StackDependencies);
-            Assert.Equal(dfg.Nodes[0], dfg.Nodes[3].StackDependencies[0].First().Node);
-            Assert.Single(dfg.Nodes[5].StackDependencies);
-            Assert.Equal(dfg.Nodes[0], dfg.Nodes[5].StackDependencies[0].First().Node);
+            Assert.Single(offsetMap[3].StackDependencies);
+            Assert.Equal(offsetMap[0], offsetMap[3].StackDependencies[0].First().Node);
+            Assert.Single(offsetMap[5].StackDependencies);
+            Assert.Equal(offsetMap[0], offsetMap[5].StackDependencies[0].First().Node);
         }
 
         [Fact]
@@ -126,11 +127,12 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             };
 
             var (cfg, dfg) = BuildFlowGraphs(instructions);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
         
-            Assert.Single(dfg.Nodes[5].StackDependencies);
+            Assert.Single(offsetMap[5].StackDependencies);
             Assert.Equal(
-                new HashSet<DataFlowNode<DummyInstruction>> {dfg.Nodes[2], dfg.Nodes[4]},
-                new HashSet<DataFlowNode<DummyInstruction>>(dfg.Nodes[5].StackDependencies[0].Select(s => s.Node)));
+                new HashSet<DataFlowNode<DummyInstruction>> {offsetMap[2], offsetMap[4]},
+                new HashSet<DataFlowNode<DummyInstruction>>(offsetMap[5].StackDependencies[0].Select(s => s.Node)));
         }
 
         [Fact]
@@ -152,18 +154,19 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             };
 
             var (cfg, dfg) = BuildFlowGraphs(instructions);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
 
             Assert.Equal(
-                new HashSet<DataFlowNode<DummyInstruction>> {dfg.Nodes[2], dfg.Nodes[4]},
-                new HashSet<DataFlowNode<DummyInstruction>>(dfg.Nodes[6].StackDependencies[0].Select(s => s.Node)));
+                new HashSet<DataFlowNode<DummyInstruction>> {offsetMap[2], offsetMap[4]},
+                new HashSet<DataFlowNode<DummyInstruction>>(offsetMap[6].StackDependencies[0].Select(s => s.Node)));
             Assert.Equal(new[]
             {
-                dfg.Nodes[6]
-            }, dfg.Nodes[2].GetDependants());
+                offsetMap[6]
+            }, offsetMap[2].GetDependants());
             Assert.Equal(new[]
             {
-                dfg.Nodes[6]
-            }, dfg.Nodes[4].GetDependants());
+                offsetMap[6]
+            }, offsetMap[4].GetDependants());
         }
 
         [Fact]
@@ -259,7 +262,7 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             };
 
             var dfgBuilder = new DummyTransitioner();
-            var argument = new ExternalDataSourceNode<DummyInstruction>(-1, "Argument 1");
+            var argument = new ExternalDataSourceNode<DummyInstruction>("Argument 1");
             dfgBuilder.DataFlowGraph.Nodes.Add(argument);
             dfgBuilder.InitialState = new SymbolicProgramState<DummyInstruction>(0,
                 ImmutableStack.Create(SymbolicValue<DummyInstruction>.CreateStackValue(argument)));
@@ -269,9 +272,11 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
                 instructions,
                 dfgBuilder);
             cfgBuilder.ConstructFlowGraph(0);
+            
             var dfg = dfgBuilder.DataFlowGraph;
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
 
-            Assert.Equal(new[] {argument}, dfg.Nodes[0].StackDependencies[0].GetNodes());
+            Assert.Equal(new[] {argument}, offsetMap[0].StackDependencies[0].GetNodes());
         }
 
         [Fact]
@@ -286,9 +291,10 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             };
             
             var (cfg, dfg) = BuildFlowGraphs(instructions);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
             
-            Assert.Equal(1, dfg.Nodes[1].StackDependencies[0].First().SlotIndex);
-            Assert.Equal(0, dfg.Nodes[2].StackDependencies[0].First().SlotIndex);
+            Assert.Equal(1, offsetMap[1].StackDependencies[0].First().SlotIndex);
+            Assert.Equal(0, offsetMap[2].StackDependencies[0].First().SlotIndex);
         }
 
         [Fact]
@@ -307,8 +313,8 @@ namespace Echo.ControlFlow.Tests.Construction.Symbolic
             Assert.Contains(cfg.Nodes, n => n.Offset == 0);
             Assert.Contains(cfg.Nodes, n => n.Offset == 10);
             Assert.DoesNotContain(cfg.Nodes, n => n.Offset == 1);
-            Assert.Empty(cfg.Nodes[0].GetOutgoingEdges());
-            Assert.Empty(cfg.Nodes[10].GetIncomingEdges());
+            Assert.Empty(cfg.Nodes.GetByOffset(0)!.GetOutgoingEdges());
+            Assert.Empty(cfg.Nodes.GetByOffset(10)!.GetIncomingEdges());
         }
     }
 }

@@ -1,8 +1,8 @@
 using System.Linq;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Symbolic;
 using Echo.DataFlow;
+using Echo.DataFlow.Construction;
 using Iced.Intel;
 using Xunit;
 
@@ -39,10 +39,11 @@ namespace Echo.Platforms.Iced.Tests
                 0x83, 0xC0, 0x02,                // add eax, 2
                 0xC3                             // ret
             }, 0);
-
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
+            
             var eax = _architecture.GetRegister(Register.EAX);
-            Assert.True(dfg.Nodes[0x5].VariableDependencies.ContainsVariable(eax));
-            Assert.Contains(dfg.Nodes[0], dfg.Nodes[0x5].VariableDependencies[eax].GetNodes());
+            Assert.True(offsetMap[0x5].VariableDependencies.ContainsVariable(eax));
+            Assert.Contains(offsetMap[0], offsetMap[0x5].VariableDependencies[eax].GetNodes());
         }
 
         [Fact]
@@ -54,10 +55,11 @@ namespace Echo.Platforms.Iced.Tests
                 0x7C, 0x00,              // jl +0
                 0xC3                     // ret
             }, 0);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
 
             var of = _architecture.GetFlag(RflagsBits.OF);
-            Assert.True(dfg.Nodes[0x3].VariableDependencies.ContainsVariable(of));
-            Assert.Contains(dfg.Nodes[0], dfg.Nodes[0x3].VariableDependencies[of].GetNodes());
+            Assert.True(offsetMap[0x3].VariableDependencies.ContainsVariable(of));
+            Assert.Contains(offsetMap[0], offsetMap[0x3].VariableDependencies[of].GetNodes());
         }
 
         [Fact]
@@ -69,11 +71,12 @@ namespace Echo.Platforms.Iced.Tests
                 /* 1: */ 0x5C, // pop esp
                 /* 2: */ 0xC3  // ret
             }, 0);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
 
-            var dependency = dfg.Nodes[1].VariableDependencies
+            var dependency = offsetMap[1].VariableDependencies
                 .FirstOrDefault(dependency => dependency.Variable.Name == "ESP");
             Assert.NotNull(dependency);
-            Assert.Contains(dfg.Nodes[0], dependency.GetNodes());
+            Assert.Contains(offsetMap[0], dependency.GetNodes());
         }
     }
 }

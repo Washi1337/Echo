@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Echo.ControlFlow.Regions;
 using Echo.ControlFlow.Serialization.Blocks;
-using Echo.ControlFlow.Serialization.Dot;
-using Echo.Graphing.Serialization.Dot;
 using Echo.Platforms.DummyPlatform;
 using Xunit;
 
@@ -18,31 +15,33 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             var cfg = new ControlFlowGraph<int>(IntArchitecture.Instance);
             for (int i = 0; i < nodeCount; i++)
                 cfg.Nodes.Add(new ControlFlowNode<int>(i, i));
-            cfg.EntryPoint = cfg.Nodes[0];
+            cfg.EntryPoint = cfg.Nodes.GetByOffset(0);
+            cfg.Nodes.UpdateOffsets();
             return cfg;
         }
 
         private static void AssertHasSubSequence(ControlFlowNode<int>[] ordering, params int[] subSequence)
         {
-            var cfg = ordering[0].ParentGraph;
-            int index = Array.IndexOf(ordering, cfg.Nodes[subSequence[0]]);
+            var cfg = ordering[0].ParentGraph!;
+            int index = Array.IndexOf(ordering, cfg.Nodes.GetByOffset(subSequence[0]));
             Assert.NotEqual(-1, index);
 
             for (int i = 0; i < subSequence.Length; i++)
-                Assert.Equal(cfg.Nodes[subSequence[i]], ordering[i + index]);
+                Assert.Equal(cfg.Nodes.GetByOffset(subSequence[i]), ordering[i + index]);
         }
 
         private static void AssertHasCluster(ControlFlowNode<int>[] ordering, params int[] cluster)
         {
             var expected = new HashSet<ControlFlowNode<int>>();
-            var cfg = ordering[0].ParentGraph;
+            var cfg = ordering[0].ParentGraph!;
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
 
             int minIndex = int.MaxValue;
             int maxIndex = int.MinValue;
 
             foreach (int id in cluster)
             {
-                var node = cfg.Nodes[id];
+                var node = offsetMap[id];
                 expected.Add(node);
 
                 int index = Array.IndexOf(ordering, node);
@@ -63,9 +62,11 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         public void SequenceShouldStartWithEntrypointNode(long entrypoint)
         {
             var cfg = GenerateGraph(2);
-            cfg.EntryPoint = cfg.Nodes[entrypoint];
-            cfg.Nodes[0].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[1].ConnectWith(cfg.Nodes[0], ControlFlowEdgeType.Unconditional);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
+            
+            cfg.EntryPoint = offsetMap[entrypoint];
+            offsetMap[0].ConnectWith(offsetMap[1], ControlFlowEdgeType.Unconditional);
+            offsetMap[1].ConnectWith(offsetMap[0], ControlFlowEdgeType.Unconditional);
 
             var sorting = cfg
                 .SortNodes()
@@ -78,19 +79,21 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         public void FallThroughEdgesShouldStickTogether()
         {
             var cfg = GenerateGraph(8);
-            cfg.Nodes[0].ConnectWith(cfg.Nodes[1], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[1].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.Unconditional);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
+            
+            offsetMap[0].ConnectWith(offsetMap[1], ControlFlowEdgeType.FallThrough);
+            offsetMap[1].ConnectWith(offsetMap[6], ControlFlowEdgeType.Unconditional);
 
-            cfg.Nodes[6].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.Conditional);
-            cfg.Nodes[6].ConnectWith(cfg.Nodes[7], ControlFlowEdgeType.FallThrough);
+            offsetMap[6].ConnectWith(offsetMap[2], ControlFlowEdgeType.Conditional);
+            offsetMap[6].ConnectWith(offsetMap[7], ControlFlowEdgeType.FallThrough);
 
-            cfg.Nodes[2].ConnectWith(cfg.Nodes[3], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[2].ConnectWith(cfg.Nodes[4], ControlFlowEdgeType.Conditional);
+            offsetMap[2].ConnectWith(offsetMap[3], ControlFlowEdgeType.FallThrough);
+            offsetMap[2].ConnectWith(offsetMap[4], ControlFlowEdgeType.Conditional);
 
-            cfg.Nodes[3].ConnectWith(cfg.Nodes[5], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[4].ConnectWith(cfg.Nodes[5], ControlFlowEdgeType.FallThrough);
+            offsetMap[3].ConnectWith(offsetMap[5], ControlFlowEdgeType.Unconditional);
+            offsetMap[4].ConnectWith(offsetMap[5], ControlFlowEdgeType.FallThrough);
 
-            cfg.Nodes[5].ConnectWith(cfg.Nodes[6], ControlFlowEdgeType.FallThrough);
+            offsetMap[5].ConnectWith(offsetMap[6], ControlFlowEdgeType.FallThrough);
 
             var sorting = cfg
                 .SortNodes()
@@ -105,8 +108,10 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         public void MultipleIncomingFallThroughEdgesShouldThrow()
         {
             var cfg = GenerateGraph(3);
-            cfg.Nodes[0].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[1].ConnectWith(cfg.Nodes[2], ControlFlowEdgeType.FallThrough);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
+            
+            offsetMap[0].ConnectWith(offsetMap[2], ControlFlowEdgeType.FallThrough);
+            offsetMap[1].ConnectWith(offsetMap[2], ControlFlowEdgeType.FallThrough);
 
             Assert.Throws<BlockOrderingException>(() => cfg.SortNodes());
         }
@@ -118,12 +123,13 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         public void PreferExitPointsLastInDoLoop(long[] indices)
         {
             var cfg = GenerateGraph(4);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
 
-            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[2]], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[3]], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.Conditional);
-            cfg.EntryPoint = cfg.Nodes[indices[0]];
+            offsetMap[indices[0]].ConnectWith(offsetMap[indices[1]], ControlFlowEdgeType.FallThrough);
+            offsetMap[indices[1]].ConnectWith(offsetMap[indices[2]], ControlFlowEdgeType.FallThrough);
+            offsetMap[indices[2]].ConnectWith(offsetMap[indices[3]], ControlFlowEdgeType.FallThrough);
+            offsetMap[indices[2]].ConnectWith(offsetMap[indices[1]], ControlFlowEdgeType.Conditional);
+            cfg.EntryPoint = offsetMap[indices[0]];
 
             var sorting = cfg
                 .SortNodes()
@@ -142,13 +148,14 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         public void PreferExitPointsLastInWhileLoop(long[] indices)
         {
             var cfg = GenerateGraph(4);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
 
-            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[2]], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[2]], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[3]], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.Conditional);
+            offsetMap[indices[0]].ConnectWith(offsetMap[indices[2]], ControlFlowEdgeType.Unconditional);
+            offsetMap[indices[1]].ConnectWith(offsetMap[indices[2]], ControlFlowEdgeType.FallThrough);
+            offsetMap[indices[2]].ConnectWith(offsetMap[indices[3]], ControlFlowEdgeType.FallThrough);
+            offsetMap[indices[2]].ConnectWith(offsetMap[indices[1]], ControlFlowEdgeType.Conditional);
 
-            cfg.EntryPoint = cfg.Nodes[indices[0]];
+            cfg.EntryPoint = offsetMap[indices[0]];
 
             var sorting = cfg
                 .SortNodes()
@@ -167,35 +174,36 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         public void NodesInExceptionHandlerBlocksShouldStickTogether(int[] indices)
         {
             var cfg = GenerateGraph(7);
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
 
             // pre
-            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.FallThrough);
+            offsetMap[indices[0]].ConnectWith(offsetMap[indices[1]], ControlFlowEdgeType.FallThrough);
 
             // protected region.
-            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[2]], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[3]], ControlFlowEdgeType.Conditional);
-            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[4]], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[indices[3]].ConnectWith(cfg.Nodes[indices[4]], ControlFlowEdgeType.FallThrough);
+            offsetMap[indices[1]].ConnectWith(offsetMap[indices[2]], ControlFlowEdgeType.FallThrough);
+            offsetMap[indices[1]].ConnectWith(offsetMap[indices[3]], ControlFlowEdgeType.Conditional);
+            offsetMap[indices[2]].ConnectWith(offsetMap[indices[4]], ControlFlowEdgeType.Unconditional);
+            offsetMap[indices[3]].ConnectWith(offsetMap[indices[4]], ControlFlowEdgeType.FallThrough);
 
             // handler region.
-            cfg.Nodes[indices[5]].ConnectWith(cfg.Nodes[indices[6]], ControlFlowEdgeType.Unconditional);
+            offsetMap[indices[5]].ConnectWith(offsetMap[indices[6]], ControlFlowEdgeType.Unconditional);
 
             // post
-            cfg.Nodes[indices[4]].ConnectWith(cfg.Nodes[indices[6]], ControlFlowEdgeType.Unconditional);
+            offsetMap[indices[4]].ConnectWith(offsetMap[indices[6]], ControlFlowEdgeType.Unconditional);
 
-            cfg.EntryPoint = cfg.Nodes[indices[0]];
+            cfg.EntryPoint = offsetMap[indices[0]];
 
             // Set up regions.
             var ehRegion = new ExceptionHandlerRegion<int>();
             cfg.Regions.Add(ehRegion);
             ehRegion.ProtectedRegion.Nodes.AddRange(new[]
             {
-                cfg.Nodes[indices[1]], cfg.Nodes[indices[2]], cfg.Nodes[indices[3]], cfg.Nodes[indices[4]]
+                offsetMap[indices[1]], offsetMap[indices[2]], offsetMap[indices[3]], offsetMap[indices[4]]
             });
             var handlerRegion = new HandlerRegion<int>();
             ehRegion.Handlers.Add(handlerRegion);
-            handlerRegion.Contents.Nodes.Add(cfg.Nodes[indices[5]]);
-            handlerRegion.Contents.EntryPoint = cfg.Nodes[indices[5]];
+            handlerRegion.Contents.Nodes.Add(offsetMap[indices[5]]);
+            handlerRegion.Contents.EntryPoint = offsetMap[indices[5]];
 
             // Sort
             var sorting = cfg
@@ -206,7 +214,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             AssertHasSubSequence(sorting, indices[0], indices[1], indices[2]);
             AssertHasSubSequence(sorting, indices[3], indices[4]);
             AssertHasCluster(sorting, indices[1], indices[2], indices[3], indices[4]);
-            Assert.True(Array.IndexOf(sorting, cfg.Nodes[indices[1]]) < Array.IndexOf(sorting, cfg.Nodes[indices[5]]),
+            Assert.True(Array.IndexOf(sorting, offsetMap[indices[1]]) < Array.IndexOf(sorting, offsetMap[indices[5]]),
                 "Handler region was ordered before protected region.");
         }
 
@@ -217,27 +225,29 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         public void HandlerRegionWithNoExitShouldBeOrderedBeforeNormalExit(int[] indices)
         {
             var cfg = GenerateGraph(4);
-            cfg.EntryPoint = cfg.Nodes[indices[0]];
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
+            
+            cfg.EntryPoint = offsetMap[indices[0]];
 
-            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.FallThrough);
-            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[3]], ControlFlowEdgeType.Unconditional);
-            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[2]], ControlFlowEdgeType.Unconditional);
+            offsetMap[indices[0]].ConnectWith(offsetMap[indices[1]], ControlFlowEdgeType.FallThrough);
+            offsetMap[indices[1]].ConnectWith(offsetMap[indices[3]], ControlFlowEdgeType.Unconditional);
+            offsetMap[indices[2]].ConnectWith(offsetMap[indices[2]], ControlFlowEdgeType.Unconditional);
 
             // Set up regions.
             var ehRegion = new ExceptionHandlerRegion<int>();
             cfg.Regions.Add(ehRegion);
-            ehRegion.ProtectedRegion.Nodes.Add(cfg.Nodes[indices[1]]);
+            ehRegion.ProtectedRegion.Nodes.Add(offsetMap[indices[1]]);
             var handlerRegion = new HandlerRegion<int>();
             ehRegion.Handlers.Add(handlerRegion);
-            handlerRegion.Contents.Nodes.Add(cfg.Nodes[indices[2]]);
-            handlerRegion.Contents.EntryPoint = cfg.Nodes[indices[2]];
+            handlerRegion.Contents.Nodes.Add(offsetMap[indices[2]]);
+            handlerRegion.Contents.EntryPoint = offsetMap[indices[2]];
 
             // Sort
             var sorting = cfg
                 .SortNodes()
                 .ToArray();
             
-            Assert.True(Array.IndexOf(sorting, cfg.Nodes[indices[2]]) < Array.IndexOf(sorting, cfg.Nodes[indices[3]]),
+            Assert.True(Array.IndexOf(sorting, offsetMap[indices[2]]) < Array.IndexOf(sorting, offsetMap[indices[3]]),
                 "Handler region was ordered after normal exit.");
         }
 
@@ -248,40 +258,42 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         public void PrologueAndEpilogueRegionsShouldHaveCorrectPrecedence(int[] indices)
         {
             var cfg = GenerateGraph(6);
-            cfg.EntryPoint = cfg.Nodes[indices[0]];
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
+            
+            cfg.EntryPoint = offsetMap[indices[0]];
 
             var eh = new ExceptionHandlerRegion<int>();
             cfg.Regions.Add(eh);
             
-            eh.ProtectedRegion.Nodes.Add(cfg.Nodes[indices[1]]);
-            eh.ProtectedRegion.EntryPoint = cfg.Nodes[indices[1]];
+            eh.ProtectedRegion.Nodes.Add(offsetMap[indices[1]]);
+            eh.ProtectedRegion.EntryPoint = offsetMap[indices[1]];
             
             var handler = new HandlerRegion<int>();
             eh.Handlers.Add(handler);
             
             handler.Prologue = new ScopeRegion<int>();
-            handler.Prologue.Nodes.Add(cfg.Nodes[indices[2]]);
-            handler.Prologue.EntryPoint = cfg.Nodes[indices[2]];
+            handler.Prologue.Nodes.Add(offsetMap[indices[2]]);
+            handler.Prologue.EntryPoint = offsetMap[indices[2]];
             
-            handler.Contents.Nodes.Add(cfg.Nodes[indices[3]]);
-            handler.Contents.EntryPoint = cfg.Nodes[indices[3]];
+            handler.Contents.Nodes.Add(offsetMap[indices[3]]);
+            handler.Contents.EntryPoint = offsetMap[indices[3]];
             
             handler.Epilogue = new ScopeRegion<int>();
-            handler.Epilogue.Nodes.Add(cfg.Nodes[indices[4]]);
-            handler.Epilogue.EntryPoint = cfg.Nodes[indices[4]];
+            handler.Epilogue.Nodes.Add(offsetMap[indices[4]]);
+            handler.Epilogue.EntryPoint = offsetMap[indices[4]];
         
-            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]]);
-            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[5]], ControlFlowEdgeType.Unconditional);
+            offsetMap[indices[0]].ConnectWith(offsetMap[indices[1]]);
+            offsetMap[indices[1]].ConnectWith(offsetMap[indices[5]], ControlFlowEdgeType.Unconditional);
         
             var sorted = cfg.SortNodes();
             Assert.Equal(new[]
             {
-                cfg.Nodes[indices[0]], // start
-                cfg.Nodes[indices[1]], // protected
-                cfg.Nodes[indices[2]], // prologue
-                cfg.Nodes[indices[3]], // handler
-                cfg.Nodes[indices[4]], // epilogue
-                cfg.Nodes[indices[5]], // exit
+                offsetMap[indices[0]], // start
+                offsetMap[indices[1]], // protected
+                offsetMap[indices[2]], // prologue
+                offsetMap[indices[3]], // handler
+                offsetMap[indices[4]], // epilogue
+                offsetMap[indices[5]], // exit
             }, sorted);
         }
 
@@ -292,39 +304,41 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
         public void HandlerWithNoLeaveBranch(int[] indices)
         {
             var cfg = GenerateGraph(6);
-            cfg.EntryPoint = cfg.Nodes[indices[0]];
+            var offsetMap = cfg.Nodes.CreateOffsetMap();
+            
+            cfg.EntryPoint = offsetMap[indices[0]];
             
             var eh = new ExceptionHandlerRegion<int>();
             cfg.Regions.Add(eh);
 
             eh.ProtectedRegion.Nodes.AddRange(new[]
             {
-                cfg.Nodes[indices[1]],
-                cfg.Nodes[indices[2]],
-                cfg.Nodes[indices[3]]
+                offsetMap[indices[1]],
+                offsetMap[indices[2]],
+                offsetMap[indices[3]]
             });
-            eh.ProtectedRegion.EntryPoint = cfg.Nodes[indices[1]];
+            eh.ProtectedRegion.EntryPoint = offsetMap[indices[1]];
             
             var handler = new HandlerRegion<int>();
             eh.Handlers.Add(handler);
-            handler.Contents.Nodes.Add(cfg.Nodes[indices[4]]);
-            handler.Contents.EntryPoint = cfg.Nodes[indices[4]];
+            handler.Contents.Nodes.Add(offsetMap[indices[4]]);
+            handler.Contents.EntryPoint = offsetMap[indices[4]];
 
-            cfg.Nodes[indices[0]].ConnectWith(cfg.Nodes[indices[1]]);
-            cfg.Nodes[indices[1]].ConnectWith(cfg.Nodes[indices[2]]);
-            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[3]]);
-            cfg.Nodes[indices[2]].ConnectWith(cfg.Nodes[indices[1]], ControlFlowEdgeType.Conditional);
-            cfg.Nodes[indices[3]].ConnectWith(cfg.Nodes[indices[5]], ControlFlowEdgeType.Unconditional);
+            offsetMap[indices[0]].ConnectWith(offsetMap[indices[1]]);
+            offsetMap[indices[1]].ConnectWith(offsetMap[indices[2]]);
+            offsetMap[indices[2]].ConnectWith(offsetMap[indices[3]]);
+            offsetMap[indices[2]].ConnectWith(offsetMap[indices[1]], ControlFlowEdgeType.Conditional);
+            offsetMap[indices[3]].ConnectWith(offsetMap[indices[5]], ControlFlowEdgeType.Unconditional);
             
             var sorted = cfg.SortNodes();
             Assert.Equal(new[]
             {
-                cfg.Nodes[indices[0]], 
-                cfg.Nodes[indices[1]], // protected
-                cfg.Nodes[indices[2]], // protected
-                cfg.Nodes[indices[3]], // protected
-                cfg.Nodes[indices[4]], // handler
-                cfg.Nodes[indices[5]],
+                offsetMap[indices[0]], 
+                offsetMap[indices[1]], // protected
+                offsetMap[indices[2]], // protected
+                offsetMap[indices[3]], // protected
+                offsetMap[indices[4]], // handler
+                offsetMap[indices[5]],
             }, sorted);
         }
     }

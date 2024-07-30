@@ -7,12 +7,10 @@ using Echo.ControlFlow.Regions;
 namespace Echo.ControlFlow.Serialization.Blocks
 {
     internal sealed class UnbreakablePathsView<TInstruction>
+        where TInstruction : notnull
     {
-        private readonly Dictionary<ControlFlowNode<TInstruction>, IList<ControlFlowNode<TInstruction>>> _nodeToPath =
-            new Dictionary<ControlFlowNode<TInstruction>, IList<ControlFlowNode<TInstruction>>>();
-
-        private readonly Dictionary<ControlFlowRegion<TInstruction>, IList<ControlFlowNode<TInstruction>>> _regionSuccessors =
-            new Dictionary<ControlFlowRegion<TInstruction>, IList<ControlFlowNode<TInstruction>>>();
+        private readonly Dictionary<ControlFlowNode<TInstruction>, IList<ControlFlowNode<TInstruction>>> _nodeToPath = new();
+        private readonly Dictionary<ControlFlowRegion<TInstruction>, IList<ControlFlowNode<TInstruction>>> _regionSuccessors = new();
 
         public void AddUnbreakablePath(IList<ControlFlowNode<TInstruction>> path)
         {
@@ -36,8 +34,8 @@ namespace Echo.ControlFlow.Serialization.Blocks
                 var n = path[i];
                 
                 // Add unconditional edge.
-                if (n.UnconditionalEdge is {Type: ControlFlowEdgeType.Unconditional})
-                    AddSuccessorToResult(result, n.UnconditionalNeighbour);
+                if (n.UnconditionalEdge is {Type: ControlFlowEdgeType.Unconditional, Target: { } neighbour})
+                    AddSuccessorToResult(result, neighbour);
 
                 // Add explicit conditional / abnormal edges.
                 AddAdjacencyListToResult(result, n.ConditionalEdges);
@@ -71,7 +69,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             ICollection<ControlFlowNode<TInstruction>> result,
             ControlFlowNode<TInstruction> node)
         {
-            // If the node is in an exception handler, here are a couple of "implicit" successors.
+            // If the node is in an exception handler, there are a couple "implicit" successors.
             //
             // - Any node in the protected region has an implicit successor to the start of every handler region.
             //
@@ -88,13 +86,13 @@ namespace Echo.ControlFlow.Serialization.Blocks
             
             var ehRegion = node.GetParentExceptionHandler();
 
-            while (ehRegion is { })
+            while (ehRegion is not null)
             {
                 // If we entered this loop, it means the node is either in the protected region or a handler region
                 // of an exception handler.
                 if (node.IsInRegion(ehRegion.ProtectedRegion))
                 {
-                    AddHandlerEntrypoints(result, ehRegion);
+                    AddHandlerEntryPoints(result, ehRegion);
                 }
                 else
                 {
@@ -107,7 +105,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             }
         }
 
-        private void AddHandlerEntrypoints(
+        private void AddHandlerEntryPoints(
             ICollection<ControlFlowNode<TInstruction>> result, 
             ExceptionHandlerRegion<TInstruction> ehRegion)
         {
@@ -129,9 +127,9 @@ namespace Echo.ControlFlow.Serialization.Blocks
 
         private void AddNextHandlerRegion(ICollection<ControlFlowNode<TInstruction>> result, ControlFlowNode<TInstruction> node)
         {
-            var handlerRegion = node.GetParentHandler();
+            var handlerRegion = node.GetParentHandler()!;
             
-            ControlFlowNode<TInstruction> nextEntry = null;
+            ControlFlowNode<TInstruction>? nextEntry = null;
             if (node.ParentRegion == handlerRegion.Prologue)
                 nextEntry = handlerRegion.Contents.EntryPoint;
             if (nextEntry is null && node.ParentRegion == handlerRegion.Contents)

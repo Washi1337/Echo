@@ -7,8 +7,9 @@ namespace Echo.DataFlow
     /// <summary>
     /// Represents a collection of data sources for a single variable dependency of a node.
     /// </summary>
-    /// <typeparam name="TContents">The type of contents to put in a data flow node.</typeparam>
-    public class VariableDependency<TContents> : DataDependency<VariableDataSource<TContents>, TContents>
+    /// <typeparam name="TInstruction">The type of instruction to put in a data flow node.</typeparam>
+    public class VariableDependency<TInstruction> : DataDependency<VariableDataSource<TInstruction>, TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new variable dependency.
@@ -32,9 +33,9 @@ namespace Echo.DataFlow
         /// </summary>
         /// <param name="node">The node assigning the value.</param>
         /// <returns>The variable data source.</returns>
-        public VariableDataSource<TContents> Add(DataFlowNode<TContents> node)
+        public VariableDataSource<TInstruction> Add(DataFlowNode<TInstruction> node)
         {
-            var source = new VariableDataSource<TContents>(node, Variable);
+            var source = new VariableDataSource<TInstruction>(node, Variable);
             return Add(source)
                 ? source 
                 : this.First(x => x.Equals(source));

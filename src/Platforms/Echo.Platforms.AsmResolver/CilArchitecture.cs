@@ -104,51 +104,21 @@ namespace Echo.Platforms.AsmResolver
         public int GetStackPopCount(in CilInstruction instruction) => instruction.GetStackPopCount(MethodBody);
 
         /// <inheritdoc />
-        public int GetReadVariablesCount(in CilInstruction instruction) => 
-            instruction.IsLdloc() || instruction.IsLdarg() 
-                ? 1
-                : 0;
-
-        /// <inheritdoc />
-        public int GetReadVariables(in CilInstruction instruction, Span<IVariable> variablesBuffer)
+        public void GetReadVariables(in CilInstruction instruction, ICollection<IVariable> variablesBuffer)
         {
             if (instruction.IsLdloc())
-            {
-                variablesBuffer[0] = GetLocal(instruction.GetLocalVariable(MethodBody.LocalVariables));
-                return 1;
-            }
-
-            if (instruction.IsLdarg())
-            {
-                variablesBuffer[0] = GetParameter(instruction.GetParameter(MethodBody.Owner.Parameters));
-                return 1;
-            }
-
-            return 0;
+                variablesBuffer.Add(GetLocal(instruction.GetLocalVariable(MethodBody.LocalVariables)));
+            else if (instruction.IsLdarg())
+                variablesBuffer.Add(GetParameter(instruction.GetParameter(MethodBody.Owner.Parameters)));
         }
 
         /// <inheritdoc />
-        public int GetWrittenVariablesCount(in CilInstruction instruction) => 
-            instruction.IsStloc() || instruction.IsStarg() 
-                ? 1
-                : 0;
-        
-        /// <inheritdoc />
-        public int GetWrittenVariables(in CilInstruction instruction, Span<IVariable> variablesBuffer)
-        {   
+        public void GetWrittenVariables(in CilInstruction instruction, ICollection<IVariable> variablesBuffer)
+        {
             if (instruction.IsStloc())
-            {
-                variablesBuffer[0] = GetLocal(instruction.GetLocalVariable(MethodBody.LocalVariables));
-                return 1;
-            }
-
-            if (instruction.IsStarg())
-            {
-                variablesBuffer[0] = GetParameter(instruction.GetParameter(MethodBody.Owner.Parameters));
-                return 1;
-            }
-
-            return 0;
+                variablesBuffer.Add(GetLocal(instruction.GetLocalVariable(MethodBody.LocalVariables)));
+            else if (instruction.IsStarg())
+                variablesBuffer.Add(GetParameter(instruction.GetParameter(MethodBody.Owner.Parameters)));
         }
     }
 }

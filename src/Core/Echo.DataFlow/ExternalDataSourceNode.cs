@@ -1,41 +1,26 @@
-using System;
-
 namespace Echo.DataFlow
 {
     /// <summary>
     /// Represents an external data source in a data flow graph. 
     /// </summary>
-    /// <typeparam name="TContents">The type of contents to store in the node.</typeparam>
-    public class ExternalDataSourceNode<TContents> : DataFlowNode<TContents>
+    /// <typeparam name="TInstruction">The type of instructions to store in the node.</typeparam>
+    public class ExternalDataSourceNode<TInstruction> : DataFlowNode<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new external data source.
         /// </summary>
-        /// <param name="id">The unique identifier of the data source. This should be a negative number.</param>
-        /// <param name="name">The display name of the external data source.</param>
-        public ExternalDataSourceNode(long id, string name) 
-            : this(id, name, default)
+        /// <param name="source">The external data source.</param>
+        public ExternalDataSourceNode(object source) 
+            : base(default)
         {
+            Source = source;
         }
 
         /// <summary>
-        /// Creates a new external data source.
+        /// Gets the object representing the external source of the auxiliary data flow node.
         /// </summary>
-        /// <param name="id">The unique identifier of the data source. This should be a negative number.</param>
-        /// <param name="name">The display name of the external data source.</param>
-        /// <param name="contents">The contents of the data flow node.</param>
-        public ExternalDataSourceNode(long id, string name, TContents contents) 
-            : base(id, contents)
-        {
-            if (id >= 0)
-                throw new ArgumentException("Identifiers of external data sources should be negative.");
-            Name = name;
-        }
-
-        /// <summary>
-        /// Gets the name of the auxiliary data flow node.
-        /// </summary>
-        public string Name
+        public object Source
         {
             get;
         }
@@ -44,6 +29,6 @@ namespace Echo.DataFlow
         public override bool IsExternal => true;
 
         /// <inheritdoc />
-        public override string ToString() => Name;
+        public override string ToString() => Source.ToString();
     }
 }

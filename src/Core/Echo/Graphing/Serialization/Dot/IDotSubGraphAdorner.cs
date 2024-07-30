@@ -19,6 +19,6 @@ namespace Echo.Graphing.Serialization.Dot
         /// </summary>
         /// <param name="subGraph">The sub graph to adorn.</param>
         /// <returns>The adornments.</returns>
-        IDictionary<string, string> GetSubGraphAttributes(ISubGraph subGraph);
+        IDictionary<string, string>? GetSubGraphAttributes(ISubGraph subGraph);
     }
 }

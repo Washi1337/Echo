@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Static;
 using Iced.Intel;
 
 namespace Echo.Platforms.Iced
@@ -14,72 +13,55 @@ namespace Echo.Platforms.Iced
     public class X86StaticSuccessorResolver : IStaticSuccessorResolver<Instruction>
     {
         /// <inheritdoc />
-        public int GetSuccessorsCount(in Instruction instruction)
-        {
-            switch (instruction.FlowControl)
-            {
-                case FlowControl.ConditionalBranch:
-                    return 2;
-                
-                case FlowControl.IndirectBranch: 
-                case FlowControl.Return:
-                    return 0;
-                
-                default:
-                    return 1;
-            }
-        }
-
-        /// <inheritdoc />
-        public int GetSuccessors(in Instruction instruction, Span<SuccessorInfo> successorsBuffer)
+        public void GetSuccessors(in Instruction instruction, IList<SuccessorInfo> successorsBuffer)
         {
             switch (instruction.FlowControl)
             {
                 case FlowControl.UnconditionalBranch:
-                    return GetUnconditionalBranchSuccessors(instruction, successorsBuffer);
-
+                    UnconditionalBranch(instruction, successorsBuffer);
+                    break;
+                
                 case FlowControl.ConditionalBranch:
-                    return GetConditionalBranchSuccessors(instruction, successorsBuffer);
+                    ConditionalBranch(instruction, successorsBuffer);
+                    break;
                 
                 case FlowControl.IndirectBranch: 
                 case FlowControl.Return:
-                    return 0;
+                    break;
                 
                 default:
-                    return GetFallthroughSuccessors(instruction, successorsBuffer);
+                    FallThrough(instruction, successorsBuffer);
+                    break;
             }
         }
 
-        private static int GetUnconditionalBranchSuccessors(Instruction instruction, Span<SuccessorInfo> successorsBuffer)
+        private static void UnconditionalBranch(Instruction instruction, IList<SuccessorInfo> successorsBuffer)
         {
-            successorsBuffer[0] = new SuccessorInfo(
+            successorsBuffer.Add(new SuccessorInfo(
                 (long) instruction.NearBranchTarget, 
-                ControlFlowEdgeType.Unconditional);
-            
-            return 1;
+                ControlFlowEdgeType.Unconditional
+            ));
         }
 
-        private static int GetConditionalBranchSuccessors(Instruction instruction, Span<SuccessorInfo> successorsBuffer)
+        private static void ConditionalBranch(Instruction instruction, IList<SuccessorInfo> successorsBuffer)
         {
-            successorsBuffer[0] = new SuccessorInfo(
+            successorsBuffer.Add(new SuccessorInfo(
                 (long) instruction.NearBranchTarget, 
-                ControlFlowEdgeType.Conditional);
+                ControlFlowEdgeType.Conditional
+            ));
             
-            successorsBuffer[1] =new SuccessorInfo(
+            successorsBuffer.Add(new SuccessorInfo(
                 (long) instruction.IP + instruction.Length, 
-                ControlFlowEdgeType.FallThrough);
-            
-            return 2;
+                ControlFlowEdgeType.FallThrough
+            ));
         }
 
-        private static int GetFallthroughSuccessors(Instruction instruction, Span<SuccessorInfo> successorsBuffer)
+        private static void FallThrough(Instruction instruction, IList<SuccessorInfo> successorsBuffer)
         {
-            successorsBuffer[0] = new SuccessorInfo(
+            successorsBuffer.Add(new SuccessorInfo(
                 (long) instruction.IP + instruction.Length,
-                ControlFlowEdgeType.FallThrough);
-            
-            return 1;
+                ControlFlowEdgeType.FallThrough
+            ));
         }
-        
     }
 }

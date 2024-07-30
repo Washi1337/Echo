@@ -16,6 +16,7 @@ namespace Echo.Ast
         /// <typeparam name="TInstruction">The type of instructions stored in the expression.</typeparam>
         /// <returns>The resulting statement.</returns>
         public static ExpressionStatement<TInstruction> Expression<TInstruction>(Expression<TInstruction> expression) 
+            where TInstruction : notnull
             => new(expression);
 
         /// <summary>
@@ -28,6 +29,7 @@ namespace Echo.Ast
         public static AssignmentStatement<TInstruction> Assignment<TInstruction>(
             IVariable variable,
             Expression<TInstruction> value)
+            where TInstruction : notnull
         {
             return new AssignmentStatement<TInstruction>(variable, value);
         }
@@ -42,6 +44,7 @@ namespace Echo.Ast
         public static AssignmentStatement<TInstruction> Assignment<TInstruction>(
             IEnumerable<IVariable> variable,
             Expression<TInstruction> value)
+            where TInstruction : notnull
         {
             return new AssignmentStatement<TInstruction>(variable, value);
         }
@@ -54,6 +57,7 @@ namespace Echo.Ast
         /// <typeparam name="TInstruction">The type of instructions stored in the expression.</typeparam>
         /// <returns>The resulting statement.</returns>
         public static PhiStatement<TInstruction> Phi<TInstruction>(IVariable representative, params IVariable[] sources)
+            where TInstruction : notnull
         {
             return new PhiStatement<TInstruction>(representative, sources.Select(x => x.ToExpression<TInstruction>()));
         }
@@ -68,13 +72,17 @@ namespace Echo.Ast
         public static PhiStatement<TInstruction> Phi<TInstruction>(
             IVariable representative, 
             params VariableExpression<TInstruction>[] sources)
+            where TInstruction : notnull
         {
             return new PhiStatement<TInstruction>(representative, sources);
         }
     }
-    
+
     /// <summary>
     /// Provides a base contract for statements in the AST
     /// </summary>
-    public abstract class Statement<TInstruction> : AstNode<TInstruction> { }
+    public abstract class Statement<TInstruction> : AstNode<TInstruction>
+        where TInstruction : notnull
+    {
+    }
 }

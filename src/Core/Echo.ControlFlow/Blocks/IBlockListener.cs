@@ -5,6 +5,7 @@ namespace Echo.ControlFlow.Blocks
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions in the blocks.</typeparam>
     public interface IBlockListener<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Visits a basic block.

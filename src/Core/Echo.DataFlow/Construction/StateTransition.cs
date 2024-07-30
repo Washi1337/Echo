@@ -1,13 +1,14 @@
-﻿using System;
+﻿using Echo.ControlFlow;
 using Echo.DataFlow.Emulation;
 
-namespace Echo.ControlFlow.Construction.Symbolic
+namespace Echo.DataFlow.Construction
 {
     /// <summary>
     /// Represents an object that encodes the transition from one program state to another after an instruction was executed.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instruction that was executed.</typeparam>
     public readonly struct StateTransition<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new program state transition.

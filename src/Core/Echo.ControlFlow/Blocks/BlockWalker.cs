@@ -7,6 +7,7 @@ namespace Echo.ControlFlow.Blocks
     /// </summary>
     /// <typeparam name="TInstruction"></typeparam>
     public class BlockWalker<TInstruction> : IBlockVisitor<TInstruction>
+        where TInstruction : notnull
     {
         private readonly IBlockListener<TInstruction> _listener;
 

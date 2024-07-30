@@ -8,6 +8,7 @@ namespace Echo.Ast
     /// Represents a statement that assigns a value to a (set of) variable(s).
     /// </summary>
     public sealed class AssignmentStatement<TInstruction> : Statement<TInstruction>
+        where TInstruction : notnull
     {
         private Expression<TInstruction> _expression = null!;
 

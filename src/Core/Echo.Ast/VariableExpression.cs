@@ -9,6 +9,7 @@ namespace Echo.Ast
     /// Represents a variable expression in the AST
     /// </summary>
     public sealed class VariableExpression<TInstruction> : Expression<TInstruction>
+        where TInstruction : notnull
     {
         private IVariable _variable = null!;
 

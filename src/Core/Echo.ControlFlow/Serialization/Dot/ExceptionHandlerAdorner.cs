@@ -11,6 +11,7 @@ namespace Echo.ControlFlow.Serialization.Dot
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions the nodes contain.</typeparam>
     public class ExceptionHandlerAdorner<TInstruction> : IDotSubGraphAdorner
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets or sets the style of an enclosing exception handler region.
@@ -133,7 +134,7 @@ namespace Echo.ControlFlow.Serialization.Dot
         public string GetSubGraphName(ISubGraph subGraph)
         {
             if (!(subGraph is IControlFlowRegion<TInstruction> region))
-                return null;
+                return string.Empty;
             
             string prefix = DetermineRegionPrefix(region);
 
@@ -189,23 +190,25 @@ namespace Echo.ControlFlow.Serialization.Dot
                 }
             }
 
-            return "cluster_block";;
+            return "cluster_block";
         }
 
         /// <inheritdoc />
-        public IDictionary<string, string> GetSubGraphAttributes(ISubGraph subGraph)
+        public IDictionary<string, string>? GetSubGraphAttributes(ISubGraph subGraph)
         {
             if (!(subGraph is IControlFlowRegion<TInstruction> region))
                 return null;
             
-            var (style, label) = GetSubGraphStyle(region);
+            (var style, string label) = GetSubGraphStyle(region);
 
-            return new Dictionary<string, string>
-            {
-                ["color"] = style.Color,
-                ["style"] = style.Style,
-                ["label"] = label
-            };
+            var result = new Dictionary<string, string>();
+            if (!string.IsNullOrEmpty(style.Color))
+                result["color"] = style.Color!;
+            if (!string.IsNullOrEmpty(style.Style))
+                result["style"] = style.Style!;
+            result["label"] = label;
+            
+            return result;
         }
 
         private (DotEntityStyle Style, string Label) GetSubGraphStyle(IControlFlowRegion<TInstruction> region)

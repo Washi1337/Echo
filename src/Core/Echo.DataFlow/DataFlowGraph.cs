@@ -11,25 +11,26 @@ using Echo.DataFlow.Serialization.Dot;
 namespace Echo.DataFlow
 {
     /// <summary>
-    /// Represents a graph that encodes data dependencies between objects. An edge (A, B) indicates node A depends on
-    /// the evaluation of node B.
+    /// Represents a graph that encodes data dependencies between instructions.
+    /// An edge (A, B) indicates node A depends on the evaluation of node B.
     /// </summary>
-    /// <typeparam name="TContents">The type of contents to store for each node.</typeparam>
-    public class DataFlowGraph<TContents> : IGraph
+    /// <typeparam name="TInstruction">The type of instruction to store in each node.</typeparam>
+    public class DataFlowGraph<TInstruction> : IGraph
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new data flow graph.
         /// </summary>
-        public DataFlowGraph(IArchitecture<TContents> architecture)
+        public DataFlowGraph(IArchitecture<TInstruction> architecture)
         {
             Architecture = architecture ?? throw new ArgumentNullException(nameof(architecture));
-            Nodes = new DataFlowNodeCollection<TContents>(this);
+            Nodes = new NodeCollection<TInstruction>(this);
         }
 
         /// <summary>
         /// Gets the architecture of the instructions that are stored in the data flow graph.
         /// </summary>
-        public IArchitecture<TContents> Architecture
+        public IArchitecture<TInstruction> Architecture
         {
             get;
         }
@@ -37,7 +38,7 @@ namespace Echo.DataFlow
         /// <summary>
         /// Gets a collection of nodes that are present in the graph.
         /// </summary>
-        public DataFlowNodeCollection<TContents> Nodes
+        public NodeCollection<TInstruction> Nodes
         {
             get;
         }
@@ -69,8 +70,8 @@ namespace Echo.DataFlow
             var dotWriter = new DotWriter(writer)
             {
                 NodeIdentifier = new IdentifiedNodeIdentifier(),
-                NodeAdorner = new DataFlowNodeAdorner<TContents>(),
-                EdgeAdorner = new DataFlowEdgeAdorner<TContents>()
+                NodeAdorner = new DataFlowNodeAdorner<TInstruction>(),
+                EdgeAdorner = new DataFlowEdgeAdorner<TInstruction>()
             };
             dotWriter.Write(this);
         }

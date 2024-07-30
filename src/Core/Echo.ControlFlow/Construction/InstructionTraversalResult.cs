@@ -11,6 +11,7 @@ namespace Echo.ControlFlow.Construction
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that were traversed.</typeparam>
     public class InstructionTraversalResult<TInstruction> : IInstructionTraversalResult<TInstruction>
+        where TInstruction : notnull
     {
         private readonly Dictionary<long, TInstruction> _instructions = new();
         private readonly HashSet<long> _fallThroughOffsets = new();

@@ -11,6 +11,7 @@ namespace Echo.Ast;
 /// </summary>
 /// <typeparam name="TInstruction">The type of instructions to store in the AST.</typeparam>
 public class CompilationUnit<TInstruction> : AstNode<TInstruction>
+    where TInstruction : notnull
 {
     private readonly Dictionary<IVariable, List<VariableExpression<TInstruction>>> _variableUses = new();
     private readonly Dictionary<IVariable, List<Statement<TInstruction>>> _variableWrites = new();

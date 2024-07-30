@@ -9,6 +9,7 @@ namespace Echo.Ast.Patterns
     /// </summary>
     /// <typeparam name="TInstruction">The type of instruction that is stored in the expression.</typeparam>
     public class AssignmentStatementPattern<TInstruction> : StatementPattern<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new assignment statement pattern that matches on any variable and any value expression.

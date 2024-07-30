@@ -12,7 +12,7 @@ namespace Echo.DataFlow.Tests.Analysis
         public void NoDependencies()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
+            var n1 = dfg.Nodes.Add(1);
 
             Assert.Equal(new[]
             {
@@ -24,8 +24,8 @@ namespace Echo.DataFlow.Tests.Analysis
         public void SingleStackDependency()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
-            var n2 = dfg.Nodes.Add(2, 2);
+            var n1 = dfg.Nodes.Add(1);
+            var n2 = dfg.Nodes.Add(2);
 
             n2.StackDependencies.SetCount(1);
             n2.StackDependencies[0].Add(n1);
@@ -40,9 +40,9 @@ namespace Echo.DataFlow.Tests.Analysis
         public void MultipleStackDependenciesShouldResultInOrder()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
-            var n2 = dfg.Nodes.Add(2, 2);
-            var n3 = dfg.Nodes.Add(3 , 3);
+            var n1 = dfg.Nodes.Add(1);
+            var n2 = dfg.Nodes.Add(2);
+            var n3 = dfg.Nodes.Add(3);
 
             n3.StackDependencies.SetCount(2);
             n3.StackDependencies[0].Add(n1);
@@ -58,9 +58,9 @@ namespace Echo.DataFlow.Tests.Analysis
         public void PathStackDependencyGraphShouldResultInOrder()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
-            var n2 = dfg.Nodes.Add(2, 2);
-            var n3 = dfg.Nodes.Add(3, 3);
+            var n1 = dfg.Nodes.Add(1);
+            var n2 = dfg.Nodes.Add(2);
+            var n3 = dfg.Nodes.Add(3);
 
             n3.StackDependencies.Add(new StackDependency<int>());
             n3.StackDependencies[0].Add(n2);
@@ -77,11 +77,11 @@ namespace Echo.DataFlow.Tests.Analysis
         public void TreeStackDependencyGraphShouldResultInOrder()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
-            var n2 = dfg.Nodes.Add(2, 2);
-            var n3 = dfg.Nodes.Add(3, 3);
-            var n4 = dfg.Nodes.Add(4, 4);
-            var n5 = dfg.Nodes.Add(5, 5);
+            var n1 = dfg.Nodes.Add(1);
+            var n2 = dfg.Nodes.Add(2);
+            var n3 = dfg.Nodes.Add(3);
+            var n4 = dfg.Nodes.Add(4);
+            var n5 = dfg.Nodes.Add(5);
 
             n5.StackDependencies.SetCount(2);
             n5.StackDependencies[0].Add(n3);
@@ -101,11 +101,11 @@ namespace Echo.DataFlow.Tests.Analysis
         public void MirroredTreeStackDependencyGraphShouldResultInOrder()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
-            var n2 = dfg.Nodes.Add(2, 2);
-            var n3 = dfg.Nodes.Add(3, 3);
-            var n4 = dfg.Nodes.Add(4, 4);
-            var n5 = dfg.Nodes.Add(5, 5);
+            var n1 = dfg.Nodes.Add(1);
+            var n2 = dfg.Nodes.Add(2);
+            var n3 = dfg.Nodes.Add(3);
+            var n4 = dfg.Nodes.Add(4);
+            var n5 = dfg.Nodes.Add(5);
 
             n5.StackDependencies.SetCount(2);
             n5.StackDependencies[0].Add(n3);
@@ -125,10 +125,10 @@ namespace Echo.DataFlow.Tests.Analysis
         public void ConvergingEvenDependencyPathsShouldFinishSubPathsBeforeGoingDeeper()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
-            var n2 = dfg.Nodes.Add(2, 2);
-            var n3 = dfg.Nodes.Add(3, 3);
-            var n4 = dfg.Nodes.Add(4, 4);
+            var n1 = dfg.Nodes.Add(1);
+            var n2 = dfg.Nodes.Add(2);
+            var n3 = dfg.Nodes.Add(3);
+            var n4 = dfg.Nodes.Add(4);
 
             n4.StackDependencies.SetCount(2);
             n4.StackDependencies[0].Add(n2);
@@ -150,12 +150,12 @@ namespace Echo.DataFlow.Tests.Analysis
         public void ConvergingShortLongDependencyPathsShouldFinishSubPathsBeforeGoingDeeper()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
-            var n2 = dfg.Nodes.Add(2, 2);
-            var n3 = dfg.Nodes.Add(3, 3);
-            var n4 = dfg.Nodes.Add(4, 4);
-            var n5 = dfg.Nodes.Add(5, 5);
-            var n6 = dfg.Nodes.Add(6, 6);
+            var n1 = dfg.Nodes.Add(1);
+            var n2 = dfg.Nodes.Add(2);
+            var n3 = dfg.Nodes.Add(3);
+            var n4 = dfg.Nodes.Add(4);
+            var n5 = dfg.Nodes.Add(5);
+            var n6 = dfg.Nodes.Add(6);
 
             n6.StackDependencies.SetCount(2);
             n6.StackDependencies[0].Add(n4);
@@ -183,7 +183,7 @@ namespace Echo.DataFlow.Tests.Analysis
         public void SelfLoopShouldThrowCyclicDependencyException()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
+            var n1 = dfg.Nodes.Add(1);
 
             n1.StackDependencies.SetCount(1);
             n1.StackDependencies[0].Add(n1);
@@ -195,8 +195,8 @@ namespace Echo.DataFlow.Tests.Analysis
         public void ShortLoopShouldThrowCyclicDependencyException()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
-            var n2 = dfg.Nodes.Add(2, 2);
+            var n1 = dfg.Nodes.Add(1);
+            var n2 = dfg.Nodes.Add(2);
 
             n1.StackDependencies.SetCount(1);
             n1.StackDependencies[0].Add(n2);
@@ -211,10 +211,10 @@ namespace Echo.DataFlow.Tests.Analysis
         public void LongLoopShouldThrowCyclicDependencyException()
         {
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
-            var n2 = dfg.Nodes.Add(2, 2);
-            var n3 = dfg.Nodes.Add(3, 3);
-            var n4 = dfg.Nodes.Add(4, 4);
+            var n1 = dfg.Nodes.Add(1);
+            var n2 = dfg.Nodes.Add(2);
+            var n3 = dfg.Nodes.Add(3);
+            var n4 = dfg.Nodes.Add(4);
 
             n1.StackDependencies.SetCount(1);
             n1.StackDependencies[0].Add(n2);
@@ -237,11 +237,11 @@ namespace Echo.DataFlow.Tests.Analysis
             var variable = new DummyVariable("v1");
             
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
-            var n2 = dfg.Nodes.Add(2, 2);
-            var n3 = dfg.Nodes.Add(3, 3);
-            var n4 = dfg.Nodes.Add(4, 4);
-            var n5 = dfg.Nodes.Add(5, 5);
+            var n1 = dfg.Nodes.Add(1);
+            var n2 = dfg.Nodes.Add(2);
+            var n3 = dfg.Nodes.Add(3);
+            var n4 = dfg.Nodes.Add(4);
+            var n5 = dfg.Nodes.Add(5);
 
             n1.StackDependencies.SetCount(1);
             n1.StackDependencies[0].Add(n2);
@@ -269,11 +269,11 @@ namespace Echo.DataFlow.Tests.Analysis
             var variable = new DummyVariable("v1");
             
             var dfg = new DataFlowGraph<int>(IntArchitecture.Instance);
-            var n1 = dfg.Nodes.Add(1, 1);
-            var n2 = dfg.Nodes.Add(2, 2);
-            var n3 = dfg.Nodes.Add(3, 3);
-            var n4 = dfg.Nodes.Add(4, 4);
-            var n5 = dfg.Nodes.Add(5, 5);
+            var n1 = dfg.Nodes.Add(1);
+            var n2 = dfg.Nodes.Add(2);
+            var n3 = dfg.Nodes.Add(3);
+            var n4 = dfg.Nodes.Add(4);
+            var n5 = dfg.Nodes.Add(5);
 
             n1.StackDependencies.SetCount(1);
             n1.StackDependencies[0].Add(n2);

@@ -46,6 +46,7 @@ public class UnsafeInvoker : IMethodInvoker
                     "AreSame" => InvokeAreSame(context, arguments),
                     "Add" => InvokeAdd(context, method, arguments),
                     "AddByteOffset" => InvokeAddByteOffset(context, arguments),
+                    "ByteOffset" => InvokeByteOffset(context, arguments),
                     _ => InvocationResult.Inconclusive()
                 };
             
@@ -53,7 +54,7 @@ public class UnsafeInvoker : IMethodInvoker
                 return InvocationResult.Inconclusive();
         }
     }
-
+    
     private static InvocationResult InvokeAsOrAsRef(CilExecutionContext context, IList<BitVector> arguments)
     {
         // We don't do any GC tracking, thus returning the same input reference suffices.
@@ -71,6 +72,13 @@ public class UnsafeInvoker : IMethodInvoker
     {
         var result = arguments[0].Clone(context.Machine.ValueFactory.BitVectorPool);
         result.AsSpan().IntegerAdd(arguments[1]);
+        return InvocationResult.StepOver(result);
+    }
+    
+    private static InvocationResult InvokeByteOffset(CilExecutionContext context, IList<BitVector> arguments)
+    {
+        var result = arguments[1].Clone(context.Machine.ValueFactory.BitVectorPool);
+        result.AsSpan().IntegerSubtract(arguments[0]);
         return InvocationResult.StepOver(result);
     }
 

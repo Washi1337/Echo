@@ -28,7 +28,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var cfg = body.ConstructStaticFlowGraph();
             
             Assert.Single(cfg.Nodes);
-            Assert.Equal(body.Instructions, cfg.Nodes[0].Contents.Instructions);
+            Assert.Equal(body.Instructions, cfg.Nodes.GetByOffset(0)!.Contents.Instructions);
         }
         
         [Fact]
@@ -39,7 +39,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var body = method.CilMethodBody!;
             var cfg = body.ConstructStaticFlowGraph();
             
-            Assert.Single(cfg.EntryPoint.ConditionalEdges);
+            Assert.Single(cfg.EntryPoint!.ConditionalEdges);
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var body = method.CilMethodBody!;
             var cfg = body.ConstructStaticFlowGraph();
             
-            Assert.Equal(3, cfg.EntryPoint.ConditionalEdges.Count);
+            Assert.Equal(3, cfg.EntryPoint!.ConditionalEdges.Count);
         }
 
         [Fact]
@@ -74,7 +74,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var cfg = method.CilMethodBody.ConstructStaticFlowGraph();
 
             var node = Assert.Single(cfg.Nodes);
-            Assert.Equal(CilOpCodes.Jmp, node.Contents.Footer.OpCode);
+            Assert.Equal(CilOpCodes.Jmp, node.Contents.Footer!.OpCode);
         }
     }
 }

@@ -9,34 +9,26 @@ namespace Echo.DataFlow
     /// <summary>
     /// Represents a single node in a data flow graph.
     /// </summary>
-    /// <typeparam name="TContents">The type of contents to store in the node.</typeparam>
-    public class DataFlowNode<TContents> : IIdentifiedNode
+    /// <typeparam name="TInstruction">The type of contents to store in the node.</typeparam>
+    public class DataFlowNode<TInstruction> : IIdentifiedNode
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new data flow graph node.
         /// </summary>
-        /// <param name="id">A unique identifier for the node that can be used for indexing the node.</param>
-        /// <param name="contents">The contents of the node.</param>
-        public DataFlowNode(long id, TContents contents)
+        /// <param name="instruction">The contents of the node.</param>
+        public DataFlowNode(TInstruction? instruction)
         {
-            Id = id;
-            Contents = contents;
-            StackDependencies = new StackDependencyCollection<TContents>(this);
-            VariableDependencies = new VariableDependencyCollection<TContents>(this);
-            IncomingEdges = new List<DataFlowEdge<TContents>>();
+            Instruction = instruction;
+            StackDependencies = new StackDependencyCollection<TInstruction>(this);
+            VariableDependencies = new VariableDependencyCollection<TInstruction>(this);
+            IncomingEdges = new List<DataFlowEdge<TInstruction>>();
         }
 
         /// <summary>
         /// Gets the data flow graph this node is a part of.
         /// </summary>
-        public DataFlowGraph<TContents> ParentGraph
-        {
-            get;
-            internal set;
-        }
-
-        /// <inheritdoc />
-        public long Id
+        public DataFlowGraph<TInstruction>? ParentGraph
         {
             get;
             internal set;
@@ -52,11 +44,22 @@ namespace Echo.DataFlow
         /// Gets a value indicating whether the data flow node represents an external data source.
         /// </summary>
         public virtual bool IsExternal => false;
+        
+        /// <summary>
+        /// Gets or sets the offset associated to the data flow node.
+        /// </summary>
+        public long Offset
+        {
+            get;
+            set;
+        }
 
+        long IIdentifiedNode.Id => Offset;
+        
         /// <summary>
         /// Gets the contents of the node.
         /// </summary>
-        public TContents Contents
+        public TInstruction? Instruction
         {
             get;
             set;
@@ -65,7 +68,7 @@ namespace Echo.DataFlow
         /// <summary>
         /// Gets a collection of values allocated on a stack that this node depends on.
         /// </summary>
-        public StackDependencyCollection<TContents> StackDependencies
+        public StackDependencyCollection<TInstruction> StackDependencies
         {
             get;
         }
@@ -73,12 +76,12 @@ namespace Echo.DataFlow
         /// <summary>
         /// Gets a collection of values that are assigned to variables that this node depends on.
         /// </summary>
-        public VariableDependencyCollection<TContents> VariableDependencies
+        public VariableDependencyCollection<TInstruction> VariableDependencies
         {
             get;
         }
 
-        internal List<DataFlowEdge<TContents>> IncomingEdges
+        internal List<DataFlowEdge<TInstruction>> IncomingEdges
         {
             get;
         }
@@ -87,7 +90,7 @@ namespace Echo.DataFlow
         /// Obtains a collection of edges that refer to dependent nodes.
         /// </summary>
         /// <returns>The edges.</returns>
-        public IEnumerable<DataFlowEdge<TContents>> GetIncomingEdges() => IncomingEdges;
+        public IEnumerable<DataFlowEdge<TInstruction>> GetIncomingEdges() => IncomingEdges;
 
         IEnumerable<IEdge> INode.GetIncomingEdges() => IncomingEdges;
 
@@ -95,7 +98,7 @@ namespace Echo.DataFlow
         /// Obtains a collection of edges encoding all the dependencies that this node has.
         /// </summary>
         /// <returns>The edges.</returns>
-        public IEnumerable<DataFlowEdge<TContents>> GetOutgoingEdges()
+        public IEnumerable<DataFlowEdge<TInstruction>> GetOutgoingEdges()
         {
             return StackDependencies
                 .SelectMany(d => d.GetEdges())
@@ -108,10 +111,10 @@ namespace Echo.DataFlow
         /// Obtains a collection of nodes that depend on this node.
         /// </summary>
         /// <returns>The dependant nodes.</returns>
-        public IEnumerable<DataFlowNode<TContents>> GetDependants() => IncomingEdges
+        public IEnumerable<DataFlowNode<TInstruction>> GetDependants() => IncomingEdges
             .Select(e => e.Dependent)
             .Distinct();
-        
+
         IEnumerable<INode> INode.GetPredecessors() => GetDependants();
 
         IEnumerable<INode> INode.GetSuccessors() => GetOutgoingEdges()
@@ -121,6 +124,16 @@ namespace Echo.DataFlow
         bool INode.HasPredecessor(INode node) => GetOutgoingEdges().Any(e => e.Dependent == node);
 
         bool INode.HasSuccessor(INode node) => GetOutgoingEdges().Any(e => e.DataSource.Node == node);
+
+        /// <summary>
+        /// Synchronizes the node's offset with the offset of the embedded instruction.
+        /// </summary>
+        public void UpdateOffset()
+        {
+            Offset = ParentGraph is not null && Instruction is not null
+                ? ParentGraph.Architecture.GetOffset(Instruction)
+                : 0;
+        }
 
         /// <summary>
         /// Removes all incident edges (both incoming and outgoing edges) from the node, effectively isolating the node
@@ -139,14 +152,14 @@ namespace Echo.DataFlow
                 dependency.Clear();
         }
 
-        private static void RemoveIncomingEdge(DataFlowEdge<TContents> edge)
+        private static void RemoveIncomingEdge(DataFlowEdge<TInstruction> edge)
         {
             switch (edge.DataSource.Type)
             {
                 case DataDependencyType.Stack:
                     foreach (var dependency in edge.Dependent.StackDependencies)
                     {
-                        if (dependency.Remove((StackDataSource<TContents>) edge.DataSource))
+                        if (dependency.Remove((StackDataSource<TInstruction>) edge.DataSource))
                             break;
                     }
 
@@ -155,7 +168,7 @@ namespace Echo.DataFlow
                 case DataDependencyType.Variable:
                     foreach (var dependency in edge.Dependent.VariableDependencies)
                     {
-                        if (dependency.Remove((VariableDataSource<TContents>) edge.DataSource))
+                        if (dependency.Remove((VariableDataSource<TInstruction>) edge.DataSource))
                             break;
                     }
 
@@ -167,6 +180,6 @@ namespace Echo.DataFlow
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"{Id:X8} ({Contents})";
+        public override string ToString() => Offset.ToString("X8");
     }
 }

@@ -5,6 +5,7 @@ namespace Echo.Ast.Analysis
 {
     internal sealed class FlowControlDeterminer<TInstruction>
         : IAstNodeVisitor<TInstruction, object?, InstructionFlowControl>
+        where TInstruction : notnull
     {
         private readonly IArchitecture<TInstruction> _isa;
         

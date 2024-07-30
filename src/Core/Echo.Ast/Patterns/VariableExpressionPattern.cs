@@ -8,6 +8,7 @@ namespace Echo.Ast.Patterns
     /// </summary>
     /// <typeparam name="TInstruction">The type of instruction that is stored in the expression.</typeparam>
     public class VariableExpressionPattern<TInstruction> : ExpressionPattern<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new variable expression pattern that matches any variable.

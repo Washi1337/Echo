@@ -8,13 +8,14 @@ namespace Echo.DataFlow.Emulation
     /// <summary>
     /// Represents an immutable snapshot of a program state that is fully symbolic.  
     /// </summary>
-    /// <typeparam name="T">The type of instructions.</typeparam>
-    public readonly struct SymbolicProgramState<T>
+    /// <typeparam name="TInstruction">The type of instructions.</typeparam>
+    public readonly struct SymbolicProgramState<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets an empty program state.
         /// </summary>
-        public static SymbolicProgramState<T> Empty
+        public static SymbolicProgramState<TInstruction> Empty
         {
             get;
         } = new(0);
@@ -26,8 +27,8 @@ namespace Echo.DataFlow.Emulation
         public SymbolicProgramState(long programCounter)
         {
             ProgramCounter = programCounter;
-            Stack = ImmutableStack<SymbolicValue<T>>.Empty;
-            Variables = ImmutableDictionary<IVariable, SymbolicValue<T>>.Empty;
+            Stack = ImmutableStack<SymbolicValue<TInstruction>>.Empty;
+            Variables = ImmutableDictionary<IVariable, SymbolicValue<TInstruction>>.Empty;
         }
 
         /// <summary>
@@ -37,11 +38,11 @@ namespace Echo.DataFlow.Emulation
         /// <param name="stack">The initial stack state.</param>
         public SymbolicProgramState(
             long programCounter, 
-            ImmutableStack<SymbolicValue<T>> stack)
+            ImmutableStack<SymbolicValue<TInstruction>> stack)
         {
             ProgramCounter = programCounter;
             Stack = stack ?? throw new ArgumentNullException(nameof(stack));
-            Variables = ImmutableDictionary<IVariable, SymbolicValue<T>>.Empty;
+            Variables = ImmutableDictionary<IVariable, SymbolicValue<TInstruction>>.Empty;
         }
 
         /// <summary>
@@ -51,10 +52,10 @@ namespace Echo.DataFlow.Emulation
         /// <param name="variables">The initial state of the variables.</param>
         public SymbolicProgramState(
             long programCounter, 
-            ImmutableDictionary<IVariable, SymbolicValue<T>> variables)
+            ImmutableDictionary<IVariable, SymbolicValue<TInstruction>> variables)
         {
             ProgramCounter = programCounter;
-            Stack = ImmutableStack<SymbolicValue<T>>.Empty;
+            Stack = ImmutableStack<SymbolicValue<TInstruction>>.Empty;
             Variables = variables ?? throw new ArgumentNullException(nameof(variables));
         }
         
@@ -66,8 +67,8 @@ namespace Echo.DataFlow.Emulation
         /// <param name="variables">The initial state of the variables.</param>
         public SymbolicProgramState(
             long programCounter, 
-            ImmutableStack<SymbolicValue<T>> stack,
-            ImmutableDictionary<IVariable, SymbolicValue<T>> variables)
+            ImmutableStack<SymbolicValue<TInstruction>> stack,
+            ImmutableDictionary<IVariable, SymbolicValue<TInstruction>> variables)
         {
             ProgramCounter = programCounter;
             Stack = stack ?? throw new ArgumentNullException(nameof(stack));
@@ -85,7 +86,7 @@ namespace Echo.DataFlow.Emulation
         /// <summary>
         /// Gets the current stack state of the program.
         /// </summary>
-        public ImmutableStack<SymbolicValue<T>> Stack
+        public ImmutableStack<SymbolicValue<TInstruction>> Stack
         {
             get;
         }
@@ -93,7 +94,7 @@ namespace Echo.DataFlow.Emulation
         /// <summary>
         /// Gets the current variable state of the program.
         /// </summary>
-        public ImmutableDictionary<IVariable, SymbolicValue<T>> Variables
+        public ImmutableDictionary<IVariable, SymbolicValue<TInstruction>> Variables
         {
             get;
         }
@@ -103,7 +104,7 @@ namespace Echo.DataFlow.Emulation
         /// </summary>
         /// <param name="programCounter">The new program counter.</param>
         /// <returns>The new program state.</returns>
-        public SymbolicProgramState<T> WithProgramCounter(long programCounter) => 
+        public SymbolicProgramState<TInstruction> WithProgramCounter(long programCounter) => 
             new(programCounter, Stack, Variables);
         
         /// <summary>
@@ -111,7 +112,7 @@ namespace Echo.DataFlow.Emulation
         /// </summary>
         /// <param name="stack">The new stack state.</param>
         /// <returns>The new program state.</returns>
-        public SymbolicProgramState<T> WithStack(ImmutableStack<SymbolicValue<T>> stack) => 
+        public SymbolicProgramState<TInstruction> WithStack(ImmutableStack<SymbolicValue<TInstruction>> stack) => 
             new(ProgramCounter, stack, Variables);
         
         /// <summary>
@@ -119,7 +120,7 @@ namespace Echo.DataFlow.Emulation
         /// </summary>
         /// <param name="variables">The new variables state.</param>
         /// <returns>The new program state.</returns>
-        public SymbolicProgramState<T> WithVariables(ImmutableDictionary<IVariable, SymbolicValue<T>> variables) => 
+        public SymbolicProgramState<TInstruction> WithVariables(ImmutableDictionary<IVariable, SymbolicValue<TInstruction>> variables) => 
             new(ProgramCounter, Stack, variables);
 
         /// <summary>
@@ -127,7 +128,7 @@ namespace Echo.DataFlow.Emulation
         /// </summary>
         /// <param name="value">The new value.</param>
         /// <returns>The new program state.</returns>
-        public SymbolicProgramState<T> Push(SymbolicValue<T> value) => 
+        public SymbolicProgramState<TInstruction> Push(SymbolicValue<TInstruction> value) => 
             new(ProgramCounter, Stack.Push(value), Variables);
 
         /// <summary>
@@ -136,7 +137,7 @@ namespace Echo.DataFlow.Emulation
         /// <param name="value">The popped value.</param>
         /// <exception cref="StackImbalanceException">Occurs when the stack is empty.</exception>
         /// <returns>The new program state.</returns>
-        public SymbolicProgramState<T> Pop(out SymbolicValue<T> value)
+        public SymbolicProgramState<TInstruction> Pop(out SymbolicValue<TInstruction> value)
         {
             if (Stack.IsEmpty)
                 throw new StackImbalanceException(ProgramCounter);
@@ -151,7 +152,7 @@ namespace Echo.DataFlow.Emulation
         /// <returns><c>true</c> if the state has changed, <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentException">Occurs when the program counters do not match.</exception>
         /// <exception cref="StackImbalanceException">Occurs when the stack heights do not match.</exception>
-        public bool MergeStates(in SymbolicProgramState<T> otherState, out SymbolicProgramState<T> newState)
+        public bool MergeStates(in SymbolicProgramState<TInstruction> otherState, out SymbolicProgramState<TInstruction> newState)
         {
             if (ProgramCounter != otherState.ProgramCounter)
                 throw new ArgumentException("Input program state has a different program counter.");
@@ -163,11 +164,11 @@ namespace Echo.DataFlow.Emulation
             var newVariables = otherState.Variables;
             changed |= MergeVariables(ref newVariables);
 
-            newState = new SymbolicProgramState<T>(ProgramCounter, newStack, newVariables);
+            newState = new SymbolicProgramState<TInstruction>(ProgramCounter, newStack, newVariables);
             return changed;
         }
 
-        private bool MergeStacks(ref ImmutableStack<SymbolicValue<T>> other)
+        private bool MergeStacks(ref ImmutableStack<SymbolicValue<TInstruction>> other)
         {
             var stack1 = Stack;
             var stack2 = other;
@@ -180,7 +181,7 @@ namespace Echo.DataFlow.Emulation
 
             bool changed = false;
             
-            var result = new SymbolicValue<T>[count];
+            var result = new SymbolicValue<TInstruction>[count];
 
             count--;
             while(count >= 0)
@@ -194,7 +195,7 @@ namespace Echo.DataFlow.Emulation
                 var newValue = value1;
                 if (!value1.SetEquals(value2))
                 {
-                    newValue = new SymbolicValue<T>(value1, value2);
+                    newValue = new SymbolicValue<TInstruction>(value1, value2);
                     changed = true;
                 }
 
@@ -208,7 +209,7 @@ namespace Echo.DataFlow.Emulation
             return changed;
         }
 
-        private bool MergeVariables(ref ImmutableDictionary<IVariable, SymbolicValue<T>> newVariables)
+        private bool MergeVariables(ref ImmutableDictionary<IVariable, SymbolicValue<TInstruction>> newVariables)
         {
             var result = Variables;
             bool changed = false;
@@ -227,7 +228,7 @@ namespace Echo.DataFlow.Emulation
                 else if (!value.SetEquals(otherValue))
                 {
                     // Variable does exist but has different data sources. Create new merged symbolic value.
-                    var newValue = new SymbolicValue<T>(value, otherValue);
+                    var newValue = new SymbolicValue<TInstruction>(value, otherValue);
                     result = result.SetItem(variable, newValue);
                     changed = true;
                 }

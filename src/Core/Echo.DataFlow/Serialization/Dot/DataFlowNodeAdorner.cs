@@ -7,8 +7,9 @@ namespace Echo.DataFlow.Serialization.Dot
     /// <summary>
     /// Represents an adorner that adds the string representation of the embedded instructions to a node in a graph.
     /// </summary>
-    /// <typeparam name="TContents">The type of instructions the nodes contain.</typeparam>
-    public class DataFlowNodeAdorner<TContents> : IDotNodeAdorner
+    /// <typeparam name="TInstruction">The type of instructions the nodes contain.</typeparam>
+    public class DataFlowNodeAdorner<TInstruction> : IDotNodeAdorner
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets or sets the shape of the node.
@@ -20,22 +21,22 @@ namespace Echo.DataFlow.Serialization.Dot
         } = "box3d";
 
         /// <inheritdoc />
-        public IDictionary<string, string> GetNodeAttributes(INode node, long id)
+        public IDictionary<string, string>? GetNodeAttributes(INode node, long id)
         {
             switch (node)
             {
-                case ExternalDataSourceNode<TContents> externalDataSource:
+                case ExternalDataSourceNode<TInstruction> externalDataSource:
                     return new Dictionary<string, string>
                     {
                         ["shape"] = NodeShape,
-                        ["label"] = externalDataSource.Name
+                        ["label"] = externalDataSource.Source.ToString()
                     };
                 
-                case DataFlowNode<TContents> dataFlowNode:
+                case DataFlowNode<TInstruction> dataFlowNode:
                     return new Dictionary<string, string>
                     {
                         ["shape"] = NodeShape,
-                        ["label"] = dataFlowNode.Contents.ToString()
+                        ["label"] = dataFlowNode.Instruction?.ToString() ?? dataFlowNode.Offset.ToString("X8")
                     };
                 
                 default:

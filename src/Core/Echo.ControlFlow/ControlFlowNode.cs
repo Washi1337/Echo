@@ -4,7 +4,6 @@ using System.Linq;
 using Echo.ControlFlow.Blocks;
 using Echo.ControlFlow.Collections;
 using Echo.ControlFlow.Regions;
-using Echo.Code;
 using Echo.Graphing;
 
 namespace Echo.ControlFlow
@@ -13,48 +12,53 @@ namespace Echo.ControlFlow
     /// Represents a node in a control flow graph, containing a basic block of instructions that are to be executed
     /// in a sequence.
     /// </summary>
-    /// <typeparam name="TInstruction">The type of data to store in the node.</typeparam>
+    /// <typeparam name="TInstruction">The type of instructions to store in the node.</typeparam>
     public class ControlFlowNode<TInstruction> : IIdentifiedNode
+        where TInstruction : notnull
     {
-        private ControlFlowEdge<TInstruction> _unconditionalEdge;
+        private ControlFlowEdge<TInstruction>? _unconditionalEdge;
 
         /// <summary>
-        /// Creates a new control flow graph node with an empty basic block, to be added to the graph.
+        /// Creates a new empty control flow node.
         /// </summary>
-        /// <param name="offset">The offset of the node.</param>
+        public ControlFlowNode()
+            : this(new BasicBlock<TInstruction>())
+        {
+        }
+
+        /// <summary>
+        /// Creates a new empty control flow node for the provided offset.
+        /// </summary>
+        /// <param name="offset">The offset.</param>
         public ControlFlowNode(long offset)
-            : this(offset, new BasicBlock<TInstruction>(offset))
+            : this(new BasicBlock<TInstruction>(offset))
         {
         }
-
+        
         /// <summary>
         /// Creates a new control flow node containing the provided basic block of instructions, to be added to the graph.
         /// </summary>
-        /// <param name="offset">The offset of the node.</param>
         /// <param name="instructions">The basic block to store in the node.</param>
-        public ControlFlowNode(long offset, params TInstruction[] instructions)
-            : this(offset, instructions.AsEnumerable())
+        public ControlFlowNode(params TInstruction[] instructions)
+            : this(new BasicBlock<TInstruction>(instructions))
         {
         }
 
         /// <summary>
         /// Creates a new control flow node containing the provided basic block of instructions, to be added to the graph.
         /// </summary>
-        /// <param name="offset">The offset of the node.</param>
         /// <param name="instructions">The basic block to store in the node.</param>
-        public ControlFlowNode(long offset, IEnumerable<TInstruction> instructions)
-            : this(offset, new BasicBlock<TInstruction>(offset, instructions))
+        public ControlFlowNode(IEnumerable<TInstruction> instructions)
+            : this(new BasicBlock<TInstruction>(instructions))
         {
         }
 
         /// <summary>
         /// Creates a new control flow node containing the provided basic block of instructions, to be added to the graph.
         /// </summary>
-        /// <param name="offset">The offset of the node.</param>
         /// <param name="basicBlock">The basic block to store in the node.</param>
-        public ControlFlowNode(long offset, BasicBlock<TInstruction> basicBlock)
+        public ControlFlowNode(BasicBlock<TInstruction> basicBlock)
         {
-            Offset = offset;
             Contents = basicBlock ?? throw new ArgumentNullException(nameof(basicBlock));
             ConditionalEdges = new AdjacencyCollection<TInstruction>(this, ControlFlowEdgeType.Conditional);
             AbnormalEdges = new AdjacencyCollection<TInstruction>(this, ControlFlowEdgeType.Abnormal);
@@ -63,7 +67,7 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the graph that contains this node, or <c>null</c> if the node is not added to any graph yet.  
         /// </summary>
-        public ControlFlowGraph<TInstruction> ParentGraph
+        public ControlFlowGraph<TInstruction>? ParentGraph
         {
             get
             {
@@ -87,23 +91,18 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the graph region that contains this node, or <c>null</c> if the node is not added to any graph yet.  
         /// </summary>
-        public IControlFlowRegion<TInstruction> ParentRegion
+        public IControlFlowRegion<TInstruction>? ParentRegion
         {
             get;
             internal set;
         }
 
         /// <summary>
-        /// Gets the offset of the node.
+        /// Gets the offset of the basic block the node is representing.
         /// </summary>
-        public long Offset
-        {
-            get;
-            internal set;
-        }
+        public long Offset => Contents.Offset;
 
-        /// <inheritdoc />
-        public long Id => Offset;
+        long IIdentifiedNode.Id => Offset;
 
         /// <inheritdoc />
         public int InDegree => IncomingEdges.Count;
@@ -129,25 +128,34 @@ namespace Echo.ControlFlow
         }
 
         /// <summary>
+        /// Gets or sets user data that is added to the node.
+        /// </summary>
+        public object? UserData
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the neighbour to which the control is transferred to after execution of this block and no
         /// other condition is met.
         /// </summary>
-        public ControlFlowNode<TInstruction> UnconditionalNeighbour
+        public ControlFlowNode<TInstruction>? UnconditionalNeighbour
         {
             get => UnconditionalEdge?.Target;
-            set => UnconditionalEdge = value == null ? null : new ControlFlowEdge<TInstruction>(this, value);
+            set => UnconditionalEdge = value is null ? null : new ControlFlowEdge<TInstruction>(this, value);
         }
 
         /// <summary>
         /// Gets or sets the edge to the neighbour to which the control is transferred to after execution of this block
         /// and no other condition is met.
         /// </summary>
-        public ControlFlowEdge<TInstruction> UnconditionalEdge
+        public ControlFlowEdge<TInstruction>? UnconditionalEdge
         {
             get => _unconditionalEdge;
             set
             {
-                if (value is {})
+                if (value is not null)
                 {
                     if (value.Type != ControlFlowEdgeType.FallThrough && value.Type != ControlFlowEdgeType.Unconditional)
                         throw new ArgumentException("New edge must be either a fallthrough edge or an unconditional edge.");
@@ -156,8 +164,7 @@ namespace Echo.ControlFlow
 
                 _unconditionalEdge?.Target.IncomingEdges.Remove(_unconditionalEdge);
                 _unconditionalEdge = value;
-                _unconditionalEdge?.Target.IncomingEdges.Add(value);
-
+                _unconditionalEdge?.Target.IncomingEdges.Add(_unconditionalEdge);
             }
         }
 
@@ -205,7 +212,7 @@ namespace Echo.ControlFlow
         /// <exception cref="InvalidOperationException">Occurs when the node already contains a fallthrough edge to another node.</exception>
         public ControlFlowEdge<TInstruction> ConnectWith(ControlFlowNode<TInstruction> neighbour)
         {
-            if (neighbour == null)
+            if (neighbour is null)
                 throw new ArgumentNullException(nameof(neighbour));
             return ConnectWith(neighbour, ControlFlowEdgeType.FallThrough);
         }
@@ -251,7 +258,18 @@ namespace Echo.ControlFlow
 
             return edge;
         }
-
+        
+        /// <summary>
+        /// Synchronizes the basic block's offset with the offset of the first instruction.
+        /// </summary>
+        public void UpdateOffset()
+        {
+            if (ParentGraph is not null)
+                Contents.UpdateOffset(ParentGraph.Architecture);
+            else
+                Contents.Offset = 0;
+        }
+        
         /// <summary>
         /// Splits the node and its embedded basic block in two nodes at the provided index, and connects the two
         /// resulting nodes with a fallthrough edge.
@@ -264,6 +282,8 @@ namespace Echo.ControlFlow
         /// </exception>
         public (ControlFlowNode<TInstruction> First, ControlFlowNode<TInstruction> Second) SplitAtIndex(int index)
         {
+            if (ParentGraph is null)
+                throw new InvalidOperationException("Cannot split a node that is not added to a graph yet.");
             if (Contents.Instructions.Count < 2)
                 throw new InvalidOperationException("Cannot split up a node with less than two instructions.");
             if (index <= 0 || index >= Contents.Instructions.Count)
@@ -279,7 +299,7 @@ namespace Echo.ControlFlow
             
             // Create and add new node.
             var newBlock = new BasicBlock<TInstruction>(ParentGraph.Architecture.GetOffset(instructions[0]), instructions);
-            var newNode = new ControlFlowNode<TInstruction>(newBlock.Offset, newBlock);
+            var newNode = new ControlFlowNode<TInstruction>(newBlock);
             ParentGraph.Nodes.Add(newNode);
             if (ParentRegion is ScopeRegion<TInstruction> scope)
                 newNode.MoveToRegion(scope);
@@ -331,6 +351,9 @@ namespace Echo.ControlFlow
         /// </exception>
         public void MergeWithSuccessor()
         {
+            if (ParentGraph is null)
+                throw new InvalidOperationException("Node is not added to a graph.");
+            
             var successor = UnconditionalNeighbour;
             if (successor is null)
                 throw new InvalidOperationException("Node has no fallthrough neighbour to merge into.");
@@ -353,11 +376,8 @@ namespace Echo.ControlFlow
         /// Gets a collection of all edges that target this node.
         /// </summary>
         /// <returns>The incoming edges.</returns>
-        public IEnumerable<ControlFlowEdge<TInstruction>> GetIncomingEdges()
-        {
-            return IncomingEdges;
-        }
-        
+        public IEnumerable<ControlFlowEdge<TInstruction>> GetIncomingEdges() => IncomingEdges;
+
         /// <summary>
         /// Gets a collection of all outgoing edges originating from this node.
         /// </summary>
@@ -461,7 +481,7 @@ namespace Echo.ControlFlow
         /// </summary>
         public void RemoveFromAnyRegion()
         {
-            if (ParentRegion != ParentGraph)
+            if (ParentRegion is not null && ParentRegion != ParentGraph)
                 ParentRegion.RemoveNode(this);
         }
 
@@ -481,8 +501,7 @@ namespace Echo.ControlFlow
         /// <returns>
         /// The parent exception handler region, or <c>null</c> if the node is not part of any exception handler.
         /// </returns>
-        public ExceptionHandlerRegion<TInstruction> GetParentExceptionHandler() =>
-            ParentRegion?.GetParentExceptionHandler();
+        public ExceptionHandlerRegion<TInstruction>? GetParentExceptionHandler() => ParentRegion?.GetParentExceptionHandler();
 
         /// <summary>
         /// Obtains the parent handler region that this node resides in (if any).
@@ -490,8 +509,7 @@ namespace Echo.ControlFlow
         /// <returns>
         /// The parent handler region, or <c>null</c> if the node is not part of any handler.
         /// </returns>
-        public HandlerRegion<TInstruction> GetParentHandler() =>
-            ParentRegion?.GetParentHandler();
+        public HandlerRegion<TInstruction>? GetParentHandler() => ParentRegion?.GetParentHandler();
 
         /// <summary>
         /// Traverses the region tree upwards and collects all regions this node is situated in. 
@@ -515,7 +533,7 @@ namespace Echo.ControlFlow
         public bool IsInRegion(IControlFlowRegion<TInstruction> region) => GetSituatedRegions().Contains(region);
 
         /// <inheritdoc />
-        public override string ToString() => Offset.ToString("X8");
+        public override string ToString() => Contents.Offset.ToString("X8");
 
         IEnumerable<IEdge> INode.GetIncomingEdges() => GetIncomingEdges();
 

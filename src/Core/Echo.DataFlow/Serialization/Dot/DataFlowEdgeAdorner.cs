@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Echo.Graphing;
 using Echo.Graphing.Serialization.Dot;
 
@@ -8,8 +7,9 @@ namespace Echo.DataFlow.Serialization.Dot
     /// <summary>
     /// Represents an adorner that styles edges in a data flow graph.
     /// </summary>
-    /// <typeparam name="TContents">The type of contents the nodes contain.</typeparam>
-    public class DataFlowEdgeAdorner<TContents> : IDotEdgeAdorner
+    /// <typeparam name="TInstruction">The type of instructions the nodes contain.</typeparam>
+    public class DataFlowEdgeAdorner<TInstruction> : IDotEdgeAdorner 
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets or sets the edge style to use for edges representing stack dependencies.
@@ -50,25 +50,25 @@ namespace Echo.DataFlow.Serialization.Dot
         } = true;
         
         /// <inheritdoc />
-        public IDictionary<string, string> GetEdgeAttributes(IEdge edge, long sourceId, long targetId)
+        public IDictionary<string, string>? GetEdgeAttributes(IEdge edge, long sourceId, long targetId)
         {
-            if (edge is DataFlowEdge<TContents> e)
+            if (edge is DataFlowEdge<TInstruction> e)
             {
                 var result = new Dictionary<string, string>();
                 
-                (var style, string label) = e.DataSource switch
+                (var style, string? label) = e.DataSource switch
                 {
-                    StackDataSource<TContents> source => (StackDependencyStyle, source.SlotIndex.ToString()),
-                    VariableDataSource<TContents> source => (VariableDependencyStyle, source.Variable.Name),
+                    StackDataSource<TInstruction> source => (StackDependencyStyle, source.SlotIndex.ToString()),
+                    VariableDataSource<TInstruction> source => (VariableDependencyStyle, source.Variable.Name),
                     _ => default
                 };
                 
                 if (!string.IsNullOrEmpty(style.Color))
-                    result["color"] = style.Color;
+                    result["color"] = style.Color!;
                 if (!string.IsNullOrEmpty(style.Style))
-                    result["style"] = style.Style;
+                    result["style"] = style.Style!;
                 if (!string.IsNullOrEmpty(label))
-                    result["label"] = label;
+                    result["label"] = label!;
 
                 return result;
             }

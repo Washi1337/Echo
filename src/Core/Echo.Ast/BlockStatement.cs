@@ -8,6 +8,7 @@ namespace Echo.Ast;
 /// </summary>
 /// <typeparam name="TInstruction">The type of instruction stored in the AST.</typeparam>
 public class BlockStatement<TInstruction> : Statement<TInstruction>
+    where TInstruction : notnull
 {
     /// <summary>
     /// Creates a new empty block.

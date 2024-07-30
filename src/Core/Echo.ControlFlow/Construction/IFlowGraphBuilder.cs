@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Echo.ControlFlow.Regions.Detection;
 using Echo.Code;
 
@@ -11,6 +10,7 @@ namespace Echo.ControlFlow.Construction
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that the control flow graph will contain.</typeparam>
     public interface IFlowGraphBuilder<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets the architecture of the instructions to graph.
@@ -49,6 +49,7 @@ namespace Echo.ControlFlow.Construction
         public static ControlFlowGraph<TInstruction> ConstructFlowGraph<TInstruction>(
             this IFlowGraphBuilder<TInstruction> self, 
             long entrypoint)
+            where TInstruction : notnull
         {
             return self.ConstructFlowGraph(entrypoint, Array.Empty<long>());
         }
@@ -67,6 +68,7 @@ namespace Echo.ControlFlow.Construction
             this IFlowGraphBuilder<TInstruction> self,
             long entrypoint, 
             IEnumerable<ExceptionHandlerRange> exceptionHandlers)
+            where TInstruction : notnull
         {
             var knownBlockHeaders = new HashSet<long>();
             foreach (var range in exceptionHandlers)

@@ -12,13 +12,16 @@ namespace Echo.Ast.Patterns
         /// Creates a new pattern that matches any type of statement. 
         /// </summary>
         /// <returns>The pattern.</returns>
-        public static AnyPattern<Statement<TInstruction>> Any<TInstruction>() => new();
+        public static AnyPattern<Statement<TInstruction>> Any<TInstruction>()
+            where TInstruction : notnull
+            => new();
 
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="AssignmentStatement{TInstruction}"/> with
         /// a single variable on the left hand side of the equals sign.
         /// </summary>
         public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>() 
+            where TInstruction : notnull
             => new(Pattern.Any<IVariable>(), Pattern.Any<Expression<TInstruction>>());
 
         /// <summary>
@@ -29,6 +32,7 @@ namespace Echo.Ast.Patterns
         public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>(
             Pattern<IVariable> variable,
             Pattern<Expression<TInstruction>> expression)
+            where TInstruction : notnull
         {
             return new AssignmentStatementPattern<TInstruction>(variable, expression);
         }
@@ -41,6 +45,7 @@ namespace Echo.Ast.Patterns
         public static AssignmentStatementPattern<TInstruction> Assignment<TInstruction>(
             IEnumerable<Pattern<IVariable>> variables,
             Pattern<Expression<TInstruction>> expression)
+            where TInstruction : notnull
         {
             return new AssignmentStatementPattern<TInstruction>(variables, expression);
         }
@@ -49,7 +54,9 @@ namespace Echo.Ast.Patterns
         /// Creates a new pattern that matches on instances of <see cref="ExpressionStatement{TInstruction}"/> with
         /// any kind of embedded expression.
         /// </summary>
-        public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>() => new();
+        public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>() 
+            where TInstruction : notnull
+            => new();
 
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="ExpressionStatement{TInstruction}"/>.
@@ -57,6 +64,7 @@ namespace Echo.Ast.Patterns
         /// <param name="expression">The pattern for the embedded expression.</param>
         public static ExpressionStatementPattern<TInstruction> Expression<TInstruction>(
             Pattern<Expression<TInstruction>> expression)
+            where TInstruction : notnull
         {
             return new ExpressionStatementPattern<TInstruction>(expression);
         }
@@ -69,6 +77,7 @@ namespace Echo.Ast.Patterns
         /// <returns>The pattern.</returns>
         public static ExpressionStatementPattern<TInstruction> Instruction<TInstruction>(
             Pattern<TInstruction> instruction)
+            where TInstruction : notnull
         {
             return new ExpressionStatementPattern<TInstruction>(ExpressionPattern.Instruction(instruction));
         }
@@ -78,7 +87,9 @@ namespace Echo.Ast.Patterns
         /// any target and any number of source variables.
         /// </summary>
         /// <returns>The pattern.</returns>
-        public static PhiStatementPattern<TInstruction> Phi<TInstruction>() => new();
+        public static PhiStatementPattern<TInstruction> Phi<TInstruction>() 
+            where TInstruction : notnull
+            => new();
 
         /// <summary>
         /// Creates a new pattern that matches on instances of <see cref="PhiStatementPattern{TInstruction}"/> with
@@ -86,7 +97,9 @@ namespace Echo.Ast.Patterns
         /// </summary>
         /// <param name="target">The target pattern to match on.</param>
         /// <returns>The pattern.</returns>
-        public static PhiStatementPattern<TInstruction> Phi<TInstruction>(Pattern<IVariable> target) => new(target);
+        public static PhiStatementPattern<TInstruction> Phi<TInstruction>(Pattern<IVariable> target) 
+            where TInstruction : notnull
+            => new(target);
     }
     
     /// <summary>
@@ -94,6 +107,7 @@ namespace Echo.Ast.Patterns
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions stored in the abstract syntax tree.</typeparam>
     public abstract class StatementPattern<TInstruction> : Pattern<Statement<TInstruction>>
+        where TInstruction : notnull
     {
     }
 }

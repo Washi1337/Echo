@@ -216,9 +216,10 @@ namespace Echo.ControlFlow.Tests
         public void SplitNodeShouldConnectUsingFallThrough()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0, 1, 2, 3, 4));
+            var node = new ControlFlowNode<int>(0, 1, 2, 3, 4);
+            graph.Nodes.Add(node);
 
-            var (first, second) = graph.Nodes[0].SplitAtIndex(2);
+            var (first, second) = node.SplitAtIndex(2);
 
             Assert.Equal(new[] { 0, 1 }, first.Contents.Instructions);
             Assert.Equal(new[] { 2, 3, 4 }, second.Contents.Instructions);
@@ -229,80 +230,95 @@ namespace Echo.ControlFlow.Tests
         public void SplitEmptyNodeShouldThrow()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            graph.Nodes.Add(new ControlFlowNode<int>(0));
-            Assert.Throws<InvalidOperationException>(() => graph.Nodes[0].SplitAtIndex(1));
+            var node = new ControlFlowNode<int>([]);
+            graph.Nodes.Add(node);
+            Assert.Throws<InvalidOperationException>(() => node.SplitAtIndex(1));
         }
 
         [Fact]
         public void SplitNodeWithSingleInstructionShouldThrow()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
-            Assert.Throws<InvalidOperationException>(() => graph.Nodes[0].SplitAtIndex(0));
+            var node = new ControlFlowNode<int>(0);
+            graph.Nodes.Add(node);
+            Assert.Throws<InvalidOperationException>(() => node.SplitAtIndex(0));
         }
 
         [Fact]
         public void SplitNodeAtHeaderShouldThrow()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0, 1, 2));
-            Assert.Throws<ArgumentOutOfRangeException>(() => graph.Nodes[0].SplitAtIndex(0));
+            var node = new ControlFlowNode<int>(0, 1, 2);
+            graph.Nodes.Add(node);
+            Assert.Throws<ArgumentOutOfRangeException>(() => node.SplitAtIndex(0));
         }
 
         [Fact]
         public void SplitNodeAtFooterShouldThrow()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0, 1, 2));
-            Assert.Throws<ArgumentOutOfRangeException>(() => graph.Nodes[0].SplitAtIndex(3));
+            var node = new ControlFlowNode<int>(0, 1, 2);
+            graph.Nodes.Add(node);
+            Assert.Throws<ArgumentOutOfRangeException>(() => node.SplitAtIndex(3));
         }
 
         [Fact]
         public void SplitNodeShouldTransferFallThroughEdge()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
-            graph.Nodes.Add(new ControlFlowNode<int>(1, 1, 2));
-            graph.Nodes.Add(new ControlFlowNode<int>(3, 3));
 
-            graph.Nodes[0].ConnectWith(graph.Nodes[1]);
-            graph.Nodes[1].ConnectWith(graph.Nodes[3]);
+            var nodes = new ControlFlowNode<int>[]
+            {
+                new(0),
+                new(1, 2),
+                new(3),
+            };
             
-            var (first, second) = graph.Nodes[1].SplitAtIndex(1);
+            graph.Nodes.AddRange(nodes);
+
+            nodes[0].ConnectWith(nodes[1]);
+            nodes[1].ConnectWith(nodes[2]);
             
-            Assert.Same(graph.Nodes[3], second.UnconditionalNeighbour); 
+            var (first, second) = nodes[1].SplitAtIndex(1);
+            
+            Assert.Same(nodes[2], second.UnconditionalNeighbour); 
         }
 
         [Fact]
         public void SplitNodeShouldTransferConditionalEdges()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
-            graph.Nodes.Add(new ControlFlowNode<int>(1, 1, 2));
-            graph.Nodes.Add(new ControlFlowNode<int>(3, 3));
-            graph.Nodes.Add(new ControlFlowNode<int>(4, 4));
 
-            graph.Nodes[0].ConnectWith(graph.Nodes[1]);
-            graph.Nodes[1].ConnectWith(graph.Nodes[3], ControlFlowEdgeType.Conditional);
-            graph.Nodes[1].ConnectWith(graph.Nodes[4]);
+            var nodes = new ControlFlowNode<int>[]
+            {
+                new(0),
+                new(1, 2),
+                new(3),
+                new(4),
+            };
             
-            var (first, second) = graph.Nodes[1].SplitAtIndex(1);
+            graph.Nodes.AddRange(nodes);
+
+            nodes[0].ConnectWith(nodes[1]);
+            nodes[1].ConnectWith(nodes[2], ControlFlowEdgeType.Conditional);
+            nodes[1].ConnectWith(nodes[3]);
             
-            Assert.Same(graph.Nodes[4], second.UnconditionalNeighbour);
-            Assert.Contains(graph.Nodes[3], second.ConditionalEdges.Select(e => e.Target));
+            var (first, second) = nodes[1].SplitAtIndex(1);
+            
+            Assert.Same(nodes[3], second.UnconditionalNeighbour);
+            Assert.Contains(nodes[2], second.ConditionalEdges.Select(e => e.Target));
         }
 
         [Fact]
         public void SplitSelfLoopNode()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0, 1));
-            graph.Nodes[0].UnconditionalNeighbour = graph.Nodes[0];
 
-            var (first, second) = graph.Nodes[0].SplitAtIndex(1);
+            var node = new ControlFlowNode<int>(0, 1);
+            graph.Nodes.Add(node);
+            node.UnconditionalNeighbour = node;
+
+            var (first, second) = node.SplitAtIndex(1);
             
             Assert.Same(second, first.UnconditionalNeighbour);
             Assert.Same(first, second.UnconditionalNeighbour);
@@ -312,88 +328,99 @@ namespace Echo.ControlFlow.Tests
         public void MergeWithSuccessorShouldRemoveSuccessor()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
-            graph.Nodes.Add(new ControlFlowNode<int>(1, 1));
-            graph.Nodes[0].ConnectWith(graph.Nodes[1]);
-            
-            graph.Nodes[0].MergeWithSuccessor();
-
-            Assert.Equal(new[]
+            var nodes = new ControlFlowNode<int>[]
             {
-                graph.Nodes[0]
-            }, graph.Nodes);
+                new(0),
+                new(1),
+            };
+            graph.Nodes.AddRange(nodes);
+            nodes[0].ConnectWith(nodes[1]);
+            
+            nodes[0].MergeWithSuccessor();
+
+            Assert.Equal([nodes[0]], graph.Nodes.ToArray());
         }
 
         [Fact]
         public void MergeWithSuccessorShouldCombineInstructions()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
-            graph.Nodes.Add(new ControlFlowNode<int>(1, 1));
-            graph.Nodes[0].ConnectWith(graph.Nodes[1]);
-            
-            graph.Nodes[0].MergeWithSuccessor();
-
-            Assert.Equal(new[]
+            var nodes = new ControlFlowNode<int>[]
             {
-                0,
-                1
-            }, graph.Nodes[0].Contents.Instructions);
+                new(0),
+                new(1),
+            };
+            graph.Nodes.AddRange(nodes);
+            nodes[0].ConnectWith(nodes[1]);
+            
+            nodes[0].MergeWithSuccessor();
+
+            Assert.Equal([0, 1], nodes[0].Contents.Instructions);
         }
 
         [Fact]
         public void MergeWithSuccessorShouldInheritFallThroughEdge()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
-            graph.Nodes.Add(new ControlFlowNode<int>(1, 1));
-            graph.Nodes.Add(new ControlFlowNode<int>(2, 2));
-            graph.Nodes[0].ConnectWith(graph.Nodes[1]);
-            graph.Nodes[1].ConnectWith(graph.Nodes[2]);
+            var nodes = new ControlFlowNode<int>[]
+            {
+                new(0),
+                new(1),
+                new(2),
+            };
+            graph.Nodes.AddRange(nodes);
+            nodes[0].ConnectWith(nodes[1]);
+            nodes[1].ConnectWith(nodes[2]);
             
-            graph.Nodes[0].MergeWithSuccessor();
-
-            Assert.Same(graph.Nodes[2], graph.Nodes[0].UnconditionalNeighbour);
+            nodes[0].MergeWithSuccessor();
+            
+            Assert.Same(nodes[2], nodes[0].UnconditionalNeighbour);
         }
 
         [Fact]
         public void MergeWithSuccessorShouldInheritConditionalEdge()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
-            graph.Nodes.Add(new ControlFlowNode<int>(1, 1));
-            graph.Nodes.Add(new ControlFlowNode<int>(2, 2));
-            graph.Nodes[0].ConnectWith(graph.Nodes[1]);
-            graph.Nodes[1].ConnectWith(graph.Nodes[2], ControlFlowEdgeType.Conditional);
-            
-            graph.Nodes[0].MergeWithSuccessor();
-
-            Assert.Equal(new[]
+            var nodes = new ControlFlowNode<int>[]
             {
-                graph.Nodes[2]
-            }, graph.Nodes[0].ConditionalEdges.Select(e => e.Target));
+                new(0),
+                new(1),
+                new(2),
+            };
+            graph.Nodes.AddRange(nodes);
+            nodes[0].ConnectWith(nodes[1]);
+            nodes[1].ConnectWith(nodes[2], ControlFlowEdgeType.Conditional);
+            
+            nodes[0].MergeWithSuccessor();
+
+            Assert.Equal([nodes[2]], nodes[0].ConditionalEdges.Select(e => e.Target));
         }
 
         [Fact]
         public void MergeWithSuccessorWithNoFallThroughNeighbourShouldThrow()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
+            var node = new ControlFlowNode<int>(0);
+            graph.Nodes.Add(node);
 
-            Assert.Throws<InvalidOperationException>(() => graph.Nodes[0].MergeWithSuccessor());
+            Assert.Throws<InvalidOperationException>(() => node.MergeWithSuccessor());
         }
 
         [Fact]
         public void MergeWithSuccessorWithConditionalEdgesShouldThrow()
         {
             var graph = new ControlFlowGraph<int>(IntArchitecture.Instance);
-            graph.Nodes.Add(new ControlFlowNode<int>(0, 0));
-            graph.Nodes.Add(new ControlFlowNode<int>(1, 1));
-            graph.Nodes.Add(new ControlFlowNode<int>(2, 2));
-            graph.Nodes[0].ConnectWith(graph.Nodes[1]);
-            graph.Nodes[0].ConnectWith(graph.Nodes[2], ControlFlowEdgeType.Conditional);
+            var nodes = new ControlFlowNode<int>[]
+            {
+                new(0),
+                new(1),
+                new(2),
+            };
+            graph.Nodes.AddRange(nodes);
+            nodes[0].ConnectWith(nodes[1]);
+            nodes[0].ConnectWith(nodes[2], ControlFlowEdgeType.Conditional);
 
-            Assert.Throws<InvalidOperationException>(() => graph.Nodes[0].MergeWithSuccessor());
+            Assert.Throws<InvalidOperationException>(() => nodes[0].MergeWithSuccessor());
         }
 
         [Theory]

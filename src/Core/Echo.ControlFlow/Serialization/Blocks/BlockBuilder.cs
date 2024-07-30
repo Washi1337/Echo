@@ -18,6 +18,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
         /// <typeparam name="TInstruction">The type of instructions stored in the graph.</typeparam>
         /// <returns>The root scope.</returns>
         public static ScopeBlock<TInstruction> ConstructBlocks<TInstruction>(this ControlFlowGraph<TInstruction> cfg)
+            where TInstruction : notnull
         {
             return BuildBlocksFromSortedNodes(cfg, cfg.SortNodes());
         }
@@ -25,6 +26,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
         private static ScopeBlock<TInstruction> BuildBlocksFromSortedNodes<TInstruction>(
             ControlFlowGraph<TInstruction> cfg, 
             IEnumerable<ControlFlowNode<TInstruction>> sorting)
+            where TInstruction : notnull
         {
             // We maintain a stack of scope information. Every time we enter a new region, we enter a new scope,
             // and similarly, we leave a scope when we leave a region.
@@ -51,6 +53,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
 
         private static void UpdateScopeStack<TInstruction>(
             IndexableStack<ScopeInfo<TInstruction>> scopeStack, ControlFlowNode<TInstruction> node)
+            where TInstruction : notnull
         {
             // Figure out regions the node is in.
             var activeRegions = node.GetSituatedRegions()
@@ -70,6 +73,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
         private static int GetCommonRegionDepth<TInstruction>(
             IndexableStack<ScopeInfo<TInstruction>> scopeStack, 
             IControlFlowRegion<TInstruction>[] activeRegions)
+            where TInstruction : notnull
         {
             int largestPossibleCommonDepth = Math.Min(scopeStack.Count, activeRegions.Length);
 
@@ -87,6 +91,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
         private static void EnterNextRegion<TInstruction>(
             IndexableStack<ScopeInfo<TInstruction>> scopeStack, 
             IControlFlowRegion<TInstruction>[] activeRegions)
+            where TInstruction : notnull
         {
             var enteredRegion = activeRegions[scopeStack.Count];
             
@@ -117,6 +122,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
         private static void EnterExceptionHandlerRegion<TInstruction>(
             IndexableStack<ScopeInfo<TInstruction>> scopeStack, 
             ExceptionHandlerRegion<TInstruction> ehRegion)
+            where TInstruction : notnull
         {
             var ehBlock = new ExceptionHandlerBlock<TInstruction>
             {
@@ -131,6 +137,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             IndexableStack<ScopeInfo<TInstruction>> scopeStack, 
             ExceptionHandlerRegion<TInstruction> parentRegion, 
             IControlFlowRegion<TInstruction> enteredRegion)
+            where TInstruction : notnull
         {
             IBlock<TInstruction> enteredBlock;
             IControlFlowRegion<TInstruction> enteredSubRegion;
@@ -176,6 +183,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
             IndexableStack<ScopeInfo<TInstruction>> scopeStack,
             HandlerRegion<TInstruction> parentRegion, 
             IControlFlowRegion<TInstruction> enteredRegion)
+            where TInstruction : notnull
         {
             IBlock<TInstruction> enteredBlock;
             IControlFlowRegion<TInstruction> enteredSubRegion;
@@ -214,8 +222,10 @@ namespace Echo.ControlFlow.Serialization.Blocks
             scopeStack.Push(new ScopeInfo<TInstruction>(enteredSubRegion, enteredBlock));
         }
 
-        private static void EnterGenericRegion<TInstruction>(IndexableStack<ScopeInfo<TInstruction>> scopeStack,
+        private static void EnterGenericRegion<TInstruction>(
+            IndexableStack<ScopeInfo<TInstruction>> scopeStack,
             IControlFlowRegion<TInstruction> enteredRegion)
+            where TInstruction : notnull
         {
             var scopeBlock = new ScopeBlock<TInstruction>();
             scopeStack.Peek().AddBlock(scopeBlock);
@@ -223,6 +233,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
         }
 
         private readonly struct ScopeInfo<TInstruction>
+            where TInstruction : notnull
         {
             public ScopeInfo(IControlFlowRegion<TInstruction> region, IBlock<TInstruction> block)
             {
@@ -250,7 +261,7 @@ namespace Echo.ControlFlow.Serialization.Blocks
 
             public override string ToString()
             {
-                return $"{Region.GetType().Name}, Offset: {Region.GetEntryPoint().Offset:X8}";
+                return $"{Region.GetType().Name}, Offset: {Region.GetEntryPoint()?.Offset ?? 0:X8}";
             }
         }
         

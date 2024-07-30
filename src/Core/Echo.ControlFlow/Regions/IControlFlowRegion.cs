@@ -9,11 +9,12 @@ namespace Echo.ControlFlow.Regions
     /// </summary>
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public interface IControlFlowRegion<TInstruction> : ISubGraph
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets the parent graph this region is part of.
         /// </summary>
-        ControlFlowGraph<TInstruction> ParentGraph
+        ControlFlowGraph<TInstruction>? ParentGraph
         {
             get;
         }
@@ -24,7 +25,7 @@ namespace Echo.ControlFlow.Regions
         /// <remarks>
         /// When this property is set to <c>null</c> this region is the root.
         /// </remarks>
-        IControlFlowRegion<TInstruction> ParentRegion
+        IControlFlowRegion<TInstruction>? ParentRegion
         {
             get;
         }
@@ -32,8 +33,8 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Obtains the first node that is executed in the region (if available).
         /// </summary>
-        /// <returns>The node, or <c>null</c> if no entrypoint was specified..</returns>
-        ControlFlowNode<TInstruction> GetEntryPoint();
+        /// <returns>The node, or <c>null</c> if no entrypoint was specified.</returns>
+        ControlFlowNode<TInstruction>? GetEntryPoint();
         
         /// <summary>
         /// Gets a collection of all nested regions defined in this region.
@@ -52,8 +53,8 @@ namespace Echo.ControlFlow.Regions
         /// Searches for a node in the control flow graph with the provided offset or identifier.
         /// </summary>
         /// <param name="offset">The offset of the node to find.</param>
-        /// <returns>The node.</returns>
-        ControlFlowNode<TInstruction> GetNodeByOffset(long offset);
+        /// <returns>The node, or <c>null</c> if no node was found with the provided offset.</returns>
+        ControlFlowNode<TInstruction>? GetNodeByOffset(long offset);
 
         /// <summary>
         /// Removes the node from the region.
@@ -74,6 +75,7 @@ namespace Echo.ControlFlow.Regions
     /// </summary>
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public interface IScopeControlFlowRegion<TInstruction> : IControlFlowRegion<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets a collection of nested sub regions that this region defines.
@@ -95,17 +97,23 @@ namespace Echo.ControlFlow.Regions
         /// <returns>
         /// The parent exception handler region, or <c>null</c> if the region is not part of any exception handler.
         /// </returns>
-        public static ExceptionHandlerRegion<TInstruction> GetParentExceptionHandler<TInstruction>(this IControlFlowRegion<TInstruction> self)=> 
-            GetParentRegion<TInstruction, ExceptionHandlerRegion<TInstruction>>(self);
-        
+        public static ExceptionHandlerRegion<TInstruction>? GetParentExceptionHandler<TInstruction>(this IControlFlowRegion<TInstruction> self)
+            where TInstruction : notnull
+        {
+            return GetParentRegion<TInstruction, ExceptionHandlerRegion<TInstruction>>(self);
+        }
+
         /// <summary>
         /// Obtains the parent handler region that this region resides in (if any).
         /// </summary>
         /// <returns>
         /// The parent exception handler region, or <c>null</c> if the region is not part of any exception handler.
         /// </returns>
-        public static HandlerRegion<TInstruction> GetParentHandler<TInstruction>(this IControlFlowRegion<TInstruction> self) => 
-            GetParentRegion<TInstruction, HandlerRegion<TInstruction>>(self);
+        public static HandlerRegion<TInstruction>? GetParentHandler<TInstruction>(this IControlFlowRegion<TInstruction> self)
+            where TInstruction : notnull
+        {
+            return GetParentRegion<TInstruction, HandlerRegion<TInstruction>>(self);
+        }
 
         /// <summary>
         /// Obtains the parent region of a specific type that this region resides in (if any).
@@ -113,14 +121,17 @@ namespace Echo.ControlFlow.Regions
         /// <returns>
         /// The parent region, or <c>null</c> if the region is not part of any region of type <typeparamref name="TRegion"/>.
         /// </returns>
-        private static TRegion GetParentRegion<TInstruction, TRegion>(IControlFlowRegion<TInstruction> self)
+        private static TRegion? GetParentRegion<TInstruction, TRegion>(IControlFlowRegion<TInstruction> self)
+            where TInstruction : notnull
             where TRegion : class, IControlFlowRegion<TInstruction>
         {
             var region = self.ParentRegion;
-            while (region is {})
+            
+            while (region is not null)
             {
                 if (region is TRegion ehRegion)
                     return ehRegion;
+
                 region = region.ParentRegion;
             }
 

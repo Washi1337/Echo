@@ -1,9 +1,5 @@
-using System.Collections.Generic;
-using System.IO;
 using Echo.Code;
-using Echo.ControlFlow.Serialization.Dot;
 using Echo.Graphing;
-using Echo.Graphing.Serialization.Dot;
 
 namespace Echo.Ast
 {
@@ -11,6 +7,7 @@ namespace Echo.Ast
     /// Represents a single node in an Abstract Syntax Tree (AST).
     /// </summary>
     public abstract class AstNode<TInstruction> : TreeNodeBase
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets the direct parent of the AST node. 

@@ -8,6 +8,7 @@ namespace Echo.Ast.Analysis;
 /// </summary>
 /// <typeparam name="TInstruction">The type of instructions the statements store.</typeparam>
 public class AstPurityClassifier<TInstruction> : IPurityClassifier<Statement<TInstruction>>
+    where TInstruction : notnull
 {
     /// <summary>
     /// Creates a new instance of the <see cref="AstPurityClassifier{TInstruction}"/> class.

@@ -8,6 +8,7 @@ namespace Echo.Ast
     /// Represents a Phi statement in the Ast
     /// </summary>
     public sealed class PhiStatement<TInstruction> : Statement<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new Phi statement
