@@ -1,5 +1,4 @@
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -101,12 +100,22 @@ namespace Echo.Graphing.Serialization.Dot
         }
 
         /// <summary>
+        /// Gets or sets a value indicating the resulting graph should be rendered as a directed graph or an
+        /// undirected graph.
+        /// </summary>
+        public bool DirectedGraph
+        {
+            get;
+            set;
+        } = true;
+
+        /// <summary>
         /// Writes a graph to the character stream.
         /// </summary>
         /// <param name="graph">The graph to write.</param>
         public void Write(IGraph graph)
         {
-            WriteHeader("digraph", null);
+            WriteHeader(DirectedGraph ? "digraph" : "graph", null);
             Writer.Indent++;
             
             var freeNodes = new HashSet<INode>(graph.GetNodes());
@@ -146,12 +155,12 @@ namespace Echo.Graphing.Serialization.Dot
                 Writer.Indent++;
                 
                 var attributes = SubGraphAdorner.GetSubGraphAttributes(subGraph);
-                if (attributes.Count > 0)
+                if (attributes is {Count: > 0})
                 {
                     string delimiter = IncludeSemicolons
                         ? ";"
                         : string.Empty;
-                    
+
                     WriteAttributes(attributes, delimiter, true);
                     Writer.WriteLine(delimiter);
                     Writer.WriteLine();
@@ -193,7 +202,7 @@ namespace Echo.Graphing.Serialization.Dot
         /// </summary>
         private void WriteFooter()
         {
-            Writer.WriteLine("}");
+            Writer.WriteLine('}');
         }
 
         /// <summary>
@@ -205,7 +214,7 @@ namespace Echo.Graphing.Serialization.Dot
             long id = NodeIdentifier.GetIdentifier(node);
             WriteIdentifier(id.ToString());
             
-            if (NodeAdorner != null)
+            if (NodeAdorner is not null)
                 WriteEntityAttributes(NodeAdorner.GetNodeAttributes(node, id));
             
             WriteSemicolon();
@@ -222,42 +231,45 @@ namespace Echo.Graphing.Serialization.Dot
             long targetId = NodeIdentifier.GetIdentifier(edge.Target);
             
             WriteIdentifier(sourceId.ToString());
-            Writer.Write(" -> ");
+            Writer.Write(DirectedGraph ? " -> " : " -- ");
             WriteIdentifier(targetId.ToString());
             
-            if (EdgeAdorner != null)
+            if (EdgeAdorner is not null)
                 WriteEntityAttributes(EdgeAdorner.GetEdgeAttributes(edge, sourceId, targetId));
             
             WriteSemicolon();
             Writer.WriteLine();
         }
 
-        private void WriteEntityAttributes(IEnumerable<KeyValuePair<string, string>>? attributes)
+        private void WriteEntityAttributes(IDictionary<string, string>? attributes)
         {
-            var array = attributes as KeyValuePair<string, string>[] ?? attributes.ToArray();
-            if (array.Length > 0)
+            if (attributes is {Count: > 0})
             {
                 Writer.Write(" [");
-                WriteAttributes(array, ", ", false);
+                WriteAttributes(attributes, ", ", false);
                 Writer.Write(']');
             }
         }
 
-        private void WriteAttributes(IEnumerable<KeyValuePair<string, string>>? attributes, string delimiter, bool newLines)
+        private void WriteAttributes(IDictionary<string, string>? attributes, string delimiter, bool newLines)
         {
-            var array = attributes as KeyValuePair<string, string>[] ?? attributes.ToArray();
-            for (int i = 0; i < array.Length; i++)
-            {
-                WriteIdentifier(array[i].Key);
-                Writer.Write('=');
-                WriteIdentifier(array[i].Value);
+            if (attributes is null)
+                return;
 
-                if (i < array.Length - 1)
+            bool writtenOne = false;
+            foreach (var item in attributes)
+            {
+                if (writtenOne)
                 {
                     Writer.Write(delimiter);
                     if (newLines)
                         Writer.WriteLine();
                 }
+
+                WriteIdentifier(item.Key);
+                Writer.Write('=');
+                WriteIdentifier(item.Value);
+                writtenOne = true;
             }
         }
 
@@ -297,9 +309,13 @@ namespace Echo.Graphing.Serialization.Dot
         protected static bool NeedsEscaping(string text)
         {
             bool startsWithDigit = char.IsDigit(text[0]);
-            return text.Any(c => EscapedCharacters.ContainsKey(c)
-                                 || !char.IsLetterOrDigit(c)
-                                 || startsWithDigit && !char.IsDigit(c));
+            foreach (char c in text)
+            {
+                if (EscapedCharacters.ContainsKey(c) || !char.IsLetterOrDigit(c) || startsWithDigit && !char.IsDigit(c))
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
