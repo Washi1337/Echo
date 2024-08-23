@@ -25,7 +25,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var cfg = method.ConstructSymbolicFlowGraph(out _);
             
             Assert.Single(cfg.Nodes);
-            Assert.Equal(method.Body.Instructions, cfg.Nodes[0].Contents.Instructions);
+            Assert.Equal(method.Body.Instructions, cfg.Nodes.GetByOffset(0)!.Contents.Instructions);
         }
         
         [Fact]
@@ -34,8 +34,9 @@ namespace Echo.Platforms.Dnlib.Tests
             var type = (TypeDef) _moduleFixture.MockModule.ResolveToken(typeof(SimpleClass).MetadataToken);
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.If));
             var cfg = method.ConstructSymbolicFlowGraph(out var dfg);
+            var offsetMap = dfg.Nodes.CreateOffsetMap();
             
-            Assert.Single(cfg.EntryPoint.ConditionalEdges);
+            Assert.Single(cfg.EntryPoint!.ConditionalEdges);
             
             var ldstrAdult = FindLdstr("Adult");
             var ldstrChild = FindLdstr("Child");
@@ -64,9 +65,9 @@ namespace Echo.Platforms.Dnlib.Tests
                     if (!visited.Add(currentOffset))
                         continue;
                     
-                    var current = dfg.Nodes[currentOffset];
+                    var current = offsetMap[currentOffset];
                     foreach (var dependant in current.GetDependants())
-                        agenda.Push(dependant.Id);
+                        agenda.Push(dependant.Offset);
                 }
 
                 return false;
@@ -80,7 +81,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var method = type.Methods.First(m => m.Name == nameof(SimpleClass.SwitchColor));
             var cfg = method.ConstructSymbolicFlowGraph(out _);
             
-            Assert.Equal(3, cfg.EntryPoint.ConditionalEdges.Count);
+            Assert.Equal(3, cfg.EntryPoint!.ConditionalEdges.Count);
         }
         
         [Fact]

@@ -9,9 +9,10 @@ namespace Echo.ControlFlow.Regions
     /// </summary>
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public class HandlerRegion<TInstruction> : ControlFlowRegion<TInstruction>
+        where TInstruction : notnull
     {
-        private ScopeRegion<TInstruction> _prologue;
-        private ScopeRegion<TInstruction> _epilogue;
+        private ScopeRegion<TInstruction>? _prologue;
+        private ScopeRegion<TInstruction>? _epilogue;
 
         /// <summary>
         /// Creates a new instance of the <see cref="HandlerRegion{TInstruction}"/> class without
@@ -32,7 +33,7 @@ namespace Echo.ControlFlow.Regions
         /// <remarks>
         /// This region is often used for filter clauses of the exception handler.
         /// </remarks>
-        public ScopeRegion<TInstruction> Prologue
+        public ScopeRegion<TInstruction>? Prologue
         {
             get => _prologue;
             set => UpdateChildRegion(ref _prologue, value);
@@ -49,26 +50,27 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets the region of nodes that form the code that proceeds the handler.
         /// </summary>
-        public ScopeRegion<TInstruction> Epilogue
+        public ScopeRegion<TInstruction>? Epilogue
         {
             get => _epilogue;
             set => UpdateChildRegion(ref _epilogue, value);
         }
 
-        private void UpdateChildRegion(ref ScopeRegion<TInstruction> field, ScopeRegion<TInstruction> value)
+        private void UpdateChildRegion(ref ScopeRegion<TInstruction>? field, ScopeRegion<TInstruction>? value)
         {
-            if (value?.ParentRegion != null)
+            if (value?.ParentRegion is not null)
                 throw new ArgumentException("Region is already added to another region.");
             if (field?.ParentRegion == this)
                 field.ParentRegion = null;
             
             field = value;
-            if (value != null)
+            
+            if (field is not null)
                 field.ParentRegion = this;
         }
 
         /// <inheritdoc />
-        public override ControlFlowNode<TInstruction> GetEntryPoint()
+        public override ControlFlowNode<TInstruction>? GetEntryPoint()
         {
             var entrypoint = _prologue?.GetEntryPoint();
             entrypoint ??= Contents.GetEntryPoint();

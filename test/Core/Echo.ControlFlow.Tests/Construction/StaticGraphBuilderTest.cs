@@ -1,14 +1,11 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
-using Echo.ControlFlow.Construction.Static;
-using Echo.ControlFlow.Serialization.Dot;
-using Echo.Graphing.Serialization.Dot;
+using Echo.ControlFlow.Construction;
 using Echo.Platforms.DummyPlatform.Code;
 using Xunit;
 
-namespace Echo.ControlFlow.Tests.Construction.Static
+namespace Echo.ControlFlow.Tests.Construction
 {
     public class StaticGraphBuilderTest
     {
@@ -106,11 +103,12 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             var graph = BuildControlFlowGraph(instructions);
 
             Assert.Equal(4, graph.Nodes.Count);
-            Assert.Single(graph.EntryPoint.ConditionalEdges);
+            Assert.Single(graph.EntryPoint!.ConditionalEdges);
             Assert.NotNull(graph.EntryPoint.UnconditionalEdge);
             Assert.Equal(
-                graph.EntryPoint.UnconditionalNeighbour.UnconditionalNeighbour, 
-                graph.EntryPoint.ConditionalEdges.First().Target.UnconditionalNeighbour);
+                graph.EntryPoint.UnconditionalNeighbour?.UnconditionalNeighbour, 
+                graph.EntryPoint.ConditionalEdges.First().Target.UnconditionalNeighbour
+            );
         }
 
         [Fact]
@@ -145,7 +143,7 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             Assert.Equal(4, graph.Nodes.Count);
             
             // Entrypoint.
-            Assert.NotNull(graph.EntryPoint.UnconditionalNeighbour);
+            Assert.NotNull(graph.EntryPoint!.UnconditionalNeighbour);
             Assert.Empty(graph.EntryPoint.ConditionalEdges);
             
             // Loop header
@@ -160,6 +158,7 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             
             // Exit
             var exit = loopHeader.UnconditionalNeighbour;
+            Assert.NotNull(exit);
             Assert.Empty(exit.GetOutgoingEdges());
         }
 
@@ -224,8 +223,8 @@ namespace Echo.ControlFlow.Tests.Construction.Static
             Assert.Contains(graph.Nodes, n => n.Offset == 0);
             Assert.Contains(graph.Nodes, n => n.Offset == 10);
             Assert.DoesNotContain(graph.Nodes, n => n.Offset == 1);
-            Assert.Empty(graph.Nodes[0].GetOutgoingEdges());
-            Assert.Empty(graph.Nodes[10].GetIncomingEdges());
+            Assert.Empty(graph.Nodes.GetByOffset(0)!.GetOutgoingEdges());
+            Assert.Empty(graph.Nodes.GetByOffset(10)!.GetIncomingEdges());
         }
     }
 }

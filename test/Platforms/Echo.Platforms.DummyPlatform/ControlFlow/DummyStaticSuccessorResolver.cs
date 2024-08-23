@@ -1,20 +1,16 @@
 using System;
+using System.Collections.Generic;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Static;
 using Echo.Platforms.DummyPlatform.Code;
 
 namespace Echo.Platforms.DummyPlatform.ControlFlow
 {
     public class DummyStaticSuccessorResolver : IStaticSuccessorResolver<DummyInstruction>
     {
-        public static DummyStaticSuccessorResolver Instance
-        {
-            get;
-        } = new();
+        public static DummyStaticSuccessorResolver Instance { get; } = new();
         
-        /// <inheritdoc />
-        public int GetSuccessorsCount(in DummyInstruction instruction)
+        public void GetSuccessors(in DummyInstruction instruction, IList<SuccessorInfo> successorsBuffer)
         {
             switch (instruction.OpCode)
             {
@@ -23,66 +19,36 @@ namespace Echo.Platforms.DummyPlatform.ControlFlow
                 case DummyOpCode.Pop:
                 case DummyOpCode.Get:
                 case DummyOpCode.Set:
-                case DummyOpCode.Jmp:
-                    return 1;
-                
-                case DummyOpCode.JmpCond:
-                case DummyOpCode.PushOffset:
-                    return 2;
-                
-                case DummyOpCode.Switch:
-                    var targets = ((long[]) instruction.Operands[0]);
-                    return targets.Length + 1;
-                
-                case DummyOpCode.Ret:
-                    return 0;
-                
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        /// <inheritdoc />
-        public int GetSuccessors(in DummyInstruction instruction, Span<SuccessorInfo> successorBuffer)
-        {
-            switch (instruction.OpCode)
-            {
-                case DummyOpCode.Op:
-                case DummyOpCode.Push:
-                case DummyOpCode.Pop:
-                case DummyOpCode.Get:
-                case DummyOpCode.Set:
-                    successorBuffer[0] = new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough);
-                    return 1;
+                    successorsBuffer.Add(new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough));
+                    break;
                 
                 case DummyOpCode.Jmp:
-                    successorBuffer[0] = new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.Unconditional);
-                    return 1;
+                    successorsBuffer.Add(new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.Unconditional));
+                    break;
                 
                 case DummyOpCode.JmpCond:
-                    successorBuffer[0] = new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough);
-                    successorBuffer[1] = new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.Conditional);
-                    return 2;
+                    successorsBuffer.Add(new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough));
+                    successorsBuffer.Add(new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.Conditional));
+                    break;
                 
                 case DummyOpCode.PushOffset:
-                    successorBuffer[0] = new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough);
-                    successorBuffer[1] = new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.None);
-                    return 2;
+                    successorsBuffer.Add(new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough));
+                    successorsBuffer.Add(new SuccessorInfo((long) instruction.Operands[0], ControlFlowEdgeType.None));
+                    break;
                 
                 case DummyOpCode.Switch:
-                    var targets = (long[]) instruction.Operands[0];
+                    long[] targets = (long[]) instruction.Operands[0];
                     for (int i = 0; i < targets.Length; i++)
-                        successorBuffer[i] = new SuccessorInfo(targets[i], ControlFlowEdgeType.Conditional);
-                    successorBuffer[targets.Length] = new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough);
-                    return targets.Length + 1;
+                        successorsBuffer.Add(new SuccessorInfo(targets[i], ControlFlowEdgeType.Conditional));
+                    successorsBuffer.Add(new SuccessorInfo(instruction.Offset + 1, ControlFlowEdgeType.FallThrough));
+                    break;
                 
                 case DummyOpCode.Ret:
-                    return 0;
+                    break;
                 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
     }
 }

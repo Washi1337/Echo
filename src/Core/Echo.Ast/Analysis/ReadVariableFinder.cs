@@ -5,6 +5,7 @@ using Echo.Code;
 namespace Echo.Ast.Analysis
 {
     internal sealed class ReadVariableFinder<TInstruction> : AstNodeListener<TInstruction>
+        where TInstruction : notnull
     {
         private readonly IArchitecture<TInstruction> _architecture;
 
@@ -23,18 +24,7 @@ namespace Echo.Ast.Analysis
 
         public override void ExitInstructionExpression(InstructionExpression<TInstruction> expression)
         {
-            int count = _architecture.GetReadVariablesCount(expression.Instruction);
-            if (count == 0)
-                return;
-            
-            var variables = ArrayPool<IVariable>.Shared.Rent(count);
-            
-            int actualCount = _architecture.GetReadVariables(expression.Instruction, variables);
-            for (int i = 0; i < actualCount; i++)
-                Variables.Add(variables[i]);
-            
-            ArrayPool<IVariable>.Shared.Return(variables);
-            
+            _architecture.GetReadVariables(expression.Instruction, Variables);
             base.ExitInstructionExpression(expression);
         }
     }

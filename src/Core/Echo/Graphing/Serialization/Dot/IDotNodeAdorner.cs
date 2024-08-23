@@ -13,6 +13,6 @@ namespace Echo.Graphing.Serialization.Dot
         /// <param name="node">The node to adorn.</param>
         /// <param name="id">The identifier assigned to the node.</param>
         /// <returns>The adornments.</returns>
-        IDictionary<string, string> GetNodeAttributes(INode node, long id);
+        IDictionary<string, string>? GetNodeAttributes(INode node, long id);
     }
 }

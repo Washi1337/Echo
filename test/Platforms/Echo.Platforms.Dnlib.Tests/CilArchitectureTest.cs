@@ -1,4 +1,5 @@
-﻿using dnlib.DotNet.Emit;
+﻿using System.Collections.Generic;
+using dnlib.DotNet.Emit;
 using Mocks;
 using Xunit;
 using IVariable = Echo.Code.IVariable;
@@ -19,7 +20,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var param = method.Parameters[index];
             var testInstruction = Instruction.Create(OpCodes.Ldarg, param);
 
-            var readVariables = new IVariable[1];
+            var readVariables = new List<IVariable>();
             arch.GetReadVariables(testInstruction, readVariables);
 
             Assert.Equal(parameterName, readVariables[0].Name);

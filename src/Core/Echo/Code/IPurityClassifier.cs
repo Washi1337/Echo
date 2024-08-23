@@ -5,6 +5,7 @@ namespace Echo.Code
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions.</typeparam>
     public interface IPurityClassifier<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets a value indicating whether a particular instruction is considered pure, that is, has no side effects.

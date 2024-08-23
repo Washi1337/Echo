@@ -7,6 +7,7 @@ namespace Echo.Ast.Analysis;
 /// </summary>
 /// <typeparam name="TInstruction">The type of instructions to store in each expression.</typeparam>
 public class AstPurityVisitor<TInstruction> : IAstNodeVisitor<TInstruction, IPurityClassifier<TInstruction>, Trilean>
+    where TInstruction : notnull
 {
     /// <summary>
     /// Gets the singleton instance of the <see cref="AstPurityVisitor{TInstruction}"/> class.

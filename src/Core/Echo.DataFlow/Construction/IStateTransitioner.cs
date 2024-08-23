@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Echo.DataFlow.Emulation;
 
-namespace Echo.ControlFlow.Construction.Symbolic
+namespace Echo.DataFlow.Construction
 {
     /// <summary>
     /// Provides members for resolving the next possible states of a program after the execution of an instruction.
@@ -15,6 +16,7 @@ namespace Echo.ControlFlow.Construction.Symbolic
     /// </para>
     /// </remarks>
     public interface IStateTransitioner<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Gets the initial state of the program at a provided entry point address.
@@ -24,23 +26,15 @@ namespace Echo.ControlFlow.Construction.Symbolic
         SymbolicProgramState<TInstruction> GetInitialState(long entrypointAddress);
 
         /// <summary>
-        /// Gets the number of transitions the current program state might transition into.
-        /// </summary>
-        /// <param name="currentState">The current state of the program.</param>
-        /// <param name="instruction">The instruction to evaluate.</param>
-        /// <returns>The number of transitions that the provided instruction might apply.</returns>
-        int GetTransitionCount(in SymbolicProgramState<TInstruction> currentState, in TInstruction instruction);
-
-        /// <summary>
         /// Resolves all possible program state transitions that the provided instruction can apply. 
         /// </summary>
         /// <param name="currentState">The current state of the program.</param>
         /// <param name="instruction">The instruction to evaluate.</param>
-        /// <param name="transitionBuffer">The output buffer to write the transitions that the instruction might apply.</param>
-        /// <returns>The number of transitions that were written into <paramref name="transitionBuffer"/>.</returns>
-        int GetTransitions(
+        /// <param name="transitionsBuffer">The output buffer to add the transitions that the instruction might apply.</param>
+        void GetTransitions(
             in SymbolicProgramState<TInstruction> currentState,
             in TInstruction instruction,
-            Span<StateTransition<TInstruction>> transitionBuffer);
+            IList<StateTransition<TInstruction>> transitionsBuffer
+        );
     }
 }

@@ -12,6 +12,7 @@ namespace Echo.ControlFlow.Collections
     /// <typeparam name="TRegion">The type of the region to store.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class RegionCollection<TInstruction, TRegion> : Collection<TRegion>
+        where TInstruction : notnull
         where TRegion : ControlFlowRegion<TInstruction>
     {
         private readonly IControlFlowRegion<TInstruction> _owner;

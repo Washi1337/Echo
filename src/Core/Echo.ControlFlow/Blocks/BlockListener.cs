@@ -4,7 +4,8 @@ namespace Echo.ControlFlow.Blocks
     /// Provides an empty base implementation for a block listener.
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions in the blocks.</typeparam>
-    public abstract class BlockListenerBase<TInstruction> : IBlockListener<TInstruction>
+    public abstract class BlockListener<TInstruction> : IBlockListener<TInstruction>
+        where TInstruction : notnull
     {
         /// <inheritdoc />
         public virtual void VisitBasicBlock(BasicBlock<TInstruction> block)

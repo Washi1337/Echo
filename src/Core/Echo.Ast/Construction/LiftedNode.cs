@@ -9,6 +9,7 @@ namespace Echo.Ast.Construction;
 /// </summary>
 /// <typeparam name="TInstruction"></typeparam>
 internal sealed class LiftedNode<TInstruction>
+    where TInstruction : notnull
 {
     private List<PhiStatement<TInstruction>>? _stackInputs;
     private Dictionary<IVariable, VariableExpression<TInstruction>>? _stackInputRefs;

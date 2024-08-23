@@ -5,6 +5,7 @@ namespace Echo.ControlFlow.Blocks
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions in the blocks.</typeparam>
     public interface IBlockVisitor<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Visits a basic block.
@@ -38,6 +39,7 @@ namespace Echo.ControlFlow.Blocks
     /// <typeparam name="TState">The type of state to pass onto the visitor.</typeparam>
     /// <typeparam name="TResult">The type of the result for every visited block.</typeparam>
     public interface IBlockVisitor<TInstruction, in TState, out TResult>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Visits a basic block.

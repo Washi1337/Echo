@@ -7,6 +7,7 @@ namespace Echo.Ast
     /// Represents and expression statement in the AST
     /// </summary>
     public sealed class ExpressionStatement<TInstruction> : Statement<TInstruction>
+        where TInstruction : notnull
     {
         private Expression<TInstruction> _expression = null!;
 

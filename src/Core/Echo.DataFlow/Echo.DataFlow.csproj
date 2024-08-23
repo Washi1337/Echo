@@ -7,6 +7,7 @@
         <PackageTags>program code analysis data-flow-graph slicing dependency-analysis</PackageTags>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -18,6 +19,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Echo.ControlFlow\Echo.ControlFlow.csproj" />
       <ProjectReference Include="..\Echo\Echo.csproj" />
     </ItemGroup>
 

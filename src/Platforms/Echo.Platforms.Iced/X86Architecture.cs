@@ -80,10 +80,8 @@ namespace Echo.Platforms.Iced
         }
 
         /// <inheritdoc />
-        public int GetReadVariablesCount(in Instruction instruction)
+        public void GetReadVariables(in Instruction instruction, ICollection<IVariable> variablesBuffer)
         {
-            int count = 0;
-            
             ref readonly var info = ref _infoFactory.GetInfo(instruction);
             
             // Check for any general purpose register reads.
@@ -95,7 +93,7 @@ namespace Echo.Platforms.Iced
                     case OpAccess.CondRead:
                     case OpAccess.ReadWrite:
                     case OpAccess.ReadCondWrite:
-                        count++;
+                        variablesBuffer.Add(_gpr[use.Register]);
                         break;
                 }
             }
@@ -108,58 +106,14 @@ namespace Echo.Platforms.Iced
                 {
                     var flag = (RflagsBits) i;
                     if ((readFlags & flag) != 0)
-                        count++;
+                        variablesBuffer.Add(_flags[flag]);
                 }
             }
-
-            return count;
         }
 
         /// <inheritdoc />
-        public int GetReadVariables(in Instruction instruction, Span<IVariable> variablesBuffer)
+        public void GetWrittenVariables(in Instruction instruction, ICollection<IVariable> variablesBuffer)
         {
-            int count = 0;
-            
-            ref readonly var info = ref _infoFactory.GetInfo(instruction);
-            
-            // Check for any general purpose register reads.
-            foreach (var use in info.GetUsedRegisters())
-            {
-                switch (use.Access)
-                {
-                    case OpAccess.Read:
-                    case OpAccess.CondRead:
-                    case OpAccess.ReadWrite:
-                    case OpAccess.ReadCondWrite:
-                        variablesBuffer[count] = _gpr[use.Register];
-                        count++;
-                        break;
-                }
-            }
-
-            // Check for any flag register reads.
-            var readFlags = instruction.RflagsRead;
-            if (readFlags != RflagsBits.None)
-            {
-                for (int i = 1; i <= (int) RflagsBits.AC; i <<= 1)
-                {
-                    var flag = (RflagsBits) i;
-                    if ((readFlags & flag) != 0)
-                    {
-                        variablesBuffer[count] = _flags[flag];
-                        count++;
-                    }
-                }
-            }
-
-            return count;
-        }
-
-        /// <inheritdoc />
-        public int GetWrittenVariablesCount(in Instruction instruction)
-        {
-            int count = 0;
-            
             ref readonly var info = ref _infoFactory.GetInfo(instruction);
             
             // Check for any general purpose register writes.
@@ -171,7 +125,7 @@ namespace Echo.Platforms.Iced
                     case OpAccess.CondWrite:
                     case OpAccess.ReadWrite:
                     case OpAccess.ReadCondWrite:
-                        count++;
+                        variablesBuffer.Add(_gpr[use.Register]);
                         break;
                 }
             }
@@ -184,52 +138,9 @@ namespace Echo.Platforms.Iced
                 {
                     var flag = (RflagsBits) i;
                     if ((modifiedFlags & flag) != 0)
-                        count++;
+                        variablesBuffer.Add(_flags[flag]);
                 }
             }
-
-            return count;
         }
-
-        /// <inheritdoc />
-        public int GetWrittenVariables(in Instruction instruction, Span<IVariable> variablesBuffer)
-        {
-            int count = 0;
-            
-            ref readonly var info = ref _infoFactory.GetInfo(instruction);
-            
-            // Check for any general purpose register writes.
-            foreach (var use in info.GetUsedRegisters())
-            {
-                switch (use.Access)
-                {
-                    case OpAccess.Write:
-                    case OpAccess.CondWrite:
-                    case OpAccess.ReadWrite:
-                    case OpAccess.ReadCondWrite:
-                        variablesBuffer[count] = _gpr[use.Register];
-                        count++;
-                        break;
-                }
-            }
-
-            // Check for any flag register writes.
-            var modifiedFlags = instruction.RflagsModified;
-            if (modifiedFlags != RflagsBits.None)
-            {
-                for (int i = 1; i <= (int) RflagsBits.AC; i <<= 1)
-                {
-                    var flag = (RflagsBits) i;
-                    if ((modifiedFlags & flag) != 0)
-                    {
-                        variablesBuffer[count] = _flags[flag];
-                        count++;
-                    }
-                }
-            }
-
-            return count;
-        }
-        
     }
 }

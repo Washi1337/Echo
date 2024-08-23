@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Echo.Code;
 
 namespace Echo.ControlFlow.Blocks
 {
@@ -9,12 +9,13 @@ namespace Echo.ControlFlow.Blocks
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions that the basic block contains.</typeparam>
     public class BasicBlock<TInstruction> : IBlock<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new, empty basic block.
         /// </summary>
         public BasicBlock()
-            : this(Enumerable.Empty<TInstruction>())
+            : this([])
         {    
         }
 
@@ -23,7 +24,7 @@ namespace Echo.ControlFlow.Blocks
         /// </summary>
         /// <param name="offset">The offset to assign to the basic block.</param>
         public BasicBlock(long offset)
-            : this(offset, Enumerable.Empty<TInstruction>())
+            : this(offset, [])
         {
         }
         
@@ -33,7 +34,7 @@ namespace Echo.ControlFlow.Blocks
         /// <param name="instructions">The instructions to add to the basic block.</param>
         /// <exception cref="ArgumentNullException">Occurs when <paramref name="instructions"/> is <c>null</c>.</exception>
         public BasicBlock(IEnumerable<TInstruction> instructions)
-            : this(-1, instructions)
+            : this(0, instructions)
         {
         }
 
@@ -45,7 +46,7 @@ namespace Echo.ControlFlow.Blocks
         /// <exception cref="ArgumentNullException">Occurs when <paramref name="instructions"/> is <c>null</c>.</exception>
         public BasicBlock(long offset, IEnumerable<TInstruction> instructions)
         {
-            if (instructions == null)
+            if (instructions is null)
                 throw new ArgumentNullException(nameof(instructions));
             Offset = offset;
             Instructions = new List<TInstruction>(instructions);   
@@ -76,12 +77,12 @@ namespace Echo.ControlFlow.Blocks
         /// <summary>
         /// Gets the first instruction that is evaluated when this basic block is executed.
         /// </summary>
-        public TInstruction Header => !IsEmpty ? Instructions[0] : default;
+        public TInstruction? Header => !IsEmpty ? Instructions[0] : default;
 
         /// <summary>
         /// Gets the last instruction that is evaluated when this basic block is executed.
         /// </summary>
-        public TInstruction Footer => !IsEmpty ? Instructions[Instructions.Count - 1] : default;
+        public TInstruction? Footer => !IsEmpty ? Instructions[Instructions.Count - 1] : default;
         
         /// <inheritdoc />
         public override string ToString() => BlockFormatter<TInstruction>.Format(this);
@@ -93,6 +94,17 @@ namespace Echo.ControlFlow.Blocks
 
         /// <inheritdoc />
         public BasicBlock<TInstruction> GetLastBlock() => this;
+
+        /// <summary>
+        /// Synchronizes the basic block's offset with the offset of the first instruction.
+        /// </summary>
+        /// <param name="architecture">The architecture description of the instructions.</param>
+        public void UpdateOffset(IArchitecture<TInstruction> architecture)
+        {
+            Offset = Header is not null
+                ? architecture.GetOffset(Header)
+                : 0;
+        }
 
         /// <inheritdoc />
         public void AcceptVisitor(IBlockVisitor<TInstruction> visitor) => visitor.VisitBasicBlock(this);

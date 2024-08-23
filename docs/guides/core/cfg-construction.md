@@ -10,6 +10,8 @@ Each architecture that supports static control flow graph building implements th
 A graph can then be constructed using the `StaticFlowGraphBuilder` class:
 
 ```csharp
+using Echo.ControlFlow.Construction;
+
 IArchitecture<TInstruction> architecture = ...;
 IStaticSuccessorResolver<TInstruction> resolver = ...;
 
@@ -66,8 +68,10 @@ This interface takes a symbolic input state, and transforms it into a set of all
 
 
 ```csharp
+using Echo.DataFlow.Construction;
+
 IArchitecture<TInstruction> architecture = ...;
-IStateTransitioner<TInstruction> transitioner = ...;
+StateTransitioner<TInstruction> transitioner = ...;
 
 IList<TInstruction> instructions = ...;
 var builder = new SymbolicFlowGraphBuilder<TInstruction>(
@@ -79,12 +83,25 @@ var builder = new SymbolicFlowGraphBuilder<TInstruction>(
 var cfg = builder.ConstructFlowGraph();
 ```
 
-A by-product of symbolic graph building is that it also produces a **data flow graph**:
+Most state transitioners produce a data flow graph as a by-product.
 
 ```csharp
-var dfg = builder.DataFlowGraph;
-```
+// First create the CFG.
+var cfg = builder.ConstructFlowGraph();
 
+// After building the CFG, a DFG is populated in the transitioner.
+var dfg = transitioner.DataFlowGraph;
+```
 
 > [!WARNING]
 > While symbolic graph construction usually is more accurate, it is significantly slower than static graph construction and can take a lot of memory.
+
+
+> [!NOTE]
+> Often, a backend platform has this boilerplate already implemented by extension methods.
+> For instance, `Echo.Platforms.AsmResolver` defines an extension method on `CilMethodBody` called `ConstructStaticFlowGraph`.
+> ```csharp
+> CilMethodBody methodBody = ...;
+> var cfg = methodBody.ConstructSymbolicFlowGraph(out var dfg);
+> ```
+> Refer to the platform-specific documentation to see how these graphs can be constructed easily.

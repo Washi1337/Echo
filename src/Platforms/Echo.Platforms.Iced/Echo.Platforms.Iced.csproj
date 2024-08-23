@@ -23,6 +23,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Core\Echo.ControlFlow\Echo.ControlFlow.csproj" />
+      <ProjectReference Include="..\..\Core\Echo.DataFlow\Echo.DataFlow.csproj" />
       <ProjectReference Include="..\..\Core\Echo\Echo.csproj" />
     </ItemGroup>
 

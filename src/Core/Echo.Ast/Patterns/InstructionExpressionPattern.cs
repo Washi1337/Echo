@@ -9,6 +9,7 @@ namespace Echo.Ast.Patterns
     /// </summary>
     /// <typeparam name="TInstruction">The type of instruction that is stored in the expression.</typeparam>
     public class InstructionExpressionPattern<TInstruction> : ExpressionPattern<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new instruction expression pattern describing an instruction expression with zero parameters.

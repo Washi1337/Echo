@@ -9,6 +9,7 @@ namespace Echo.ControlFlow.Regions
     /// </summary>
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     public class ExceptionHandlerRegion<TInstruction> : ControlFlowRegion<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Creates a new instance of the <see cref="ExceptionHandlerRegion{TInstruction}"/> class.
@@ -41,7 +42,7 @@ namespace Echo.ControlFlow.Regions
         }
 
         /// <inheritdoc />
-        public override ControlFlowNode<TInstruction> GetEntryPoint() => ProtectedRegion.EntryPoint;
+        public override ControlFlowNode<TInstruction>? GetEntryPoint() => ProtectedRegion.EntryPoint;
 
         /// <inheritdoc />
         public override IEnumerable<ControlFlowNode<TInstruction>> GetNodes() =>

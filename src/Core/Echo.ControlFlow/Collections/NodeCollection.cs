@@ -10,14 +10,15 @@ namespace Echo.ControlFlow.Collections
     /// <summary>
     /// Represents a mutable collection of nodes present in a graph.
     /// </summary>
-    /// <typeparam name="TContents">The type of data that is stored in each node.</typeparam>
+    /// <typeparam name="TInstruction">The type of data that is stored in each node.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class NodeCollection<TContents> : ICollection<ControlFlowNode<TContents>>
+    public class NodeCollection<TInstruction> : ICollection<ControlFlowNode<TInstruction>>
+        where TInstruction : notnull
     {
-        private readonly Dictionary<long, ControlFlowNode<TContents>> _nodes = new Dictionary<long, ControlFlowNode<TContents>>();
-        private readonly ControlFlowGraph<TContents> _owner;
+        private readonly List<ControlFlowNode<TInstruction>> _nodes = new();
+        private readonly ControlFlowGraph<TInstruction> _owner;
 
-        internal NodeCollection(ControlFlowGraph<TContents> owner)
+        internal NodeCollection(ControlFlowGraph<TInstruction> owner)
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
@@ -29,13 +30,19 @@ namespace Echo.ControlFlow.Collections
         public bool IsReadOnly => false;
 
         /// <summary>
-        /// Gets a node by its offset.
+        /// Wraps a basic block into a node and adds it to the graph.
         /// </summary>
-        /// <param name="offset">The node offset.</param>
-        public ControlFlowNode<TContents> this[long offset] => _nodes[offset];
-        
+        /// <param name="item">The block.</param>
+        /// <returns>The created node.</returns>
+        public ControlFlowNode<TInstruction> Add(BasicBlock<TInstruction> item)
+        {
+            var node = new ControlFlowNode<TInstruction>(item);
+            Add(node);
+            return node;
+        }
+
         /// <inheritdoc />
-        public void Add(ControlFlowNode<TContents> item)
+        public void Add(ControlFlowNode<TInstruction> item)
         {
             if (item is null)
                 throw new ArgumentNullException();
@@ -43,10 +50,8 @@ namespace Echo.ControlFlow.Collections
                 return;
             if (item.ParentGraph != null)
                 throw new ArgumentException("Cannot add a node from another graph.");
-            if (_nodes.ContainsKey(item.Offset))
-                throw new ArgumentException($"A node with offset 0x{item.Offset:X8} was already added to the graph.");
 
-            _nodes.Add(item.Offset, item);
+            _nodes.Add(item);
             item.ParentRegion = _owner;
         }
 
@@ -57,23 +62,23 @@ namespace Echo.ControlFlow.Collections
         /// <exception cref="ArgumentException">
         /// Occurs when at least one node in the provided collection is already added to another graph.
         /// </exception>
-        public void AddRange(IEnumerable<ControlFlowNode<TContents>> items)
+        public void AddRange(IEnumerable<ControlFlowNode<TInstruction>> items)
         {
             var nodes = items.ToArray();
 
+            // Validate before adding.
             for (int i = 0; i < nodes.Length; i++)
             {
                 var node = nodes[i];
-                if (node.ParentGraph != _owner && node.ParentGraph != null)
+                if (node.ParentGraph is not null && node.ParentGraph != _owner)
                     throw new ArgumentException("Sequence contains nodes from another graph.");
-                if (_nodes.ContainsKey(node.Offset))
-                    throw new ArgumentException($"Sequence contains nodes with offsets that were already added to the graph.");
             }
 
+            // Add the nodes.
             for (int i = 0; i < nodes.Length; i++)
             {
                 var node = nodes[i];
-                _nodes.Add(node.Offset, node);
+                _nodes.Add(node);
                 node.ParentRegion = _owner;
             }
         }
@@ -81,43 +86,20 @@ namespace Echo.ControlFlow.Collections
         /// <inheritdoc />
         public void Clear()
         {
-            foreach (var node in _nodes.Keys.ToArray())
+            foreach (var node in _nodes.ToArray())
                 Remove(node);
         }
 
-        /// <summary>
-        /// Determines whether a node with a specific offset was added to the collection.
-        /// </summary>
-        /// <param name="offset">The offset to the node.</param>
-        /// <returns><c>true</c> if there exists a node with the provided offset, <c>false</c> otherwise.</returns>
-        public bool Contains(long offset)
-        {
-            return _nodes.ContainsKey(offset);
-        }
+        /// <inheritdoc />
+        public bool Contains(ControlFlowNode<TInstruction> item) => _nodes.Contains(item);
 
         /// <inheritdoc />
-        public bool Contains(ControlFlowNode<TContents> item)
-        {
-            if (item == null)
-                return false;
-            return _nodes.TryGetValue(item.Offset, out var node) && node == item;
-        }
+        public void CopyTo(ControlFlowNode<TInstruction>[] array, int arrayIndex) => _nodes.CopyTo(array, arrayIndex);
 
         /// <inheritdoc />
-        public void CopyTo(ControlFlowNode<TContents>[] array, int arrayIndex)
+        public bool Remove(ControlFlowNode<TInstruction> item)
         {
-            _nodes.Values.CopyTo(array, arrayIndex);
-        }
-
-        /// <summary>
-        /// Removes a node by its offset.
-        /// </summary>
-        /// <param name="offset">The offset. of the node to remove.</param>
-        /// <returns><c>true</c> if the collection contained a node with the provided offset., and the node was removed
-        /// successfully, <c>false</c> otherwise.</returns>
-        public bool Remove(long offset)
-        {
-            if (_nodes.TryGetValue(offset, out var item))
+            if (_nodes.Remove(item))
             {
                 // Remove outgoing edges.
                 item.UnconditionalEdge = null;
@@ -144,111 +126,53 @@ namespace Echo.ControlFlow.Collections
                     }
                 }
                 
-                //Remove node.
-                _nodes.Remove(offset);
-                item.ParentRegion.RemoveNode(item);
-                item.ParentRegion = null;
-                
+                // Remove node from graph.
+                if (item.ParentRegion is not null)
+                {
+                    item.ParentRegion.RemoveNode(item);
+                    item.ParentRegion = null;
+                }
+
                 return true;
             }
 
             return false;
         }
 
-        /// <inheritdoc />
-        public bool Remove(ControlFlowNode<TContents> item) => 
-            item != null && Remove(item.Offset);
-
         /// <summary>
         /// Synchronizes all offsets of each node and basic blocks with the underlying instructions.
         /// </summary>
-        /// <exception cref="InvalidOperationException">Occurs when one or more basic blocks referenced by the nodes
-        /// are in a state that new offsets cannot be determined. This includes empty basic blocks and duplicated header
-        /// offsets.</exception>
-        /// <remarks>
-        /// <para>
-        /// Because updating offsets is a relatively expensive task, calls to this method should be delayed as much as
-        /// possible.
-        /// </para>
-        /// <para>
-        /// This method will invalidate any enumerators that are enumerating this collection of nodes.
-        /// </para>
-        /// </remarks>
         public void UpdateOffsets()
         {
-            var nodes = new Dictionary<long, ControlFlowNode<TContents>>(Count);
-
-            // Verify whether all basic blocks are valid, i.e. are not empty and contain no duplicate offsets.
-            // If any problem arises we do not want to commit any changes to the node collection.
-            foreach (var entry in _nodes)
-            {
-                var node = entry.Value;
-
-                if (node.Contents.IsEmpty)
-                    throw new InvalidOperationException("Collection contains one or more empty basic blocks.");
-
-                long newOffset = _owner.Architecture.GetOffset(node.Contents.Header);
-                if (nodes.ContainsKey(newOffset))
-                    throw new InvalidOperationException($"Collection contains multiple basic blocks with header offset {newOffset:X8}.");
-
-                nodes.Add(newOffset, node);
-            }
-
-            // Update the collection by editing the dictionary directly instead of using the public Clear and Add
-            // methods. The public methods remove any incident edges to each node, which means we'd have to add them 
-            // again. 
-
-            _nodes.Clear();
-
-            foreach (var entry in nodes)
-            {
-                entry.Value.Offset = entry.Key;
-                entry.Value.Contents.Offset = entry.Key;
-                _nodes.Add(entry.Key, entry.Value);
-            }
+            foreach (var node in _nodes)
+                node.UpdateOffset();
         }
 
         /// <summary>
-        /// Obtains an enumerator that enumerates all nodes in the collection.
+        /// Constructs a mapping from basic block header offsets to their respective nodes.
         /// </summary>
-        /// <returns></returns>
-        public Enumerator GetEnumerator() => new Enumerator(this);
+        /// <returns>The mapping</returns>
+        /// <exception cref="ArgumentException">The control flow graph contains nodes with duplicated offsets.</exception>
+        public IDictionary<long, ControlFlowNode<TInstruction>> CreateOffsetMap()
+        {
+            return _nodes.ToDictionary(x => x.Offset, x => x);
+        }
 
-        IEnumerator<ControlFlowNode<TContents>> IEnumerable<ControlFlowNode<TContents>>.GetEnumerator() =>
-            GetEnumerator();
+        /// <summary>
+        /// Finds a node by its basic block header offset.
+        /// </summary>
+        /// <param name="offset">The offset.</param>
+        /// <returns>The node, or <c>null</c> if no node was found with the provided offset.</returns>
+        /// <remarks>
+        /// This is a linear lookup. For many lookups by offset, consider first creating an offset map using
+        /// <see cref="CreateOffsetMap"/>.
+        /// </remarks>
+        public ControlFlowNode<TInstruction>? GetByOffset(long offset) => _nodes.FirstOrDefault(x => x.Contents.Offset == offset);
+
+        /// <inheritdoc />
+        public IEnumerator<ControlFlowNode<TInstruction>> GetEnumerator() => _nodes.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        /// <summary>
-        /// Represents an enumerator that enumerates all nodes in a control flow graph.
-        /// </summary>
-        public struct Enumerator : IEnumerator<ControlFlowNode<TContents>>
-        {
-            private Dictionary<long, ControlFlowNode<TContents>>.Enumerator _enumerator;
-
-            /// <summary>
-            /// Creates a new instance of the <see cref="Enumerator"/> structure.
-            /// </summary>
-            /// <param name="collection">The collection to enumerate.</param>
-            public Enumerator(NodeCollection<TContents> collection)
-            {
-                _enumerator = collection._nodes.GetEnumerator();
-            }
-
-            /// <inheritdoc />
-            public ControlFlowNode<TContents> Current => _enumerator.Current.Value;
-
-            object IEnumerator.Current => Current;
-
-            /// <inheritdoc />
-            public bool MoveNext() => _enumerator.MoveNext();
-
-            /// <inheritdoc />
-            public void Reset() => ((IEnumerator) _enumerator).Reset();
-
-            /// <inheritdoc />
-            public void Dispose() => _enumerator.Dispose();
-        }
         
     }
 }

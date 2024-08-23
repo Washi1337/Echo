@@ -5,6 +5,7 @@
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions the nodes contain.</typeparam>
     public interface IInstructionFormatter<TInstruction>
+        where TInstruction : notnull
     {
         /// <summary>
         /// Formats a given <typeparamref name="TInstruction"/>.

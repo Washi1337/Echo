@@ -1,6 +1,7 @@
 using System;
-using Echo.ControlFlow.Construction.Static;
+using System.Collections.Generic;
 using Echo.Code;
+using Echo.ControlFlow.Construction;
 using Echo.Platforms.DummyPlatform.ControlFlow;
 
 namespace Echo.Platforms.DummyPlatform.Code
@@ -34,41 +35,17 @@ namespace Echo.Platforms.DummyPlatform.Code
         public int GetStackPushCount(in DummyInstruction instruction) => instruction.PushCount;
 
         public int GetStackPopCount(in DummyInstruction instruction) => instruction.PopCount;
-
-        public int GetReadVariablesCount(in DummyInstruction instruction)
-        {
-            return instruction.OpCode == DummyOpCode.Get 
-                ? 1
-                : 0;
-        }
-
-        public int GetReadVariables(in DummyInstruction instruction, Span<IVariable> variablesBuffer)
+        
+        public void GetReadVariables(in DummyInstruction instruction, ICollection<IVariable> variablesBuffer)
         {
             if (instruction.OpCode == DummyOpCode.Get)
-            {
-                variablesBuffer[0] = (IVariable) instruction.Operands[0];
-                return 1;
-            }
-
-            return 0;
+                variablesBuffer.Add((IVariable) instruction.Operands[0]);
         }
 
-        public int GetWrittenVariablesCount(in DummyInstruction instruction)
-        {
-            return instruction.OpCode == DummyOpCode.Set 
-                ? 1
-                : 0;
-        }
-
-        public int GetWrittenVariables(in DummyInstruction instruction, Span<IVariable> variablesBuffer)
+        public void GetWrittenVariables(in DummyInstruction instruction, ICollection<IVariable> variablesBuffer)
         {
             if (instruction.OpCode == DummyOpCode.Set)
-            {
-                variablesBuffer[0] = (IVariable) instruction.Operands[0];
-                return 1;
-            }
-
-            return 0;
+                variablesBuffer.Add((IVariable) instruction.Operands[0]);
         }
     }
 }

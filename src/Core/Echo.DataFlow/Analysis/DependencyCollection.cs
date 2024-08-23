@@ -15,11 +15,12 @@ namespace Echo.DataFlow.Analysis
         /// of nodes can be executed sequentially.
         /// </summary>
         /// <param name="node">The node to find all dependencies for.</param>
-        /// <typeparam name="T">The type of contents that each node contains.</typeparam>
+        /// <typeparam name="TInstruction">The type of instructions that each node contains.</typeparam>
         /// <returns>The topological ordering of all dependencies of the node.</returns>
         /// <exception cref="CyclicDependencyException">Occurs when there is a cyclic dependency in the graph.</exception>
-        public static IEnumerable<DataFlowNode<T>> GetOrderedDependencies<T>(this DataFlowNode<T> node) =>
-            GetOrderedDependencies(node, DependencyCollectionFlags.IncludeAllDependencies);
+        public static IEnumerable<DataFlowNode<TInstruction>> GetOrderedDependencies<TInstruction>(this DataFlowNode<TInstruction> node) 
+            where TInstruction : notnull
+            => GetOrderedDependencies(node, DependencyCollectionFlags.IncludeAllDependencies);
 
         /// <summary>
         /// Collects all dependency nodes recursively, and sorts them in a topological order such that the final collection
@@ -27,14 +28,17 @@ namespace Echo.DataFlow.Analysis
         /// </summary>
         /// <param name="node">The node to find all dependencies for.</param>
         /// <param name="flags">Flags that influence the behaviour of the algorithm.</param>
-        /// <typeparam name="T">The type of contents that each node contains.</typeparam>
+        /// <typeparam name="TInstruction">The type of instructions that each node contains.</typeparam>
         /// <returns>The topological ordering of all dependencies of the node.</returns>
         /// <exception cref="CyclicDependencyException">Occurs when there is a cyclic dependency in the graph.</exception>
-        public static IEnumerable<DataFlowNode<T>> GetOrderedDependencies<T>(this DataFlowNode<T> node, DependencyCollectionFlags flags)
+        public static IEnumerable<DataFlowNode<TInstruction>> GetOrderedDependencies<TInstruction>(
+            this DataFlowNode<TInstruction> node, 
+            DependencyCollectionFlags flags)
+            where TInstruction : notnull
         {
             try
             {
-                var topologicalSorting = new TopologicalSorter<DataFlowNode<T>>(GetSortedOutgoingEdges);
+                var topologicalSorting = new TopologicalSorter<DataFlowNode<TInstruction>>(GetSortedOutgoingEdges);
                 return topologicalSorting.GetTopologicalSorting(node);
             }
             catch (CycleDetectedException ex)
@@ -42,9 +46,9 @@ namespace Echo.DataFlow.Analysis
                 throw new CyclicDependencyException("Cyclic dependency was detected.", ex);
             }
 
-            IReadOnlyList<DataFlowNode<T>> GetSortedOutgoingEdges(DataFlowNode<T> n)
+            IReadOnlyList<DataFlowNode<TInstruction>> GetSortedOutgoingEdges(DataFlowNode<TInstruction> n)
             {
-                var result = new List<DataFlowNode<T>>();
+                var result = new List<DataFlowNode<TInstruction>>();
                 
                 // Prioritize stack dependencies over variable dependencies.
                 if ((flags & DependencyCollectionFlags.IncludeStackDependencies) != 0)

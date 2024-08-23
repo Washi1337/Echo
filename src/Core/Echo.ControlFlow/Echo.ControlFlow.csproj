@@ -7,6 +7,8 @@
         <PackageTags>program code analysis control-flow-graph blocks serialization dominator-analysis</PackageTags>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Nullable>enable</Nullable>
+        <LangVersion>12</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -19,11 +21,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Echo\Echo.csproj" />
-      <ProjectReference Include="..\Echo.DataFlow\Echo.DataFlow.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="System.Memory" Version="4.5.5" />
+      <PackageReference Include="Nullable" Version="1.3.1" />
     </ItemGroup>
 
 </Project>

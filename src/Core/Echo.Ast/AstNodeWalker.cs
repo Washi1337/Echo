@@ -5,6 +5,7 @@ namespace Echo.Ast
     /// </summary>
     /// <typeparam name="TInstruction">The instruction stored in the AST.</typeparam>
     public class AstNodeWalker<TInstruction> : IAstNodeVisitor<TInstruction>
+        where TInstruction : notnull
     {
         private readonly IAstNodeListener<TInstruction> _listener;
 

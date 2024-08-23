@@ -10,6 +10,7 @@ namespace Echo.ControlFlow.Serialization.Dot
     /// </summary>
     /// <typeparam name="TInstruction">The type of instructions stored in the basic block.</typeparam>
     public class OffsetNodeIdentifier<TInstruction> : INodeIdentifier
+        where TInstruction : notnull
     {
         /// <summary>
         /// Provides a default instance of the <see cref="OffsetNodeIdentifier{TInstruction}"/> class. 

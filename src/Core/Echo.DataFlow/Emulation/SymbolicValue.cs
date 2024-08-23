@@ -9,7 +9,8 @@ namespace Echo.DataFlow.Emulation
     /// <summary>
     /// Represents a symbolic value that resides in memory. 
     /// </summary>
-    public sealed class SymbolicValue<T> : ISet<DataSource<T>>
+    public sealed class SymbolicValue<TInstruction> : ISet<DataSource<TInstruction>>
+        where TInstruction : notnull
     {
         // -------------------------
         // Implementation rationale:
@@ -26,7 +27,7 @@ namespace Echo.DataFlow.Emulation
         //    - DataSource<T>:            The dependency has a single data source.
         //    - HashSet<DataSource<T>>:   The dependency has multiple data sources.
         
-        private object _listObject;
+        private object? _listObject;
         
         /// <summary>
         /// Creates a new symbolic value with no data sources.
@@ -40,7 +41,7 @@ namespace Echo.DataFlow.Emulation
         /// Creates a new symbolic value with a single data source.
         /// </summary>
         /// <param name="dataSource">The data source of the symbolic value.</param>
-        public SymbolicValue(DataSource<T> dataSource)
+        public SymbolicValue(DataSource<TInstruction> dataSource)
         {
             _listObject = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
         }
@@ -49,15 +50,15 @@ namespace Echo.DataFlow.Emulation
         /// Creates a new symbolic value with the provided data sources.
         /// </summary>
         /// <param name="dataSources">The data sources of the symbolic value.</param>
-        public SymbolicValue(IEnumerable<DataSource<T>> dataSources)
+        public SymbolicValue(IEnumerable<DataSource<TInstruction>> dataSources)
         {
-            _listObject = new HashSet<DataSource<T>>(dataSources);
+            _listObject = new HashSet<DataSource<TInstruction>>(dataSources);
         }
 
         /// <summary>
         /// Merges two data dependencies into one symbolic value.
         /// </summary>
-        public SymbolicValue(SymbolicValue<T> left, SymbolicValue<T> right)
+        public SymbolicValue(SymbolicValue<TInstruction> left, SymbolicValue<TInstruction> right)
         {
             int totalCount = left.Count + right.Count;
             switch (totalCount)
@@ -71,7 +72,7 @@ namespace Echo.DataFlow.Emulation
                     break;
 
                 default:
-                    var set = new HashSet<DataSource<T>>(left);
+                    var set = new HashSet<DataSource<TInstruction>>(left);
                     set.UnionWith(right);
                     _listObject = set;
                     break;
@@ -82,8 +83,8 @@ namespace Echo.DataFlow.Emulation
         public int Count => _listObject switch
         {
             null => 0,
-            DataSource<T> _ => 1,
-            ICollection<DataSource<T>> collection => collection.Count,
+            DataSource<TInstruction> _ => 1,
+            ICollection<DataSource<TInstruction>> collection => collection.Count,
             _ => throw new InvalidOperationException("Data dependency is in an invalid state.")
         };
 
@@ -100,8 +101,8 @@ namespace Echo.DataFlow.Emulation
         /// </summary>
         /// <param name="node">The node producing the value.</param>
         /// <returns>The symbolic value.</returns>
-        public static SymbolicValue<T> CreateStackValue(DataFlowNode<T> node) => 
-            new(new StackDataSource<T>(node, 0));
+        public static SymbolicValue<TInstruction> CreateStackValue(DataFlowNode<TInstruction> node) => 
+            new(new StackDataSource<TInstruction>(node, 0));
 
         /// <summary>
         /// Creates a new symbolic value referencing a stack value produced by the provided node. 
@@ -109,8 +110,8 @@ namespace Echo.DataFlow.Emulation
         /// <param name="node">The node producing the value.</param>
         /// <param name="slotIndex">The index of the stack value that was produced by the node.</param>
         /// <returns>The symbolic value.</returns>
-        public static SymbolicValue<T> CreateStackValue(DataFlowNode<T> node, int slotIndex) => 
-            new(new StackDataSource<T>(node, slotIndex));
+        public static SymbolicValue<TInstruction> CreateStackValue(DataFlowNode<TInstruction> node, int slotIndex) => 
+            new(new StackDataSource<TInstruction>(node, slotIndex));
 
         /// <summary>
         /// Creates a new symbolic value referencing a variable value assigned by the provided node. 
@@ -118,20 +119,20 @@ namespace Echo.DataFlow.Emulation
         /// <param name="node">The node assigning the value.</param>
         /// <param name="variable">The variable that was assigned a value.</param>
         /// <returns>The symbolic value.</returns>
-        public static SymbolicValue<T> CreateVariableValue(DataFlowNode<T> node, IVariable variable) => 
-            new(new VariableDataSource<T>(node, variable));
+        public static SymbolicValue<TInstruction> CreateVariableValue(DataFlowNode<TInstruction> node, IVariable variable) => 
+            new(new VariableDataSource<TInstruction>(node, variable));
 
         /// <summary>
         /// Interprets the symbolic value as a collection of stack data sources.
         /// </summary>
         /// <returns>The stack data sources.</returns>
-        public IEnumerable<StackDataSource<T>> AsStackValue() => this.Cast<StackDataSource<T>>();
+        public IEnumerable<StackDataSource<TInstruction>> AsStackValue() => this.Cast<StackDataSource<TInstruction>>();
         
         /// <summary>
         /// Interprets the symbolic value as a collection of variable data sources.
         /// </summary>
         /// <returns>The variable data sources.</returns>
-        public IEnumerable<VariableDataSource<T>> AsVariableValue() => this.Cast<VariableDataSource<T>>();
+        public IEnumerable<VariableDataSource<TInstruction>> AsVariableValue() => this.Cast<VariableDataSource<TInstruction>>();
 
         private static bool ThrowInvalidStateException() => 
             throw new InvalidOperationException("Data dependency is in an invalid state.");
@@ -143,7 +144,7 @@ namespace Echo.DataFlow.Emulation
         }
 
         /// <inheritdoc />
-        public bool Add(DataSource<T> item)
+        public bool Add(DataSource<TInstruction> item)
         {
             AssertIsWritable();
 
@@ -153,18 +154,18 @@ namespace Echo.DataFlow.Emulation
                     _listObject = item;
                     return true;
 
-                case DataSource<T> node:
+                case DataSource<TInstruction> node:
                     if (node == item)
                         return false;
                     
-                    _listObject = new HashSet<DataSource<T>>
+                    _listObject = new HashSet<DataSource<TInstruction>>
                     {
                         node,
                         item
                     };
                     return true;
 
-                case ISet<DataSource<T>> nodes:
+                case ISet<DataSource<TInstruction>> nodes:
                     return nodes.Add(item);
 
                 default:
@@ -173,7 +174,7 @@ namespace Echo.DataFlow.Emulation
         }
 
         /// <inheritdoc />
-        public void ExceptWith(IEnumerable<DataSource<T>> other)
+        public void ExceptWith(IEnumerable<DataSource<TInstruction>> other)
         {
             AssertIsWritable();
             
@@ -182,11 +183,11 @@ namespace Echo.DataFlow.Emulation
         }
 
         /// <inheritdoc />
-        public void IntersectWith(IEnumerable<DataSource<T>> other)
+        public void IntersectWith(IEnumerable<DataSource<TInstruction>> other)
         {
             AssertIsWritable();
             
-            var set = new HashSet<DataSource<T>>(other);
+            var set = new HashSet<DataSource<TInstruction>>(other);
             foreach (var item in this)
             {
                 if (!set.Contains(item))
@@ -195,14 +196,14 @@ namespace Echo.DataFlow.Emulation
         }
 
         /// <inheritdoc />
-        public bool IsProperSubsetOf(IEnumerable<DataSource<T>> other)
+        public bool IsProperSubsetOf(IEnumerable<DataSource<TInstruction>> other)
         {
             switch (_listObject)
             {
                 case null:
                     return other.Any();
                 
-                case DataSource<T> node:
+                case DataSource<TInstruction> node:
                     bool containsElement = false;
                     foreach (var item in other)
                     {
@@ -214,7 +215,7 @@ namespace Echo.DataFlow.Emulation
 
                     return false;
                     
-                case ISet<DataSource<T>> nodes:
+                case ISet<DataSource<TInstruction>> nodes:
                     return nodes.IsProperSubsetOf(other);
                 
                 default:
@@ -223,38 +224,38 @@ namespace Echo.DataFlow.Emulation
         }
 
         /// <inheritdoc />
-        public bool IsProperSupersetOf(IEnumerable<DataSource<T>> other) => _listObject switch
+        public bool IsProperSupersetOf(IEnumerable<DataSource<TInstruction>> other) => _listObject switch
         {
             null => false,
-            DataSource<T> _ => !other.Any(),
-            ISet<DataSource<T>> nodes => nodes.IsProperSupersetOf(other),
+            DataSource<TInstruction> _ => !other.Any(),
+            ISet<DataSource<TInstruction>> nodes => nodes.IsProperSupersetOf(other),
             _ => ThrowInvalidStateException(),
         };
 
         /// <inheritdoc />
-        public bool IsSubsetOf(IEnumerable<DataSource<T>> other) => _listObject switch
+        public bool IsSubsetOf(IEnumerable<DataSource<TInstruction>> other) => _listObject switch
         {
             null => true,
-            DataSource<T> node => other.Contains(node),
-            ISet<DataSource<T>> nodes => nodes.IsSubsetOf(other),
+            DataSource<TInstruction> node => other.Contains(node),
+            ISet<DataSource<TInstruction>> nodes => nodes.IsSubsetOf(other),
             _ =>  ThrowInvalidStateException(),
         };
 
         /// <inheritdoc />
-        public bool IsSupersetOf(IEnumerable<DataSource<T>> other)
+        public bool IsSupersetOf(IEnumerable<DataSource<TInstruction>> other)
         {
             switch (_listObject)
             {
                 case null:
                     return !other.Any();
 
-                case DataSource<T> node:
+                case DataSource<TInstruction> node:
                 {
                     using var enumerator = other.GetEnumerator();
                     return !enumerator.MoveNext() || enumerator.Current == node && !enumerator.MoveNext();
                 }
 
-                case ISet<DataSource<T>> nodes:
+                case ISet<DataSource<TInstruction>> nodes:
                     return nodes.IsSupersetOf(other);
 
                 default:
@@ -263,18 +264,18 @@ namespace Echo.DataFlow.Emulation
         }
 
         /// <inheritdoc />
-        public bool Overlaps(IEnumerable<DataSource<T>> other) => _listObject switch
+        public bool Overlaps(IEnumerable<DataSource<TInstruction>> other) => _listObject switch
         {
             null => false,
-            DataSource<T> node => other.Contains(node),
-            ISet<DataSource<T>> nodes => nodes.Overlaps(other),
+            DataSource<TInstruction> node => other.Contains(node),
+            ISet<DataSource<TInstruction>> nodes => nodes.Overlaps(other),
             _ => ThrowInvalidStateException(),
         };
 
         /// <inheritdoc />
-        public bool SetEquals(IEnumerable<DataSource<T>> other)
+        public bool SetEquals(IEnumerable<DataSource<TInstruction>> other)
         {
-            if (other is SymbolicValue<T> otherSymbolicValue)
+            if (other is SymbolicValue<TInstruction> otherSymbolicValue)
                 return SetEqualsFast(otherSymbolicValue);
             
             switch (_listObject)
@@ -282,13 +283,13 @@ namespace Echo.DataFlow.Emulation
                 case null:
                     return !other.Any();
                 
-                case DataSource<T> node:
+                case DataSource<TInstruction> node:
                 {
                     using var enumerator = other.GetEnumerator();
                     return enumerator.MoveNext() && node == enumerator.Current && !enumerator.MoveNext();
                 }
 
-                case ISet<DataSource<T>> nodes:
+                case ISet<DataSource<TInstruction>> nodes:
                     return nodes.SetEquals(other);
 
                 default:
@@ -296,18 +297,18 @@ namespace Echo.DataFlow.Emulation
             }
         }
         
-        private bool SetEqualsFast(SymbolicValue<T> other)
+        private bool SetEqualsFast(SymbolicValue<TInstruction> other)
         {
             switch (_listObject)
             {
                 case null:
                     return other._listObject is null;
                 
-                case DataSource<T> node:
-                    return other._listObject is DataSource<T> otherSource && node == otherSource;
+                case DataSource<TInstruction> node:
+                    return other._listObject is DataSource<TInstruction> otherSource && node == otherSource;
 
-                case ISet<DataSource<T>> nodes:
-                    return other._listObject is ISet<DataSource<T>> otherSet && nodes.SetEquals(otherSet);
+                case ISet<DataSource<TInstruction>> nodes:
+                    return other._listObject is ISet<DataSource<TInstruction>> otherSet && nodes.SetEquals(otherSet);
 
                 default:
                     return ThrowInvalidStateException();
@@ -315,7 +316,7 @@ namespace Echo.DataFlow.Emulation
         }
 
         /// <inheritdoc />
-        public void SymmetricExceptWith(IEnumerable<DataSource<T>> other)
+        public void SymmetricExceptWith(IEnumerable<DataSource<TInstruction>> other)
         {
             foreach (var item in other)
             {
@@ -327,14 +328,14 @@ namespace Echo.DataFlow.Emulation
         }
 
         /// <inheritdoc />
-        public void UnionWith(IEnumerable<DataSource<T>> other)
+        public void UnionWith(IEnumerable<DataSource<TInstruction>> other)
         {
             AssertIsWritable();
             foreach (var node in other)
                 Add(node);
         }
 
-        void ICollection<DataSource<T>>.Add(DataSource<T> item)
+        void ICollection<DataSource<TInstruction>>.Add(DataSource<TInstruction> item)
         {
             if (item is null)
                 throw new ArgumentNullException(nameof(item));
@@ -350,11 +351,11 @@ namespace Echo.DataFlow.Emulation
                 case null:
                     break;
 
-                case DataSource<T> node:
+                case DataSource<TInstruction> node:
                     Remove(node);
                     break;
 
-                case ICollection<DataSource<T>> nodes:
+                case ICollection<DataSource<TInstruction>> nodes:
                     foreach (var node in nodes.ToArray())
                         Remove(node);
                     break;
@@ -368,27 +369,27 @@ namespace Echo.DataFlow.Emulation
         }
 
         /// <inheritdoc />
-        public bool Contains(DataSource<T> item) => _listObject switch
+        public bool Contains(DataSource<TInstruction> item) => _listObject switch
         {
             null => false,
-            DataSource<T> node => item == node,
-            ICollection<DataSource<T>> nodes => nodes.Contains(item),
+            DataSource<TInstruction> node => item == node,
+            ICollection<DataSource<TInstruction>> nodes => nodes.Contains(item),
             _ => ThrowInvalidStateException()
         };
 
         /// <inheritdoc />
-        public void CopyTo(DataSource<T>[] array, int arrayIndex)
+        public void CopyTo(DataSource<TInstruction>[] array, int arrayIndex)
         {
             switch (_listObject)
             {
                 case null:
                     break;
                 
-                case DataSource<T> node:
+                case DataSource<TInstruction> node:
                     array[arrayIndex] = node;
                     break;
                 
-                case ICollection<DataSource<T>> nodes:
+                case ICollection<DataSource<TInstruction>> nodes:
                     nodes.CopyTo(array, arrayIndex);
                     break;
                 
@@ -403,11 +404,11 @@ namespace Echo.DataFlow.Emulation
         /// </summary>
         /// <param name="node">The node to remove all data sources from.</param>
         /// <returns><c>true</c> if any data source was removed, <c>false</c> otherwise.</returns>
-        public bool Remove(DataFlowNode<T> node)
+        public bool Remove(DataFlowNode<TInstruction> node)
         {
             AssertIsWritable();
             
-            var sourcesToRemove = new List<DataSource<T>>();
+            var sourcesToRemove = new List<DataSource<TInstruction>>();
 
             foreach (var source in this)
             {
@@ -422,7 +423,7 @@ namespace Echo.DataFlow.Emulation
         }
         
         /// <inheritdoc />
-        public bool Remove(DataSource<T> item) 
+        public bool Remove(DataSource<TInstruction> item) 
         {
             AssertIsWritable();
             
@@ -431,7 +432,7 @@ namespace Echo.DataFlow.Emulation
                 case null:
                     return false;
 
-                case DataSource<T> node:
+                case DataSource<TInstruction> node:
                     if (node == item)
                     {
                         _listObject = null;
@@ -440,7 +441,7 @@ namespace Echo.DataFlow.Emulation
 
                     return false;
 
-                case ICollection<DataSource<T>> nodes:
+                case ICollection<DataSource<TInstruction>> nodes:
                     return nodes.Remove(item);
 
                 default:
@@ -451,7 +452,7 @@ namespace Echo.DataFlow.Emulation
         /// <summary>
         /// Gets a collection of nodes that were referenced by all data sources in this data dependency.
         /// </summary>
-        public IEnumerable<DataFlowNode<T>> GetNodes() => this
+        public IEnumerable<DataFlowNode<TInstruction>> GetNodes() => this
             .Select(source => source.Node)
             .Distinct();
         
@@ -459,8 +460,8 @@ namespace Echo.DataFlow.Emulation
         public override string ToString() => _listObject switch
         {
             null => "?",
-            DataSource<T> node => node.ToString(),
-            IEnumerable<DataSource<T>> collection => $"({string.Join(" | ", collection)})",
+            DataSource<TInstruction> node => node.ToString(),
+            IEnumerable<DataSource<TInstruction>> collection => $"({string.Join(" | ", collection)})",
             _ => ThrowInvalidStateException().ToString()
         };
 
@@ -470,32 +471,32 @@ namespace Echo.DataFlow.Emulation
         /// <returns>The enumerator.</returns>
         public Enumerator GetEnumerator() => new (this);
 
-        IEnumerator<DataSource<T>> IEnumerable<DataSource<T>>.GetEnumerator() => GetEnumerator();
+        IEnumerator<DataSource<TInstruction>> IEnumerable<DataSource<TInstruction>>.GetEnumerator() => GetEnumerator();
         
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         /// Provides a mechanism for enumerating all data sources within a single symbolic value. 
         /// </summary>
-        public struct Enumerator : IEnumerator<DataSource<T>>
+        public struct Enumerator : IEnumerator<DataSource<TInstruction>>
         {
-            private readonly SymbolicValue<T> _collection;
-            private HashSet<DataSource<T>>.Enumerator _setEnumerator;
+            private readonly SymbolicValue<TInstruction> _collection;
+            private HashSet<DataSource<TInstruction>>.Enumerator _setEnumerator;
 
             /// <summary>
             /// Creates a new instance of the <see cref="Enumerator"/> structure.
             /// </summary>
             /// <param name="collection">The data dependency to enumerate the data sources for.</param>
-            public Enumerator(SymbolicValue<T> collection)
+            public Enumerator(SymbolicValue<TInstruction> collection)
             {
                 _collection = collection ?? throw new ArgumentNullException(nameof(collection));
-                if (collection._listObject is HashSet<DataSource<T>> nodes)
+                if (collection._listObject is HashSet<DataSource<TInstruction>> nodes)
                     _setEnumerator = nodes.GetEnumerator();
-                Current = null;
+                Current = null!;
             }
 
             /// <inheritdoc />
-            public DataSource<T> Current
+            public DataSource<TInstruction> Current
             {
                 get;
                 private set;
@@ -514,7 +515,7 @@ namespace Echo.DataFlow.Emulation
                     case null:
                         return false;
                     
-                    case DataSource<T> source:
+                    case DataSource<TInstruction> source:
                         if (Current is null)
                         {
                             Current = source;
@@ -526,13 +527,12 @@ namespace Echo.DataFlow.Emulation
                     default:
                         if (_setEnumerator.MoveNext())
                         {
-                            Current = _setEnumerator.Current;
+                            Current = _setEnumerator.Current!;
                             return true;
                         }
                         break;
                 }
                 
-                Current = null;
                 return false;
             }
 

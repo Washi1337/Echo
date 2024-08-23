@@ -4,10 +4,9 @@ using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Cil;
 using Echo.ControlFlow;
 using Echo.ControlFlow.Construction;
-using Echo.ControlFlow.Construction.Static;
-using Echo.ControlFlow.Construction.Symbolic;
 using Echo.ControlFlow.Regions.Detection;
 using Echo.DataFlow;
+using Echo.DataFlow.Construction;
 
 namespace Echo.Platforms.AsmResolver
 {
@@ -84,7 +83,8 @@ namespace Echo.Platforms.AsmResolver
             var cfgBuilder = new SymbolicFlowGraphBuilder<CilInstruction>(
                 architecture,
                 self.Instructions,
-                dfgBuilder);
+                dfgBuilder
+            );
 
             var ehRanges = self.ExceptionHandlers
                 .ToEchoRanges()

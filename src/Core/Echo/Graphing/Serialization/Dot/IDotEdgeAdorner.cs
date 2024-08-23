@@ -14,6 +14,6 @@ namespace Echo.Graphing.Serialization.Dot
         /// <param name="sourceId">The identifier assigned to the source node.</param>
         /// <param name="targetId">The identifier assigned to the target node.</param>
         /// <returns>The adornments.</returns>
-        IDictionary<string, string> GetEdgeAttributes(IEdge edge, long sourceId, long targetId);
+        IDictionary<string, string>? GetEdgeAttributes(IEdge edge, long sourceId, long targetId);
     }
 }
