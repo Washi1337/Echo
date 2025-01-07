@@ -340,9 +340,6 @@ public class ControlFlowGraphLifterTest
             // ret()
             DummyInstruction.Ret(6)
         });
-        
-        using var fs = File.CreateText("/tmp/output.dot");
-        cfg.ToDotGraph(fs, new DummyFormatter { IncludeOffset = false }.ToAstFormatter());
     }
     
     [Fact]
