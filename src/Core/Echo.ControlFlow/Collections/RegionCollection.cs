@@ -28,7 +28,7 @@ namespace Echo.ControlFlow.Collections
 
         private void AssertRegionValidity(TRegion item)
         {
-            if (item.ParentRegion is {})
+            if (item.ParentRegion is not null)
                 throw new ArgumentException("Region is already part of another graph.");
         }
 

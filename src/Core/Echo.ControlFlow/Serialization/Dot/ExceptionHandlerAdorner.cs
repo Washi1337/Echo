@@ -213,19 +213,13 @@ namespace Echo.ControlFlow.Serialization.Dot
 
         private (DotEntityStyle Style, string Label) GetSubGraphStyle(IControlFlowRegion<TInstruction> region)
         {
-            switch (region)
+            return region switch
             {
-                case ScopeRegion<TInstruction> basicRegion:
-                    return GetScopeStyle(basicRegion);
-
-                case ExceptionHandlerRegion<TInstruction> _:
-                    return (ExceptionHandlerStyle, ExceptionHandlerLabel);
-
-                case HandlerRegion<TInstruction> _:
-                    return (HandlerStyle, HandlerLabel);
-            }
-
-            return (DefaultStyle, string.Empty);
+                ScopeRegion<TInstruction> basicRegion => GetScopeStyle(basicRegion),
+                ExceptionHandlerRegion<TInstruction> _ => (ExceptionHandlerStyle, ExceptionHandlerLabel),
+                HandlerRegion<TInstruction> _ => (HandlerStyle, HandlerLabel),
+                _ => (DefaultStyle, string.Empty)
+            };
         }
 
         private (DotEntityStyle Style, string Label) GetScopeStyle(ScopeRegion<TInstruction> basicRegion)
@@ -251,7 +245,11 @@ namespace Echo.ControlFlow.Serialization.Dot
                 }
             }
 
-            return (DefaultStyle, "Scope");
+            string label = basicRegion.ScopeType != ScopeRegionType.None
+                ? basicRegion.ScopeType.ToString()
+                : "Scope";
+
+            return (DefaultStyle, label);
         }
         
     }

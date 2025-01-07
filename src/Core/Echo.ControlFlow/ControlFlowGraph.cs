@@ -65,6 +65,8 @@ namespace Echo.ControlFlow
             get;
         }
 
+        ICollection<ControlFlowNode<TInstruction>> IScopeControlFlowRegion<TInstruction>.Nodes => Nodes;
+
         /// <summary>
         /// Gets a collection of top-level regions that this control flow graph defines. 
         /// </summary>

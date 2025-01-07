@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Echo.ControlFlow.Collections;
 using Echo.Graphing;
 
 namespace Echo.ControlFlow.Regions
@@ -39,7 +38,7 @@ namespace Echo.ControlFlow.Regions
         /// <summary>
         /// Gets a collection of all nested regions defined in this region.
         /// </summary>
-        /// <returns>The sub regions.</returns>
+        /// <returns>The subregions.</returns>
         IEnumerable<ControlFlowRegion<TInstruction>> GetSubRegions();
         
         /// <summary>
@@ -70,22 +69,6 @@ namespace Echo.ControlFlow.Regions
         IEnumerable<ControlFlowNode<TInstruction>> GetSuccessors();
     }
 
-    /// <summary>
-    /// Represents a scope of regions. 
-    /// </summary>
-    /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
-    public interface IScopeControlFlowRegion<TInstruction> : IControlFlowRegion<TInstruction>
-        where TInstruction : notnull
-    {
-        /// <summary>
-        /// Gets a collection of nested sub regions that this region defines.
-        /// </summary>
-        public RegionCollection<TInstruction, ControlFlowRegion<TInstruction>> Regions
-        {
-            get;
-        }
-    }
-    
     /// <summary>
     /// Provides extensions to the <see cref="IControlFlowRegion{TInstruction}"/> interface.
     /// </summary>

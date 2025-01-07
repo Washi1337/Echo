@@ -7,26 +7,32 @@ namespace Echo.ControlFlow.Regions
     /// Represents a simple unordered region defining an inner scope in the control flow graph.
     /// </summary>
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
-    public class ScopeRegion<TInstruction> : ControlFlowRegion<TInstruction>
+    public class ScopeRegion<TInstruction> : ControlFlowRegion<TInstruction>, IScopeControlFlowRegion<TInstruction>
         where TInstruction : notnull
     {
         /// <summary>
-        /// Creates a new instance of the <see cref="ScopeRegion{TInstruction}"/> class.
+        /// Creates a new empty scope region with no extra semantics attached.
         /// </summary>
         public ScopeRegion()
+            : this(ScopeRegionType.None)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new empty scope region of the provided scope type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        public ScopeRegion(ScopeRegionType type)
         {
             Regions = new RegionCollection<TInstruction, ControlFlowRegion<TInstruction>>(this);
             Nodes = new RegionNodeCollection<TInstruction>(this);
+            ScopeType = type;
         }
 
         /// <summary>
         /// Gets or sets the first node that is executed in the region.
         /// </summary>
-        public ControlFlowNode<TInstruction>? EntryPoint
-        {
-            get;
-            set;
-        }
+        public ControlFlowNode<TInstruction>? EntryPoint { get; set; }
 
         /// <summary>
         /// Gets a collection of top-level nodes that this region consists of.
@@ -34,18 +40,19 @@ namespace Echo.ControlFlow.Regions
         /// <remarks>
         /// This collection does not include any nodes in the nested sub regions.
         /// </remarks>
-        public RegionNodeCollection<TInstruction> Nodes
-        {
-            get;
-        }
+        public RegionNodeCollection<TInstruction> Nodes { get; }
+
+        ICollection<ControlFlowNode<TInstruction>> IScopeControlFlowRegion<TInstruction>.Nodes => Nodes;
 
         /// <summary>
-        /// Gets a collection of nested sub regions that this region defines.
+        /// Gets a collection of nested subregions that this region defines.
         /// </summary>
-        public RegionCollection<TInstruction, ControlFlowRegion<TInstruction>> Regions
-        {
-            get;
-        }
+        public RegionCollection<TInstruction, ControlFlowRegion<TInstruction>> Regions { get; }
+
+        /// <summary>
+        /// Gets or sets the type of scope.
+        /// </summary>
+        public ScopeRegionType ScopeType { get; set; }
 
         /// <inheritdoc />
         public override IEnumerable<ControlFlowNode<TInstruction>> GetNodes()

@@ -8,6 +8,23 @@ using Echo.Graphing;
 namespace Echo.ControlFlow.Analysis.Domination
 {
     /// <summary>
+    /// Provides extension methods for constructing dominator trees.
+    /// </summary>
+    public static class DominatorTree
+    {
+        /// <summary>
+        /// Constructs a dominator tree from a control flow graph.
+        /// </summary>
+        /// <param name="graph">The control flow graph to turn into a dominator tree.</param>
+        /// <returns>The constructed dominator tree.</returns>
+        public static DominatorTree<TInstruction> FromGraph<TInstruction>(ControlFlowGraph<TInstruction> graph)
+            where TInstruction : notnull
+        {
+            return DominatorTree<TInstruction>.FromGraph(graph);
+        }
+    }
+
+    /// <summary>
     /// Represents a dominator tree, where each tree node corresponds to one node in a graph, and each
     /// is immediately dominated by its parent.
     /// </summary>
