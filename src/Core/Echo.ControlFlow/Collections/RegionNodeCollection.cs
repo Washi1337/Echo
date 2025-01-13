@@ -8,20 +8,20 @@ using Echo.ControlFlow.Regions;
 namespace Echo.ControlFlow.Collections
 {
     /// <summary>
-    /// Represents a collection of nodes that are put into  a control flow region.
+    /// Represents a collection of nodes that are put into a control flow region.
     /// </summary>
     /// <typeparam name="TInstruction">The type of data that each node in the graph stores.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class RegionNodeCollection<TInstruction> : Collection<ControlFlowNode<TInstruction>>
         where TInstruction : notnull
     {
-        private readonly IControlFlowRegion<TInstruction> _owner;
+        private readonly IScopeControlFlowRegion<TInstruction> _owner;
 
         /// <summary>
         /// Creates a new instance of the <see cref="RegionNodeCollection{TInstruction}"/> class.
         /// </summary>
         /// <param name="owner">The region owning the collection of nodes.</param>
-        public RegionNodeCollection(IControlFlowRegion<TInstruction> owner)
+        public RegionNodeCollection(IScopeControlFlowRegion<TInstruction> owner)
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }

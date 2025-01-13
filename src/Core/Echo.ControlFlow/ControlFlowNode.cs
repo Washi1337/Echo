@@ -71,7 +71,7 @@ namespace Echo.ControlFlow
         {
             get
             {
-                var region = ParentRegion;
+                var region = (IControlFlowRegion<TInstruction>?) ParentRegion;
                 while (true)
                 {
                     switch (region)
@@ -91,7 +91,7 @@ namespace Echo.ControlFlow
         /// <summary>
         /// Gets the graph region that contains this node, or <c>null</c> if the node is not added to any graph yet.  
         /// </summary>
-        public IControlFlowRegion<TInstruction>? ParentRegion
+        public IScopeControlFlowRegion<TInstruction>? ParentRegion
         {
             get;
             internal set;
@@ -517,8 +517,8 @@ namespace Echo.ControlFlow
         /// <returns>The regions this node is situated in, starting with the inner-most regions.</returns>
         public IEnumerable<IControlFlowRegion<TInstruction>> GetSituatedRegions()
         {
-            var parentRegion = ParentRegion;
-            while (parentRegion is {})
+            var parentRegion = (IControlFlowRegion<TInstruction>?) ParentRegion;
+            while (parentRegion is not null)
             {
                 yield return parentRegion;
                 parentRegion = parentRegion.ParentRegion;

@@ -12,10 +12,10 @@ namespace Echo.Graphing.Serialization.Dot
     {
         private static readonly IDictionary<char, string> EscapedCharacters = new Dictionary<char, string>
         {
-            ['\r'] = "\\\r",
-            ['\n'] = "\\\n",
+            ['\r'] = "\\r",
+            ['\n'] = "\\n",
             ['"'] = "\\\"",
-            ['\t'] = "\\\t",
+            ['\t'] = "\\t",
         };
 
         /// <summary>
