@@ -65,7 +65,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}}
       
       - name: Test
-        run: dotnet test --no-restore --verbosity minimal
+        run: dotnet test --no-restore --verbosity minimal --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}}
 
       - name: Push to NuGet Nightly
         env: 
