@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Echo.ControlFlow.Analysis.Domination;
 using Echo.Graphing;
 using Echo.Platforms.DummyPlatform;
@@ -85,8 +86,8 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             cfg.EntryPoint = nodes[0];
 
             var tree = DominatorTree<int>.FromGraph(cfg);
-            Assert.Equal(new HashSet<INode> {nodes[2]}, tree.GetDominanceFrontier(nodes[1]));
-            Assert.Equal(new HashSet<INode> {nodes[2]}, tree.GetDominanceFrontier(nodes[2]));
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[2]}, tree.GetDominanceFrontier(nodes[1]).ToHashSet());
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[2]}, tree.GetDominanceFrontier(nodes[2]).ToHashSet());
         }
 
         [Fact]
@@ -127,16 +128,16 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
             
             var tree = DominatorTree<int>.FromGraph(cfg);
             Assert.Empty(tree.GetDominanceFrontier(nodes[0]));
-            Assert.Equal(new HashSet<INode> {nodes[1]}, tree.GetDominanceFrontier(nodes[1]));
-            Assert.Equal(new HashSet<INode> {nodes[3]}, tree.GetDominanceFrontier(nodes[2]));
-            Assert.Equal(new HashSet<INode> {nodes[1], nodes[3]}, tree.GetDominanceFrontier(nodes[3]));
-            Assert.Equal(new HashSet<INode> {nodes[1], nodes[3], nodes[4]}, tree.GetDominanceFrontier(nodes[4]));
-            Assert.Equal(new HashSet<INode> {nodes[7]}, tree.GetDominanceFrontier(nodes[5]));
-            Assert.Equal(new HashSet<INode> {nodes[7]}, tree.GetDominanceFrontier(nodes[6]));
-            Assert.Equal(new HashSet<INode> {nodes[1], nodes[3], nodes[4], nodes[7]}, tree.GetDominanceFrontier(nodes[7]));
-            Assert.Equal(new HashSet<INode> {nodes[1], nodes[3], nodes[7]}, tree.GetDominanceFrontier(nodes[8]));
-            Assert.Equal(new HashSet<INode> {nodes[1]}, tree.GetDominanceFrontier(nodes[9]));
-            Assert.Equal(new HashSet<INode> {nodes[7]}, tree.GetDominanceFrontier(nodes[10]));
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[1]}, tree.GetDominanceFrontier(nodes[1]).ToHashSet());
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[3]}, tree.GetDominanceFrontier(nodes[2]).ToHashSet());
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[1], nodes[3]}, tree.GetDominanceFrontier(nodes[3]).ToHashSet());
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[1], nodes[3], nodes[4]}, tree.GetDominanceFrontier(nodes[4]).ToHashSet());
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[7]}, tree.GetDominanceFrontier(nodes[5]).ToHashSet());
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[7]}, tree.GetDominanceFrontier(nodes[6]).ToHashSet());
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[1], nodes[3], nodes[4], nodes[7]}, tree.GetDominanceFrontier(nodes[7]).ToHashSet());
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[1], nodes[3], nodes[7]}, tree.GetDominanceFrontier(nodes[8]).ToHashSet());
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[1]}, tree.GetDominanceFrontier(nodes[9]).ToHashSet());
+            Assert.Equal(new HashSet<ControlFlowNode<int>> {nodes[7]}, tree.GetDominanceFrontier(nodes[10]).ToHashSet());
         }
     }
 }

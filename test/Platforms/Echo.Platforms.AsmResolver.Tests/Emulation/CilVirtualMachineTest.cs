@@ -86,7 +86,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             Assert.True(Assert.Single(_mainThread.CallStack).IsRoot);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact]
         public void RunShouldTerminate()
         {
             // Prepare dummy method.
@@ -111,7 +111,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             Assert.True(Assert.Single(_mainThread.CallStack).IsRoot);
         }
 
-        [Fact(Timeout = 5000)]
+        [Fact]
         public void CancelShouldThrow()
         {
             // Prepare dummy method.

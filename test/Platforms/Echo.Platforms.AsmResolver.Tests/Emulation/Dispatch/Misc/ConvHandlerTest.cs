@@ -13,16 +13,16 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Misc
         }
 
         [Theory]
-        [InlineData(0x7f, CilCode.Conv_I1, 0x7f)]
-        [InlineData(0x7f, CilCode.Conv_Ovf_I1, 0x7f)]
-        [InlineData(0x80, CilCode.Conv_I1, -0x80)]
+        [InlineData(0x7f, CilCode.Conv_I1, 0x7fL)]
+        [InlineData(0x7f, CilCode.Conv_Ovf_I1, 0x7fL)]
+        [InlineData(0x80, CilCode.Conv_I1, -0x80L)]
         [InlineData(0x80, CilCode.Conv_Ovf_I1, null)]
-        [InlineData(0x80, CilCode.Conv_I2, 0x80)]
-        [InlineData(0x7fff, CilCode.Conv_I2, 0x7fff)]
-        [InlineData(0x8000, CilCode.Conv_I2, -0x8000)]
+        [InlineData(0x80, CilCode.Conv_I2, 0x80L)]
+        [InlineData(0x7fff, CilCode.Conv_I2, 0x7fffL)]
+        [InlineData(0x8000, CilCode.Conv_I2, -0x8000L)]
         [InlineData(0x8000, CilCode.Conv_Ovf_I2, null)]
-        [InlineData(0x7fffffff, CilCode.Conv_I4, 0x7fffffff)]
-        [InlineData(0x80000000, CilCode.Conv_I4, -0x80000000)]
+        [InlineData(0x7fffffff, CilCode.Conv_I4, 0x7fffffffL)]
+        [InlineData(0x80000000, CilCode.Conv_I4, -0x80000000L)]
         [InlineData(0x80000000, CilCode.Conv_Ovf_I4, null)]
         public void ConvIToI(long value, CilCode code, long? expectedValue)
         {
@@ -38,8 +38,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Misc
         }
 
         [Theory]
-        [InlineData(1.0, CilCode.Conv_I4, 1)]
-        [InlineData(-1.0, CilCode.Conv_I4, -1)]
+        [InlineData(1.0, CilCode.Conv_I4, 1L)]
+        [InlineData(-1.0, CilCode.Conv_I4, -1L)]
         public void ConvFToI(double value, CilCode code, long? expectedValue)
         {
             var stack = Context.CurrentFrame.EvaluationStack;
