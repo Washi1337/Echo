@@ -100,7 +100,7 @@ namespace Echo
             Start == other.Start && End == other.End;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => 
+        public override bool Equals(object? obj) => 
             obj is AddressRange other && Equals(other);
 
         /// <inheritdoc />

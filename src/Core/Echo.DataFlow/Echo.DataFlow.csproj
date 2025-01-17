@@ -1,13 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
         <Title>Echo.DataFlow</Title>
         <Description>Data flow models and algorithms for the Echo program analysis toolsuite.</Description>
         <PackageTags>program code analysis data-flow-graph slicing dependency-analysis</PackageTags>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -25,6 +21,7 @@
 
     <ItemGroup>
       <PackageReference Include="System.Collections.Immutable" Version="1.7.1" />
+      <PackageReference Include="Nullable" Version="1.3.1" />
     </ItemGroup>
 
 </Project>

@@ -30,7 +30,7 @@ namespace Echo.Graphing.Analysis.Traversal
             return _order.AsReadOnly();
         }
 
-        private void TraversalOnNodeDiscovered(object sender, NodeDiscoveryEventArgs e)
+        private void TraversalOnNodeDiscovered(object? sender, NodeDiscoveryEventArgs e)
         {
             if (!e.ContinueExploring)
                 return;
@@ -49,7 +49,7 @@ namespace Echo.Graphing.Analysis.Traversal
             _stack.Push(e.NewNode);
         }
 
-        private void TraversalOnTraversalCompleted(object sender, EventArgs e)
+        private void TraversalOnTraversalCompleted(object? sender, EventArgs e)
         {
             AddRemainingNodes();
         }

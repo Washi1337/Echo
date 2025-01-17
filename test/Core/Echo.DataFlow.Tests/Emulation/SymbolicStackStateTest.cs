@@ -32,7 +32,7 @@ namespace Echo.DataFlow.Tests.Emulation
             var state2 = new SymbolicProgramState<DummyInstruction>(0, stack2);
             
             Assert.True(state1.MergeStates(state2, out var newState));
-            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources), newState.Stack.Peek().GetNodes());
+            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources), newState.Stack.Peek().GetNodes().ToHashSet());
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace Echo.DataFlow.Tests.Emulation
             var state2 = new SymbolicProgramState<DummyInstruction>(0, stack2);
             
             Assert.False(state1.MergeStates(state2, out var newState));
-            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(new[] {source}), newState.Stack.Peek().GetNodes());
+            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(new[] {source}), newState.Stack.Peek().GetNodes().ToHashSet());
         }
 
         [Fact]
@@ -101,7 +101,7 @@ namespace Echo.DataFlow.Tests.Emulation
             int index = sources.Length - 1;
             foreach (var slot in newState.Stack)
             {
-                Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources[index]), slot.GetNodes());
+                Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources[index]), slot.GetNodes().ToHashSet());
                 index--;
             }
         }

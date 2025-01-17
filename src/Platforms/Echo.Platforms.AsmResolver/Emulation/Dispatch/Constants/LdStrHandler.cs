@@ -12,7 +12,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Constants
         /// <inheritdoc />
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
-            string value = instruction.Operand!.ToString();
+            string? value = instruction.Operand as string;
+            if (value is null)
+                return CilDispatchResult.InvalidProgram(context);
 
             long stringAddress = context.Machine.Heap.GetInternedString(value);
             var vector = context.Machine.ValueFactory.RentNativeInteger(stringAddress);

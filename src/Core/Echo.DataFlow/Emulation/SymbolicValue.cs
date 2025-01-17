@@ -460,7 +460,7 @@ namespace Echo.DataFlow.Emulation
         public override string ToString() => _listObject switch
         {
             null => "?",
-            DataSource<TInstruction> node => node.ToString(),
+            DataSource<TInstruction> node => node.ToString()!,
             IEnumerable<DataSource<TInstruction>> collection => $"({string.Join(" | ", collection)})",
             _ => ThrowInvalidStateException().ToString()
         };

@@ -103,8 +103,8 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
             var offsetMap = cfg.Nodes.CreateOffsetMap();
             
-            var ehRegion1 = offsetMap[1].GetParentExceptionHandler();
-            var ehRegion2 = offsetMap[6].GetParentExceptionHandler();
+            var ehRegion1 = offsetMap[1].GetParentExceptionHandler()!;
+            var ehRegion2 = offsetMap[6].GetParentExceptionHandler()!;
             
             Assert.NotSame(ehRegion1, ehRegion2);
             Assert.Same(ehRegion1.ProtectedRegion, offsetMap[1].ParentRegion); 
@@ -302,7 +302,7 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
             var cfg = ConstructGraphWithEHRegions(instructions, ranges);
             var offsetMap = cfg.Nodes.CreateOffsetMap();
 
-            var ehRegion = offsetMap[1].GetParentExceptionHandler();
+            var ehRegion = offsetMap[1].GetParentExceptionHandler()!;
             var handlerRegion = Assert.Single(ehRegion.Handlers);
             Assert.NotNull(handlerRegion);
             Assert.NotNull(handlerRegion.Prologue);
@@ -310,9 +310,9 @@ namespace Echo.ControlFlow.Tests.Regions.Detection
 
             Assert.Same(cfg, offsetMap[0].ParentRegion);
             Assert.Same(ehRegion.ProtectedRegion, offsetMap[1].ParentRegion);
-            Assert.Same(handlerRegion.Prologue, offsetMap[3].GetParentHandler().Prologue);
-            Assert.Same(handlerRegion.Contents, offsetMap[5].GetParentHandler().Contents);
-            Assert.Same(handlerRegion.Epilogue, offsetMap[7].GetParentHandler().Epilogue);
+            Assert.Same(handlerRegion.Prologue, offsetMap[3].GetParentHandler()!.Prologue);
+            Assert.Same(handlerRegion.Contents, offsetMap[5].GetParentHandler()!.Contents);
+            Assert.Same(handlerRegion.Epilogue, offsetMap[7].GetParentHandler()!.Epilogue);
             Assert.Same(cfg, offsetMap[9].ParentRegion);
         }
 

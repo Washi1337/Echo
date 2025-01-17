@@ -29,7 +29,7 @@ namespace Echo.DataFlow.Serialization.Dot
                     return new Dictionary<string, string>
                     {
                         ["shape"] = NodeShape,
-                        ["label"] = externalDataSource.Source.ToString()
+                        ["label"] = externalDataSource.ToString()
                     };
                 
                 case DataFlowNode<TInstruction> dataFlowNode:

@@ -1,13 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
         <Title>Echo.Platforms.AsmResolver</Title>
         <Description>CIL back-end powered by AsmResolver for the Echo program analysis toolsuite.</Description>
         <PackageTags>cil program code analysis control-flow-graph data-flow-graph slicing emulation</PackageTags>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

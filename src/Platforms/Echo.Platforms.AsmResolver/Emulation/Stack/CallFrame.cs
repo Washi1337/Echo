@@ -320,7 +320,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                     _exceptionHandlers.Add(frame);
                 }
 
-                frame.AddHandler((CilExceptionHandler) range.UserData);
+                frame.AddHandler((CilExceptionHandler) range.UserData!);
             }
         }
 

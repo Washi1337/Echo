@@ -10,6 +10,7 @@ namespace Echo.Memory
     /// Reading from this memory chunk always results in reading unknown memory.
     /// </remarks>
     public class GenericMockMemory<T> : UninitializedMemorySpace
+        where T : notnull
     {
         private readonly Dictionary<T, long> _itemToOffset;
         private readonly Dictionary<long, T> _offsetToItem;

@@ -215,7 +215,7 @@ namespace Echo
         public bool Equals(Trilean other) => Value == other.Value;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => obj is Trilean other && Equals(other);
+        public override bool Equals(object? obj) => obj is Trilean other && Equals(other);
 
         /// <inheritdoc />
         public override int GetHashCode() => (int) Value;

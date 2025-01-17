@@ -256,6 +256,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             }
         }
         
+        /// <summary>
+        /// Finds a matching implementation or override of a base method in a type.
+        /// </summary>
+        /// <param name="type">The type to search in.</param>
+        /// <param name="baseMethod">The method to find an implementation for.</param>
+        /// <returns>The method, or <c>null</c> if none is found.</returns>
         protected static MethodDefinition? FindMethodImplementationInType(TypeDefinition? type, MethodDefinition? baseMethod)
         {
             if (type is null || baseMethod is null || !baseMethod.IsVirtual)

@@ -29,6 +29,6 @@ namespace Echo.DataFlow
         public override bool IsExternal => true;
 
         /// <inheritdoc />
-        public override string ToString() => Source.ToString();
+        public override string ToString() => Source.ToString() ?? "<External>";
     }
 }

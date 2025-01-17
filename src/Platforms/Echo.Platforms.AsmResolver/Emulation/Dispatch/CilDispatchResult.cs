@@ -132,6 +132,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         }
 
         /// <inheritdoc />
-        public override string ToString() => DebuggerDisplay.ToString();
+        public override string ToString() => DebuggerDisplay.ToString()!;
     }
 }

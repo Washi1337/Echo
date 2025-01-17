@@ -324,7 +324,7 @@ namespace Echo.Graphing.Serialization.Dot
         /// <param name="c">The character to write.</param>
         protected void WriteEscapedCharacter(char c)
         {
-            if (EscapedCharacters.TryGetValue(c, out string escaped))
+            if (EscapedCharacters.TryGetValue(c, out string? escaped))
                 Writer.Write(escaped);
             else
                 Writer.Write(c);

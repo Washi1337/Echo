@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Echo.Code;
 
@@ -73,8 +74,10 @@ namespace Echo.DataFlow.Collections
         /// <param name="variable">The variable.</param>
         /// <param name="dependency">When this function returns <c>true</c>, contains the dependency.</param>
         /// <returns><c>true</c> if the variable was registered as a dependency, <c>false</c> otherwise.</returns>
-        public bool TryGetDependency(IVariable variable, out VariableDependency<TInstruction> dependency) => 
-            _entries.TryGetValue(variable, out dependency);
+        public bool TryGetDependency(IVariable variable, [NotNullWhen(true)] out VariableDependency<TInstruction>? dependency)
+        {
+            return _entries.TryGetValue(variable, out dependency);
+        }
 
         /// <summary>
         /// Adds a variable dependency to the node.

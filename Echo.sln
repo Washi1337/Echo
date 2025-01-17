@@ -7,6 +7,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.DataFlow", "src\Core\Echo.DataFlow\Echo.DataFlow.csproj", "{2D940041-E424-4960-AF1D-A0ECA48DB7F4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{620B6332-1C8B-4C82-BE28-5D62765C96F0}"
+	ProjectSection(SolutionItems) = preProject
+		test\Directory.Build.props = test\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{91D56580-50E2-49B4-A5C0-DB83C9AADF8D}"
 EndProject
@@ -23,6 +26,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.ControlFlow.Tests", "test\Core\Echo.ControlFlow.Tests\Echo.ControlFlow.Tests.csproj", "{F52C85BF-C329-4DF7-A8D8-E9A7E1925D1C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7B5309CC-0188-475C-9449-074CAA925A4B}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deps", "deps", "{F3162144-2D6C-4FD9-B8BB-DCCD49C87989}"
 EndProject
@@ -49,6 +55,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{83706566-D2F1-463F-B8B7-E8D870709657}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
+		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Global

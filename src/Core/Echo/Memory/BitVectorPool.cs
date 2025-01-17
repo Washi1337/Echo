@@ -71,9 +71,10 @@ namespace Echo.Memory
             if (!_freeInstancesBySize.TryGetValue(size, out var pool))
             {
                 pool = new ConcurrentBag<BitVector>();
-                while (_freeInstancesBySize.TryAdd(size, pool) || !_freeInstancesBySize.TryGetValue(size, out pool))
+                while (_freeInstancesBySize.TryAdd(size, pool))
                 {
-                    // ...
+                    if (_freeInstancesBySize.TryGetValue(size, out var newPool))
+                        pool = newPool;
                 }
             }
 

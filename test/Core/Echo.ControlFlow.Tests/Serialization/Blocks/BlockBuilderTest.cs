@@ -61,7 +61,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             
             var region = new ScopeRegion<DummyInstruction>();
             cfg.Regions.Add(region);
-            region.Nodes.Add(cfg.Nodes.GetByOffset(2));
+            region.Nodes.Add(cfg.Nodes.GetByOffset(2)!);
             
             var rootScope = cfg.ConstructBlocks();
             
@@ -72,7 +72,7 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             
             var order = rootScope.GetAllBlocks().ToArray();
             Assert.Equal(
-                new long[] {0, 2, 4}, 
+                [0, 2, 4], 
                 order.Select(b => b.Offset));
         }
 
@@ -298,9 +298,9 @@ namespace Echo.ControlFlow.Tests.Serialization.Blocks
             Assert.Equal(new[] {1L}, ehBlock.ProtectedBlock.GetAllBlocks().Select(b => b.Offset));
             var handlerBlock = Assert.Single(ehBlock.Handlers);
             Assert.NotNull(handlerBlock);
-            Assert.Equal(new[] {3L}, handlerBlock.Prologue.GetAllBlocks().Select(b => b.Offset));
-            Assert.Equal(new[] {5L}, handlerBlock.Contents.GetAllBlocks().Select(b => b.Offset));
-            Assert.Equal(new[] {7L}, handlerBlock.Epilogue.GetAllBlocks().Select(b => b.Offset));
+            Assert.Equal([3L], handlerBlock.Prologue!.GetAllBlocks().Select(b => b.Offset));
+            Assert.Equal([5L], handlerBlock.Contents.GetAllBlocks().Select(b => b.Offset));
+            Assert.Equal([7L], handlerBlock.Epilogue!.GetAllBlocks().Select(b => b.Offset));
         }
     }
 }
