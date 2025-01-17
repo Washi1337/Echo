@@ -14,7 +14,7 @@ public static class AstVariableExtensions
     /// <param name="self">The variable to cross-reference.</param>
     /// <param name="unit">The compilation unit to cross-reference in.</param>
     /// <returns>The expressions referencing the variable.</returns>
-    public static IEnumerable<VariableExpression<TInstruction>> GetIsUsedBy<TInstruction>(
+    public static IReadOnlyList<VariableExpression<TInstruction>> GetIsUsedBy<TInstruction>(
         this IVariable self,
         CompilationUnit<TInstruction> unit)
         where TInstruction : notnull
@@ -28,7 +28,7 @@ public static class AstVariableExtensions
     /// <param name="self">The variable to cross-reference.</param>
     /// <param name="unit">The compilation unit to cross-reference in.</param>
     /// <returns>The statements writing to the variable.</returns>
-    public static IEnumerable<Statement<TInstruction>> GetIsWrittenBy<TInstruction>(
+    public static IReadOnlyList<Statement<TInstruction>> GetIsWrittenBy<TInstruction>(
         this IVariable self,
         CompilationUnit<TInstruction> unit)
         where TInstruction : notnull

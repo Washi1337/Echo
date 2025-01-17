@@ -55,6 +55,15 @@ public class SyntheticVariable : IVariable
     {
         get;
     }
+    
+    /// <summary>
+    /// Gets or sets additional user data associated to the synthetic variable.
+    /// </summary>
+    public object? UserData
+    {
+        get;
+        set;
+    }
 
     private string GenerateName()
     {

@@ -23,6 +23,15 @@ namespace Echo.Ast
             get;
             set;
         }
+        
+        /// <summary>
+        /// Gets or sets additional user data that is associated to the AST node. 
+        /// </summary>
+        public object? UserData
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Obtains the parent compilation unit the AST is added to (if available).

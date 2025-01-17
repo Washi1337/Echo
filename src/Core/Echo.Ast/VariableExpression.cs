@@ -28,7 +28,7 @@ namespace Echo.Ast
         public IVariable Variable
         {
             get => _variable;
-            internal set
+            set
             {
                 if (_variable != value)
                 { 

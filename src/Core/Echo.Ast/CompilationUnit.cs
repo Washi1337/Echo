@@ -15,6 +15,7 @@ public class CompilationUnit<TInstruction> : AstNode<TInstruction>
 {
     private readonly Dictionary<IVariable, List<VariableExpression<TInstruction>>> _variableUses = new();
     private readonly Dictionary<IVariable, List<Statement<TInstruction>>> _variableWrites = new();
+    private readonly HashSet<IVariable> _variables = new();
         
     private BlockStatement<TInstruction> _root = null!;
 
@@ -36,14 +37,19 @@ public class CompilationUnit<TInstruction> : AstNode<TInstruction>
     }
 
     /// <summary>
+    /// Gets a collection of all referenced variables in the compilation unit.
+    /// </summary>
+    public IReadOnlyCollection<IVariable> Variables => _variables;
+
+    /// <summary>
     /// Gets all expressions in the compilation unit that reference the provided variable.
     /// </summary>
     /// <param name="variable">The variable to cross-reference.</param>
     /// <returns>The expressions referencing the variable.</returns>
-    public IEnumerable<VariableExpression<TInstruction>> GetVariableUses(IVariable variable)
+    public IReadOnlyList<VariableExpression<TInstruction>> GetVariableUses(IVariable variable)
     {
         return !_variableUses.TryGetValue(variable, out var uses)
-            ? Enumerable.Empty<VariableExpression<TInstruction>>()
+            ? Array.Empty<VariableExpression<TInstruction>>()
             : uses.ToArray(); // Clone to prevent list being modified after returning.
     }
 
@@ -52,10 +58,10 @@ public class CompilationUnit<TInstruction> : AstNode<TInstruction>
     /// </summary>
     /// <param name="variable">The variable to cross-reference.</param>
     /// <returns>The statements writing to the variable.</returns>
-    public IEnumerable<Statement<TInstruction>> GetVariableWrites(IVariable variable)
+    public IReadOnlyList<Statement<TInstruction>> GetVariableWrites(IVariable variable)
     {
         return !_variableWrites.TryGetValue(variable, out var writes) 
-            ? Enumerable.Empty<Statement<TInstruction>>()
+            ? Array.Empty<Statement<TInstruction>>()
             : writes.ToArray(); // Clone to prevent list being modified after returning.
     }
 
@@ -68,6 +74,7 @@ public class CompilationUnit<TInstruction> : AstNode<TInstruction>
         }
         
         uses.Add(expression);
+        _variables.Add(expression.Variable);
     }
 
     internal void UnregisterVariableUse(VariableExpression<TInstruction> expression)
@@ -76,7 +83,11 @@ public class CompilationUnit<TInstruction> : AstNode<TInstruction>
         {
             uses.Remove(expression);
             if (uses.Count == 0)
+            {
                 _variableUses.Remove(expression.Variable);
+                if (!_variableWrites.ContainsKey(expression.Variable))
+                    _variables.Remove(expression.Variable);
+            }
         }
     }
 
@@ -89,6 +100,7 @@ public class CompilationUnit<TInstruction> : AstNode<TInstruction>
         }
 
         writes.Add(statement);
+        _variables.Add(variable);
     }
 
     internal void UnregisterVariableWrite(IVariable variable, Statement<TInstruction> statement)
@@ -97,7 +109,11 @@ public class CompilationUnit<TInstruction> : AstNode<TInstruction>
         {
             writes.Remove(statement);
             if (writes.Count == 0)
-                _variableUses.Remove(variable);
+            {
+                _variableWrites.Remove(variable);
+                if (!_variableUses.ContainsKey(variable))
+                    _variables.Remove(variable);
+            }
         }
     }
 
