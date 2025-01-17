@@ -1,13 +1,20 @@
 <Project>
 
     <PropertyGroup>
-        <Copyright>Copyright © Washi 2019-2023</Copyright>
+        <Copyright>Copyright © Washi 2019-2025</Copyright>
         <PackageProjectUrl>https://github.com/Washi1337/Echo</PackageProjectUrl>
         <PackageLicense>https://github.com/Washi1337/Echo/LICENSE.md</PackageLicense>
         <RepositoryUrl>https://github.com/Washi1337/Echo</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <LangVersion>10</LangVersion>
-        <Version>0.9.0.1</Version>
+        <LangVersion>12</LangVersion>
+        <Nullable>enable</Nullable>
+        <VersionPrefix>1.0.0</VersionPrefix>
+        <VersionSuffix>alpha.1</VersionSuffix>
+        <Deterministic>true</Deterministic>
+        <UseArtifactsOutput>true</UseArtifactsOutput>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
 </Project>

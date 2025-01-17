@@ -16,7 +16,7 @@ namespace Echo.Platforms.AsmResolver.Tests
         [InlineData(CilCode.Ldc_R4, 1.0f)]
         [InlineData(CilCode.Ldc_I4, 123)]
         [InlineData(CilCode.Ldstr, "Hello, world!")]
-        public void PushingConstantsShouldBePure(CilCode code, object operand)
+        public void PushingConstantsShouldBePure(CilCode code, object? operand)
         {
             var instruction = new CilInstruction(code.ToOpCode(), operand);
             Assert.Equal(Trilean.True, _classifier.IsPure(instruction));

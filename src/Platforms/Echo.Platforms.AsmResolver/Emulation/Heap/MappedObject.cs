@@ -88,7 +88,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
                 int index = (int) ((offset - _machine.ValueFactory.ArrayHeaderSize) / size);
                 
                 // Read + Marshal
-                object value = array.GetValue(index);
+                object? value = array.GetValue(index);
                 buffer.Write(_machine.ObjectMarshaller.ToBitVector(value));
             }
         }

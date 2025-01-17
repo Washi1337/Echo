@@ -42,6 +42,9 @@ namespace Echo.DataFlow.Construction
             get;
         }
 
+        /// <summary>
+        /// Gets a mapping between offsets to data flow nodes. 
+        /// </summary>
         public IDictionary<long, DataFlowNode<TInstruction>> OffsetMap
         {
             get;

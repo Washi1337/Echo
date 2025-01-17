@@ -46,7 +46,7 @@ namespace Echo.Graphing.Analysis.Traversal
             return _order.AsReadOnly();
         }
         
-        private void TraversalOnNodeDiscovered(object sender, NodeDiscoveryEventArgs e)
+        private void TraversalOnNodeDiscovered(object? sender, NodeDiscoveryEventArgs e)
         {
             if (!_indices.ContainsKey(e.NewNode))
             {

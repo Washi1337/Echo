@@ -59,6 +59,6 @@ namespace Echo.Ast.Patterns
         }
         
         /// <inheritdoc />
-        public override string ToString() => Expression.ToString();
+        public override string ToString() => Expression.ToString()!;
     }
 }

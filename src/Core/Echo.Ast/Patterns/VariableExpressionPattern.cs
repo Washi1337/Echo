@@ -49,7 +49,7 @@ namespace Echo.Ast.Patterns
         }
 
         /// <inheritdoc />
-        public override string ToString() => Variable.ToString();
+        public override string ToString() => Variable.ToString()!;
 
         /// <summary>
         /// Captures the embedded variable.

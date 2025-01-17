@@ -16,6 +16,6 @@
         } = new();
 
         /// <inheritdoc />
-        public string Format(in TInstruction instruction) => instruction.ToString();
+        public string Format(in TInstruction instruction) => instruction.ToString()!;
     }
 }

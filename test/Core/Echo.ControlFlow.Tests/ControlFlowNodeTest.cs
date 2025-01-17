@@ -29,9 +29,9 @@ namespace Echo.ControlFlow.Tests
             var nodes = CreateDummyGraph(2);
             nodes[0].UnconditionalEdge = new ControlFlowEdge<int>(nodes[0], nodes[1]);
             
-            Assert.Equal(nodes[0], nodes[0].UnconditionalEdge.Origin);
-            Assert.Equal(nodes[1], nodes[0].UnconditionalEdge.Target);
-            Assert.Equal(ControlFlowEdgeType.FallThrough, nodes[0].UnconditionalEdge.Type);
+            Assert.Equal(nodes[0], nodes[0].UnconditionalEdge!.Origin);
+            Assert.Equal(nodes[1], nodes[0].UnconditionalEdge!.Target);
+            Assert.Equal(ControlFlowEdgeType.FallThrough, nodes[0].UnconditionalEdge!.Type);
             Assert.Equal(1, nodes[0].OutDegree);
             Assert.Equal(1, nodes[1].InDegree);
         }
@@ -151,7 +151,7 @@ namespace Echo.ControlFlow.Tests
             nodes[0].ConnectWith(nodes[1], ControlFlowEdgeType.Conditional);
             
             Assert.Equal(2, nodes[0].ConditionalEdges.Count);
-            Assert.Equal(2, nodes[0].ParentGraph.GetEdges().Count());
+            Assert.Equal(2, nodes[0].ParentGraph!.GetEdges().Count());
             Assert.Equal(2, nodes[0].OutDegree);
             Assert.Equal(2, nodes[1].InDegree);
         }

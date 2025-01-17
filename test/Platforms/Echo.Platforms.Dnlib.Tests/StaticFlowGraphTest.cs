@@ -21,6 +21,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var graph = graphBuilder.ConstructFlowGraph(0);
             Assert.Single(graph.Nodes);
             Assert.Empty(graph.GetEdges());
+            Assert.NotNull(graph.EntryPoint);
             Assert.Equal(0, graph.EntryPoint.OutDegree);
         }
 
@@ -34,6 +35,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var graphBuilder = new StaticFlowGraphBuilder<Instruction>(arch, arch.Method.Body.Instructions, resolver);
 
             var graph = graphBuilder.ConstructFlowGraph(0);
+            Assert.NotNull(graph.EntryPoint);
             Assert.Equal(2, graph.EntryPoint.OutDegree);
         }
 

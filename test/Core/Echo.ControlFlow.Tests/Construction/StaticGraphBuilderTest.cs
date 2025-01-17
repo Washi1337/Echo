@@ -10,7 +10,7 @@ namespace Echo.ControlFlow.Tests.Construction
     public class StaticGraphBuilderTest
     {
         private static ControlFlowGraph<DummyInstruction> BuildControlFlowGraph(DummyInstruction[] instructions,
-            long entrypoint = 0, IEnumerable<long> knownBlockHeaders = null)
+            long entrypoint = 0, IEnumerable<long>? knownBlockHeaders = null)
         {
             var builder = new StaticFlowGraphBuilder<DummyInstruction>(
                 DummyArchitecture.Instance,

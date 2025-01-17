@@ -16,7 +16,7 @@ namespace Echo.DataFlow.Tests.Construction
         private static (ControlFlowGraph<DummyInstruction> cfg, DataFlowGraph<DummyInstruction> dfg) BuildFlowGraphs(
             DummyInstruction[] instructions,
             long entrypoint = 0,
-            IEnumerable<long> knownBlockHeaders = null)
+            IEnumerable<long>? knownBlockHeaders = null)
         {
             var dfgBuilder = new DummyTransitioner();
             var cfgBuilder = new SymbolicFlowGraphBuilder<DummyInstruction>(
@@ -24,7 +24,7 @@ namespace Echo.DataFlow.Tests.Construction
                 instructions,
                 dfgBuilder);
 
-            var cfg = cfgBuilder.ConstructFlowGraph(entrypoint, knownBlockHeaders ?? Enumerable.Empty<long>());
+            var cfg = cfgBuilder.ConstructFlowGraph(entrypoint, knownBlockHeaders ?? []);
             return (cfg, dfgBuilder.DataFlowGraph);
         }
 

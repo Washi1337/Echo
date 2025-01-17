@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Echo.Code;
 using Echo.DataFlow.Emulation;
 using Echo.Platforms.DummyPlatform.Code;
@@ -34,7 +35,7 @@ namespace Echo.DataFlow.Tests.Emulation
             var state2 = new SymbolicProgramState<DummyInstruction>(0, variables2);
             
             Assert.True(state1.MergeStates(state2, out var newState));
-            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources), newState.Variables[variable].GetNodes());
+            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(sources), newState.Variables[variable].GetNodes().ToHashSet());
         }
 
         [Fact]
@@ -54,7 +55,7 @@ namespace Echo.DataFlow.Tests.Emulation
             var state2 = new SymbolicProgramState<DummyInstruction>(0, variables2);
             
             Assert.False(state1.MergeStates(state2, out var newState));
-            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(new []{source}), newState.Variables[variable].GetNodes());
+            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>([source]), newState.Variables[variable].GetNodes().ToHashSet());
         }
 
         [Fact]
@@ -82,8 +83,8 @@ namespace Echo.DataFlow.Tests.Emulation
             var state2 = new SymbolicProgramState<DummyInstruction>(0, variables2);
             
             Assert.True(state1.MergeStates(state2, out var newState));
-            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(new []{sources[0]}), newState.Variables[variables[0]].GetNodes());
-            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>(new []{sources[1]}), newState.Variables[variables[1]].GetNodes());
+            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>([sources[0]]), newState.Variables[variables[0]].GetNodes().ToHashSet());
+            Assert.Equal(new HashSet<DataFlowNode<DummyInstruction>>([sources[1]]), newState.Variables[variables[1]].GetNodes().ToHashSet());
         }
     }
 }

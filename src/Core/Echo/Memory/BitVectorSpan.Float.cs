@@ -11,7 +11,7 @@ namespace Echo.Memory
         public float F32
         {
             get => MemoryMarshal.Read<float>(Bits);
-            set => MemoryMarshal.Write(Bits, ref value);
+            set => MemoryMarshal.Cast<byte, float>(Bits)[0] = value;
         }
         
         /// <summary>
@@ -20,7 +20,7 @@ namespace Echo.Memory
         public double F64
         {
             get => MemoryMarshal.Read<double>(Bits);
-            set => MemoryMarshal.Write(Bits, ref value);
+            set => MemoryMarshal.Cast<byte, double>(Bits)[0] = value;
         }
 
         /// <summary>

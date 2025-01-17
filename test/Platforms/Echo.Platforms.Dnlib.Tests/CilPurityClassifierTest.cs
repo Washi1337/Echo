@@ -17,7 +17,7 @@ namespace Echo.Platforms.Dnlib.Tests
         [InlineData(DnlibCode.Ldc_R4, 1.0f)]
         [InlineData(DnlibCode.Ldc_I4, 123)]
         [InlineData(DnlibCode.Ldstr, "Hello, world!")]
-        public void PushingConstantsShouldBePure(DnlibCode code, object operand) 
+        public void PushingConstantsShouldBePure(DnlibCode code, object? operand) 
         {
             var instruction = new Instruction(code.ToOpCode(), operand);
             Assert.Equal(Trilean.True, _classifier.IsPure(instruction));

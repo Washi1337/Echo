@@ -68,8 +68,8 @@ namespace Echo.Memory
         /// <param name="value">The bits.</param>
         public BitVector(sbyte value)
         {
-            Bits = new byte[] {unchecked((byte) value)};
-            KnownMask = new byte[] {0xFF};
+            Bits = [unchecked((byte) value)];
+            KnownMask = [0xFF];
         }
 
         /// <summary>
@@ -79,8 +79,8 @@ namespace Echo.Memory
         /// <param name="knownMask">The bitmask indicating which bits in <paramref name="bits"/> are known.</param>
         public BitVector(sbyte bits, byte knownMask)
         {
-            Bits = BitConverter.GetBytes(bits);
-            KnownMask = BitConverter.GetBytes(knownMask);
+            Bits = [unchecked((byte) bits)];
+            KnownMask = [0xFF];
         }
         
         /// <summary>
@@ -89,8 +89,8 @@ namespace Echo.Memory
         /// <param name="value">The bits.</param>
         public BitVector(byte value)
         {
-            Bits = new[] {value};
-            KnownMask = new byte[] {0xFF};
+            Bits = [value];
+            KnownMask = [0xFF];
         }
 
         /// <summary>
@@ -100,8 +100,8 @@ namespace Echo.Memory
         /// <param name="knownMask">The bitmask indicating which bits in <paramref name="bits"/> are known.</param>
         public BitVector(byte bits, byte knownMask)
         {
-            Bits = BitConverter.GetBytes(bits);
-            KnownMask = BitConverter.GetBytes(knownMask);
+            Bits = [bits];
+            KnownMask = [knownMask];
         }
         
         /// <summary>
@@ -111,7 +111,7 @@ namespace Echo.Memory
         public BitVector(short value)
         {
             Bits = BitConverter.GetBytes(value);
-            KnownMask = new byte[] {0xFF, 0xFF};
+            KnownMask = [0xFF, 0xFF];
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Echo.Memory
         public BitVector(ushort value)
         {
             Bits = BitConverter.GetBytes(value);
-            KnownMask = new byte[] {0xFF, 0xFF};
+            KnownMask = [0xFF, 0xFF];
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace Echo.Memory
         public BitVector(int value)
         {
             Bits = BitConverter.GetBytes(value);
-            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF};
+            KnownMask = [0xFF, 0xFF, 0xFF, 0xFF];
         }
         
         /// <summary>
@@ -174,7 +174,7 @@ namespace Echo.Memory
         public BitVector(uint value)
         {
             Bits = BitConverter.GetBytes(value);
-            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF};
+            KnownMask = [0xFF, 0xFF, 0xFF, 0xFF];
         }
         
         /// <summary>
@@ -195,7 +195,7 @@ namespace Echo.Memory
         public BitVector(long value)
         {
             Bits = BitConverter.GetBytes(value);
-            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+            KnownMask = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF];
         }
         
         /// <summary>
@@ -216,7 +216,7 @@ namespace Echo.Memory
         public BitVector(ulong value)
         {
             Bits = BitConverter.GetBytes(value);
-            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+            KnownMask = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF];
         }
         
         /// <summary>
@@ -237,7 +237,7 @@ namespace Echo.Memory
         public BitVector(float value)
         {
             Bits = BitConverter.GetBytes(value);
-            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF};
+            KnownMask = [0xFF, 0xFF, 0xFF, 0xFF];
         }
 
         /// <summary>
@@ -247,7 +247,7 @@ namespace Echo.Memory
         public BitVector(double value)
         {
             Bits = BitConverter.GetBytes(value);
-            KnownMask = new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+            KnownMask = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF];
         }
         
         /// <summary>

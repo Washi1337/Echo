@@ -92,10 +92,10 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         {
             // Artificially construct a looping construct.
             var graph = TestGraphs.CreateLoop();
-            var n1 = graph.Nodes.GetByOffset(0);
-            var n2 = graph.Nodes.GetByOffset(1);
-            var n3 = graph.Nodes.GetByOffset(2);
-            var n4 = graph.Nodes.GetByOffset(4);
+            var n1 = graph.Nodes.GetByOffset(0)!;
+            var n2 = graph.Nodes.GetByOffset(1)!;
+            var n3 = graph.Nodes.GetByOffset(2)!;
+            var n4 = graph.Nodes.GetByOffset(4)!;
             
             var dominatorTree = DominatorTree<DummyInstruction>.FromGraph(graph);
             Assert.Equal(graph.EntryPoint, dominatorTree.Root.OriginalNode);

@@ -1,0 +1,11 @@
+<Project>
+
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+    
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ArtifactsPath>$(MSBuildThisFileDirectory)..\artifacts\test</ArtifactsPath>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+</Project>

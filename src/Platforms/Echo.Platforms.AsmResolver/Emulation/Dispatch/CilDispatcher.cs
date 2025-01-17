@@ -41,8 +41,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
                 if (!type.IsAbstract && typeof(ICilOpCodeHandler).IsAssignableFrom(type))
                 {
                     var attribute = type.GetCustomAttribute<DispatcherTableEntryAttribute>();
+                    if (attribute is null)
+                        continue;
 
-                    var instance = (ICilOpCodeHandler) Activator.CreateInstance(type);
+                    var instance = (ICilOpCodeHandler) Activator.CreateInstance(type)!;
                     foreach (var opCode in attribute.OpCodes)
                         DefaultDispatcherTable[opCode] = instance;
                 }

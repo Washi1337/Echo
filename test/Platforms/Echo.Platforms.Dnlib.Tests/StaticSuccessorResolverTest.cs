@@ -66,6 +66,7 @@ namespace Echo.Platforms.Dnlib.Tests
             var cfg = method.ConstructStaticFlowGraph();
 
             var node = Assert.Single(cfg.Nodes);
+            Assert.NotNull(node.Contents.Footer);
             Assert.Equal(OpCodes.Jmp, node.Contents.Footer.OpCode);
         }
     }

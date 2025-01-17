@@ -24,7 +24,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Constants
         [InlineData(CilCode.Ldc_I4_7, null)]
         [InlineData(CilCode.Ldc_I4_8, null)]
         [InlineData(CilCode.Ldc_I4_M1, null)]
-        public void PushI4(CilCode code, object operand)
+        public void PushI4(CilCode code, object? operand)
         {
             var instruction = new CilInstruction(code.ToOpCode(), operand);
 
