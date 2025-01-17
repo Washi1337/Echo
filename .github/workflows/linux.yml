@@ -34,3 +34,10 @@ jobs:
       
       - name: Test
         run: dotnet test --no-restore --verbosity minimal
+
+      - name: Push to NuGet Nightly
+        env: 
+          NIGHTLY_NUGET_SOURCE: ${{ secrets.NIGHTLY_NUGET_SOURCE }}
+          NIGHTLY_NUGET_API_KEY: ${{ secrets.NIGHTLY_NUGET_API_KEY }}
+        if: ${{github.ref == 'refs/heads/master' && env.NIGHTLY_NUGET_SOURCE != '' && env.NIGHTLY_NUGET_API_KEY != '' }}
+        run: dotnet nuget push "./artifacts/**/*.nupkg" -k ${{env.NIGHTLY_NUGET_API_KEY}} -s ${{env.NIGHTLY_NUGET_SOURCE}} --skip-duplicate
