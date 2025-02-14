@@ -336,6 +336,26 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         }
 
         [Fact]
+        public void CallStepInWithInitializerIgnored()
+        {
+            // Look up metadata.
+            var type = ModuleFixture.MockModule.LookupMember<TypeDefinition>(typeof(ClassWithInitializer).MetadataToken);
+            var method = type.Methods.First(m => m.Name == nameof(ClassWithInitializer.MethodFieldAccess));
+
+            // Ignore cctors
+            Context.Machine.EmulationFlags |= CilEmulationFlags.SkipTypeInitializations;
+
+            // Step into method.
+            Context.Machine.Invoker = DefaultInvokers.StepIn;
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Call, method));
+
+            Assert.True(result.IsSuccess);
+
+            // Verify that the .cctor is not called.
+            Assert.Same(method, Context.Thread.CallStack.Peek(0).Method);
+        }
+
+        [Fact]
         public void CallStepInWithThrowingInitializer()
         {
             // Look up metadata.

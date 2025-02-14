@@ -15,7 +15,8 @@ public abstract class FieldOpCodeHandler : ICilOpCodeHandler
         var field = (IFieldDescriptor) instruction.Operand!;
         
         // Ensure the enclosing type is initialized in the runtime.
-        if (field.DeclaringType is { } declaringType)
+        if ((context.Machine.EmulationFlags & CilEmulationFlags.SkipTypeInitializations) == 0
+            && field.DeclaringType is { } declaringType)
         {
             var genericContext = GenericContext.FromMember(context.CurrentFrame.Method);
             var instantiated = declaringType.ToTypeSignature().InstantiateGenericTypes(genericContext);
