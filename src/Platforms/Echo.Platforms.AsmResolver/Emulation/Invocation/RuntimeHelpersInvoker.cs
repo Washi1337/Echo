@@ -38,11 +38,11 @@ public class RuntimeHelpersInvoker : IMethodInvoker
     {
         if (method is not MethodSpecification { Signature.TypeArguments: { Count: 1 } typeArguments })
             return InvocationResult.Inconclusive();
+
+        var factory = context.Machine.ValueFactory;
+        bool result = factory.GetTypeValueMemoryLayout(typeArguments[0]).IsReferenceOrContainsReferences;
         
-        // TODO: This is inaccurate (feature-blocked by https://github.com/Washi1337/AsmResolver/issues/530).
-        bool result = !typeArguments[0].IsValueType;
-        
-        return InvocationResult.StepOver(context.Machine.ValueFactory.RentBoolean(result));
+        return InvocationResult.StepOver(factory.RentBoolean(result));
     }
     
     private static InvocationResult InvokeInitializeArray(CilExecutionContext context, IList<BitVector> arguments)
