@@ -1,4 +1,5 @@
 using AsmResolver.DotNet.Signatures;
+using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation
 {
@@ -24,6 +25,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// according to the method's return type.
         /// </summary>
         public static IMethodInvoker ReturnDefault => ReturnDefaultInvoker.ReturnDefault;
+
+        /// <summary>
+        /// Gets the method invoker that always steps over the requested method and produces the <c>false</c> constant
+        /// as a return value.
+        /// </summary>
+        public static ReturnConstantInvoker ReturnFalse { get; } = new(0);
+
+        /// <summary>
+        /// Gets the method invoker that always steps over the requested method and produces the <c>true</c> constant
+        /// as a return value.
+        /// </summary>
+        public static ReturnConstantInvoker ReturnTrue { get; } = new(1);
 
         /// <summary>
         /// Gets the method invoker that steps over any method that is not within the resolution scope of the current
@@ -86,6 +99,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// </summary>
         /// <param name="baseInvoker">The invoker to use for producing a result when stepping over a method.</param>
         public static NativeMethodInvoker HandleNativeWith(IMethodInvoker baseInvoker) => new(baseInvoker);
+
+        /// <summary>
+        /// Creates a method invoker that always steps over the requested method and returns the provided value.
+        /// </summary>
+        /// <param name="value">The value to return.</param>
+        /// <returns>The invoker.</returns>
+        public static ReturnConstantInvoker ReturnValue(BitVector value) => new(value);
         
         /// <summary>
         /// Creates a new method shim invoker that multiplexes a set of methods to individual handlers.  
