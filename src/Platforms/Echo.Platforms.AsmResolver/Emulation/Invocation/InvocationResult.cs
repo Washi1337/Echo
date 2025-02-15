@@ -32,7 +32,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// Determines whether the invocation was successful.
         /// </summary>
         [MemberNotNullWhen(true, nameof(Value))]
-        public bool IsSuccess => ResultType is InvocationResultType.StepIn or InvocationResultType.StepOver;
+        public bool IsSuccess => ResultType is InvocationResultType.StepIn or InvocationResultType.StepOver or InvocationResultType.FullyHandled;
 
         /// <summary>
         /// When <see cref="ResultType"/> is <see cref="InvocationResultType.StepOver"/>, gets the value that the

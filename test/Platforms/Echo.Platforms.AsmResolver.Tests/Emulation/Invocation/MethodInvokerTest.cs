@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using AsmResolver.DotNet;
@@ -219,6 +220,35 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
             Assert.True(result.IsSuccess);
             Assert.NotNull(result.Value);
             Assert.Equal(1337 + 1338 + 1339, result.Value!.AsSpan().I32);
+        }
+
+        [Fact]
+        public void DelegateInvokeOnUnknownBackingMethod()
+        {
+            var testClass = _fixture.MockModule.TopLevelTypes.First(t => t.Name == nameof(TestClass));
+            var method = testClass.Methods.First(m => m.Name == nameof(TestClass.ReturnAnyInt));
+            var delegateType = testClass.NestedTypes.First(t => t.Name == nameof(TestClass.ReturnAnyIntDelegate));
+            var invoke = delegateType.Methods.First(m => m.Name == nameof(TestClass.ReturnAnyIntDelegate.Invoke));
+
+            long instance = _context.Machine.Heap.AllocateObject(delegateType, false);
+
+            _context.Machine.UnknownResolver = new TestDelegateUnknownResolver(method);
+            _context.Machine.Invoker = DefaultInvokers.StepIn;
+            var result = DefaultInvokers.DelegateShim.Invoke(_context, invoke, [instance]);
+
+            Assert.True(result.IsSuccess);
+            Assert.Equal(method, _context.Thread.CallStack.Peek().Method);
+        }
+
+        private sealed class TestDelegateUnknownResolver(IMethodDescriptor method) : ThrowUnknownResolver
+        {
+            public override IMethodDescriptor? ResolveDelegateTarget(
+                CilExecutionContext context,
+                ObjectHandle delegateObject,
+                IList<BitVector> arguments)
+            {
+                return method;
+            }
         }
     }
 }

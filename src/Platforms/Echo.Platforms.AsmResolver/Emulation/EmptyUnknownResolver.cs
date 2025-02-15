@@ -96,7 +96,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <inheritdoc />
-        public bool ResolveExceptionFilter(
+        public virtual IMethodDescriptor? ResolveDelegateTarget(
+            CilExecutionContext context,
+            ObjectHandle delegateObject,
+            IList<BitVector> arguments)
+        {
+            return null;
+        }
+
+        /// <inheritdoc />
+        public virtual bool ResolveExceptionFilter(
             CilExecutionContext context, 
             CilInstruction instruction,
             StackSlot conclusion)

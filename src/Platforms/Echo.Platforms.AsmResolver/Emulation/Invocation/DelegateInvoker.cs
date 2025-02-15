@@ -1,46 +1,39 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet;
-using AsmResolver.DotNet.Signatures;
-using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation.Dispatch;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Invocation;
+
 /// <summary>
-/// Wrapper for Delegates
+/// Implements a method invoker that handles <see cref="System.Delegate"/> and its derivatives.
 /// </summary>
 public class DelegateInvoker : IMethodInvoker
 {
     /// <summary>
-    /// Instance
+    /// Gets the singleton instance of the <see cref="DelegateInvoker"/> class.
     /// </summary>
     public static DelegateInvoker Instance { get; } = new();
 
     /// <inheritdoc />
     public InvocationResult Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments)
     {
-        if (method is not { Name: { } name, DeclaringType: { } declaringType, Signature: { } signature })
+        if (method is not { Name.Value: { } name, DeclaringType: { } declaringType, Signature: not null })
             return InvocationResult.Inconclusive();
         
         if (declaringType.Resolve() is { IsDelegate: false })
             return InvocationResult.Inconclusive();
-        
-        if (method.Name == ".ctor")
+
+        return name switch
         {
-            return ConstructDelegate(context, arguments);
-        }
-        else if (method.Name == "Invoke")
-        {
-            return InvokeDelegate(context, method, arguments);
-        }
-        else
-        {
-            return InvocationResult.Inconclusive();
-        }
+            ".ctor" => ConstructDelegate(context, arguments),
+            "Invoke" => InvokeDelegate(context, method, arguments),
+            _ => InvocationResult.Inconclusive()
+        };
     }
     
-    private InvocationResult ConstructDelegate(CilExecutionContext context, IList<BitVector> arguments)
+    private static InvocationResult ConstructDelegate(CilExecutionContext context, IList<BitVector> arguments)
     {
         var vm = context.Machine;
         var valueFactory = vm.ValueFactory;
@@ -55,59 +48,65 @@ public class DelegateInvoker : IMethodInvoker
         return InvocationResult.StepOver(null);
     }
     
-    private InvocationResult InvokeDelegate(CilExecutionContext context, IMethodDescriptor invokeMethod, IList<BitVector> arguments)
+    private static InvocationResult InvokeDelegate(CilExecutionContext context, IMethodDescriptor invokeMethod, IList<BitVector> arguments)
     {
         var vm = context.Machine;
         var valueFactory = vm.ValueFactory;
 
         var self = arguments[0].AsObjectHandle(vm);
 
-        var methodPtrFieldValue = self.ReadField(valueFactory.DelegateMethodPtrField);
+        // Try to resolve the managed method behind the delegate.
+        IMethodDescriptor? method = null;
 
-        if (!methodPtrFieldValue.IsFullyKnown)
-            throw new CilEmulatorException($"Field {self.GetObjectType().FullName}::_methodPtr contains an unknown value. Perhaps delegate was initialised with an error, or memory was corrupted.");
+        var methodPtrFieldValue = self.ReadField(valueFactory.DelegateMethodPtrField).AsSpan();
+        if (methodPtrFieldValue.IsFullyKnown)
+        {
+            long methodPtr = methodPtrFieldValue.ReadNativeInteger(vm.Is32Bit);
+            valueFactory.ClrMockMemory.MethodEntryPoints.TryGetObject(methodPtr, out method);
+        }
 
-        var methodPtr = methodPtrFieldValue.AsSpan().ReadNativeInteger(vm.Is32Bit);
+        method ??= vm.UnknownResolver.ResolveDelegateTarget(context, self, arguments);
+        if (method is null)
+            return InvocationResult.Inconclusive();
 
-        if (!valueFactory.ClrMockMemory.MethodEntryPoints.TryGetObject(methodPtr, out var method))
-            throw new CilEmulatorException($"Cant resolve method from {self.GetObjectType().FullName}::_methodPtr. Possible causes: IMethodDescriptor was not mapped by the emulator, or memory was corrupted.");
-
-        var newArguments = new BitVector[method!.Signature!.GetTotalParameterCount()];
+        // Prepare new arguments.
+        var newArguments = new BitVector[method.Signature!.GetTotalParameterCount()];
 
         int argumentIndex = 0;
 
-        // read and push this for HasThis methods
-        if (method!.Signature!.HasThis)
+        // Read and push this for HasThis methods
+        if (method.Signature.HasThis)
             newArguments[argumentIndex++] = self.ReadField(valueFactory.DelegateTargetField);
 
-        // skip 1 for delegate "this"
-        for (var i = 1; i < arguments.Count; i++)
+        // Skip 1 for delegate "this"
+        for (int i = 1; i < arguments.Count; i++)
             newArguments[argumentIndex++] = arguments[i];
 
+        // Invoke the backing method.
         var result = context.Machine.Invoker.Invoke(context, method, newArguments);
 
-        if (!result.IsSuccess)
+        switch (result.ResultType)
         {
-            // return error
-            return result;
-        }
-        else if (result.ResultType == InvocationResultType.StepOver)
-        {
-            // return value
-            return result;
-        }
-        else if (result.ResultType == InvocationResultType.StepIn)
-        {
-            // create and push the trampoline frame
-            var trampolineFrame = context.Thread.CallStack.Push(invokeMethod);
-            trampolineFrame.IsTrampoline = true;
+            case InvocationResultType.Exception:
+            case InvocationResultType.Inconclusive:
+            case InvocationResultType.StepOver:
+            case InvocationResultType.FullyHandled:
+                return result;
 
-            // create and push the method for which the delegate was created
-            var frame = context.Thread.CallStack.Push(method);
-            for (int i = 0; i < newArguments.Length; i++)
-                frame.WriteArgument(i, newArguments[i]);
+            case InvocationResultType.StepIn:
+                // Create and push the trampoline frame
+                var trampolineFrame = context.Thread.CallStack.Push(invokeMethod);
+                trampolineFrame.IsTrampoline = true;
+
+                // Create and push the method for which the delegate was created
+                var frame = context.Thread.CallStack.Push(method);
+                for (int i = 0; i < newArguments.Length; i++)
+                    frame.WriteArgument(i, newArguments[i]);
+
+                return InvocationResult.FullyHandled();
+
+            default:
+                throw new ArgumentOutOfRangeException();
         }
-        
-        return InvocationResult.FullyHandled();
     }
 }

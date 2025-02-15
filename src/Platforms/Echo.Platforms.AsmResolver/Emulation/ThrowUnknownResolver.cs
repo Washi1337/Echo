@@ -95,7 +95,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <inheritdoc />
-        public bool ResolveExceptionFilter(
+        public virtual IMethodDescriptor? ResolveDelegateTarget(
+            CilExecutionContext context,
+            ObjectHandle delegateObject,
+            IList<BitVector> arguments)
+        {
+            throw new CilEmulatorException($"Attempted to resolve the backing method of a delegate that is initialized with an unknown target method pointer.");
+        }
+
+        /// <inheritdoc />
+        public virtual bool ResolveExceptionFilter(
             CilExecutionContext context, 
             CilInstruction instruction,
             StackSlot conclusion)

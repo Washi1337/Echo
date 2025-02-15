@@ -288,7 +288,7 @@ namespace Mocks
         
         public delegate int ReturnAnyIntDelegate();
         
-        private static int ReturnAnyInt() => 5;
+        public static int ReturnAnyInt() => 5;
         
         public static int TestDelegateCall()
         {

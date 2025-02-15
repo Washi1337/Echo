@@ -89,6 +89,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </returns>
         IMethodDescriptor? ResolveMethod(CilExecutionContext context, CilInstruction instruction, IList<BitVector> arguments);
 
+        IMethodDescriptor? ResolveDelegateTarget(CilExecutionContext context, ObjectHandle delegateObject, IList<BitVector> arguments);
+
         /// <summary>
         /// Resolves an unknown conclusion for an exception filter.
         /// </summary>
