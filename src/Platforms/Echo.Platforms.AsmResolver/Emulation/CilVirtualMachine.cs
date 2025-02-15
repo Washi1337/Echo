@@ -189,6 +189,15 @@ namespace Echo.Platforms.AsmResolver.Emulation
         }
 
         /// <summary>
+        /// Gets or sets flags that control the behavior of the virtual machine.
+        /// </summary>
+        public CilEmulationFlags EmulationFlags
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Creates a new thread in the machine.
         /// </summary>
         /// <param name="stackSize">The amount of memory to allocate for the thread's stack.</param>
@@ -208,7 +217,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <param name="thread">The thread to remove.</param>
         /// <remarks>
         /// This does not gracefully terminate a thread. Any code that is still running will remain executing, and may
-        /// have unwanted side-effects. Therefore, be sure to only call this method only when it is certain that no code
+        /// have unwanted side effects. Therefore, be sure to only call this method only when it is certain that no code
         /// is running. 
         /// </remarks>
         public void DestroyThread(CilThread thread)

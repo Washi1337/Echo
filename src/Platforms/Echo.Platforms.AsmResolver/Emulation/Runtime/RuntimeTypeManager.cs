@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using AsmResolver;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 
@@ -108,6 +106,9 @@ public sealed class RuntimeTypeManager
                 return TypeInitializerResult.Exception(initialization.Exception);
             }
 
+            // Initialize static fields stored in the type.
+            InitializeStaticFields(type, definition);
+
             // "Call" the constructor.
             initialization.ConstructorCalled = true;
 
@@ -118,9 +119,9 @@ public sealed class RuntimeTypeManager
                 var result = (IMethodDescriptor) cctor;
                 
                 // Instantiate any args in the declaring type.
-                var context = GenericContext.FromType(type);
                 if (type.ToTypeSignature() is {} typeSignature)
                 {
+                    var context = GenericContext.FromType(type);
                     var newType = typeSignature.InstantiateGenericTypes(context);
                     if (newType != typeSignature)
                         result = newType.ToTypeDefOrRef().CreateMemberReference(cctor.Name!, cctor.Signature!);
@@ -133,16 +134,32 @@ public sealed class RuntimeTypeManager
             return TypeInitializerResult.NoAction();
         }
     }
- 
-    private sealed class TypeInitialization
-    {
-        public TypeInitialization(ITypeDescriptor type)
-        {
-            Type = type;
-        }
 
-        public ITypeDescriptor Type { get; }
-        
+    private void InitializeStaticFields(ITypeDescriptor type, TypeDefinition definition)
+    {
+        var context = GenericContext.FromType(type);
+
+        var reference = type.ToTypeDefOrRef();
+        foreach (var field in definition.Fields)
+        {
+            // We only initialize static fields that don't have a fieldrva.
+            if (field is not {IsStatic: true, IsLiteral: false, HasFieldRva: false, Signature: { } signature})
+                continue;
+
+            // Ensure we have the generic instance version of the field when necessary.
+            IFieldDescriptor actual = type != reference
+                ? reference.CreateMemberReference(field.Name, signature.InstantiateGenericTypes(context))
+                : field;
+
+            // Ensure field is initialized.
+            _machine.StaticFields.GetOrInitializeFieldAddress(actual, true);
+        }
+    }
+
+    private sealed class TypeInitialization(ITypeDescriptor type)
+    {
+        public ITypeDescriptor Type { get; } = type;
+
         public bool ConstructorCalled { get; set; }
 
         public ObjectHandle Exception { get; set; }

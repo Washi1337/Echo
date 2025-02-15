@@ -220,7 +220,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
                     // Ensure type initializer is called for declaring type when necessary.
                     // TODO: Handle `beforefieldinit` flag.
-                    if (method.DeclaringType is { } declaringType)
+                    if ((context.Machine.EmulationFlags & CilEmulationFlags.SkipTypeInitializations) == 0
+                        && method.DeclaringType is { } declaringType)
                     {
                         return context.Machine.TypeManager
                             .HandleInitialization(context.Thread, declaringType)

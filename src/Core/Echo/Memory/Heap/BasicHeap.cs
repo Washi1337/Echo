@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Echo.Code;
 
 namespace Echo.Memory.Heap
 {

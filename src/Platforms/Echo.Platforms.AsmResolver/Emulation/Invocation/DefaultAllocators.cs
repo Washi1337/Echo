@@ -11,7 +11,7 @@ public static class DefaultAllocators
     public static UnknownAddressAllocator UnknownAddress => UnknownAddressAllocator.Instance;
     
     /// <summary>
-    /// Gets an allocator that allocates objects in the virtualalized heap of the underlying virtual machine.
+    /// Gets an allocator that allocates objects in the virtualized heap of the underlying virtual machine.
     /// </summary>
     public static VirtualHeapAllocator VirtualHeap => VirtualHeapAllocator.Instance;
 

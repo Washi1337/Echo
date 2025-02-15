@@ -19,8 +19,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
         private static readonly MethodInfo SetField;
         private static readonly MethodInfo SetSize;
 
-        private readonly Dictionary<ITypeDescriptor, TypeMemoryLayout> _contentLayouts = new(new SignatureComparer());
-        private readonly Dictionary<ITypeDescriptor, TypeMemoryLayout> _valueLayouts = new(new SignatureComparer());
+        private readonly Dictionary<ITypeDescriptor, TypeMemoryLayout> _contentLayouts = new(SignatureComparer.Default);
+        private readonly Dictionary<ITypeDescriptor, TypeMemoryLayout> _valueLayouts = new(SignatureComparer.Default);
 
         static ValueFactory()
         {

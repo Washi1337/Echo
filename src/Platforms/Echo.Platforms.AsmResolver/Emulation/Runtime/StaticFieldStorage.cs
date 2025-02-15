@@ -48,11 +48,32 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
         /// <returns>The address.</returns>
         public long GetFieldAddress(IFieldDescriptor field)
         {
+            return GetOrInitializeFieldAddress(field, false);
+        }
+
+        /// <summary>
+        /// Obtains a writable bitvector slice that spans the value of the provided field.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <returns>The slice.</returns>
+        public BitVectorSpan GetFieldSpan(IFieldDescriptor field) => _heap.GetChunkSpan(GetFieldAddress(field));
+
+        /// <summary>
+        /// Gets the address of the provided field. If the field was accessed for the first time, the field's contents
+        /// will be either cleared or left unknown.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <param name="initializeWithZeroes"><c>true</c> if the field's contents should be initialized with zeroes on first access.</param>
+        /// <returns>The address.</returns>
+        public long GetOrInitializeFieldAddress(IFieldDescriptor field, bool initializeWithZeroes)
+        {
             if (!_fields.TryGetValue(field, out long address))
             {
                 var layout = _valueFactory.GetTypeValueMemoryLayout(field.Signature!.FieldType);
-                address = _heap.Allocate(layout.Size, true);
+                address = _heap.Allocate(layout.Size, initializeWithZeroes);
 
+                // Pre-initialize fields that are assigned some field rva data.
+                // TODO: For more accuracy, we should return the address from within the mapped PE memory range.
                 if (field.Resolve() is { IsStatic: true, HasFieldRva: true, FieldRva: IReadableSegment data } def)
                 {
                     field = def;
@@ -64,13 +85,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
 
             return address;
         }
-
-        /// <summary>
-        /// Obtains a writable bitvector slice that spans the value of the provided field. 
-        /// </summary>
-        /// <param name="field">The field.</param>
-        /// <returns>The slice.</returns>
-        public BitVectorSpan GetFieldSpan(IFieldDescriptor field) => _heap.GetChunkSpan(GetFieldAddress(field));
 
         /// <inheritdoc />
         public bool IsValidAddress(long address) => _heap.IsValidAddress(address);

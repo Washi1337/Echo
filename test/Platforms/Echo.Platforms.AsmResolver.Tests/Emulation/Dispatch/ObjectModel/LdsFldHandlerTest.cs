@@ -83,6 +83,28 @@ public class LdsFldHandlerTest : CilOpCodeHandlerTestBase
     }
 
     [Fact]
+    public void ReadStaticInt32WithInitializerIgnored()
+    {
+        // Lookup metadata.
+        var type = ModuleFixture.MockModule.LookupMember<TypeDefinition>(typeof(ClassWithInitializer).MetadataToken);
+        var cctor = type.GetStaticConstructor();
+        var field = type.Fields.First(x => x.Name == nameof(ClassWithInitializer.Field));
+
+        // Configure emulator to ignore cctors.
+        Context.Machine.EmulationFlags |= CilEmulationFlags.SkipTypeInitializations;
+
+        // Load static field.
+        var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Ldsfld, field));
+
+        // Verify we did not jump into the cctor.
+        Assert.True(result.IsSuccess);
+        Assert.NotSame(cctor, Context.Thread.CallStack.Peek(0).Method);
+
+        // Verify that an unknown object is pushed.
+        Assert.False(Assert.Single(Context.CurrentFrame.EvaluationStack).Contents.IsFullyKnown);
+    }
+
+    [Fact]
     public void ReadStaticInt32WithFieldRva()
     {
         var field = new FieldDefinition(
