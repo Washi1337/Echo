@@ -21,6 +21,8 @@
   href: core/ast-basics.md
 - name: Dominator Analysis
   href: core/dominators.md
+- name: Liveness Analysis
+  href: core/liveness.md
 
 - name: AsmResolver Backend
 - name: CIL Graph Construction
