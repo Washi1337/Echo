@@ -165,9 +165,8 @@ internal sealed class LivenessAnalyzer<TInstruction>
         changed |= Update(_nodeLiveness, node, _nodeLiveness[node].UnionIn(_instructionLiveness[instructions[0]].In));
     }
 
-    private static bool Update<TKey, TValue>(Dictionary<TKey, TValue> collection, TKey node, TValue data)
+    private static bool Update<TKey>(Dictionary<TKey, LivenessData> collection, TKey node, LivenessData data)
         where TKey : notnull
-        where TValue : notnull
     {
         var original = collection[node];
         if (!original.Equals(data))
