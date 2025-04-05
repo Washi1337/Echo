@@ -5,8 +5,9 @@ Dominator analysis give structure to CFGs, and can be very useful in static anal
 
 Consider the following if-statement graph:
 
-<div >
-![](../../images/if.png)
+<div style="text-align:center">
+    <img src="../../images/if.png" style="height:300px">
+</div>
 
 In the example graph, node 1 dominates all nodes in the graph. 
 However, node 2 does not dominate node 4, since there exists another execution path to node 4 that does not include node 2 (namely 1 -> 3 -> 4).
