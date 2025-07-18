@@ -60,8 +60,8 @@ namespace Echo.ControlFlow.Blocks
         public BasicBlock<TInstruction>? GetLastBlock()
         {
             var result = default(BasicBlock<TInstruction>);
-            for (int i = Handlers.Count - 1; i > 0 && result is null; i--)
-                result = Handlers[i].GetFirstBlock();
+            for (int i = Handlers.Count - 1; i >= 0 && result is null; i--)
+                result = Handlers[i].GetLastBlock();
             return result ?? ProtectedBlock.GetLastBlock();
         }
 
