@@ -109,7 +109,7 @@ public class LdFldHandlerTest : CilOpCodeHandlerTestBase
         // Create method with a struct local so that we can take the address of an instance.
         var method = new MethodDefinition("Dummy", MethodAttributes.Static,
             MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
-        method.CilMethodBody = new CilMethodBody(method)
+        method.CilMethodBody = new CilMethodBody
         {
             LocalVariables = {new CilLocalVariable(structType.ToTypeSignature())}
         };

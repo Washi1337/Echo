@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Stack
@@ -35,7 +36,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             _factory = factory;
             AddressRange = new AddressRange(0, maxSize);
 
-            var rootMethod = new MethodDefinition("<<root>>", 0, 
+            var rootMethod = new MethodDefinition("<<root>>", MethodAttributes.Static, 
                 MethodSignature.CreateStatic(factory.ContextModule.CorLibTypeFactory.Void));
             Push(new CallFrame(rootMethod, factory, true));
         }

@@ -27,7 +27,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
                 method.Signature!.ParameterTypes.Add(localType);
             method.Parameters.PullUpdatesFromMethodSignature();
 
-            var body = new CilMethodBody(method);
+            var body = new CilMethodBody();
             method.CilMethodBody = body;
 
             Context.Thread.CallStack.Push(method);
@@ -45,7 +45,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
             Context.CurrentFrame.WriteArgument(argIndex, new BitVector(1337).AsSpan());
             
             var result = Dispatcher.Dispatch(Context, 
-                new CilInstruction(CilOpCodes.Ldarg, Context.CurrentFrame.Body!.Owner.Parameters[argIndex]));
+                new CilInstruction(CilOpCodes.Ldarg, Context.CurrentFrame.Body!.Owner!.Parameters[argIndex]));
             
             Assert.True(result.IsSuccess);
             var value = Context.CurrentFrame.EvaluationStack.Peek();
@@ -66,7 +66,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
             Context.CurrentFrame.EvaluationStack.Push(new StackSlot(new BitVector(1337), StackSlotTypeHint.Integer));
             
             var result = Dispatcher.Dispatch(Context, 
-                new CilInstruction(CilOpCodes.Starg, Context.CurrentFrame.Body!.Owner.Parameters[argIndex]));
+                new CilInstruction(CilOpCodes.Starg, Context.CurrentFrame.Body!.Owner!.Parameters[argIndex]));
             
             Assert.True(result.IsSuccess);
 
@@ -91,7 +91,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
             Context.CurrentFrame.WriteArgument(argIndex, expected.AsSpan());
             
             var result = Dispatcher.Dispatch(Context, 
-                new CilInstruction(CilOpCodes.Ldarg, Context.CurrentFrame.Body!.Owner.Parameters[argIndex]));
+                new CilInstruction(CilOpCodes.Ldarg, Context.CurrentFrame.Body!.Owner!.Parameters[argIndex]));
             
             Assert.True(result.IsSuccess);
             var value = Context.CurrentFrame.EvaluationStack.Peek();
@@ -115,7 +115,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
             Context.CurrentFrame.WriteArgument(argIndex, expected.AsSpan());
             
             var result = Dispatcher.Dispatch(Context, 
-                new CilInstruction(CilOpCodes.Ldarg, Context.CurrentFrame.Body!.Owner.Parameters[argIndex]));
+                new CilInstruction(CilOpCodes.Ldarg, Context.CurrentFrame.Body!.Owner!.Parameters[argIndex]));
             
             Assert.True(result.IsSuccess);
             var value = Context.CurrentFrame.EvaluationStack.Peek();
@@ -136,7 +136,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
             Context.CurrentFrame.EvaluationStack.Push(new StackSlot(new BitVector(0x01234567), StackSlotTypeHint.Integer));
             
             var result = Dispatcher.Dispatch(Context, 
-                new CilInstruction(CilOpCodes.Starg, Context.CurrentFrame.Body!.Owner.Parameters[argIndex]));
+                new CilInstruction(CilOpCodes.Starg, Context.CurrentFrame.Body!.Owner!.Parameters[argIndex]));
             
             Assert.True(result.IsSuccess);
 
@@ -157,7 +157,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
             PrepareMethodWithArgument(argIndex, ModuleFixture.MockModule.CorLibTypeFactory.Int32);
             
             var result = Dispatcher.Dispatch(Context, 
-                new CilInstruction(CilOpCodes.Ldarga, Context.CurrentFrame.Body!.Owner.Parameters[argIndex]));
+                new CilInstruction(CilOpCodes.Ldarga, Context.CurrentFrame.Body!.Owner!.Parameters[argIndex]));
             
             Assert.True(result.IsSuccess);
 

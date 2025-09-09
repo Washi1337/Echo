@@ -59,7 +59,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var method = new MethodDefinition("Dummy", MethodAttributes.Static,
                 MethodSignature.CreateStatic(_moduleFixture.MockModule.CorLibTypeFactory.Void));
 
-            method.CilMethodBody = new CilMethodBody(method)
+            method.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {

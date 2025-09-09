@@ -27,7 +27,7 @@ namespace Echo.Platforms.AsmResolver.Tests
             var module = new ModuleDefinition("Module");
             var method = new MethodDefinition("MyMethod", MethodAttributes.Static,
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
-            var body = method.CilMethodBody = new CilMethodBody(method);
+            var body = method.CilMethodBody = new CilMethodBody();
             var instructions = body.Instructions;
 
             var start = new CilInstructionLabel();

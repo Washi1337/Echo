@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(fixture.MockModule.CorLibTypeFactory.Void));
 
-            var body = new CilMethodBody(dummyMethod);
+            var body = new CilMethodBody();
             body.Instructions.Add(CilOpCodes.Ret);
 
             var vm = new CilVirtualMachine(fixture.MockModule, false);

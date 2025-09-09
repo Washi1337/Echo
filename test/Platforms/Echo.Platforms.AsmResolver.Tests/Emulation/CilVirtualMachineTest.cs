@@ -10,7 +10,6 @@ using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
 using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Invocation;
-using Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Mocks;
 using Xunit;
@@ -62,7 +61,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
             
-            var body = new CilMethodBody(dummyMethod);
+            var body = new CilMethodBody();
             for (int i = 0; i < 100; i++)
                 body.Instructions.Add(Nop);
             body.Instructions.Add(Ret);
@@ -95,7 +94,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
             
-            var body = new CilMethodBody(dummyMethod);
+            var body = new CilMethodBody();
             for (int i = 0; i < 100; i++)
                 body.Instructions.Add(Nop);
             body.Instructions.Add(Ret);
@@ -120,7 +119,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
             
-            var body = new CilMethodBody(dummyMethod);
+            var body = new CilMethodBody();
             for (int i = 0; i < 100; i++)
                 body.Instructions.Add(Nop);
             body.Instructions.Add(Br, body.Instructions[0].CreateLabel());
@@ -153,7 +152,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
 
-            var body = new CilMethodBody(dummyMethod)
+            var body = new CilMethodBody
             {
                 Instructions =
                 {
@@ -187,7 +186,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
 
-            dummyMethod.CilMethodBody = new CilMethodBody(dummyMethod)
+            dummyMethod.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -221,7 +220,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
 
-            foo.CilMethodBody = new CilMethodBody(foo)
+            foo.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -231,7 +230,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             };
             foo.CilMethodBody.Instructions.CalculateOffsets();
             
-            bar.CilMethodBody = new CilMethodBody(foo)
+            bar.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -267,7 +266,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
 
-            foo.CilMethodBody = new CilMethodBody(foo)
+            foo.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -277,7 +276,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             };
             foo.CilMethodBody.Instructions.CalculateOffsets();
             
-            bar.CilMethodBody = new CilMethodBody(foo)
+            bar.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -308,7 +307,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 MethodSignature.CreateStatic(_fixture.MockModule.CorLibTypeFactory.Void));
 
             var label = new CilInstructionLabel();
-            foo.CilMethodBody = new CilMethodBody(foo)
+            foo.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -343,7 +342,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 MethodSignature.CreateStatic(factory.Int32, factory.Int32.MakeSzArrayType()));
 
             var loopStart = new CilInstructionLabel();
-            sum.CilMethodBody = new CilMethodBody(sum)
+            sum.CilMethodBody = new CilMethodBody
             {
                 LocalVariables =
                 {
@@ -417,7 +416,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 MethodSignature.CreateStatic(factory.Int32, factory.Int32, factory.Int32));
             
             // return Bar(3, 4) * 5;
-            var fooBody = new CilMethodBody(foo)
+            var fooBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -433,7 +432,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             foo.CilMethodBody = fooBody;
             
             // return arg0 + arg1;
-            var barBody = new CilMethodBody(bar)
+            var barBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -479,7 +478,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                     stringBuilderType.ToTypeSignature(false),
                     factory.String));
             
-            var fooBody = new CilMethodBody(foo)
+            var fooBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -638,7 +637,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                     new GenericParameterSignature(GenericParameterType.Method, 0))
             );
             dummyMethod.GenericParameters.Add(new GenericParameter("T"));
-            dummyMethod.CilMethodBody = new CilMethodBody(dummyMethod)
+            dummyMethod.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {

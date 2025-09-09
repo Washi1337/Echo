@@ -81,7 +81,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
 
             // Allocate this parameter if required.
             if (method.Signature.HasThis)
-                AllocateFrameField(method.DeclaringType?.ToTypeSignature() ?? method.Module!.CorLibTypeFactory.Object);
+                AllocateFrameField(method.DeclaringType?.ToTypeSignature() ?? method.ContextModule!.CorLibTypeFactory.Object);
             
             // Allocate rest of the parameters.
             foreach (var parameterType in method.Signature.ParameterTypes)
@@ -265,7 +265,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                 throw new ArgumentException("Method does not have a managed method body.");
             
             var context = GenericContext.FromMethod(Method);
-            var type = Body.Owner.Parameters.GetBySignatureIndex(index).ParameterType.InstantiateGenericTypes(context);
+            var type = Body.Owner!.Parameters.GetBySignatureIndex(index).ParameterType.InstantiateGenericTypes(context);
             
             var result = EvaluationStack.Factory.CreateValue(type, false);
             ReadArgument(index, result);

@@ -116,7 +116,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             var innerHandlerStart = new CilInstructionLabel();
             var innerHandlerEnd = new CilInstructionLabel();
 
-            method.CilMethodBody = new CilMethodBody(method)
+            method.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -202,7 +202,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             var handler2Start = new CilInstructionLabel();
             var handler2End = new CilInstructionLabel();
 
-            method.CilMethodBody = new CilMethodBody(method)
+            method.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -292,7 +292,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             var innerHandlerStart = new CilInstructionLabel();
             var innerHandlerEnd = new CilInstructionLabel();
 
-            method.CilMethodBody = new CilMethodBody(method)
+            method.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {
@@ -370,7 +370,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
             var inner2HandlerStart = new CilInstructionLabel();
             var inner2HandlerEnd = new CilInstructionLabel();
 
-            method.CilMethodBody = new CilMethodBody(method)
+            method.CilMethodBody = new CilMethodBody
             {
                 Instructions =
                 {

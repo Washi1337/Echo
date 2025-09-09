@@ -23,7 +23,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Variables
             var method = new MethodDefinition("DummyMethod", MethodAttributes.Static,
                 MethodSignature.CreateStatic(factory.Void));
 
-            var body = new CilMethodBody(method);
+            var body = new CilMethodBody();
             for (int i = 0; i <= localCount; i++)
                 body.LocalVariables.Add(new CilLocalVariable(localType));
             method.CilMethodBody = body;
