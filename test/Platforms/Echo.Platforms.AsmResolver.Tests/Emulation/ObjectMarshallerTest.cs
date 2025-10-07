@@ -145,7 +145,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         public void DeserializeInjectedObjectShouldReturnSameObject()
         {
             object dummy = new();
-            long address = _machine.ObjectMapMemory.GetOrCreateMapping(dummy).AddressRange.Start;
+            long address = _machine.HostObjects.GetOrCreate(dummy).AddressRange.Start;
             
             object? result = _machine.ObjectMarshaller.ToObject<object?>(_machine.ValueFactory.CreateNativeInteger(address));
             Assert.Same(dummy, result);

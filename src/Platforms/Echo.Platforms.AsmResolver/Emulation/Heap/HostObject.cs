@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Memory;
+using AsmResolver.DotNet.Signatures;
 using Echo.Memory;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Heap
@@ -11,7 +12,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
     /// <summary>
     /// Embeds a managed object into the memory of a virtual machine, providing HLE access to the object.
     /// </summary>
-    public class MappedObject : IMemorySpace
+    public class HostObject : IMemorySpace
     {
         private readonly Dictionary<uint, FieldInfo> _fields = new();
         private readonly CilVirtualMachine _machine;
@@ -22,12 +23,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// Creates a new managed object embedding.
         /// </summary>
         /// <param name="o">The object to embed.</param>
-        /// <param name="virtualLayout">The memory layout of the object.</param>
         /// <param name="machine">The machine the object is valid in.</param>
-        public MappedObject(object o, TypeMemoryLayout virtualLayout, CilVirtualMachine machine)
+        public HostObject(object o, CilVirtualMachine machine)
         {
             Object = o ?? throw new ArgumentNullException(nameof(o));
-            _virtualLayout = virtualLayout;
+            _virtualLayout = GetLayout(machine.ValueFactory, o);
             _machine = machine;
         }
 
@@ -204,5 +204,23 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             return fieldInfo;
         }
 
+        private static TypeMemoryLayout GetLayout(ValueFactory factory, object value)
+        {
+            var type = value.GetType();
+            var descriptor = factory.ContextModule.DefaultImporter.ImportType(type);
+
+            // Special treatment for array types.
+            if (descriptor is TypeSpecification { Signature: SzArrayTypeSignature arrayType })
+            {
+                uint totalSize = factory.GetArrayObjectSize(arrayType.BaseType, ((Array) value).Length);
+                uint dataSize = totalSize - factory.ObjectHeaderSize;
+                return new TypeMemoryLayout(
+                    descriptor,
+                    dataSize,
+                    factory.Is32Bit ? MemoryLayoutAttributes.Is32Bit : MemoryLayoutAttributes.Is64Bit);
+            }
+
+            return factory.GetTypeContentsMemoryLayout(descriptor);
+        }
     }
 }

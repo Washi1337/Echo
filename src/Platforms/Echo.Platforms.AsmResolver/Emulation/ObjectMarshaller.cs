@@ -76,7 +76,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
         private BitVector CreateObjectReferenceVector(object obj)
         {
-            var map = Machine.ObjectMapMemory.GetOrCreateMapping(obj);
+            var map = Machine.HostObjects.GetOrCreate(obj);
             return Machine.ValueFactory.CreateNativeInteger(map.AddressRange.Start);
         }
 
@@ -136,8 +136,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (pointer == 0)
                 return null;
 
-            if (Machine.ObjectMapMemory.TryGetObject(pointer, out var map))
-                return map.Object;
+            if (Machine.HostObjects.TryGetKey(pointer, out object? key))
+                return key;
 
             if (targetType.IsArray && targetType.GetArrayRank() == 1)
                 return DeserializeArray(pointer, targetType.GetElementType()!);

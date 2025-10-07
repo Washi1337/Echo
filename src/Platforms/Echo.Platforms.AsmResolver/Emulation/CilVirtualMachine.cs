@@ -41,13 +41,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
             Loader = new PELoader(Memory);
             
             ValueFactory = new ValueFactory(contextModule, is32Bit);
-            ObjectMapMemory = new ObjectMapMemory(this, 0x1000_0000);
+            HostObjects = new ObjectMapMemory<object, HostObject>(0x1000_0000, o => new HostObject(o, this));
             ObjectMarshaller = new ObjectMarshaller(this);
             
             if (is32Bit)
             {
                 Memory.Map(0x1000_0000, Heap = new ManagedObjectHeap(0x0100_0000, ValueFactory));
-                Memory.Map(0x6000_0000, ObjectMapMemory);
+                Memory.Map(0x6000_0000, HostObjects);
                 Memory.Map(0x7000_0000, StaticFields = new StaticFieldStorage(ValueFactory, 0x0100_0000));
                 Memory.Map(0x7100_0000, ValueFactory.ClrMockMemory);
                 Memory.Map(0x7f00_0000, _callStackMemory = new CallStackMemory(0x100_0000, ValueFactory));
@@ -55,7 +55,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             else
             {
                 Memory.Map(0x0000_0100_0000_0000, Heap = new ManagedObjectHeap(0x01000_0000, ValueFactory));
-                Memory.Map(0x0000_7ffd_0000_0000, ObjectMapMemory);
+                Memory.Map(0x0000_7ffd_0000_0000, HostObjects);
                 Memory.Map(0x0000_7ffe_0000_0000, StaticFields = new StaticFieldStorage(ValueFactory, 0x1000_0000));
                 Memory.Map(0x0000_7ffe_1000_0000, ValueFactory.ClrMockMemory);
                 Memory.Map(0x0000_7ffe_8000_0000, _callStackMemory = new CallStackMemory(0x1000_0000, ValueFactory));
@@ -101,7 +101,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets the memory manager that embeds managed objects into virtual memory.
         /// </summary>
-        public ObjectMapMemory ObjectMapMemory
+        public ObjectMapMemory<object, HostObject> HostObjects
         {
             get;
         }
