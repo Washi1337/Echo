@@ -106,14 +106,13 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
 
             var handle = _machine.ObjectMarshaller.ToBitVector(obj).AsObjectHandle(_machine);
             var type = handle.GetObjectType();
-            
-            // Ensure the type name from Echo starts with the reflection type name
-            // This is because the reflection name doesn't include the generics in the Name field like AsmResolver does
-            // TypeNameBuilder can give us the full reflection assembly qualified name, but the type assemblies may differ (System.Private.CoreLib vs System.Runtime)
-            Assert.StartsWith(obj.GetType().Name, type.Name);
 
-            // Ensure type arguments are correct
             var genericInstanceTypeSignature = Assert.IsType<GenericInstanceTypeSignature>(type.ToTypeSignature());
+            
+            // Ensure name of the base generic type matches our reflection type name
+            Assert.Equal(obj.GetType().Name, genericInstanceTypeSignature.GenericType.Name);
+            
+            // Ensure type arguments are correct
             Assert.Equal(genericInstanceTypeSignature.TypeArguments, [_machine.ContextModule.CorLibTypeFactory.Int32, _machine.ContextModule.CorLibTypeFactory.String]);
         }
 
