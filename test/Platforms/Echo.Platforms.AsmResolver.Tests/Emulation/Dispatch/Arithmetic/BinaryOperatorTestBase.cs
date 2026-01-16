@@ -146,6 +146,21 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
             Assert.Equal(64, slot.Contents.Count);
             Assert.Equal(expected, slot.Contents.AsSpan().U64);
         }
+        
+        protected void AssertCorrect(CilOpCode code, long a, long b, long expected)
+        {
+            var stack = Context.CurrentFrame.EvaluationStack;
+
+            stack.Push(new StackSlot(a, StackSlotTypeHint.Integer));
+            stack.Push(new StackSlot(b, StackSlotTypeHint.Integer));
+
+            var result = Dispatcher.Dispatch(Context, new CilInstruction(code));
+            
+            Assert.True(result.IsSuccess);
+            var slot = Context.CurrentFrame.EvaluationStack.Peek();
+            Assert.Equal(64, slot.Contents.Count);
+            Assert.Equal(expected, slot.Contents.AsSpan().I64);
+        }
 
         protected void AssertCorrect(CilOpCode code, double a, double b, double expected)
         {

@@ -1,6 +1,5 @@
 using System;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
@@ -15,18 +14,18 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         }
 
         [Fact]
-        public void DivI4ToI4() => AssertCorrect(CilOpCodes.Div, 1000u, 20u, 50u);
+        public void DivI4ToI4() => AssertCorrect(CilOpCodes.Div, -1000, 20, -50);
 
         [Theory]
         [InlineData(1000u, 20ul, 50ul)]
-        public void DivI4ToI8(uint a, ulong b, ulong expected) => AssertCorrect(CilOpCodes.Div, a, b, expected);
+        public void DivU4ToU8(uint a, ulong b, ulong expected) => AssertCorrect(CilOpCodes.Div_Un, a, b, expected);
 
         [Theory]
         [InlineData(1000ul, 20u, 50ul)]
-        public void DivI8ToI4(ulong a, uint b, ulong expected) => AssertCorrect(CilOpCodes.Div, a, b, expected);
+        public void DivI8ToI4(ulong a, uint b, ulong expected) => AssertCorrect(CilOpCodes.Div_Un, a, b, expected);
 
         [Fact]
-        public void DivI8ToI8() => AssertCorrect(CilOpCodes.Div, 1000ul, 20ul, 50ul);
+        public void DivI8ToI8() => AssertCorrect(CilOpCodes.Div, -1000L, 20L, -50L);
 
         [Fact]
         public void DivR8ToR8() => AssertCorrect(CilOpCodes.Div, 1000.0, 20.0, 50.0);

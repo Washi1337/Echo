@@ -15,24 +15,29 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         }
 
         [Theory]
+        [InlineData(-1000, 20, 0)]
+        [InlineData(-1000, 999, -1)]
+        public void I4ToI4(int a, int b, int expected) => AssertCorrect(CilOpCodes.Rem, a, b, expected);
+
+        [Theory]
         [InlineData(1000u, 20u, 0u)]
         [InlineData(1000u, 999u, 1u)]
-        public void I4ToI4(uint a, uint b, uint expected) => AssertCorrect(CilOpCodes.Rem, a, b, expected);
+        public void U4ToU4(uint a, uint b, uint expected) => AssertCorrect(CilOpCodes.Rem_Un, a, b, expected);
+        
+        [Theory]
+        [InlineData(-1000, 20L, 0L)]
+        [InlineData(-1000, 999L, -1L)]
+        public void I4ToI8(int a, long b, long expected) => AssertCorrect(CilOpCodes.Rem, a, b, expected);
 
         [Theory]
-        [InlineData(1000u, 20ul, 0ul)]
-        [InlineData(1000u, 999ul, 1ul)]
-        public void I4ToI8(uint a, ulong b, ulong expected) => AssertCorrect(CilOpCodes.Rem, a, b, expected);
+        [InlineData(-1000L, 20, 0L)]
+        [InlineData(-1000L, 999, -1L)]
+        public void I8ToI4(long a, int b, long expected) => AssertCorrect(CilOpCodes.Rem, a, b, expected);
 
         [Theory]
-        [InlineData(1000ul, 20u, 0ul)]
-        [InlineData(1000ul, 999u, 1ul)]
-        public void I8ToI4(ulong a, uint b, ulong expected) => AssertCorrect(CilOpCodes.Rem, a, b, expected);
-
-        [Theory]
-        [InlineData(1000ul, 20ul, 0ul)]
-        [InlineData(1000ul, 999ul, 1ul)]
-        public void I8ToI8(ulong a, ulong b, ulong expected) => AssertCorrect(CilOpCodes.Rem, a, b, expected);
+        [InlineData(-1000L, 20ul, 0L)]
+        [InlineData(-1000L, 999ul, -1L)]
+        public void I8ToI8(long a, long b, long expected) => AssertCorrect(CilOpCodes.Rem, a, b, expected);
 
         [Theory]
         [InlineData(1000.0, 20.0, 1000.0 % 20.0)]
