@@ -551,7 +551,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
             // since the setters in TypeMemoryLayout are marked internal. This probably is worthy of a change in 
             // AsmResolver's API in the future.
             
-            var layout = new TypeMemoryLayout(definition, 0,
+            var finalType = context.Type != null ? definition.MakeGenericInstanceType([..context.Type.TypeArguments]).ToTypeDefOrRef() : definition;
+            var layout = new TypeMemoryLayout(finalType, 0,
                 Is32Bit ? MemoryLayoutAttributes.Is32Bit : MemoryLayoutAttributes.Is64Bit);
             
             uint currentOffset = 0;

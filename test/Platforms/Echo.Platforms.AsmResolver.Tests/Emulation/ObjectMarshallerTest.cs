@@ -100,6 +100,23 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         }
 
         [Fact]
+        public void SerializeGenericTypeShouldRetainGenerics()
+        {
+            var obj = new SimpleGenericClass<int, string>();
+
+            var handle = _machine.ObjectMarshaller.ToBitVector(obj).AsObjectHandle(_machine);
+            var type = handle.GetObjectType();
+
+            var genericInstanceTypeSignature = Assert.IsType<GenericInstanceTypeSignature>(type.ToTypeSignature());
+            
+            // Ensure name of the base generic type matches our reflection type name
+            Assert.Equal(obj.GetType().Name, genericInstanceTypeSignature.GenericType.Name);
+            
+            // Ensure type arguments are correct
+            Assert.Equal(genericInstanceTypeSignature.TypeArguments, [_machine.ContextModule.CorLibTypeFactory.Int32, _machine.ContextModule.CorLibTypeFactory.String]);
+        }
+
+        [Fact]
         public void SerializeInt32Array()
         {
             int[] array = Enumerable.Range(100, 10).ToArray();
