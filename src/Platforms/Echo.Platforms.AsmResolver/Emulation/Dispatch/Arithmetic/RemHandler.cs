@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arithmetic
             var argument2Value = argument2.Contents.AsSpan();
             
             if (argument1.TypeHint == StackSlotTypeHint.Integer)
-                argument1Value.IntegerRemainder(argument2Value);
+                argument1Value.IntegerRemainder(argument2Value, IsSignedOperation(instruction));
             else
                 argument1Value.FloatRemainder(argument2Value);
             

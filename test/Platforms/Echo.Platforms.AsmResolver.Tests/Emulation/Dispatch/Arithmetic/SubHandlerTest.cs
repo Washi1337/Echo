@@ -15,20 +15,22 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         }
 
         [Fact]
-        public void SubI4ToI4() => AssertCorrect(CilOpCodes.Sub, 0x1234, 0x234u, 0x1000u);
-
-        [Theory]
-        [InlineData(1234, 234, 1000)]
-        [InlineData(0x0000_0000, 1, 0xffff_ffff_ffff_ffff)]
-        public void SubI4ToI8(uint a, ulong b, ulong expected) => AssertCorrect(CilOpCodes.Sub, a, b, expected);
-
-        [Theory]
-        [InlineData(1234, 234, 1000)]
-        [InlineData(0x0000_0000, 1, 0xffff_ffff_ffff_ffff)]
-        public void SubI8ToI4(ulong a, uint b, ulong expected) => AssertCorrect(CilOpCodes.Sub, a, b, expected);
+        public void SubI4ToI4() => AssertCorrect(CilOpCodes.Sub, 0x1234, 0x234, 0x1000);
 
         [Fact]
-        public void SubI8ToI8() => AssertCorrect(CilOpCodes.Sub, 0x1234ul, 0x1000ul, 0x234ul);
+        public void SubI4ToI8() => AssertCorrect(CilOpCodes.Sub, 1234, 234L, 1000L);
+
+        [Fact]
+        public void SubU4ToU8() => AssertCorrect(CilOpCodes.Sub, 0x0000_0000, 1L, 0xffff_ffff_ffff_ffffL);
+        
+        [Fact]
+        public void SubI8ToI4() => AssertCorrect(CilOpCodes.Sub, 1234L, 234, 1000L);
+        
+        [Fact]
+        public void SubU8ToU4() => AssertCorrect(CilOpCodes.Sub, 0x0000_0000L, 1, 0xffff_ffff_ffff_ffffL);
+        
+        [Fact]
+        public void SubI8ToI8() => AssertCorrect(CilOpCodes.Sub, 0x1234L, 0x1000L, 0x234L);
 
         [Fact]
         public void SubR8ToR8() => AssertCorrect(CilOpCodes.Sub, 6.912D, 1.234D, 5.678D);

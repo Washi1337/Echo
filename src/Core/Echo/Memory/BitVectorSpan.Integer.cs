@@ -609,8 +609,9 @@ namespace Echo.Memory
         /// Interprets the bit vector as an integer and divides it by a second integer.
         /// </summary>
         /// <param name="other">The integer to divide the current integer by.</param>
+        /// <param name="signed">Indicates whether the integers should be interpreted as signed or unsigned integers.</param>
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match in bit length.</exception>
-        public void IntegerDivide(BitVectorSpan other)
+        public void IntegerDivide(BitVectorSpan other, bool signed)
         {
             AssertSameBitSize(other);
 
@@ -624,19 +625,31 @@ namespace Echo.Memory
             switch (Count)
             {
                 case 8:
-                    U8 /= other.U8;
+                    if (signed)
+                        I8 /= other.I8;
+                    else
+                        U8 /= other.U8;
                     return;
 
                 case 16:
-                    U16 /= other.U16;
+                    if (signed)
+                        I16 /= other.I16;
+                    else
+                        U16 /= other.U16;
                     return;
 
                 case 32:
-                    U32 /= other.U32;
+                    if (signed)
+                        I32 /= other.I32;
+                    else
+                        U32 /= other.U32;
                     return;
                 
                 case 64:
-                    U64 /= other.U64;
+                    if (signed)
+                        I64 /= other.I64;
+                    else
+                        U64 /= other.U64;
                     return;
                 
                 default:
@@ -650,8 +663,9 @@ namespace Echo.Memory
         /// Interprets the bit vector as an integer, divides it by a second integer and produces the remainder.
         /// </summary>
         /// <param name="other">The integer to divide the current integer by.</param>
+        /// <param name="signed">Indicates whether the integers should be interpreted as signed or unsigned integers.</param>
         /// <exception cref="ArgumentException">Occurs when the sizes of the integers do not match in bit length.</exception>
-        public void IntegerRemainder(BitVectorSpan other)
+        public void IntegerRemainder(BitVectorSpan other, bool signed)
         {
             AssertSameBitSize(other);
 
@@ -665,19 +679,31 @@ namespace Echo.Memory
             switch (Count)
             {
                 case 8:
-                    U8 %= other.U8;
+                    if (signed)
+                        I8 %= other.I8;
+                    else
+                        U8 %= other.U8;
                     return;
 
                 case 16:
-                    U16 %= other.U16;
+                    if (signed)
+                        I16 %= other.I16;
+                    else
+                        U16 %= other.U16;
                     return;
 
                 case 32:
-                    U32 %= other.U32;
+                    if (signed)
+                        I32 %= other.I32;
+                    else
+                        U32 %= other.U32;
                     return;
                 
                 case 64:
-                    U64 %= other.U64;
+                    if (signed)
+                        I64 %= other.I64;
+                    else
+                        U64 %= other.U64;
                     return;
                 
                 default:
