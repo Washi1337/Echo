@@ -12,15 +12,15 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         }
         
         [Fact]
-        public void OrI4ToI4() => AssertCorrect(CilOpCodes.Or, 0x22220000u, 0x00001111, 0x22221111);
+        public void OrI4ToI4() => AssertCorrect(CilOpCodes.Or, 0x22220000, 0x00001111, 0x22221111);
 
         [Fact]
-        public void OrI4ToI8() => AssertCorrect(CilOpCodes.Or, 0x22222222u, 0x11111111_00000000ul, 0x11111111_22222222ul);
+        public void OrI4ToI8() => AssertCorrect(CilOpCodes.Or, 0x22222222, 0x11111111_00000000L, 0x11111111_22222222L);
 
         [Fact]
-        public void OrI8ToI4() => AssertCorrect(CilOpCodes.Or, 0x11111111_00000000ul, 0x22222222u, 0x11111111_22222222ul);
+        public void OrI8ToI4() => AssertCorrect(CilOpCodes.Or, 0x11111111_00000000L, 0x22222222, 0x11111111_22222222L);
 
         [Fact]
-        public void OrI8ToI8() => AssertCorrect(CilOpCodes.Or, 0x11111111_00000000ul, 0x00000000_22222222ul, 0x11111111_22222222ul);
+        public void OrI8ToI8() => AssertCorrect(CilOpCodes.Or, 0x11111111_00000000L, 0x00000000_22222222L, 0x11111111_22222222L);
     }
 }

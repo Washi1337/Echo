@@ -16,16 +16,30 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
         [Fact]
         public void DivI4ToI4() => AssertCorrect(CilOpCodes.Div, -1000, 20, -50);
 
+        [Fact]
+        public void DivI4ToI8() => AssertCorrect(CilOpCodes.Div, -1000, 20L, -50L);
+
+        [Fact]
+        public void DivI8ToI4() => AssertCorrect(CilOpCodes.Div, -1000L, 20, -50L);
+
+        [Fact]
+        public void DivI8ToI8() => AssertCorrect(CilOpCodes.Div, -1000L, 20L, -50L);
+
+        [Theory]
+        [InlineData(1000u, 20u, 50u)]
+        public void DivU4ToU4(uint a, uint b, uint expected) => AssertCorrect(CilOpCodes.Div_Un, a, b, expected);
+
         [Theory]
         [InlineData(1000u, 20ul, 50ul)]
         public void DivU4ToU8(uint a, ulong b, ulong expected) => AssertCorrect(CilOpCodes.Div_Un, a, b, expected);
 
         [Theory]
         [InlineData(1000ul, 20u, 50ul)]
-        public void DivI8ToI4(ulong a, uint b, ulong expected) => AssertCorrect(CilOpCodes.Div_Un, a, b, expected);
+        public void DivU8ToU4(ulong a, uint b, ulong expected) => AssertCorrect(CilOpCodes.Div_Un, a, b, expected);
 
-        [Fact]
-        public void DivI8ToI8() => AssertCorrect(CilOpCodes.Div, -1000L, 20L, -50L);
+        [Theory]
+        [InlineData(1000ul, 20ul, 50ul)]
+        public void DivU8ToU8(ulong a, ulong b, ulong expected) => AssertCorrect(CilOpCodes.Div_Un, a, b, expected);
 
         [Fact]
         public void DivR8ToR8() => AssertCorrect(CilOpCodes.Div, 1000.0, 20.0, 50.0);
@@ -46,5 +60,4 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arithmetic
             Assert.Equal(typeof(InvalidProgramException).FullName, type.FullName);
         }
     }
-
 }
