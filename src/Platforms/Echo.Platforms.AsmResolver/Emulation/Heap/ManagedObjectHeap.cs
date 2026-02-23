@@ -185,6 +185,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             return address;
         }
         
+        /// <summary>
+        /// Attempts to get the address of an already interned string in the virtual managed heap.
+        /// </summary>
+        /// <param name="value">The string.</param>
+        /// <param name="address">When this method returns <c>true</c>, contains the address of the interned string.</param>
+        /// <returns><c>true</c> if the string was found in the intern pool; otherwise, <c>false</c>.</returns>
+        public bool TryGetInternedString(string value, out long address)
+        {
+            return _internedStrings.TryGetValue(value, out address);
+        }
+
         private void SetMethodTable(BitVectorSpan objectSpan, ITypeDescriptor type) => objectSpan
             .SliceObjectMethodTable(_factory)
             .WriteNativeInteger(_factory.ClrMockMemory.MethodTables.GetAddress(type), _factory.Is32Bit);

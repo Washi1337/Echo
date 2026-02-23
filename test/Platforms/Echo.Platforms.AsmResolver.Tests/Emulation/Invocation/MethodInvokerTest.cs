@@ -240,6 +240,92 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
             Assert.Equal(method, _context.Thread.CallStack.Peek().Method);
         }
 
+        [Fact]
+        public void InternString()
+        {
+            var invoker = StringInvoker.Instance;
+            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve()!;
+            var internMethod = stringType.Methods.First(m => m.Name == "Intern");
+
+            const string str = "Hello, world!";
+            long strAddress = _context.Machine.Heap.AllocateString(str);
+            var strArg = _context.Machine.ValueFactory.RentNativeInteger(strAddress);
+
+            var result = invoker.Invoke(_context, internMethod, [strArg]);
+
+            Assert.True(result.IsSuccess);
+            Assert.True(result.Value.IsFullyKnown);
+            
+            Assert.True(_context.Machine.Heap.TryGetInternedString(str, out long internedAddress));
+            Assert.Equal(internedAddress, result.Value.AsSpan().ReadNativeInteger(_context.Machine.Is32Bit));
+        }
+
+        [Fact]
+        public void InternSameStringTwiceReturnsSameAddress()
+        {
+            var invoker = StringInvoker.Instance;
+            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve()!;
+            var internMethod = stringType.Methods.First(m => m.Name == "Intern");
+
+            const string str = "Hello, world!";
+            long strAddress1 = _context.Machine.Heap.AllocateString(str);
+            long strAddress2 = _context.Machine.Heap.AllocateString(str);
+
+            var result1 = invoker.Invoke(_context, internMethod, [_context.Machine.ValueFactory.RentNativeInteger(strAddress1)]);
+            var result2 = invoker.Invoke(_context, internMethod, [_context.Machine.ValueFactory.RentNativeInteger(strAddress2)]);
+
+            Assert.True(result1.IsSuccess);
+            Assert.True(result2.IsSuccess);
+            
+            Assert.True(result1.Value.IsFullyKnown);
+            Assert.True(result2.Value.IsFullyKnown);
+            
+            Assert.Equal(result1.Value.AsSpan().ReadNativeInteger(_context.Machine.Is32Bit),
+                result2.Value.AsSpan().ReadNativeInteger(_context.Machine.Is32Bit));
+        }
+
+        [Fact]
+        public void IsInternedOnInternedString()
+        {
+            var invoker = StringInvoker.Instance;
+            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve()!;
+            var internMethod = stringType.Methods.First(m => m.Name == "Intern");
+            var isInternedMethod = stringType.Methods.First(m => m.Name == "IsInterned");
+
+            const string str = "Hello, world!";
+            long strAddress = _context.Machine.Heap.AllocateString(str);
+            var internResult = invoker.Invoke(_context, internMethod,
+                [_context.Machine.ValueFactory.RentNativeInteger(strAddress)]);
+
+            long strAddress2 = _context.Machine.Heap.AllocateString(str);
+            var isInternedResult = invoker.Invoke(_context, isInternedMethod,
+                [_context.Machine.ValueFactory.RentNativeInteger(strAddress2)]);
+
+            Assert.True(internResult.IsSuccess);
+            Assert.True(internResult.Value?.IsFullyKnown);
+            
+            Assert.True(isInternedResult.IsSuccess);
+            Assert.True(isInternedResult.Value?.IsFullyKnown);
+
+            Assert.Equal(internResult.Value!.AsSpan().ReadNativeInteger(_context.Machine.Is32Bit),
+                isInternedResult.Value!.AsSpan().ReadNativeInteger(_context.Machine.Is32Bit));
+        }
+
+        [Fact]
+        public void IsInternedOnNonInternedString()
+        {
+            var invoker = StringInvoker.Instance;
+            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve()!;
+            var isInternedMethod = stringType.Methods.First(m => m.Name == "IsInterned");
+
+            const string str = "Never interned";
+            long strAddress = _context.Machine.Heap.AllocateString(str);
+            var result = invoker.Invoke(_context, isInternedMethod, [_context.Machine.ValueFactory.RentNativeInteger(strAddress)]);
+
+            Assert.True(result.IsSuccess);
+            Assert.Null(result.Value);
+        }
+
         private sealed class TestDelegateUnknownResolver(IMethodDescriptor method) : ThrowUnknownResolver
         {
             public override IMethodDescriptor? ResolveDelegateTarget(
