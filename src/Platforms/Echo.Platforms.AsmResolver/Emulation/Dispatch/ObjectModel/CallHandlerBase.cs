@@ -155,13 +155,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             
             var context = GenericContext.FromMethod(caller);
             var result = callee;
+            bool declaringTypeInstantiated = false;
             
             // Instantiate any args in the declaring type.
             if (callee.DeclaringType?.ToTypeDefOrRef() is TypeSpecification { Signature: {} typeSignature })
             {
                 var newType = typeSignature.InstantiateGenericTypes(context);
                 if (newType != typeSignature)
+                {
                     result = newType.ToTypeDefOrRef().CreateMemberReference(callee.Name!, callee.Signature!);
+                    declaringTypeInstantiated = true;
+                }
             }
 
             // When generic instance method call, instantiate any type arguments when necessary. 
@@ -169,33 +173,39 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             {
                 // Delay the allocation of a completely new method specification unless we absolutely need to.
                 
-                // Try finding the first argument that needed instantiation. 
-                TypeSignature? firstInstantiated = null; 
-                int index = -1;
+                // Try to instantiate type arguments.
+                // To avoid unnecessary allocations, only create a new array when at least one type argument
+                // actually needs instantiation.
+                TypeSignature[]? args = null;
                 for (int i = 0; i < signature.TypeArguments.Count; i++)
                 {
                     var original = signature.TypeArguments[i];
                     var instantiated = original.InstantiateGenericTypes(context);
-                    if (instantiated != original)
+                    // InstantiateGenericTypes returns the same instance if nothing was instantiated.
+                    if (args is not null)
                     {
-                        firstInstantiated = instantiated;
-                        index = i;
-                        break;
+                        args[i] = instantiated;
+                    }
+                    else if (instantiated != original)
+                    {
+                        // Allocate the array and backfill.
+                        args = new TypeSignature[signature.TypeArguments.Count];
+                        for (int j = 0; j < i; j++)
+                            args[j] = signature.TypeArguments[j];
+                        args[i] = instantiated;
                     }
                 }
 
-                // If there is one, create the new signature.
-                if (firstInstantiated is not null)
+                // Create a new method specification if:
+                // - Any type argument was instantiated.
+                // - The declaring type was instantiated and the method descriptor was re-created,
+                //   meaning we need to re-attach the method type arguments to the new descriptor (#151).
+                if (args is not null || declaringTypeInstantiated)
                 {
-                    var args = new TypeSignature[signature.TypeArguments.Count];
-                    for (int i = 0; i < index; i++)
-                        args[i] = signature.TypeArguments[i];
-                    args[index] = firstInstantiated;
-                    for (int i = index + 1; i < args.Length; i++)
-                        args[i] = signature.TypeArguments[i].InstantiateGenericTypes(context);
+                    args ??= [..signature.TypeArguments];
                     
-                    if (result is MemberReference member)
-                        result = member.MakeGenericInstanceMethod(args);
+                    if (declaringTypeInstantiated)
+                        result = ((MemberReference)result).MakeGenericInstanceMethod(args);
                     else
                         result = method.MakeGenericInstanceMethod(args);
                 }
