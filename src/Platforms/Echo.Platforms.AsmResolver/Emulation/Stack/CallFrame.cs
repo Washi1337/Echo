@@ -30,7 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         private readonly List<uint> _offsets = new();
         private readonly List<ExceptionHandlerFrame> _exceptionHandlers = new();
         private BitVector _localStorage;
-        private long _baseAddress;
+        private AddressRange _addressRange;
 
         /// <summary>
         /// Constructs a new call stack frame.
@@ -89,7 +89,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
 
             // Actually reserve space for the entire frame.
             _localStorage = new BitVector((int) (currentOffset * 8), false);
-            
+            _addressRange = new AddressRange(0, _localStorage.ByteCount);
+
             // Initialize locals to zero when method body says we should.
             if (_initializeLocals)
             {
@@ -172,10 +173,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public ITypeDescriptor? ConstrainedType { get; set; }
         
         /// <inheritdoc />
-        public AddressRange AddressRange => new(_baseAddress, _baseAddress + _localStorage.ByteCount);
+        public AddressRange AddressRange => _addressRange;
 
         /// <inheritdoc />
-        public bool IsValidAddress(long address) => AddressRange.Contains(address);
+        public bool IsValidAddress(long address) => _addressRange.Contains(address);
 
         /// <summary>
         /// Allocates local stack memory in the stack frame.
@@ -189,17 +190,21 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             if (size < 0)
                 throw new ArgumentOutOfRangeException(nameof(size));
 
-            long address = AddressRange.End;
+            long address = _addressRange.End;
             int originalSize = _localStorage.Count;
             _localStorage = _localStorage.Resize(originalSize + size * 8, false);
             if (!_initializeLocals)
                 _localStorage.AsSpan(originalSize, _localStorage.Count - originalSize).MarkFullyUnknown();
-            
+
+            _addressRange = new AddressRange(_addressRange.Start, _addressRange.Start + _localStorage.ByteCount);
             return address;
         }
 
         /// <inheritdoc />
-        public void Rebase(long baseAddress) => _baseAddress = baseAddress;
+        public void Rebase(long baseAddress)
+        {
+            _addressRange = new AddressRange(baseAddress, baseAddress + _localStorage.ByteCount);
+        }
 
         /// <summary>
         /// Gets the address (relative to the start of the frame) to a local variable in the frame. 
@@ -208,7 +213,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <returns>The address</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the local index is invalid.</exception>
         public long GetLocalAddress(int index) => index < LocalsCount
-            ? _baseAddress + _offsets[index]
+            ? _addressRange.Start + _offsets[index]
             : throw new ArgumentOutOfRangeException(nameof(index));
 
         /// <summary>
@@ -251,7 +256,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <returns>The address</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the argument index is invalid.</exception>
         public long GetArgumentAddress(int index) => index < Method.Signature!.GetTotalParameterCount()
-            ? _baseAddress + _offsets[LocalsCount + 1 + index]
+            ? _addressRange.Start + _offsets[LocalsCount + 1 + index]
             : throw new ArgumentOutOfRangeException(nameof(index));
 
         /// <summary>
@@ -290,19 +295,19 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// <inheritdoc />
         public void Read(long address, BitVectorSpan buffer)
         {
-            _localStorage.AsSpan((int) (address - _baseAddress) * 8, buffer.Count).CopyTo(buffer);
+            _localStorage.AsSpan((int) (address - _addressRange.Start) * 8, buffer.Count).CopyTo(buffer);
         }
 
         /// <inheritdoc />
         public void Write(long address, BitVectorSpan buffer)
         {
-            buffer.CopyTo(_localStorage.AsSpan((int) (address - _baseAddress) * 8, buffer.Count));
+            buffer.CopyTo(_localStorage.AsSpan((int) (address - _addressRange.Start) * 8, buffer.Count));
         }
 
         /// <inheritdoc />
         public void Write(long address, ReadOnlySpan<byte> buffer)
         {
-            _localStorage.AsSpan((int) (address - _baseAddress) * 8, buffer.Length).Write(buffer);
+            _localStorage.AsSpan((int) (address - _addressRange.Start) * 8, buffer.Length).Write(buffer);
         }
 
         private void InitializeExceptionHandlerFrames()
