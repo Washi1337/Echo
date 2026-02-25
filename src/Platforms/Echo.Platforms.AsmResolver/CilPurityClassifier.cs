@@ -195,9 +195,22 @@ namespace Echo.Platforms.AsmResolver
                 case CilCode.Stind_I2:
                 case CilCode.Stind_I4:
                 case CilCode.Stind_I8:
+                case CilCode.Stind_R4:
                 case CilCode.Stind_R8:
+                case CilCode.Stind_Ref:
                     return PointerWritePurity;
-                
+
+                case CilCode.Cpblk:
+                case CilCode.Initblk:
+                    return PointerWritePurity;
+
+                case CilCode.Throw:
+                case CilCode.Rethrow:
+                    return false;
+
+                case CilCode.Localloc:
+                    return false;
+
                 default:
                     return true;
             }
@@ -270,12 +283,17 @@ namespace Echo.Platforms.AsmResolver
             {
                 case CilCode.Newarr:
                     return false;
-                
+
                 case CilCode.Stelem:
-                    return ArrayWritePurity | DefaultTypeAccessPurity;
-                
-                 default:
-                     return DefaultTypeAccessPurity;
+                    return ArrayWritePurity;
+
+                case CilCode.Cpobj:
+                case CilCode.Initobj:
+                case CilCode.Stobj:
+                    return PointerWritePurity;
+
+                default:
+                    return DefaultTypeAccessPurity;
             }
         }
 
