@@ -8,8 +8,8 @@ namespace Echo.Memory
     /// </summary>
     public class BasicMemorySpace : IMemorySpace
     {
-        private long _baseAddress;
-        
+        private AddressRange _addressRange;
+
         /// <summary>
         /// Creates a new memory space.
         /// </summary>
@@ -19,7 +19,7 @@ namespace Echo.Memory
             : this(new BitVector(size * 8, initialize))
         {
         }
-        
+
         /// <summary>
         /// Wraps a byte array into a memory space.
         /// </summary>
@@ -27,8 +27,9 @@ namespace Echo.Memory
         public BasicMemorySpace(byte[] backBuffer)
         {
             BackBuffer = new BitVector(backBuffer);
+            _addressRange = new AddressRange(0, BackBuffer.Count / 8);
         }
-        
+
         /// <summary>
         /// Wraps a bit vector into a memory space.
         /// </summary>
@@ -36,6 +37,7 @@ namespace Echo.Memory
         public BasicMemorySpace(BitVector backBuffer)
         {
             BackBuffer = backBuffer;
+            _addressRange = new AddressRange(0, BackBuffer.Count / 8);
         }
 
         /// <summary>
@@ -47,30 +49,33 @@ namespace Echo.Memory
         }
 
         /// <inheritdoc />
-        public AddressRange AddressRange => new(_baseAddress, _baseAddress + BackBuffer.Count / 8);
+        public AddressRange AddressRange => _addressRange;
 
         /// <inheritdoc />
-        public bool IsValidAddress(long address) => AddressRange.Contains(address);
+        public bool IsValidAddress(long address) => _addressRange.Contains(address);
 
         /// <inheritdoc />
-        public void Rebase(long baseAddress) => _baseAddress = baseAddress;
+        public void Rebase(long baseAddress)
+        {
+            _addressRange = new AddressRange(baseAddress, baseAddress + BackBuffer.Count / 8);
+        }
 
         /// <inheritdoc />
         public void Read(long address, BitVectorSpan buffer)
         {
-            BackBuffer.AsSpan((int) (address - _baseAddress) * 8, buffer.Count).CopyTo(buffer);
+            BackBuffer.AsSpan((int) (address - _addressRange.Start) * 8, buffer.Count).CopyTo(buffer);
         }
 
         /// <inheritdoc />
         public void Write(long address, BitVectorSpan buffer)
         {
-            buffer.CopyTo(BackBuffer.AsSpan((int) (address - _baseAddress) * 8, buffer.Count));
+            buffer.CopyTo(BackBuffer.AsSpan((int) (address - _addressRange.Start) * 8, buffer.Count));
         }
 
         /// <inheritdoc />
         public void Write(long address, ReadOnlySpan<byte> buffer)
         {
-            BackBuffer.AsSpan((int) ((address - _baseAddress) * 8)).Write(buffer);
+            BackBuffer.AsSpan((int) ((address - _addressRange.Start) * 8)).Write(buffer);
         }
     }
 }

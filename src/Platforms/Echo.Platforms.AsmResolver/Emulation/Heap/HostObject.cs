@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         private readonly Dictionary<uint, FieldInfo> _fields = new();
         private readonly CilVirtualMachine _machine;
         private readonly TypeMemoryLayout _virtualLayout;
-        private long _baseAddress;
+        private AddressRange _addressRange;
 
         /// <summary>
         /// Creates a new managed object embedding.
@@ -29,6 +29,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             Object = o ?? throw new ArgumentNullException(nameof(o));
             _virtualLayout = GetLayout(machine.ValueFactory, o);
             _machine = machine;
+            _addressRange = new AddressRange(0, machine.ValueFactory.ObjectHeaderSize + _virtualLayout.Size);
         }
 
         /// <summary>
@@ -44,13 +45,16 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// </summary>
 
         /// <inheritdoc />
-        public AddressRange AddressRange => new(_baseAddress, _baseAddress + _machine.ValueFactory.ObjectHeaderSize + _virtualLayout.Size);
+        public AddressRange AddressRange => _addressRange;
 
         /// <inheritdoc />
-        public bool IsValidAddress(long address) => AddressRange.Contains(address);
+        public bool IsValidAddress(long address) => _addressRange.Contains(address);
 
         /// <inheritdoc />
-        public void Rebase(long baseAddress) => _baseAddress = baseAddress;
+        public void Rebase(long baseAddress)
+        {
+            _addressRange = new AddressRange(baseAddress, baseAddress + _machine.ValueFactory.ObjectHeaderSize + _virtualLayout.Size);
+        }
 
         /// <inheritdoc />
         public void Read(long address, BitVectorSpan buffer)
@@ -58,7 +62,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             buffer.MarkFullyUnknown();
 
             // First field in an object is always its method table (i.e., pointer to its type).
-            uint offset = (uint) (address - _baseAddress);
+            uint offset = (uint) (address - _addressRange.Start);
             if (offset == 0)
             {
                 long methodTable = _machine.ValueFactory.ClrMockMemory.MethodTables.GetAddress(_virtualLayout.Type);
@@ -108,7 +112,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// <inheritdoc />
         public void Write(long address, BitVectorSpan buffer)
         {
-            uint offset = (uint) (address - _baseAddress);
+            uint offset = (uint) (address - _addressRange.Start);
 
             if (Object.GetType().IsArray)
                 WriteToArray(offset, buffer);
