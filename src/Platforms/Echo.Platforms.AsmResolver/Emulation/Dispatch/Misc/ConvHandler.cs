@@ -139,14 +139,14 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Misc
                         overflow = false;
                         result = pool.Rent(32, false);
                         if (span.IsFullyKnown)
-                            result.AsSpan().Write(span.I32);
+                            result.AsSpan().Write(((float)(isSigned ?  span.I64 : span.U64))); // Read as I64/U64 because span was resized to 64 bits, I32/U32 could lose upper bits for large values
                         break;
 
                     case ElementType.R8:
                         overflow = false;
                         result = pool.Rent(64, false);
                         if (span.IsFullyKnown)
-                            result.AsSpan().Write(span.I64);
+                            result.AsSpan().Write((double)(isSigned ? span.I64 : span.U64));
                         break;
 
                     default:
@@ -189,7 +189,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Misc
                 case ElementType.U1:
                 case ElementType.I2:
                 case ElementType.U2:
-                case ElementType.R4:
                 case ElementType.I4:
                 case ElementType.U4:
                 case ElementType.I when context.Machine.Is32Bit:
@@ -199,10 +198,17 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Misc
 
                 case ElementType.I8:
                 case ElementType.U8:
-                case ElementType.R8:
                 case ElementType.I when !context.Machine.Is32Bit:
                 case ElementType.U when !context.Machine.Is32Bit:
                     result = new StackSlot(pool.Rent(64, false), StackSlotTypeHint.Integer);
+                    break;
+
+                case ElementType.R4:
+                    result = new StackSlot(pool.Rent(32, false), StackSlotTypeHint.Float);
+                    break;
+
+                case ElementType.R8:
+                    result = new StackSlot(pool.Rent(64, false), StackSlotTypeHint.Float);
                     break;
 
                 default:
