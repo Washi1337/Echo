@@ -92,7 +92,7 @@ public class StringInvoker : IMethodInvoker
             if (context.Machine.Heap.TryGetInternedString(str, out long internedAddress))
                 return InvocationResult.StepOver(context.Machine.ValueFactory.RentNativeInteger(internedAddress));
         
-            return InvocationResult.StepOver(null);
+            return InvocationResult.StepOver(context.Machine.ValueFactory.RentNull());
         }
     }
 }
