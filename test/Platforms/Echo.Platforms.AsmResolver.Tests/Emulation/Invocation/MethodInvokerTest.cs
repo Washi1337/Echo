@@ -323,7 +323,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
             var result = invoker.Invoke(_context, isInternedMethod, [_context.Machine.ValueFactory.RentNativeInteger(strAddress)]);
 
             Assert.True(result.IsSuccess);
-            Assert.Null(result.Value);
+            Assert.True(result.Value.IsFullyKnown);
+            Assert.Equivalent(result.Value, _context.Machine.ValueFactory.CreateNull());
         }
 
         private sealed class TestDelegateUnknownResolver(IMethodDescriptor method) : ThrowUnknownResolver
