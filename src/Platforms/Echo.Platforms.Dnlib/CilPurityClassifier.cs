@@ -57,12 +57,12 @@ namespace Echo.Platforms.Dnlib
         {
             get;
             set;
-        } = true;
+        } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether writes to field should be considered pure or not by default.  
+        /// Gets or sets a value indicating whether writes to field should be considered pure or not by default.
         /// </summary>
-        public Trilean DefaultFieldWritePurity 
+        public Trilean DefaultFieldWritePurity
         {
             get;
             set;
@@ -70,13 +70,13 @@ namespace Echo.Platforms.Dnlib
 
         /// <summary>
         /// Gets or sets a value indicating whether method accesses (e.g. reading method pointers) should be
-        /// considered pure or not by default.  
+        /// considered pure or not by default.
         /// </summary>
-        public Trilean DefaultMethodAccessPurity 
+        public Trilean DefaultMethodAccessPurity
         {
             get;
             set;
-        } = true;
+        } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether method calls should be considered pure or not by default.  
@@ -193,8 +193,21 @@ namespace Echo.Platforms.Dnlib
                 case DnlibCode.Stind_I2:
                 case DnlibCode.Stind_I4:
                 case DnlibCode.Stind_I8:
+                case DnlibCode.Stind_R4:
                 case DnlibCode.Stind_R8:
+                case DnlibCode.Stind_Ref:
                     return PointerWritePurity;
+
+                case DnlibCode.Cpblk:
+                case DnlibCode.Initblk:
+                    return PointerWritePurity;
+
+                case DnlibCode.Throw:
+                case DnlibCode.Rethrow:
+                    return false;
+
+                case DnlibCode.Localloc:
+                    return false;
 
                 default:
                     return true;
@@ -261,12 +274,20 @@ namespace Echo.Platforms.Dnlib
             }
         }
 
-        private Trilean ClassifyInlineType(in Instruction instruction) 
+        private Trilean ClassifyInlineType(in Instruction instruction)
         {
-            switch (instruction.OpCode.Code) 
+            switch (instruction.OpCode.Code)
             {
+                case DnlibCode.Newarr:
+                    return false;
+
                 case DnlibCode.Stelem:
-                    return ArrayWritePurity | DefaultTypeAccessPurity;
+                    return ArrayWritePurity;
+
+                case DnlibCode.Cpobj:
+                case DnlibCode.Initobj:
+                case DnlibCode.Stobj:
+                    return PointerWritePurity;
 
                 default:
                     return DefaultTypeAccessPurity;
