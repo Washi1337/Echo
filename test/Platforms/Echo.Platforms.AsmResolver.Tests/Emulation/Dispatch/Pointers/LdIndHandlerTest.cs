@@ -96,16 +96,14 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             var stack = Context.CurrentFrame.EvaluationStack;
 
             const long address = 0x0600_0000;
-            Context.Machine.Memory.Map(address, new BasicMemorySpace(new byte[]
-            {
-                0x00, 0x01, 0x02, 0x03
-            }));
+            Context.Machine.Memory.Map(address, new BasicMemorySpace([0x00, 0x01, 0x02, 0x03]));
             stack.Push(new StackSlot(address, StackSlotTypeHint.Integer));
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(
                 CilOpCodes.Ldobj, 
-                Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
-            
+                Context.Machine.ValueFactory.CorLibTypeFactory.Int32.Type))
+            ;
+
             Assert.True(result.IsSuccess);
 
             var slot = Context.CurrentFrame.EvaluationStack.Peek();

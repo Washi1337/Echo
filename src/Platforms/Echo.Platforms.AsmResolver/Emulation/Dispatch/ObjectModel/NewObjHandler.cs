@@ -19,7 +19,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         public override CilDispatchResult Dispatch(CilExecutionContext context, CilInstruction instruction)
         {
             var constructor = (IMethodDescriptor)instruction.Operand!;
-            var instanceType = constructor.DeclaringType!.ToTypeSignature();
+            var instanceType = constructor.DeclaringType!.ToTypeSignature(context.RuntimeContext);
 
             var arguments = GetArguments(context, constructor);
             try

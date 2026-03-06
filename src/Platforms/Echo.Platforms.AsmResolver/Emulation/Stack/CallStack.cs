@@ -36,8 +36,12 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             _factory = factory;
             AddressRange = new AddressRange(0, maxSize);
 
-            var rootMethod = new MethodDefinition("<<root>>", MethodAttributes.Static, 
-                MethodSignature.CreateStatic(factory.ContextModule.CorLibTypeFactory.Void));
+            var rootMethod = new MethodDefinition(
+                "<<root>>",
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(factory.CorLibTypeFactory.Void)
+            );
+            
             Push(new CallFrame(rootMethod, factory, true));
         }
 

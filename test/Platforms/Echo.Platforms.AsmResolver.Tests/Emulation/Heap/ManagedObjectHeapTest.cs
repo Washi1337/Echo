@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using Echo.Memory;
 using Echo.Memory.Heap;
@@ -23,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
         public ManagedObjectHeapTest(MockModuleFixture fixture)
         {
             _fixture = fixture;
-            _factory = new ValueFactory(fixture.CurrentTestModule, false);
+            _factory = new ValueFactory(fixture.CurrentTestModule.RuntimeContext!, false);
             _objectHeap = new ManagedObjectHeap(new BasicHeap(1000), _factory);
         }
 
@@ -35,7 +34,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
             long address = _objectHeap.AllocateString(value);
             var objectSpan = _objectHeap.GetObjectSpan(address);
 
-            Assert.Equal(_factory.ContextModule.CorLibTypeFactory.String,
+            Assert.Equal(_factory.CorLibTypeFactory.String,
                 _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_factory).I64));
             Assert.Equal(value.Length, objectSpan.SliceStringLength(_factory).I32);
             Assert.Equal(value, new string(MemoryMarshal.Cast<byte, char>(objectSpan.SliceStringData(_factory).Bits)));
@@ -73,7 +72,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
 
             // Verify type
             Assert.Equal(
-                _factory.ContextModule.CorLibTypeFactory.Int32.MakeSzArrayType(),
+                _factory.CorLibTypeFactory.Int32.MakeSzArrayType(),
                 _factory.ClrMockMemory.MethodTables.GetObject(objectSpan.SliceObjectMethodTable(_factory).I64),
                 Comparer);
             

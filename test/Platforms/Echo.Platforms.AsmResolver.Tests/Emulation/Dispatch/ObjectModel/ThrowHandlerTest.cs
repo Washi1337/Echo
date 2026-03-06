@@ -3,7 +3,6 @@ using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
@@ -39,8 +38,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var stack = Context.CurrentFrame.EvaluationStack;
 
             var exceptionType = ModuleDefinition.FromFile(typeof(IOException).Assembly.Location)
-                .TopLevelTypes.First(t => t.IsTypeOf("System.IO", "IOException"))
-                .ImportWith(Context.Machine.ContextModule.DefaultImporter);
+                .TopLevelTypes.First(t => t.IsTypeOf("System.IO", "IOException"));
             
             long exceptionPointer = machine.Heap.AllocateObject(exceptionType, true);
             stack.Push(new StackSlot(

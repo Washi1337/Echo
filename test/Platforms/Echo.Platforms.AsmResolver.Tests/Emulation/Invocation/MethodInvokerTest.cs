@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
         {
             _fixture = fixture;
 
-            var machine = new CilVirtualMachine(fixture.MockModule, false);
+            var machine = new CilVirtualMachine(fixture.MockModule.RuntimeContext!, false);
             var thread = machine.CreateThread();
             _context = new CilExecutionContext(thread, CancellationToken.None);
             _context.Thread.CallStack.Push(fixture.MockModule.GetOrCreateModuleConstructor());
@@ -244,7 +244,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
         public void InternString()
         {
             var invoker = StringInvoker.Instance;
-            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve()!;
+            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve(_fixture.MockModule.RuntimeContext);
             var internMethod = stringType.Methods.First(m => m.Name == "Intern");
 
             const string str = "Hello, world!";
@@ -264,7 +264,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
         public void InternSameStringTwiceReturnsSameAddress()
         {
             var invoker = StringInvoker.Instance;
-            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve()!;
+            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve(_fixture.MockModule.RuntimeContext);
             var internMethod = stringType.Methods.First(m => m.Name == "Intern");
 
             const string str = "Hello, world!";
@@ -288,7 +288,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
         public void IsInternedOnInternedString()
         {
             var invoker = StringInvoker.Instance;
-            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve()!;
+            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve(_fixture.MockModule.RuntimeContext);
             var internMethod = stringType.Methods.First(m => m.Name == "Intern");
             var isInternedMethod = stringType.Methods.First(m => m.Name == "IsInterned");
 
@@ -315,7 +315,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
         public void IsInternedOnNonInternedString()
         {
             var invoker = StringInvoker.Instance;
-            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve()!;
+            var stringType = _fixture.MockModule.CorLibTypeFactory.String.Type.Resolve(_fixture.MockModule.RuntimeContext);
             var isInternedMethod = stringType.Methods.First(m => m.Name == "IsInterned");
 
             const string str = "Never interned";
@@ -329,7 +329,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Invocation
 
         private sealed class TestDelegateUnknownResolver(IMethodDescriptor method) : ThrowUnknownResolver
         {
-            public override IMethodDescriptor? ResolveDelegateTarget(
+            public override IMethodDescriptor ResolveDelegateTarget(
                 CilExecutionContext context,
                 ObjectHandle delegateObject,
                 IList<BitVector> arguments)

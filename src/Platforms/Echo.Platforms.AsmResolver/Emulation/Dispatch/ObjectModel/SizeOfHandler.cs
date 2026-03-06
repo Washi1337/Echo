@@ -18,7 +18,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var factory = context.Machine.ValueFactory;
             var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
 
-            var type = ((ITypeDefOrRef)instruction.Operand!).ToTypeSignature().InstantiateGenericTypes(genericContext);
+            var type = ((ITypeDefOrRef)instruction.Operand!)
+                .ToTypeSignature(context.RuntimeContext)
+                .InstantiateGenericTypes(genericContext);
+
             var value = factory.BitVectorPool.Rent(32, false);
             value.AsSpan().Write(factory.GetTypeValueMemoryLayout(type).Size);
             stack.Push(new StackSlot(value, StackSlotTypeHint.Integer));

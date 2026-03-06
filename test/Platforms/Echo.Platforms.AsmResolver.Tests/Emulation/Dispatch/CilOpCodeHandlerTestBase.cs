@@ -25,7 +25,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch
             var body = new CilMethodBody();
             body.Instructions.Add(CilOpCodes.Ret);
             
-            var vm = new CilVirtualMachine(fixture.MockModule, false);
+            var vm = new CilVirtualMachine(fixture.MockModule.RuntimeContext!, false);
             var thread = vm.CreateThread();
             thread.CallStack.Push(dummyMethod);
             

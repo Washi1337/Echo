@@ -33,7 +33,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         {
             _fixture = fixture;
             _testOutputHelper = testOutputHelper;
-            _vm = new CilVirtualMachine(fixture.MockModule, false);
+            _vm = new CilVirtualMachine(fixture.MockModule.RuntimeContext!, false);
             _mainThread = _vm.CreateThread();
         }
 
@@ -339,7 +339,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             var sum = new MethodDefinition(
                 "Sum", 
                 MethodAttributes.Static,
-                MethodSignature.CreateStatic(factory.Int32, factory.Int32.MakeSzArrayType()));
+                MethodSignature.CreateStatic(factory.Int32, [factory.Int32.MakeSzArrayType()]));
 
             var loopStart = new CilInstructionLabel();
             sum.CilMethodBody = new CilMethodBody
@@ -413,7 +413,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             var bar = new MethodDefinition(
                 "Bar",
                 MethodAttributes.Static,
-                MethodSignature.CreateStatic(factory.Int32, factory.Int32, factory.Int32));
+                MethodSignature.CreateStatic(factory.Int32, [factory.Int32, factory.Int32]));
             
             // return Bar(3, 4) * 5;
             var fooBody = new CilMethodBody
@@ -466,17 +466,17 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
 
             var appendMethod = stringBuilderType
                 .CreateMemberReference("Append", MethodSignature.CreateInstance(
-                    stringBuilderType.ToTypeSignature(false), factory.String))
+                    stringBuilderType.ToTypeSignature(false), [factory.String]))
                 .ImportWith(_fixture.MockModule.DefaultImporter);
 
             // Prepare dummy method.
             var foo = new MethodDefinition(
-                "Foo", 
+                "Foo",
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(
-                    factory.Void, 
-                    stringBuilderType.ToTypeSignature(false),
-                    factory.String));
+                    factory.Void,
+                    [stringBuilderType.ToTypeSignature(false), factory.String]
+                ));
             
             var fooBody = new CilMethodBody
             {
@@ -498,7 +498,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
 
             // Set up invoker to reflection invoke StringBuilder::Append(string), and return unknown for everything else. 
             _vm.Invoker = DefaultInvokers.CreateShim()
-                .Map((IMethodDescriptor) appendMethod.Resolve()!, DefaultInvokers.ReflectionInvoke)
+                .Map((IMethodDescriptor) appendMethod.Resolve(_vm.RuntimeContext), DefaultInvokers.ReflectionInvoke)
                 .WithFallback(DefaultInvokers.ReturnUnknown);
 
             // Call it with a real string builder.
@@ -634,7 +634,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
                 "DummyMethod",
                 MethodAttributes.Static,
                 MethodSignature.CreateStatic(factory.String, 1,
-                    new GenericParameterSignature(GenericParameterType.Method, 0))
+                    [new GenericParameterSignature(GenericParameterType.Method, 0)])
             );
             dummyMethod.GenericParameters.Add(new GenericParameter("T"));
             dummyMethod.CilMethodBody = new CilMethodBody
@@ -649,7 +649,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             };
             dummyMethod.CilMethodBody.Instructions.CalculateOffsets();
 
-            var frame = _mainThread.CallStack.Push(dummyMethod.MakeGenericInstanceMethod(factory.Int32));
+            var frame = _mainThread.CallStack.Push(dummyMethod.MakeGenericInstanceMethod([factory.Int32]));
             frame.WriteArgument(0, new BitVector(1337));
 
             var instructions = dummyMethod.CilMethodBody.Instructions;

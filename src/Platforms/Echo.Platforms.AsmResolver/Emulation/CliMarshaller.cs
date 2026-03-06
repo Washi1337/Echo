@@ -31,8 +31,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 case ElementType.ValueType:
                     if (!_resolvedTypes.TryGetValue(type, out var definition))
                     {
-                        definition = type.Resolve();
-                        if (definition is not null)
+                        if (type.TryResolve(_valueFactory.RuntimeContext, out definition))
                             _resolvedTypes.Add(type, definition);
                     }
 

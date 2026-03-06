@@ -22,7 +22,7 @@ public class DelegateInvoker : IMethodInvoker
         if (method is not { Name.Value: { } name, DeclaringType: { } declaringType, Signature: not null })
             return InvocationResult.Inconclusive();
         
-        if (declaringType.Resolve() is { IsDelegate: false })
+        if (!declaringType.TryResolve(context.RuntimeContext, out var definition) || !definition.IsDelegate)
             return InvocationResult.Inconclusive();
 
         return name switch

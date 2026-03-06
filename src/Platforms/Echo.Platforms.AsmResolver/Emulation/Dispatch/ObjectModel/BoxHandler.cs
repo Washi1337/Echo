@@ -15,7 +15,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         protected override CilDispatchResult DispatchInternal(CilExecutionContext context, CilInstruction instruction)
         {
             var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
-            var type = ((ITypeDefOrRef)instruction.Operand!).ToTypeSignature();
+            var type = ((ITypeDefOrRef)instruction.Operand!).ToTypeSignature(context.RuntimeContext);
 
             type = type.InstantiateGenericTypes(genericContext);
 

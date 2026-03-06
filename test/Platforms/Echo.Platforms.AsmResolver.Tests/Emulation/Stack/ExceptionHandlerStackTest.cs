@@ -24,7 +24,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public ExceptionHandlerStackTest(MockModuleFixture fixture)
         {
             _fixture = fixture;
-            _vm = new CilVirtualMachine(_fixture.MockModule, false);
+            _vm = new CilVirtualMachine(_fixture.MockModule.RuntimeContext!, false);
             _mainThread = _vm.CreateThread();
         }
 

@@ -16,7 +16,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public VirtualStackTest(MockModuleFixture fixture)
         {
             _fixture = fixture;
-            _factory = new ValueFactory(fixture.CurrentTestModule, false);
+            _factory = new ValueFactory(fixture.CurrentTestModule.RuntimeContext!, false);
         }
 
         [Fact]

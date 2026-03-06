@@ -20,7 +20,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
             var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
 
             // Determine parameters.
-            var elementType = ((ITypeDefOrRef) instruction.Operand!).ToTypeSignature().InstantiateGenericTypes(genericContext);
+            var elementType = ((ITypeDefOrRef) instruction.Operand!)
+                .ToTypeSignature(context.RuntimeContext)
+                .InstantiateGenericTypes(genericContext);
+
             var arrayIndex = stack.Pop();
             var arrayAddress = stack.Pop();
             var result = factory.RentNativeInteger(false);

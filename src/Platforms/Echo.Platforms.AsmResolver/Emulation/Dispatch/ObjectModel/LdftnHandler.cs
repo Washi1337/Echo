@@ -15,8 +15,8 @@ public class LdftnHandler : FallThroughOpCodeHandler
     {
         var stack = context.CurrentFrame.EvaluationStack;
         var factory = context.Machine.ValueFactory;
-        var methods = context.Machine.ValueFactory.ClrMockMemory.MethodEntryPoints;
-        var type = context.Machine.ContextModule.CorLibTypeFactory.IntPtr;
+        var methods = factory.ClrMockMemory.MethodEntryPoints;
+        var type = factory.CorLibTypeFactory.IntPtr;
 
         var functionPointer = methods.GetAddress((IMethodDescriptor)instruction.Operand!);
         stack.Push(factory.CreateNativeInteger(functionPointer), type);

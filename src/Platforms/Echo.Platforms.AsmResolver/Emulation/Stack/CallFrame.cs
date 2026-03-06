@@ -60,7 +60,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             _initializeLocals = false;
             
             // Allocate local variables. 
-            if (method.Resolve()?.CilMethodBody is not { } body)
+            if (!method.TryResolve(factory.RuntimeContext, out var definition) || definition.CilMethodBody is not { } body)
             {
                 Body = null;
             }
@@ -81,7 +81,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
 
             // Allocate this parameter if required.
             if (method.Signature.HasThis)
-                AllocateFrameField(method.DeclaringType?.ToTypeSignature() ?? method.ContextModule!.CorLibTypeFactory.Object);
+                AllocateFrameField(method.DeclaringType?.ToTypeSignature(factory.RuntimeContext) ?? method.ContextModule!.CorLibTypeFactory.Object);
             
             // Allocate rest of the parameters.
             foreach (var parameterType in method.Signature.ParameterTypes)
@@ -320,7 +320,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
             {
                 if (!merged.TryGetValue(range.ProtectedRange, out var frame))
                 {
-                    frame = new ExceptionHandlerFrame(range.ProtectedRange);
+                    frame = new ExceptionHandlerFrame(EvaluationStack.Factory, range.ProtectedRange);
                     merged.Add(range.ProtectedRange, frame);
                     _exceptionHandlers.Add(frame);
                 }

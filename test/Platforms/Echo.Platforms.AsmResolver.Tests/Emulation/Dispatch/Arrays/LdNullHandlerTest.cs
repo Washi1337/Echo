@@ -1,5 +1,4 @@
 using AsmResolver.PE.DotNet.Cil;
-using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
@@ -43,7 +42,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         [InlineData(10)]
         public void Int32Array(int length)
         {
-            long array = Context.Machine.Heap.AllocateSzArray(Context.Machine.ContextModule.CorLibTypeFactory.Int32, length, true);
+            long array = Context.Machine.Heap.AllocateSzArray(Context.Machine.ValueFactory.CorLibTypeFactory.Int32, length, true);
             
             var stack = Context.CurrentFrame.EvaluationStack;
             stack.Push(new StackSlot(array, StackSlotTypeHint.Integer));

@@ -161,8 +161,8 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         {
             var elementType = Object.GetType().GetElementType()!;
 
-            var factory = _machine.ContextModule.CorLibTypeFactory;
-            var representative = Type.GetTypeCode(elementType) switch
+            var factory = _machine.ValueFactory.CorLibTypeFactory;
+            return Type.GetTypeCode(elementType) switch
             {
                 TypeCode.Boolean => factory.Boolean,
                 TypeCode.Byte => factory.Byte,
@@ -181,7 +181,6 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
                 _ when !elementType.IsValueType => factory.Object,
                 _ => throw new NotSupportedException($"Could not deserialize an array with element type {elementType}.")
             };
-            return representative;
         }
 
         private FieldInfo? GetFieldInfoAtOffset(uint offset)
@@ -211,7 +210,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         private static TypeMemoryLayout GetLayout(ValueFactory factory, object value)
         {
             var type = value.GetType();
-            var descriptor = factory.ContextModule.DefaultImporter.ImportType(type);
+            var descriptor = factory.Importer.ImportType(type);
 
             // Special treatment for array types.
             if (descriptor is TypeSpecification { Signature: SzArrayTypeSignature arrayType })

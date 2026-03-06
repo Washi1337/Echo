@@ -55,14 +55,15 @@ public class RuntimeHelpersInvoker : IMethodInvoker
         if (!context.Machine.ValueFactory.ClrMockMemory.Fields.TryGetObject(fieldHandle.Address, out var field))
             return InvocationResult.Inconclusive();
 
-        // Resole the field behind the field descriptor.
-        var definition = field!.Resolve();
+        // Resolve the field behind the field descriptor.
+        if (!field!.TryResolve(context.RuntimeContext, out var definition))
+            return InvocationResult.Inconclusive();
 
         // Read the data.
-        if (definition?.FieldRva is not IReadableSegment segment)
+        if (definition.FieldRva is not IReadableSegment segment)
             return InvocationResult.Inconclusive();
-        array.WriteArrayData(segment.ToArray());
 
+        array.WriteArrayData(segment.ToArray());
         return InvocationResult.StepOver(null);
     }
 }

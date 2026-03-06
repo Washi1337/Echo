@@ -96,8 +96,7 @@ public sealed class RuntimeTypeManager
                 return TypeInitializerResult.NoAction();
             
             // Try resolve the type that is being initialized.
-            var definition = type.Resolve();
-            if (definition is null)
+            if (!type.TryResolve(thread.Machine.RuntimeContext, out var definition))
             {
                 initialization.Exception = _machine.Heap
                     .AllocateObject(_machine.ValueFactory.TypeInitializationExceptionType, true)
@@ -119,13 +118,11 @@ public sealed class RuntimeTypeManager
                 var result = (IMethodDescriptor) cctor;
                 
                 // Instantiate any args in the declaring type.
-                if (type.ToTypeSignature() is {} typeSignature)
-                {
-                    var context = GenericContext.FromType(type);
-                    var newType = typeSignature.InstantiateGenericTypes(context);
-                    if (newType != typeSignature)
-                        result = newType.ToTypeDefOrRef().CreateMemberReference(cctor.Name!, cctor.Signature!);
-                }
+                var typeSignature = type.ToTypeSignature(thread.Machine.RuntimeContext);
+                var context = GenericContext.FromType(type);
+                var newType = typeSignature.InstantiateGenericTypes(context);
+                if (newType != typeSignature)
+                    result = newType.ToTypeDefOrRef().CreateMemberReference(cctor.Name!, cctor.Signature!);
 
                 thread.CallStack.Push(result);
                 return TypeInitializerResult.Redirected();

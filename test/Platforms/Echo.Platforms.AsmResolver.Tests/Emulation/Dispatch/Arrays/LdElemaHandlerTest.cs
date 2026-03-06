@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         private long CreateArray(int elementCount)
         {
             var factory = Context.Machine.ValueFactory;
-            var elementType = factory.ContextModule.CorLibTypeFactory.Int32;
+            var elementType = factory.CorLibTypeFactory.Int32;
 
             long array = Context.Machine.Heap.AllocateSzArray(elementType, elementCount, false);
             var arraySpan = Context.Machine.Heap.GetObjectSpan(array);
@@ -36,7 +36,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(
                 CilOpCodes.Ldelema, 
-                Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
+                Context.Machine.ValueFactory.CorLibTypeFactory.Int32.Type));
             
             Assert.False(result.IsSuccess);
             var exceptionType = result.ExceptionObject.GetObjectType();
@@ -54,7 +54,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(
                 CilOpCodes.Ldelema, 
-                Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
+                Context.Machine.ValueFactory.CorLibTypeFactory.Int32.Type));
             
             Assert.False(result.IsSuccess);
             var exceptionType = result.ExceptionObject.GetObjectType();
@@ -72,7 +72,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(
                 CilOpCodes.Ldelema, 
-                Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
+                Context.Machine.ValueFactory.CorLibTypeFactory.Int32.Type));
 
             Assert.True(result.IsSuccess);
             Assert.Single(stack);
@@ -90,7 +90,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(
                 CilOpCodes.Ldelema, 
-                Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
+                Context.Machine.ValueFactory.CorLibTypeFactory.Int32.Type));
 
             Assert.True(result.IsSuccess);
             Assert.Single(stack);

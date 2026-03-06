@@ -1,4 +1,5 @@
 using System.Threading;
+using AsmResolver.DotNet;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 
 namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
@@ -44,5 +45,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch
         {
             get;
         }
+
+        public RuntimeContext RuntimeContext => Machine.RuntimeContext;
     }
 }

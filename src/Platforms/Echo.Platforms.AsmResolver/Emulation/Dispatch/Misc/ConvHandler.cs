@@ -313,7 +313,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Misc
 
         private static TypeSignature GetTargetType(CilExecutionContext context, CilCode code)
         {
-            var factory = context.Machine.ContextModule.CorLibTypeFactory;
+            var factory = context.Machine.ValueFactory.CorLibTypeFactory;
             
             return code switch
             {

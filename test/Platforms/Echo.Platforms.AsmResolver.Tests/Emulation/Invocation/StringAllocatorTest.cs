@@ -22,20 +22,20 @@ public class StringAllocatorTest : IClassFixture<MockModuleFixture>
 
     public StringAllocatorTest(MockModuleFixture fixture)
     {
-        var machine = new CilVirtualMachine(fixture.MockModule, false);
+        var machine = new CilVirtualMachine(fixture.MockModule.RuntimeContext!, false);
         var thread = machine.CreateThread();
         _context = new CilExecutionContext(thread, CancellationToken.None);
         _context.Thread.CallStack.Push(fixture.MockModule.GetOrCreateModuleConstructor());
 
         _corlibFactory = fixture.MockModule.CorLibTypeFactory;
-        _stringType = _corlibFactory.String.Type.Resolve()!;
+        _stringType = _corlibFactory.String.Type.Resolve(fixture.MockModule.RuntimeContext!);
     }
 
     [Fact]
     public void UsingCharArrayConstructorNull()
     {
         // Locate .ctor(char[])
-        var ctor = _stringType.GetConstructor(_corlibFactory.Char.MakeSzArrayType())!;
+        var ctor = _stringType.GetConstructor([_corlibFactory.Char.MakeSzArrayType()])!;
 
         // Allocate using null pointer.
         var result = _allocator.Allocate(_context, ctor, [_context.Machine.ValueFactory.CreateNull()]);
@@ -59,7 +59,7 @@ public class StringAllocatorTest : IClassFixture<MockModuleFixture>
         array.WriteArrayData(MemoryMarshal.Cast<char, byte>(data));
 
         // Allocate string using .ctor(char[])
-        var ctor = _stringType.GetConstructor(_corlibFactory.Char.MakeSzArrayType())!;
+        var ctor = _stringType.GetConstructor([_corlibFactory.Char.MakeSzArrayType()])!;
         var result = _allocator.Allocate(_context, ctor, [
             _context.Machine.ValueFactory.CreateNativeInteger(array.Address)
         ]);
@@ -88,11 +88,11 @@ public class StringAllocatorTest : IClassFixture<MockModuleFixture>
         array.WriteArrayData(MemoryMarshal.Cast<char, byte>(data));
 
         // Allocate string using .ctor(char[], int32, int32)
-        var ctor = _stringType.GetConstructor(
+        var ctor = _stringType.GetConstructor([
             _corlibFactory.Char.MakeSzArrayType(),
             _corlibFactory.Int32,
             _corlibFactory.Int32
-        )!;
+        ])!;
         var result = _allocator.Allocate(_context, ctor, [
             _context.Machine.ValueFactory.CreateNativeInteger(array.Address),
             new BitVector(startIndex),
@@ -119,7 +119,7 @@ public class StringAllocatorTest : IClassFixture<MockModuleFixture>
         _context.Machine.Memory.Write(address, MemoryMarshal.Cast<char, byte>(data));
 
         // Allocate string using .ctor(char*)
-        var ctor = _stringType.GetConstructor(_corlibFactory.Char.MakePointerType())!;
+        var ctor = _stringType.GetConstructor([_corlibFactory.Char.MakePointerType()])!;
         var result = _allocator.Allocate(_context, ctor, [_context.Machine.ValueFactory.CreateNativeInteger(address)]);
 
         // Verify.
@@ -143,11 +143,11 @@ public class StringAllocatorTest : IClassFixture<MockModuleFixture>
         _context.Machine.Memory.Write(address, MemoryMarshal.Cast<char, byte>(data));
 
         // Allocate string using .ctor(char*, int32, int32)
-        var ctor = _stringType.GetConstructor(
+        var ctor = _stringType.GetConstructor([
             _corlibFactory.Char.MakePointerType(),
             _corlibFactory.Int32,
             _corlibFactory.Int32
-        )!;
+        ])!;
         var result = _allocator.Allocate(_context, ctor, [
             _context.Machine.ValueFactory.CreateNativeInteger(address),
             new BitVector(startIndex),
@@ -170,7 +170,7 @@ public class StringAllocatorTest : IClassFixture<MockModuleFixture>
         long address = _context.Machine.Heap.AllocateFlat(20, false);
 
         // Attempt to allocate string using .ctor(char*)
-        var ctor = _stringType.GetConstructor(_corlibFactory.Char.MakePointerType())!;
+        var ctor = _stringType.GetConstructor([_corlibFactory.Char.MakePointerType()])!;
         Assert.ThrowsAny<CilEmulatorException>(() =>
         {
             _allocator.Allocate(_context, ctor, [_context.Machine.ValueFactory.CreateNativeInteger(address)]);
@@ -188,7 +188,7 @@ public class StringAllocatorTest : IClassFixture<MockModuleFixture>
         ));
 
         // Allocate string using .ctor(char*)
-        var ctor = _stringType.GetConstructor(_corlibFactory.Char.MakePointerType())!;
+        var ctor = _stringType.GetConstructor([_corlibFactory.Char.MakePointerType()])!;
         var result = _allocator.Allocate(_context, ctor, [_context.Machine.ValueFactory.CreateNativeInteger(address)]);
 
         // Verify
@@ -209,7 +209,7 @@ public class StringAllocatorTest : IClassFixture<MockModuleFixture>
         _context.Machine.Memory.Write(address, data);
 
         // Allocate string using .ctor(sbyte*)
-        var ctor = _stringType.GetConstructor(_corlibFactory.SByte.MakePointerType())!;
+        var ctor = _stringType.GetConstructor([_corlibFactory.SByte.MakePointerType()])!;
         var result = _allocator.Allocate(_context, ctor, [_context.Machine.ValueFactory.CreateNativeInteger(address)]);
 
         // Verify.
@@ -233,11 +233,11 @@ public class StringAllocatorTest : IClassFixture<MockModuleFixture>
         _context.Machine.Memory.Write(address, data);
 
         // Allocate string using .ctor(sbyte*, int32, int32)
-        var ctor = _stringType.GetConstructor(
+        var ctor = _stringType.GetConstructor([
             _corlibFactory.SByte.MakePointerType(),
             _corlibFactory.Int32,
             _corlibFactory.Int32
-        )!;
+        ])!;
         var result = _allocator.Allocate(_context, ctor, [
             _context.Machine.ValueFactory.CreateNativeInteger(address),
             new BitVector(startIndex),
@@ -257,7 +257,7 @@ public class StringAllocatorTest : IClassFixture<MockModuleFixture>
     public void UsingCharInt32Constructor()
     {
         // Allocate string using .ctor(char, int32)
-        var ctor = _stringType.GetConstructor(_corlibFactory.Char, _corlibFactory.Int32)!;
+        var ctor = _stringType.GetConstructor([_corlibFactory.Char, _corlibFactory.Int32])!;
         var result = _allocator.Allocate(_context, ctor, [
             new BitVector('A'),
             new BitVector(30)

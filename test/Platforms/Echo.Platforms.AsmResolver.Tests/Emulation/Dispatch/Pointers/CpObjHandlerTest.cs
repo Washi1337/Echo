@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
         public void CopyFromNullShouldThrow()
         {
             var stack = Context.CurrentFrame.EvaluationStack;
-            var type = Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type;
+            var type = Context.Machine.ValueFactory.CorLibTypeFactory.Int32.Type;
 
             // Map some destination.
             long destinationAddress = 0x0600_0000;
@@ -40,7 +40,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
         public void CopyToNullShouldThrow()
         {
             var stack = Context.CurrentFrame.EvaluationStack;
-            var type = Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type;
+            var type = Context.Machine.ValueFactory.CorLibTypeFactory.Int32.Type;
 
             // Map some destination.
             long sourceAddress = 0x0600_0000;
@@ -67,7 +67,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
             };
 
             var stack = Context.CurrentFrame.EvaluationStack;
-            var type = Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type;
+            var type = Context.Machine.ValueFactory.CorLibTypeFactory.Int32.Type;
 
             // Map some source.
             long sourceAddress = 0x0600_0000;

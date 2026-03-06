@@ -35,7 +35,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
                     return CilDispatchResult.NullReference(context);
                 
                 // Perform the copy.
-                var buffer = factory.CreateValue(type.ToTypeSignature(), false);
+                var buffer = factory.CreateValue(type.ToTypeSignature(context.RuntimeContext), false);
                 
                 // If source address is unknown, leave the buffer with unknown bits.
                 if (sourceAddress.HasValue)

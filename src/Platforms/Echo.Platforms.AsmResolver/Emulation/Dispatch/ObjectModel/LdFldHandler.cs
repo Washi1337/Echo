@@ -24,7 +24,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
 
             try
             {
-                return field.Resolve() is { IsStatic: true }
+                return field.TryResolve(context.RuntimeContext, out var definition) && definition.IsStatic
                     ? ReadStaticField(context, field) 
                     : ReadInstanceField(context, instruction, instance);
             }
@@ -89,7 +89,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                             case { } actualAddress:
                                 // A non-null reference was passed.
 
-                                var handle = field.DeclaringType!.IsValueType
+                                var handle = field.DeclaringType!.GetIsValueType(context.RuntimeContext)
                                     ? actualAddress.AsStructHandle(context.Machine)
                                     : actualAddress.AsObjectHandle(context.Machine).Contents;
 

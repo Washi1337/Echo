@@ -22,7 +22,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
         public void NewObject()
         {
             // Find System.Object::.ctor()
-            var type = ModuleFixture.MockModule.CorLibTypeFactory.Object.Resolve()!;
+            var type = ModuleFixture.MockModule.CorLibTypeFactory.Object.Resolve(ModuleFixture.MockModule.RuntimeContext);
             var constructor = type.Methods.First(m => m is {IsConstructor: true, Parameters.Count: 0});
             
             var result = Dispatcher.Dispatch(Context, new CilInstruction(CilOpCodes.Newobj, constructor));

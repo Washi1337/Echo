@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
         {
             _fixture = fixture;
             
-            _factory = new ValueFactory(fixture.MockModule, false);
+            _factory = new ValueFactory(fixture.MockModule.RuntimeContext!, false);
             _storage = new StaticFieldStorage(_factory, 0x0100_0000);
         }
 
@@ -49,7 +49,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Heap
         [Fact]
         public void GetSpanOfObjectShouldReflectPointer()
         {
-            var objectFIeld = new FieldDefinition("ObjectFIeld", FieldAttributes.Static,
+            var objectFIeld = new FieldDefinition("ObjectField", FieldAttributes.Static,
                 _fixture.MockModule.CorLibTypeFactory.Object);
 
             var intSpan = _storage.GetFieldSpan(objectFIeld);
