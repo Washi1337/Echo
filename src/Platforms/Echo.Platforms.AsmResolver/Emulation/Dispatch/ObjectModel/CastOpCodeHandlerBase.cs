@@ -18,7 +18,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
 
             var value = stack.Pop();
-            var targetType = ((ITypeDefOrRef) instruction.Operand!).ToTypeSignature().InstantiateGenericTypes(genericContext);
+            var targetType = ((ITypeDefOrRef) instruction.Operand!)
+                .ToTypeSignature(context.RuntimeContext)
+                .InstantiateGenericTypes(genericContext);
 
             try
             {
@@ -43,10 +45,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     case { } actualAddress:
                         // A non-null reference was passed.
                         var handle = actualAddress.AsObjectHandle(context.Machine);
-                        var objectType = handle.GetObjectType().ToTypeSignature();
+                        var objectType = handle.GetObjectType().ToTypeSignature(context.RuntimeContext);
 
                         // TODO: handle full verifier-assignable-to operation.
-                        return objectType.IsAssignableTo(targetType)
+                        return objectType.IsAssignableTo(targetType, context.RuntimeContext)
                             ? HandleSuccessfulCast(context, handle, targetType)
                             : HandleFailedCast(context, objectType, targetType);
                 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -43,10 +44,14 @@ public readonly partial struct ObjectHandle
             get
             {
                 if (_handle.IsNull)
-                    return Array.Empty<KeyValuePair<object, object>>();
+                    return [];
 
-                var type = _handle.GetObjectType().ToTypeSignature();
-
+                var descriptor = _handle.GetObjectType();
+                bool? isValueType = descriptor.TryGetIsValueType(_handle.Machine.RuntimeContext);
+                if (!isValueType.HasValue)
+                    return [];
+                
+                var type = descriptor.ToTypeSignature(_handle.Machine.RuntimeContext);
                 return type switch
                 {
                     CorLibTypeSignature {ElementType: ElementType.String} => GetStringValue(),
@@ -99,9 +104,8 @@ public readonly partial struct ObjectHandle
         private KeyValuePair<object, object>[] GetObjectFieldValues(TypeSignature type)
         {
             // We need to resolve the type to know which fields to include.
-            var definition = type.Resolve();
-            if (definition is null)
-                return Array.Empty<KeyValuePair<object, object>>();
+            if (!type.TryResolve(_handle.Machine!.RuntimeContext, out var definition))
+                return [];
 
             // Collect all fields and their values.
             var result = new List<KeyValuePair<object, object>>();

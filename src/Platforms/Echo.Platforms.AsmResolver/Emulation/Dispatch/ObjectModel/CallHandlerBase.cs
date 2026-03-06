@@ -111,7 +111,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             var factory = context.Machine.ValueFactory;
             var stack = context.CurrentFrame.EvaluationStack;
             
-            var declaringType = method.DeclaringType?.ToTypeSignature() ?? factory.ContextModule.CorLibTypeFactory.Object;
+            var declaringType = method.DeclaringType?.ToTypeSignature(context.RuntimeContext) ?? factory.CorLibTypeFactory.Object;
             return stack.Pop(declaringType);
         }
 
@@ -273,7 +273,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
         /// <param name="type">The type to search in.</param>
         /// <param name="baseMethod">The method to find an implementation for.</param>
         /// <returns>The method, or <c>null</c> if none is found.</returns>
-        protected static MethodDefinition? FindMethodImplementationInType(TypeDefinition? type, MethodDefinition? baseMethod)
+        protected static MethodDefinition? FindMethodImplementationInType(RuntimeContext context, TypeDefinition? type, MethodDefinition? baseMethod)
         {
             if (type is null || baseMethod is null || !baseMethod.IsVirtual)
                 return baseMethod;
@@ -290,15 +290,15 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 if (baseMethod.IsStatic)
                 {
                     // Static base methods can only be implemented through explicit interface implementation.
-                    implementation = TryFindExplicitInterfaceImplementationInType(type, baseMethod);
+                    implementation = TryFindExplicitInterfaceImplementationInType(context, type, baseMethod);
                 }
                 else
                 {
                     // Prioritize interface implementations.
                     if (declaringType.IsInterface)
                     {
-                        implementation = TryFindExplicitInterfaceImplementationInType(type, baseMethod)
-                            ?? TryFindImplicitInterfaceImplementationInType(type, baseMethod);
+                        implementation = TryFindExplicitInterfaceImplementationInType(context, type, baseMethod)
+                            ?? TryFindImplicitInterfaceImplementationInType(context, type, baseMethod);
                     }
 
                     // Try to find other implicit implementations.
@@ -309,7 +309,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     break;
                 
                 // Move up type hierarchy tree.
-                type = type.BaseType?.Resolve();
+                if (type.BaseType is null)
+                    break;
+
+                type.BaseType.TryResolve(context, out type);
             }
 
             // If there's no override, just use the base implementation (if available).
@@ -334,13 +337,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             return null;
         }
 
-        private static MethodDefinition? TryFindImplicitInterfaceImplementationInType(TypeDefinition type, MethodDefinition baseMethod)
+        private static MethodDefinition? TryFindImplicitInterfaceImplementationInType(RuntimeContext context, TypeDefinition type, MethodDefinition baseMethod)
         {
             // Find the correct interface implementation and instantiate any generics.
             MethodSignature? baseMethodSig = null;
             foreach (var interfaceImpl in type.Interfaces)
             {
-                if (SignatureComparer.Default.Equals(interfaceImpl.Interface?.ToTypeSignature().GetUnderlyingTypeDefOrRef(), baseMethod.DeclaringType))
+                if (context.SignatureComparer.Equals(interfaceImpl.Interface?.ToTypeSignature(context).GetUnderlyingTypeDefOrRef(), baseMethod.DeclaringType))
                 {
                     baseMethodSig = baseMethod.Signature?.InstantiateGenericTypes(GenericContext.FromType(interfaceImpl.Interface!));
                     break;
@@ -356,7 +359,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 // Only public virtual instance methods can implicity implement interface methods. (ECMA-335, 6th edition, II.12.2)
                 if (method is { IsPublic: true, IsVirtual: true, IsStatic: false }
                     && method.Name == baseMethod.Name
-                    && SignatureComparer.Default.Equals(method.Signature, baseMethodSig))
+                    && context.SignatureComparer.Equals(method.Signature, baseMethodSig))
                 {
                     return method;
                 }
@@ -365,7 +368,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             return null;
         }
 
-        private static MethodDefinition? TryFindExplicitInterfaceImplementationInType(TypeDefinition type, MethodDefinition baseMethod)
+        private static MethodDefinition? TryFindExplicitInterfaceImplementationInType(RuntimeContext context, TypeDefinition type, MethodDefinition baseMethod)
         {
             for (int i = 0; i < type.MethodImplementations.Count; i++)
             {
@@ -374,15 +377,18 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                     continue;
 
                 // Compare underlying TypeDefOrRef and instantiate any generics to ensure correct comparison.
-                var declaringType = impl.Declaration?.DeclaringType?.ToTypeSignature().GetUnderlyingTypeDefOrRef();
-                if (!SignatureComparer.Default.Equals(declaringType, baseMethod.DeclaringType))
+                var declaringType = impl.Declaration?.DeclaringType?.ToTypeSignature(context).GetUnderlyingTypeDefOrRef();
+                if (!context.SignatureComparer.Equals(declaringType, baseMethod.DeclaringType))
                     continue;
 
-                var context = GenericContext.FromMethod(impl.Declaration!);
-                var implMethodSig = impl.Declaration!.Signature?.InstantiateGenericTypes(context); 
-                var baseMethodSig = baseMethod.Signature?.InstantiateGenericTypes(context);
-                if (SignatureComparer.Default.Equals(baseMethodSig, implMethodSig))
-                    return impl.Body?.Resolve();
+                var genericContext = GenericContext.FromMethod(impl.Declaration!);
+                var implMethodSig = impl.Declaration!.Signature?.InstantiateGenericTypes(genericContext); 
+                var baseMethodSig = baseMethod.Signature?.InstantiateGenericTypes(genericContext);
+                if (context.SignatureComparer.Equals(baseMethodSig, implMethodSig)
+                    && impl.Body?.TryResolve(context, out var definition) is true)
+                {
+                    return definition;
+                }
             }
 
             return null;

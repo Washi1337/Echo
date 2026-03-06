@@ -6,7 +6,7 @@
         <PackageLicense>https://github.com/Washi1337/Echo/LICENSE.md</PackageLicense>
         <RepositoryUrl>https://github.com/Washi1337/Echo</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <LangVersion>12</LangVersion>
+        <LangVersion>14</LangVersion>
         <Nullable>enable</Nullable>
         <VersionPrefix>1.0.0</VersionPrefix>
         <VersionSuffix>alpha.1</VersionSuffix>

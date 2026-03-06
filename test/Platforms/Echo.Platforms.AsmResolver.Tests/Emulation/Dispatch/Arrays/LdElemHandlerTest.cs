@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         private long CreateArray(int elementCount)
         {
             var factory = Context.Machine.ValueFactory;
-            var elementType = factory.ContextModule.CorLibTypeFactory.Int32;
+            var elementType = factory.CorLibTypeFactory.Int32;
 
             long array = Context.Machine.Heap.AllocateSzArray(elementType, elementCount, false);
             var arraySpan = Context.Machine.Heap.GetObjectSpan(array);

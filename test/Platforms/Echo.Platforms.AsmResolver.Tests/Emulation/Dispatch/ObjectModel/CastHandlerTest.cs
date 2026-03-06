@@ -192,7 +192,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
                 .Methods
                 .First(m => m.Name == nameof(SimpleClass.GenericMethod));
 
-            var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int16);
+            var methodSpecification = genericMethod.MakeGenericInstanceMethod([ModuleFixture.MockModule.CorLibTypeFactory.Int16]);
 
             Context.Thread.CallStack.Push(methodSpecification);
 
@@ -222,7 +222,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
                 .Methods
                 .First(m => m.Name == nameof(SimpleClass.GenericMethod));
 
-            var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int32);
+            var methodSpecification = genericMethod.MakeGenericInstanceMethod([ModuleFixture.MockModule.CorLibTypeFactory.Int32]);
 
             Context.Thread.CallStack.Push(methodSpecification);
 
@@ -251,7 +251,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
                 .Methods
                 .First(m => m.Name == nameof(SimpleClass.GenericMethod));
 
-            var methodSpecification = genericMethod.MakeGenericInstanceMethod(ModuleFixture.MockModule.CorLibTypeFactory.Int64);
+            var methodSpecification = genericMethod.MakeGenericInstanceMethod([ModuleFixture.MockModule.CorLibTypeFactory.Int64]);
 
             Context.Thread.CallStack.Push(methodSpecification);
 

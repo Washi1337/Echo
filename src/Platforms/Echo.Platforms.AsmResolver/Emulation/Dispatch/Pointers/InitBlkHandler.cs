@@ -16,7 +16,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             var factory = context.Machine.ValueFactory;
             
             var size = stack.Pop();
-            var value = stack.Pop(context.Machine.ContextModule.CorLibTypeFactory.Byte); 
+            var value = stack.Pop(factory.CorLibTypeFactory.Byte); 
             var address = stack.Pop();
             
             try

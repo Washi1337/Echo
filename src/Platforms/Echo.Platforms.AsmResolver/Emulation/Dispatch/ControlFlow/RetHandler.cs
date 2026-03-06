@@ -35,7 +35,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ControlFlow
                 if (index != -1 && body.Instructions[index].OpCode.Code == CilCode.Newobj)
                 {
                     var resultingType = calleeFrame.Method.DeclaringType!
-                        .ToTypeSignature()
+                        .ToTypeSignature(context.RuntimeContext)
                         .InstantiateGenericTypes(genericContext);
                     
                     var slot = CreateResultingStackSlot(

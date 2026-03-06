@@ -40,8 +40,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                         ?? objectPointer.AsObjectHandle(context.Machine).GetObjectType();
                     
                     // Find the implementation.
-                    var implementation = FindMethodImplementationInType(objectType.Resolve(), method.Resolve());
-                    if (implementation is null)
+                    if (!objectType.TryResolve(context.RuntimeContext, out var objectTypeDefinition)
+                        || !method.TryResolve(context.RuntimeContext, out var methodDefinition)
+                        || FindMethodImplementationInType(context.RuntimeContext, objectTypeDefinition, methodDefinition) is not { } implementation)
                     {
                         // There is no implementation for the method.
                         return MethodDevirtualizationResult.Exception(
@@ -51,7 +52,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                                 .AsObjectHandle(context.Machine)
                         );
                     }
-                    
+
                     // Instantiate any generics.
                     var genericContext = GenericContext.FromMethod(method);
                     if (genericContext.IsEmpty)

@@ -1,6 +1,5 @@
 using AsmResolver.PE.DotNet.Cil;
 using Echo.Memory;
-using Echo.Platforms.AsmResolver.Emulation;
 using Echo.Platforms.AsmResolver.Emulation.Stack;
 using Echo.Platforms.AsmResolver.Tests.Mock;
 using Xunit;
@@ -92,7 +91,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Pointers
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(
                 CilOpCodes.Stobj, 
-                Context.Machine.ContextModule.CorLibTypeFactory.Int32.Type));
+                Context.Machine.ValueFactory.CorLibTypeFactory.Int32.Type));
 
             Assert.True(result.IsSuccess);
             Assert.Empty(stack);

@@ -17,7 +17,7 @@ public class CliMarshallerTest : IClassFixture<MockModuleFixture>
     public CliMarshallerTest(MockModuleFixture fixture)
     {
         _fixture = fixture;
-        _factory = new ValueFactory(_fixture.MockModule, false);
+        _factory = new ValueFactory(_fixture.MockModule.RuntimeContext!, false);
         _marshaller = new CliMarshaller(_factory);
     }
 

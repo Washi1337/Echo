@@ -35,12 +35,12 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// </summary>
         /// <param name="contextModule">The main module to base the context on.</param>
         /// <param name="is32Bit">Indicates whether the virtual machine runs in 32-bit mode or 64-bit mode.</param>
-        public CilVirtualMachine(ModuleDefinition contextModule, bool is32Bit)
+        public CilVirtualMachine(RuntimeContext runtimeContext, bool is32Bit)
         {
             Memory = new VirtualMemory(is32Bit ? uint.MaxValue : long.MaxValue);
             Loader = new PELoader(Memory);
             
-            ValueFactory = new ValueFactory(contextModule, is32Bit);
+            ValueFactory = new ValueFactory(runtimeContext, is32Bit);
             HostObjects = new ObjectMapMemory<object, HostObject>(0x1000_0000, o => new HostObject(o, this));
             ObjectMarshaller = new ObjectMarshaller(this);
             
@@ -114,11 +114,8 @@ namespace Echo.Platforms.AsmResolver.Emulation
             get;
         }
 
-        /// <summary>
-        /// Gets the main module the emulator is executing instructions for.
-        /// </summary>
-        public ModuleDefinition ContextModule => ValueFactory.ContextModule;
-
+        public RuntimeContext RuntimeContext => ValueFactory.RuntimeContext;
+        
         /// <summary>
         /// Gets the service that is responsible for mapping executable files in memory.
         /// </summary>

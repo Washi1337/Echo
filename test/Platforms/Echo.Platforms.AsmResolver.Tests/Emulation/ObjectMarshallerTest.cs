@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -20,7 +19,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         public ObjectMarshallerTest(MockModuleFixture fixture)
         {
             _fixture = fixture;
-            _machine = new CilVirtualMachine(fixture.MockModule, false);
+            _machine = new CilVirtualMachine(fixture.MockModule.RuntimeContext!, false);
         }
 
         [Theory]
@@ -76,7 +75,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             var type = handle.GetObjectType();
             Assert.Equal(nameof(SimpleClass), type.Name);
 
-            var definition = type.Resolve()!;
+            var definition = type.Resolve(_machine.RuntimeContext);
             var intField = definition.Fields.First(f => f.Name == nameof(SimpleClass.IntField));
             var stringField = definition.Fields.First(f => f.Name == nameof(SimpleClass.StringField));
             var simpleClassField = definition.Fields.First(f => f.Name == nameof(SimpleClass.SimpleClassField));
@@ -107,13 +106,16 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
             var handle = _machine.ObjectMarshaller.ToBitVector(obj).AsObjectHandle(_machine);
             var type = handle.GetObjectType();
 
-            var genericInstanceTypeSignature = Assert.IsType<GenericInstanceTypeSignature>(type.ToTypeSignature());
+            var genericInstanceTypeSignature = Assert.IsType<GenericInstanceTypeSignature>(type.ToTypeSignature(_machine.RuntimeContext));
             
             // Ensure name of the base generic type matches our reflection type name
             Assert.Equal(obj.GetType().Name, genericInstanceTypeSignature.GenericType.Name);
             
             // Ensure type arguments are correct
-            Assert.Equal(genericInstanceTypeSignature.TypeArguments, [_machine.ContextModule.CorLibTypeFactory.Int32, _machine.ContextModule.CorLibTypeFactory.String]);
+            Assert.Equal(
+                genericInstanceTypeSignature.TypeArguments,
+                [_machine.ValueFactory.CorLibTypeFactory.Int32, _machine.ValueFactory.CorLibTypeFactory.String]
+            );
         }
 
         [Fact]
@@ -123,9 +125,9 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
 
             var result = _machine.ObjectMarshaller.ToBitVector(array).AsObjectHandle(_machine);
             
-            var elementType = _machine.ContextModule.CorLibTypeFactory.Int32;
+            var elementType = _machine.ValueFactory.CorLibTypeFactory.Int32;
             
-            Assert.Equal(elementType.MakeSzArrayType(), result.GetObjectType().ToTypeSignature(), SignatureComparer.Default);
+            Assert.Equal(elementType.MakeSzArrayType(), result.GetObjectType().ToTypeSignature(_machine.RuntimeContext), SignatureComparer.Default);
             Assert.Equal(array.Length, result.ReadArrayLength().AsSpan().I32);
             Assert.All(Enumerable.Range(0, array.Length), i =>
             {
@@ -171,7 +173,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation
         [Fact]
         public void DeserializeInt32Array()
         {
-            var elementType = _machine.ContextModule.CorLibTypeFactory.Int32;
+            var elementType = _machine.ValueFactory.CorLibTypeFactory.Int32;
             var handle = _machine.Heap.AllocateSzArray(elementType, 10, true).AsObjectHandle(_machine);
             
             for (int i = 0; i < 10; i++)

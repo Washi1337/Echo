@@ -374,7 +374,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         public BitVector ReadObjectData()
         {
             AssertIsValidHandle();
-            var buffer = Machine.ValueFactory.CreateValue(GetObjectType().ToTypeSignature(), false);
+            var buffer = Machine.ValueFactory.CreateValue(GetObjectType().ToTypeSignature(Machine.RuntimeContext), false);
             ReadObjectData(buffer);
             return buffer;
         }

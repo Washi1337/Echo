@@ -19,7 +19,10 @@ public abstract class FieldOpCodeHandler : ICilOpCodeHandler
             && field.DeclaringType is { } declaringType)
         {
             var genericContext = GenericContext.FromMember(context.CurrentFrame.Method);
-            var instantiated = declaringType.ToTypeSignature().InstantiateGenericTypes(genericContext);
+            var instantiated = declaringType
+                .ToTypeSignature(context.RuntimeContext)
+                .InstantiateGenericTypes(genericContext);
+
             var initResult = context.Machine.TypeManager.HandleInitialization(context.Thread, instantiated);
             if (!initResult.IsNoAction)
                 return initResult.ToDispatchResult();

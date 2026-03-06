@@ -16,9 +16,11 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Pointers
             var factory = context.Machine.ValueFactory;
             var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
             
-            var type = ((ITypeDefOrRef)instruction.Operand!).ToTypeSignature().InstantiateGenericTypes(genericContext);
-            var address = context.CurrentFrame.EvaluationStack.Pop();
+            var type = ((ITypeDefOrRef)instruction.Operand!)
+                .ToTypeSignature(context.RuntimeContext)
+                .InstantiateGenericTypes(genericContext);
 
+            var address = context.CurrentFrame.EvaluationStack.Pop();
 
             try
             {
