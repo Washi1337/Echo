@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Text;
 using Echo.Memory;
-using Echo.Platforms.AsmResolver.Emulation.Heap;
 
 namespace Echo.Platforms.AsmResolver.Emulation
 {
@@ -147,14 +146,14 @@ namespace Echo.Platforms.AsmResolver.Emulation
 
         private object? DeserializeArray(long pointer, Type elementType)
         {
-            var factory = Machine.ContextModule.CorLibTypeFactory;
+            var factory = Machine.ValueFactory.CorLibTypeFactory;
             var representative = Type.GetTypeCode(elementType) switch
             {
                 TypeCode.Boolean => factory.Boolean,
                 TypeCode.Byte => factory.Byte,
                 TypeCode.Char => factory.Char,
                 TypeCode.DateTime => factory.Int64,
-                TypeCode.Decimal => Machine.ValueFactory.DecimalType.ToTypeSignature(),
+                TypeCode.Decimal => Machine.ValueFactory.DecimalType.ToTypeSignature(isValueType: true),
                 TypeCode.Double => factory.Double,
                 TypeCode.Int16 => factory.Int16,
                 TypeCode.Int32 => factory.Int32,

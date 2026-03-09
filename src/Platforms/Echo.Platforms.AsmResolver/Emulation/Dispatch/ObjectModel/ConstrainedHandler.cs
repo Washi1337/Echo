@@ -15,7 +15,7 @@ public class ConstrainedHandler : FallThroughOpCodeHandler
     {
         var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
         context.CurrentFrame.ConstrainedType = ((ITypeDescriptor)instruction.Operand!)
-            .ToTypeSignature()
+            .ToTypeSignature(context.RuntimeContext)
             .InstantiateGenericTypes(genericContext);
 
         return CilDispatchResult.Success();

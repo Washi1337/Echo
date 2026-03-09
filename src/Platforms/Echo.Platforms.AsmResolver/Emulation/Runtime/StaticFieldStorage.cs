@@ -74,12 +74,13 @@ namespace Echo.Platforms.AsmResolver.Emulation.Runtime
 
                 // Pre-initialize fields that are assigned some field rva data.
                 // TODO: For more accuracy, we should return the address from within the mapped PE memory range.
-                if (field.Resolve() is { IsStatic: true, HasFieldRva: true, FieldRva: IReadableSegment data } def)
+                if (field.TryResolve(_valueFactory.RuntimeContext, out var definition)
+                    && definition is { IsStatic: true, HasFieldRva: true, FieldRva: IReadableSegment data })
                 {
-                    field = def;
+                    field = definition;
                     _heap.GetChunkSpan(address).Write(data.WriteIntoArray());
                 }
-                
+
                 _fields.Add(field, address);
             }
 

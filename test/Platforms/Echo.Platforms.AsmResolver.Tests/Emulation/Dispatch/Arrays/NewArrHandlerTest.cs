@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var factory = Context.Machine.ValueFactory;
             
             int elementCount = 10;
-            var elementType = factory.ContextModule.CorLibTypeFactory.Int32;
+            var elementType = factory.CorLibTypeFactory.Int32;
             
             Context.CurrentFrame.EvaluationStack.Push(new StackSlot(elementCount, StackSlotTypeHint.Integer));
 
@@ -41,7 +41,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         [Fact]
         public void NewInt32ArrayUnknownSizeShouldPushUnknownPointer()
         {
-            var elementType = Context.Machine.ValueFactory.ContextModule.CorLibTypeFactory.Int32;
+            var elementType = Context.Machine.ValueFactory.CorLibTypeFactory.Int32;
             
             Context.CurrentFrame.EvaluationStack.Push(new StackSlot(
                 new BitVector(32, false), 

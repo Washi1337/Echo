@@ -18,7 +18,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Variables
             var genericContext = GenericContext.FromMethod(context.CurrentFrame.Method);
 
             // Extract parameter in opcode or operand.
-            var parameter = instruction.GetParameter(frame.Body!.Owner.Parameters);
+            var parameter = instruction.GetParameter(frame.Body!.Owner!.Parameters);
 
             var parameterType = parameter.ParameterType.InstantiateGenericTypes(genericContext);
 

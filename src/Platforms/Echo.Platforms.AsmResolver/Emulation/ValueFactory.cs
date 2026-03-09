@@ -31,101 +31,99 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Creates a new value factory.
         /// </summary>
-        /// <param name="contextModule">The manifest module to use for context.</param>
+        /// <param name="runtimeContext">The runtime context to assume when creating values and managing types.</param>
         /// <param name="is32Bit">A value indicating whether the environment is a 32-bit or 64-bit system.</param>
-        public ValueFactory(ModuleDefinition contextModule, bool is32Bit)
+        public ValueFactory(RuntimeContext runtimeContext, bool is32Bit)
         {
-            ContextModule = contextModule;
+            RuntimeContext = runtimeContext;
             Is32Bit = is32Bit;
             PointerSize = is32Bit ? 4u : 8u;
             ClrMockMemory = new ClrMockMemory();
             BitVectorPool = new BitVectorPool();
             Marshaller = new CliMarshaller(this);
+            var corLibScope = RuntimeContext.RuntimeCorLib?.ToAssemblyReference()
+                ?? throw new ArgumentException("The provided runtime context does not have an implementation.");
+            
+            // TODO: we still rely on some old behavior where we need ContextModule to be set in some fringe situations. Remove this.
+            var dummyModule = new ModuleDefinition("Root", corLibScope);
+            Importer = dummyModule.DefaultImporter;
+            CorLibTypeFactory = dummyModule.CorLibTypeFactory;
+            // CorLibTypeFactory = new CorLibTypeFactory(corLibScope);
 
             // Force System.String to be aligned at 4 bytes (required for low level string APIs).
-            GetTypeDefOrRefContentsLayout(contextModule.CorLibTypeFactory.String.Type, default, 4);
+            GetTypeDefOrRefContentsLayout(CorLibTypeFactory.String.Type, default, 4);
 
-            DelegateType = new TypeReference(
-                contextModule,
-                contextModule.CorLibTypeFactory.CorLibScope,
-                nameof(System),
-                nameof(Delegate)).Resolve()!;
+            DelegateType = corLibScope
+                .CreateTypeReference(nameof(System), nameof(Delegate))
+                .Resolve(runtimeContext);
 
-            DelegateTargetField = new MemberReference(
-                (IMemberRefParent)DelegateType,
-                "_target",
-                new FieldSignature(contextModule.CorLibTypeFactory.Object));
+            DelegateTargetField = DelegateType.ToTypeDefOrRef()
+                .CreateMemberReference("_target", new FieldSignature(CorLibTypeFactory.Object));
 
-            DelegateMethodPtrField = new MemberReference(
-                (IMemberRefParent)DelegateType,
-                "_methodPtr",
-                new FieldSignature(contextModule.CorLibTypeFactory.IntPtr));
+            DelegateMethodPtrField = DelegateType.ToTypeDefOrRef()
+                .CreateMemberReference("_methodPtr", new FieldSignature(CorLibTypeFactory.IntPtr));
 
-            DecimalType = new TypeReference(
-                contextModule, 
-                contextModule.CorLibTypeFactory.CorLibScope, 
-                nameof(System),
-                nameof(Decimal)).Resolve()!;
+            DecimalType = corLibScope
+                .CreateTypeReference(nameof(System), nameof(Decimal))
+                .Resolve(runtimeContext);
             
-            InvalidProgramExceptionType = new TypeReference(
-                contextModule, 
-                contextModule.CorLibTypeFactory.CorLibScope, 
-                nameof(System),
-                nameof(InvalidProgramException)).Resolve()!;
+            InvalidProgramExceptionType = corLibScope
+                .CreateTypeReference(nameof(System), nameof(InvalidProgramException))
+                .Resolve(runtimeContext);
             
-            TypeInitializationExceptionType = new TypeReference(
-                contextModule, 
-                contextModule.CorLibTypeFactory.CorLibScope, 
-                nameof(System),
-                nameof(TypeInitializationException)).Resolve()!;
+            TypeInitializationExceptionType = corLibScope
+                .CreateTypeReference(nameof(System), nameof(TypeInitializationException))
+                .Resolve(runtimeContext);
             
-            NullReferenceExceptionType = new TypeReference(
-                contextModule, 
-                contextModule.CorLibTypeFactory.CorLibScope, 
-                nameof(System),
-                nameof(NullReferenceException)).Resolve()!;
+            NullReferenceExceptionType = corLibScope
+                .CreateTypeReference(nameof(System), nameof(NullReferenceException))
+                .Resolve(runtimeContext);
             
-            InvalidProgramExceptionType = new TypeReference(
-                contextModule, 
-                contextModule.CorLibTypeFactory.CorLibScope, 
-                nameof(System),
-                nameof(InvalidProgramException)).Resolve()!;
+            InvalidProgramExceptionType = corLibScope
+                .CreateTypeReference(nameof(System), nameof(InvalidProgramException))
+                .Resolve(runtimeContext);
             
-            IndexOutOfRangeExceptionType = new TypeReference(
-                contextModule, 
-                contextModule.CorLibTypeFactory.CorLibScope, 
-                nameof(System),
-                nameof(IndexOutOfRangeException)).Resolve()!;
+            IndexOutOfRangeExceptionType = corLibScope
+                .CreateTypeReference(nameof(System), nameof(IndexOutOfRangeException))
+                .Resolve(runtimeContext);
             
-            StackOverflowExceptionType = new TypeReference(
-                contextModule, 
-                contextModule.CorLibTypeFactory.CorLibScope, 
-                nameof(System),
-                nameof(StackOverflowException)).Resolve()!;
+            StackOverflowExceptionType = corLibScope
+                .CreateTypeReference(nameof(System), nameof(StackOverflowException))
+                .Resolve(runtimeContext);
             
-            MissingMethodExceptionType = new TypeReference(
-                contextModule, 
-                contextModule.CorLibTypeFactory.CorLibScope, 
-                nameof(System),
-                nameof(MissingMethodException)).Resolve()!;
+            MissingMethodExceptionType = corLibScope
+                .CreateTypeReference(nameof(System), nameof(MissingMethodException))
+                .Resolve(runtimeContext);
             
-            InvalidCastExceptionType = new TypeReference(
-                contextModule, 
-                contextModule.CorLibTypeFactory.CorLibScope, 
-                nameof(System),
-                nameof(InvalidCastException)).Resolve()!;
-            
-            OverflowExceptionType = new TypeReference(
-                contextModule, 
-                contextModule.CorLibTypeFactory.CorLibScope, 
-                nameof(System),
-                nameof(OverflowException)).Resolve()!;
+            InvalidCastExceptionType = corLibScope
+                .CreateTypeReference(nameof(System), nameof(InvalidCastException))
+                .Resolve(runtimeContext);
+
+            OverflowExceptionType = corLibScope
+                .CreateTypeReference(nameof(System), nameof(OverflowException))
+                .Resolve(runtimeContext);
         }
 
         /// <summary>
-        /// Gets the manifest module to use for context.
+        /// Gets the runtime context the value factory assumes when managing types.
         /// </summary>
-        public ModuleDefinition ContextModule
+        public RuntimeContext RuntimeContext
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the importer that is associated to the <see cref="ValueFactory"/>.
+        /// </summary>
+        public ReferenceImporter Importer
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the corlib type factory that is associated to the <see cref="ValueFactory"/>.
+        /// </summary>
+        public CorLibTypeFactory CorLibTypeFactory
         {
             get;
         }
@@ -157,7 +155,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets a reference to the <see cref="decimal"/> type. 
         /// </summary>
-        public ITypeDescriptor DecimalType
+        public ITypeDefOrRef DecimalType
         {
             get;
         }
@@ -165,7 +163,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets a reference to the <see cref="Delegate"/> type. 
         /// </summary>
-        public ITypeDescriptor DelegateType
+        public ITypeDefOrRef DelegateType
         {
             get;
         }
@@ -189,7 +187,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets a reference to the <see cref="InvalidProgramException"/> type. 
         /// </summary>
-        public ITypeDescriptor InvalidProgramExceptionType
+        public ITypeDefOrRef InvalidProgramExceptionType
         {
             get;
         }
@@ -205,7 +203,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets a reference to the <see cref="NullReferenceException"/> type. 
         /// </summary>
-        public ITypeDescriptor NullReferenceExceptionType
+        public ITypeDefOrRef NullReferenceExceptionType
         {
             get;
         }
@@ -213,7 +211,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets a reference to the <see cref="IndexOutOfRangeException"/> type. 
         /// </summary>
-        public ITypeDescriptor IndexOutOfRangeExceptionType
+        public ITypeDefOrRef IndexOutOfRangeExceptionType
         {
             get;
         }
@@ -221,7 +219,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets a reference to the <see cref="StackOverflowException"/> type. 
         /// </summary>
-        public ITypeDescriptor StackOverflowExceptionType
+        public ITypeDefOrRef StackOverflowExceptionType
         {
             get;
         }
@@ -229,7 +227,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets a reference to the <see cref="MissingMethodException"/> type. 
         /// </summary>
-        public ITypeDescriptor MissingMethodExceptionType
+        public ITypeDefOrRef MissingMethodExceptionType
         {
             get;
         }
@@ -237,7 +235,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets a reference to the <see cref="InvalidCastException"/> type. 
         /// </summary>
-        public ITypeDescriptor InvalidCastExceptionType
+        public ITypeDefOrRef InvalidCastExceptionType
         {
             get;
         }
@@ -245,7 +243,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <summary>
         /// Gets a reference to the <see cref="OverflowException"/> type. 
         /// </summary>
-        public ITypeDescriptor OverflowExceptionType
+        public ITypeDefOrRef OverflowExceptionType
         {
             get;
         }
@@ -299,7 +297,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <returns>The total size in bytes.</returns>
         public uint GetArrayObjectSize(ITypeDescriptor elementType, int elementCount)
         {
-            uint elementSize = elementType.IsValueType
+            uint elementSize = elementType.GetIsValueType(RuntimeContext)
                 ? GetTypeValueMemoryLayout(elementType).Size
                 : PointerSize;
 
@@ -463,13 +461,13 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the type could not be measured.</exception>
         public TypeMemoryLayout GetTypeValueMemoryLayout(ITypeDescriptor type)
         {
-            type = ContextModule.CorLibTypeFactory.FromType(type) ?? type;
+            type = CorLibTypeFactory.FromType(type) ?? type;
             if (!_valueLayouts.TryGetValue(type, out var memoryLayout))
             {
                 memoryLayout = type switch
                 {
-                    ITypeDefOrRef typeDefOrRef => typeDefOrRef.GetImpliedMemoryLayout(Is32Bit),
-                    TypeSignature signature => signature.GetImpliedMemoryLayout(Is32Bit),
+                    ITypeDefOrRef typeDefOrRef => typeDefOrRef.GetImpliedMemoryLayout(RuntimeContext, Is32Bit),
+                    TypeSignature signature => signature.GetImpliedMemoryLayout(RuntimeContext, Is32Bit),
                     _ => throw new ArgumentOutOfRangeException(nameof(type))
                 };
 
@@ -488,7 +486,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the type could not be measured.</exception>
         public TypeMemoryLayout GetTypeContentsMemoryLayout(ITypeDescriptor type)
         {
-            type = ContextModule.CorLibTypeFactory.FromType(type) ?? type;
+            type = CorLibTypeFactory.FromType(type) ?? type;
             if (!_contentLayouts.TryGetValue(type, out var memoryLayout))
             {
                 memoryLayout = type switch
@@ -516,11 +514,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
                 throw new ArgumentException("Field declaring type is unknown.");
 
             var layout = GetTypeContentsMemoryLayout(field.DeclaringType);
+            var definition = field.Resolve(RuntimeContext);
 
-            if (field.Resolve() is not { } resolvedField)
-                throw new ArgumentException($"Could not resolve field '{field}'");
-            
-            return layout[resolvedField];
+            return layout[definition];
         }
         
         /// <summary>
@@ -539,8 +535,9 @@ namespace Echo.Platforms.AsmResolver.Emulation
             if (type is TypeSpecification {Signature: { } signature})
                 return GetTypeSignatureContentsLayout(signature);
 
-            if (type.Resolve() is not {IsValueType: false} definition)
-                return type.GetImpliedMemoryLayout(Is32Bit);
+            var definition = type.Resolve(RuntimeContext);
+            if (definition.IsValueType)
+                return type.GetImpliedMemoryLayout(RuntimeContext, Is32Bit);
             
             // Hack: AsmResolver currently does not support layout detection of reference types, mainly because it
             // is CLR implementation specific. Therefore, we "invent" a new layout ourselves instead for our minimal
@@ -550,10 +547,16 @@ namespace Echo.Platforms.AsmResolver.Emulation
             // This does mean however that we need to manually construct a type layout through some reflection
             // since the setters in TypeMemoryLayout are marked internal. This probably is worthy of a change in 
             // AsmResolver's API in the future.
-            
-            var finalType = context.Type != null ? definition.MakeGenericInstanceType([..context.Type.TypeArguments]).ToTypeDefOrRef() : definition;
-            var layout = new TypeMemoryLayout(finalType, 0,
-                Is32Bit ? MemoryLayoutAttributes.Is32Bit : MemoryLayoutAttributes.Is64Bit);
+
+            var finalType = context.Type != null
+                ? definition.MakeGenericInstanceType(RuntimeContext, context.Type.TypeArguments).ToTypeDefOrRef()
+                : definition;
+
+            var layout = new TypeMemoryLayout(
+                finalType,
+                size: 0,
+                Is32Bit ? MemoryLayoutAttributes.Is32Bit : MemoryLayoutAttributes.Is64Bit
+            );
             
             uint currentOffset = 0;
 
@@ -562,7 +565,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
             while (definition is not null)
             {
                 hierarchy.Push(definition);
-                definition = definition.BaseType?.Resolve();
+                definition = definition.BaseType?.Resolve(RuntimeContext);
             } 
 
             // Add all fields top-to-bottom to the layout.
@@ -578,10 +581,10 @@ namespace Echo.Platforms.AsmResolver.Emulation
                     // Infer layout for this field.
                     var contentsLayout = field.Signature.FieldType
                         .InstantiateGenericTypes(context)
-                        .GetImpliedMemoryLayout(Is32Bit);
+                        .GetImpliedMemoryLayout(RuntimeContext, Is32Bit);
                     
                     var fieldLayout = new FieldMemoryLayout(field, currentOffset, contentsLayout);
-                    SetField.Invoke(layout, new object[] {field, fieldLayout});
+                    SetField.Invoke(layout, [field, fieldLayout]);
                     
                     currentOffset = (currentOffset + contentsLayout.Size).Align(alignment);
                 }
@@ -603,7 +606,7 @@ namespace Echo.Platforms.AsmResolver.Emulation
                     return GetTypeDefOrRefContentsLayout(type.GetUnderlyingTypeDefOrRef()!, GenericContext.FromType(type), PointerSize);
 
                 default:
-                    return type.GetImpliedMemoryLayout(Is32Bit);
+                    return type.GetImpliedMemoryLayout(RuntimeContext, Is32Bit);
             }
         }
     }

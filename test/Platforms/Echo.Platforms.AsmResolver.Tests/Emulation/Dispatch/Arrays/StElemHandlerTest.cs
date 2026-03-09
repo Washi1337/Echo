@@ -17,7 +17,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
         [Fact]
         public void WriteOutOfRangeShouldThrow()
         {
-            long array = Context.Machine.Heap.AllocateSzArray(Context.Machine.ContextModule.CorLibTypeFactory.Int32, 10, true);
+            long array = Context.Machine.Heap.AllocateSzArray(Context.Machine.ValueFactory.CorLibTypeFactory.Int32, 10, true);
             
             var stack = Context.CurrentFrame.EvaluationStack;
             stack.Push(new StackSlot(array, StackSlotTypeHint.Integer));
@@ -36,7 +36,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Arrays
             var factory = Context.Machine.ValueFactory;
             var stack = Context.CurrentFrame.EvaluationStack;
             
-            var elementType = Context.Machine.ContextModule.CorLibTypeFactory.Int32;
+            var elementType = Context.Machine.ValueFactory.CorLibTypeFactory.Int32;
             long array = Context.Machine.Heap.AllocateSzArray(elementType, 10, true);
 
             Assert.All(Enumerable.Range(0, 10), i =>

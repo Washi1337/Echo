@@ -93,10 +93,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.Arrays
         
         private static TypeSignature GetElementType(CilExecutionContext context, CilInstruction instruction)
         {
-            var factory = context.Machine.ValueFactory.ContextModule.CorLibTypeFactory;
+            var factory = context.Machine.ValueFactory.CorLibTypeFactory;
             return instruction.OpCode.Code switch
             {
-                CilCode.Ldelem => ((ITypeDefOrRef) instruction.Operand!).ToTypeSignature(),
+                CilCode.Ldelem => ((ITypeDefOrRef) instruction.Operand!).ToTypeSignature(context.Machine.RuntimeContext),
                 CilCode.Ldelem_I => factory.IntPtr,
                 CilCode.Ldelem_I1 => factory.SByte,
                 CilCode.Ldelem_I2 => factory.Int16,

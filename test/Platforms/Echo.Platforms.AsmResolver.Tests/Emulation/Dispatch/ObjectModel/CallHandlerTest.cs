@@ -55,9 +55,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var factory = ModuleFixture.MockModule.CorLibTypeFactory;
             var method = new MethodDefinition("Dummy", MethodAttributes.Static, MethodSignature.CreateStatic(
                 factory.Int32,
-                factory.Int32,
-                factory.Int32,
-                factory.Int32));
+                [factory.Int32, factory.Int32, factory.Int32]
+            ));
 
             Context.Machine.Invoker = invoker;
 
@@ -72,7 +71,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             Assert.Equal(InvocationResultType.StepOver, invoker.LastInvocationResult.ResultType);
             Assert.Single(callerFrame.EvaluationStack);
             Assert.Same(method, invoker.LastMethod);
-            Assert.Equal(new[] {0, 1, 2}, invoker.LastArguments!.Select(x => x.AsSpan().I32));
+            Assert.Equal([0, 1, 2], invoker.LastArguments!.Select(x => x.AsSpan().I32));
         }
 
         [Fact]
@@ -82,9 +81,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var factory = ModuleFixture.MockModule.CorLibTypeFactory;
             var method = new MethodDefinition("Dummy", MethodAttributes.Public, MethodSignature.CreateInstance(
                 factory.Int32,
-                factory.Int32,
-                factory.Int32,
-                factory.Int32));
+                [factory.Int32, factory.Int32, factory.Int32]
+            ));
 
             Context.Machine.Invoker = invoker;
 
@@ -131,9 +129,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var factory = ModuleFixture.MockModule.CorLibTypeFactory;
             var method = new MethodDefinition("Dummy", MethodAttributes.Static, MethodSignature.CreateStatic(
                 factory.Int32,
-                factory.Int32,
-                factory.Int32,
-                factory.Int32));
+                [factory.Int32, factory.Int32, factory.Int32]
+            ));
 
             Context.Machine.Invoker = invoker;
             
@@ -188,9 +185,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var factory = ModuleFixture.MockModule.CorLibTypeFactory;
             var method = new MethodDefinition("Dummy", MethodAttributes.Static, MethodSignature.CreateStatic(
                 factory.Int32, 
-                factory.Int32,
-                factory.Double,
-                factory.Double));
+                [factory.Int32, factory.Double, factory.Double]
+            ));
 
             Context.Machine.Invoker = invoker;
 
@@ -222,8 +218,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var method = new MethodDefinition("Dummy", MethodAttributes.Static, MethodSignature.CreateStatic(
                     factory.Int32,
                     1,
-                    new GenericParameterSignature(GenericParameterType.Method, 0)))
-                .MakeGenericInstanceMethod(factory.Int32);
+                    [new GenericParameterSignature(GenericParameterType.Method, 0)]))
+                .MakeGenericInstanceMethod([factory.Int32]);
 
             Context.Machine.Invoker = invoker;
 
@@ -249,8 +245,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var caller = new MethodDefinition(
                 "GenericCaller",
                 MethodAttributes.Static,
-                MethodSignature.CreateStatic(factory.Int32, 1, new GenericParameterSignature(GenericParameterType.Method, 0))
-            ).MakeGenericInstanceMethod(factory.Int32);
+                MethodSignature.CreateStatic(factory.Int32, 1, [new GenericParameterSignature(GenericParameterType.Method, 0)])
+            ).MakeGenericInstanceMethod([factory.Int32]);
 
             var module = new ModuleDefinition("DummyModule");
             var calleeType = new TypeDefinition(null, "SomeGenericType", TypeAttributes.Class, factory.Object.Type);
@@ -258,7 +254,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             // void SomeGenericType<!!0>::SomeMethod();
             var callee = calleeType
-                .MakeGenericInstanceType(new GenericParameterSignature(GenericParameterType.Method, 0))
+                .MakeGenericInstanceType(isValueType: false, [new GenericParameterSignature(GenericParameterType.Method, 0)])
                 .ToTypeDefOrRef()
                 .CreateMemberReference("SomeMethod", MethodSignature.CreateStatic(factory.Void));
             
@@ -271,7 +267,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             // void SomeGenericType<int>::SomeMethod();
             Assert.Equal(calleeType
-                    .MakeGenericInstanceType(factory.Int32)
+                    .MakeGenericInstanceType(isValueType: false, [factory.Int32])
                     .ToTypeDefOrRef()
                     .CreateMemberReference(callee.Name!, MethodSignature.CreateStatic(factory.Void)),
                 Context.CurrentFrame.Method,
@@ -288,8 +284,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var caller = new MethodDefinition(
                 "GenericCaller",
                 MethodAttributes.Static,
-                MethodSignature.CreateStatic(factory.Int32, 1, new GenericParameterSignature(GenericParameterType.Method, 0))
-            ).MakeGenericInstanceMethod(factory.Int32);
+                MethodSignature.CreateStatic(factory.Int32, 1, [new GenericParameterSignature(GenericParameterType.Method, 0)])
+            ).MakeGenericInstanceMethod([factory.Int32]);
 
             var module = new ModuleDefinition("DummyModule");
             var calleeType = new TypeDefinition(null, "SomeType", TypeAttributes.Class, factory.Object.Type);
@@ -297,8 +293,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             // void SomeType::SomeGenericMethod<!!0>();
             var callee = calleeType
-                .CreateMemberReference("SomeGenericMethod", MethodSignature.CreateStatic(factory.Void, 1))
-                .MakeGenericInstanceMethod(new GenericParameterSignature(GenericParameterType.Method, 0));
+                .CreateMemberReference("SomeGenericMethod", MethodSignature.CreateStatic(factory.Void, 1, []))
+                .MakeGenericInstanceMethod([new GenericParameterSignature(GenericParameterType.Method, 0)]);
             
             Context.Thread.CallStack.Push(caller);
             Context.Machine.Invoker = DefaultInvokers.StepIn;
@@ -309,8 +305,8 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             // void SomeType::SomeGenericMethod<int>();
             Assert.Equal(calleeType
-                    .CreateMemberReference(callee.Name, MethodSignature.CreateStatic(factory.Void, 1))
-                    .MakeGenericInstanceMethod(factory.Int32),
+                    .CreateMemberReference(callee.Name, MethodSignature.CreateStatic(factory.Void, 1, []))
+                    .MakeGenericInstanceMethod([factory.Int32]),
                 Context.CurrentFrame.Method,
                 SignatureComparer.Default
             );
@@ -333,23 +329,23 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var callerDefinition = new MethodDefinition(
                 "GenericCaller",
                 MethodAttributes.Static,
-                MethodSignature.CreateStatic(factory.Int32, 1, new GenericParameterSignature(GenericParameterType.Method, 0))
+                MethodSignature.CreateStatic(factory.Int32, 1, [new GenericParameterSignature(GenericParameterType.Method, 0)])
             );
             
             // int GenericCallerType<short>::GenericCaller<byte>();
             var caller = callerTypeDefinition
-                .MakeGenericInstanceType(factory.Int16)
+                .MakeGenericInstanceType(isValueType: false,  [factory.Int16])
                 .ToTypeDefOrRef()
                 .CreateMemberReference(callerDefinition.Name!, callerDefinition.Signature)
-                .MakeGenericInstanceMethod(factory.Byte);
+                .MakeGenericInstanceMethod([factory.Byte]);
             callerTypeDefinition.Methods.Add(callerDefinition);
             
             // void SomeGenericType<!!0>::SomeMethod<long>();
             var callee = calleeType
-                .MakeGenericInstanceType(new GenericParameterSignature(GenericParameterType.Method, 0))
+                .MakeGenericInstanceType(isValueType: false, [new GenericParameterSignature(GenericParameterType.Method, 0)])
                 .ToTypeDefOrRef()
-                .CreateMemberReference("SomeMethod", MethodSignature.CreateStatic(factory.Void, 1))
-                .MakeGenericInstanceMethod(factory.Int64);
+                .CreateMemberReference("SomeMethod", MethodSignature.CreateStatic(factory.Void, 1, []))
+                .MakeGenericInstanceMethod([factory.Int64]);
             
             Context.Thread.CallStack.Push(caller);
             Context.Machine.Invoker = DefaultInvokers.StepIn;
@@ -360,10 +356,10 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             // void SomeGenericType<byte>::SomeMethod<long>();
             Assert.Equal(calleeType
-                    .MakeGenericInstanceType(factory.Byte)
+                    .MakeGenericInstanceType(isValueType: false, [factory.Byte])
                     .ToTypeDefOrRef()
-                    .CreateMemberReference(callee.Name, MethodSignature.CreateStatic(factory.Void, 1))
-                    .MakeGenericInstanceMethod(factory.Int64),
+                    .CreateMemberReference(callee.Name, MethodSignature.CreateStatic(factory.Void, 1, []))
+                    .MakeGenericInstanceMethod([factory.Int64]),
                 Context.CurrentFrame.Method,
                 SignatureComparer.Default
             );
@@ -382,15 +378,15 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             var callerDefinition = new MethodDefinition(
                 "GenericCaller",
                 MethodAttributes.Static,
-                MethodSignature.CreateStatic(factory.Int32, 1, new GenericParameterSignature(GenericParameterType.Method, 0))
+                MethodSignature.CreateStatic(factory.Int32, 1, [new GenericParameterSignature(GenericParameterType.Method, 0)])
             );
 
             // int GenericCallerType<short>::GenericCaller<int>();
             var caller = callerTypeDefinition
-                .MakeGenericInstanceType(factory.Int16)
+                .MakeGenericInstanceType(isValueType: false, [factory.Int16])
                 .ToTypeDefOrRef()
                 .CreateMemberReference(callerDefinition.Name!, callerDefinition.Signature)
-                .MakeGenericInstanceMethod(factory.Int32);
+                .MakeGenericInstanceMethod([factory.Int32]);
             callerTypeDefinition.Methods.Add(callerDefinition);
 
             var module = new ModuleDefinition("DummyModule");
@@ -399,12 +395,19 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             // void SomeGenericType<!!0, !0>::SomeMethod<long, !!0, !0>();
             var callee = calleeType
-                .MakeGenericInstanceType(new GenericParameterSignature(GenericParameterType.Method, 0),
-                    new GenericParameterSignature(GenericParameterType.Type, 0))
+                .MakeGenericInstanceType(
+                    isValueType: false,
+                    [
+                        new GenericParameterSignature(GenericParameterType.Method, 0),
+                        new GenericParameterSignature(GenericParameterType.Type, 0)
+                    ])
                 .ToTypeDefOrRef()
-                .CreateMemberReference("SomeMethod", MethodSignature.CreateStatic(factory.Void, 3))
-                .MakeGenericInstanceMethod(factory.Int64, new GenericParameterSignature(GenericParameterType.Method, 0),
-                    new GenericParameterSignature(GenericParameterType.Type, 0));
+                .CreateMemberReference("SomeMethod", MethodSignature.CreateStatic(factory.Void, 3, []))
+                .MakeGenericInstanceMethod([
+                    factory.Int64,
+                    new GenericParameterSignature(GenericParameterType.Method, 0),
+                    new GenericParameterSignature(GenericParameterType.Type, 0)
+                ]);
             
             Context.Thread.CallStack.Push(caller);
             Context.Machine.Invoker = DefaultInvokers.StepIn;
@@ -415,10 +418,10 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.ObjectModel
             
             // void SomeGenericType<int, short>::SomeMethod<long, int, short>();
             Assert.Equal(calleeType
-                    .MakeGenericInstanceType(factory.Int32, factory.Int16)
+                    .MakeGenericInstanceType(isValueType: false, [factory.Int32, factory.Int16])
                     .ToTypeDefOrRef()
-                    .CreateMemberReference(callee.Name, MethodSignature.CreateStatic(factory.Void, 3))
-                    .MakeGenericInstanceMethod(factory.Int64, factory.Int32, factory.Int16),
+                    .CreateMemberReference(callee.Name, MethodSignature.CreateStatic(factory.Void, 3, []))
+                    .MakeGenericInstanceMethod([factory.Int64, factory.Int32, factory.Int16]),
                 Context.CurrentFrame.Method,
                 SignatureComparer.Default
             );

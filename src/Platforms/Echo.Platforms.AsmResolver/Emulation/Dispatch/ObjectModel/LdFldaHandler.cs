@@ -26,7 +26,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
             try
             {
                 // We can actually reference static fields with ldfld. The instance is then just ignored.
-                if (field.Resolve() is {IsStatic: true})
+                if (field.TryResolve(context.RuntimeContext, out var definition) && definition.IsStatic)
                     result.AsSpan().Write(context.Machine.StaticFields.GetFieldAddress(field));
                 else
                     GetInstanceFieldAddress(context, instance, field, result);
@@ -69,7 +69,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Dispatch.ObjectModel
                 resultSpan.IntegerAdd(fieldOffsetVector);
 
                 // Skip also the object header for fields defined within objects.
-                if (!field.DeclaringType!.IsValueType)
+                if (!field.DeclaringType!.TryGetIsValueType(context.RuntimeContext).GetValueOrDefault())
                     resultSpan.IntegerAdd(objectHeaderSize);
             }
             finally

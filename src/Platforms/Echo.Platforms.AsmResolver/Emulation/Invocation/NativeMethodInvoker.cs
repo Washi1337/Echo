@@ -30,8 +30,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Invocation
         /// <inheritdoc />
         public InvocationResult Invoke(CilExecutionContext context, IMethodDescriptor method, IList<BitVector> arguments)
         {
-            var definition = method.Resolve();
-            return definition?.CilMethodBody is null 
+            return method.TryResolve(context.RuntimeContext, out var definition) && definition?.CilMethodBody is null 
                 ? BaseInvoker.Invoke(context, method, arguments) 
                 : InvocationResult.Inconclusive();
         }

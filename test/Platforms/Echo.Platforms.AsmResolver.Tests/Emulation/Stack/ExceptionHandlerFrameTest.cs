@@ -20,7 +20,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public ExceptionHandlerFrameTest(MockModuleFixture fixture)
         {
             _fixture = fixture;
-            _vm = new CilVirtualMachine(_fixture.MockModule, false);
+            _vm = new CilVirtualMachine(_fixture.MockModule.RuntimeContext!, false);
             _mainThread = _vm.CreateThread();
         }
 
@@ -73,12 +73,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         {
             var exception = _vm.ObjectMarshaller.ToObjectHandle(Activator.CreateInstance(exceptionType));
             var frame = GetMockFrame(nameof(TestClass.TryCatchCatch)).ExceptionHandlers[0];
-            
-            Assert.Equal(new[]
-            {
-                "System.IO.IOException",
-                "System.Net.WebException"
-            }, frame.Handlers.Select(x=>x.ExceptionType!.FullName));
+
+            Assert.Equal(
+                ["System.IO.IOException", "System.Net.WebException"],
+                frame.Handlers.Select(x => x.ExceptionType!.FullName)
+            );
 
             int? offset = frame.RegisterException(exception);
             if (expectedIndex.HasValue)
@@ -91,12 +90,11 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Stack
         public void RegisterExceptionInCatchClauseShouldReturnNull()
         {
             var frame = GetMockFrame(nameof(TestClass.TryCatchSpecificAndGeneral)).ExceptionHandlers[0];
-            
-            Assert.Equal(new[]
-            {
-                "System.IO.EndOfStreamException",
-                "System.IO.IOException"
-            }, frame.Handlers.Select(x=>x.ExceptionType!.FullName));
+
+            Assert.Equal(
+                ["System.IO.EndOfStreamException", "System.IO.IOException"],
+                frame.Handlers.Select(x => x.ExceptionType!.FullName)
+            );
 
             Assert.True(frame.RegisterException(_vm.ObjectMarshaller.ToObjectHandle(new EndOfStreamException())).HasValue);
             Assert.False(frame.RegisterException(_vm.ObjectMarshaller.ToObjectHandle(new IOException())).HasValue);

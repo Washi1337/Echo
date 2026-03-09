@@ -29,7 +29,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         public void Push(ObjectHandle value)
         {
             var vector = Factory.RentNativeInteger(value.Address);
-            Push(vector, Factory.ContextModule.CorLibTypeFactory.Object, true);
+            Push(vector, Factory.CorLibTypeFactory.Object, true);
         }
 
         /// <summary>

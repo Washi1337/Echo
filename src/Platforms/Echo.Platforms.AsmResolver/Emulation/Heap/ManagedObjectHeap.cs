@@ -64,7 +64,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
         /// </exception>
         public long AllocateObject(ITypeDescriptor type, bool initialize)
         {
-            switch (type.ToTypeSignature().ElementType)
+            switch (type.ToTypeSignature(_factory.RuntimeContext).ElementType)
             {
                 case ElementType.Array:
                 case ElementType.SzArray:
@@ -132,7 +132,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             var chunkSpan = _backingHeap.GetChunkSpan(address);
 
             // Set object type.
-            SetMethodTable(chunkSpan, _factory.ContextModule.CorLibTypeFactory.String);
+            SetMethodTable(chunkSpan, _factory.CorLibTypeFactory.String);
             
             // Set string length field.
             chunkSpan.SliceStringLength(_factory).Write(length);
@@ -155,7 +155,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Heap
             var chunkSpan = _backingHeap.GetChunkSpan(address);
 
             // Set object type.
-            SetMethodTable(chunkSpan, _factory.ContextModule.CorLibTypeFactory.String);
+            SetMethodTable(chunkSpan, _factory.CorLibTypeFactory.String);
 
             // Set string length field.
             chunkSpan.SliceStringLength(_factory).Write(stringLength);

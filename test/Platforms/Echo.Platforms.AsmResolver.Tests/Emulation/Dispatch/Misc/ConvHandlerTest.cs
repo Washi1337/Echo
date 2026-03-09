@@ -33,7 +33,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Misc
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new BitVector(value), Context.Machine.ContextModule.CorLibTypeFactory.Int64);
+            stack.Push(new BitVector(value), Context.Machine.ValueFactory.CorLibTypeFactory.Int64);
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode()));
 
@@ -65,7 +65,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Misc
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new BitVector(value), Context.Machine.ContextModule.CorLibTypeFactory.Int64);
+            stack.Push(new BitVector(value), Context.Machine.ValueFactory.CorLibTypeFactory.Int64);
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode()));
 
@@ -88,7 +88,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Misc
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new BitVector(value), Context.Machine.ContextModule.CorLibTypeFactory.Int64);
+            stack.Push(new BitVector(value), Context.Machine.ValueFactory.CorLibTypeFactory.Int64);
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode()));
 
@@ -107,7 +107,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Misc
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new BitVector(value), Context.Machine.ContextModule.CorLibTypeFactory.Int64);
+            stack.Push(new BitVector(value), Context.Machine.ValueFactory.CorLibTypeFactory.Int64);
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode()));
 
@@ -161,7 +161,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Misc
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new BitVector(value), Context.Machine.ContextModule.CorLibTypeFactory.Double);
+            stack.Push(new BitVector(value), Context.Machine.ValueFactory.CorLibTypeFactory.Double);
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode()));
 
@@ -190,7 +190,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Misc
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new BitVector(value), Context.Machine.ContextModule.CorLibTypeFactory.Double);
+            stack.Push(new BitVector(value), Context.Machine.ValueFactory.CorLibTypeFactory.Double);
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode()));
 
@@ -218,7 +218,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Misc
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new BitVector(value), Context.Machine.ContextModule.CorLibTypeFactory.Int64);
+            stack.Push(new BitVector(value), Context.Machine.ValueFactory.CorLibTypeFactory.Int64);
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode()));
 
@@ -242,7 +242,7 @@ namespace Echo.Platforms.AsmResolver.Tests.Emulation.Dispatch.Misc
         {
             var stack = Context.CurrentFrame.EvaluationStack;
 
-            stack.Push(new BitVector(value), Context.Machine.ContextModule.CorLibTypeFactory.Double);
+            stack.Push(new BitVector(value), Context.Machine.ValueFactory.CorLibTypeFactory.Double);
 
             var result = Dispatcher.Dispatch(Context, new CilInstruction(code.ToOpCode()));
 

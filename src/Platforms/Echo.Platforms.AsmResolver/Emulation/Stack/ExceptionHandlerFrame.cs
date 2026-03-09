@@ -12,6 +12,7 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
     [DebuggerDisplay("Range = {ProtectedRange}, Handler Count = {Handlers.Count}, Next Offset = {NextOffset}")]
     public class ExceptionHandlerFrame
     {
+        private readonly ValueFactory _factory;
         private readonly List<CilExceptionHandler> _handlers;
         private int _currentHandlerIndex = -1;
 
@@ -19,8 +20,9 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
         /// Creates a new exception handler frame.
         /// </summary>
         /// <param name="protectedRange">The IL offset range the exception handler is protecting.</param>
-        public ExceptionHandlerFrame(AddressRange protectedRange)
+        public ExceptionHandlerFrame(ValueFactory factory, AddressRange protectedRange)
         {
+            _factory = factory;
             ProtectedRange = protectedRange;
             _handlers = new List<CilExceptionHandler>();
             Reset();
@@ -238,10 +240,10 @@ namespace Echo.Platforms.AsmResolver.Emulation.Stack
                 switch (CurrentHandler.HandlerType)
                 {
                     case CilExceptionHandlerType.Exception:
-                        var supportedType = CurrentHandler.ExceptionType!.ToTypeSignature();
-                        var actualType = ExceptionObject.GetObjectType().ToTypeSignature();
+                        var supportedType = CurrentHandler.ExceptionType!.ToTypeSignature(_factory.RuntimeContext);
+                        var actualType = ExceptionObject.GetObjectType().ToTypeSignature(_factory.RuntimeContext);
 
-                        if (actualType.IsAssignableTo(supportedType))
+                        if (actualType.IsAssignableTo(supportedType, _factory.RuntimeContext))
                         {
                             IsHandlingException = true;
                             return CurrentHandler.HandlerStart!.Offset;
