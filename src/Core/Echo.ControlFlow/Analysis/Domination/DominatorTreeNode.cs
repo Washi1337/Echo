@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Echo.Graphing;
 
 namespace Echo.ControlFlow.Analysis.Domination
@@ -14,9 +13,12 @@ namespace Echo.ControlFlow.Analysis.Domination
     public class DominatorTreeNode<TInstruction> : TreeNodeBase
         where TInstruction : notnull
     {
-        internal DominatorTreeNode(ControlFlowNode<TInstruction> node)
+        internal DominatorTreeNode(
+            ControlFlowNode<TInstruction> node,
+            HashSet<ControlFlowNode<TInstruction>> predecessors)
         {
             OriginalNode = node;
+            Predecessors = predecessors;
             Children = new TreeNodeCollection<DominatorTreeNode<TInstruction>, DominatorTreeNode<TInstruction>>(this);
         }
 
@@ -29,6 +31,14 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// Gets the node that this tree node was derived from. 
         /// </summary>
         public ControlFlowNode<TInstruction> OriginalNode
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the nodes that the original node was reached from while the tree was constructed.
+        /// </summary>
+        internal HashSet<ControlFlowNode<TInstruction>> Predecessors
         {
             get;
         }
@@ -49,16 +59,30 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// immediate successor of the original node.
         /// </summary>
         /// <returns>The children, represented by the dominator tree nodes.</returns>
-        public IEnumerable<DominatorTreeNode<TInstruction>> GetDirectChildren() =>
-            Children.Where(c => c.Parent!.HasPredecessor(OriginalNode));
+        public IEnumerable<DominatorTreeNode<TInstruction>> GetDirectChildren()
+        {
+            for (int i = 0; i < Children.Count; i++)
+            {
+                var child = Children[i];
+                if (child.Predecessors.Contains(OriginalNode))
+                    yield return child;
+            }
+        }
 
         /// <summary>
         /// Gets a collection of children representing all nodes that were dominated by the original node, but were not
         /// an immediate successor of the original node.
         /// </summary>
         /// <returns>The children, represented by the dominator tree nodes.</returns>
-        public IEnumerable<DominatorTreeNode<TInstruction>> GetIndirectChildren() =>
-            Children.Where(c => !c.Parent!.HasPredecessor(OriginalNode));
+        public IEnumerable<DominatorTreeNode<TInstruction>> GetIndirectChildren()
+        {
+            for (int i = 0; i < Children.Count; i++)
+            {
+                var child = Children[i];
+                if (!child.Predecessors.Contains(OriginalNode))
+                    yield return child;
+            }
+        }
 
         /// <summary>
         /// Gets all the nodes that are dominated by this control flow graph node.

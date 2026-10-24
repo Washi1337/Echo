@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Echo.Graphing.Analysis.Connectivity
 {
@@ -19,53 +18,47 @@ namespace Echo.Graphing.Analysis.Connectivity
             // and the transposition of the graph is replaced with looking at the predecessors rather than the
             // successors of the current node in the depth first search. 
             
-            var nodes = new HashSet<INode>(graph.GetNodes());
             var visited = new HashSet<INode>();
             var result = new List<ISet<INode>>();
 
-            while (nodes.Count != 0)
-            {
-                var start = nodes.First();
+            var stack = GetFillOrder(graph.GetNodes());
 
-                var stack =  GetFillOrder(start);
-                
-                while (stack.Count > 0)
-                {
-                    var current = stack.Pop();
-                    nodes.Remove(current);
-                    if (!visited.Contains(current))
-                        result.Add(ReverseDepthFirstSearch(visited, current));
-                }
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                if (!visited.Contains(current))
+                    result.Add(ReverseDepthFirstSearch(visited, current));
             }
 
             return result;
         }
 
-        private static Stack<INode> GetFillOrder(INode start)
+        private static Stack<INode> GetFillOrder(IEnumerable<INode> nodes)
         {
             // This used to be a recursive function, but was recoded to be iterative to avoid stack overflows.
             
             var result = new Stack<INode>();
             
             var visited = new HashSet<INode>();
-            visited.Add(start);
             
             var agenda = new Stack<FillOrderState>();
-            agenda.Push(new FillOrderState(start, false));
+            foreach (var node in nodes)
+                agenda.Push(new FillOrderState(node, false));
 
             while (agenda.Count > 0)
             {
                 var currentState = agenda.Pop();
                 if (!currentState.HasTraversedSuccessors)
                 {
-                    visited.Add(currentState.Node);
+                    if (!visited.Add(currentState.Node))
+                        continue;
 
                     // Schedule current node first to get it post-processed after the successors.
                     currentState.HasTraversedSuccessors = true;
                     agenda.Push(currentState);
 
                     // Schedule successors for initial processing.
-                    foreach (var successor in start.GetSuccessors())
+                    foreach (var successor in currentState.Node.GetSuccessors())
                     {
                         if (!visited.Contains(successor))
                             agenda.Push(new FillOrderState(successor, false));

@@ -532,6 +532,54 @@ namespace Echo.ControlFlow
         /// <returns><c>true</c> if the node is within the region, <c>false</c> otherwise.</returns>
         public bool IsInRegion(IControlFlowRegion<TInstruction> region) => GetSituatedRegions().Contains(region);
 
+        /// <summary>
+        /// Gets a collection of nodes that this node may transfer control to by virtue of the exception handlers it is
+        /// situated in, and that are not encoded as explicit edges in the graph.
+        /// </summary>
+        /// <returns>The nodes.</returns>
+        /// <remarks>
+        /// A node in a protected region may transfer control to the entrypoint of every handler of the exception
+        /// handler. A node in the prologue of a handler may transfer control to the body of that handler, and a node
+        /// in the body may transfer control to the epilogue.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Occurs when a handler that the node may transfer control to has no entrypoint assigned.
+        /// </exception>
+        public IEnumerable<ControlFlowNode<TInstruction>> GetImplicitSuccessors()
+        {
+            foreach (var region in GetSituatedRegions())
+            {
+                switch (region.ParentRegion)
+                {
+                    case ExceptionHandlerRegion<TInstruction> ehRegion when region == ehRegion.ProtectedRegion:
+                        for (int i = 0; i < ehRegion.Handlers.Count; i++)
+                        {
+                            yield return ehRegion.Handlers[i].GetEntryPoint() ?? throw new InvalidOperationException(
+                                $"Handler region {i.ToString()} of exception handler does not have an entrypoint assigned.");
+                        }
+
+                        break;
+
+                    case HandlerRegion<TInstruction> handlerRegion:
+                        var next = GetNextHandlerSubRegionEntryPoint(region, handlerRegion);
+                        if (next is not null)
+                            yield return next;
+                        break;
+                }
+            }
+        }
+
+        private static ControlFlowNode<TInstruction>? GetNextHandlerSubRegionEntryPoint(
+            IControlFlowRegion<TInstruction> region,
+            HandlerRegion<TInstruction> handler)
+        {
+            if (region == handler.Prologue)
+                return handler.Contents.EntryPoint;
+            if (region == handler.Contents)
+                return handler.Epilogue?.EntryPoint;
+            return null;
+        }
+
         /// <inheritdoc />
         public override string ToString() => Contents.Offset.ToString("X8");
 

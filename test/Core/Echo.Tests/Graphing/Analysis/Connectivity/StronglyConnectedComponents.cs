@@ -91,5 +91,26 @@ namespace Echo.Tests.Graphing.Analysis.Connectivity
 
         }
 
+        [Fact]
+        public void NodesThatShareNoCycleShouldResultInSeparateComponents()
+        {
+            var graph = new IntGraph();
+
+            var nodes = new IntNode[7];
+            for (int i = 0; i < nodes.Length; i++)
+                nodes[i] = graph.AddNode(i);
+
+            int[][] edges = [[1, 5], [2, 0], [2, 4], [2, 6], [3, 0], [3, 6], [4, 5], [5, 2], [6, 3], [6, 4], [6, 5]];
+            foreach (var edge in edges)
+                nodes[edge[0]].ConnectWith(nodes[edge[1]]);
+
+            var components = graph.FindStronglyConnectedComponents();
+
+            Assert.Equal(3, components.Count);
+            Assert.Contains(new HashSet<INode> {nodes[0]}, components);
+            Assert.Contains(new HashSet<INode> {nodes[1]}, components);
+            Assert.Contains(new HashSet<INode> {nodes[2], nodes[3], nodes[4], nodes[5], nodes[6]}, components);
+        }
+
     }
 }

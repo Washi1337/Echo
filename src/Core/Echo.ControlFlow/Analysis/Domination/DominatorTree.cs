@@ -35,7 +35,9 @@ namespace Echo.ControlFlow.Analysis.Domination
         private Dictionary<ControlFlowNode<TInstruction>, ISet<ControlFlowNode<TInstruction>>>? _frontier;
         private readonly object _frontierSyncLock = new();
 
-        private DominatorTree(IDictionary<ControlFlowNode<TInstruction>, DominatorTreeNode<TInstruction>> nodes, ControlFlowNode<TInstruction> root)
+        private DominatorTree(
+            IDictionary<ControlFlowNode<TInstruction>, DominatorTreeNode<TInstruction>> nodes,
+            ControlFlowNode<TInstruction> root)
         {
             _nodes = nodes;
             Root = nodes[root];
@@ -55,6 +57,15 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// </summary>
         /// <param name="node">The control flow graph node to get the tree node from.</param>
         public DominatorTreeNode<TInstruction> this[ControlFlowNode<TInstruction> node] => _nodes[node];
+
+        /// <summary>
+        /// Attempts to get the dominator tree node associated to the given control flow graph node.
+        /// </summary>
+        /// <param name="node">The control flow graph node to get the tree node from.</param>
+        /// <param name="treeNode">The tree node, or <c>null</c> if the node is not in the tree.</param>
+        /// <returns><c>True</c> if the node is in the tree, <c>false</c> otherwise.</returns>
+        public bool TryGetNode(ControlFlowNode<TInstruction> node, [NotNullWhen(true)] out DominatorTreeNode<TInstruction>? treeNode) =>
+            _nodes.TryGetValue(node, out treeNode);
   
         /// <summary>
         /// Constructs a dominator tree from a control flow graph.
@@ -66,22 +77,41 @@ namespace Echo.ControlFlow.Analysis.Domination
             if (graph.EntryPoint == null)
                 throw new ArgumentException("Control flow graph does not have an entrypoint.");
             
-            var idoms = GetImmediateDominators(graph.EntryPoint);
-            var nodes = ConstructTreeNodes(idoms, graph.EntryPoint);
-            return new DominatorTree<TInstruction>(nodes, graph.EntryPoint);
+            return FromGraph(
+                graph.EntryPoint,
+                static node => node.GetSuccessors().Concat(node.GetImplicitSuccessors()));
+        }
+
+        /// <summary>
+        /// Constructs a dominator tree from an entrypoint and a function that obtains the successors of a node.
+        /// </summary>
+        /// <param name="entrypoint">The entrypoint of the graph.</param>
+        /// <param name="getSuccessors">A function that obtains the successors of a node.</param>
+        /// <returns>The constructed dominator tree.</returns>
+        public static DominatorTree<TInstruction> FromGraph(
+            ControlFlowNode<TInstruction> entrypoint,
+            Func<ControlFlowNode<TInstruction>, IEnumerable<ControlFlowNode<TInstruction>>> getSuccessors)
+        {
+            var traversalResult = TraverseGraph(entrypoint, getSuccessors);
+            var idoms = GetImmediateDominators(entrypoint, traversalResult);
+            var nodes = ConstructTreeNodes(idoms, entrypoint, traversalResult.Predecessors);
+            return new DominatorTree<TInstruction>(nodes, entrypoint);
         }
         
         /// <summary>
         /// Computes the dominator tree of a control flow graph, defined by its entrypoint.
         /// </summary>
         /// <param name="entrypoint">The entrypoint of the control flow graph.</param>
+        /// <param name="traversalResult">The result of traversing the graph from the entrypoint.</param>
         /// <returns>A dictionary mapping all the nodes to their immediate dominator.</returns>
         /// <remarks>
         /// The algorithm used is based on the one engineered by Lengauer and Tarjan.
         /// https://www.cs.princeton.edu/courses/archive/fall03/cs528/handouts/a%20fast%20algorithm%20for%20finding.pdf
         /// https://www.cl.cam.ac.uk/~mr10/lengtarj.pdf
         /// </remarks> 
-        private static IDictionary<ControlFlowNode<TInstruction>, ControlFlowNode<TInstruction>> GetImmediateDominators(ControlFlowNode<TInstruction> entrypoint)
+        private static IDictionary<ControlFlowNode<TInstruction>, ControlFlowNode<TInstruction>> GetImmediateDominators(
+            ControlFlowNode<TInstruction> entrypoint,
+            TraversalResult traversalResult)
         {
             var immediateDominators = new Dictionary<ControlFlowNode<TInstruction>, ControlFlowNode<TInstruction>?>();
             
@@ -93,9 +123,6 @@ namespace Echo.ControlFlow.Analysis.Domination
                 var semi = new Dictionary<ControlFlowNode<TInstruction>, ControlFlowNode<TInstruction>>();
                 var ancestor = new Dictionary<ControlFlowNode<TInstruction>, ControlFlowNode<TInstruction>?>();
                 var bucket = new Dictionary<ControlFlowNode<TInstruction>, ISet<ControlFlowNode<TInstruction>>>();
-
-                // Traverse graph in depth first manner, and record node indices and parents.
-                var traversalResult = TraverseGraph(entrypoint);
 
                 // Initialize the intermediate mappings.
                 var orderedNodes = traversalResult.TraversalOrder;
@@ -156,83 +183,67 @@ namespace Echo.ControlFlow.Analysis.Domination
 
             int GetPredecessors(ControlFlowNode<TInstruction> node)
             {
-                // If the current node is the entrypoint of a handler block, then we implicitly have 
-                // all the nodes in the protected region as predecessor. However, for this algorithm,
-                // it should be enough to only schedule the entrypoint of the protected region.
-                bool isHandlerEntrypoint = node.GetParentHandler() is { } parentHandler
-                                           && node == parentHandler.GetEntryPoint();
-
-                int actualInDegree1 = node.InDegree;
-                if (isHandlerEntrypoint)
-                    actualInDegree1++;
+                var predecessors = traversalResult.Predecessors[node];
 
                 // Ensure we have enough space in the buffer.
-                if (predecessorBuffer.Length < actualInDegree1)
+                if (predecessorBuffer.Length < predecessors.Count)
                 {
                     pool.Return(predecessorBuffer);
-                    predecessorBuffer = pool.Rent(actualInDegree1);
+                    predecessorBuffer = pool.Rent(predecessors.Count);
                 }
 
-                // Copy over predecessors.
-                for (int j = 0; j < node.IncomingEdges.Count; j++)
-                    predecessorBuffer[j] = node.IncomingEdges[j].Origin;
-
-                // Copy over protected entrypoint if we were a handler entrypoint.
-                if (isHandlerEntrypoint)
-                    predecessorBuffer[actualInDegree1 - 1] = node.GetParentExceptionHandler()!.ProtectedRegion.EntryPoint!;
-                return actualInDegree1;
+                predecessors.CopyTo(predecessorBuffer, 0);
+                return predecessors.Count;
             }
 
             return immediateDominators!;
         }
 
-        private static TraversalResult TraverseGraph(ControlFlowNode<TInstruction> entrypoint)
+        private static TraversalResult TraverseGraph(
+            ControlFlowNode<TInstruction> entrypoint,
+            Func<ControlFlowNode<TInstruction>, IEnumerable<ControlFlowNode<TInstruction>>> getSuccessors)
         {
             var result = new TraversalResult();
             result.TraversalOrder = new List<ControlFlowNode<TInstruction>>();
             result.NodeIndices = new Dictionary<ControlFlowNode<TInstruction>, int>();
             result.NodeParents = new Dictionary<ControlFlowNode<TInstruction>, ControlFlowNode<TInstruction>>();
+            result.Predecessors = new Dictionary<ControlFlowNode<TInstruction>, HashSet<ControlFlowNode<TInstruction>>>
+            {
+                [entrypoint] = new HashSet<ControlFlowNode<TInstruction>>()
+            };
 
             var visited = new HashSet<ControlFlowNode<TInstruction>>();
-            var agenda = new Stack<ControlFlowNode<TInstruction>>();
-            agenda.Push(entrypoint);
+            var agenda = new Stack<(ControlFlowNode<TInstruction> Node, ControlFlowNode<TInstruction>? Origin)>();
+            agenda.Push((entrypoint, null));
 
             while (agenda.Count > 0)
             {
-                var currentNode = agenda.Pop();
+                var (currentNode, origin) = agenda.Pop();
                 if (!visited.Add(currentNode))
                     continue;
+
+                if (origin is not null)
+                    result.NodeParents[currentNode] = origin;
 
                 result.NodeIndices[currentNode] = result.TraversalOrder.Count;
                 result.TraversalOrder.Add(currentNode);
 
-                // Schedule the "normal" successors.
-                foreach (var successor in currentNode.GetSuccessors())
+                foreach (var successor in getSuccessors(currentNode))
                     Schedule(currentNode, successor);
-
-                // If we are in a protected region of an exception handler, then the node can technically
-                // transfer control to any of the handler blocks. These are not encoded in the graph explicitly,
-                // so we need to manually schedule these.
-                
-                if (currentNode.GetParentExceptionHandler() is { } parentEh
-                    && currentNode.IsInRegion(parentEh.ProtectedRegion))
-                {
-                    for (int i = 0; i < parentEh.Handlers.Count; i++)
-                        Schedule(currentNode, parentEh.Handlers[i].GetEntryPoint()!);
-                }
             }
 
             void Schedule(ControlFlowNode<TInstruction> origin, ControlFlowNode<TInstruction> successor)
             {
-                agenda.Push(successor);
+                agenda.Push((successor, origin));
 
-                if (!result.NodeParents.ContainsKey(successor))
-                    result.NodeParents[successor] = origin;
+                if (!result.Predecessors.TryGetValue(successor, out var predecessors))
+                    result.Predecessors[successor] = predecessors = new HashSet<ControlFlowNode<TInstruction>>();
+                predecessors.Add(origin);
             }
 
             return result;
         }
-        
+
         /// <summary>
         /// Constructs a dominator tree from the control flow graph.
         /// </summary>
@@ -240,11 +251,12 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// its name.</returns>
         private static IDictionary<ControlFlowNode<TInstruction>, DominatorTreeNode<TInstruction>> ConstructTreeNodes(
             IDictionary<ControlFlowNode<TInstruction>, ControlFlowNode<TInstruction>> idoms, 
-            ControlFlowNode<TInstruction> entrypoint)
+            ControlFlowNode<TInstruction> entrypoint,
+            IDictionary<ControlFlowNode<TInstruction>, HashSet<ControlFlowNode<TInstruction>>> predecessors)
         {
             var result = new Dictionary<ControlFlowNode<TInstruction>, DominatorTreeNode<TInstruction>>
             {
-                [entrypoint] = new DominatorTreeNode<TInstruction>(entrypoint)
+                [entrypoint] = (DominatorTreeNode<TInstruction>)new(entrypoint, predecessors[entrypoint])
             };
             
             foreach (var entry in idoms)
@@ -255,9 +267,9 @@ namespace Echo.ControlFlow.Analysis.Domination
                 if (dominator != dominated)
                 {
                     if (!result.TryGetValue(dominated, out var child))
-                        result[dominated] = child = new DominatorTreeNode<TInstruction>(dominated);
+                        result[dominated] = child = new(dominated, predecessors[dominated]);
                     if (!result.TryGetValue(dominator, out var parent))
-                        result[dominator] = parent = new DominatorTreeNode<TInstruction>(dominator);
+                        result[dominator] = parent = new(dominator, predecessors[dominator]);
 
                     parent.Children.Add(child);
                 }
@@ -303,7 +315,8 @@ namespace Echo.ControlFlow.Analysis.Domination
         /// </returns>
         public bool Dominates(ControlFlowNode<TInstruction> dominator, ControlFlowNode<TInstruction> dominated)
         {
-            var current = this[dominated];
+            if (!_nodes.TryGetValue(dominated, out var current))
+                return false;
 
             while (current is not null)
             {
@@ -342,8 +355,8 @@ namespace Echo.ControlFlow.Analysis.Domination
             
             foreach (var node in _nodes.Keys)
             {
-                var predecessors = node
-                    .GetPredecessors()
+                var predecessors = _nodes[node]
+                    .Predecessors
                     .ToArray();
                 
                 if (predecessors.Length >= 2)
@@ -388,6 +401,12 @@ namespace Echo.ControlFlow.Analysis.Domination
             }
             
             public Dictionary<ControlFlowNode<TInstruction>, ControlFlowNode<TInstruction>> NodeParents
+            {
+                get;
+                set;
+            }
+
+            public Dictionary<ControlFlowNode<TInstruction>, HashSet<ControlFlowNode<TInstruction>>> Predecessors
             {
                 get;
                 set;
