@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Echo.ControlFlow.Collections;
@@ -84,59 +83,21 @@ namespace Echo.ControlFlow.Serialization.Blocks
             // Therefore, we add these as "virtual" successors to the list, to ensure the topological sorting
             // takes this into account.
             
+            foreach (var successor in node.GetImplicitSuccessors())
+                AddSuccessorToResult(result, successor);
+
+            // Any node in a handler region also implicitly can transfer control to one of the successors of any
+            // node in the protected region (e.g. a try-finally construct does not have explicit outgoing branches).
             var ehRegion = node.GetParentExceptionHandler();
 
             while (ehRegion is not null)
             {
-                // If we entered this loop, it means the node is either in the protected region or a handler region
-                // of an exception handler.
-                if (node.IsInRegion(ehRegion.ProtectedRegion))
-                {
-                    AddHandlerEntryPoints(result, ehRegion);
-                }
-                else
-                {
-                    AddNextHandlerRegion(result, node);
+                if (!node.IsInRegion(ehRegion.ProtectedRegion))
                     AddRegionSuccessors(result, ehRegion.ProtectedRegion);
-                }
 
                 // Move up the EH region tree.
                 ehRegion = ehRegion.GetParentExceptionHandler();
             }
-        }
-
-        private void AddHandlerEntryPoints(
-            ICollection<ControlFlowNode<TInstruction>> result, 
-            ExceptionHandlerRegion<TInstruction> ehRegion)
-        {
-            for (int i = 0; i < ehRegion.Handlers.Count; i++)
-            {
-                var handlerRegion = ehRegion.Handlers[i];
-
-                // Ensure the handler that we can jump to has an entrypoint node.
-                var handlerEntry = handlerRegion.GetEntryPoint();
-                if (handlerEntry is null)
-                {
-                    throw new InvalidOperationException(
-                        $"Handler region {i.ToString()} of exception handler does not have an entrypoint assigned.");
-                }
-
-                AddSuccessorToResult(result, handlerEntry);
-            }
-        }
-
-        private void AddNextHandlerRegion(ICollection<ControlFlowNode<TInstruction>> result, ControlFlowNode<TInstruction> node)
-        {
-            var handlerRegion = node.GetParentHandler()!;
-            
-            ControlFlowNode<TInstruction>? nextEntry = null;
-            if (node.ParentRegion == handlerRegion.Prologue)
-                nextEntry = handlerRegion.Contents.EntryPoint;
-            if (nextEntry is null && node.ParentRegion == handlerRegion.Contents)
-                nextEntry = handlerRegion.Epilogue?.EntryPoint;
-
-            if (nextEntry != null)
-                AddSuccessorToResult(result, nextEntry);
         }
 
         private void AddRegionSuccessors(ICollection<ControlFlowNode<TInstruction>> result, ControlFlowRegion<TInstruction> region)

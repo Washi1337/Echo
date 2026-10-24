@@ -241,6 +241,35 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
         }
 
         [Fact]
+        public void HandlerEpilogue()
+        {
+            var cfg = new ControlFlowGraph<int>(IntArchitecture.Instance);
+
+            var nodes = Enumerable.Range(0, 3).Select(x => new ControlFlowNode<int>(x)).ToArray();
+            cfg.Nodes.AddRange(nodes);
+            cfg.EntryPoint = nodes[0];
+
+            var ehRegion = new ExceptionHandlerRegion<int>();
+            cfg.Regions.Add(ehRegion);
+            ehRegion.ProtectedRegion.Nodes.Add(nodes[0]);
+            ehRegion.ProtectedRegion.EntryPoint = nodes[0];
+
+            var handler = new HandlerRegion<int>();
+            ehRegion.Handlers.Add(handler);
+            handler.Contents.Nodes.Add(nodes[1]);
+            handler.Contents.EntryPoint = nodes[1];
+            handler.Epilogue = new ScopeRegion<int>();
+            handler.Epilogue.Nodes.Add(nodes[2]);
+            handler.Epilogue.EntryPoint = nodes[2];
+
+            var tree = DominatorTree<int>.FromGraph(cfg);
+            Assert.Same(nodes[0], tree[nodes[1]].Parent!.OriginalNode);
+            Assert.Same(nodes[1], tree[nodes[2]].Parent!.OriginalNode);
+            Assert.Equal(new[] { nodes[1] }, tree[nodes[0]].GetDirectChildren().Select(c => c.OriginalNode));
+            Assert.Equal(new[] { nodes[2] }, tree[nodes[1]].GetDirectChildren().Select(c => c.OriginalNode));
+        }
+
+        [Fact]
         public void ChildrenAndSuccessorFunction()
         {
             var graph = TestGraphs.CreateIfElse();
@@ -255,6 +284,11 @@ namespace Echo.ControlFlow.Tests.Analysis.Domination
 
             tree = DominatorTree<DummyInstruction>.FromGraph(n1, n => n.GetSuccessors().Where(s => s != n3));
             Assert.True(tree.Dominates(n2, n4));
+
+            tree = DominatorTree<DummyInstruction>.FromGraph(
+                n1,
+                n => n == n1 ? n.GetSuccessors().Append(n4) : n.GetSuccessors());
+            Assert.Contains(n4, tree.Root.GetDirectChildren().Select(c => c.OriginalNode));
         }
     }
 }
